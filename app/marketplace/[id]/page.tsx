@@ -45,9 +45,9 @@ export default function ItemDetails() {
         });
 
         // 2. Encrypted Transaction Manifest
-        const txRef = doc(collection(db, "transactions"));
-        const claimToken = Math.random().toString(36).substring(2, 8).toUpperCase();
+        if (!auth.currentUser) throw new Error("Authentication required for checkout.");
         
+        const txRef = doc(collection(db, "transactions"));
         transaction.set(txRef, {
           item_id: id,
           title: itemDoc.data().title,
@@ -57,7 +57,7 @@ export default function ItemDetails() {
           seller_id: itemDoc.data().seller_id,
           status: 'PENDING',
           created_at: new Date().toISOString(),
-          claim_token: claimToken,
+          claim_token: Math.random().toString(36).substring(2, 8).toUpperCase(),
           protocol: 'QR_HANDSHAKE'
         });
       });

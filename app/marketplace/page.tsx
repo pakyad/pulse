@@ -5,7 +5,7 @@ import { subscribeToMarketplace } from '@/lib/marketplace-utils';
 import { db, auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { Search, ShoppingBag, Plus, ArrowLeft, Slidertoggles as SlidersHorizontal, Package, Zap } from 'lucide-react';
+import { Search, ShoppingBag, Plus, ArrowLeft, SlidersHorizontal, Package, Zap } from 'lucide-react';
 import Link from 'next/link';
 import MarketplaceCard from '@/components/MarketplaceCard';
 import CreateListing from '@/components/CreateListing';

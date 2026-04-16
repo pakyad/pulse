@@ -1,63 +1,88 @@
-"use client";
-
+'use client'
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutGrid, ScanLine, User, PlusSquare, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { auth, db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { Home, Newspaper, Trophy, Bell, User } from 'lucide-react';
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  useEffect(() => {
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        // Listen for active PENDING handshakes to show the notification badge
+        const q = query(
+          collection(db, "transactions"),
+          where("buyer_id", "==", user.uid),
+          where("status", "==", "PENDING")
+        );
+
+        const unsubSnap = onSnapshot(q, (snap) => {
+          setNotificationCount(snap.docs.length);
+        });
+        return () => unsubSnap();
+      }
+    });
+
+    return () => unsubAuth();
+  }, []);
 
   const navItems = [
-    { name: 'Market', path: '/marketplace', icon: LayoutGrid },
-    { name: 'Scan', path: '/scanner', icon: ScanLine },
-    { name: 'Post', path: '/post', icon: PlusSquare },
-    { name: 'Me', path: '/me', icon: User },
+    { name: 'Home', path: '/marketplace', icon: Home },
+    { name: 'Pulse', path: '/pulse', icon: Newspaper, isCenter: true },
+    { name: 'Rewards', path: '/leaderboard', icon: Trophy },
+    { name: 'Inbox', path: '/me', icon: Bell, badge: notificationCount },
+    { name: 'Account', path: '/me', icon: User },
   ];
 
-  // Hidden on Auth pages to maintain the high-fidelity gate
-  if (pathname === '/auth') return null;
-
   return (
-    <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-sm">
-      <motion.div 
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", damping: 20, stiffness: 100 }}
-        className="bg-navy/85 backdrop-blur-[24px] border border-white/10 rounded-[32px] p-2.5 flex justify-around items-center shadow-[0_30px_60px_rgba(0,31,63,0.4)] ring-1 ring-white/5"
-      >
+    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-[#E5E5E5] pb-2 shadow-[0_-1px_10px_rgba(0,0,0,0.02)]">
+      <div className="flex justify-around items-end h-[60px] max-w-lg mx-auto px-4">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
+          const Icon = item.icon;
+
           return (
             <Link 
-                key={item.path} 
+                key={item.name} 
                 href={item.path} 
-                className="relative group p-4 flex flex-col items-center gap-1 transition-all active:scale-95"
+                className="flex-1 flex flex-col items-center justify-center relative py-1 transition-all active:scale-95 duration-200"
             >
-              <item.icon 
-                size={22} 
-                strokeWidth={isActive ? 2.5 : 2}
-                className={`transition-all duration-300 ${isActive ? 'text-orange scale-110 drop-shadow-[0_0_8px_rgba(255,133,27,0.4)]' : 'text-white/40 group-hover:text-white/60'}`} 
-              />
               
-              {isActive && (
-                <motion.div 
-                    layoutId="nav-pill"
-                    className="absolute inset-0 bg-white/5 rounded-2xl z-[-1]" 
-                />
+              {/* Notification Badge */}
+              {item.badge !== undefined && item.badge > 0 && (
+                <div className="absolute top-0 right-1/4 bg-[#FF3B30] text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10">
+                  {item.badge}
+                </div>
               )}
-              
-              {isActive && (
-                <motion.div 
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-orange rounded-full shadow-[0_0_12px_#FF851B]" 
+
+              {/* Icon Container with Center Highlight logic */}
+              <div className={`p-2 rounded-full mb-0.5 transition-all duration-300 ${item.isCenter ? (isActive ? 'bg-blue-500/10' : 'bg-blue-50/50') : ''}`}>
+                <Icon 
+                  size={24} 
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className={isActive ? 'text-[#007AFF]' : 'text-[#8E8E93]'} 
                 />
+              </div>
+
+              {/* Label */}
+              <span className={`text-[10px] font-black tracking-tighter transition-colors ${isActive ? 'text-[#007AFF]' : 'text-[#8E8E93]'}`}>
+                {item.name}
+              </span>
+
+              {/* iOS Active Indicator Dot */}
+              {isActive && !item.isCenter && (
+                <div className="w-1 h-1 bg-[#007AFF] rounded-full mt-0.5" />
               )}
             </Link>
           );
         })}
-      </motion.div>
+      </div>
+      {/* Home Indicator line (iOS Style) */}
+      <div className="h-1 w-32 bg-[#E5E5E5] rounded-full mx-auto mt-3" />
     </nav>
   );
 }

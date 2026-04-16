@@ -1,163 +1,124 @@
-"use client";
-
-import React from 'react';
-import { Trophy, Medal, Crown, ArrowUp, User, ArrowLeft, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { getStatusTier } from '@/lib/utils/hustle';
-
-const MOCK_LEADERS = [
-  { id: '1', name: 'Iyad Iman', score: 1250, rank: 1 },
-  { id: '2', name: 'Sarah Chen', score: 980, rank: 2 },
-  { id: '3', name: 'Marcus Tan', score: 850, rank: 3 },
-  { id: '4', name: 'Arief Hakimi', score: 720, rank: 4 },
-  { id: '5', name: 'Nurul Huda', score: 680, rank: 5 },
-  { id: '6', name: 'Jason Lee', score: 540, rank: 6 },
-  { id: '7', name: 'Elena Gilbert', score: 410, rank: 7 },
-  { id: '8', name: 'Siti Saleha', score: 390, rank: 8 },
-];
+'use client'
+import { useEffect, useState } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { Trophy, Medal, Star, Zap, Crown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LeaderboardPage() {
-  const userRank = 1; // Simulation
-  const userScore = 1250;
-  const userTier = getStatusTier(userScore);
+  const [clubs, setClubs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 🛰️ Real-time Competitive Sync
+    const q = query(
+      collection(db, "users"),
+      where("role", "==", "CLUB"),
+      orderBy("hustle_score", "desc"),
+      limit(10)
+    );
+
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setClubs(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const getRankIcon = (index: number) => {
+    if (index === 0) return (
+        <div className="relative">
+            <Trophy className="text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]" size={28} />
+            <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                className="absolute -top-2 -right-2 opacity-50"
+            >
+                <Crown size={12} className="text-yellow-500" />
+            </motion.div>
+        </div>
+    );
+    if (index === 1) return <Medal className="text-slate-400" size={26} />;
+    if (index === 2) return <Star className="text-orange" size={24} />;
+    return <span className="text-navy/20 font-black text-lg italic">#{index + 1}</span>;
+  };
+
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-pearl">
+        <div className="w-12 h-12 bg-navy animate-pulse rounded-xl mb-4" />
+        <p className="text-[10px] text-navy/20 font-black uppercase tracking-[0.5em] text-center italic">CALIBRATING RANKINGS...</p>
+    </div>
+  );
 
   return (
-    <div className="px-6 pt-24 pb-48 max-w-2xl mx-auto min-h-screen">
-      <header className="text-center mb-16">
-        <Link href="/" className="absolute left-6 top-24 p-2 hover:bg-navy/5 rounded-full transition-colors">
-          <ArrowLeft className="text-navy w-5 h-5" />
-        </Link>
-        <p className="text-[10px] text-orange font-black uppercase tracking-[0.4em] mb-2 leading-none">Campus Hierarchy</p>
-        <h1 className="text-5xl font-black text-navy tracking-tighter italic uppercase leading-none">The Pulse 50</h1>
+    <main className="px-6 pt-16 pb-32 max-w-lg mx-auto bg-pearl min-h-screen">
+      <header className="mb-12">
+        <div className="flex items-center gap-3 mb-2">
+            <div className="h-[2px] w-8 bg-orange" />
+            <p className="text-orange text-[10px] font-black uppercase tracking-[0.4em]">Ecosystem Status</p>
+        </div>
+        <h1 className="text-4xl font-black text-navy italic tracking-tighter uppercase leading-none">Leaderboard</h1>
       </header>
 
-      {/* The Podium Spotlight */}
-      <div className="flex items-end justify-center gap-2 mb-20 h-72">
-        {/* 2nd Place */}
-        <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex-1 flex flex-col items-center"
-        >
-          <div className="w-14 h-14 rounded-full bg-navy/5 border border-navy/10 mb-3 flex items-center justify-center relative">
-             <User size={24} className="text-navy/20" />
-             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white border border-navy/10 rounded-full flex items-center justify-center text-[10px] font-black text-navy italic">2</div>
-          </div>
-          <div className="hologram-card w-full p-4 text-center h-36 flex flex-col justify-center border-b-0 rounded-b-none bg-white/40">
-             <p className="text-xs font-black text-navy truncate tracking-tight">{MOCK_LEADERS[1].name}</p>
-             <p className="text-lg font-black text-navy/40 tracking-tighter">{MOCK_LEADERS[1].score}</p>
-             <p className="text-[8px] font-black text-navy/30 uppercase tracking-widest mt-1">PRO</p>
-          </div>
-        </motion.div>
+      <section className="space-y-4">
+        <AnimatePresence mode="popLayout">
+            {clubs.map((club, index) => {
+                const level = Math.floor((club.hustle_score || 0) / 100) + 1;
+                return (
+                    <motion.div 
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        key={club.id} 
+                        className={`hologram-card p-6 flex justify-between items-center bg-white border border-navy/5 ${
+                            index === 0 ? 'ring-2 ring-yellow-500/20 bg-white/80' : 
+                            index === 1 ? 'bg-white/60' : 
+                            index === 2 ? 'bg-white/40' : 'bg-white/20'
+                        }`}
+                    >
+                        <div className="flex items-center gap-5">
+                            <div className="w-12 flex justify-center items-center">
+                                {getRankIcon(index)}
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-black text-navy uppercase tracking-tight leading-none mb-1.5">{club.full_name}</h4>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-[10px] font-bold text-navy/40 uppercase tracking-widest leading-none">
+                                        {club.hustle_score || 0} HP
+                                    </p>
+                                    <div className="w-1 h-1 rounded-full bg-navy/10" />
+                                    <p className="text-[8px] font-black text-orange uppercase tracking-[0.2em] leading-none italic">
+                                        {club.performance_tier || 'NOVICE'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
 
-        {/* 1st Place - The Crown */}
-        <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex-1 flex flex-col items-center z-10"
-        >
-          <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <Crown size={32} className="text-orange mb-3" />
-          </motion.div>
-          
-          <div className="w-20 h-20 rounded-full border-2 border-orange p-1.5 mb-3 shadow-[0_0_20px_rgba(255,133,27,0.2)]">
-             <div className="w-full h-full rounded-full bg-navy/10 flex items-center justify-center">
-                <User size={32} className="text-navy" />
-             </div>
-          </div>
-          <div className="hologram-card w-full p-6 text-center h-52 flex flex-col justify-center scale-110 border-orange/30 shadow-2xl shadow-orange/10 bg-white">
-             <p className="text-[10px] font-black text-orange tracking-[0.2em] mb-1">CHAMPION</p>
-             <p className="text-sm font-black text-navy uppercase tracking-tight mb-2">{MOCK_LEADERS[0].name}</p>
-             <div className="flex flex-col">
-                <p className="text-3xl font-black text-orange tracking-tighter leading-none">{MOCK_LEADERS[0].score}</p>
-                <p className="text-[9px] font-black text-orange/50 uppercase tracking-widest mt-1">Hustle HP</p>
-             </div>
-          </div>
-        </motion.div>
+                        <div className="flex flex-col items-end gap-1.5">
+                            <div className="bg-navy px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-navy/10 border border-white/10">
+                                <Zap size={10} className="text-orange animate-pulse" />
+                                <span className="text-[9px] font-black text-white italic uppercase tracking-tighter">LVL {level}</span>
+                            </div>
+                        </div>
+                    </motion.div>
+                );
+            })}
+        </AnimatePresence>
 
-        {/* 3rd Place */}
-        <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex-1 flex flex-col items-center"
-        >
-          <div className="w-14 h-14 rounded-full bg-navy/5 border border-navy/10 mb-3 flex items-center justify-center relative">
-             <User size={24} className="text-navy/20" />
-             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white border border-navy/10 rounded-full flex items-center justify-center text-[10px] font-black text-navy italic">3</div>
-          </div>
-          <div className="hologram-card w-full p-4 text-center h-28 flex flex-col justify-center border-b-0 rounded-b-none bg-white/40">
-             <p className="text-xs font-black text-navy truncate tracking-tight">{MOCK_LEADERS[2].name}</p>
-             <p className="text-base font-black text-navy/40 tracking-tighter">{MOCK_LEADERS[2].score}</p>
-             <p className="text-[8px] font-black text-navy/30 uppercase tracking-widest mt-1">STAR</p>
-          </div>
-        </motion.div>
-      </div>
+        {clubs.length === 0 && (
+            <div className="p-20 border-2 border-dashed border-navy/5 rounded-[40px] flex flex-col items-center opacity-20">
+                <Trophy size={40} className="mb-4" />
+                <p className="text-[10px] font-black uppercase tracking-widest italic">Awaiting competitive signals</p>
+            </div>
+        )}
+      </section>
 
-      {/* The Rest of the Hustlers */}
-      <div className="space-y-3">
-        {MOCK_LEADERS.slice(3).map((student) => (
-          <motion.div 
-            key={student.id} 
-            initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="soft-lens px-6 py-5 rounded-3xl flex items-center justify-between group hover:bg-white/80 transition-all border border-navy/5"
-          >
-            <div className="flex items-center gap-6">
-              <span className="text-xs font-black text-navy/20 w-4 italic">#{student.rank}</span>
-              <div className="w-10 h-10 rounded-2xl bg-navy/5 border border-navy/5 flex items-center justify-center">
-                 <User size={18} className="text-navy/20" />
-              </div>
-              <div>
-                <p className="text-sm font-black text-navy tracking-tight uppercase">{student.name}</p>
-                <p className={`text-[9px] font-black uppercase tracking-widest ${getStatusTier(student.score).color}`}>
-                    {getStatusTier(student.score).label}
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-black text-navy tabular-nums">{student.score} HP</p>
-              <p className="text-[9px] text-green-500 font-bold flex items-center justify-end gap-1 uppercase tracking-tighter">
-                <ArrowUp size={8} strokeWidth={3} /> +12
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Sticky "Your Rank" Bar */}
-      <div className="fixed bottom-6 left-6 right-6 z-50">
-        <motion.div 
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-navy text-white p-6 rounded-[32px] flex items-center justify-between shadow-[0_20px_50px_rgba(0,31,63,0.3)] border border-white/5"
-        >
-          <div className="flex items-center gap-5">
-            <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${userTier.borderColor} bg-white/5`}>
-              <Zap size={20} className={userTier.color} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                  <p className="text-[9px] text-white/40 uppercase font-black tracking-[0.2em]">Your Standing</p>
-                  <div className={`w-1.5 h-1.5 rounded-full ${userTier.color === 'text-orange' ? 'bg-orange' : 'bg-white'} animate-pulse`} />
-              </div>
-              <p className="text-base font-black italic tracking-tighter uppercase whitespace-nowrap">
-                Rank #{userRank} — {userTier.label}
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className={`text-2xl font-black tabular-nums ${userTier.color === 'text-orange' ? 'text-orange' : 'text-white'}`}>{userScore}</p>
-            <p className="text-[8px] text-white/40 uppercase font-black tracking-widest">Aggregate HP</p>
-          </div>
-        </motion.div>
-      </div>
-    </div>
+      {/* Institutional Insight */}
+      <footer className="mt-12 p-8 border-t border-navy/5">
+        <p className="text-[9px] text-navy/30 font-bold uppercase tracking-widest text-center leading-relaxed">
+            Rankings are updated in real-time based on verified field handshakes and ecosystem volume.
+        </p>
+      </footer>
+    </main>
   );
 }
