@@ -1,218 +1,212 @@
-'use client'
+"use client";
 import { useState, useEffect } from 'react';
 import { db, auth, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, onSnapshot } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Camera, Plus, Loader2, ArrowLeft, Zap, Package, XCircle, ShieldAlert } from 'lucide-react';
+import { 
+  Camera, ChevronLeft, X, CheckCircle2, Loader2, 
+  Tag, AlignLeft, DollarSign, Package, ChevronRight,
+  Zap, Rocket, Info, Image as ImageIcon
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function PostHustle() {
-  const [loading, setLoading] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
+const CATEGORIES = ['Food & Drinks', 'Books', 'Tech', 'Apparel', 'Stationery', 'Services', 'Other'];
+
+export default function DeployAsset() {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [profile, setProfile] = useState<any>(null);
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const router = useRouter();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [stock, setStock] = useState('10');
+  const [category, setCategory] = useState('Food & Drinks');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // 🛰️ Role-Based Synchronization
-            const userRef = doc(db, "users", user.uid);
-            const unsubProfile = onSnapshot(userRef, (snap) => {
-                if (snap.exists()) {
-                    setUserRole(snap.data().role);
-                }
-                setAuthLoading(false);
-            });
-            return () => unsubProfile();
-        } else {
-            router.push('/auth');
-        }
+    const unsub = auth.onAuthStateChanged((u) => {
+      if (!u) { router.push('/auth'); return; }
+      onSnapshot(doc(db, 'users', u.uid), (s) => setProfile(s.data()));
     });
-    return unsubAuth;
+    return () => unsub();
   }, [router]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<any>) => {
-    e.preventDefault();
-    if (!auth.currentUser || !image) return alert("Strategic Error: Optical asset required.");
+  const handleDeploy = async () => {
+    if (!auth.currentUser || !image) return;
     setLoading(true);
-
     try {
-      const fileName = `${Date.now()}_${image.name}`;
-      const imageRef = ref(storage, `items/${auth.currentUser.uid}/${fileName}`);
-      const uploadResult = await uploadBytes(imageRef, image);
-      const url = await getDownloadURL(uploadResult.ref);
-
-      const formData = new FormData(e.currentTarget);
-      await addDoc(collection(db, "items"), {
-        title: formData.get('title'),
-        price: Number(formData.get('price')),
-        stock_count: Number(formData.get('stock')),
+      const imgRef = ref(storage, `items/${auth.currentUser.uid}/${Date.now()}_${image.name}`);
+      const snap = await uploadBytes(imgRef, image);
+      const url = await getDownloadURL(snap.ref);
+      
+      await addDoc(collection(db, 'items'), {
+        title, 
+        description, 
+        price: Number(price),
+        stock_count: Number(stock), 
+        category,
         image_url: url,
         seller_id: auth.currentUser.uid,
-        status: 'active',
+        seller_name: profile?.full_name || 'Verified Seller',
+        status: 'active', 
+        is_active: true,
+        is_official: profile?.role === 'CLUB',
         created_at: serverTimestamp(),
-        is_official: true // CLUB deployments are official
       });
-
-      router.push('/marketplace');
-    } catch (err: any) {
-      console.error(err);
-      alert("Deployment Disrupted: " + (err.message || "Unknown error"));
-    } finally {
-      setLoading(false);
-    }
+      router.push('/merchant');
+    } catch (e: any) {
+      alert(e.message || 'Deployment error.');
+    } finally { setLoading(false); }
   };
 
-  if (authLoading) return <div className="min-h-screen flex flex-col items-center justify-center bg-pearl">
-    <div className="w-12 h-12 bg-navy animate-pulse rounded-xl mb-4" />
-    <p className="text-[10px] text-navy/20 font-black uppercase tracking-[0.5em] text-center italic">AUDITING IDENTITY...</p>
-  </div>;
-
-  // 🛡️ ROLE-BASED ACCESS CONTROL (RBAC) Fallback
-  if (userRole !== 'CLUB') {
-      return (
-        <main className="min-h-screen bg-pearl flex items-center justify-center p-8">
-            <motion.div 
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="hologram-card p-12 max-w-md w-full bg-white text-center shadow-2xl relative overflow-hidden"
-            >
-                <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12">
-                    <ShieldAlert size={120} className="text-navy" />
-                </div>
-                
-                <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-red-100">
-                    <XCircle size={40} className="text-red-500" />
-                </div>
-
-                <h1 className="text-2xl font-black text-navy uppercase tracking-tighter mb-2 italic">Access Denied</h1>
-                <p className="text-[11px] font-black text-red-500 uppercase tracking-[0.3em] mb-6">Unauthorized Security Layer</p>
-                
-                <p className="text-xs text-navy/40 font-medium leading-relaxed mb-10">
-                    Inventory Uplink is strictly reserved for authenticated **CLUB** stakeholders. Standard student status does not possess deployment clearance.
-                </p>
-
-                <button 
-                  onClick={() => router.push('/marketplace')}
-                  className="w-full bg-navy text-white py-5 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-xl hover:bg-orange transition-all active:scale-95"
-                >
-                  Return to Nexus
-                </button>
-            </motion.div>
-        </main>
-      );
-  }
+  const canNext = step === 1 ? !!preview : step === 2 ? title.trim() && price && Number(price) > 0 : true;
 
   return (
-    <main className="min-h-screen bg-pearl p-6 pb-32">
-      <header className="mb-12 pt-12 flex items-center justify-between max-w-2xl mx-auto">
-        <div className="flex items-center gap-4">
-            <button onClick={() => router.back()} className="p-3 bg-white border border-navy/5 rounded-2xl hover:bg-navy hover:text-white transition-all shadow-sm">
-                <ArrowLeft size={20} />
-            </button>
-            <div>
-                <p className="text-orange text-[10px] font-black uppercase tracking-[0.4em] mb-1 leading-none italic">Institutional Portal</p>
-                <h1 className="text-3xl font-black text-navy uppercase italic tracking-tighter leading-none">CLUB DEPLOYMENT</h1>
-            </div>
-        </div>
-        <div className="w-12 h-12 bg-orange/5 border border-orange/10 rounded-2xl flex items-center justify-center">
-            <ShieldAlert className="text-orange w-6 h-6" />
-        </div>
-      </header>
+    <main className="min-h-screen bg-[#FDFDFD] font-sans text-navy antialiased pb-32">
+      
+      {/* ── Compact 45% Container ── */}
+      <div className="max-w-[480px] mx-auto px-6">
+        
+        {/* Nav */}
+        <nav className="pt-10 mb-12 flex items-center justify-between">
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
+            onClick={() => step > 1 ? setStep(s => s - 1) : router.back()} 
+            className="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center text-navy/30"
+          >
+            <ChevronLeft size={24} />
+          </motion.button>
+          <div className="flex gap-1.5">
+            {[1, 2, 3].map(i => (
+              <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${step === i ? 'w-8 bg-navy' : 'w-2 bg-slate-100'}`} />
+            ))}
+          </div>
+          <div className="w-11" />
+        </nav>
 
-      <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl mx-auto">
-        {/* Tactical Image Picker */}
-        <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative h-72 w-full bg-white rounded-[40px] border-2 border-dashed border-navy/10 flex flex-col items-center justify-center overflow-hidden shadow-inner group"
-        >
-          {preview ? (
-            <img src={preview} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-          ) : (
-            <div className="flex flex-col items-center justify-center">
-              <div className="w-16 h-16 bg-navy/5 rounded-full flex items-center justify-center mb-4">
-                <Camera size={32} className="text-navy/20" />
+        <AnimatePresence mode="wait">
+          {/* Step 1: Visual Capture */}
+          {step === 1 && (
+            <motion.div key="s1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
+              <div className="space-y-2">
+                <h1 className="text-[32px] font-black tracking-tightest leading-none">Capture <br/>Asset</h1>
+                <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Optical clarity drives higher handshake frequency.</p>
               </div>
-              <p className="text-[10px] font-black text-navy/40 uppercase tracking-[0.3em]">Capture Club Asset</p>
-            </div>
-          )}
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleImageChange}
-            className="absolute inset-0 opacity-0 cursor-pointer z-10" 
-            required
-          />
-        </motion.div>
 
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-navy/30 uppercase tracking-[0.2em] ml-4">Official Item Name</label>
-            <input 
-                name="title" 
-                placeholder="e.g. Club Membership Tee" 
-                className="w-full bg-white p-6 rounded-[28px] font-black text-navy placeholder:text-navy/20 border border-navy/5 shadow-xl shadow-navy/5 outline-none focus:ring-1 ring-orange/30 transition-all italic text-lg tracking-tight" 
-                required 
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <label className="text-[10px] font-black text-navy/30 uppercase tracking-[0.2em] ml-4">Pricing (RM)</label>
-                <input 
-                    name="price" 
-                    type="number" 
-                    step="0.01"
-                    placeholder="25.00" 
-                    className="bg-white p-6 rounded-[28px] font-black text-navy border border-navy/5 shadow-xl shadow-navy/5 outline-none focus:ring-1 ring-orange/30 transition-all italic tabular-nums" 
-                    required 
-                />
-            </div>
-            <div className="space-y-2">
-                <label className="text-[10px] font-black text-navy/30 uppercase tracking-[0.2em] ml-4">Available Units</label>
-                <input 
-                    name="stock" 
-                    type="number" 
-                    placeholder="50" 
-                    className="bg-white p-6 rounded-[28px] font-black text-navy border border-navy/5 shadow-xl shadow-navy/5 outline-none focus:ring-1 ring-orange/30 transition-all italic tabular-nums" 
-                    required 
-                />
-            </div>
-          </div>
+              <div className="relative aspect-square w-full bg-slate-50 rounded-[3rem] border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group">
+                {preview ? (
+                  <>
+                    <img src={preview} className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => { setPreview(null); setImage(null); }} className="absolute top-6 right-6 w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-navy shadow-lg">
+                      <X size={20} />
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-20 h-20 bg-white rounded-[2.5rem] flex items-center justify-center shadow-xl shadow-black/5 text-slate-200">
+                      <ImageIcon size={32} />
+                    </div>
+                    <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Select Visual Asset</p>
+                  </div>
+                )}
+                <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) { setImage(f); setPreview(URL.createObjectURL(f)); } }} className="absolute inset-0 opacity-0 cursor-pointer" />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 2: Core Data */}
+          {step === 2 && (
+            <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
+              <div className="space-y-2">
+                <h1 className="text-[32px] font-black tracking-tightest leading-none">Registry <br/>Data</h1>
+                <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Define the market value and domain.</p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Asset Identity</label>
+                  <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Official Badminton Club Jersey" className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[18px] font-bold text-navy outline-none focus:border-navy shadow-sm" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Yield (RM)</label>
+                    <input value={price} onChange={e => setPrice(e.target.value)} type="number" placeholder="45.00" className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[20px] font-black text-navy outline-none focus:border-navy shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Volume</label>
+                    <input value={stock} onChange={e => setStock(e.target.value)} type="number" placeholder="20" className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[20px] font-black text-navy outline-none focus:border-navy shadow-sm" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Domain</label>
+                  <div className="flex flex-wrap gap-2">
+                    {CATEGORIES.map(c => (
+                      <button key={c} type="button" onClick={() => setCategory(c)} className={`px-4 py-2.5 rounded-xl text-[11px] font-bold border-2 transition-all ${category === c ? 'bg-navy text-white border-navy shadow-lg' : 'bg-white text-slate-400 border-slate-50'}`}>
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 3: Final Review */}
+          {step === 3 && (
+            <motion.div key="s3" initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} className="space-y-8">
+              <div className="space-y-2">
+                <h1 className="text-[32px] font-black tracking-tightest leading-none">Deploy <br/>Sequence</h1>
+                <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Final validation before global broadcast.</p>
+              </div>
+
+              <div className="relative group">
+                <div className="absolute inset-0 translate-y-3 translate-x-2 rounded-[3rem] bg-slate-100" />
+                <div className="relative bg-white border border-slate-50 rounded-[3rem] overflow-hidden shadow-sm">
+                  <div className="h-64 relative bg-slate-50 flex items-center justify-center">
+                    {preview ? <img src={preview} className="w-full h-full object-cover" /> : <Package size={48} className="text-slate-200" />}
+                  </div>
+                  <div className="p-8">
+                    <div className="flex gap-2 mb-3">
+                      <span className="px-2 py-1 bg-navy/5 text-navy text-[9px] font-black uppercase tracking-widest rounded-md">{category}</span>
+                    </div>
+                    <h3 className="text-[24px] font-bold text-navy leading-tight">{title || 'Asset Unnamed'}</h3>
+                    <p className="text-[28px] font-black text-navy mt-4">RM {Number(price||0).toFixed(0)}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Tactical Footer */}
+        <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto px-6 py-10 bg-[#FDFDFD]/90 backdrop-blur-xl">
+          {step < 3 ? (
+            <motion.button
+              whileTap={{ scale: 0.98, y: 1 }}
+              disabled={!canNext}
+              onClick={() => setStep(s => s + 1)}
+              className="w-full h-[72px] bg-navy text-white rounded-[2rem] font-bold text-[16px] flex items-center justify-center gap-3 disabled:opacity-30 shadow-2xl shadow-navy/20"
+            >
+              Next Phase <ChevronRight size={20} />
+            </motion.button>
+          ) : (
+            <motion.button
+              whileTap={{ scale: 0.98, y: 1 }}
+              disabled={loading}
+              onClick={handleDeploy}
+              className="w-full h-[72px] bg-navy text-white rounded-[2rem] font-bold text-[16px] flex items-center justify-center gap-3 shadow-2xl shadow-navy/30"
+            >
+              {loading ? <><Loader2 size={20} className="animate-spin" /> Finalizing...</> : <><Rocket size={20} /> Finalize Launch</>}
+            </motion.button>
+          )}
         </div>
 
-        <button 
-          disabled={loading}
-          className="w-full bg-navy text-white p-7 rounded-[32px] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl hover:bg-orange hover:shadow-[0_20px_40px_rgba(255,133,27,0.3)] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 mt-8 relative overflow-hidden group"
-        >
-          {loading ? (
-              <>
-                  <Loader2 className="animate-spin" size={20} />
-                  Synchronizing Pulse...
-              </>
-          ) : (
-              <>
-                  <div className="relative">
-                    <Zap size={20} className="group-hover:rotate-12 transition-transform text-orange" />
-                  </div>
-                  Execute Official Deployment
-              </>
-          )}
-        </button>
-      </form>
+      </div>
     </main>
   );
 }

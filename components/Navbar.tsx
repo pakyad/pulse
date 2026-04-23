@@ -20,7 +20,7 @@ export default function Navbar() {
         <div className="w-8 h-8 bg-navy rounded-lg flex items-center justify-center transition-transform group-hover:rotate-12">
             <span className="text-white font-black text-sm">P</span>
         </div>
-        <h1 className="text-xl font-black text-navy tracking-tighter uppercase">Codep Pulse</h1>
+        <h1 className="text-xl font-black text-navy  ">Codep Pulse</h1>
       </Link>
       
       <div className="flex items-center gap-2 md:gap-6">

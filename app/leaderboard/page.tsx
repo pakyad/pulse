@@ -40,13 +40,13 @@ export default function LeaderboardPage() {
     );
     if (index === 1) return <Medal className="text-slate-400" size={26} />;
     if (index === 2) return <Star className="text-orange" size={24} />;
-    return <span className="text-navy/20 font-black text-lg italic">#{index + 1}</span>;
+    return <span className="text-navy/20 font-black text-lg ">#{index + 1}</span>;
   };
 
   if (loading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-pearl">
         <div className="w-12 h-12 bg-navy animate-pulse rounded-xl mb-4" />
-        <p className="text-[10px] text-navy/20 font-black uppercase tracking-[0.5em] text-center italic">CALIBRATING RANKINGS...</p>
+        <p className="text-[10px] text-navy/20 font-black  tracking-[0.5em] text-center ">CALIBRATING RANKINGS...</p>
     </div>
   );
 
@@ -55,9 +55,9 @@ export default function LeaderboardPage() {
       <header className="mb-12">
         <div className="flex items-center gap-3 mb-2">
             <div className="h-[2px] w-8 bg-orange" />
-            <p className="text-orange text-[10px] font-black uppercase tracking-[0.4em]">Ecosystem Status</p>
+            <p className="text-orange text-[10px] font-black  tracking-[0.4em]">Ecosystem Status</p>
         </div>
-        <h1 className="text-4xl font-black text-navy italic tracking-tighter uppercase leading-none">Leaderboard</h1>
+        <h1 className="text-4xl font-black text-navy    leading-none">Leaderboard</h1>
       </header>
 
       <section className="space-y-4">
@@ -81,13 +81,13 @@ export default function LeaderboardPage() {
                                 {getRankIcon(index)}
                             </div>
                             <div>
-                                <h4 className="text-sm font-black text-navy uppercase tracking-tight leading-none mb-1.5">{club.full_name}</h4>
+                                <h4 className="text-sm font-black text-navy  tracking-tight leading-none mb-1.5">{club.full_name}</h4>
                                 <div className="flex items-center gap-2">
-                                    <p className="text-[10px] font-bold text-navy/40 uppercase tracking-widest leading-none">
+                                    <p className="text-[10px] font-bold text-navy/40  tracking-widest leading-none">
                                         {club.hustle_score || 0} HP
                                     </p>
                                     <div className="w-1 h-1 rounded-full bg-navy/10" />
-                                    <p className="text-[8px] font-black text-orange uppercase tracking-[0.2em] leading-none italic">
+                                    <p className="text-[8px] font-black text-orange  tracking-[0.2em] leading-none ">
                                         {club.performance_tier || 'NOVICE'}
                                     </p>
                                 </div>
@@ -97,7 +97,7 @@ export default function LeaderboardPage() {
                         <div className="flex flex-col items-end gap-1.5">
                             <div className="bg-navy px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-navy/10 border border-white/10">
                                 <Zap size={10} className="text-orange animate-pulse" />
-                                <span className="text-[9px] font-black text-white italic uppercase tracking-tighter">LVL {level}</span>
+                                <span className="text-[9px] font-black text-white   ">LVL {level}</span>
                             </div>
                         </div>
                     </motion.div>
@@ -108,14 +108,14 @@ export default function LeaderboardPage() {
         {clubs.length === 0 && (
             <div className="p-20 border-2 border-dashed border-navy/5 rounded-[40px] flex flex-col items-center opacity-20">
                 <Trophy size={40} className="mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-widest italic">Awaiting competitive signals</p>
+                <p className="text-[10px] font-black  tracking-widest ">Awaiting competitive signals</p>
             </div>
         )}
       </section>
 
       {/* Institutional Insight */}
       <footer className="mt-12 p-8 border-t border-navy/5">
-        <p className="text-[9px] text-navy/30 font-bold uppercase tracking-widest text-center leading-relaxed">
+        <p className="text-[9px] text-navy/30 font-bold  tracking-widest text-center leading-relaxed">
             Rankings are updated in real-time based on verified field handshakes and ecosystem volume.
         </p>
       </footer>

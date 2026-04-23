@@ -144,11 +144,11 @@ export default function ScannerPage() {
                   <Award size={64} className="text-orange" />
                 </motion.div>
 
-                <h1 className="text-6xl font-black text-white uppercase italic tracking-tighter mb-4 leading-none strike-through decoration-orange decoration-8">Level Up</h1>
-                <p className="text-orange text-sm font-black uppercase tracking-[0.5em] mb-12 animate-pulse">Handshake Verified +50 HP</p>
+                <h1 className="text-6xl font-black text-white    mb-4 leading-none strike-through decoration-orange decoration-8">Level Up</h1>
+                <p className="text-orange text-sm font-black  tracking-[0.5em] mb-12 animate-pulse">Handshake Verified +50 HP</p>
                 
                 <div className="flex flex-col gap-4 w-full max-w-xs">
-                    <Link href="/me" className="flex items-center justify-center gap-4 bg-white text-navy px-12 py-6 rounded-[28px] font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl hover:bg-orange hover:text-white transition-all active:scale-95 group">
+                    <Link href="/me" className="flex items-center justify-center gap-4 bg-white text-navy px-12 py-6 rounded-[28px] font-black  tracking-[0.2em] text-[11px] shadow-2xl hover:bg-orange hover:text-white transition-all active:scale-95 group">
                       Return to Hub 
                       <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
                     </Link>
@@ -167,8 +167,8 @@ export default function ScannerPage() {
                     <X className="text-white w-6 h-6" />
                 </button>
                 <div className="text-center">
-                    <h1 className="text-white text-2xl font-black tracking-widest uppercase italic leading-none mb-1">Optical Hub</h1>
-                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.4em]">Multi-Doc Sync Active</p>
+                    <h1 className="text-white text-2xl font-black tracking-widest   leading-none mb-1">Optical Hub</h1>
+                    <p className="text-[10px] text-white/40 font-bold  tracking-[0.4em]">Multi-Doc Sync Active</p>
                 </div>
                 <div className="w-14" />
             </header>
@@ -178,7 +178,7 @@ export default function ScannerPage() {
                 <div className="absolute inset-0 border-[60px] border-black/40 backdrop-blur-[2px] z-20 pointer-events-none" />
             </div>
             
-            <p className="mt-12 text-white/30 text-[10px] font-black uppercase tracking-[0.3em] text-center max-w-[280px] leading-relaxed">
+            <p className="mt-12 text-white/30 text-[10px] font-black  tracking-[0.3em] text-center max-w-[280px] leading-relaxed">
               Establishing high-speed handshake... Reward protocol initialized.
             </p>
           </motion.main>
@@ -190,7 +190,7 @@ export default function ScannerPage() {
         #pulse-reader__status_span { display: none !important; }
         #pulse-reader__dashboard_section_csr button {
           background: #FF851B !important; color: white !important; border: none !important;
-          border-radius: 16px !important; padding: 10px 24px !important; text-transform: uppercase !important;
+          border-radius: 16px !important; padding: 10px 24px !important; text-transform:  !important;
           font-weight: 900 !important; font-size: 11px !important; letter-spacing: 0.2em !important;
         }
         #pulse-reader video { border-radius: 40px !important; object-fit: cover !important; width: 100% !important; height: 100% !important; }

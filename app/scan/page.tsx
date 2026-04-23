@@ -111,8 +111,8 @@ export default function HandshakeScanner() {
               <X className="text-white w-5 h-5" />
           </button>
           <div className="flex flex-col items-center">
-              <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.4em] mb-1">Handshake Active</p>
-              <h1 className="text-xl font-black text-white italic tracking-tighter">Optical Scanner</h1>
+              <p className="text-[10px] text-white/40 font-black  tracking-[0.4em] mb-1">Handshake Active</p>
+              <h1 className="text-xl font-black text-white  ">Optical Scanner</h1>
           </div>
           <div className="w-11" />
       </header>
@@ -128,7 +128,7 @@ export default function HandshakeScanner() {
                 <div className="w-24 h-24 bg-orange rounded-full flex items-center justify-center mb-10 shadow-[0_0_50px_rgba(255,133,27,0.4)]">
                     <CheckCircle2 size={48} className="text-white" />
                 </div>
-                <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-4">Handshake Verified</h2>
+                <h2 className="text-4xl font-black text-white    mb-4">Handshake Verified</h2>
                 <div className="flex flex-col items-center gap-2">
                     <div className="bg-white/10 px-6 py-2 rounded-full border border-white/10 flex items-center gap-2">
                         <Zap size={14} className="text-orange" />
@@ -137,7 +137,7 @@ export default function HandshakeScanner() {
                 </div>
                 <button 
                     onClick={() => router.push('/me')}
-                    className="mt-12 bg-white text-navy px-10 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl active:scale-95 transition-all"
+                    className="mt-12 bg-white text-navy px-10 py-4 rounded-2xl font-black  tracking-[0.2em] text-xs shadow-xl active:scale-95 transition-all"
                 >
                     Return to Hub
                 </button>
@@ -149,7 +149,7 @@ export default function HandshakeScanner() {
       <footer className="absolute bottom-12 left-0 w-full px-12 text-center pointer-events-none">
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-5 rounded-3xl">
               <p className="text-xs font-bold text-white mb-1">Align QR Code within the brackets</p>
-              <p className="text-[10px] text-white/40 uppercase tracking-widest">Scanning for Live Transaction Pulse...</p>
+              <p className="text-[10px] text-white/40  tracking-widest">Scanning for Live Transaction Pulse...</p>
           </div>
       </footer>
 

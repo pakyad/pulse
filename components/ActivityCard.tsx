@@ -19,7 +19,7 @@ export default function ActivityCard({ id, title, price, type, status, location 
       <div className="hologram-card p-4 relative hover:border-orange/50 transition-all duration-300 group">
         {/* Type Badge */}
         <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-navy/5 border border-navy/10 flex items-center gap-1">
-           <span className="text-[8px] font-bold text-navy/60 uppercase tracking-tighter">{type}</span>
+           <span className="text-[8px] font-bold text-navy/60  ">{type}</span>
            <Zap size={8} className="text-navy/40" />
         </div>
         
@@ -35,8 +35,8 @@ export default function ActivityCard({ id, title, price, type, status, location 
         <div className="space-y-1">
           <h3 className="text-xs font-bold text-navy truncate tracking-tight">{title}</h3>
           <div className="flex justify-between items-baseline">
-            <p className="text-[11px] font-black text-orange uppercase tracking-tighter">RM {price.toFixed(2)}</p>
-            {location && <p className="text-[9px] text-navy/30 font-mono italic">{location}</p>}
+            <p className="text-[11px] font-black text-orange  ">RM {price.toFixed(2)}</p>
+            {location && <p className="text-[9px] text-navy/30 font-mono ">{location}</p>}
           </div>
         </div>
         

@@ -35,6 +35,35 @@ export const registerStudent = async (email: string, pass: string, fullName: str
 };
 
 /**
+ * Admin Protocol: Register an Official Institutional Merchant (Club/Org).
+ * This is an ADMIN ONLY action to ensure institutional vetting.
+ */
+export const createInstitutionalMerchant = async (email: string, pass: string, clubName: string) => {
+  try {
+    // 1. Create Auth Identity
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    const user = userCredential.user;
+
+    // 2. Initialize Institutional Profile
+    // Stores the organization name and sets high-prestige flags
+    await setDoc(doc(db, "users", user.uid), {
+      full_name: clubName,
+      email: email,
+      role: 'CLUB',
+      is_official: true,
+      is_verified_merchant: true,
+      hustle_score: 500, // Starting prestige for official entities
+      created_at: new Date().toISOString()
+    });
+
+    return { user, error: null };
+  } catch (error: any) {
+    console.error("Institutional Deployment Error:", error.message);
+    return { user: null, error: error.message };
+  }
+};
+
+/**
  * Secure Session Handshake (Login)
  */
 export const loginStudent = async (email: string, pass: string) => {
@@ -58,3 +87,26 @@ export const logoutUser = async () => {
         return { success: false, error: error.message };
     }
 }
+/**
+ * Institutional Protocol: Submit application and synchronize with Institutional Ledger.
+ * Handles both Runner and Merchant registration.
+ */
+export const submitInstitutionalApplication = async (uid: string, data: any, type: 'runner' | 'merchant') => {
+  try {
+    const userRef = doc(db, "users", uid);
+    const statusField = type === 'runner' ? 'runner_status' : 'merchant_status';
+    const verifiedField = type === 'runner' ? 'is_verified_runner' : 'is_verified_merchant';
+
+    await setDoc(userRef, {
+      ...data,
+      [statusField]: 'pending',
+      [verifiedField]: false,
+      applied_at: new Date().toISOString()
+    }, { merge: true });
+
+    return { success: true, error: null };
+  } catch (error: any) {
+    console.error("Institutional Registry Error:", error.message);
+    return { success: false, error: error.message };
+  }
+};

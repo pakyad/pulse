@@ -28,7 +28,7 @@ export default function HypeGrid() {
         >
           {/* Tag Overlay */}
           <div className="flex justify-between items-start mb-4 relative z-10">
-            <span className="text-[10px] uppercase font-bold tracking-tighter bg-navy/5 text-navy px-2 py-1 rounded-md border-[0.5px] border-navy/10 backdrop-blur-md">
+            <span className="text-[10px]  font-bold  bg-navy/5 text-navy px-2 py-1 rounded-md border-[0.5px] border-navy/10 backdrop-blur-md">
               {product.category}
             </span>
             <button className="text-navy/40 group-hover:text-orange transition-colors">

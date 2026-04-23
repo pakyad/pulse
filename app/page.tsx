@@ -3,16 +3,35 @@
 import React, { useEffect } from 'react';
 import HologramID from '@/components/shared/HologramID';
 import HypeGrid from '@/components/marketplace/HypeGrid';
-import { db } from '@/lib/firebase';
+import AnnouncementCarousel from '@/components/shared/AnnouncementCarousel';
+import ServiceGrid from '@/components/shared/ServiceGrid';
+import LatestHero from '@/components/shared/LatestHero';
+import { db, auth } from '@/lib/firebase';
 
 export default function Home() {
   useEffect(() => {
-    console.log("Firebase Pulse Signal: Database instance verified.", db);
+    const unsub = auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = '/home';
+      } else {
+        window.location.href = '/auth';
+      }
+    });
+    return () => unsub();
   }, []);
 
   return (
     <div className="pt-24 min-h-screen">
-      <main className="pb-20 px-6 max-w-7xl mx-auto space-y-12">
+      <main className="pb-20 px-6 max-w-7xl mx-auto space-y-16">
+        {/* Campus Hub Section */}
+        <ServiceGrid />
+
+        {/* Latest Hero Slider */}
+        <LatestHero />
+
+        {/* Official Announcement Section */}
+        <AnnouncementCarousel />
+
         {/* Digital ID Section */}
         <section className="flex flex-col items-center gap-8">
           <div className="text-center space-y-2">
@@ -31,7 +50,7 @@ export default function Home() {
         <section className="space-y-6">
           <div className="flex justify-between items-center px-4">
             <h2 className="text-xl font-bold text-navy tracking-tight">Activity Hub</h2>
-            <button className="text-xs font-bold text-navy/40 hover:text-navy transition-colors uppercase tracking-widest">View All</button>
+            <button className="text-xs font-bold text-navy/40 hover:text-navy transition-colors  tracking-widest">View All</button>
           </div>
           <HypeGrid />
         </section>

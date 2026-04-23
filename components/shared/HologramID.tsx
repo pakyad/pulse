@@ -31,7 +31,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
                 <ShieldCheck className="text-navy w-6 h-6" />
               </div>
               <div className="text-right">
-                <p className="text-[10px] uppercase tracking-widest opacity-50">University Ecosystem</p>
+                <p className="text-[10px]  tracking-widest opacity-50">University Ecosystem</p>
                 <p className="font-bold text-navy">Pulse ID</p>
               </div>
             </div>
@@ -53,8 +53,8 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
           <div className="relative z-10 pt-8 border-t border-navy/10">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-[10px] uppercase tracking-widest opacity-50 mb-1">Matric Number</p>
-                <p className="font-mono text-navy tracking-tighter">{matricNo}</p>
+                <p className="text-[10px]  tracking-widest opacity-50 mb-1">Matric Number</p>
+                <p className="font-mono text-navy ">{matricNo}</p>
               </div>
               <MapPin className="text-navy opacity-20 w-5 h-5" />
             </div>
@@ -66,7 +66,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
 
         {/* Back: Dynamic QR */}
         <div className="absolute inset-0 backface-hidden hologram-card rounded-3xl p-8 flex flex-col items-center justify-center rotate-y-180">
-          <p className="text-[10px] text-navy/40 mb-4 uppercase tracking-[0.2em] font-black">Transaction Verified</p>
+          <p className="text-[10px] text-navy/40 mb-4  tracking-[0.2em] font-black">Transaction Verified</p>
           <div className="bg-white p-4 rounded-2xl shadow-inner mb-6 border-[0.5px] border-navy/10">
             {claimToken ? (
               <QrCode className="w-32 h-32 text-navy" />
@@ -77,7 +77,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
             )}
           </div>
           <div className="text-center">
-            <p className="font-bold text-navy mb-1 uppercase tracking-widest text-xs">Handshake Handshake</p>
+            <p className="font-bold text-navy mb-1  tracking-widest text-xs">Handshake Handshake</p>
             <p className="text-[10px] text-navy opacity-40 px-4 leading-tight">Show this to the seller/runner to complete the secure handshake.</p>
           </div>
           

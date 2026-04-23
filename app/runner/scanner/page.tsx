@@ -38,7 +38,7 @@ export default function RunnerScanner() {
           </div>
         </div>
 
-        <p className="mt-12 text-white/40 text-[10px] uppercase font-black tracking-[0.4em]">
+        <p className="mt-12 text-white/40 text-[10px]  font-black tracking-[0.4em]">
           Align {mode === 'QR' ? 'Handshake QR' : 'Drop-zone'} within frame
         </p>
       </div>
@@ -54,8 +54,8 @@ export default function RunnerScanner() {
         
         <div className="soft-lens px-6 py-2 rounded-full border border-white/10">
           <div className="flex flex-col items-center">
-            <span className="text-[8px] text-white/40 uppercase font-black tracking-[0.2em]">Deployment Active</span>
-            <span className="text-xs font-black text-white tracking-widest uppercase">TX-88219 HOODIE</span>
+            <span className="text-[8px] text-white/40  font-black tracking-[0.2em]">Deployment Active</span>
+            <span className="text-xs font-black text-white tracking-widest ">TX-88219 HOODIE</span>
           </div>
         </div>
 
@@ -73,20 +73,20 @@ export default function RunnerScanner() {
               className={`flex-1 py-4 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 ${mode === 'QR' ? 'bg-orange text-white shadow-[0_0_20px_rgba(255,133,27,0.3)]' : 'text-white/30 hover:text-white/60'}`}
             >
               <Zap size={18} /> 
-              <span className="text-[10px] font-black uppercase tracking-widest">Handshake</span>
+              <span className="text-[10px] font-black  tracking-widest">Handshake</span>
             </button>
             <button 
               onClick={() => setMode('PHOTO')}
               className={`flex-1 py-4 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 ${mode === 'PHOTO' ? 'bg-orange text-white shadow-[0_0_20px_rgba(255,133,27,0.3)]' : 'text-white/30 hover:text-white/60'}`}
             >
               <Package size={18} /> 
-              <span className="text-[10px] font-black uppercase tracking-widest">Photo Drop</span>
+              <span className="text-[10px] font-black  tracking-widest">Photo Drop</span>
             </button>
           </div>
 
           <motion.button 
             whileTap={{ scale: 0.95 }}
-            className="w-full bg-white text-navy font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-[11px] shadow-2xl"
+            className="w-full bg-white text-navy font-black py-5 rounded-2xl  tracking-[0.2em] text-[11px] shadow-2xl"
           >
             {mode === 'QR' ? 'Initiate Optical Scan' : 'Capture Proof of Drop'}
           </motion.button>

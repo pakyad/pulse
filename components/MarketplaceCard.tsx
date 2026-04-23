@@ -51,7 +51,7 @@ export default function MarketplaceCard({ item, onPurchase }: MarketplaceCardPro
                     e.stopPropagation();
                     onPurchase?.(item.id);
                 }}
-                className="w-full bg-white text-navy py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-2"
+                className="w-full bg-white text-navy py-2 rounded-xl text-[10px] font-black  tracking-widest shadow-xl flex items-center justify-center gap-2"
             >
                 <ShoppingBag size={12} />
                 Acquire Pulse
@@ -61,18 +61,18 @@ export default function MarketplaceCard({ item, onPurchase }: MarketplaceCardPro
       
       <div className="px-1.5 pb-1">
         <div className="flex justify-between items-start mb-1">
-            <h3 className="text-[12px] font-black text-navy uppercase leading-tight tracking-tight w-[70%] truncate">
+            <h3 className="text-[12px] font-black text-navy  leading-tight tracking-tight w-[70%] truncate">
               {item.title}
             </h3>
             <div className="flex items-center gap-1 opacity-20">
                 <Zap size={10} className="fill-navy" />
-                <span className="text-[8px] font-black uppercase">Active</span>
+                <span className="text-[8px] font-black ">Active</span>
             </div>
         </div>
         
         <div className="flex justify-between items-center mt-3">
           <div className="flex flex-col">
-            <p className="text-[9px] text-navy/30 font-black uppercase tracking-[0.1em] leading-none mb-0.5">Inventory</p>
+            <p className="text-[9px] text-navy/30 font-black  tracking-[0.1em] leading-none mb-0.5">Inventory</p>
             <p className="text-[10px] text-navy/60 font-black tabular-nums">
                 {item.stock_count || 1} UNITS
             </p>

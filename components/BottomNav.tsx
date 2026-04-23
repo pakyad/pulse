@@ -4,14 +4,19 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { Home, Newspaper, Trophy, Bell, User } from 'lucide-react';
+import { Home, Newspaper, Bike, Bell, User, ShoppingBag } from 'lucide-react';
 
 export default function BottomNav() {
   const pathname = usePathname();
   const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
+    let unsubSnap: (() => void) | null = null;
+
     const unsubAuth = auth.onAuthStateChanged((user) => {
+      // Cleanup previous listener
+      if (unsubSnap) unsubSnap();
+
       if (user) {
         // Listen for active PENDING handshakes to show the notification badge
         const q = query(
@@ -20,22 +25,24 @@ export default function BottomNav() {
           where("status", "==", "PENDING")
         );
 
-        const unsubSnap = onSnapshot(q, (snap) => {
+        unsubSnap = onSnapshot(q, (snap) => {
           setNotificationCount(snap.docs.length);
         });
-        return () => unsubSnap();
       }
     });
 
-    return () => unsubAuth();
+    return () => {
+      unsubAuth();
+      if (unsubSnap) unsubSnap();
+    };
   }, []);
 
   const navItems = [
-    { name: 'Home', path: '/marketplace', icon: Home },
+    { name: 'Home', path: '/home', icon: Home },
+    { name: 'Market', path: '/marketplace', icon: ShoppingBag },
     { name: 'Pulse', path: '/pulse', icon: Newspaper, isCenter: true },
-    { name: 'Rewards', path: '/leaderboard', icon: Trophy },
-    { name: 'Inbox', path: '/me', icon: Bell, badge: notificationCount },
-    { name: 'Account', path: '/me', icon: User },
+    { name: 'Run', path: '/run', icon: Bike },
+    { name: 'Me', path: '/me', icon: User },
   ];
 
   return (
@@ -69,7 +76,7 @@ export default function BottomNav() {
               </div>
 
               {/* Label */}
-              <span className={`text-[10px] font-black tracking-tighter transition-colors ${isActive ? 'text-[#007AFF]' : 'text-[#8E8E93]'}`}>
+              <span className={`text-[10px] font-black  transition-colors ${isActive ? 'text-[#007AFF]' : 'text-[#8E8E93]'}`}>
                 {item.name}
               </span>
 

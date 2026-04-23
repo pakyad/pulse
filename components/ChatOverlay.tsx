@@ -63,8 +63,8 @@ export default function ChatOverlay({ tx_id, status, recipientName, isOpen, onCl
                      <MessageSquare className="text-navy w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-black text-navy text-sm uppercase tracking-tight">{recipientName}</h3>
-                    <p className="text-[10px] text-navy/40 font-bold uppercase tracking-widest flex items-center gap-1">
+                    <h3 className="font-black text-navy text-sm  tracking-tight">{recipientName}</h3>
+                    <p className="text-[10px] text-navy/40 font-bold  tracking-widest flex items-center gap-1">
                        {isArchived ? <Lock size={10} /> : <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
                        {isArchived ? 'Session Archived' : 'Live Sync'}
                     </p>
@@ -95,7 +95,7 @@ export default function ChatOverlay({ tx_id, status, recipientName, isOpen, onCl
                {isArchived && (
                  <div className="flex flex-col items-center gap-3 py-10 opacity-30">
                     <History size={24} className="text-navy" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-navy text-center">
+                    <p className="text-[10px] font-black  tracking-[0.3em] text-navy text-center">
                        Handshake complete. <br/> This conversation is archived.
                     </p>
                  </div>

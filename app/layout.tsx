@@ -1,15 +1,21 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import type { Metadata } from "next"
-import Navbar from '@/components/Navbar'
-import BottomNav from '@/components/BottomNav'
+import NavigationGate from '@/components/NavigationGate'
 
-const inter = Inter({ subsets: ['latin'] })
+const pjs = Plus_Jakarta_Sans({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "CODEP PULSE | High-End University Ecosystem",
   description: "Perfectly beautiful university marketplace and runner ecosystem.",
 };
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export default function RootLayout({
   children,
@@ -17,18 +23,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} min-h-screen relative`}>
+    <html lang="en" className={pjs.className}>
+      <body className={`${pjs.className} min-h-screen relative antialiased`}>
         {/* Breathing background layer */}
-        <div className="aura-bg animate-mesh-aura" />
+        <div className="aura-bg fixed inset-0 pointer-events-none animate-mesh-aura" />
         
         {/* Dynamic Aura Spots for depth */}
-        <div className="aura-spot w-[600px] h-[600px] -top-40 -left-40 animate-mesh-aura" />
-        <div className="aura-spot w-[400px] h-[400px] top-[20%] -right-20 animate-mesh-aura" />
-        <div className="aura-spot w-[500px] h-[500px] -bottom-20 left-[20%] animate-mesh-aura" />
+        <div className="aura-spot absolute pointer-events-none w-[600px] h-[600px] -top-40 -left-40 animate-mesh-aura" />
+        <div className="aura-spot absolute pointer-events-none w-[400px] h-[400px] top-[20%] -right-20 animate-mesh-aura" />
+        <div className="aura-spot absolute pointer-events-none w-[500px] h-[500px] -bottom-20 left-[20%] animate-mesh-aura" />
 
-        <Navbar />
-        <BottomNav />
+
+        <NavigationGate />
 
         {/* Main Content Area */}
         <main className="relative z-10">

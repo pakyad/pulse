@@ -64,8 +64,8 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
         </button>
 
         <header className="mb-8">
-            <p className="text-[10px] text-orange font-black uppercase tracking-[0.3em] mb-1">New Deployment</p>
-            <h2 className="text-3xl font-black text-navy tracking-tighter uppercase leading-none">Activate Listing</h2>
+            <p className="text-[10px] text-orange font-black  tracking-[0.3em] mb-1">New Deployment</p>
+            <h2 className="text-3xl font-black text-navy   leading-none">Activate Listing</h2>
         </header>
 
         <div className="space-y-6">
@@ -82,10 +82,10 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                     <div className="w-12 h-12 bg-navy/5 rounded-full flex items-center justify-center mb-4">
                         <Upload className="w-6 h-6 text-navy/40" />
                     </div>
-                    <p className="text-[10px] font-black text-navy/40 uppercase tracking-widest">
+                    <p className="text-[10px] font-black text-navy/40  tracking-widest">
                         Handshake visual asset
                     </p>
-                    <p className="text-[8px] text-navy/20 uppercase font-black tracking-tighter mt-1">
+                    <p className="text-[8px] text-navy/20  font-black  mt-1">
                         PNG / JPG (MAX 5MB)
                     </p>
                 </div>
@@ -95,7 +95,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
 
           <div className="space-y-4">
               <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-navy/40 ml-4">Deployment Label</label>
+                  <label className="text-[9px] font-black  tracking-widest text-navy/40 ml-4">Deployment Label</label>
                   <input 
                     placeholder="e.g. Vintage UTM Varsity Pack" 
                     className="soft-lens w-full px-6 py-4 rounded-2xl text-sm font-bold text-navy focus:ring-1 ring-orange/30 transition-all border-none outline-none placeholder:text-navy/20"
@@ -105,7 +105,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
               
               <div className="flex gap-4">
                 <div className="flex-1 space-y-1">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-navy/40 ml-4">Valuation (MYR)</label>
+                    <label className="text-[9px] font-black  tracking-widest text-navy/40 ml-4">Valuation (MYR)</label>
                     <input 
                         type="number" 
                         placeholder="0.00" 
@@ -114,7 +114,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                     />
                 </div>
                 <div className="w-32 space-y-1">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-navy/40 ml-4">Units</label>
+                    <label className="text-[9px] font-black  tracking-widest text-navy/40 ml-4">Units</label>
                     <input 
                         type="number" 
                         placeholder="1" 
@@ -128,7 +128,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
           <button 
             disabled={loading}
             onClick={handleUpload}
-            className="w-full bg-navy text-white py-5 rounded-[24px] font-black uppercase tracking-[0.3em] text-[11px] shadow-2xl hover:bg-orange transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
+            className="w-full bg-navy text-white py-5 rounded-[24px] font-black  tracking-[0.3em] text-[11px] shadow-2xl hover:bg-orange transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
           >
             {loading ? 'Synchronizing Pipeline...' : 'Activate Marketplace Pulse'}
             {loading ? <Zap size={16} className="animate-spin" /> : <Zap size={16} />}
@@ -139,7 +139,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
         <div className="mt-8 pt-6 border-t border-navy/5 flex justify-between items-center opacity-40">
             <div className="flex items-center gap-2">
                 <Package size={14} className="text-navy" />
-                <span className="text-[8px] font-black uppercase tracking-widest leading-none">Student Capacity: 5 Slots</span>
+                <span className="text-[8px] font-black  tracking-widest leading-none">Student Capacity: 5 Slots</span>
             </div>
             <ChevronRight size={14} />
         </div>

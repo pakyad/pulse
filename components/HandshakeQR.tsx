@@ -36,8 +36,8 @@ export default function HandshakeQR({ txId }: HandshakeQRProps) {
           <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
              <CheckCircle2 size={40} className="text-white animate-pulse" />
           </div>
-          <h4 className="text-xl font-black text-navy uppercase tracking-tighter leading-none mb-2">Handshake Complete</h4>
-          <p className="text-[10px] text-navy/40 font-black uppercase tracking-[0.3em]">Hustle Points Transferred</p>
+          <h4 className="text-xl font-black text-navy   leading-none mb-2">Handshake Complete</h4>
+          <p className="text-[10px] text-navy/40 font-black  tracking-[0.3em]">Hustle Points Transferred</p>
         </motion.div>
       ) : (
         <motion.div 
@@ -69,12 +69,12 @@ export default function HandshakeQR({ txId }: HandshakeQRProps) {
           <div className="text-center relative z-10">
             <div className="flex items-center justify-center gap-2 mb-3">
                <ShieldCheck size={14} className="text-orange" />
-               <p className="text-[10px] text-navy/50 font-black uppercase tracking-[0.3em]">Secure Handshake Signal</p>
+               <p className="text-[10px] text-navy/50 font-black  tracking-[0.3em]">Secure Handshake Signal</p>
             </div>
-            <p className="text-sm font-black text-navy uppercase tracking-tight">Show this to the Field Runner</p>
+            <p className="text-sm font-black text-navy  tracking-tight">Show this to the Field Runner</p>
             <div className="flex items-center justify-center gap-1.5 mt-4">
                <div className="w-1.5 h-1.5 rounded-full bg-orange animate-ping" />
-               <span className="text-[8px] font-black text-navy/30 uppercase tracking-widest leading-none">Broadcasting ID: {txId.slice(0, 8)}</span>
+               <span className="text-[8px] font-black text-navy/30  tracking-widest leading-none">Broadcasting ID: {txId.slice(0, 8)}</span>
             </div>
           </div>
         </motion.div>
