@@ -28,7 +28,7 @@ export default function TreasuryView() {
                </div>
             </div>
             <div className="flex items-baseline gap-4">
-              <h2 className="text-[52px] font-bold tracking-tight text-[#0A0F1E]">RM 14,802.42</h2>
+              <h2 className="text-[52px] font-bold tracking-widest text-[#0A0F1E]">RM 14,802.42</h2>
               <span className="text-slate-200 text-sm font-bold tracking-widest uppercase">Direct Sales</span>
             </div>
           </div>
@@ -49,7 +49,7 @@ export default function TreasuryView() {
            <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-10">
               <BarChart3 size={28} className="text-[#007AFF]" />
            </div>
-           <h4 className="text-white font-bold text-lg tracking-tight mb-3">Sales Stats</h4>
+           <h4 className="text-white font-bold text-lg tracking-widest mb-3">Sales Stats</h4>
            <p className="text-white/30 text-[13px] leading-relaxed mb-10 px-4 font-medium">View detailed reports on which clubs and merchants are making the most sales.</p>
            <button className="mt-auto w-full bg-[#007AFF] text-white font-bold text-[10px] py-5 rounded-2xl hover:bg-blue-600 transition-all uppercase tracking-[0.3em] shadow-xl shadow-blue-500/20 active:scale-95">
              Open Reports

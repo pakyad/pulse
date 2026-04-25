@@ -44,7 +44,7 @@ export default function BooksHub() {
         </button>
         <div className="text-center">
           <p className="text-[10px] font-black text-violet-500 uppercase tracking-[0.4em] mb-1">Knowledge Sync</p>
-          <h1 className="text-[20px] font-bold tracking-tight text-navy">Campus Library Hub</h1>
+          <h1 className="text-[20px] font-bold tracking-widest text-navy">Campus Library Hub</h1>
         </div>
         <div className="w-12 h-12 rounded-full bg-violet-50 flex items-center justify-center text-violet-500">
           <Book size={20} />
@@ -61,7 +61,7 @@ export default function BooksHub() {
            <input 
               type="text" 
               placeholder="Search library or textbook exchange..."
-              className="w-full h-16 bg-slate-50 border border-slate-100 rounded-[2rem] pl-16 pr-6 text-[14px] font-medium outline-none focus:bg-white focus:border-violet-500 focus:shadow-2xl focus:shadow-violet-500/10 transition-all"
+              className="w-full h-16 bg-slate-50 border border-slate-100 rounded-4xl pl-16 pr-6 text-[14px] font-medium outline-none focus:bg-white focus:border-violet-500 focus:shadow-2xl focus:shadow-violet-500/10 transition-all"
            />
         </div>
 
@@ -125,7 +125,7 @@ export default function BooksHub() {
                  <Sparkles size={20} className="text-violet-400" />
                  <p className="text-[11px] font-black tracking-widest uppercase text-white/40">Market Integration</p>
               </div>
-              <h2 className="text-[28px] font-bold tracking-tight leading-none">Recycle Your Knowledge.</h2>
+              <h2 className="text-[28px] font-bold tracking-widest leading-none">Recycle Your Knowledge.</h2>
               <p className="text-[14px] text-white/40 leading-relaxed font-medium">
                  List your used textbooks on the Pulse Marketplace and earn instant university credits.
               </p>

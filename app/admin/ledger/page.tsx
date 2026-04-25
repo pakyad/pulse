@@ -129,7 +129,7 @@ export default function AdminLedgerPage() {
                       key={req.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="bg-white/5 border border-white/5 p-8 rounded-[3rem] hover:bg-white/[0.08] transition-all group"
+                      className="bg-white/5 border border-white/5 p-8 rounded-[3rem] hover:bg-white/8 transition-all group"
                     >
                        <div className="flex justify-between items-start mb-8">
                           <div className="flex items-center gap-4">
@@ -149,11 +149,11 @@ export default function AdminLedgerPage() {
                        <div className="grid grid-cols-3 gap-8 mb-8 p-6 bg-white/5 rounded-3xl">
                           <div>
                              <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">Gross Revenue</p>
-                             <p className="text-[16px] font-bold tracking-tight text-white">RM {req.total_revenue.toFixed(2)}</p>
+                             <p className="text-[16px] font-bold tracking-widest text-white">RM {req.total_revenue.toFixed(2)}</p>
                           </div>
                           <div>
                              <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">Pulse Fee (10%)</p>
-                             <p className="text-[16px] font-bold tracking-tight text-red-400">- RM {req.pulse_fee.toFixed(2)}</p>
+                             <p className="text-[16px] font-bold tracking-widest text-red-400">- RM {req.pulse_fee.toFixed(2)}</p>
                           </div>
                           <div>
                              <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">Net Payout</p>

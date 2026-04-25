@@ -128,7 +128,7 @@ export default function AdminSidebar({ activeModule, setActiveModule }: AdminSid
       {/* Simple Branding */}
       <div className="p-8 pt-10">
         <h2 className="text-slate-100 font-bold text-xl tracking-tight">PULSE ADMIN</h2>
-        <div className="h-[1px] w-8 bg-[#007AFF] mt-2 rounded-full" />
+        <div className="h-px w-8 bg-[#007AFF] mt-2 rounded-full" />
       </div>
 
       {/* Simplified Navigation */}

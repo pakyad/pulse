@@ -4,92 +4,192 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, increment, getDoc } from 'firebase/firestore';
 import {
   Package, MapPin, Clock, ChevronLeft, Zap,
-  Truck, Search, Bell, Radio, InboxIcon
+  Truck, Search, Bell, Radio, InboxIcon, AlertCircle,
+  ShieldCheck, Phone
 } from 'lucide-react';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
-// ── Ian Earn Badge ──
-function EarnBadge({ price }: { price: number }) {
-  const runnerCut = (price * 0.15).toFixed(2); // runner earns 15% of order value
+// ── Mission Card Component ──
+function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id: string) => void; disabled: boolean }) {
+  const [holdProgress, setHoldProgress] = useState(0);
+  const [isHolding, setIsHolding] = useState(false);
+  const runnerCut = 2.00; // Flat fee for demo
+
+  const [hasAccepted, setHasAccepted] = useState(false);
+
+  useEffect(() => {
+    let interval: any;
+    if (isHolding && !hasAccepted) {
+      interval = setInterval(() => {
+        setHoldProgress(prev => {
+          if (prev >= 100) return 100;
+          return prev + 5; 
+        });
+      }, 40);
+    } else if (!isHolding && !hasAccepted) {
+      setHoldProgress(0);
+    }
+    return () => clearInterval(interval);
+  }, [isHolding, hasAccepted]);
+
+  useEffect(() => {
+    if (holdProgress >= 100 && !hasAccepted) {
+      setHasAccepted(true);
+      setIsHolding(false);
+      onAccept(order.id);
+    }
+  }, [holdProgress, hasAccepted, order.id, onAccept]);
+
   return (
-    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl">
-      <Zap size={11} className="text-emerald-500 fill-emerald-500" />
-      <span className="text-[10px] font-black text-emerald-600">Earn RM {runnerCut}</span>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-md transition-all group overflow-hidden relative"
+    >
+      {/* Pixelated Scanning Overlay */}
+      {isHolding && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 bg-navy/5 pointer-events-none z-10"
+        >
+           <motion.div 
+             animate={{ y: [-10, 300] }}
+             transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+             className="w-full h-2 bg-navy/10 blur-sm"
+           />
+           <div className="absolute inset-0 overflow-hidden opacity-10">
+              <div className="grid grid-cols-10 h-full w-full">
+                 {Array.from({ length: 50 }).map((_, i) => (
+                   <motion.div 
+                     key={i} 
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: [0, 1, 0] }}
+                     transition={{ duration: 0.5, delay: i * 0.02, repeat: Infinity }}
+                     className="bg-navy h-4 w-full" 
+                   />
+                 ))}
+              </div>
+           </div>
+        </motion.div>
+      )}
+
+      {/* Progress Bar (Bottom) */}
+      <motion.div 
+        initial={{ width: 0 }}
+        animate={{ width: `${holdProgress}%` }}
+        className="absolute bottom-0 left-0 h-1.5 bg-navy pointer-events-none z-20 transition-all duration-75"
+      />
+
+      <div className="flex items-start justify-between mb-8">
+        <div className="flex items-center gap-5">
+          <div className="w-16 h-16 rounded-[1.5rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-navy shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+             {order.image_url ? (
+               <img src={order.image_url} className="w-full h-full object-cover" alt="" />
+             ) : (
+               <Package size={28} />
+             )}
+          </div>
+          <div>
+            <h3 className="font-black text-navy text-[18px] tracking-tightest leading-none mb-2 uppercase">{order.title}</h3>
+            <div className="flex items-center gap-3">
+               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Yield: RM {runnerCut.toFixed(2)}</span>
+               <div className="w-1 h-1 rounded-full bg-slate-200" />
+               <div className="flex items-center gap-1">
+                  <Zap size={10} className="text-amber-500 fill-amber-500" />
+                  <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">High Demand</span>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Logistics Detail */}
+      <div className="space-y-4 mb-8 bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100/50">
+        <div className="flex items-center gap-4">
+          <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
+             <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+          </div>
+          <div className="flex-1">
+             <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Node Alpha</p>
+             <p className="text-[13px] font-bold text-slate-500 truncate">{order.seller_name || 'Merchant Point'}</p>
+          </div>
+        </div>
+        <div className="ml-4 h-4 border-l border-dashed border-slate-200" />
+        <div className="flex items-center gap-4">
+          <div className="w-8 h-8 rounded-xl bg-navy text-white flex items-center justify-center">
+             <MapPin size={14} fill="currentColor" />
+          </div>
+          <div className="flex-1">
+             <p className="text-[9px] font-black text-navy/30 uppercase tracking-widest">Destination Node</p>
+             <p className="text-[13px] font-bold text-navy truncate">{order.drop_off_location}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Trigger Button */}
+      <button
+        onMouseDown={() => !disabled && setIsHolding(true)}
+        onMouseUp={() => setIsHolding(false)}
+        onMouseLeave={() => setIsHolding(false)}
+        onTouchStart={() => !disabled && setIsHolding(true)}
+        onTouchEnd={() => setIsHolding(false)}
+        disabled={disabled}
+        className={`w-full h-16 rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest transition-all select-none relative z-20 ${
+          disabled 
+          ? 'bg-slate-50 text-slate-300' 
+          : isHolding 
+            ? 'bg-navy text-white scale-[0.98] shadow-2xl shadow-navy/30' 
+            : 'bg-navy/5 text-navy border border-navy/10 hover:bg-navy/10'
+        }`}
+      >
+        {disabled ? 'Capacity Reached' : isHolding ? `Securing Node... ${holdProgress}%` : 'Hold to Secure Mission'}
+      </button>
+    </motion.div>
   );
 }
 
-// ── Ian Delivery Card ──
-// Ian: data-forward. Left accent border. Precise earn amount. Clear pickup → drop-off flow.
-function DeliveryCard({ order, onAccept, isAccepting }: { order: any; onAccept: (id: string) => void; isAccepting: boolean }) {
+function ProtocolSuccessOverlay({ onInitiate }: { onInitiate: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onInitiate();
+    }, 2500); // Wait 2.5 seconds for animation then redirect
+    return () => clearTimeout(timer);
+  }, [onInitiate]);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="bg-white border border-slate-100 border-l-4 border-l-accent rounded-2xl p-4 shadow-sm"
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 z-[1000] bg-navy flex flex-col items-center justify-center p-12 text-center"
     >
-      {/* Top row: item + earn badge */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          {order.image_url ? (
-            <img src={order.image_url} className="w-10 h-10 rounded-xl object-cover border border-slate-100" alt={order.title} />
-          ) : (
-            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-              <Package size={18} className="text-slate-300" />
-            </div>
-          )}
-          <div>
-            <h3 className="text-[14px] font-bold text-navy leading-tight line-clamp-1">{order.title}</h3>
-            <p className="text-[11px] text-slate-400 font-medium">From: {order.seller_name || 'Seller'}</p>
+       {/* Pixel Art Pulse (Simplified CSS) */}
+       <div className="relative mb-12">
+          <motion.div 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.3, 0.1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute inset-0 bg-white rounded-full blur-3xl"
+          />
+          <div className="w-32 h-32 bg-white/5 border border-white/10 rounded-[2.5rem] flex items-center justify-center relative">
+             <Truck size={48} className="text-white" />
           </div>
-        </div>
-        <EarnBadge price={order.price || 0} />
-      </div>
+       </div>
 
-      {/* Route: seller → buyer drop-off */}
-      <div className="flex items-center gap-2 mb-4 px-1">
-        <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-sm bg-slate-300" />
-          <span className="text-[11px] font-bold text-slate-400">Pick up from seller</span>
-        </div>
-        <div className="flex-1 h-px border-t border-dashed border-slate-200" />
-        <div className="flex items-center gap-1.5">
-          <MapPin size={11} className="text-accent" />
-          <span className="text-[11px] font-bold text-navy">{order.drop_off_location || 'Buyer will specify'}</span>
-        </div>
-      </div>
+       <h2 className="text-[42px] font-black text-white tracking-tightest leading-none mb-4 uppercase">
+          Mission <br/> Secured
+       </h2>
+       <p className="text-[14px] font-bold text-white/40 uppercase tracking-widest mb-16">
+          Commencing Logistics Protocol <br/> Phase 01: Merchant Rendezvous
+       </p>
 
-      {/* Ian metadata row */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-slate-300">
-          <Clock size={11} />
-          <span className="text-[10px] font-bold">
-            {order.created_at ? new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
-          </span>
-        </div>
-
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.96, y: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
-          disabled={isAccepting}
-          onClick={() => onAccept(order.id)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-navy text-white rounded-xl text-[12px] font-bold disabled:opacity-50 shadow-lg shadow-navy/15"
-        >
-          {isAccepting ? (
-            <div className="w-4 h-4 border-2 border-white/20 border-t-white animate-spin rounded-full" />
-          ) : (
-            <>
-              <Truck size={14} />
-              Accept Delivery
-            </>
-          )}
-        </motion.button>
-      </div>
+       <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-white/10 border-t-white rounded-full animate-spin" />
+          <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Starting Work...</p>
+       </div>
     </motion.div>
   );
 }
@@ -100,58 +200,85 @@ export default function MissionBoard() {
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [pendingCount, setPendingCount] = useState(0);
+  const [activeMissionsCount, setActiveMissionsCount] = useState(0);
+  const [permissionError, setPermissionError] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [securedOrderId, setSecuredOrderId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
+    let unsubProfile: (() => void) | undefined;
+    let unsubOrders: (() => void) | undefined;
+
     const unsubAuth = auth.onAuthStateChanged((user) => {
-      if (!user) { setLoading(false); return; }
+      if (!user) {
+        if (unsubProfile) unsubProfile();
+        if (unsubOrders) unsubOrders();
+        router.push('/auth');
+        return;
+      }
 
-      onSnapshot(doc(db, 'users', user.uid), (snap) => setProfile(snap.data()));
+      unsubProfile = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          setProfile(data);
+          setActiveMissionsCount(data?.current_missions?.length || 0);
+        }
+      }, (error) => {
+        console.error("Profile sync error:", error);
+      });
 
-      // Pending notifications for bell
-      const qPending = query(collection(db, 'transactions'), where('buyer_id', '==', user.uid), where('status', '==', 'PENDING'));
-      onSnapshot(qPending, (snap) => setPendingCount(snap.docs.length));
-
-      // ── Real deliveries available for runners ──
-      // Query: orders needing a runner, not yet assigned
       const qOrders = query(
         collection(db, 'transactions'),
         where('delivery_type', '==', 'RUNNER'),
         where('status', '==', 'AWAITING_RUNNER')
       );
-      const unsubOrders = onSnapshot(qOrders, (snap) => {
+      
+      unsubOrders = onSnapshot(qOrders, (snap) => {
         const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Sort newest first client-side
-        docs.sort((a: any, b: any) => {
-          const aT = a.created_at ? new Date(a.created_at).getTime() : 0;
-          const bT = b.created_at ? new Date(b.created_at).getTime() : 0;
-          return bT - aT;
-        });
-        setOrders(docs);
+        setOrders(docs.sort((a: any, b: any) => (b.created_at || '').localeCompare(a.created_at || '')));
         setLoading(false);
+        setPermissionError(false);
+      }, (error) => {
+        console.error("Order pool error:", error);
+        setLoading(false);
+        if (error.code === 'permission-denied') {
+          setPermissionError(true);
+        }
       });
-
-      return () => unsubOrders();
     });
-    return () => unsubAuth();
-  }, []);
+
+    return () => {
+      unsubAuth();
+      if (unsubProfile) unsubProfile();
+      if (unsubOrders) unsubOrders();
+    };
+  }, [router]);
 
   const handleAccept = async (orderId: string) => {
-    if (!auth.currentUser || !profile) return;
+    if (!auth.currentUser || !profile || activeMissionsCount >= 2) return;
+    
     setAcceptingId(orderId);
     try {
-      await updateDoc(doc(db, 'transactions', orderId), {
+      const runnerRef = doc(db, 'users', auth.currentUser.uid);
+      const orderRef = doc(db, 'transactions', orderId);
+
+      await updateDoc(orderRef, {
         runner_id: auth.currentUser.uid,
         runner_name: profile.full_name || 'Runner',
-        status: 'ON_THE_WAY',
+        status: 'ACCEPTED',
         accepted_at: new Date().toISOString(),
       });
-      // Navigate to active delivery screen
-      router.push(`/runner/active?order=${orderId}`);
+
+      await updateDoc(runnerRef, {
+        current_missions: arrayUnion(orderId)
+      });
+
+      setSecuredOrderId(orderId);
+      setShowSuccess(true);
     } catch (err) {
       console.error('Accept failed:', err);
-      alert('Could not accept this delivery. Please try again.');
+      alert('Mission failed to lock. Re-syncing...');
     } finally {
       setAcceptingId(null);
     }
@@ -159,89 +286,84 @@ export default function MissionBoard() {
 
   return (
     <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
+      <AnimatePresence>
+         {showSuccess && (
+            <ProtocolSuccessOverlay onInitiate={() => router.push(`/runner/active?order=${securedOrderId}`)} />
+         )}
+      </AnimatePresence>
 
-      {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
-        <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
-          <ChevronLeft size={28} strokeWidth={2} />
-        </button>
-        <div className="flex-1">
-          <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50 border border-slate-100 rounded-full flex items-center px-4 gap-3">
-            <Search size={18} className="text-slate-300" />
-            <span className="text-[13px] font-bold text-slate-300">Search...</span>
-          </button>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <button onClick={() => router.push('/activity')} className="relative p-2 text-navy/40">
-            <Bell size={22} strokeWidth={2} />
-            {pendingCount > 0 && (
-              <div className="absolute top-1.5 right-1.5 bg-accent text-white text-[8px] font-black h-3.5 w-3.5 rounded-full flex items-center justify-center border-2 border-[#FDFDFD]">
-                {pendingCount}
-              </div>
-            )}
-          </button>
-          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Runner'} />
-        </div>
+      <nav className="px-8 pt-12 flex justify-between items-center">
+         <button onClick={() => router.push('/home')} className="w-12 h-12 rounded-[1.5rem] bg-white border border-slate-100 flex items-center justify-center text-navy shadow-sm transition-all active:scale-90">
+            <ChevronLeft size={24} />
+         </button>
+         <div className="flex items-center gap-6">
+            <AnimatePresence>
+               {activeMissionsCount > 0 && (
+                 <motion.button 
+                   initial={{ opacity: 0, scale: 0.8 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   onClick={() => router.push('/run')} 
+                   className="w-12 h-12 rounded-[1.5rem] bg-navy text-white flex items-center justify-center shadow-lg shadow-navy/20 relative"
+                 >
+                    <Zap size={20} fill="currentColor" />
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" />
+                 </motion.button>
+               )}
+            </AnimatePresence>
+            <div className="flex flex-col items-end">
+               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Status</span>
+               <div className="flex items-center gap-1.5 mt-0.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[12px] font-black text-navy uppercase tracking-tight">Searching Nodes</span>
+               </div>
+            </div>
+            <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} userId={auth.currentUser?.uid} />
+         </div>
       </nav>
 
-      {/* ── HEADER ── Ian: clean data header */}
-      <section className="px-6 pt-32 pb-2">
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <h1 className="text-[28px] font-bold tracking-tight text-navy">Deliveries</h1>
-            <p className="text-[12px] text-slate-400 font-medium mt-0.5">Available right now on campus</p>
-          </div>
-          <div className="flex items-center gap-1.5 pb-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Live</span>
-          </div>
-        </div>
+      <header className="px-8 pt-12 pb-8">
+         <h1 className="text-[36px] font-black tracking-tightest leading-none mb-4 uppercase">Mission <br/> Pool</h1>
+         <div className="flex items-center gap-3">
+            <div className="px-3 py-1 bg-navy text-white rounded-lg">
+               <span className="text-[10px] font-black uppercase tracking-widest">{orders.length} Available</span>
+            </div>
+            <div className={`px-3 py-1 rounded-lg border flex items-center gap-2 ${activeMissionsCount >= 2 ? 'bg-red-50 border-red-100 text-red-500' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
+               <span className="text-[10px] font-black uppercase tracking-widest">Active: {activeMissionsCount}/2</span>
+               {activeMissionsCount >= 2 && <AlertCircle size={10} />}
+            </div>
+         </div>
+      </header>
 
-        {/* Ian count label */}
-        <div className="flex items-center gap-2 mb-5">
-          <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
-            {loading ? '—' : orders.length} order{orders.length !== 1 ? 's' : ''} waiting
-          </span>
-        </div>
-      </section>
+      <section className="px-8 space-y-6">
+        {permissionError && (
+          <div className="p-8 bg-red-50 border border-red-100 rounded-[2.5rem] text-center space-y-3">
+             <AlertCircle className="mx-auto text-red-500" size={32} />
+             <p className="text-[14px] font-black text-red-600 uppercase tracking-widest">Protocol Blocked</p>
+             <p className="text-[12px] text-red-400 font-medium leading-relaxed">Your account lacks clearance to access the mission ledger. Please contact an administrator.</p>
+          </div>
+        )}
 
-      {/* ── DELIVERIES LIST ── */}
-      <section className="px-6 space-y-3">
         {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(n => (
-              <div key={n} className="h-28 bg-slate-50 rounded-2xl border border-slate-100 animate-pulse" />
-            ))}
+          <div className="py-20 flex flex-col items-center gap-4 text-slate-200">
+             <div className="w-10 h-10 border-4 border-slate-100 border-t-navy rounded-full animate-spin" />
+             <p className="text-[11px] font-black uppercase tracking-widest">Scanning Network...</p>
           </div>
         ) : orders.length > 0 ? (
-          <AnimatePresence>
-            {orders.map((order, i) => (
-              <motion.div
-                key={order.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <DeliveryCard
-                  order={order}
-                  onAccept={handleAccept}
-                  isAccepting={acceptingId === order.id}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          orders.map((order) => (
+            <MissionCard 
+              key={order.id} 
+              order={order} 
+              onAccept={handleAccept} 
+              disabled={activeMissionsCount >= 2} 
+            />
+          ))
         ) : (
-          // Ian empty state: factual, simple
-          <div className="py-20 flex flex-col items-center text-center gap-4">
-            <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center">
-              <InboxIcon size={28} className="text-slate-200" />
+          !permissionError && (
+            <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-[3rem] flex flex-col items-center">
+               <Radio className="text-slate-100 mb-4" size={48} />
+               <p className="text-[14px] font-black text-slate-300 uppercase tracking-widest">No active mission signals</p>
             </div>
-            <div>
-              <p className="text-[14px] font-bold text-navy">No deliveries right now</p>
-              <p className="text-[12px] text-slate-400 font-medium mt-1">Check back soon — orders come in throughout the day</p>
-            </div>
-          </div>
+          )
         )}
       </section>
 

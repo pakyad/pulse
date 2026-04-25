@@ -36,10 +36,10 @@ export default function RunnerOnboarding() {
   }, []);
 
   return (
-    <main className="h-screen h-[100svh] bg-[#FDFDFD] font-sans antialiased text-slate-900 flex flex-col overflow-hidden">
+    <main className="h-screen h-svh bg-[#FDFDFD] font-sans antialiased text-slate-900 flex flex-col overflow-hidden">
       
       {/* --- STANDARDIZED DASHBOARD HEADER (ACTION FOCUS) --- */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex items-center justify-between bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
+      <nav className="fixed top-0 left-0 right-0 z-100 px-5 pt-8 pb-4 flex items-center justify-between bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
          <div className="flex items-center gap-3">
             <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
                <ChevronLeft size={28} strokeWidth={2} />
@@ -82,7 +82,7 @@ export default function RunnerOnboarding() {
            <CircleDollarSign className="absolute -right-4 -bottom-4 text-white/5 w-24 h-24 rotate-12" />
            <div className="relative z-10">
               <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] mb-3">Policy</p>
-              <h3 className="text-[20px] font-bold tracking-tight leading-tight mb-2">Keep 90% of <br/> Earnings.</h3>
+              <h3 className="text-[20px] font-bold tracking-widest leading-tight mb-2">Keep 90% of <br/> Earnings.</h3>
               <p className="text-[11px] text-white/30 leading-snug font-medium max-w-[180px]">10% protocol fee for upkeep. 100% tips go directly to you.</p>
            </div>
         </div>
@@ -102,7 +102,7 @@ export default function RunnerOnboarding() {
                 { icon: HeartPulse, title: 'GPA Shield', desc: 'Active monitoring during exam periods.' },
                 { icon: Coins, title: 'Settlements', desc: 'Weekly automated transfers to your wallet.' }
               ].map((item, i) => (
-                <div key={i} className="min-w-[210px] bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm">
+                <div key={i} className="min-w-[210px] bg-white border border-slate-100 rounded-4xl p-6 shadow-sm">
                    <div className="w-9 h-9 rounded-2xl bg-slate-50 flex items-center justify-center mb-5">
                       <item.icon size={17} className="text-slate-900" />
                    </div>
@@ -117,7 +117,7 @@ export default function RunnerOnboarding() {
         <div className="mb-10">
            <div className="flex justify-between items-center mb-5 px-1">
               <h3 className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">Career Path</h3>
-              <div className="w-8 h-[1px] bg-slate-100" />
+              <div className="w-8 h-px bg-slate-100" />
            </div>
            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-6 px-6 pb-4">
               {[
@@ -138,7 +138,7 @@ export default function RunnerOnboarding() {
         </div>
 
         {/* Protocol Rules (Monochromatic) */}
-        <div className="bg-slate-50 border border-slate-100 rounded-[2rem] p-7 space-y-6 mb-12">
+        <div className="bg-slate-50 border border-slate-100 rounded-4xl p-7 space-y-6 mb-12">
            <div className="flex items-center gap-3">
               <Scale size={16} className="text-slate-300" />
               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Protocol Rules</h4>

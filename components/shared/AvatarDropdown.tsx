@@ -66,7 +66,7 @@ export default function AvatarDropdown({ photoUrl, userName }: AvatarDropdownPro
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute right-0 mt-3 w-56 bg-white rounded-3xl shadow-2xl shadow-navy/10 border border-slate-100 overflow-hidden z-[200]"
+            className="absolute right-0 mt-3 w-56 bg-white rounded-3xl shadow-2xl shadow-navy/10 border border-slate-100 overflow-hidden z-200"
           >
             <div className="p-2">
               {menuItems.map((section, idx) => (

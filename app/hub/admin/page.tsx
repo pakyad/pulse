@@ -72,7 +72,7 @@ export default function AdminHub() {
         </button>
         <div className="text-center">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">MIIT Registry</p>
-          <h1 className="text-[18px] font-bold tracking-tight text-navy">Administrative Desk</h1>
+          <h1 className="text-[18px] font-bold tracking-widest text-navy">Administrative Desk</h1>
         </div>
         <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-white">
            <ShieldCheck size={18} />
@@ -90,7 +90,7 @@ export default function AdminHub() {
            
            <div className="space-y-3">
               {ACTIVE_SUBMISSIONS.map((sub) => (
-                <div key={sub.id} className="p-5 bg-white border border-slate-100 rounded-[2rem] flex items-center justify-between group cursor-pointer hover:shadow-xl hover:shadow-navy/5 transition-all">
+                <div key={sub.id} className="p-5 bg-white border border-slate-100 rounded-4xl flex items-center justify-between group cursor-pointer hover:shadow-xl hover:shadow-navy/5 transition-all">
                    <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300">
                          <Clock size={18} />
@@ -129,7 +129,7 @@ export default function AdminHub() {
                       <channel.icon size={28} strokeWidth={1.5} />
                    </div>
                    <div>
-                      <h4 className="text-[18px] font-bold text-navy tracking-tight mb-1">{channel.title}</h4>
+                      <h4 className="text-[18px] font-bold text-navy tracking-widest mb-1">{channel.title}</h4>
                       <p className="text-[12px] text-slate-400 font-medium leading-relaxed">{channel.sub}</p>
                    </div>
                    <div className="flex flex-wrap gap-2 pt-2">
@@ -167,7 +167,7 @@ export default function AdminHub() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-navy/80 backdrop-blur-md flex items-end md:items-center justify-center"
+            className="fixed inset-0 z-100 bg-navy/80 backdrop-blur-md flex items-end md:items-center justify-center"
           >
              <motion.div 
                initial={{ y: '100%' }}
@@ -328,7 +328,7 @@ export default function AdminHub() {
                          <button 
                            type="button"
                            onClick={() => setSelectedChannel(null)}
-                           className="w-full h-16 bg-navy text-white rounded-[2rem] font-bold tracking-tight hover:bg-navy/90 active:scale-95 transition-all shadow-xl shadow-navy/20 flex items-center justify-center gap-3"
+                           className="w-full h-16 bg-navy text-white rounded-4xl font-bold tracking-widest hover:bg-navy/90 active:scale-95 transition-all shadow-xl shadow-navy/20 flex items-center justify-center gap-3"
                          >
                             <Plus size={20} />
                             Submit to Registry

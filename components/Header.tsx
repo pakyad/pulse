@@ -1,21 +1,26 @@
 'use client'
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, Zap, ChevronLeft, LogOut, Bell, Settings } from 'lucide-react';
+import { Search, ChevronLeft, LogOut, Bell, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { getDemoUser } from '@/lib/demo-utils';
+import SearchOverlay from '@/components/shared/SearchOverlay';
+import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [profile, setProfile] = useState<any>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Universal back visibility
-  const isRootPage = false;
+  // Universal back visibility - ONLY Home is absolute root
+  const isRootPage = pathname === '/home';
+  const showSearchBar = !pathname?.startsWith('/run');
+  const displayName = profile?.full_name || auth.currentUser?.email?.split('@')[0] || 'Student';
 
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((user) => {
@@ -50,81 +55,65 @@ export default function Header() {
     return () => unsubAuth();
   }, []);
 
-
   return (
-    <header className="sticky top-0 z-[100] w-full bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 pt-2 pb-3">
-      <div className="flex items-center gap-4 max-w-lg mx-auto">
-        
-        {/* 1. DYNAMIC BACK BUTTON */}
-        {!isRootPage ? (
-          <button 
-            onClick={() => router.back()} 
-            className="p-2 -ml-2 hover:bg-gray-50 rounded-full transition-all active:scale-90 flex items-center justify-center min-w-[44px] min-h-[44px]"
-          >
-            <ChevronLeft size={24} strokeWidth={1.5} className="text-navy" />
-          </button>
-        ) : (
-          <div className="w-4" />
-        )}
+    <>
+      <header className="fixed top-0 left-0 right-0 z-[100] w-full bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50 px-5 pt-12 pb-4">
+        <div className="flex items-center gap-3 w-full max-w-2xl mx-auto">
+          
+          <AnimatePresence initial={false}>
+            {!isRootPage && (
+              <motion.button 
+                initial={{ opacity: 0, x: -10, width: 0 }}
+                animate={{ opacity: 1, x: 0, width: 'auto' }}
+                exit={{ opacity: 0, x: -10, width: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                onClick={() => router.back()} 
+                className="p-2 -ml-2 hover:bg-slate-50 rounded-xl transition-all active:scale-90 flex items-center justify-center shrink-0"
+              >
+                <ChevronLeft size={28} strokeWidth={2} className="text-navy" />
+              </motion.button>
+            )}
+          </AnimatePresence>
 
-        <div className="flex-1" />
+          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="flex-1 w-full relative">
+            <AnimatePresence>
+              {showSearchBar && (
+                <motion.button 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  onClick={() => setIsSearchOpen(true)} 
+                  className="w-full h-11 bg-slate-50 border border-slate-100 rounded-xl flex items-center px-4 gap-3 transition-all active:scale-[0.98] absolute inset-0"
+                >
+                  <Search size={18} className="text-slate-300" />
+                  <span className="text-[13px] font-bold text-slate-300">Search Pulse</span>
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
-        {/* TOP-RIGHT CLUSTER: [ Bell ] [ Settings ] [ Avatar ] */}
-        <div className="flex items-center gap-4 shrink-0">
-           {/* 2. PERSISTENT INBOX (Bell) with Active Logic */}
-           <button 
-               onClick={() => router.push('/activity')}
-               className={`transition-all relative p-2 active:scale-90 ${pathname === '/activity' ? 'text-[#007AFF]' : 'text-navy/40 hover:text-navy'}`}
-           >
-             <Bell 
-               size={22} 
-               strokeWidth={pathname === '/activity' ? 2.5 : 1.5} 
-             />
-             {notificationCount > 0 && (
-               <div className="absolute top-1 right-1 bg-accent text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                   {notificationCount}
-               </div>
-             )}
-           </button>
+          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="flex items-center gap-3 shrink-0">
+            <button 
+                onClick={() => router.push('/activity')}
+                className={`transition-all relative p-2 active:scale-90 ${pathname === '/activity' ? 'text-[#007AFF]' : 'text-navy/40 hover:text-navy'}`}
+            >
+              <Bell size={22} strokeWidth={pathname === '/activity' ? 2.5 : 2} />
+              {notificationCount > 0 && (
+                <div className="absolute top-1 right-1 bg-accent text-white text-[8px] font-black h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
+                    {notificationCount}
+                </div>
+              )}
+            </button>
 
-           {/* 3. SETTINGS ICON (Synced with Home) */}
-           <button className="text-navy/40 hover:text-navy transition-colors p-2">
-             <Settings size={22} strokeWidth={1.5} />
-           </button>
-
-           {/* 4. PROFILE AVATAR WITH DROPDOWN */}
-           <div className="relative">
-             <div 
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="h-9 w-9 rounded-full bg-[#0A0F1E] flex items-center justify-center border-2 border-white shadow-xl overflow-hidden shrink-0 active:scale-90 transition-transform cursor-pointer"
-             >
-               {profile?.photo_url ? (
-                 <img src={profile.photo_url} alt="Profile" className="h-full w-full object-cover" />
-               ) : (
-                 <span className="text-[11px] font-black text-white">
-                   {profile?.full_name?.charAt(0) || 'P'}
-                 </span>
-               )}
-             </div>
-
-          {/* DROP DOWN LIST */}
-          {showDropdown && (
-            <div className="absolute top-[120%] right-0 w-44 bg-white border border-slate-100 rounded-2xl shadow-2xl shadow-black/10 p-2 z-[200] animate-in fade-in slide-in-from-top-2 duration-300">
-               <button 
-                  onClick={() => {
-                     auth.signOut().then(() => router.push('/auth'));
-                     setShowDropdown(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 rounded-xl transition-colors group"
-               >
-                 <LogOut size={16} className="text-slate-400 group-hover:text-red-500 transition-colors" />
-                 <span className="text-[13px] font-bold text-navy group-hover:text-red-500 transition-colors">Sign Out</span>
-               </button>
-            </div>
-          )}
+            <AvatarDropdown 
+              photoUrl={profile?.photo_url} 
+              userName={displayName} 
+            />
+          </motion.div>
         </div>
-      </div>
-    </div>
-  </header>
-);
+      </header>
+
+      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
+  );
 }

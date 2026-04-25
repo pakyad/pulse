@@ -39,7 +39,7 @@ export default function ServicesHub() {
         </button>
         <div className="text-center">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Campus Hub</p>
-          <h1 className="text-[18px] font-bold tracking-tight text-navy">Services</h1>
+          <h1 className="text-[18px] font-bold tracking-widest text-navy">Services</h1>
         </div>
         <button className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy/40">
           <Settings size={18} />
@@ -154,7 +154,7 @@ export default function ServicesHub() {
              { name: "Bus Schedule", icon: Bus },
              { name: "Campus Map", icon: Map },
            ].map((u, i) => (
-             <div key={i} className="p-5 bg-white border border-slate-50 rounded-[1.5rem] flex items-center justify-between group cursor-pointer hover:bg-slate-50 transition-all">
+             <div key={i} className="p-5 bg-white border border-slate-50 rounded-3xl flex items-center justify-between group cursor-pointer hover:bg-slate-50 transition-all">
                 <div className="flex items-center gap-4">
                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-navy group-hover:text-white transition-all">
                       <u.icon size={18} />

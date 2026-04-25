@@ -47,7 +47,7 @@ export default function FoundHub() {
         </button>
         <div className="text-center">
           <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Items</p>
-          <h1 className="text-[18px] font-bold tracking-tight text-navy">Lost & Found</h1>
+          <h1 className="text-[18px] font-bold tracking-widest text-navy">Lost & Found</h1>
         </div>
         <button className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy/40">
           <Filter size={18} />
@@ -57,7 +57,7 @@ export default function FoundHub() {
       <div className="max-w-2xl mx-auto px-6 mt-8 space-y-12">
         
         {/* 2. REGISTRY SWITCHER */}
-        <div className="flex bg-slate-50 p-1.5 rounded-[2rem] border border-slate-100 relative">
+        <div className="flex bg-slate-50 p-1.5 rounded-4xl border border-slate-100 relative">
            <motion.div 
              className="absolute inset-1.5 w-[calc(50%-6px)] bg-white rounded-[1.8rem] shadow-sm z-0"
              animate={{ x: activeTab === 'FOUND' ? 0 : '100%' }}
@@ -83,13 +83,13 @@ export default function FoundHub() {
               <input 
                  type="text" 
                  placeholder="Search for an item..."
-                 className="w-full h-14 bg-white border border-slate-100 rounded-[2rem] pl-16 pr-6 text-[14px] font-medium outline-none focus:border-navy focus:shadow-2xl focus:shadow-navy/5 transition-all"
+                 className="w-full h-14 bg-white border border-slate-100 rounded-4xl pl-16 pr-6 text-[14px] font-medium outline-none focus:border-navy focus:shadow-2xl focus:shadow-navy/5 transition-all"
               />
            </div>
 
            <div className="bg-amber-50 rounded-[3rem] p-8 border border-amber-100/50 flex items-center justify-between group cursor-pointer hover:bg-amber-100/30 transition-all">
               <div className="space-y-1">
-                 <h3 className="text-[18px] font-bold text-amber-900 tracking-tight leading-none">Report an Item</h3>
+                 <h3 className="text-[18px] font-bold text-amber-900 tracking-widest leading-none">Report an Item</h3>
                  <p className="text-[13px] text-amber-700/60 font-medium">Found something? Let others know.</p>
               </div>
               <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-amber-500 shadow-xl shadow-amber-500/10 group-hover:scale-110 transition-transform">
@@ -133,7 +133,7 @@ export default function FoundHub() {
                             <Clock size={12} className="text-slate-300" />
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{item.time}</p>
                          </div>
-                         <h4 className="text-[18px] font-bold text-navy leading-tight tracking-tight group-hover:text-amber-600 transition-colors">{item.title}</h4>
+                         <h4 className="text-[18px] font-bold text-navy leading-tight tracking-widest group-hover:text-amber-600 transition-colors">{item.title}</h4>
                          <div className="flex items-center gap-2 pt-1 text-slate-400">
                             <MapPin size={14} strokeWidth={1.5} />
                             <p className="text-[13px] font-medium leading-none">{item.location}</p>

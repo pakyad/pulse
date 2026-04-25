@@ -99,14 +99,14 @@ export default function UniStorePage() {
     <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
 
       {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
+      <nav className="fixed top-0 left-0 right-0 z-100 px-5 pt-8 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
         <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
           <ChevronLeft size={28} strokeWidth={2} />
         </button>
         <div className="flex-1">
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">UniKL Official</span>
-            <h1 className="text-[17px] font-bold text-navy tracking-tight leading-none">UniStore</h1>
+            <h1 className="text-[17px] font-bold text-navy tracking-widest leading-none">UniStore</h1>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -140,7 +140,7 @@ export default function UniStorePage() {
         {/* ── PRODUCT GRID ── */}
         {loading ? (
           <div className="grid grid-cols-2 gap-4">
-            {[1,2,3,4].map(n => <div key={n} className="aspect-[3/4] bg-slate-50 rounded-2xl animate-pulse" />)}
+            {[1,2,3,4].map(n => <div key={n} className="aspect-3/4 bg-slate-50 rounded-2xl animate-pulse" />)}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-8">

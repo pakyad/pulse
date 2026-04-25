@@ -45,12 +45,12 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 100 }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 z-[100] bg-white overflow-y-auto no-scrollbar pb-32"
+          className="fixed inset-0 z-100 bg-white overflow-y-auto no-scrollbar pb-32"
         >
           {/* Header */}
           <div className="px-6 pt-12 pb-6 flex flex-col gap-8">
             <div className="flex justify-between items-center">
-              <h2 className="text-[36px] font-bold tracking-tight text-navy">Search</h2>
+              <h2 className="text-[36px] font-bold tracking-widest text-navy">Search</h2>
               <button 
                 onClick={onClose}
                 className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-navy transition-all"
@@ -126,8 +126,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             </div>
             <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar snap-x">
                {[1, 2, 3, 4].map((item) => (
-                 <div key={item} className="w-[180px] flex-shrink-0 snap-start group cursor-pointer">
-                    <div className="aspect-[3/4] bg-slate-50 rounded-[2rem] overflow-hidden mb-4 p-4 border border-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                 <div key={item} className="w-[180px] shrink-0 snap-start group cursor-pointer">
+                    <div className="aspect-3/4 bg-slate-50 rounded-4xl overflow-hidden mb-4 p-4 border border-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
                        <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=300&h=400&fit=crop" className="w-[85%] h-[85%] object-cover rounded-2xl shadow-xl transition-transform duration-500 group-hover:scale-105" alt=""/>
                     </div>
                     <p className="text-[14px] font-bold text-navy leading-tight line-clamp-1">Campus Tech Unbox</p>

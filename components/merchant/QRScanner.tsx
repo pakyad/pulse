@@ -52,7 +52,7 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[300] bg-black flex flex-col items-center justify-center"
+      className="fixed inset-0 z-300 bg-black flex flex-col items-center justify-center"
     >
       {/* 1. TOP BAR */}
       <div className="absolute top-0 left-0 right-0 h-32 px-8 flex justify-between items-center z-20 bg-gradient-to-b from-black to-transparent">

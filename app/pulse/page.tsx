@@ -87,7 +87,7 @@ export default function PulseBulletinPage() {
     <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
 
       {/* ── FIXED NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
+      <nav className="fixed top-0 left-0 right-0 z-100 px-5 pt-8 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
         <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
           <ChevronLeft size={28} strokeWidth={2} />
         </button>
@@ -124,7 +124,7 @@ export default function PulseBulletinPage() {
         <div className="px-5">
           <motion.div whileTap={{ scale: 0.98 }} className="relative h-[220px] rounded-[2.5rem] overflow-hidden shadow-xl shadow-navy/10 cursor-pointer">
             <img src={PRIORITY_CARD.img} className="absolute inset-0 w-full h-full object-cover" alt="" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0F1E]/95 via-[#0A0F1E]/40 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-[#0A0F1E]/95 via-[#0A0F1E]/40 to-transparent" />
             <div className="absolute inset-0 p-7 flex flex-col justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
@@ -152,7 +152,7 @@ export default function PulseBulletinPage() {
               <motion.div
                 key={item.id}
                 whileTap={{ scale: 0.97 }}
-                className="shrink-0 w-[240px] rounded-[2rem] overflow-hidden cursor-pointer shadow-md shadow-navy/5"
+                className="shrink-0 w-[240px] rounded-4xl overflow-hidden cursor-pointer shadow-md shadow-navy/5"
               >
                 <div className="relative h-[130px]">
                   <img src={item.img} className="w-full h-full object-cover" alt={item.title} />
@@ -176,7 +176,7 @@ export default function PulseBulletinPage() {
             <Activity size={16} className="text-accent animate-pulse" />
             <h3 className="text-[17px] font-bold text-navy tracking-tight">Academic Alerts</h3>
           </div>
-          <div className="bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm">
+          <div className="bg-white border border-slate-100 rounded-4xl overflow-hidden shadow-sm">
             {ACADEMIC_ALERTS.map((alert, i) => (
               <div key={alert.id}>
                 <button
@@ -242,7 +242,7 @@ export default function PulseBulletinPage() {
 
         {/* ── INSTITUTIONAL REGISTRY (Image RIGHT — Apple News style) ── */}
         <div className="px-5">
-          <h3 className="text-[17px] font-bold text-navy tracking-tight mb-4">Institutional Registry</h3>
+          <h3 className="text-[17px] font-bold text-navy tracking-widest mb-4">Institutional Registry</h3>
           <div className="space-y-1">
             {NEWS_FEED.map((item, i) => (
               <button

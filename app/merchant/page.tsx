@@ -98,7 +98,7 @@ export default function MerchantTerminal() {
             <div className="w-10 h-10 rounded-xl bg-navy flex items-center justify-center text-white shadow-lg shadow-navy/20">
               <Zap size={20} />
             </div>
-            <h1 className="text-[18px] font-black tracking-tight uppercase tracking-[0.1em]">Terminal</h1>
+            <h1 className="text-[18px] font-black tracking-widest uppercase tracking-widest">Terminal</h1>
           </div>
           <div className="flex items-center gap-2">
             <motion.button 
@@ -137,7 +137,7 @@ export default function MerchantTerminal() {
         </header>
 
         {/* Tab Nav */}
-        <nav className="mb-10 p-1.5 bg-slate-50 rounded-[2rem] flex items-center gap-1">
+        <nav className="mb-10 p-1.5 bg-slate-50 rounded-4xl flex items-center gap-1">
           {(['hub', 'inventory', 'orders', 'settings'] as Tab[]).map((t) => (
             <button 
               key={t}
@@ -217,7 +217,7 @@ export default function MerchantTerminal() {
                 <button onClick={() => router.push("/post")} className="text-[11px] font-bold text-accent">+ Add New</button>
               </div>
               {items.map(item => (
-                <div key={item.id} className="bg-white border border-slate-100 rounded-[2rem] p-5 flex items-center gap-5 shadow-sm">
+                <div key={item.id} className="bg-white border border-slate-100 rounded-4xl p-5 flex items-center gap-5 shadow-sm">
                   <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-50 overflow-hidden shrink-0">
                     {item.image_url ? <img src={item.image_url} className="w-full h-full object-cover" /> : <Package size={24} className="text-slate-300" />}
                   </div>
@@ -243,7 +243,7 @@ export default function MerchantTerminal() {
                 <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400" /><span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Live Sync</span></div>
               </div>
               {orders.map(o => (
-                <div key={o.id} className={`bg-white border border-slate-100 rounded-[2rem] p-6 space-y-4 shadow-sm border-l-4 ${STATUS_MAP[o.status]?.border}`}>
+                <div key={o.id} className={`bg-white border border-slate-100 rounded-4xl p-6 space-y-4 shadow-sm border-l-4 ${STATUS_MAP[o.status]?.border}`}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex gap-4 min-w-0">
                       <div className="w-12 h-12 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-50">
@@ -306,7 +306,7 @@ export default function MerchantTerminal() {
 
       {/* Floating Scanner */}
       {activeTab !== 'settings' && (
-        <div className="fixed bottom-10 left-0 right-0 flex justify-center pointer-events-none z-[100]">
+        <div className="fixed bottom-10 left-0 right-0 flex justify-center pointer-events-none z-100">
           <motion.button 
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}

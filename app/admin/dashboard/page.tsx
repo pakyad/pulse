@@ -102,7 +102,7 @@ export default function AdminDashboard() {
                 <ChevronRight size={10} className="text-slate-200" />
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{activeMeta.label}</span>
               </nav>
-              <h1 className="text-3xl font-bold tracking-tight text-[#0A0F1E]">{activeMeta.label}</h1>
+              <h1 className="text-3xl font-bold tracking-widest text-[#0A0F1E]">{activeMeta.label}</h1>
             </div>
             
             <div className="flex items-center gap-6">

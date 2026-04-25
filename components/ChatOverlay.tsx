@@ -79,7 +79,7 @@ export default function ChatOverlay({ tx_id, status, recipientName, isOpen, onCl
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 no-scrollbar scroll-smooth">
                {messages.map((msg) => (
                  <div key={msg.id} className={`flex ${msg.sender === 'ME' ? 'justify-end' : 'justify-start'} mb-6`}>
-                    <div className={`max-w-[80%] px-5 py-3 rounded-2xl text-[13px] font-medium leading-relaxed tracking-tight ${
+                    <div className={`max-w-[80%] px-5 py-3 rounded-2xl text-[13px] font-medium leading-relaxed tracking-widest ${
                        msg.sender === 'ME' 
                        ? 'bg-navy text-white rounded-tr-none shadow-lg' 
                        : 'soft-lens text-navy rounded-tl-none border-[0.5px] border-navy/10 shadow-sm'

@@ -1,288 +1,288 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, onSnapshot, query, collection, where } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { ChevronLeft, Package, Camera, CheckCircle2, Clock, Truck, ShoppingBag, Bell, Settings, AlertCircle, MapPin } from 'lucide-react';
+import { 
+  ChevronLeft, CheckCircle2, Circle, HelpCircle, 
+  ChevronRight, Package, Truck, Check, ShieldCheck, Star,
+  MessageSquare, Loader2, Bell, X, Info, Phone, Store
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import AvatarDropdown from '@/components/shared/AvatarDropdown';
-import Link from 'next/link';
+import { updateOrderStatus } from '@/lib/marketplace-utils';
+import ChatOverlay from '@/components/ChatOverlay';
+import { updateDoc } from 'firebase/firestore';
+import PulseLine from '@/components/shared/PulseLine';
 
-// ── Ian Status Config ──
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string; icon: any; description: string }> = {
-  PENDING: {
-    label: 'Waiting for pickup',
-    color: 'text-amber-600',
-    bg: 'bg-amber-50 border-amber-100',
-    dot: 'bg-amber-400 animate-pulse',
-    icon: Clock,
-    description: 'The seller has your order. Head over or wait for confirmation.',
-  },
-  AWAITING_RUNNER: {
-    label: 'Finding a runner',
-    color: 'text-blue-600',
-    bg: 'bg-blue-50 border-blue-100',
-    dot: 'bg-blue-400 animate-pulse',
-    icon: Package,
-    description: 'A runner is being assigned to deliver your order.',
-  },
-  ON_THE_WAY: {
-    label: 'On the way',
-    color: 'text-violet-600',
-    bg: 'bg-violet-50 border-violet-100',
-    dot: 'bg-violet-400 animate-pulse',
-    icon: Truck,
-    description: 'Your runner has accepted and is heading to deliver.',
-  },
-  COLLECTED: {
-    label: 'Done',
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50 border-emerald-100',
-    dot: 'bg-emerald-400',
-    icon: CheckCircle2,
-    description: 'Order complete. Enjoy!',
-  },
-  COMPLETE: {
-    label: 'Done',
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50 border-emerald-100',
-    dot: 'bg-emerald-400',
-    icon: CheckCircle2,
-    description: 'Order complete. Enjoy!',
-  },
-};
-
-// ── Ian Timeline ──
-// Simple 3-step visual. Shows exactly where the order is.
-function OrderTimeline({ status, deliveryType }: { status: string; deliveryType: string }) {
-  const isRunner = deliveryType === 'RUNNER';
-  const steps = isRunner
-    ? [
-        { key: 'ordered', label: 'Ordered', done: true },
-        { key: 'runner', label: 'Runner assigned', done: ['ON_THE_WAY', 'COLLECTED', 'COMPLETE'].includes(status) },
-        { key: 'done', label: 'Delivered', done: ['COLLECTED', 'COMPLETE'].includes(status) },
-      ]
-    : [
-        { key: 'ordered', label: 'Ordered', done: true },
-        { key: 'ready', label: 'Ready for pickup', done: ['PENDING', 'COLLECTED', 'COMPLETE'].includes(status) },
-        { key: 'done', label: 'Collected', done: ['COLLECTED', 'COMPLETE'].includes(status) },
-      ];
-
-  return (
-    <div className="flex items-center gap-0">
-      {steps.map((step, i) => (
-        <div key={step.key} className="flex items-center flex-1">
-          <div className="flex flex-col items-center">
-            <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
-              step.done ? 'bg-navy' : 'bg-slate-100'
-            }`}>
-              {step.done
-                ? <CheckCircle2 size={14} className="text-white" />
-                : <div className="w-2 h-2 rounded-sm bg-slate-300" />
-              }
-            </div>
-            <p className={`text-[9px] font-bold mt-1.5 text-center leading-tight w-14 ${
-              step.done ? 'text-navy' : 'text-slate-300'
-            }`}>{step.label}</p>
-          </div>
-          {i < steps.length - 1 && (
-            <div className={`flex-1 h-px mx-1 mb-4 ${step.done ? 'bg-navy' : 'bg-slate-100'}`} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export default function OrderDetail() {
+export default function OrderDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [tx, setTx] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const uid = auth.currentUser?.uid;
-  const isSeller = uid === tx?.seller_id;
-  const isBuyer = uid === tx?.buyer_id;
+  const [actionLoading, setActionLoading] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [lastStatus, setLastStatus] = useState<string | null>(null);
+  const isDelayed = tx?.status === 'PENDING' && (Date.now() - new Date(tx?.created_at).getTime()) > 300000;
 
   useEffect(() => {
+    let unsub: (() => void) | undefined;
+
     const unsubAuth = onAuthStateChanged(auth, (user) => {
-      if (!user) { router.push('/auth'); return; }
-
-      onSnapshot(doc(db, 'users', user.uid), (snap) => setProfile(snap.data()));
-
-      const qPending = query(collection(db, 'transactions'), where('buyer_id', '==', user.uid), where('status', '==', 'PENDING'));
-      onSnapshot(qPending, (snap) => setNotificationCount(snap.docs.length));
-
+      if (!user) {
+        if (unsub) unsub();
+        router.push('/auth');
+        return;
+      }
+      setUserId(user.uid);
       const txRef = doc(db, 'transactions', id as string);
-      const unsub = onSnapshot(txRef, (snap) => {
-        if (snap.exists()) setTx({ id: snap.id, ...snap.data() });
+      unsub = onSnapshot(txRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          setTx({ id: snap.id, ...data });
+          
+          if (lastStatus && lastStatus !== data.status) {
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 5000);
+          }
+          setLastStatus(data.status);
+        }
         setLoading(false);
       });
-      return () => unsub();
     });
-    return () => unsubAuth();
-  }, [id, router]);
+
+    return () => {
+      unsubAuth();
+      if (unsub) unsub();
+    };
+  }, [id, router, lastStatus]);
+
+  const handleUpdateStatus = async (nextStatus: string) => {
+    if (!userId || !tx) return;
+    setActionLoading(true);
+    try {
+      await updateOrderStatus(tx.id, nextStatus, userId);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getPulseState = (status: string): 'ordered' | 'preparing' | 'delivered' => {
+    if (['COMPLETED', 'COLLECTED'].includes(status)) return 'delivered';
+    if (['PENDING', 'CONFIRMED'].includes(status)) return 'ordered';
+    return 'preparing';
+  };
 
   if (loading || !tx) return (
-    <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-navy/10 border-t-navy rounded-full animate-spin" />
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-slate-100 border-t-navy rounded-full animate-spin" />
     </div>
   );
 
-  const config = STATUS_CONFIG[tx.status] || STATUS_CONFIG['PENDING'];
-  const StatusIcon = config.icon;
-  const isDone = tx.status === 'COLLECTED' || tx.status === 'COMPLETE';
+  const pulseState = getPulseState(tx.status);
 
   return (
     <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
-
-      {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex items-center justify-between bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
-        <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
-            <ChevronLeft size={28} strokeWidth={2} />
-          </button>
-          <h2 className="text-[15px] font-bold text-navy">Order Details</h2>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <button onClick={() => router.push('/activity')} className="relative p-2 text-navy/40">
-            <Bell size={22} strokeWidth={2} />
-            {notificationCount > 0 && (
-              <div className="absolute top-1.5 right-1.5 bg-accent text-white text-[8px] font-black h-3.5 w-3.5 rounded-full flex items-center justify-center border-2 border-[#FDFDFD]">
-                {notificationCount}
-              </div>
-            )}
-          </button>
-          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
-        </div>
-      </nav>
-
-      <div className="pt-28 px-6 space-y-5">
-
-        {/* ── IAN STATUS CARD ── big, clear, no ambiguity ── */}
-        <div className={`rounded-2xl border p-5 ${config.bg}`}>
-          <div className="flex items-center gap-3 mb-2">
-            <div className={`w-2 h-2 rounded-full ${config.dot}`} />
-            <span className={`text-[11px] font-black uppercase tracking-widest ${config.color}`}>
-              {config.label}
-            </span>
-          </div>
-          <p className="text-[14px] text-navy font-medium">{config.description}</p>
-        </div>
-
-        {/* ── ITEM SUMMARY ── */}
-        <div className="bg-white border border-slate-100 rounded-2xl p-5">
-          <div className="flex items-center gap-4 mb-4">
-            {tx.image_url ? (
-              <img src={tx.image_url} className="w-16 h-16 rounded-2xl object-cover border border-slate-100" alt={tx.title} />
-            ) : (
-              <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-                <ShoppingBag size={24} className="text-slate-300" />
-              </div>
-            )}
-            <div>
-              <h2 className="text-[18px] font-bold text-navy leading-tight">{tx.title}</h2>
-              <p className="text-[20px] font-black text-navy mt-1">RM {Number(tx.price).toFixed(2)}</p>
+      
+      {/* ── Glassmorphism Status Toast ── */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div 
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className="fixed top-8 left-6 right-6 z-[500] bg-white/80 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-6 shadow-3xl flex items-center gap-4"
+          >
+            <div className="w-12 h-12 bg-navy text-white rounded-2xl flex items-center justify-center shrink-0">
+               <Bell size={24} className="animate-bounce" />
             </div>
-          </div>
-
-          {/* Ian metadata */}
-          <div className="space-y-2 pt-4 border-t border-slate-50">
-            <div className="flex justify-between">
-              <span className="text-[12px] font-bold text-slate-400">Order code</span>
-              <span className="font-mono text-[12px] font-black text-navy">{tx.order_code || tx.claim_token || '—'}</span>
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Status Protocol Update</p>
+              <h4 className="text-[14px] font-black uppercase tracking-tight text-navy">
+                Asset State: {tx.status.replace(/_/g, ' ')}
+              </h4>
             </div>
-            <div className="flex justify-between">
-              <span className="text-[12px] font-bold text-slate-400">Delivery</span>
-              <span className="text-[12px] font-bold text-navy">
-                {tx.delivery_type === 'RUNNER' ? 'Runner delivery' : 'Self collect'}
-              </span>
-            </div>
-            {tx.drop_off_location && (
-              <div className="flex justify-between">
-                <span className="text-[12px] font-bold text-slate-400">Drop-off</span>
-                <span className="text-[12px] font-bold text-navy">{tx.drop_off_location}</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-[12px] font-bold text-slate-400">Seller</span>
-              <span className="text-[12px] font-bold text-navy">{tx.seller_name || 'Verified seller'}</span>
-            </div>
-          </div>
-        </div>
+            <button onClick={() => setShowToast(false)} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
+               <X size={18} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* ── IAN TIMELINE ── */}
-        <div className="bg-white border border-slate-100 rounded-2xl p-5">
-          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-5">Progress</p>
-          <OrderTimeline status={tx.status} deliveryType={tx.delivery_type || 'SELF_COLLECT'} />
-        </div>
-
-        {/* ── BUYER ACTION: SCAN TO CONFIRM ── only for self-collect pending orders ── */}
-        <AnimatePresence>
-          {isBuyer && tx.status === 'PENDING' && tx.delivery_type !== 'RUNNER' && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-3"
-            >
-              <p className="text-[11px] font-bold text-slate-400 text-center">
-                Ready to collect? Scan the seller's QR code to confirm.
-              </p>
-              <motion.button
-                whileTap={{ scale: 0.97, y: 2 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 18 }}
-                onClick={() => router.push('/scanner')}
-                className="w-full h-[58px] bg-navy text-white rounded-2xl font-bold text-[15px] flex items-center justify-center gap-3 shadow-xl shadow-navy/15"
-              >
-                <Camera size={20} />
-                Scan QR to collect
-              </motion.button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── SELLER VIEW: show their QR code link ── */}
-        <AnimatePresence>
-          {isSeller && !isDone && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-navy rounded-2xl p-5 text-white text-center space-y-3"
-            >
-              <p className="text-[11px] font-black uppercase tracking-widest text-white/50">You're the seller</p>
-              <p className="text-[15px] font-bold">Show your QR code to the buyer or runner for confirmation.</p>
-              <p className="font-mono text-[20px] font-black text-white/80 tracking-widest">
-                {tx.order_code || tx.claim_token}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── DONE ── */}
-        <AnimatePresence>
-          {isDone && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 text-center space-y-2"
-            >
-              <CheckCircle2 size={32} className="text-emerald-500 mx-auto" />
-              <p className="text-[16px] font-bold text-emerald-700">Order complete</p>
-              <p className="text-[12px] text-emerald-600/70 font-medium">Thanks for using Pulse.</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Report */}
-        <button className="w-full h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center gap-2 text-[11px] font-bold text-slate-400 active:scale-95 transition-all">
-          <AlertCircle size={14} />
-          Report an issue
+      {/* Header */}
+      <header className="px-8 pt-16 pb-8 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-[100] border-b border-slate-50">
+        <button onClick={() => router.back()} className="w-12 h-12 rounded-[1.5rem] bg-slate-50 border border-slate-100 flex items-center justify-center transition-all active:scale-90">
+          <ChevronLeft size={24} />
         </button>
+        <div className="text-center">
+           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">ID #{tx.id.slice(0,6)}</span>
+           <h2 className="text-[16px] font-black uppercase tracking-tightest mt-1">Transaction Log</h2>
+        </div>
+        <button onClick={() => setIsSupportOpen(true)} className="w-12 h-12 rounded-[1.5rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-navy/30">
+          <HelpCircle size={24} />
+        </button>
+      </header>
+
+      <div className="px-8 py-10 space-y-12">
+        
+        {/* Item Summary (Bento Style) */}
+        <section className="bg-white border border-slate-100 rounded-[3rem] p-8 flex items-center gap-8 shadow-sm">
+          <div className="w-24 h-24 bg-slate-50 rounded-[2rem] overflow-hidden border border-slate-50 shrink-0">
+            <img src={tx.image_url} className="w-full h-full object-cover" alt="" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">{tx.category || 'Asset'}</p>
+            <h1 className="text-[24px] font-black text-navy leading-none uppercase tracking-tighter">{tx.title}</h1>
+            <div className="flex items-center gap-3">
+              <p className="text-[20px] font-black text-navy uppercase">RM {Number(tx.price).toFixed(0)}</p>
+              <span className="text-[11px] font-bold text-slate-300">QTY: {tx.quantity || 1}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* The Pulse Line (Mandatory) */}
+        <section className="space-y-6">
+          <div className="flex justify-between items-baseline px-2">
+            <h3 className="text-[18px] font-black text-navy uppercase tracking-tightest">Real-time Pulse</h3>
+            <div className="flex items-center gap-2">
+               <div className="w-2 h-2 rounded-full bg-navy animate-pulse" />
+               <span className="text-[10px] font-black text-navy uppercase tracking-widest">Live Sync</span>
+            </div>
+          </div>
+          <div className="bg-white border border-slate-100 rounded-[3rem] p-10 shadow-sm">
+            <PulseLine state={pulseState} />
+          </div>
+        </section>
+
+        {/* Handshake Protocol (Buyer View) */}
+        {tx.delivery_type === 'RUNNER' && !['COMPLETED', 'COLLECTED'].includes(tx.status) && userId === tx.buyer_id && (
+          <section className="space-y-6">
+            <h3 className="text-[18px] font-black text-navy uppercase tracking-tightest">Security Handshake</h3>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+              className="bg-navy text-white rounded-[3rem] p-10 flex flex-col items-center gap-8 shadow-2xl shadow-navy/30 border-4 border-white/5"
+            >
+               <div className="text-center space-y-2">
+                  <p className="text-[11px] font-black uppercase tracking-[0.4em] text-white/30">Verification Protocol</p>
+                  <p className="text-[15px] font-bold uppercase tracking-wide">Present this code to the Runner node</p>
+               </div>
+               <div className="grid grid-cols-4 gap-4 w-full">
+                  {(tx.handshake_code || '0000').split('').map((char: string, i: number) => (
+                    <div key={i} className="aspect-square bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 shadow-inner">
+                       <span className="text-[36px] font-black tracking-tighter">{char}</span>
+                    </div>
+                  ))}
+               </div>
+               <div className="flex items-center gap-3 px-5 py-2.5 bg-white/5 rounded-full border border-white/10">
+                  <ShieldCheck size={16} className="text-emerald-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40 italic">End-to-End Secure Handshake</span>
+               </div>
+            </motion.div>
+          </section>
+        )}
+
+        {/* Logistics Detail */}
+        <section className="bg-white border border-slate-100 rounded-[3rem] p-10 space-y-8 shadow-sm">
+          <div className="flex items-start gap-6">
+            <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-navy shrink-0">
+               <MapPin size={28} />
+            </div>
+            <div>
+               <p className="text-[16px] font-black uppercase tracking-tightest">Drop-off Node</p>
+               <p className="text-[14px] text-slate-400 font-bold leading-relaxed mt-2 uppercase tracking-wide">
+                  {tx.drop_off_location || 'Campus Main Hub'}
+               </p>
+            </div>
+          </div>
+          
+          <div className="h-px bg-slate-50 w-full" />
+          
+          <div className="flex items-start gap-6">
+            <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-navy shrink-0">
+               <Store size={28} />
+            </div>
+            <div>
+               <p className="text-[16px] font-black uppercase tracking-tightest">Vendor Origin</p>
+               <p className="text-[14px] text-slate-400 font-bold leading-relaxed mt-2 uppercase tracking-wide">
+                  {tx.seller_name || 'Verified Merchant Node'}
+               </p>
+            </div>
+          </div>
+        </section>
+
       </div>
+
+      {/* ── Contextual Command Center (Fixed) ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-[200] px-8 pb-12 pt-8 bg-white/90 backdrop-blur-xl border-t border-slate-50/50">
+         <div className="max-w-[480px] mx-auto space-y-4">
+            
+            {/* Merchant Logic */}
+            {userId === tx.seller_id && tx.status === 'PENDING' && (
+              <ActionButton 
+                label="Accept & Prepare Asset"
+                icon={<Package size={24} />}
+                onClick={() => handleUpdateStatus('PREPPING')}
+                loading={actionLoading}
+                color="navy"
+              />
+            )}
+
+            {userId === tx.seller_id && tx.status === 'PREPPING' && (
+              <ActionButton 
+                label={tx.delivery_type === 'RUNNER' ? 'Hand Over to Runner' : 'Ready for Collection'}
+                icon={<Truck size={24} />}
+                onClick={() => handleUpdateStatus(tx.delivery_type === 'RUNNER' ? 'AWAITING_RUNNER' : 'DELIVERING')}
+                loading={actionLoading}
+                color="emerald"
+              />
+            )}
+
+            {/* Buyer Logic */}
+            {userId === tx.buyer_id && (tx.status === 'DELIVERING' || tx.status === 'ARRIVED') && (
+              <ActionButton 
+                label="Confirm Secured Delivery"
+                icon={<Check size={24} />}
+                onClick={() => handleUpdateStatus('COMPLETED')}
+                loading={actionLoading}
+                color="emerald"
+              />
+            )}
+
+            <button 
+              onClick={() => setIsSupportOpen(true)}
+              className="w-full h-16 rounded-[2rem] bg-slate-50 border border-slate-100 font-black text-[13px] uppercase tracking-[0.2em] text-navy active:scale-95 transition-all flex items-center justify-center gap-3"
+            >
+               <Phone size={18} /> Support Link
+            </button>
+         </div>
+      </div>
+
+      <ChatOverlay 
+        isOpen={isSupportOpen}
+        onClose={() => setIsSupportOpen(false)}
+        tx_id={tx.id}
+        status={tx.status}
+        recipientName="Pulse Support Node"
+      />
     </main>
+  );
+}
+
+function ActionButton({ label, onClick, color, loading, icon }: any) {
+  const bg = color === 'navy' ? 'bg-navy shadow-navy/30' : 'bg-emerald-500 shadow-emerald-500/30';
+  return (
+    <motion.button
+      whileTap={{ scale: 0.95 }}
+      disabled={loading}
+      onClick={onClick}
+      className={`w-full h-20 ${bg} text-white rounded-[2.5rem] font-black text-[15px] uppercase tracking-[0.2em] shadow-2xl flex items-center justify-center gap-4 transition-all`}
+    >
+       {loading ? <Loader2 size={24} className="animate-spin" /> : <>{icon} {label} <ArrowRight size={22} /> </>}
+    </motion.button>
   );
 }

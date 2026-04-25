@@ -130,7 +130,7 @@ export default function PublicProfile() {
           {/* Name + Meta */}
           <div className="flex-1 min-w-0 pt-1">
             <div className="flex items-center gap-2 mb-1.5">
-              <h1 className="text-[24px] font-black text-navy tracking-tight leading-tight truncate">
+              <h1 className="text-[24px] font-black text-navy tracking-widest leading-tight truncate">
                 {displayName}
               </h1>
               {isClub && (
@@ -181,7 +181,7 @@ export default function PublicProfile() {
               { label: 'Members', value: profile.member_count || '—' },
               { label: 'Sold', value: profile.total_sold || '—' },
             ].map(stat => (
-              <div key={stat.label} className="bg-white border border-slate-100 rounded-[2rem] p-5 text-center shadow-sm">
+              <div key={stat.label} className="bg-white border border-slate-100 rounded-4xl p-5 text-center shadow-sm">
                 <p className="text-[22px] font-black text-navy tabular-nums leading-none">{stat.value}</p>
                 <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">{stat.label}</p>
               </div>
@@ -201,7 +201,7 @@ export default function PublicProfile() {
               { label: 'Active Listings', value: listings.length },
               { label: 'Joined', value: profile.created_at ? new Date(profile.created_at?.seconds * 1000 || profile.created_at).getFullYear() : '—' },
             ].map(stat => (
-              <div key={stat.label} className="bg-white border border-slate-100 rounded-[2rem] p-5 text-center shadow-sm">
+              <div key={stat.label} className="bg-white border border-slate-100 rounded-4xl p-5 text-center shadow-sm">
                 <p className="text-[22px] font-black text-navy tabular-nums leading-none">{stat.value}</p>
                 <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">{stat.label}</p>
               </div>
@@ -226,7 +226,7 @@ export default function PublicProfile() {
 
         {listings.length === 0 ? (
           <div className="py-20 flex flex-col items-center gap-4 text-center">
-            <div className="w-16 h-16 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200 border border-slate-100">
+            <div className="w-16 h-16 bg-slate-50 rounded-4xl flex items-center justify-center text-slate-200 border border-slate-100">
               <Package size={28} strokeWidth={1.5} />
             </div>
             <p className="text-[13px] font-medium text-slate-400">No active listings yet.</p>

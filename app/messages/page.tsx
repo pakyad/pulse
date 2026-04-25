@@ -71,7 +71,7 @@ export default function MessagesPage() {
               <button onClick={() => router.push('/activity')} className="p-1 -ml-1 text-slate-300 hover:text-navy transition-colors">
                  <ArrowLeft size={24} />
               </button>
-              <h1 className="text-[24px] font-bold tracking-tight text-navy">Messages</h1>
+              <h1 className="text-[24px] font-bold tracking-widest text-navy">Messages</h1>
            </div>
            
            <div className="flex items-center gap-4 text-navy/40">
@@ -102,7 +102,7 @@ export default function MessagesPage() {
            </div>
            <div className="flex gap-4 overflow-x-auto no-scrollbar py-2">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex-shrink-0 relative">
+                <div key={i} className="shrink-0 relative">
                    <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 p-0.5 relative active:scale-95 transition-transform cursor-pointer">
                       <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Node${i}`} className="w-full h-full rounded-[0.8rem]" alt=""/>
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-[3px] border-white" />
@@ -136,7 +136,7 @@ export default function MessagesPage() {
               {/* Message Content */}
               <div className="flex-1 min-w-0 pr-2">
                  <div className="flex justify-between items-center mb-0.5">
-                    <h3 className={`text-[15px] font-bold tracking-tight leading-none ${chat.unread ? 'text-navy' : 'text-navy/60'}`}>
+                    <h3 className={`text-[15px] font-bold tracking-widest leading-none ${chat.unread ? 'text-navy' : 'text-navy/60'}`}>
                        {chat.name}
                     </h3>
                     <span className="text-[11px] font-bold text-slate-300">{chat.time}</span>

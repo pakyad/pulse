@@ -14,22 +14,22 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 // ── Fallback data (used when Firestore has no campaigns/announcements) ──
 const HERO_SLIDES: BannerSlide[] = [
   {
-    id: 'h1', tag: 'NEW MERCH', ctaText: 'Shop Now', ctaPath: '/marketplace',
-    headline: "Badminton Club Official Jersey '26",
-    subline: 'RM 95 · Limited to 50 units · L3 Hub pickup',
-    img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1000&auto=format&fit=crop',
+    id: 'h1', ctaPath: '/pulse',
+    headline: "Synchronize Your Stipend",
+    subline: 'Check your MARA allowance status & payment schedule',
+    bgColor: '#4A5D23' // Olive Green
   },
   {
-    id: 'h2', tag: 'OFFICIAL NOTICE', ctaText: 'Learn More', ctaPath: '/pulse',
-    headline: 'Hostel Applications Open for Sem 2',
-    subline: 'Apply via UniKL Student Portal · Deadline: 30 April',
-    img: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1000&auto=format&fit=crop',
+    id: 'h2', ctaPath: '/pulse',
+    headline: "Clear Outstanding Fees",
+    subline: 'Your Semester 4 tuition clearance is pending authorization.',
+    bgColor: '#1E293B' // Navy Slate
   },
   {
-    id: 'h3', tag: 'TOMORROW · 9AM', ctaText: 'Register Now', ctaPath: '/pulse',
-    headline: 'Motivational Talk: Ignite Your Purpose',
-    subline: 'Prof. Dr. Zainal Abidin · Main Hall, MIIT',
-    img: 'https://images.unsplash.com/photo-1540575861501-7c00117fb3c9?q=80&w=1000&auto=format&fit=crop',
+    id: 'h3', ctaPath: '/pulse',
+    headline: "Final Results Published",
+    subline: 'Your academic transcript for Sem 3 is now officially available.',
+    bgColor: '#8B5CF6' // Purple
   },
 ];
 
@@ -99,10 +99,17 @@ export default function PulseHome() {
     const qItems = query(
       collection(db, 'items'), 
       where('status', '==', 'active'), 
-      orderBy('created_at', 'desc'), 
       limit(20)
     );
-    const unsubItems = onSnapshot(qItems, s => setLiveItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    const unsubItems = onSnapshot(qItems, s => {
+      const docs = s.docs.map(d => ({ id: d.id, ...d.data() }));
+      docs.sort((a: any, b: any) => {
+        const tA = a.created_at?.toMillis ? a.created_at.toMillis() : 0;
+        const tB = b.created_at?.toMillis ? b.created_at.toMillis() : 0;
+        return tB - tA;
+      });
+      setLiveItems(docs);
+    });
     const qAnn = query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(3));
     const unsubAnn = onSnapshot(qAnn, s => setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() }))));
     return () => { unsubItems(); unsubAnn(); };
@@ -121,32 +128,7 @@ export default function PulseHome() {
   return (
     <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
 
-      {/* ── FIXED NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
-        <div className="p-2 -ml-2 text-navy/10 opacity-0 pointer-events-none">
-          <ChevronLeft size={28} strokeWidth={2} />
-        </div>
-        <div className="flex-1">
-          <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50 border border-slate-100 rounded-xl flex items-center px-4 gap-3 transition-all">
-            <Search size={18} className="text-slate-300" />
-            <span className="text-[13px] font-bold text-slate-300">Search Pulse</span>
-          </button>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <button onClick={() => router.push('/activity')} className="relative p-2 active:scale-90 text-navy/40 hover:text-navy">
-            <Bell size={22} strokeWidth={2} />
-            {notificationCount > 0 && (
-              <div className="absolute top-1.5 right-1.5 bg-accent text-white text-[8px] font-black h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
-                {notificationCount}
-              </div>
-            )}
-          </button>
-          <AvatarDropdown 
-            photoUrl={profile?.photo_url} 
-            userName={firstName} 
-          />
-        </div>
-      </nav>
+
 
       <div className="pt-28 px-6 space-y-12 pb-12">
 
@@ -156,7 +138,7 @@ export default function PulseHome() {
 
         {/* ── CAMPUS HUB ── */}
         <div>
-          <h3 className="text-[17px] font-bold text-navy tracking-tight mb-5">Campus Hub</h3>
+          <h3 className="text-[17px] font-bold text-navy tracking-widest mb-5">Campus Hub</h3>
           <ServiceGrid />
         </div>
 
@@ -179,7 +161,7 @@ export default function PulseHome() {
                 onClick={() => router.push('/pulse')}
                 className="shrink-0 w-[240px] cursor-pointer group"
               >
-                <div className="w-full h-[140px] bg-slate-50 rounded-[2rem] overflow-hidden mb-3 border border-slate-100 shadow-sm relative">
+                <div className="w-full h-[140px] bg-slate-50 rounded-4xl overflow-hidden mb-3 border border-slate-100 shadow-sm relative">
                   <img src={item.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.title} />
                   <div className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm">
                     <span className={`text-[8px] font-black uppercase tracking-widest ${TAG_COLORS[item.tag] || 'text-slate-500'}`}>{item.tag}</span>
@@ -300,7 +282,7 @@ export default function PulseHome() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-[11px] font-black text-navy tracking-tight transition-colors uppercase group-hover:text-accent">{club.name}</p>
+                  <p className="text-[11px] font-black text-navy tracking-widest transition-colors uppercase group-hover:text-accent">{club.name}</p>
                   <div className="h-0.5 w-0 transition-all duration-300 mx-auto mt-0.5 rounded-full group-hover:w-full" style={{ backgroundColor: club.color }} />
                 </div>
               </motion.div>
@@ -346,8 +328,8 @@ export default function PulseHome() {
                 className={`group cursor-pointer relative ${index % 2 === 1 ? 'mt-10' : ''}`}
               >
                 {/* Bobbing Glass Vessel */}
-                <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden mb-4 glass-card border-white/40 shadow-xl shadow-navy/5 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-navy/10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent opacity-50" />
+                <div className="relative aspect-4/5 rounded-[2.5rem] overflow-hidden mb-4 glass-card border-white/40 shadow-xl shadow-navy/5 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-navy/10">
+                  <div className="absolute inset-0 bg-linear-to-br from-accent/5 via-transparent to-transparent opacity-50" />
                   
                   <img src={item.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 image-rendering-pixelated" alt={item.title} />
                   
@@ -373,7 +355,7 @@ export default function PulseHome() {
 
       </div>
 
-      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
     </main>
   );
 }

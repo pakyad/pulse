@@ -93,7 +93,7 @@ export default function RunnerRegistration() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={1} />
-              <h1 className="text-[32px] font-bold tracking-tight mb-3">Identity Registry</h1>
+              <h1 className="text-[32px] font-bold tracking-widest mb-3">Identity Registry</h1>
               <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
                 Connect your professional persona to the Pulse {type === 'runner' ? 'Carrier' : 'Merchant'} Network.
               </p>
@@ -148,7 +148,7 @@ export default function RunnerRegistration() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={2} />
-              <h1 className="text-[32px] font-bold tracking-tight mb-3">Campus Registry</h1>
+              <h1 className="text-[32px] font-bold tracking-widest mb-3">Campus Registry</h1>
               <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
                 Identify your operational hub {type === 'merchant' ? 'for logistical synchronization.' : 'within the UniKL ecosystem.'}
               </p>
@@ -199,7 +199,7 @@ export default function RunnerRegistration() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={3} />
-              <h1 className="text-[32px] font-bold tracking-tight mb-3">{type === 'merchant' ? 'Terminal Profile' : 'Logistics Profile'}</h1>
+              <h1 className="text-[32px] font-bold tracking-widest mb-3">{type === 'merchant' ? 'Terminal Profile' : 'Logistics Profile'}</h1>
               <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
                 {type === 'merchant' 
                   ? 'Define your store operational bandwidth and fulfillment mode.' 
@@ -248,7 +248,7 @@ export default function RunnerRegistration() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={4} />
-              <h1 className="text-[32px] font-bold tracking-tight mb-3">Payout Terminal</h1>
+              <h1 className="text-[32px] font-bold tracking-widest mb-3">Payout Terminal</h1>
               <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
                 Synchronize your bank account for secure, automated hustle payouts.
               </p>
@@ -307,7 +307,7 @@ export default function RunnerRegistration() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={5} />
-              <h1 className="text-[32px] font-bold tracking-tight mb-3">Protocol Agreement</h1>
+              <h1 className="text-[32px] font-bold tracking-widest mb-3">Protocol Agreement</h1>
               <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
                 Review the {type === 'merchant' ? 'Merchant' : 'Carrier'} Standard Operating Procedures for Pulse.
               </p>
@@ -345,7 +345,7 @@ export default function RunnerRegistration() {
               <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[2.2rem] flex items-center justify-center mx-auto mb-8 shadow-inner">
                 <CheckCircle2 size={40} />
               </div>
-              <h1 className="text-[32px] font-bold tracking-tight mb-4">Registration Sent</h1>
+              <h1 className="text-[32px] font-bold tracking-widest mb-4">Registration Sent</h1>
               <p className="text-slate-400 text-[16px] font-medium leading-relaxed mb-12">
                 Your credentials are being verified by the Pulse Protocol. You will be notified once your terminal is active.
               </p>

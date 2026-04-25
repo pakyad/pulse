@@ -25,11 +25,11 @@ export default function MarketplaceCard({ item, onPurchase }: MarketplaceCardPro
             whileTap={{ scale: 0.98 }}
             className="hologram-card p-2.5 group cursor-pointer transition-all bg-white/40 border-navy/5 h-full"
         >
-      <div className="relative aspect-[4/5] rounded-2xl overflow-hidden mb-3 bg-navy/5 shadow-inner">
+      <div className="relative aspect-4/5 rounded-2xl overflow-hidden mb-3 bg-navy/5 shadow-inner">
         <img 
           src={item.image_url} 
           alt={item.title} 
-          className="object-cover w-full h-full grayscale-[30%] group-hover:grayscale-0 transition-all duration-700 ease-out scale-105 group-hover:scale-100" 
+          className="object-cover w-full h-full grayscale-30 group-hover:grayscale-0 transition-all duration-700 ease-out scale-105 group-hover:scale-100" 
         />
         
         {/* Pricing Badge */}
@@ -45,7 +45,7 @@ export default function MarketplaceCard({ item, onPurchase }: MarketplaceCardPro
         )}
 
         {/* Hover Overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-navy/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute inset-x-0 bottom-0 p-4 bg-linear-to-t from-navy/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             <button 
                 onClick={(e) => {
                     e.stopPropagation();
@@ -61,7 +61,7 @@ export default function MarketplaceCard({ item, onPurchase }: MarketplaceCardPro
       
       <div className="px-1.5 pb-1">
         <div className="flex justify-between items-start mb-1">
-            <h3 className="text-[12px] font-black text-navy  leading-tight tracking-tight w-[70%] truncate">
+            <h3 className="text-[12px] font-black text-navy  leading-tight tracking-widest w-[70%] truncate">
               {item.title}
             </h3>
             <div className="flex items-center gap-1 opacity-20">
@@ -72,7 +72,7 @@ export default function MarketplaceCard({ item, onPurchase }: MarketplaceCardPro
         
         <div className="flex justify-between items-center mt-3">
           <div className="flex flex-col">
-            <p className="text-[9px] text-navy/30 font-black  tracking-[0.1em] leading-none mb-0.5">Inventory</p>
+            <p className="text-[9px] text-navy/30 font-black  tracking-widest leading-none mb-0.5">Inventory</p>
             <p className="text-[10px] text-navy/60 font-black tabular-nums">
                 {item.stock_count || 1} UNITS
             </p>

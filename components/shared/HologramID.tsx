@@ -37,7 +37,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
             </div>
 
             <div className="space-y-4">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-navy/5 to-pearl border-[0.5px] border-navy/10 flex items-center justify-center">
+              <div className="w-24 h-24 rounded-2xl bg-linear-to-br from-navy/5 to-pearl border-[0.5px] border-navy/10 flex items-center justify-center">
                 <User className="text-navy opacity-20 w-12 h-12" />
               </div>
               <div>
@@ -61,7 +61,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
           </div>
 
           {/* Holographic SVE Refraction */}
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none" />
+          <div className="absolute top-0 left-0 w-full h-full bg-linear-to-tr from-transparent via-white/10 to-transparent pointer-events-none" />
         </div>
 
         {/* Back: Dynamic QR */}

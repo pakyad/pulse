@@ -41,7 +41,7 @@ export default function Navbar() {
            })}
         </div>
 
-        <div className="h-6 w-[1px] bg-navy/10 mx-2 hidden md:block" />
+        <div className="h-6 w-px bg-navy/10 mx-2 hidden md:block" />
 
         <div className="flex items-center gap-3">
           <Link href="/notifications" className="p-2 text-navy/40 hover:text-orange transition-colors relative">

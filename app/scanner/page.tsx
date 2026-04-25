@@ -175,7 +175,7 @@ export default function ScannerPage() {
 
             <div className="mt-28 relative group w-full max-w-sm aspect-square rounded-[40px] overflow-hidden border-4 border-white/5 shadow-2xl bg-black">
                 <div id="pulse-reader" className="w-full h-full relative z-10" />
-                <div className="absolute inset-0 border-[60px] border-black/40 backdrop-blur-[2px] z-20 pointer-events-none" />
+                <div className="absolute inset-0 border-60 border-black/40 backdrop-blur-[2px] z-20 pointer-events-none" />
             </div>
             
             <p className="mt-12 text-white/30 text-[10px] font-black  tracking-[0.3em] text-center max-w-[280px] leading-relaxed">

@@ -130,7 +130,7 @@ export default function ApprovalList({ type }: ApprovalListProps) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white border border-slate-100 rounded-[2rem] p-8 flex items-center justify-between group hover:border-blue-100 transition-colors shadow-sm"
+                className="bg-white border border-slate-100 rounded-4xl p-8 flex items-center justify-between group hover:border-blue-100 transition-colors shadow-sm"
               >
                 <div className="flex items-center gap-6">
                   <div className="w-14 h-14 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden">

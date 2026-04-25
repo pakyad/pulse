@@ -61,7 +61,7 @@ const AnnouncementCarousel = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`w-40 h-56 rounded-2xl p-4 flex flex-col justify-between shadow-sm border border-black/5 bg-gradient-to-br ${item.gradient} relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer`}
+              className={`w-40 h-56 rounded-2xl p-4 flex flex-col justify-between shadow-sm border border-black/5 bg-linear-to-br ${item.gradient} relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer`}
             >
               <div className="space-y-3">
                 <span className={`text-[10px] font-black tracking-widest ${item.accent} opacity-60 uppercase`}>

@@ -32,7 +32,7 @@ export default function FacilityModule({
         </div>
 
         <div className="space-y-1">
-           <h4 className="text-[15px] font-bold text-white tracking-tight uppercase group-hover:text-accent transition-colors">{name}</h4>
+           <h4 className="text-[15px] font-bold text-white tracking-widest uppercase group-hover:text-accent transition-colors">{name}</h4>
            <div className="flex items-center gap-2">
               <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">{area}</p>
               {isOnline && <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />}

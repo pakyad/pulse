@@ -147,7 +147,7 @@ export default function RegistryList({ type }: RegistryListProps) {
                 </div>
                 <div className="space-y-4 flex-1">
                    <div>
-                      <h4 className="text-[#0A0F1E] font-bold text-[18px] tracking-tight mb-1">{item.student_name}</h4>
+                      <h4 className="text-[#0A0F1E] font-bold text-[18px] tracking-widest mb-1">{item.student_name}</h4>
                       <div className="flex items-center gap-3 text-slate-300">
                          <p className="text-[11px] font-black uppercase tracking-widest">{item.student_id}</p>
                          <span className="w-1 h-1 rounded-full bg-slate-200" />
@@ -176,14 +176,14 @@ export default function RegistryList({ type }: RegistryListProps) {
               <div className="flex items-center gap-3 mt-8 md:mt-0 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={() => handleAction(item.id, 'APPROVED')}
-                  className="h-12 px-8 rounded-[1.5rem] bg-navy text-white font-bold text-[12px] hover:scale-105 transition-all active:scale-95 flex items-center gap-2 shadow-xl shadow-navy/10"
+                  className="h-12 px-8 rounded-3xl bg-navy text-white font-bold text-[12px] hover:scale-105 transition-all active:scale-95 flex items-center gap-2 shadow-xl shadow-navy/10"
                 >
                   <Check size={18} />
                   Approve
                 </button>
                 <button 
                   onClick={() => handleAction(item.id, 'REJECTED')}
-                  className="h-12 w-12 rounded-[1.5rem] bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
+                  className="h-12 w-12 rounded-3xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
                 >
                   <X size={20} />
                 </button>

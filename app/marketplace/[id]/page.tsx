@@ -64,7 +64,7 @@ function MarziaDeliverySheet({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[300] bg-navy/50 backdrop-blur-sm flex items-end"
+      className="fixed inset-0 z-300 bg-navy/50 backdrop-blur-sm flex items-end"
       onClick={onClose}
     >
       <motion.div
@@ -73,7 +73,7 @@ function MarziaDeliverySheet({
         exit={{ y: '100%' }}
         transition={{ type: 'spring', stiffness: 420, damping: 38 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full bg-[#FDFDFD] rounded-t-[2rem] overflow-hidden"
+        className="w-full bg-[#FDFDFD] rounded-t-4xl overflow-hidden"
       >
         {/* Marzia handle + header */}
         <div className="px-6 pt-5 pb-4 border-b border-slate-50">
@@ -311,7 +311,7 @@ export default function ItemDetails() {
     <div className="min-h-screen bg-[#FDFDFD] font-sans text-navy antialiased">
 
       {/* ── NAV (floats over image) ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-3 flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 z-100 px-5 pt-8 pb-3 flex items-center justify-between">
         {/* Josh back button — voxel pod with 3D base */}
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -401,7 +401,7 @@ export default function ItemDetails() {
         </div>
 
         {/* ── Title + Price — Josh: BIG, direct ── */}
-        <h1 className="text-[28px] font-bold leading-tight tracking-tight text-navy mb-2">
+        <h1 className="text-[28px] font-bold leading-tight tracking-widest text-navy mb-2">
           {item.title}
         </h1>
 

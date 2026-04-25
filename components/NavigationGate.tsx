@@ -68,7 +68,8 @@ export default function NavigationGate() {
     return () => unsubscribe();
   }, [pathname, router]);
 
-  const hideHeader = isAuthPage || pathname === '/' || pathname === '/home' || pathname === '/pulse' || pathname === '/run' || pathname === '/me' || pathname === '/activity' || pathname === '/messages' || pathname === '/merchant' || pathname === '/marketplace' || pathname?.startsWith('/hub');
+  // Only hide the global header on auth pages, root ('/'), me ('/me'), and merchant/admin terminals.
+  const hideHeader = isAuthPage || pathname === '/' || pathname === '/me' || pathname === '/merchant' || pathname?.startsWith('/hub');
   const isMerchantTerminal = pathname?.startsWith('/merchant');
   const isRunTerminal = pathname?.startsWith('/run');
 

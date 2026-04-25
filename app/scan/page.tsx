@@ -96,7 +96,7 @@ export default function HandshakeScanner() {
       
       {/* Soft Lens Overlays */}
       <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 border-[40px] border-black/60 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 border-40 border-black/60 backdrop-blur-[2px]" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] border-2 border-orange/40 rounded-3xl shadow-[0_0_50px_rgba(255,133,27,0.2)]">
                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-orange rounded-tl-xl" />
                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-orange rounded-tr-xl" />

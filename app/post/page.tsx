@@ -190,7 +190,7 @@ export default function DeployAsset() {
               whileTap={{ scale: 0.98, y: 1 }}
               disabled={!canNext}
               onClick={() => setStep(s => s + 1)}
-              className="w-full h-[72px] bg-navy text-white rounded-[2rem] font-bold text-[16px] flex items-center justify-center gap-3 disabled:opacity-30 shadow-2xl shadow-navy/20"
+              className="w-full h-[72px] bg-navy text-white rounded-4xl font-bold text-[16px] flex items-center justify-center gap-3 disabled:opacity-30 shadow-2xl shadow-navy/20"
             >
               Next Phase <ChevronRight size={20} />
             </motion.button>
@@ -199,7 +199,7 @@ export default function DeployAsset() {
               whileTap={{ scale: 0.98, y: 1 }}
               disabled={loading}
               onClick={handleDeploy}
-              className="w-full h-[72px] bg-navy text-white rounded-[2rem] font-bold text-[16px] flex items-center justify-center gap-3 shadow-2xl shadow-navy/30"
+              className="w-full h-[72px] bg-navy text-white rounded-4xl font-bold text-[16px] flex items-center justify-center gap-3 shadow-2xl shadow-navy/30"
             >
               {loading ? <><Loader2 size={20} className="animate-spin" /> Finalizing...</> : <><Rocket size={20} /> Finalize Launch</>}
             </motion.button>

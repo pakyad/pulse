@@ -144,7 +144,7 @@ export default function PromoteHub() {
                  <ArrowLeft size={18} />
               </button>
               <div>
-                 <h1 className="text-[24px] font-bold tracking-tight text-navy">Promotion Center</h1>
+                 <h1 className="text-[24px] font-bold tracking-widest text-navy">Promotion Center</h1>
                  <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest leading-none mt-1">Boost your items to the front page</p>
               </div>
            </div>
@@ -178,7 +178,7 @@ export default function PromoteHub() {
                         <Zap size={24} className={tokensRemaining > 0 ? "fill-white" : ""} />
                      </div>
                       <div>
-                         <h3 className={`text-[20px] font-bold tracking-tight mb-2 ${tokensRemaining > 0 ? 'text-white' : 'text-slate-400'}`}>Boost an Item</h3>
+                         <h3 className={`text-[20px] font-bold tracking-widest mb-2 ${tokensRemaining > 0 ? 'text-white' : 'text-slate-400'}`}>Boost an Item</h3>
                          <p className={`text-[13px] font-medium leading-relaxed ${tokensRemaining > 0 ? 'text-white/40' : 'text-slate-300'}`}>Put your items at the top of the home page so every student sees them.</p>
                       </div>
                   </div>
@@ -221,7 +221,7 @@ export default function PromoteHub() {
                                  {camp.status === 'active' ? <CheckCircle2 size={20} /> : camp.status === 'pending' ? <Clock size={20} /> : <XCircle size={20} />}
                               </div>
                               <div>
-                                 <h4 className="text-[16px] font-bold text-navy mb-0.5 tracking-tight line-clamp-1">{camp.creative?.headline}</h4>
+                                 <h4 className="text-[16px] font-bold text-navy mb-0.5 tracking-widest line-clamp-1">{camp.creative?.headline}</h4>
                                  <div className="flex items-center gap-3">
                                     <span className="text-[9px] font-bold uppercase text-slate-300 tracking-widest">{camp.template_id}</span>
                                     <span className="w-1 h-1 rounded-full bg-slate-100" />
@@ -364,11 +364,11 @@ export default function PromoteHub() {
                              <div className="space-y-6">
                                 <div className="space-y-2">
                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">Campaign Headline</p>
-                                   <input value={draft.headline} onChange={e => setDraft({ ...draft, headline: e.target.value })} className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[1.5rem] px-6 font-bold text-navy outline-none focus:border-navy transition-all" />
+                                   <input value={draft.headline} onChange={e => setDraft({ ...draft, headline: e.target.value })} className="w-full h-14 bg-slate-50 border border-slate-100 rounded-3xl px-6 font-bold text-navy outline-none focus:border-navy transition-all" />
                                 </div>
                                 <div className="space-y-2">
                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">Creative Caption</p>
-                                   <textarea value={draft.caption} onChange={e => setDraft({ ...draft, caption: e.target.value })} className="w-full h-32 bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6 font-bold text-navy outline-none focus:border-navy transition-all resize-none" />
+                                   <textarea value={draft.caption} onChange={e => setDraft({ ...draft, caption: e.target.value })} className="w-full h-32 bg-slate-50 border border-slate-100 rounded-3xl p-6 font-bold text-navy outline-none focus:border-navy transition-all resize-none" />
                                 </div>
                              </div>
                              
@@ -394,7 +394,7 @@ export default function PromoteHub() {
                              
                              <button 
                                onClick={() => setStudioStep(3)}
-                               className="w-full py-6 bg-navy text-white rounded-[2rem] font-bold uppercase tracking-widest text-[13px] shadow-2xl shadow-navy/20 active:scale-95 transition-all"
+                               className="w-full py-6 bg-navy text-white rounded-4xl font-bold uppercase tracking-widest text-[13px] shadow-2xl shadow-navy/20 active:scale-95 transition-all"
                              >
                                 Review Final Sync
                              </button>
@@ -410,7 +410,7 @@ export default function PromoteHub() {
                              </div>
                              
                              {/* THE PHONE MOCKUP */}
-                             <div className="w-full max-w-[320px] aspect-[9/17] bg-[#0A1121] rounded-[4rem] p-6 relative overflow-hidden border-[8px] border-slate-900 shadow-2xl">
+                             <div className="w-full max-w-[320px] aspect-9/17 bg-[#0A1121] rounded-[4rem] p-6 relative overflow-hidden border-8 border-slate-900 shadow-2xl">
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#1e3a8a_0%,transparent_70%)] opacity-30" />
                                 <div className="relative z-10 space-y-6 pt-10">
                                    <div className="px-3 py-1 bg-white/10 rounded-full border border-white/10 w-fit">
@@ -440,7 +440,7 @@ export default function PromoteHub() {
                           <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mx-auto shadow-inner">
                              <CheckCircle2 size={40} />
                           </div>
-                          <h2 className="text-[32px] font-bold tracking-tight text-navy">Ready for Authorization?</h2>
+                          <h2 className="text-[32px] font-bold tracking-widest text-navy">Ready for Authorization?</h2>
                           <div className="p-8 bg-slate-50 rounded-[3rem] text-left space-y-4 border border-slate-100">
                              <div className="flex justify-between items-center">
                                 <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Protocol Sync</p>

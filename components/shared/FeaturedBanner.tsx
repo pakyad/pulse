@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { ArrowUpRight } from 'lucide-react';
 
 export interface BannerSlide {
   id: string | number;
-  tag: string;
+  tag?: string;
   headline: string;
   subline?: string;
-  ctaText: string;
+  ctaText?: string;
   ctaPath: string;
-  img: string;
+  bgColor?: string;
 }
 
 interface FeaturedBannerProps {
@@ -44,48 +45,65 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
 
   return (
     <div className="relative">
-      <div className={`relative ${height} rounded-[2.5rem] overflow-hidden shadow-xl shadow-navy/10`}>
+      <div className={`relative ${height} rounded-[2.5rem] overflow-hidden shadow-xl shadow-black/5`}>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={index}
             custom={direction}
-            initial={{ x: direction * 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: direction * -50, opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="absolute inset-0 flex flex-col justify-end p-8"
+            style={{ backgroundColor: slide.bgColor || '#4A5D23' }}
           >
-            <img src={slide.img} className="w-full h-full object-cover" alt="" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0F1E]/90 via-[#0A0F1E]/30 to-transparent" />
-            <div className="absolute inset-0 p-7 flex flex-col justify-between">
-              <span className="self-start px-3 py-1.5 bg-white/15 backdrop-blur-md rounded-full text-[9px] font-black text-white uppercase tracking-[0.2em] border border-white/10">
-                {slide.tag}
-              </span>
-              <div className="space-y-3">
-                <div>
-                  <h2 className="text-white text-[21px] font-bold leading-tight tracking-tight">{slide.headline}</h2>
-                  {slide.subline && <p className="text-white/50 text-[12px] font-medium mt-1 leading-snug">{slide.subline}</p>}
-                </div>
-                <button
-                  onClick={() => router.push(slide.ctaPath)}
-                  className="self-start px-6 py-2.5 bg-white text-navy text-[12px] font-bold rounded-full shadow-xl shadow-black/20 active:scale-95 transition-all"
-                >
-                  {slide.ctaText}
-                </button>
-              </div>
+            {/* Abstract Graphic Background (Overlapping Squares) */}
+            <div className="absolute right-[-20px] top-[10%] pointer-events-none opacity-80 mix-blend-overlay">
+               <motion.div 
+                 animate={{ rotate: 15 }}
+                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                 className="absolute right-12 top-4 w-40 h-40 rounded-[2.5rem] bg-white/20 border border-white/30 backdrop-blur-sm"
+               />
+               <motion.div 
+                 animate={{ rotate: -10 }}
+                 transition={{ duration: 15, repeat: Infinity, ease: "linear", repeatType: "reverse" }}
+                 className="absolute right-4 top-8 w-40 h-40 rounded-[2.5rem] bg-white/20 border border-white/30 backdrop-blur-md"
+               />
+               <motion.div 
+                 animate={{ rotate: 5 }}
+                 className="relative right-0 top-12 w-40 h-40 rounded-[2.5rem] bg-white/30 border border-white/40 backdrop-blur-lg flex items-center justify-center shadow-2xl"
+               >
+                  <div className="w-16 h-16 rounded-2xl border-2 border-white/40" />
+               </motion.div>
+            </div>
+
+            {/* Content Area */}
+            <div className="relative z-10 flex items-end justify-between w-full">
+               <div className="flex-1 pr-6">
+                 <h2 className="text-white text-[24px] font-bold leading-tight tracking-tight mb-2">{slide.headline}</h2>
+                 {slide.subline && <p className="text-white/70 text-[14px] font-medium leading-snug">{slide.subline}</p>}
+               </div>
+               
+               {/* Square CTA Button */}
+               <button
+                 onClick={() => router.push(slide.ctaPath)}
+                 className="shrink-0 w-16 h-16 bg-white rounded-2xl shadow-xl shadow-black/10 flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50"
+               >
+                 <ArrowUpRight size={28} className="text-black" strokeWidth={2.5} />
+               </button>
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {slides.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3.5">
+        <div className="flex justify-center gap-2 mt-4">
           {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => goTo(i)}
               className={`transition-all duration-300 rounded-full ${
-                i === index ? 'w-5 h-1.5 bg-navy' : 'w-1.5 h-1.5 bg-slate-200'
+                i === index ? 'w-6 h-1.5 bg-black' : 'w-1.5 h-1.5 bg-gray-200'
               }`}
             />
           ))}

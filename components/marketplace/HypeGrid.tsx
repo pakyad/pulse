@@ -37,7 +37,7 @@ export default function HypeGrid() {
           </div>
 
           {/* Product Image Placeholder */}
-          <div className="aspect-square rounded-xl bg-gradient-to-br from-navy/5 to-transparent border-[0.5px] border-navy/5 mb-4 flex items-center justify-center relative z-10">
+          <div className="aspect-square rounded-xl bg-linear-to-br from-navy/5 to-transparent border-[0.5px] border-navy/5 mb-4 flex items-center justify-center relative z-10">
              <ShoppingBag className="w-12 h-12 text-navy opacity-5" />
           </div>
 

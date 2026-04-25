@@ -120,7 +120,7 @@ export default function AdminPrestigePage() {
                       key={camp.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-white/5 border border-white/5 p-8 rounded-[3rem] hover:bg-white/[0.08] transition-all group relative overflow-hidden"
+                      className="bg-white/5 border border-white/5 p-8 rounded-[3rem] hover:bg-white/8 transition-all group relative overflow-hidden"
                     >
                        <div className="absolute top-0 right-0 p-8 opacity-5">
                           {camp.template_id === 'overture' ? <LayoutDashboard size={80} /> : camp.template_id === 'spotlight' ? <Search size={80} /> : <Zap size={80} />}
@@ -140,7 +140,7 @@ export default function AdminPrestigePage() {
                           </div>
 
                           <div className="space-y-1">
-                             <h4 className="text-[18px] font-bold tracking-tight text-white line-clamp-1">{camp.creative?.headline || camp.item?.title}</h4>
+                             <h4 className="text-[18px] font-bold tracking-widest text-white line-clamp-1">{camp.creative?.headline || camp.item?.title}</h4>
                              <div className="flex items-center gap-2">
                                 <span className="text-[10px] font-bold text-accent uppercase tracking-widest">{camp.campus || 'Global'}</span>
                                 <span className="w-1 h-1 rounded-full bg-white/10" />
@@ -179,7 +179,7 @@ export default function AdminPrestigePage() {
       {/* ADMIN PREVIEW OVERLAY */}
       <AnimatePresence>
         {selectedCamp && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-200 flex items-center justify-center p-6">
             <motion.div 
                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                onClick={() => setSelectedCamp(null)}
@@ -218,7 +218,7 @@ export default function AdminPrestigePage() {
                      {/* THE PREVIEW RENDER */}
                      <div className="bg-white/5 p-8 rounded-[3rem] border border-white/10 space-y-6">
                         <div className="space-y-4">
-                           <h4 className="text-[24px] font-bold text-white tracking-tight leading-tight">{selectedCamp.creative?.headline}</h4>
+                           <h4 className="text-[24px] font-bold text-white tracking-widest leading-tight">{selectedCamp.creative?.headline}</h4>
                            <p className="text-white/40 text-[14px] leading-relaxed">{selectedCamp.creative?.caption}</p>
                         </div>
                         <div className="flex items-center justify-between pt-6 border-t border-white/5">

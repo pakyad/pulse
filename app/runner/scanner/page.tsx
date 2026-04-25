@@ -30,7 +30,7 @@ export default function RunnerScanner() {
           <motion.div 
             animate={{ top: ['10%', '90%', '10%'] }}
             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-            className="absolute left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-orange to-transparent shadow-[0_0_10px_#FF851B] z-10"
+            className="absolute left-4 right-4 h-px bg-linear-to-r from-transparent via-orange to-transparent shadow-[0_0_10px_#FF851B] z-10"
           />
 
           <div className="absolute inset-0 flex items-center justify-center opacity-20">

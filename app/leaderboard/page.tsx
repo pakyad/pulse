@@ -81,7 +81,7 @@ export default function LeaderboardPage() {
                                 {getRankIcon(index)}
                             </div>
                             <div>
-                                <h4 className="text-sm font-black text-navy  tracking-tight leading-none mb-1.5">{club.full_name}</h4>
+                                <h4 className="text-sm font-black text-navy  tracking-widest leading-none mb-1.5">{club.full_name}</h4>
                                 <div className="flex items-center gap-2">
                                     <p className="text-[10px] font-bold text-navy/40  tracking-widest leading-none">
                                         {club.hustle_score || 0} HP

@@ -39,7 +39,7 @@ export default function MedHub() {
         </button>
         <div className="text-center">
           <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Health & Wellness</p>
-          <h1 className="text-[18px] font-bold tracking-tight text-navy">Campus Clinic</h1>
+          <h1 className="text-[18px] font-bold tracking-widest text-navy">Campus Clinic</h1>
         </div>
         <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
           <Heart size={18} fill="currentColor" />
@@ -121,7 +121,7 @@ export default function MedHub() {
                    <item.icon size={22} strokeWidth={2} />
                 </div>
                 <div>
-                   <p className="text-[15px] font-bold text-navy tracking-tight leading-none mb-1">{item.label}</p>
+                   <p className="text-[15px] font-bold text-navy tracking-widest leading-none mb-1">{item.label}</p>
                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-widest">{item.sub}</p>
                 </div>
              </motion.button>

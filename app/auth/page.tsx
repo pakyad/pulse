@@ -3,96 +3,284 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, ChevronLeft, Globe, Loader2 } from 'lucide-react';
+import { 
+  X, ChevronLeft, Loader2, Apple
+} from 'lucide-react';
 import { auth, db } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 
 export default function AuthPage() {
   const router = useRouter();
+  const [view, setView] = useState<'landing' | 'login' | 'register'>('landing');
+  const [regStep, setRegStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [regData, setRegData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    surname: '',
+    matricNo: '',
+    acceptedTerms: false
+  });
 
   const handleLogin = async () => {
     setLoading(true);
     setError(null);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userRef = doc(db, "users", userCredential.user.uid);
+      const user = userCredential.user;
+      
+      const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
+      
       if (userSnap.exists()) {
-        const role = userSnap.data().role;
-        router.push(role === 'ADMIN' ? '/admin/dashboard' : role === 'CLUB' ? '/merchant' : '/home');
+        const userData = userSnap.data();
+        if (userData.role === 'ADMIN') router.push('/admin/dashboard');
+        else if (userData.role === 'CLUB') router.push('/merchant');
+        else router.push('/home');
       } else {
         router.push('/home');
       }
     } catch (err: any) {
-      setError("Identity verification failed");
+      setError(err.message || 'Identity verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { registerStudent } = await import('@/lib/auth-utils');
+      const fullName = `${regData.firstName} ${regData.surname}`.trim();
+      const { user, error: regErr } = await registerStudent(
+        regData.email, 
+        regData.password, 
+        fullName, 
+        regData.matricNo
+      );
+
+      if (regErr) throw new Error(regErr);
+      if (user) router.push('/home');
+    } catch (err: any) {
+      setError(err.message || 'Registry creation failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-black flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background DNA: The Pulse Glow */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900/20 blur-[120px] rounded-full" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-900/20 blur-[120px] rounded-full" />
-
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-[400px] backdrop-blur-2xl bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl relative z-10"
-      >
-        <div className="flex flex-col items-center mb-12">
-          <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-            <span className="text-black text-3xl font-black italic">P</span>
-          </div>
-          <h1 className="text-white text-3xl font-black tracking-tighter uppercase">Pulse</h1>
-          <p className="text-white/40 text-[10px] font-bold tracking-[0.3em] uppercase mt-2">University OS</p>
-        </div>
-
-        <div className="space-y-4">
-          {error && <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest text-center">{error}</p>}
-          
-          <div className="space-y-1">
-            <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white/60 transition-colors" size={18} />
-              <input 
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="Student Email"
-                className="w-full h-14 bg-white/[0.05] border border-white/10 rounded-2xl pl-12 pr-4 text-white text-sm outline-none focus:border-white/30 transition-all font-medium"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white/60 transition-colors" size={18} />
-              <input 
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                placeholder="Security Key"
-                className="w-full h-14 bg-white/[0.05] border border-white/10 rounded-2xl pl-12 pr-4 text-white text-sm outline-none focus:border-white/30 transition-all font-medium"
-              />
-            </div>
-          </div>
-
-          <button 
-            onClick={handleLogin} disabled={loading}
-            className="w-full h-14 bg-white text-black rounded-2xl font-black text-xs tracking-[0.2em] uppercase hover:bg-white/90 active:scale-[0.98] transition-all flex items-center justify-center mt-4"
+    <main className="min-h-screen bg-white font-sans text-black overflow-x-hidden antialiased relative">
+      
+      <AnimatePresence mode="wait">
+        {view === 'landing' && (
+          <motion.div 
+            key="landing" 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="flex flex-col min-h-screen px-6 py-6 max-w-md mx-auto w-full"
           >
-            {loading ? <Loader2 className="animate-spin" size={20} /> : "Establish Link"}
-          </button>
-        </div>
+            {/* Top Bar */}
+            <div className="flex items-center justify-between mb-8">
+               <button 
+                 onClick={() => router.push('/')} 
+                 className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all active:scale-90"
+               >
+                  <X size={20} className="text-black" />
+               </button>
+               <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">Sign in</h1>
+               <div className="w-10" />
+            </div>
 
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <div className="w-full h-px bg-white/10" />
-          <button className="text-white/40 text-[11px] font-bold tracking-widest uppercase hover:text-white transition-colors">
-            Request Access
-          </button>
-        </div>
-      </motion.div>
+            {/* Headers */}
+            <div className="mb-auto">
+               <h2 className="text-[32px] font-bold tracking-tight mb-2">Hi</h2>
+               <p className="text-[15px] text-gray-500 leading-snug pr-4">
+                 You can use your email or username, or continue with your social account.
+               </p>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="w-full space-y-4 pb-8">
+               <button 
+                 onClick={() => setView('login')}
+                 className="w-full py-4 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-[2rem] font-semibold text-[16px] transition-all"
+               >
+                  Use email or username
+               </button>
+
+               <div className="flex items-center gap-4 py-2">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-[14px] text-gray-500 font-medium">or</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+               </div>
+
+               <button 
+                 className="w-full py-4 bg-black text-white rounded-[2rem] font-semibold text-[16px] flex items-center justify-center gap-3 transition-all"
+               >
+                  <Apple size={22} fill="currentColor" />
+                  Sign in with Apple
+               </button>
+
+               <button 
+                 className="w-full py-4 bg-white border border-gray-300 text-black rounded-[2rem] font-semibold text-[16px] flex items-center justify-center gap-3 transition-all active:bg-gray-50"
+               >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22">
+                     <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+                     <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+                     <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+                     <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+                  </svg>
+                  Sign in with Google
+               </button>
+
+               <div className="pt-6 text-center">
+                  <p className="text-[14px] text-gray-500 mb-1">Haven't signed up yet?</p>
+                  <button onClick={() => setView('register')} className="text-[14px] text-[#0A66C2] font-medium hover:underline">
+                     Create an account
+                  </button>
+               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {view === 'login' && (
+          <motion.div 
+            key="login" 
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+            className="flex flex-col min-h-screen px-6 py-6 max-w-md mx-auto w-full"
+          >
+            <div className="flex items-center justify-between mb-8">
+               <button onClick={() => setView('landing')} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all active:scale-90">
+                  <ChevronLeft size={24} className="text-black" />
+               </button>
+               <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">Sign in</h1>
+               <div className="w-10" />
+            </div>
+
+            <div className="space-y-6 flex-1 mt-4">
+               {error && <div className="p-4 bg-red-50 text-red-600 rounded-xl text-[14px] font-medium border border-red-100">{error}</div>}
+               
+               <div className="space-y-2">
+                  <label className="text-[14px] font-medium text-gray-700 ml-1">Email or username</label>
+                  <input 
+                    type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                    className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all"
+                  />
+               </div>
+
+               <div className="space-y-2">
+                  <label className="text-[14px] font-medium text-gray-700 ml-1">Password</label>
+                  <input 
+                    type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                    className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all"
+                  />
+               </div>
+
+               <button 
+                 onClick={handleLogin} disabled={loading}
+                 className="w-full py-4 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-[2rem] font-semibold text-[16px] shadow-sm active:scale-95 transition-all flex items-center justify-center mt-4"
+               >
+                 {loading ? <Loader2 className="animate-spin" size={24} /> : 'Sign in'}
+               </button>
+            </div>
+          </motion.div>
+        )}
+
+        {view === 'register' && (
+          <motion.div 
+            key="register" 
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+            className="flex flex-col min-h-screen px-6 py-6 max-w-md mx-auto w-full"
+          >
+            <div className="flex items-center justify-between mb-8">
+               <button onClick={() => regStep > 1 ? setRegStep(s => s - 1) : setView('landing')} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all active:scale-90">
+                  <ChevronLeft size={24} className="text-black" />
+               </button>
+               <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">Create account</h1>
+               <div className="flex gap-1.5">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${regStep === i ? 'w-6 bg-black' : 'w-1.5 bg-gray-200'}`} />
+                  ))}
+               </div>
+            </div>
+
+            <div className="flex-1 space-y-6 mt-4">
+               <AnimatePresence mode="wait">
+                  {regStep === 1 && (
+                    <motion.div key="st1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+                       <h2 className="text-[24px] font-bold mb-6">What's your name?</h2>
+                       <div className="space-y-2">
+                          <label className="text-[14px] font-medium text-gray-700 ml-1">First name</label>
+                          <input value={regData.firstName} onChange={e => setRegData({...regData, firstName: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-[14px] font-medium text-gray-700 ml-1">Surname</label>
+                          <input value={regData.surname} onChange={e => setRegData({...regData, surname: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
+                       </div>
+                       <div className="space-y-2 pt-2">
+                          <label className="text-[14px] font-medium text-gray-700 ml-1">Matric Number</label>
+                          <input value={regData.matricNo} onChange={e => setRegData({...regData, matricNo: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
+                       </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 2 && (
+                    <motion.div key="st2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+                       <h2 className="text-[24px] font-bold mb-6">Set up your login</h2>
+                       <div className="space-y-2">
+                          <label className="text-[14px] font-medium text-gray-700 ml-1">Email address</label>
+                          <input type="email" value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-[14px] font-medium text-gray-700 ml-1">Password</label>
+                          <input type="password" value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-[14px] font-medium text-gray-700 ml-1">Confirm Password</label>
+                          <input type="password" value={regData.confirmPassword} onChange={e => setRegData({...regData, confirmPassword: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
+                       </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 3 && (
+                    <motion.div key="st3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                       <h2 className="text-[24px] font-bold mb-2">Terms & Privacy</h2>
+                       <p className="text-[15px] text-gray-500 leading-snug">
+                         By creating an account, you agree to our Terms of Service and Privacy Policy.
+                       </p>
+                       
+                       <div className="pt-4 flex items-center gap-3">
+                          <input 
+                            type="checkbox" 
+                            id="terms" 
+                            checked={regData.acceptedTerms} 
+                            onChange={() => setRegData({...regData, acceptedTerms: !regData.acceptedTerms})}
+                            className="w-6 h-6 rounded border-gray-300 accent-black"
+                          />
+                          <label htmlFor="terms" className="text-[15px] font-medium">I accept the terms and conditions</label>
+                       </div>
+                    </motion.div>
+                  )}
+               </AnimatePresence>
+            </div>
+
+            <button 
+               onClick={() => regStep < 3 ? setRegStep(s => s + 1) : handleRegister()}
+               disabled={loading || (regStep === 3 && !regData.acceptedTerms)}
+               className="w-full py-4 mt-8 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-[2rem] font-semibold text-[16px] shadow-sm active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
+            >
+               {loading ? <Loader2 className="animate-spin" size={24} /> : regStep < 3 ? 'Next' : 'Create account'}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
