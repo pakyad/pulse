@@ -176,10 +176,10 @@ export default function MePage() {
 
         {/* ── MY LISTINGS ── */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-[17px] font-bold text-navy tracking-tight">My Listings</h2>
-              <p className="text-[11px] font-medium text-slate-400 mt-0.5">{myListings.length} active items</p>
+              <h2 className="text-[18px] font-bold text-navy tracking-tight">My Listings</h2>
+              <p className="text-[12px] font-medium text-slate-400 mt-1">{myListings.length} active items</p>
             </div>
             <button onClick={() => router.push('/post')} className="w-10 h-10 bg-navy text-white rounded-xl flex items-center justify-center shadow-lg shadow-navy/10 active:scale-90 transition-all">
               <Plus size={20} strokeWidth={3} />

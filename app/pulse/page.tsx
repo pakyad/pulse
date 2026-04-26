@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
-import { Bell, Settings, Search, ChevronLeft, ChevronRight, Activity, Shield, AlertTriangle, Clock, CheckCircle, BookOpen, CalendarDays, Home, Users } from 'lucide-react';
+import { Bell, Settings, Search, ChevronLeft, ChevronRight, Activity, Shield, AlertTriangle, Clock, CheckCircle, BookOpen, CalendarDays, Home, Users, ArrowRight } from 'lucide-react';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
@@ -113,39 +113,39 @@ export default function PulseBulletinPage() {
 
         {/* ── EDITORIAL HEADER ── */}
         <div className="px-5">
-          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.35em]">Pulse Bulletin</p>
+          <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Pulse Bulletin</p>
           <div className="flex items-center gap-2 mt-1">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <p className="text-[11px] font-medium text-slate-400">UniKL City Campus · Live</p>
           </div>
         </div>
 
-        {/* ── PRIORITY CARD (Breaking) ── */}
+        {/* ── PRIORITY CARD (FeaturedBanner Style) ── */}
         <div className="px-5">
-          <motion.div whileTap={{ scale: 0.98 }} className="relative h-[220px] rounded-[2.5rem] overflow-hidden shadow-xl shadow-navy/10 cursor-pointer">
-            <img src={PRIORITY_CARD.img} className="absolute inset-0 w-full h-full object-cover" alt="" />
-            <div className="absolute inset-0 bg-linear-to-t from-[#0A0F1E]/95 via-[#0A0F1E]/40 to-transparent" />
-            <div className="absolute inset-0 p-7 flex flex-col justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                <span className="text-[9px] font-black text-accent/80 uppercase tracking-[0.25em]">{PRIORITY_CARD.tag}</span>
-              </div>
-              <div className="space-y-3">
-                <h2 className="text-white text-[22px] font-bold leading-tight tracking-tight">{PRIORITY_CARD.headline}</h2>
-                <p className="text-white/50 text-[12px] font-medium leading-snug line-clamp-2">{PRIORITY_CARD.body}</p>
-                <button className="self-start px-5 py-2.5 bg-white text-navy text-[11px] font-bold rounded-full active:scale-95 transition-all">
-                  {PRIORITY_CARD.cta}
-                </button>
-              </div>
-            </div>
+          <motion.div whileTap={{ scale: 0.98 }} className="relative rounded-[2.5rem] overflow-hidden bg-purple-500 p-8 flex flex-col justify-between shadow-sm cursor-pointer min-h-[220px]">
+             {/* Subtle internal texture/pattern */}
+             <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+             <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">{PRIORITY_CARD.tag}</span>
+                </div>
+                <div>
+                  <h2 className="text-white text-[28px] font-bold leading-tight tracking-tight mb-2">{PRIORITY_CARD.headline}</h2>
+                  <p className="text-white/80 text-[13px] font-medium leading-snug line-clamp-2 max-w-[260px] mb-6">{PRIORITY_CARD.body}</p>
+                  <button className="px-6 py-3 bg-white text-navy text-[13px] font-bold rounded-[1rem] shadow-sm active:scale-95 transition-all flex items-center gap-2 w-fit">
+                    {PRIORITY_CARD.cta} <ArrowRight size={16} />
+                  </button>
+                </div>
+             </div>
           </motion.div>
         </div>
 
         {/* ── CAMPUS LIFE ── */}
         <div>
-          <div className="px-5 mb-4">
-            <h3 className="text-[17px] font-bold text-navy tracking-tight">Campus Life</h3>
-            <p className="text-[11px] text-slate-400 font-medium mt-0.5">Events, notices & club activity</p>
+          <div className="px-5 mb-6">
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">Campus Life</h3>
+            <p className="text-[12px] text-slate-400 font-medium mt-0.5">Events, notices & club activity</p>
           </div>
           <div className="flex gap-4 overflow-x-auto px-5 no-scrollbar pb-1">
             {CAMPUS_LIFE.map((item) => (
@@ -172,9 +172,8 @@ export default function PulseBulletinPage() {
 
         {/* ── ACADEMIC EKG ── */}
         <div className="px-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity size={16} className="text-accent animate-pulse" />
-            <h3 className="text-[17px] font-bold text-navy tracking-tight">Academic Alerts</h3>
+          <div className="flex items-center gap-2 mb-6">
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">Academic Alerts</h3>
           </div>
           <div className="bg-white border border-slate-100 rounded-4xl overflow-hidden shadow-sm">
             {ACADEMIC_ALERTS.map((alert, i) => (
@@ -224,9 +223,8 @@ export default function PulseBulletinPage() {
 
         {/* ── FACILITY LEDGER ── */}
         <div>
-          <div className="px-5 mb-4 flex items-center gap-2">
-            <Shield size={16} className="text-slate-300" />
-            <h3 className="text-[17px] font-bold text-navy tracking-tight">Facility Status</h3>
+          <div className="px-5 mb-6 flex items-center gap-2">
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">Facility Status</h3>
           </div>
           <div className="flex gap-3 overflow-x-auto px-5 no-scrollbar pb-1">
             {FACILITIES.map((f) => (
@@ -240,9 +238,9 @@ export default function PulseBulletinPage() {
           </div>
         </div>
 
-        {/* ── INSTITUTIONAL REGISTRY (Image RIGHT — Apple News style) ── */}
+        {/* ── INSTITUTIONAL REGISTRY ── */}
         <div className="px-5">
-          <h3 className="text-[17px] font-bold text-navy tracking-widest mb-4">Institutional Registry</h3>
+          <h3 className="text-[18px] font-bold text-navy tracking-tight mb-6">Institutional Registry</h3>
           <div className="space-y-1">
             {NEWS_FEED.map((item, i) => (
               <button

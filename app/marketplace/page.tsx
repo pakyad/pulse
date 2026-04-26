@@ -4,19 +4,19 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
-import { Search, Plus, X, Flame, ArrowRight, Package, Clock, Zap, Terminal } from 'lucide-react';
+import { ShoppingBag, Laptop, BookOpen, Shirt, Box, Sparkles, Zap } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 
 
-// ── Mandated Pixelate Cute Icon Categories (Restored) ──
+// ── Premium Hub-Style Categories ──
 const CATEGORIES = [
-  { id: 'fb', label: 'Official Store', filter: 'F&B', icon: '🍔', bg: '#4A90E2', glow: '#63A1FF', count: '24 Items' }, 
-  { id: 'lab', label: 'Tech & Gadgets', filter: 'Lab Kits', icon: '🧪', bg: '#4481EB', glow: '#04BEFE', count: '18 Items' }, 
-  { id: 'study', label: 'Books & Refs', filter: 'Study Materials', icon: '📚', bg: '#F2994A', glow: '#F2C94C', count: '32 Items' }, 
-  { id: 'merch', label: 'Campus Services', filter: 'Club Merch', icon: '👕', bg: '#27AE60', glow: '#34D399', count: '9 Items' }, 
-  { id: 'med', label: 'Club Apparel', filter: 'Club Merch', icon: '👕', bg: '#9B51E0', glow: '#A855F7', count: '15 Items' }, 
-  { id: 'misc', label: 'Miscellaneous', filter: 'Medicine', icon: '💊', bg: '#4B6CB7', glow: '#182848', count: '41 Items' }, 
+  { id: 'store', label: 'Official', filter: 'Official', icon: ShoppingBag, color: 'bg-[#1877F2]' }, 
+  { id: 'tech', label: 'Tech', filter: 'Tech', icon: Laptop, color: 'bg-[#4A5568]' }, 
+  { id: 'books', label: 'Books', filter: 'Books', icon: BookOpen, color: 'bg-[#9B51E0]' }, 
+  { id: 'apparel', label: 'Apparel', filter: 'Merch', icon: Shirt, color: 'bg-[#E83E8C]' }, 
+  { id: 'misc', label: 'Misc', filter: 'Misc', icon: Box, color: 'bg-[#F2994A]' }, 
+  { id: 'services', label: 'Services', filter: 'Services', icon: Sparkles, color: 'bg-[#27AE60]' }, 
 ];
 
 const DISCOVERY_FALLBACK = [
@@ -75,21 +75,21 @@ export default function MarketplacePage() {
         {/* ── BROWSE CATEGORIES ── */}
         <div className="pl-6">
           <div className="flex items-center justify-between pr-6 mb-5">
-            <h3 className="text-[22px] font-black text-[#0A0F1E] tracking-tight">Browse Categories</h3>
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">Browse Categories</h3>
           </div>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 pr-6">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pr-6">
             {CATEGORIES.map((cat) => (
               <motion.button
                 key={cat.id}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                className={`flex items-center gap-2.5 px-4 py-2.5 rounded-full border transition-all shrink-0
-                  ${activeCategory === cat.filter ? 'border-navy bg-slate-50 shadow-sm' : 'border-slate-100 bg-white shadow-sm hover:bg-slate-50'}`}
+                className={`flex flex-col items-center gap-2 shrink-0 transition-opacity ${activeCategory === cat.filter ? 'opacity-100' : activeCategory ? 'opacity-40 hover:opacity-100' : 'opacity-100'}`}
               >
-                <span className="text-[18px] leading-none">{cat.icon}</span>
-                <span className={`text-[14px] font-bold whitespace-nowrap
-                  ${activeCategory === cat.filter ? 'text-navy' : 'text-[#0A0F1E]'}`}
-                >
+                <div className={`w-14 h-14 rounded-[1.2rem] flex items-center justify-center text-white shadow-sm relative overflow-hidden ${cat.color}`}>
+                   <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+                   <cat.icon size={24} strokeWidth={2.5} className="relative z-10" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                   {cat.label}
                 </span>
               </motion.button>
@@ -101,10 +101,10 @@ export default function MarketplacePage() {
         {!activeCategory && (
           <div>
             <div className="px-6 mb-6 flex items-center justify-between">
-              <h3 className="text-[22px] font-black text-navy tracking-tight">Live Drops</h3>
+              <h3 className="text-[18px] font-bold text-navy tracking-tight">Live Drops</h3>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                <span className="text-[11px] font-black text-blue-600 uppercase tracking-widest leading-none text-[9px]">ACTIVE NODE</span>
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none">ACTIVE NODE</span>
               </div>
             </div>
             <div className="flex gap-5 overflow-x-auto px-6 no-scrollbar pb-4">
@@ -132,10 +132,10 @@ export default function MarketplacePage() {
         )}
 
         {/* ── DISCOVERY GRID ── */}
-        <div className="px-6">
+        <div className="px-6 mt-12">
           <div className="mb-6 px-1">
-            <h3 className="text-[22px] font-bold text-gray-900 tracking-tight">Discovery</h3>
-            <p className="text-[14px] text-[#9CA3AF] font-medium">All campus listings</p>
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">Discovery</h3>
+            <p className="text-[12px] text-slate-400 font-medium mt-1">All campus listings</p>
           </div>
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-10">
