@@ -14,11 +14,12 @@ import dynamic from "next/dynamic";
 
 const HandshakeQR = dynamic(() => import("@/components/HandshakeQR"), { ssr: false });
 import QRScanner from "@/components/merchant/QRScanner";
+import HeartbeatLine from "@/components/shared/HeartbeatLine";
 
 type Tab = "hub" | "inventory" | "orders" | "settings";
 
-const STATUS_MAP: Record<string, { label: string; dot: string; border: string; color: string }> = {
-  PENDING: { label: "Pickup required", dot: "bg-amber-400 animate-pulse", border: "border-l-amber-400", color: "text-amber-600" },
+const STATUS_MAP: Record<string, { label: string; dot: string; border: string; color: string; action?: boolean }> = {
+  PENDING: { label: "Pickup required", dot: "bg-amber-400 animate-pulse", border: "border-l-amber-400", color: "text-amber-600", action: true },
   AWAITING_RUNNER: { label: "Dispatching", dot: "bg-blue-400 animate-pulse", border: "border-l-blue-400", color: "text-blue-600" },
   ON_THE_WAY: { label: "Transit", dot: "bg-violet-400 animate-pulse", border: "border-l-violet-400", color: "text-violet-600" },
   COLLECTED: { label: "Fulfilled", dot: "bg-emerald-400", border: "border-l-emerald-400", color: "text-emerald-600" },
@@ -157,9 +158,12 @@ export default function MerchantTerminal() {
             <motion.div key="hub" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 bg-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-navy/20">
-                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Total Yield</p>
-                  <h4 className="text-[42px] font-black tabular-nums tracking-tighter">RM {revenue.toFixed(0)}</h4>
-                  <div className="mt-8 flex items-center justify-between">
+                  <div className="absolute top-0 left-0 right-0">
+                    <HeartbeatLine color="#3B82F6" speed={3} />
+                  </div>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 relative z-10">Total Yield</p>
+                  <h4 className="text-[42px] font-black tabular-nums tracking-tighter relative z-10">RM {revenue.toFixed(0)}</h4>
+                  <div className="mt-8 flex items-center justify-between relative z-10">
                     <span className="text-[11px] font-bold text-white/30">Sync status: Active</span>
                     <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   </div>

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Map, Navigation, Phone, MessageSquare, CheckCircle2, AlertTriangle, ShieldAlert, Package, Navigation2, Loader2 } from 'lucide-react';
 import { auth, db } from '@/lib/firebase';
-import { doc, onSnapshot, updateDoc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, setDoc, getDoc, addDoc, collection } from 'firebase/firestore';
 
 export default function ActiveRunPage() {
    const router = useRouter();
@@ -43,10 +43,22 @@ export default function ActiveRunPage() {
             // Mission Complete: Clear from current_missions and move to history
             const snap = await getDoc(userRef);
             const currentBalance = snap.data()?.balance || 0;
+            const payout = mission.payout || 4.50;
+
+            // 1. Record Transaction
+            await addDoc(collection(db, 'users', auth.currentUser.uid, 'transactions'), {
+               item: mission.title || 'Package Delivery',
+               from: mission.from || 'Pickup',
+               to: mission.to || 'Dropoff',
+               price: payout,
+               date: new Date().toLocaleString('en-MY', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+               timestamp: new Date()
+            });
             
+            // 2. Finalize Profile
             await updateDoc(userRef, {
                current_missions: [],
-               balance: currentBalance + (mission.payout || 4.50)
+               balance: currentBalance + payout
             });
             router.push('/run');
          } else {

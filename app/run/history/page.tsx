@@ -5,26 +5,43 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, History, Search, MapPin, ChevronRight, Package, CheckCircle2 } from 'lucide-react';
 import { auth, db } from '@/lib/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 
 export default function RunnerHistoryPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => {
       if (user) {
+        // 1. Listen to Profile
         onSnapshot(doc(db, 'users', user.uid), (s) => setProfile(s.data()));
+
+        // 2. Listen to Transactions Sub-collection
+        const q = query(
+          collection(db, 'users', user.uid, 'transactions'), 
+          orderBy('timestamp', 'desc')
+        );
+        
+        const unsubTx = onSnapshot(q, (snapshot) => {
+          const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setHistory(docs);
+          setLoading(false);
+        });
+
+        return () => { unsubTx(); };
+      } else {
+        router.push('/auth');
       }
     });
     return () => unsub();
-  }, []);
+  }, [router]);
 
-  const dummyHistory = [
-    { id: '1', item: 'Nasi Lemak Ayam', from: 'Cafe Block A', to: 'Library East', price: 4.50, date: 'Today, 14:20' },
-    { id: '2', item: 'Iced Milo', from: 'Mamak Block B', to: 'V1 Hostel', price: 3.00, date: 'Today, 11:15' },
-    { id: '3', item: 'Tech Hoodie', from: 'MIIT Level 4', to: 'Block A Parking', price: 6.00, date: 'Yesterday' },
-    { id: '4', item: 'Lanyard', from: 'Admin Office', to: 'Block C Lounge', price: 2.50, date: '24 JUL' },
+  const displayHistory = history.length > 0 ? history : [
+    { id: 'd1', item: 'Nasi Lemak Ayam', from: 'Cafe Block A', to: 'Library East', price: 4.50, date: 'Today, 14:20', timestamp: new Date() },
+    { id: 'd2', item: 'Iced Milo', from: 'Mamak Block B', to: 'V1 Hostel', price: 3.00, date: 'Today, 11:15', timestamp: new Date() },
   ];
 
   return (
@@ -56,7 +73,7 @@ export default function RunnerHistoryPage() {
       <section className="px-6 py-6 space-y-4">
         <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2 ml-1">Recent Syncs</p>
         
-        {dummyHistory.map((job) => (
+        {displayHistory.map((job) => (
           <motion.div 
             key={job.id}
             whileTap={{ scale: 0.98 }}
