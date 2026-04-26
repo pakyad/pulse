@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { Bell, Settings, Search, ChevronLeft, ChevronRight, ArrowUpRight, GraduationCap, Zap } from 'lucide-react';
+import { Bell, Settings, Search, ChevronLeft, ChevronRight, ArrowUpRight, GraduationCap, Zap, Cpu, BarChart3, Monitor, Video } from 'lucide-react';
 import ServiceGrid from '@/components/shared/ServiceGrid';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import FeaturedBanner, { BannerSlide } from '@/components/shared/FeaturedBanner';
@@ -130,7 +130,7 @@ export default function PulseHome() {
 
 
 
-      <div className="pt-28 px-6 space-y-12 pb-12">
+      <div className="pt-28 px-6 space-y-16 pb-12">
 
 
         {/* ── HERO BANNER ── */}
@@ -138,17 +138,14 @@ export default function PulseHome() {
 
         {/* ── CAMPUS HUB ── */}
         <div>
-          <h3 className="text-[17px] font-bold text-navy tracking-widest mb-5">Campus Hub</h3>
+          <h3 className="text-[18px] font-bold text-navy tracking-tight mb-6">Campus Hub</h3>
           <ServiceGrid />
         </div>
 
         {/* ── WHAT'S HAPPENING ── */}
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">What's happening</h3>
-              <p className="text-[11px] text-slate-400 font-medium mt-0.5">Campus news & highlights</p>
-            </div>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">What's happening</h3>
             <button onClick={() => router.push('/pulse')} className="text-[12px] font-bold text-accent flex items-center gap-1">
               Explore <ChevronRight size={14} />
             </button>
@@ -167,8 +164,7 @@ export default function PulseHome() {
                     <span className={`text-[8px] font-black uppercase tracking-widest ${TAG_COLORS[item.tag] || 'text-slate-500'}`}>{item.tag}</span>
                   </div>
                 </div>
-                <h4 className="text-[14px] font-bold text-navy leading-tight truncate px-1">{item.title}</h4>
-                <p className="text-[11px] font-medium text-slate-400 mt-0.5 px-1">{item.sub}</p>
+                <h4 className="text-[14px] font-bold text-navy leading-tight truncate px-1 mt-1">{item.title}</h4>
               </motion.div>
             ))}
           </div>
@@ -176,11 +172,8 @@ export default function PulseHome() {
 
         {/* ── IN THE MARKET ── */}
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">In The Market</h3>
-              <p className="text-[11px] text-slate-400 font-medium mt-0.5">What students are buying</p>
-            </div>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">In The Market</h3>
             <button onClick={() => router.push('/marketplace')} className="text-[12px] font-bold text-accent flex items-center gap-1">
               See All <ArrowUpRight size={14} />
             </button>
@@ -193,8 +186,13 @@ export default function PulseHome() {
                 onClick={() => router.push(`/marketplace/${item.id}`)}
                 className="shrink-0 w-[160px] cursor-pointer group"
               >
-                <div className="w-full aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-2.5 border border-slate-100 shadow-sm relative">
-                  <img src={item.image_url || item.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 image-rendering-pixelated" alt={item.title} />
+                <div className="w-full aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-2.5 border border-slate-100 shadow-sm relative flex items-center justify-center">
+                  <img 
+                    src={item.image_url || item.img || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400'} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 image-rendering-pixelated" 
+                    alt={item.title} 
+                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400'; }}
+                  />
                   <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.05] pointer-events-none" />
                 </div>
                 <h4 className="text-[13px] font-bold text-navy leading-tight truncate">{item.title}</h4>
@@ -212,104 +210,45 @@ export default function PulseHome() {
           </div>
         </div>
 
-        {/* ── CAMPUS CLUBS (JOSH DESIGN PROTOCOL) ── */}
+        {/* ── CAMPUS CLUBS (PREMIUM PILLS PROTOCOL) ── */}
         <div>
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-[17px] font-bold text-navy tracking-tight">Campus Clubs</h3>
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">Campus Clubs</h3>
             <button onClick={() => router.push('/pulse')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Directory</button>
           </div>
-          <div className="flex gap-7 -mx-6 px-6 overflow-x-auto no-scrollbar pb-6">
+          <div className="flex gap-3 -mx-6 px-6 overflow-x-auto no-scrollbar pb-2">
             {[
-              { id: 'c1', name: 'MIIT', color: '#3B82F6', icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="4" width="16" height="16" fill="currentColor" />
-                  <rect x="8" y="8" width="8" height="8" fill="white" opacity="0.5" />
-                  <rect x="11" y="2" width="2" height="4" fill="currentColor" />
-                  <rect x="11" y="18" width="2" height="4" fill="currentColor" />
-                  <rect x="2" y="11" width="4" height="2" fill="currentColor" />
-                  <rect x="18" y="11" width="4" height="2" fill="currentColor" />
-                </svg>
-              )},
-              { id: 'c2', name: 'UBIS', color: '#10B981', icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="14" width="4" height="6" fill="currentColor" />
-                  <rect x="10" y="8" width="4" height="12" fill="currentColor" />
-                  <rect x="16" y="4" width="4" height="16" fill="currentColor" />
-                </svg>
-              )},
-              { id: 'c3', name: 'MIDI', color: '#8B5CF6', icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="4" width="16" height="10" fill="currentColor" />
-                  <rect x="6" y="6" width="4" height="4" fill="white" opacity="0.4" />
-                  <rect x="12" y="6" width="4" height="4" fill="white" opacity="0.6" />
-                  <rect x="8" y="16" width="8" height="4" fill="currentColor" />
-                </svg>
-              )},
-              { id: 'c4', name: 'SRC', color: '#F43F5E', icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="8" width="12" height="8" fill="currentColor" />
-                  <rect x="16" y="6" width="4" height="12" fill="currentColor" />
-                  <rect x="6" y="10" width="4" height="4" fill="white" opacity="0.5" />
-                </svg>
-              )},
-            ].map((club, index) => (
+              { id: 'c1', name: 'MIIT', style: 'bg-blue-50/80 text-blue-600 border-blue-100/50', icon: <Cpu size={16} /> },
+              { id: 'c2', name: 'UBIS', style: 'bg-emerald-50/80 text-emerald-600 border-emerald-100/50', icon: <BarChart3 size={16} /> },
+              { id: 'c3', name: 'MIDI', style: 'bg-purple-50/80 text-purple-600 border-purple-100/50', icon: <Monitor size={16} /> },
+              { id: 'c4', name: 'SRC', style: 'bg-rose-50/80 text-rose-600 border-rose-100/50', icon: <Video size={16} /> },
+            ].map((club) => (
               <motion.div
                 key={club.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ 
-                  type: 'spring', 
-                  stiffness: 500, 
-                  damping: 15,
-                  delay: index * 0.05 
-                }}
-                whileHover={{ y: -8, scale: 1.05 }}
-                whileTap={{ scale: 0.9, y: 0 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => router.push('/pulse')}
-                className="shrink-0 flex flex-col items-center gap-4 cursor-pointer group"
+                className={`shrink-0 flex items-center gap-2.5 px-5 py-3 rounded-2xl border cursor-pointer transition-all duration-300 hover:shadow-sm hover:opacity-90 ${club.style}`}
               >
-                {/* Josh Voxel Pod */}
-                <div className="w-[64px] h-[64px] relative">
-                   {/* 3D Base */}
-                  <div className="absolute inset-0 translate-y-1.5 translate-x-1 rounded-2xl bg-slate-200 group-hover:bg-opacity-20 transition-all duration-300" style={{ backgroundColor: `${club.color}33` }} />
-                  {/* Main Block */}
-                  <div className="absolute inset-0 rounded-2xl bg-white border-2 border-slate-100 flex items-center justify-center p-3 shadow-sm group-hover:border-opacity-30 transition-all duration-300 overflow-hidden" style={{ borderColor: `${club.color}33` }}>
-                     {/* Pixel Grid Overlay */}
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
-                    <div className="relative z-10 scale-125 image-rendering-pixelated group-hover:scale-150 transition-all duration-500" style={{ color: club.color }}>
-                      {club.icon}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <p className="text-[11px] font-black text-navy tracking-widest transition-colors uppercase group-hover:text-accent">{club.name}</p>
-                  <div className="h-0.5 w-0 transition-all duration-300 mx-auto mt-0.5 rounded-full group-hover:w-full" style={{ backgroundColor: club.color }} />
-                </div>
+                 {club.icon}
+                 <span className="text-[13px] font-bold tracking-tight">{club.name}</span>
               </motion.div>
             ))}
             
-            {/* View More Josh Style */}
             <motion.div
-              whileHover={{ y: -8, scale: 1.05 }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => router.push('/pulse')}
-              className="shrink-0 flex flex-col items-center gap-4 cursor-pointer group"
+              className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl border border-dashed border-slate-200 text-slate-400 cursor-pointer transition-all duration-300 hover:bg-slate-50 hover:text-navy hover:border-slate-300"
             >
-              <div className="w-[64px] h-[64px] rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 group-hover:bg-navy group-hover:text-white group-hover:border-navy transition-all duration-300">
-                <ChevronRight size={24} />
-              </div>
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">More</p>
+              <span className="text-[13px] font-bold tracking-tight">View All</span>
+              <ChevronRight size={14} />
             </motion.div>
           </div>
         </div>
 
         {/* ── THE ESSENTIALS (BOB DESIGN PROTOCOL) ── */}
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">The Essentials</h3>
-              <p className="text-[11px] text-slate-400 font-medium mt-0.5">Academic & campus must-haves</p>
-            </div>
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">The Essentials</h3>
             <button onClick={() => router.push('/marketplace')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">See All</button>
           </div>
           <div className="grid grid-cols-2 gap-x-5 gap-y-12 items-start pt-4">

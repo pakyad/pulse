@@ -75,7 +75,7 @@ export default function Header() {
             )}
           </AnimatePresence>
 
-          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="flex-1 w-full relative">
+          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="flex-1 h-11 relative">
             <AnimatePresence>
               {showSearchBar && (
                 <motion.button 
