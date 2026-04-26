@@ -3,15 +3,16 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { Clock, ShieldAlert, FileText, Globe, Home, Zap, Package, ChevronRight, Activity, TrendingUp, Search, ChevronLeft, Bell } from 'lucide-react';
+import { Clock, ShieldAlert, FileText, Globe, Home, Zap, Package, ChevronRight, Activity, TrendingUp, Search, ChevronLeft, Bell, MapPin, Flame, Power, Navigation, Phone, X } from 'lucide-react';
 import RunnerOnboarding from './onboarding/page'; 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 
 function RunnerDashboard({ profile }: { profile: any }) {
    const router = useRouter();
    const [isSearchOpen, setIsSearchOpen] = useState(false);
+   const [isOnline, setIsOnline] = useState(false);
    const activeMissions = profile?.current_missions || [];
    const hasActive = activeMissions.length > 0;
 
@@ -26,7 +27,7 @@ function RunnerDashboard({ profile }: { profile: any }) {
             <div className="flex-1">
                <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50 border border-slate-100 rounded-full flex items-center px-4 gap-3">
                   <Search size={18} className="text-slate-300" />
-                  <span className="text-[13px] font-bold text-slate-300">Search Pulse</span>
+                  <span className="text-[13px] font-bold text-slate-300">Search</span>
                </button>
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -40,99 +41,193 @@ function RunnerDashboard({ profile }: { profile: any }) {
             </div>
          </nav>
 
-         <div className="pt-28 px-5 space-y-12 pb-12">
+         <div className="pt-28 px-5 space-y-8 pb-12">
             
-            {/* Minimal Header area */}
-            <div>
-               <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Runner Terminal</p>
-               <div className="flex items-center gap-2 mt-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <p className="text-[11px] font-medium text-slate-400">Online & Synchronized</p>
+            {/* ── 1. STATUS TOGGLE (Online/Offline) ── */}
+            <div className="bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm flex items-center justify-between">
+               <div className="flex flex-col">
+                  <h3 className="text-[18px] font-bold text-navy tracking-tight">Status</h3>
+                  <p className="text-[13px] text-slate-400 mt-0.5">{isOnline ? 'You are receiving jobs' : 'You are currently resting'}</p>
+               </div>
+               <button 
+                  onClick={() => setIsOnline(!isOnline)}
+                  className={`w-[68px] h-[36px] rounded-full relative transition-colors duration-300 shadow-inner ${isOnline ? 'bg-emerald-500' : 'bg-slate-200'}`}
+               >
+                  <motion.div 
+                     layout
+                     className="w-7 h-7 bg-white rounded-full absolute top-1 shadow-md"
+                     initial={false}
+                     animate={{ x: isOnline ? 36 : 4 }}
+                  />
+               </button>
+            </div>
+
+            {/* ── 2. EARNINGS CARD (Ledger) ── */}
+            <div className="bg-white border border-slate-100 rounded-[2.5rem] p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+               <div className="flex items-center justify-between mb-4">
+                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Today's Earnings</p>
+                  <button onClick={() => router.push('/admin/ledger')} className="px-4 py-2 bg-[#F6F7F9] text-navy font-bold text-[11px] rounded-xl active:scale-95 transition-all">
+                     Withdraw
+                  </button>
+               </div>
+               <div className="flex items-baseline gap-2 mb-8">
+                  <span className="text-[42px] font-bold tracking-tight text-navy leading-none">RM 45.00</span>
+               </div>
+               
+               <div className="flex gap-4 border-t border-slate-100 pt-5">
+                  <div className="flex-1 flex flex-col items-start">
+                     <p className="text-[12px] font-medium text-slate-400 mb-0.5">Rating</p>
+                     <p className="text-[18px] font-bold text-navy">4.9 <span className="text-[12px] text-slate-400 font-medium">/ 5</span></p>
+                  </div>
+                  <div className="w-[1px] bg-slate-100" />
+                  <div className="flex-1 flex flex-col items-start pl-2">
+                     <p className="text-[12px] font-medium text-slate-400 mb-0.5">Completion</p>
+                     <p className="text-[18px] font-bold text-navy">98%</p>
+                  </div>
                </div>
             </div>
 
-            {/* Earnings Card - Soft & Smooth Gradient */}
-            <motion.div 
-               whileTap={{ scale: 0.98 }}
-               className="bg-linear-to-br from-[#1877F2] to-[#0A58CA] rounded-[2rem] p-7 text-white flex flex-col justify-between relative overflow-hidden shadow-lg shadow-blue-500/20"
-            >
-               {/* Soft Abstract Shapes */}
-               <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-               <div className="absolute bottom-0 right-10 w-32 h-32 bg-blue-300 opacity-20 rounded-full blur-2xl pointer-events-none" />
-               
-               <p className="text-[12px] font-medium text-white/80 mb-2 relative z-10">Today's Yield</p>
-               <div className="flex items-baseline gap-2 mb-8 relative z-10">
-                  <span className="text-[42px] font-bold tracking-tight leading-none">RM 0.00</span>
-                  <span className="text-[14px] font-medium text-white/80">/ 0 runs</span>
-               </div>
-               
-               <div className="flex gap-3 relative z-10">
-                  <div className="flex-1 bg-white/10 rounded-[1.2rem] p-4 flex flex-col items-start backdrop-blur-sm">
-                     <p className="text-[11px] font-medium text-white/80 mb-1">Trust Score</p>
-                     <p className="text-[16px] font-bold text-white tracking-tight">100%</p>
-                  </div>
-                  <div className="flex-1 bg-white/10 rounded-[1.2rem] p-4 flex flex-col items-start backdrop-blur-sm">
-                     <p className="text-[11px] font-medium text-white/80 mb-1">Time Online</p>
-                     <p className="text-[16px] font-bold text-white tracking-tight">0h 0m</p>
-                  </div>
-               </div>
-            </motion.div>
-
-            {/* Current Active Mission */}
+            {/* ── 3. MISSION TERMINAL (Active or Available) ── */}
             <div>
-               <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-[18px] font-bold text-navy tracking-tight">Active Directives</h3>
-               </div>
                {hasActive ? (
-                  <motion.div 
-                     whileTap={{ scale: 0.98 }}
-                     onClick={() => router.push(`/runner/active?order=${activeMissions[0]}`)}
-                     className="bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm flex items-center justify-between cursor-pointer group"
-                  >
-                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-[1.2rem] bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                           <Zap size={22} fill="currentColor" />
-                        </div>
-                        <div>
-                           <h4 className="text-[15px] font-bold tracking-tight text-navy mb-0.5">Mission in Progress</h4>
-                           <p className="text-[12px] font-medium text-slate-400">Tap to view waypoints</p>
-                        </div>
-                     </div>
-                     <ChevronRight size={18} className="text-slate-300 group-hover:text-emerald-500 transition-colors shrink-0" />
-                  </motion.div>
-               ) : (
-                  <div className="bg-white border border-slate-100 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center shadow-sm">
-                     <div className="w-14 h-14 bg-slate-50 rounded-[1.2rem] flex items-center justify-center mb-4">
-                        <Package size={24} className="text-slate-300" />
-                     </div>
-                     <p className="text-[15px] font-bold text-navy mb-1 tracking-tight">No Active Missions</p>
-                     <p className="text-[12px] font-medium text-slate-400">You are currently idle on the network.</p>
+                  /* ── ACTIVE DELIVERY MEGA-CARD ── */
+                  <div className="bg-white border-2 border-emerald-500 rounded-[2rem] p-6 shadow-lg shadow-emerald-500/10 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+                      <div className="relative z-10">
+                         <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-2">
+                               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                               <h3 className="text-[16px] font-bold text-navy">Active Delivery</h3>
+                            </div>
+                            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest">In Progress</span>
+                         </div>
+                         
+                         <div className="space-y-4 mb-8">
+                            <div className="flex gap-4">
+                               <div className="flex flex-col items-center mt-1">
+                                  <div className="w-3 h-3 rounded-full border-2 border-blue-500 bg-white" />
+                                  <div className="w-[2px] h-10 bg-slate-100" />
+                                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                               </div>
+                               <div className="flex-1 space-y-4">
+                                  <div>
+                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pick up</p>
+                                     <p className="text-[15px] font-bold text-navy leading-tight">Cafe Block A</p>
+                                  </div>
+                                  <div>
+                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Drop off</p>
+                                     <p className="text-[15px] font-bold text-navy leading-tight">Library East (Level 2)</p>
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
+
+                         <div className="flex gap-3">
+                            <button onClick={() => router.push('/runner/active')} className="flex-1 bg-navy text-white h-12 rounded-[1.2rem] flex items-center justify-center gap-2 font-bold text-[13px] shadow-sm active:scale-95 transition-all">
+                               <Navigation size={16} /> Open Map
+                            </button>
+                            <button className="w-12 h-12 bg-slate-50 text-navy rounded-[1.2rem] flex items-center justify-center border border-slate-100 active:scale-95 transition-all">
+                               <Phone size={18} />
+                            </button>
+                         </div>
+                      </div>
                   </div>
+               ) : (
+                  /* ── AVAILABLE JOBS FEED ── */
+                  <>
+                     <div className="flex items-center gap-2 mb-5">
+                        <h3 className="text-[18px] font-bold text-navy tracking-tight">Available Jobs</h3>
+                        {isOnline && <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-1" />}
+                     </div>
+                     
+                     <AnimatePresence mode="wait">
+                        {isOnline ? (
+                           <motion.div 
+                              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                              className="space-y-4"
+                           >
+                              {/* Job Request Card */}
+                              <motion.div className="bg-white border border-slate-100 rounded-[1.5rem] p-5 shadow-sm">
+                                 <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                       <span className="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-md text-[9px] font-black uppercase tracking-widest">Food</span>
+                                       <h4 className="text-[16px] font-bold text-navy mt-2 leading-tight">Nasi Lemak Ayam</h4>
+                                       <p className="text-[12px] font-medium text-slate-400 mt-0.5">Estimated 15 mins</p>
+                                    </div>
+                                    <p className="text-[18px] font-black text-navy">RM 4.00</p>
+                                 </div>
+                                 <div className="flex items-center gap-2 text-[12px] font-medium text-slate-400 bg-[#F6F7F9] p-3 rounded-xl mb-4">
+                                    <span className="flex items-center gap-1 text-navy"><MapPin size={14}/> Cafe Block A</span>
+                                    <ChevronRight size={14} className="text-slate-300"/>
+                                    <span>Library East</span>
+                                 </div>
+                                 <div className="flex gap-3">
+                                    <button onClick={() => router.push('/missions')} className="flex-1 bg-emerald-500 text-white h-11 rounded-[1rem] font-bold text-[13px] shadow-sm active:scale-95 transition-all">
+                                       Accept Job
+                                    </button>
+                                    <button className="w-11 h-11 bg-slate-50 text-slate-400 rounded-[1rem] flex items-center justify-center active:scale-95 transition-all">
+                                       <X size={18} />
+                                    </button>
+                                 </div>
+                              </motion.div>
+                           </motion.div>
+                        ) : (
+                           <motion.div 
+                              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                              className="bg-[#F6F7F9] rounded-[2rem] p-8 flex flex-col items-center justify-center text-center border border-slate-50"
+                           >
+                              <p className="text-[15px] font-bold text-navy mb-1">You are Offline</p>
+                              <p className="text-[13px] text-slate-400">Turn on your status to see live jobs.</p>
+                           </motion.div>
+                        )}
+                     </AnimatePresence>
+                  </>
                )}
             </div>
 
-            {/* Mission Pool Radar */}
+            {/* ── 4. LIVE NETWORK HEATMAP (Deep Hotzones) ── */}
             <div>
-               <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-[18px] font-bold text-navy tracking-tight">Network Radar</h3>
+               <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[18px] font-bold text-navy tracking-tight">Live Network Heatmap</h3>
+                  <div className="px-2.5 py-1 bg-red-50 text-red-500 rounded-md text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm border border-red-100">
+                     <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> Live
+                  </div>
                </div>
-               <motion.div 
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => router.push('/missions')}
-                  className="bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm cursor-pointer flex items-center justify-between group"
-               >
-                  <div className="flex items-center gap-4">
-                     <div className="w-14 h-14 bg-blue-50 text-blue-500 rounded-[1.2rem] flex items-center justify-center shrink-0">
-                        <Activity size={22} />
+               
+               <button onClick={() => router.push('/missions')} className="w-full bg-[#F6F7F9] rounded-[2rem] p-6 relative overflow-hidden text-left border border-slate-50 shadow-sm active:scale-[0.98] transition-all group">
+                  {/* Abstract Radar Background */}
+                  <div className="absolute right-[-20%] top-[-20%] w-[150%] aspect-square rounded-full border border-red-500/10 pointer-events-none" />
+                  <div className="absolute right-[-10%] top-[-10%] w-[130%] aspect-square rounded-full border border-red-500/10 pointer-events-none" />
+                  <div className="absolute right-0 top-0 w-[110%] aspect-square rounded-full bg-linear-to-bl from-red-500/5 to-transparent pointer-events-none" />
+                  
+                  <div className="relative z-10">
+                     <div className="flex items-center gap-4 mb-5">
+                        <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-red-500 border border-slate-100 shrink-0">
+                           <Flame size={26} />
+                        </div>
+                        <div>
+                           <p className="text-[11px] font-black text-red-500 uppercase tracking-widest mb-0.5">Surge Pricing Active</p>
+                           <h4 className="text-[20px] font-bold text-navy leading-tight">Library East</h4>
+                        </div>
                      </div>
-                     <div>
-                        <h4 className="text-[15px] font-bold tracking-tight text-navy mb-0.5">Mission Pool</h4>
-                        <p className="text-[12px] font-medium text-slate-400">Scan for available deliveries</p>
+                     
+                     <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 border border-white shadow-sm space-y-3">
+                        <div className="flex justify-between items-center">
+                           <span className="text-[13px] font-bold text-slate-500">Current Demand</span>
+                           <span className="text-[13px] font-black text-navy">Very High</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                           <div className="w-[85%] h-full bg-red-500 rounded-full" />
+                        </div>
+                        <div className="flex justify-between items-center pt-1 border-t border-slate-100/50 mt-1">
+                           <span className="text-[13px] font-bold text-slate-500">Earnings Multiplier</span>
+                           <span className="text-[13px] font-black text-emerald-500 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">x1.5 Payout</span>
+                        </div>
                      </div>
                   </div>
-                  <ChevronRight size={18} className="text-slate-300 group-hover:text-blue-500 transition-colors shrink-0" />
-               </motion.div>
+               </button>
             </div>
+
          </div>
          <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       </main>

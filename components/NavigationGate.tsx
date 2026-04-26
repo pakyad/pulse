@@ -77,11 +77,13 @@ export default function NavigationGate() {
   if (!isAuthPage && checking) return null;
   if (role === 'CLUB' && !isMerchantTerminal) return null;
 
+  const isDeepView = pathname === '/activity' || pathname?.startsWith('/messages');
+
   return (
     <>
-      {!hideHeader && !pathname?.startsWith('/admin') && <Header />}
-      {/* Hide Student BottomNav for Industrial Terminals (Merchant, Admin) */}
-      {!isMerchantTerminal && !pathname?.startsWith('/admin') && !isAuthPage && <BottomNav />}
+      {!hideHeader && !pathname?.startsWith('/admin') && !isDeepView && <Header />}
+      {/* Hide Student BottomNav for Industrial Terminals (Merchant, Admin) and Deep Views */}
+      {!isMerchantTerminal && !pathname?.startsWith('/admin') && !isAuthPage && !isDeepView && <BottomNav />}
     </>
   );
 }
