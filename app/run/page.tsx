@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { 
   Clock, ShieldAlert, FileText, Globe, Home, Zap, Package, 
   ChevronRight, Activity, TrendingUp, Search, ChevronLeft, 
@@ -19,8 +19,33 @@ function RunnerDashboard({ profile }: { profile: any }) {
    const router = useRouter();
    const [isSearchOpen, setIsSearchOpen] = useState(false);
    const [isOnline, setIsOnline] = useState(false);
+   const [isAccepting, setIsAccepting] = useState(false);
    const activeMissions = profile?.current_missions || [];
    const hasActive = activeMissions.length > 0;
+
+   const handleAcceptOrder = async () => {
+      if (!auth.currentUser) return;
+      setIsAccepting(true);
+      try {
+         const userRef = doc(db, 'users', auth.currentUser.uid);
+         await setDoc(userRef, {
+            current_missions: [{
+               id: 'PL-992A',
+               title: 'Nasi Lemak Ayam + Iced Milo',
+               from: 'Cafe Block A',
+               to: 'Library East',
+               payout: 4.50,
+               status: 'active',
+               started_at: new Date().toISOString()
+            }]
+         }, { merge: true });
+         router.push('/run/active');
+      } catch (error) {
+         console.error("Failed to accept order:", error);
+      } finally {
+         setIsAccepting(false);
+      }
+   };
 
    return (
       <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy max-w-md mx-auto border-x border-slate-50 shadow-sm">
@@ -169,8 +194,12 @@ function RunnerDashboard({ profile }: { profile: any }) {
                                     </div>
                                  </div>
 
-                                 <button className="w-full h-12 bg-navy text-white rounded-2xl font-bold text-[13px] shadow-lg shadow-navy/20 active:scale-95 transition-all">
-                                    Accept Order
+                                 <button 
+                                    onClick={handleAcceptOrder}
+                                    disabled={isAccepting}
+                                    className="w-full h-12 bg-navy text-white rounded-2xl font-bold text-[13px] shadow-lg shadow-navy/20 active:scale-95 transition-all disabled:opacity-50"
+                                 >
+                                    {isAccepting ? 'Accepting...' : 'Accept Order'}
                                  </button>
                               </div>
                            </motion.div>
