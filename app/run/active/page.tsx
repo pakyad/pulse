@@ -1,12 +1,65 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Map, Navigation, Phone, MessageSquare, CheckCircle2, AlertTriangle, ShieldAlert, Package, Navigation2 } from 'lucide-react';
+import { ChevronLeft, Map, Navigation, Phone, MessageSquare, CheckCircle2, AlertTriangle, ShieldAlert, Package, Navigation2, Loader2 } from 'lucide-react';
+import { auth, db } from '@/lib/firebase';
+import { doc, onSnapshot, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 
 export default function ActiveRunPage() {
    const router = useRouter();
-   const [step, setStep] = useState(1); // 1: Heading to pickup, 2: At Pickup, 3: Heading to Dropoff, 4: Delivered
+   const [step, setStep] = useState<number | null>(null); 
+   const [mission, setMission] = useState<any>(null);
+
+   useEffect(() => {
+      const unsub = auth.onAuthStateChanged((user) => {
+         if (!user) { router.push('/auth'); return; }
+         
+         const userRef = doc(db, 'users', user.uid);
+         return onSnapshot(userRef, (docSnap) => {
+            if (docSnap.exists()) {
+               const data = docSnap.data();
+               const activeMission = data.current_missions?.[0];
+               if (activeMission) {
+                  setMission(activeMission);
+                  setStep(activeMission.step || 1);
+               } else {
+                  // No mission found, redirect back
+                  router.push('/run');
+               }
+            }
+         });
+      });
+      return () => unsub();
+   }, [router]);
+
+   const handleStepUpdate = async () => {
+      if (!auth.currentUser || !mission || step === null) return;
+      const nextStep = step + 1;
+      
+      try {
+         const userRef = doc(db, 'users', auth.currentUser.uid);
+         if (nextStep > 4) {
+            // Mission Complete: Clear from current_missions and move to history
+            const snap = await getDoc(userRef);
+            const currentBalance = snap.data()?.balance || 0;
+            
+            await updateDoc(userRef, {
+               current_missions: [],
+               balance: currentBalance + (mission.payout || 4.50)
+            });
+            router.push('/run');
+         } else {
+            // Update step in Firestore
+            const updatedMissions = [{ ...mission, step: nextStep }];
+            await updateDoc(userRef, { current_missions: updatedMissions });
+         }
+      } catch (error) {
+         console.error("Failed to update mission step:", error);
+      }
+   };
+
+   if (step === null) return <main className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-navy/20" size={32} /></main>;
 
    return (
       <main className="min-h-screen bg-[#FDFDFD] font-sans text-navy pb-32">
@@ -117,7 +170,7 @@ export default function ActiveRunPage() {
          <div className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-[#FDFDFD] via-[#FDFDFD] to-transparent pt-10">
             {step < 4 ? (
                <button 
-                  onClick={() => setStep(step + 1)}
+                  onClick={handleStepUpdate}
                   className="w-full h-16 bg-navy text-white rounded-[1.5rem] font-bold text-[16px] shadow-lg shadow-navy/20 active:scale-95 transition-all flex items-center justify-center gap-3"
                >
                   {step === 1 && "I've Arrived at Pickup"}
@@ -126,7 +179,7 @@ export default function ActiveRunPage() {
                </button>
             ) : (
                <button 
-                  onClick={() => router.push('/run')}
+                  onClick={handleStepUpdate}
                   className="w-full h-16 bg-emerald-500 text-white rounded-[1.5rem] font-bold text-[16px] shadow-lg shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-3"
                >
                   <CheckCircle2 size={20} /> Finish & Return to Hub
