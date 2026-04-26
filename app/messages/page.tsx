@@ -36,7 +36,7 @@ export default function MessagesPage() {
       <section className="px-6 pt-12 pb-4">
         <div className="flex justify-between items-center mb-8">
            <div className="flex items-center gap-3">
-              <button onClick={() => router.push('/activity')} className="p-1 -ml-2 text-slate-300 hover:text-navy transition-colors">
+              <button onClick={() => router.push('/home')} className="p-1 -ml-2 text-slate-300 hover:text-navy transition-colors">
                  <ArrowLeft size={22} />
               </button>
               <h1 className="text-[26px] font-bold tracking-tight text-navy">Messages</h1>

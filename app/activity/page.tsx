@@ -106,7 +106,7 @@ export default function InboxPage() {
       {/* HEADER */}
       <section className="px-4 pt-12 pb-3 flex items-center justify-between gap-3">
          <div className="flex items-center gap-3">
-            <button onClick={() => router.back()} className="p-1 -ml-2 text-slate-300 hover:text-navy transition-colors">
+            <button onClick={() => router.push('/home')} className="p-1 -ml-2 text-slate-300 hover:text-navy transition-colors">
                <ArrowLeft size={22} />
             </button>
             <h1 className="text-[26px] font-bold tracking-tight text-navy">Inbox</h1>
