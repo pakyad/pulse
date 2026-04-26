@@ -9,14 +9,20 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 
 
-// ── Premium Hub-Style Categories ──
+// ── Premium 3D Voxel-Style Categories (Full-Color Pill) ──
 const CATEGORIES = [
-  { id: 'store', label: 'Official', filter: 'Official', icon: ShoppingBag, color: 'bg-[#1877F2]' }, 
-  { id: 'tech', label: 'Tech', filter: 'Tech', icon: Laptop, color: 'bg-[#4A5568]' }, 
-  { id: 'books', label: 'Books', filter: 'Books', icon: BookOpen, color: 'bg-[#9B51E0]' }, 
-  { id: 'apparel', label: 'Apparel', filter: 'Merch', icon: Shirt, color: 'bg-[#E83E8C]' }, 
-  { id: 'misc', label: 'Misc', filter: 'Misc', icon: Box, color: 'bg-[#F2994A]' }, 
-  { id: 'services', label: 'Services', filter: 'Services', icon: Sparkles, color: 'bg-[#27AE60]' }, 
+  { id: 'store', label: 'Official', filter: 'Official', icon: ShoppingBag, color: 'bg-[#1877F2]', shadow: 'bg-[#1E40AF]' }, 
+  { id: 'tech', label: 'Tech', filter: 'Tech', icon: Laptop, color: 'bg-[#4A5568]', shadow: 'bg-[#334155]' }, 
+  { id: 'books', label: 'Books', filter: 'Books', icon: BookOpen, color: 'bg-[#9B51E0]', shadow: 'bg-[#581C87]' }, 
+  { id: 'apparel', label: 'Apparel', filter: 'Merch', icon: Shirt, color: 'bg-[#E83E8C]', shadow: 'bg-[#BE185D]' }, 
+  { id: 'misc', label: 'Misc', filter: 'Misc', icon: Box, color: 'bg-[#F2994A]', shadow: 'bg-[#C2410C]' }, 
+  { id: 'services', label: 'Services', filter: 'Services', icon: Sparkles, color: 'bg-[#27AE60]', shadow: 'bg-[#166534]' }, 
+];
+
+const OFFICIAL_CAMPAIGNS = [
+  { id: 'camp1', club_name: 'Badminton Club', tag: 'Merch Drop', title: '2026 Varsity Jerseys Pre-Order', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=BC', tagColor: 'bg-blue-50 text-blue-600' },
+  { id: 'camp2', club_name: 'Basketball Club', tag: 'Selections', title: 'Open Tryouts for Campus Team', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=BB', tagColor: 'bg-orange-50 text-orange-600' },
+  { id: 'camp3', club_name: 'MIDI Council', tag: 'Tickets', title: 'Final Year Dinner Registration', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=MD', tagColor: 'bg-purple-50 text-purple-600' }
 ];
 
 const DISCOVERY_FALLBACK = [
@@ -74,56 +80,60 @@ export default function MarketplacePage() {
 
         {/* ── BROWSE CATEGORIES ── */}
         <div className="pl-6">
-          <div className="flex items-center justify-between pr-6 mb-5">
+          <div className="flex items-center justify-between pr-6 mb-4">
             <h3 className="text-[18px] font-bold text-navy tracking-tight">Browse Categories</h3>
           </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pr-6">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-8 pr-6 pt-2">
             {CATEGORIES.map((cat) => (
-              <motion.button
+              <button
                 key={cat.id}
-                whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                className={`flex flex-col items-center gap-2 shrink-0 transition-opacity ${activeCategory === cat.filter ? 'opacity-100' : activeCategory ? 'opacity-40 hover:opacity-100' : 'opacity-100'}`}
+                className={`relative cursor-pointer shrink-0 transition-opacity ${activeCategory === cat.filter ? 'opacity-100' : activeCategory ? 'opacity-40 hover:opacity-100' : 'opacity-100'} group h-[48px]`}
               >
-                <div className={`w-14 h-14 rounded-[1.2rem] flex items-center justify-center text-white shadow-sm relative overflow-hidden ${cat.color}`}>
-                   <div className="absolute inset-0 bg-black/10 pointer-events-none" />
-                   <cat.icon size={24} strokeWidth={2.5} className="relative z-10" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  {cat.label}
-                </span>
-              </motion.button>
+                 {/* 3D Base (Shadow/Extrusion) */}
+                 <div className={`absolute inset-0 translate-y-1.5 translate-x-1 rounded-full ${cat.shadow} transition-all duration-300 group-hover:translate-y-2.5 group-hover:translate-x-1.5`} />
+                 
+                 {/* Main Block (Full Color Pill) */}
+                 <div className={`relative h-full px-6 rounded-full ${cat.color} border-2 border-black/10 flex items-center justify-center gap-3 transition-all duration-300 group-hover:-translate-y-1 group-hover:-translate-x-0.5 group-active:translate-y-0.5 group-active:translate-x-0.5 shadow-inner`}>
+                    <div className="absolute inset-0 bg-black/5 rounded-full pointer-events-none" />
+                    <cat.icon size={18} strokeWidth={2.5} className={`text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.15)] group-hover:scale-110 transition-transform duration-300 relative z-10`} />
+                    <span className="text-[14px] font-bold text-white whitespace-nowrap pt-0.5 drop-shadow-[1px_1px_0_rgba(0,0,0,0.15)] relative z-10">
+                      {cat.label}
+                    </span>
+                 </div>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* ── LIVE DROPS ── */}
+        {/* ── OFFICIAL CAMPAIGNS (Clubs & Merchants) ── */}
         {!activeCategory && (
-          <div>
-            <div className="px-6 mb-6 flex items-center justify-between">
-              <h3 className="text-[18px] font-bold text-navy tracking-tight">Live Drops</h3>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none">ACTIVE NODE</span>
-              </div>
+          <div className="mt-2 border-t border-slate-100 pt-10">
+            <div className="px-6 mb-6">
+              <h3 className="text-[18px] font-bold text-navy tracking-tight">Official Campaigns</h3>
+              <p className="text-[13px] text-slate-400 font-medium mt-0.5">Exclusive drops from campus clubs</p>
             </div>
-            <div className="flex gap-5 overflow-x-auto px-6 no-scrollbar pb-4">
-              {discoveryItems.slice(0, 4).map((item) => (
+            <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar pb-6">
+              {OFFICIAL_CAMPAIGNS.map((camp) => (
                 <motion.div
-                  key={item.id}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => router.push(`/marketplace/${item.id}`)}
-                  className="shrink-0 w-[160px] group cursor-pointer"
+                  key={camp.id}
+                  whileTap={{ scale: 0.98 }}
+                  className="shrink-0 w-[240px] p-5 rounded-[2rem] bg-white border border-slate-100 shadow-sm flex flex-col justify-between min-h-[140px] group cursor-pointer hover:border-slate-200 transition-all"
                 >
-                  <div className="relative aspect-square bg-white rounded-[2rem] overflow-hidden shadow-[0_12px_30px_rgba(0,0,0,0.04)] border border-slate-50 mb-4">
-                    <img src={item.image_url} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="flex items-start justify-between mb-4">
+                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${camp.tagColor}`}>
+                       {camp.tag}
+                     </span>
+                     <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
+                        <img src={camp.logo} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                     </div>
                   </div>
-                  <div className="px-1 space-y-1">
-                    <h4 className="text-[13px] font-bold text-navy truncate tracking-tight">{item.title}</h4>
-                    <div className="flex items-center justify-between">
-                      <p className="text-[15px] font-black text-navy">RM {Number(item.price).toFixed(0)}</p>
-                      <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest">UNI</span>
-                    </div>
+                  
+                  <div>
+                    <p className="text-[12px] font-medium text-slate-400 mb-1">{camp.club_name}</p>
+                    <h4 className="text-[16px] font-bold text-navy leading-snug tracking-tight">
+                      {camp.title}
+                    </h4>
                   </div>
                 </motion.div>
               ))}
@@ -145,8 +155,8 @@ export default function MarketplacePage() {
                 onClick={() => router.push(`/marketplace/rog-zephyrus-special`)}
                 className="flex flex-col cursor-pointer group"
               >
-                <div className="relative aspect-square bg-white rounded-xl overflow-hidden shadow-sm mb-3">
-                  <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=600" className="w-full h-full object-cover" />
+                <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-slate-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-3">
+                  <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=600" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 </div>
                 <div className="space-y-1.5 px-0.5">
                   <div className="flex justify-between items-start gap-2">
@@ -173,8 +183,8 @@ export default function MarketplacePage() {
                 onClick={() => router.push(`/marketplace/${item.id}`)}
                 className="flex flex-col cursor-pointer group"
               >
-                <div className="relative aspect-square bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm mb-3">
-                  <img src={item.image_url} className="w-full h-full object-cover" alt={item.title} />
+                <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-slate-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-3">
+                  <img src={item.image_url} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={item.title} />
                   <div className="absolute top-2 left-2 w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm">
                     <div className="grid grid-cols-2 gap-0.5">
                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />

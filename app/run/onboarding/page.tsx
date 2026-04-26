@@ -78,17 +78,17 @@ export default function RunnerOnboarding() {
 
         {/* Major Benefit Card */}
         <motion.div 
-           animate={{ y: [0, -4, 0] }}
-           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-           className="bg-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-navy/20"
+           whileTap={{ scale: 0.98 }}
+           className="bg-linear-to-br from-[#8B5CF6] to-[#7C3AED] rounded-[2rem] p-8 text-white relative overflow-hidden shadow-lg shadow-purple-500/20"
         >
-           {/* Pixelated Carbon Overlay */}
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none image-rendering-pixelated" />
-           <CircleDollarSign className="absolute -right-4 -bottom-4 text-white/5 w-32 h-32 rotate-12" />
+           {/* Soft Abstract Shapes */}
+           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+           <CircleDollarSign className="absolute -right-6 -bottom-6 text-white/10 w-40 h-40 rotate-12" />
+           
            <div className="relative z-10">
-              <p className="text-[10px] font-black text-white/50 uppercase tracking-widest mb-3">Policy</p>
+              <p className="text-[10px] font-black text-white/80 uppercase tracking-widest mb-3">Policy</p>
               <h3 className="text-[28px] font-bold tracking-tight leading-tight mb-3">Keep 90% of <br/> Earnings.</h3>
-              <p className="text-[12px] text-white/50 leading-snug font-medium max-w-[200px]">10% protocol fee for upkeep. 100% tips go directly to you.</p>
+              <p className="text-[12px] text-white/80 leading-snug font-medium max-w-[200px]">10% protocol fee for upkeep. 100% tips go directly to you.</p>
            </div>
         </motion.div>
 
@@ -145,8 +145,7 @@ export default function RunnerOnboarding() {
         </div>
 
         {/* Protocol Rules */}
-        <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-8 space-y-6 relative overflow-hidden">
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
+        <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-8 space-y-6 relative overflow-hidden shadow-sm">
            <div className="flex items-center gap-3 relative z-10">
               <Scale size={20} className="text-slate-300" />
               <h4 className="text-[12px] font-black text-navy uppercase tracking-widest">Protocol Rules</h4>

@@ -59,9 +59,30 @@ const FACILITIES = [
 ];
 
 const NEWS_FEED = [
-  { id: 'n1', tag: 'ACHIEVEMENT', title: 'UniKL MIIT Ranked Top 5 Engineering Schools Nationwide', time: '1d ago', img: 'https://images.unsplash.com/photo-1523240715639-99781313a4be?q=80&w=200&auto=format&fit=crop' },
-  { id: 'n2', tag: 'POLICY',      title: 'Updated Student Code of Conduct Takes Effect May 2026', time: '2d ago', img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=200&auto=format&fit=crop' },
-  { id: 'n3', tag: 'RESEARCH',    title: 'New Innovation Lab Opens at MIIT North Campus',         time: '3d ago', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=200&auto=format&fit=crop' },
+  { 
+    id: 'n1', 
+    tag: 'ACHIEVEMENT', 
+    title: 'UniKL MIIT Ranked Top 5 Nationwide', 
+    time: '1d ago', 
+    img: 'https://images.unsplash.com/photo-1523240715639-99781313a4be?q=80&w=200&auto=format&fit=crop',
+    circleBg: 'bg-[#FFF3EB]' // Orange tint
+  },
+  { 
+    id: 'n2', 
+    tag: 'POLICY',      
+    title: 'Updated Student Code of Conduct', 
+    time: '2d ago', 
+    img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=200&auto=format&fit=crop',
+    circleBg: 'bg-[#EBF3FF]' // Blue tint
+  },
+  { 
+    id: 'n3', 
+    tag: 'RESEARCH',    
+    title: 'New Innovation Lab Opens at North Campus',         
+    time: '3d ago', 
+    img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=200&auto=format&fit=crop',
+    circleBg: 'bg-[#F3E8FF]' // Purple tint
+  },
 ];
 
 const STATUS_LABEL: Record<string, string> = { open: 'Open', limited: 'Limited', closed: 'Closed' };
@@ -238,27 +259,38 @@ export default function PulseBulletinPage() {
           </div>
         </div>
 
-        {/* ── INSTITUTIONAL REGISTRY ── */}
+        {/* ── INSTITUTIONAL REGISTRY (Blinkist Editorial Layout) ── */}
         <div className="px-5">
-          <h3 className="text-[18px] font-bold text-navy tracking-tight mb-6">Institutional Registry</h3>
-          <div className="space-y-1">
-            {NEWS_FEED.map((item, i) => (
-              <button
+          <h3 className="text-[20px] font-bold text-navy tracking-tight mb-6">Institutional Registry</h3>
+          <div className="flex flex-col gap-4">
+            {NEWS_FEED.map((item) => (
+              <motion.div
                 key={item.id}
-                className={`w-full flex items-start gap-4 py-5 text-left group transition-all hover:bg-slate-50/50 rounded-2xl px-2 ${i < NEWS_FEED.length - 1 ? 'border-b border-slate-50' : ''}`}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-[#F6F7F9] rounded-[1.5rem] p-6 relative overflow-hidden flex items-center justify-between cursor-pointer border border-slate-50"
               >
-                <div className="flex-1 min-w-0 py-0.5">
-                  <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{item.tag}</span>
-                  <h4 className="text-[14px] font-bold text-navy leading-snug mt-1.5 group-hover:text-accent transition-colors line-clamp-2">{item.title}</h4>
-                  <p className="text-[11px] text-slate-400 font-medium mt-2">{item.time}</p>
+                {/* Left Side Content */}
+                <div className="relative z-10 w-[60%]">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">
+                    {item.tag}
+                  </span>
+                  <h4 className="text-[17px] font-bold text-navy mb-1.5 leading-tight">{item.title}</h4>
+                  <p className="text-[13px] text-[#6B7280] font-medium">{item.time}</p>
                 </div>
-                <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-slate-50">
-                  <img src={item.img} className="w-full h-full object-cover" alt={item.title} />
+
+                {/* Right Side Graphic */}
+                <div className="absolute right-0 top-0 bottom-0 w-[45%] flex items-center justify-end pointer-events-none pr-6">
+                   {/* Soft Circle Background (Overflowing) */}
+                   <div className={`absolute right-[-15%] top-1/2 -translate-y-1/2 w-[120%] aspect-square rounded-full ${item.circleBg}`} />
+                   {/* Premium Framed Image */}
+                   <div className="relative z-10 w-[64px] h-[64px] bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] overflow-hidden border-4 border-white">
+                      <img src={item.img} className="w-full h-full object-cover" alt={item.title} />
+                   </div>
                 </div>
-              </button>
+              </motion.div>
             ))}
           </div>
-          <button className="w-full mt-6 h-14 border border-slate-100 rounded-2xl text-[12px] font-bold text-slate-400 uppercase tracking-widest active:scale-95 transition-all bg-white shadow-sm">
+          <button className="w-full mt-6 h-14 border border-slate-100 rounded-2xl text-[12px] font-bold text-slate-400 uppercase tracking-widest active:scale-95 transition-all bg-white shadow-sm hover:bg-slate-50">
             Load More
           </button>
         </div>

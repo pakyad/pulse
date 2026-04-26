@@ -3,123 +3,138 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { Clock, ShieldAlert, FileText, Globe, Home, Zap, Package, ChevronRight, Activity, TrendingUp } from 'lucide-react';
+import { Clock, ShieldAlert, FileText, Globe, Home, Zap, Package, ChevronRight, Activity, TrendingUp, Search, ChevronLeft, Bell } from 'lucide-react';
 import RunnerOnboarding from './onboarding/page'; 
 import { motion } from 'framer-motion';
+import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import SearchOverlay from '@/components/shared/SearchOverlay';
 
 function RunnerDashboard({ profile }: { profile: any }) {
    const router = useRouter();
+   const [isSearchOpen, setIsSearchOpen] = useState(false);
    const activeMissions = profile?.current_missions || [];
    const hasActive = activeMissions.length > 0;
 
    return (
       <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
-         <div className="pt-28 px-6 space-y-16 pb-12">
+         
+         {/* ── FIXED NAV ── */}
+         <nav className="fixed top-0 left-0 right-0 z-50 px-5 pt-8 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
+            <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
+               <ChevronLeft size={28} strokeWidth={2} />
+            </button>
+            <div className="flex-1">
+               <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50 border border-slate-100 rounded-full flex items-center px-4 gap-3">
+                  <Search size={18} className="text-slate-300" />
+                  <span className="text-[13px] font-bold text-slate-300">Search Pulse</span>
+               </button>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+               <button onClick={() => router.push('/activity')} className="relative p-2 active:scale-90 text-navy/40 hover:text-navy">
+                  <Bell size={22} strokeWidth={2} />
+               </button>
+               <AvatarDropdown 
+                  photoUrl={profile?.photo_url} 
+                  userName={profile?.full_name || 'Pulse'} 
+               />
+            </div>
+         </nav>
+
+         <div className="pt-28 px-5 space-y-12 pb-12">
             
             {/* Minimal Header area */}
-            <header className="flex flex-col gap-2">
-               <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Terminal Online</span>
+            <div>
+               <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Runner Terminal</p>
+               <div className="flex items-center gap-2 mt-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-[11px] font-medium text-slate-400">Online & Synchronized</p>
                </div>
-               <h1 className="text-[32px] font-bold tracking-tight leading-tight">Runner Hub</h1>
-            </header>
+            </div>
 
-            {/* Earnings Card - Matching "The Essentials" Glass/Texture style */}
+            {/* Earnings Card - Soft & Smooth Gradient */}
             <motion.div 
-               animate={{ y: [0, -4, 0] }}
-               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                whileTap={{ scale: 0.98 }}
-               className="bg-navy rounded-[2.5rem] p-8 text-white flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-navy/20"
+               className="bg-linear-to-br from-[#1877F2] to-[#0A58CA] rounded-[2rem] p-7 text-white flex flex-col justify-between relative overflow-hidden shadow-lg shadow-blue-500/20"
             >
-               {/* Pixelated Carbon Overlay for pulse aesthetic */}
-               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none image-rendering-pixelated" />
-               <div className="absolute -top-10 -right-10 p-6 opacity-5 rotate-12 pointer-events-none blur-sm">
-                  <TrendingUp size={160} />
+               {/* Soft Abstract Shapes */}
+               <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+               <div className="absolute bottom-0 right-10 w-32 h-32 bg-blue-300 opacity-20 rounded-full blur-2xl pointer-events-none" />
+               
+               <p className="text-[12px] font-medium text-white/80 mb-2 relative z-10">Today's Yield</p>
+               <div className="flex items-baseline gap-2 mb-8 relative z-10">
+                  <span className="text-[42px] font-bold tracking-tight leading-none">RM 0.00</span>
+                  <span className="text-[14px] font-medium text-white/80">/ 0 runs</span>
                </div>
                
-               <p className="text-[11px] font-bold text-white/50 uppercase tracking-widest mb-1 relative z-10">Today's Yield</p>
-               <div className="flex items-end gap-2 mb-8 relative z-10">
-                  <span className="text-[48px] font-black leading-none tracking-tighter">RM 0.00</span>
-                  <span className="text-[14px] font-bold text-white/50 mb-1.5">/ 0 runs</span>
-               </div>
-               
-               <div className="flex gap-4 relative z-10">
-                  <div className="flex-1 bg-white/10 rounded-2xl p-4 backdrop-blur-md border border-white/10 flex flex-col items-start shadow-inner">
-                     <p className="text-[9px] font-black text-white/50 uppercase tracking-widest">Trust Score</p>
-                     <p className="text-[18px] font-black mt-1 text-white">100%</p>
+               <div className="flex gap-3 relative z-10">
+                  <div className="flex-1 bg-white/10 rounded-[1.2rem] p-4 flex flex-col items-start backdrop-blur-sm">
+                     <p className="text-[11px] font-medium text-white/80 mb-1">Trust Score</p>
+                     <p className="text-[16px] font-bold text-white tracking-tight">100%</p>
                   </div>
-                  <div className="flex-1 bg-white/10 rounded-2xl p-4 backdrop-blur-md border border-white/10 flex flex-col items-start shadow-inner">
-                     <p className="text-[9px] font-black text-white/50 uppercase tracking-widest">Time Online</p>
-                     <p className="text-[18px] font-black mt-1 text-white">0h 0m</p>
+                  <div className="flex-1 bg-white/10 rounded-[1.2rem] p-4 flex flex-col items-start backdrop-blur-sm">
+                     <p className="text-[11px] font-medium text-white/80 mb-1">Time Online</p>
+                     <p className="text-[16px] font-bold text-white tracking-tight">0h 0m</p>
                   </div>
                </div>
             </motion.div>
 
             {/* Current Active Mission */}
             <div>
-               <div className="flex justify-between items-center mb-6">
+               <div className="flex justify-between items-center mb-5">
                   <h3 className="text-[18px] font-bold text-navy tracking-tight">Active Directives</h3>
                </div>
                {hasActive ? (
                   <motion.div 
                      whileTap={{ scale: 0.98 }}
                      onClick={() => router.push(`/runner/active?order=${activeMissions[0]}`)}
-                     className="bg-white border-2 border-emerald-500/20 rounded-3xl p-6 shadow-sm flex items-center justify-between cursor-pointer group hover:border-emerald-500/40 transition-all"
+                     className="bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm flex items-center justify-between cursor-pointer group"
                   >
                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center relative overflow-hidden">
-                           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
-                           <Zap size={24} fill="currentColor" className="relative z-10" />
+                        <div className="w-14 h-14 rounded-[1.2rem] bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
+                           <Zap size={22} fill="currentColor" />
                         </div>
                         <div>
-                           <h4 className="text-[15px] font-bold tracking-tight mb-0.5 text-navy">Mission in Progress</h4>
+                           <h4 className="text-[15px] font-bold tracking-tight text-navy mb-0.5">Mission in Progress</h4>
                            <p className="text-[12px] font-medium text-slate-400">Tap to view waypoints</p>
                         </div>
                      </div>
-                     <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                        <ChevronRight size={18} className="text-emerald-600" />
-                     </div>
+                     <ChevronRight size={18} className="text-slate-300 group-hover:text-emerald-500 transition-colors shrink-0" />
                   </motion.div>
                ) : (
-                  <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
-                     <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 relative z-10">
-                        <Package size={28} className="text-slate-300" />
+                  <div className="bg-white border border-slate-100 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center shadow-sm">
+                     <div className="w-14 h-14 bg-slate-50 rounded-[1.2rem] flex items-center justify-center mb-4">
+                        <Package size={24} className="text-slate-300" />
                      </div>
-                     <p className="text-[14px] font-bold text-navy mb-1 tracking-tight relative z-10">No Active Missions</p>
-                     <p className="text-[12px] font-medium text-slate-400 relative z-10">You are currently idle on the network.</p>
+                     <p className="text-[15px] font-bold text-navy mb-1 tracking-tight">No Active Missions</p>
+                     <p className="text-[12px] font-medium text-slate-400">You are currently idle on the network.</p>
                   </div>
                )}
             </div>
 
             {/* Mission Pool Radar */}
             <div>
-               <div className="flex justify-between items-center mb-6">
+               <div className="flex justify-between items-center mb-5">
                   <h3 className="text-[18px] font-bold text-navy tracking-tight">Network Radar</h3>
                </div>
                <motion.div 
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push('/missions')}
-                  className="bg-white border border-slate-100 rounded-[2.5rem] p-6 shadow-sm cursor-pointer relative overflow-hidden group hover:border-blue-100 transition-all hover:shadow-md"
+                  className="bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm cursor-pointer flex items-center justify-between group"
                >
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
-                  <div className="flex items-center justify-between relative z-10">
-                     <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 bg-blue-50 border border-blue-100 text-blue-500 rounded-2xl flex items-center justify-center relative overflow-hidden">
-                           <div className="absolute inset-0 bg-blue-500/10 pointer-events-none" />
-                           <Activity size={28} className="relative z-10" />
-                        </div>
-                        <div>
-                           <h4 className="text-[16px] font-bold tracking-tight text-navy mb-0.5">Mission Pool</h4>
-                           <p className="text-[12px] font-medium text-slate-400">Scan for available deliveries</p>
-                        </div>
+                  <div className="flex items-center gap-4">
+                     <div className="w-14 h-14 bg-blue-50 text-blue-500 rounded-[1.2rem] flex items-center justify-center shrink-0">
+                        <Activity size={22} />
                      </div>
-                     <ChevronRight size={20} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
+                     <div>
+                        <h4 className="text-[15px] font-bold tracking-tight text-navy mb-0.5">Mission Pool</h4>
+                        <p className="text-[12px] font-medium text-slate-400">Scan for available deliveries</p>
+                     </div>
                   </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-blue-500 transition-colors shrink-0" />
                </motion.div>
             </div>
          </div>
+         <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       </main>
    );
 }
