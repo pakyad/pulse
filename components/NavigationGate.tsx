@@ -4,62 +4,71 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+
+import { VETTED_ACCOUNTS } from '@/lib/utils/admin-seeding';
+import { seedSEClubItems } from '@/lib/utils/seed-se-club';
 
 export default function NavigationGate() {
   const pathname = usePathname();
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [role, setRole] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   const isAuthPage = pathname?.startsWith('/auth');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // INSTITUTIONAL IDENTITY FIREWALL (Hard-locked for Demo)
-        const isOfficialMerchant = user.email === 'testclub@pulse.com';
-        const isOfficialStudent = ['iyad.mohmad@s.unikl.edu.my', 'iyad.iman@unikl.edu.my'].includes(user.email || '');
-
-        if (isOfficialMerchant) {
-           setRole('CLUB');
-           if (!pathname?.startsWith('/merchant')) {
-              router.replace('/merchant');
-           }
-           setChecking(false);
-           return;
-        }
-
-        if (isOfficialStudent) {
-           setRole('STUDENT');
-           if (pathname?.startsWith('/merchant')) {
-              router.replace('/home');
-           }
-           setChecking(false);
-           return;
-        }
-
-        // Global Guard: Aggressive Role Lookup
+        const vetting = VETTED_ACCOUNTS.find(a => a.email.toLowerCase() === user.email?.toLowerCase());
+        
         try {
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
           
-          if (userSnap.exists()) {
-             const userData = userSnap.data();
-             const currentRole = userData.role;
-             setRole(currentRole);
+          let userData: any = null;
 
-             // Institutional Tunneling logic
-             if (currentRole === 'CLUB' && !pathname?.startsWith('/merchant')) {
-                router.replace('/merchant');
-             } else if (currentRole === 'STUDENT' && pathname?.startsWith('/merchant')) {
-                router.replace('/home');
-             }
+          if (!userSnap.exists() && vetting) {
+            // Initialize vetted account if missing from Firestore
+            userData = { ...vetting, created_at: new Date().toISOString() };
+            await setDoc(userRef, userData);
+          } else if (userSnap.exists()) {
+            userData = userSnap.data();
+            // Sync vetted roles if they drift
+            if (vetting && (userData.role !== vetting.role || userData.is_verified_runner !== vetting.is_verified_runner)) {
+              userData = { ...userData, ...vetting };
+              await updateDoc(userRef, vetting);
+            }
+          }
+
+          if (userData) {
+            setRole(userData.role);
+            setProfile(userData);
+
+            // Special Seeding for SE Club
+            if (user.email === 'se-club@s.unikl.edu.my') {
+              seedSEClubItems(user.uid);
+            }
+
+            // Routing Logic
+            if (userData.role === 'CLUB' && !pathname?.startsWith('/merchant')) {
+              router.replace('/merchant');
+            } else if (userData.role === 'STUDENT' && pathname?.startsWith('/merchant')) {
+              router.replace('/home');
+            }
+
+            // Runner Gating
+            const isInRunModule = pathname?.startsWith('/run');
+            const isOnboarding = pathname === '/run/onboarding';
+            if (isInRunModule && !isOnboarding && userData.runner_status === 'none' && !userData.is_verified_runner) {
+              router.replace('/run/onboarding');
+            }
           }
         } catch (error) {
-          console.error("Shield Guard Error:", error);
+          console.error("Pulse Registry Shield Error:", error);
         }
       }
       setChecking(false);

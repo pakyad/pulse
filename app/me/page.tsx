@@ -14,6 +14,7 @@ import {
 import HologramID from '@/components/shared/HologramID';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import HeartbeatLine from '@/components/shared/HeartbeatLine';
 import Link from 'next/link';
 
 // Apple Settings-style menu groups
@@ -93,13 +94,15 @@ export default function MePage() {
         {/* ── IDENTITY BLOCK ── */}
         <div>
           <div className="flex items-center gap-5 mb-6">
-            <div className="relative shrink-0">
-              <div className="w-20 h-20 rounded-[1.8rem] overflow-hidden border-2 border-white shadow-2xl bg-slate-50">
+            <div className="relative shrink-0 group cursor-pointer" onClick={() => setIsIDOpen(true)}>
+              <div className="w-20 h-20 rounded-[1.8rem] overflow-hidden border-2 border-white shadow-2xl bg-slate-50 group-hover:scale-105 transition-transform">
                 <img src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} className="w-full h-full object-cover" />
               </div>
               <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
                 <ShieldCheck size={14} className="text-white" />
               </div>
+              {/* Pulse Ring */}
+              <div className="absolute -inset-1 rounded-[2rem] border-2 border-emerald-500/20 animate-pulse-slow pointer-events-none" />
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-[24px] font-black tracking-tight leading-none text-navy">
@@ -137,9 +140,12 @@ export default function MePage() {
 
         {/* ── STAT BENTO ── */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-navy rounded-[2rem] p-5 aspect-square flex flex-col justify-between shadow-xl shadow-navy/15">
-            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center"><Wallet size={18} className="text-white" /></div>
-            <div><p className="text-[10px] font-medium text-white/40 mb-1">Balance</p><h3 className="text-[22px] font-black text-white leading-none">RM 46.50</h3></div>
+          <div className="bg-navy rounded-[2rem] p-5 aspect-square flex flex-col justify-between shadow-xl shadow-navy/15 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 opacity-40">
+               <HeartbeatLine color="#3B82F6" speed={3} />
+            </div>
+            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center relative z-10"><Wallet size={18} className="text-white" /></div>
+            <div className="relative z-10"><p className="text-[10px] font-medium text-white/40 mb-1">Balance</p><h3 className="text-[22px] font-black text-white leading-none">RM {(profile?.balance || 0).toFixed(2)}</h3></div>
           </div>
           <div className="bg-white border border-slate-100 rounded-[2rem] p-5 aspect-square flex flex-col justify-between shadow-sm">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center"><TrendingUp size={18} className="text-emerald-500" /></div>

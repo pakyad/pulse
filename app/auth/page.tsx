@@ -202,87 +202,93 @@ export default function AuthPage() {
           <motion.div 
             key="register" 
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-            className="flex flex-col min-h-screen px-6 py-6 max-w-md mx-auto w-full"
+            className="flex flex-col min-h-screen px-8 py-12 max-w-md mx-auto w-full"
           >
-            <div className="flex items-center justify-between mb-8">
-               <button onClick={() => regStep > 1 ? setRegStep(s => s - 1) : setView('landing')} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all active:scale-90">
-                  <ChevronLeft size={24} className="text-black" />
+            <div className="flex items-center justify-between mb-16">
+               <button onClick={() => regStep > 1 ? setRegStep(s => s - 1) : setView('landing')} className="p-2 -ml-2 text-slate-300 hover:text-black transition-colors">
+                  <ChevronLeft size={28} />
                </button>
-               <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">Create account</h1>
-               <div className="flex gap-1.5">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${regStep === i ? 'w-6 bg-black' : 'w-1.5 bg-gray-200'}`} />
+               <div className="flex gap-1">
+                  {[1, 2].map(i => (
+                    <div key={i} className={`h-1 rounded-full transition-all duration-500 ${regStep === i ? 'w-8 bg-black' : 'w-2 bg-slate-100'}`} />
                   ))}
                </div>
             </div>
 
-            <div className="flex-1 space-y-6 mt-4">
+            <div className="flex-1">
                <AnimatePresence mode="wait">
                   {regStep === 1 && (
-                    <motion.div key="st1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-                       <h2 className="text-[24px] font-bold mb-6">What's your name?</h2>
-                       <div className="space-y-2">
-                          <label className="text-[14px] font-medium text-gray-700 ml-1">First name</label>
-                          <input value={regData.firstName} onChange={e => setRegData({...regData, firstName: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
-                       </div>
-                       <div className="space-y-2">
-                          <label className="text-[14px] font-medium text-gray-700 ml-1">Surname</label>
-                          <input value={regData.surname} onChange={e => setRegData({...regData, surname: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
-                       </div>
-                       <div className="space-y-2 pt-2">
-                          <label className="text-[14px] font-medium text-gray-700 ml-1">Matric Number</label>
-                          <input value={regData.matricNo} onChange={e => setRegData({...regData, matricNo: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
-                       </div>
+                    <motion.div key="st1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-12">
+                       <h2 className="text-[36px] font-black tracking-tightest leading-[1.1] text-navy">
+                         Institutional <br/>Identity.
+                       </h2>
+                       
+                       <button 
+                         onClick={() => {
+                            setLoading(true);
+                            setTimeout(() => {
+                               setLoading(false);
+                               setRegStep(2);
+                            }, 800);
+                         }}
+                         className="w-full h-16 bg-white border border-slate-100 rounded-2xl flex items-center justify-center gap-4 hover:bg-slate-50 transition-all active:scale-[0.98] shadow-sm"
+                       >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="20" height="20">
+                             <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+                             <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+                             <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+                             <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+                          </svg>
+                          <span className="text-[14px] font-bold tracking-tight text-navy">Continue with Microsoft</span>
+                          {loading && <Loader2 className="animate-spin text-slate-300" size={16} />}
+                       </button>
+
+                       <p className="text-[12px] text-slate-400 font-medium leading-relaxed px-1">
+                         Pulse authenticates via your university AD to ensure ecosystem security.
+                       </p>
                     </motion.div>
                   )}
 
                   {regStep === 2 && (
-                    <motion.div key="st2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-                       <h2 className="text-[24px] font-bold mb-6">Set up your login</h2>
-                       <div className="space-y-2">
-                          <label className="text-[14px] font-medium text-gray-700 ml-1">Email address</label>
-                          <input type="email" value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
-                       </div>
-                       <div className="space-y-2">
-                          <label className="text-[14px] font-medium text-gray-700 ml-1">Password</label>
-                          <input type="password" value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
-                       </div>
-                       <div className="space-y-2">
-                          <label className="text-[14px] font-medium text-gray-700 ml-1">Confirm Password</label>
-                          <input type="password" value={regData.confirmPassword} onChange={e => setRegData({...regData, confirmPassword: e.target.value})} className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all" />
-                       </div>
-                    </motion.div>
-                  )}
+                    <motion.div key="st2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-12">
+                       <h2 className="text-[36px] font-black tracking-tightest leading-[1.1] text-navy">
+                         Secure <br/>Access.
+                       </h2>
 
-                  {regStep === 3 && (
-                    <motion.div key="st3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                       <h2 className="text-[24px] font-bold mb-2">Terms & Privacy</h2>
-                       <p className="text-[15px] text-gray-500 leading-snug">
-                         By creating an account, you agree to our Terms of Service and Privacy Policy.
-                       </p>
-                       
-                       <div className="pt-4 flex items-center gap-3">
-                          <input 
-                            type="checkbox" 
-                            id="terms" 
-                            checked={regData.acceptedTerms} 
-                            onChange={() => setRegData({...regData, acceptedTerms: !regData.acceptedTerms})}
-                            className="w-6 h-6 rounded border-gray-300 accent-black"
-                          />
-                          <label htmlFor="terms" className="text-[15px] font-medium">I accept the terms and conditions</label>
+                       <div className="space-y-8">
+                          <div className="space-y-1 border-b border-slate-100 pb-2">
+                             <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest">ID</label>
+                             <input 
+                               type="email" value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} 
+                               placeholder="student@s.unikl.edu.my"
+                               className="w-full bg-transparent text-[16px] font-bold text-navy outline-none placeholder:text-slate-200" 
+                             />
+                          </div>
+                          <div className="space-y-1 border-b border-slate-100 pb-2">
+                             <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Key</label>
+                             <input 
+                               type="password" value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} 
+                               placeholder="Set your password"
+                               className="w-full bg-transparent text-[16px] font-bold text-navy outline-none placeholder:text-slate-200" 
+                             />
+                          </div>
                        </div>
                     </motion.div>
                   )}
                </AnimatePresence>
             </div>
 
-            <button 
-               onClick={() => regStep < 3 ? setRegStep(s => s + 1) : handleRegister()}
-               disabled={loading || (regStep === 3 && !regData.acceptedTerms)}
-               className="w-full py-4 mt-8 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-[2rem] font-semibold text-[16px] shadow-sm active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
-            >
-               {loading ? <Loader2 className="animate-spin" size={24} /> : regStep < 3 ? 'Next' : 'Create account'}
-            </button>
+            {regStep === 2 && (
+               <div className="pt-12">
+                  <button 
+                     onClick={handleRegister}
+                     disabled={loading || !regData.email || !regData.password}
+                     className="w-full h-16 bg-navy text-white rounded-2xl font-bold text-[15px] shadow-2xl shadow-navy/20 active:scale-[0.98] transition-all flex items-center justify-center disabled:opacity-20"
+                  >
+                     {loading ? <Loader2 className="animate-spin" size={20} /> : 'Finalize Synchronize'}
+                  </button>
+               </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
