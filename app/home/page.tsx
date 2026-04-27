@@ -130,7 +130,7 @@ export default function PulseHome() {
 
 
 
-      <div className="pt-28 px-6 space-y-16 pb-12">
+      <div className="pt-40 px-8 space-y-10 pb-12">
 
 
         {/* ── HERO BANNER ── */}
@@ -138,16 +138,16 @@ export default function PulseHome() {
 
         {/* ── CAMPUS HUB ── */}
         <div>
-          <h3 className="text-[18px] font-bold text-navy tracking-tight mb-6">Campus Hub</h3>
+          <h3 className="text-[17px] font-bold text-navy tracking-tight mb-5">Campus Hub</h3>
           <ServiceGrid />
         </div>
 
         {/* ── WHAT'S HAPPENING ── */}
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-[18px] font-bold text-navy tracking-tight">What's happening</h3>
-            <button onClick={() => router.push('/pulse')} className="text-[12px] font-bold text-accent flex items-center gap-1">
-              Explore <ChevronRight size={14} />
+          <div className="flex justify-between items-baseline mb-5">
+            <h3 className="text-[17px] font-bold text-navy tracking-tight">What's happening</h3>
+            <button onClick={() => router.push('/pulse')} className="text-[13px] font-medium text-slate-400 hover:text-navy transition-colors">
+              View all
             </button>
           </div>
           <div className="flex gap-4 -mx-6 px-6 overflow-x-auto no-scrollbar pb-1">
@@ -170,53 +170,62 @@ export default function PulseHome() {
           </div>
         </div>
 
-        {/* ── IN THE MARKET ── */}
+        {/* ── IN THE MARKET (IKEA STYLE REDESIGN) ── */}
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-[18px] font-bold text-navy tracking-tight">In The Market</h3>
-            <button onClick={() => router.push('/marketplace')} className="text-[12px] font-bold text-accent flex items-center gap-1">
-              See All <ArrowUpRight size={14} />
+          <div className="flex justify-between items-baseline mb-5 px-1">
+            <h3 className="text-[17px] font-bold text-navy tracking-tight">In the market</h3>
+            <button 
+              onClick={() => router.push('/marketplace')} 
+              className="text-[13px] font-medium text-slate-400 hover:text-navy transition-colors"
+            >
+              View all
             </button>
           </div>
-          <div className="flex gap-4 -mx-6 px-6 overflow-x-auto no-scrollbar pb-1">
-            {displayItems.slice(0, 4).map((item) => (
+          
+          <div className="flex gap-4 -mx-8 px-8 overflow-x-auto no-scrollbar pb-2">
+            {displayItems.slice(0, 6).map((item) => (
               <motion.div
                 key={item.id}
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => router.push(`/marketplace/${item.id}`)}
-                className="shrink-0 w-[160px] cursor-pointer group"
+                className="shrink-0 w-[150px] cursor-pointer group"
               >
-                <div className="w-full aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-2.5 border border-slate-100 shadow-sm relative flex items-center justify-center">
+                {/* IKEA Style Card: White, Padded, Shadowed */}
+                <div className="w-full aspect-[5/4] bg-white rounded-xl overflow-hidden mb-3 border border-slate-100 shadow-sm flex items-center justify-center p-3 relative">
                   <img 
                     src={item.image_url || item.img || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400'} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 image-rendering-pixelated" 
+                    className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500" 
                     alt={item.title} 
                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400'; }}
                   />
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.05] pointer-events-none" />
+                  <div className="absolute top-2 right-2">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                  </div>
                 </div>
-                <h4 className="text-[13px] font-bold text-navy leading-tight truncate">{item.title}</h4>
-                <p className="text-[13px] font-black text-accent mt-0.5">RM {Number(item.price).toFixed(0)}</p>
+                
+                <h4 className="text-[13px] font-medium text-navy leading-tight line-clamp-1 mb-0.5">{item.title}</h4>
+                <p className="text-[14px] font-bold text-navy">RM {Number(item.price).toFixed(0)}</p>
               </motion.div>
             ))}
+
             <motion.div
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => router.push('/marketplace')}
-              className="shrink-0 w-[120px] aspect-square bg-slate-50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all self-start"
+              className="shrink-0 w-[150px] aspect-[5/4] bg-slate-50/30 border border-dashed border-slate-100 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all"
             >
-              <ArrowUpRight size={20} className="text-slate-300" />
-              <span className="text-[10px] font-bold text-slate-300 text-center leading-tight">View All</span>
+              <ArrowUpRight size={16} className="text-navy/20" />
+              <span className="text-[10px] font-bold text-navy/20">See more</span>
             </motion.div>
           </div>
         </div>
 
         {/* ── CAMPUS CLUBS (PREMIUM PILLS PROTOCOL) ── */}
         <div>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-[18px] font-bold text-navy tracking-tight">Campus Clubs</h3>
-            <button onClick={() => router.push('/pulse')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Directory</button>
+          <div className="flex justify-between items-baseline mb-5">
+            <h3 className="text-[17px] font-bold text-navy tracking-tight">Campus clubs</h3>
+            <button onClick={() => router.push('/pulse')} className="text-[13px] font-medium text-slate-400 hover:text-navy transition-colors">Directory</button>
           </div>
-          <div className="flex gap-3 -mx-6 px-6 overflow-x-auto no-scrollbar pb-2">
+          <div className="flex gap-3 -mx-8 px-8 overflow-x-auto no-scrollbar pb-2">
             {[
               { id: 'c1', name: 'MIIT', style: 'bg-blue-50/80 text-blue-600 border-blue-100/50', icon: <Cpu size={16} /> },
               { id: 'c2', name: 'UBIS', style: 'bg-emerald-50/80 text-emerald-600 border-emerald-100/50', icon: <BarChart3 size={16} /> },
@@ -227,19 +236,19 @@ export default function PulseHome() {
                 key={club.id}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => router.push('/pulse')}
-                className={`shrink-0 flex items-center gap-2.5 px-5 py-3 rounded-2xl border cursor-pointer transition-all duration-300 hover:shadow-sm hover:opacity-90 ${club.style}`}
+                className={`shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl border cursor-pointer transition-all ${club.style}`}
               >
                  {club.icon}
-                 <span className="text-[13px] font-bold tracking-tight">{club.name}</span>
+                 <span className="text-[13px] font-medium tracking-tight">{club.name}</span>
               </motion.div>
             ))}
             
             <motion.div
               whileTap={{ scale: 0.96 }}
               onClick={() => router.push('/pulse')}
-              className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl border border-dashed border-slate-200 text-slate-400 cursor-pointer transition-all duration-300 hover:bg-slate-50 hover:text-navy hover:border-slate-300"
+              className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-dashed border-slate-100 text-slate-400 cursor-pointer transition-all"
             >
-              <span className="text-[13px] font-bold tracking-tight">View All</span>
+              <span className="text-[13px] font-medium tracking-tight">View all</span>
               <ChevronRight size={14} />
             </motion.div>
           </div>
@@ -247,9 +256,9 @@ export default function PulseHome() {
 
         {/* ── THE ESSENTIALS (BOB DESIGN PROTOCOL) ── */}
         <div>
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-[18px] font-bold text-navy tracking-tight">The Essentials</h3>
-            <button onClick={() => router.push('/marketplace')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">See All</button>
+          <div className="flex justify-between items-baseline mb-5">
+            <h3 className="text-[17px] font-bold text-navy tracking-tight">The essentials</h3>
+            <button onClick={() => router.push('/marketplace')} className="text-[13px] font-medium text-slate-400 hover:text-navy transition-colors">See all</button>
           </div>
           <div className="grid grid-cols-2 gap-x-5 gap-y-12 items-start pt-4">
             {ESSENTIALS_FALLBACK.map((item, index) => (

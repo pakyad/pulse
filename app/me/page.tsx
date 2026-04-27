@@ -89,7 +89,7 @@ export default function MePage() {
         </button>
       </div>
 
-      <div className="pt-12 px-5 space-y-10">
+      <div className="pt-40 px-5 space-y-10">
 
         {/* ── IDENTITY BLOCK ── */}
         <div>

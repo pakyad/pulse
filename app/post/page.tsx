@@ -133,17 +133,17 @@ export default function DeployAsset() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Yield (RM)</label>
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Price (RM)</label>
                     <input value={price} onChange={e => setPrice(e.target.value)} type="number" placeholder="45.00" className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[20px] font-black text-navy outline-none focus:border-navy shadow-sm" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Volume</label>
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Quantity</label>
                     <input value={stock} onChange={e => setStock(e.target.value)} type="number" placeholder="20" className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[20px] font-black text-navy outline-none focus:border-navy shadow-sm" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Domain</label>
+                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Category</label>
                   <div className="flex flex-wrap gap-2">
                     {CATEGORIES.map(c => (
                       <button key={c} type="button" onClick={() => setCategory(c)} className={`px-4 py-2.5 rounded-xl text-[11px] font-bold border-2 transition-all ${category === c ? 'bg-navy text-white border-navy shadow-lg' : 'bg-white text-slate-400 border-slate-50'}`}>
@@ -160,8 +160,8 @@ export default function DeployAsset() {
           {step === 3 && (
             <motion.div key="s3" initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} className="space-y-8">
               <div className="space-y-2">
-                <h1 className="text-[32px] font-black tracking-tightest leading-none">Deploy <br/>Sequence</h1>
-                <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Final validation before global broadcast.</p>
+                <h1 className="text-[32px] font-black tracking-tightest leading-none">Review</h1>
+                <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Check everything before posting.</p>
               </div>
 
               <div className="relative group">
@@ -174,7 +174,7 @@ export default function DeployAsset() {
                     <div className="flex gap-2 mb-3">
                       <span className="px-2 py-1 bg-navy/5 text-navy text-[9px] font-black uppercase tracking-widest rounded-md">{category}</span>
                     </div>
-                    <h3 className="text-[24px] font-bold text-navy leading-tight">{title || 'Asset Unnamed'}</h3>
+                    <h3 className="text-[24px] font-bold text-navy leading-tight">{title || 'Item Unnamed'}</h3>
                     <p className="text-[28px] font-black text-navy mt-4">RM {Number(price||0).toFixed(0)}</p>
                   </div>
                 </div>
@@ -192,7 +192,7 @@ export default function DeployAsset() {
               onClick={() => setStep(s => s + 1)}
               className="w-full h-[72px] bg-navy text-white rounded-4xl font-bold text-[16px] flex items-center justify-center gap-3 disabled:opacity-30 shadow-2xl shadow-navy/20"
             >
-              Next Phase <ChevronRight size={20} />
+              Continue <ChevronRight size={20} />
             </motion.button>
           ) : (
             <motion.button
@@ -201,7 +201,7 @@ export default function DeployAsset() {
               onClick={handleDeploy}
               className="w-full h-[72px] bg-navy text-white rounded-4xl font-bold text-[16px] flex items-center justify-center gap-3 shadow-2xl shadow-navy/30"
             >
-              {loading ? <><Loader2 size={20} className="animate-spin" /> Finalizing...</> : <><Rocket size={20} /> Finalize Launch</>}
+              {loading ? <><Loader2 size={20} className="animate-spin" /> Posting...</> : <>Post Item <ChevronRight size={20} /></>}
             </motion.button>
           )}
         </div>

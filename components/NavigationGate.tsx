@@ -77,10 +77,11 @@ export default function NavigationGate() {
     return () => unsubscribe();
   }, [pathname, router]);
 
-  // Only hide the global header on auth pages, root ('/'), me ('/me'), and merchant/admin terminals.
-  const hideHeader = isAuthPage || pathname === '/' || pathname === '/me' || pathname === '/merchant' || pathname?.startsWith('/hub');
+  // Only hide the global header on auth pages, root ('/'), me ('/me'), merchant/admin terminals, and active mission terminal.
+  const hideHeader = isAuthPage || pathname === '/' || pathname === '/me' || pathname === '/merchant' || pathname?.startsWith('/hub') || pathname?.startsWith('/run/active');
   const isMerchantTerminal = pathname?.startsWith('/merchant');
   const isRunTerminal = pathname?.startsWith('/run');
+  const isActiveMission = pathname?.startsWith('/run/active');
 
   // Block flash of student UI for Merchants
   if (!isAuthPage && checking) return null;
@@ -91,8 +92,8 @@ export default function NavigationGate() {
   return (
     <>
       {!hideHeader && !pathname?.startsWith('/admin') && !isDeepView && <Header />}
-      {/* Hide Student BottomNav for Industrial Terminals (Merchant, Admin) and Deep Views */}
-      {!isMerchantTerminal && !pathname?.startsWith('/admin') && !isAuthPage && !isDeepView && <BottomNav />}
+      {/* Hide Student BottomNav for Industrial Terminals (Merchant, Admin), Active Missions, and Deep Views */}
+      {!isMerchantTerminal && !pathname?.startsWith('/admin') && !isAuthPage && !isDeepView && !isActiveMission && <BottomNav />}
     </>
   );
 }

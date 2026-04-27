@@ -76,7 +76,7 @@ export default function MarketplacePage() {
 
   return (
     <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#1A1A1A]">
-      <div className="pt-28 space-y-12 pb-24">
+      <div className="pt-40 space-y-12 pb-24">
 
         {/* ── BROWSE CATEGORIES ── */}
         <div className="pl-6">

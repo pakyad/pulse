@@ -11,8 +11,8 @@ const VoxelContainer = ({ children, color, shadow }: { children: React.ReactNode
     {/* 3D Base (Shadow/Extrusion) */}
     <div className={`absolute inset-0 translate-y-1.5 translate-x-1 rounded-xl ${shadow} transition-all duration-300 group-hover:translate-y-2.5 group-hover:translate-x-1.5`} />
     {/* Main Voxel Block */}
-    <div className={`absolute inset-0 rounded-xl ${color} border-2 border-black/10 flex items-center justify-center transition-all duration-300 group-hover:-translate-y-1 group-hover:-translate-x-0.5 group-active:translate-y-0.5 group-active:translate-x-0.5 shadow-inner`}>
-      <div className="relative z-10 scale-[1.2] drop-shadow-[2px_2px_0_rgba(0,0,0,0.1)] group-hover:scale-[1.3] transition-transform duration-300">
+    <div className={`absolute inset-0 rounded-xl ${color} border border-black/5 flex items-center justify-center transition-all duration-200 group-hover:-translate-y-0.5 shadow-sm`}>
+      <div className="relative z-10 scale-[1.0] group-hover:scale-[1.1] transition-transform duration-300">
         {children}
       </div>
     </div>
@@ -110,8 +110,8 @@ const ServiceGrid = () => {
   if (!mounted) return <div className="h-[240px]" />;
 
   return (
-    <section className="px-1 py-2">
-      <div className="grid grid-cols-4 gap-x-2 gap-y-10">
+    <section className="px-1 py-1">
+      <div className="grid grid-cols-4 gap-x-2 gap-y-8">
         {services.map((service, index) => (
           <motion.div
             key={service.id}
@@ -132,7 +132,7 @@ const ServiceGrid = () => {
             </VoxelContainer>
             
             <div className="text-center">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.12em] group-hover:text-navy transition-colors duration-300">
+              <span className="text-[12px] font-medium text-slate-400 group-hover:text-navy transition-colors duration-300">
                 {service.label}
               </span>
             </div>

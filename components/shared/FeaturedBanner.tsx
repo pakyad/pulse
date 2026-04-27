@@ -21,7 +21,7 @@ interface FeaturedBannerProps {
   height?: string;
 }
 
-export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 'h-[220px]' }: FeaturedBannerProps) {
+export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 'h-[180px]' }: FeaturedBannerProps) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
 
   return (
     <div className="relative">
-      <div className={`relative ${height} rounded-[2.5rem] overflow-hidden shadow-xl shadow-black/5`}>
+      <div className={`relative ${height} rounded-3xl overflow-hidden shadow-sm`}>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={index}
@@ -54,7 +54,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="absolute inset-0 flex flex-col justify-end p-8"
+            className="absolute inset-0 flex flex-col justify-end p-6"
             style={{ backgroundColor: slide.bgColor || '#4A5D23' }}
           >
             {/* Abstract Graphic Background (Overlapping Squares) */}
@@ -80,16 +80,16 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
             {/* Content Area */}
             <div className="relative z-10 flex items-end justify-between w-full">
                <div className="flex-1 pr-6">
-                 <h2 className="text-white text-[24px] font-bold leading-tight tracking-tight mb-2">{slide.headline}</h2>
-                 {slide.subline && <p className="text-white/70 text-[14px] font-medium leading-snug">{slide.subline}</p>}
+                 <h2 className="text-white text-[20px] font-bold leading-tight tracking-tight mb-1">{slide.headline}</h2>
+                 {slide.subline && <p className="text-white/80 text-[13px] font-medium leading-snug">{slide.subline}</p>}
                </div>
                
                {/* Square CTA Button */}
                <button
                  onClick={() => router.push(slide.ctaPath)}
-                 className="shrink-0 w-16 h-16 bg-white rounded-2xl shadow-xl shadow-black/10 flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50"
+                 className="shrink-0 w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50"
                >
-                 <ArrowUpRight size={28} className="text-black" strokeWidth={2.5} />
+                 <ArrowUpRight size={20} className="text-black" strokeWidth={2} />
                </button>
             </div>
           </motion.div>

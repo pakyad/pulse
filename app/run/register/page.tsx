@@ -26,10 +26,14 @@ export default function RunnerRegistration() {
   const [formData, setFormData] = useState({
     fullName: '',
     matricId: '',
+    emergencyContact: '',
+    emergencyPhone: '',
     campus: '',
     transport: '',
+    licenseUrl: '',
     bankName: '',
-    accountNumber: ''
+    accountNumber: '',
+    zones: [] as string[]
   });
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -126,12 +130,38 @@ export default function RunnerRegistration() {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-6 pt-4 border-t border-slate-50">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-navy/30 ml-1">Emergency Protocols</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300 ml-1">Next of Kin</p>
+                      <input 
+                        type="text" 
+                        placeholder="Name"
+                        value={formData.emergencyContact}
+                        onChange={(e) => setFormData({...formData, emergencyContact: e.target.value})}
+                        className="w-full h-[54px] bg-slate-50 border border-slate-100 rounded-xl px-4 font-bold text-navy outline-none focus:border-navy transition-all text-sm" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300 ml-1">Emergency Phone</p>
+                      <input 
+                        type="text" 
+                        placeholder="01x-xxx"
+                        value={formData.emergencyPhone}
+                        onChange={(e) => setFormData({...formData, emergencyPhone: e.target.value})}
+                        className="w-full h-[54px] bg-slate-50 border border-slate-100 rounded-xl px-4 font-bold text-navy outline-none focus:border-navy transition-all text-sm" 
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="mt-12">
                 <button 
                   onClick={() => nextStep('campus' as any)}
-                  disabled={!formData.fullName || !formData.matricId}
+                  disabled={!formData.fullName || !formData.matricId || !formData.emergencyContact || !formData.emergencyPhone}
                   className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   Confirm Identity
@@ -179,10 +209,36 @@ export default function RunnerRegistration() {
                 </div>
               </div>
 
+              {formData.campus === 'City Campus' && (
+                <div className="mt-8 space-y-4">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Operational Zones</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['MIIT Branch', 'UBIS Branch', 'MIDI Branch'].map(zone => (
+                      <button
+                        key={zone}
+                        onClick={() => {
+                          const newZones = formData.zones.includes(zone) 
+                            ? formData.zones.filter(z => z !== zone)
+                            : [...formData.zones, zone];
+                          setFormData({...formData, zones: newZones});
+                        }}
+                        className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+                          formData.zones.includes(zone) 
+                            ? 'bg-navy text-white border-navy shadow-lg shadow-navy/10' 
+                            : 'bg-white text-slate-400 border-slate-100'
+                        }`}
+                      >
+                        {zone}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="mt-12">
                 <button 
                   onClick={() => nextStep('logistics')}
-                  disabled={!formData.campus}
+                  disabled={!formData.campus || (formData.campus === 'City Campus' && formData.zones.length === 0)}
                   className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   Verify Campus
@@ -210,7 +266,7 @@ export default function RunnerRegistration() {
               <div className="space-y-4">
                 <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Transport Mode</p>
                 <div className="grid grid-cols-1 gap-3">
-                  {['Walking', 'Bicycle / Scooter', 'Motorcycle'].map((mode) => (
+                  {['Walking', 'Bicycle / Scooter', 'Motorcycle', 'Car'].map((mode) => (
                     <button
                       key={mode}
                       onClick={() => setFormData({...formData, transport: mode})}
@@ -227,6 +283,17 @@ export default function RunnerRegistration() {
                   ))}
                 </div>
               </div>
+
+              {(formData.transport === 'Motorcycle' || formData.transport === 'Car') && (
+                <div className="mt-8 space-y-4">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Identity Evidence</p>
+                  <div className="bg-slate-50 border-2 border-dashed border-slate-100 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-slate-100/50 transition-all">
+                    <ShieldCheck size={28} className="text-slate-300" />
+                    <p className="text-xs font-bold text-slate-400">Upload Driving License</p>
+                    <span className="text-[10px] text-slate-300 font-medium text-center">PDF or JPEG (Max 5MB)</span>
+                  </div>
+                </div>
+              )}
 
               <div className="mt-12">
                 <button 

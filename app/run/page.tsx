@@ -23,23 +23,36 @@ function RunnerDashboard({ profile }: { profile: any }) {
    const activeMissions = profile?.current_missions || [];
    const hasActive = activeMissions.length > 0;
 
-   const handleAcceptOrder = async () => {
+    const handleAcceptOrder = async () => {
       if (!auth.currentUser) return;
       setIsAccepting(true);
       try {
          const userRef = doc(db, 'users', auth.currentUser.uid);
          await setDoc(userRef, {
             current_missions: [{
-               id: 'PL-992A',
+               id: 'CODEP-8821',
                title: 'Nasi Lemak Ayam + Iced Milo',
+               items: [
+                  { name: 'Nasi Lemak Ayam', qty: 1, price: 8.50 },
+                  { name: 'Iced Milo', qty: 1, price: 3.00 }
+               ],
                from: 'Cafe Block A',
+               from_instructions: 'Go to the side counter and ask for Order #CODEP-8821.',
                to: 'Library East',
+               to_instructions: 'I am wearing a red shirt. Leave at the main entrance desk if not seen.',
+               customer: {
+                  name: 'Amirul H.',
+                  phone: '012-3456789',
+                  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
+               },
                payout: 4.50,
                status: 'active',
+               step: 1,
                started_at: new Date().toISOString()
             }]
          }, { merge: true });
-         router.push('/run/active');
+         // We don't navigate immediately so the user can see the "Accepted" state on the dashboard
+         // But the profile listener will trigger hasActive update
       } catch (error) {
          console.error("Failed to accept order:", error);
       } finally {
@@ -77,7 +90,7 @@ function RunnerDashboard({ profile }: { profile: any }) {
                <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isOnline ? 'bg-navy text-white shadow-[0_0_20px_rgba(10,15,30,0.2)]' : 'bg-slate-50 text-slate-300'}`}>
                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="butt">
-                        <path d="M4 14h2v-2h2v-2h2V8h2v2h2v2h2v2h2v2h-2v-2h-2v-2h-2v-2h-2v2H8v2H6v2H4v-2z" />
+                        <path d="M4 14h2v-2h2v-2h2V8h2v2h2v2h2v2h2v2h2v2h-2v-2h-2v-2h-2v-2h-2v2H8v2H6v2H4v-2z" />
                         <path d="M10 18h4v2h-4v-2z" className={isOnline ? 'animate-pulse' : ''} />
                      </svg>
                   </div>
@@ -112,7 +125,7 @@ function RunnerDashboard({ profile }: { profile: any }) {
                <div className="bg-white border border-slate-100 rounded-[1.3rem] p-5 flex flex-col justify-between shadow-sm min-h-[150px]">
                   <div className="flex items-center gap-2">
                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400">
-                        <path d="M12 2v2h2v2h2v2h2v2h2v2h-2v2h-2v2h-2v2h-2v2h-2v-2H8v-2H6v-2H4v-2H2v-2h2v-2h2v-2h2v-2h2v-2h2z" />
+                        <path d="M12 2v2h2v2h2v2h2v2h2v2h-2v2h-2v2h-2v2h-2v2h-2v-2H8v-2H6v-2H4v-2H2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2z" />
                      </svg>
                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Rating</p>
                   </div>
@@ -125,93 +138,133 @@ function RunnerDashboard({ profile }: { profile: any }) {
 
             {/* ── 3. MISSION TERMINAL ── */}
             <div>
-               {hasActive ? (
-                  <div className="bg-white border-2 border-emerald-500 rounded-[2.5rem] p-6 shadow-lg shadow-emerald-500/5 relative overflow-hidden">
-                      <div className="relative z-10">
-                         <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-2">
-                               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                               <h3 className="text-[13px] font-black text-navy uppercase tracking-[0.2em]">Live Handshake</h3>
-                            </div>
-                            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest">Active</span>
-                         </div>
-                         <div className="space-y-4 mb-8">
-                            <p className="text-[18px] font-bold text-navy">Package Delivery to Library East</p>
-                         </div>
-                         <button onClick={() => router.push('/run/active')} className="w-full bg-navy text-white h-12 rounded-2xl flex items-center justify-center gap-2 font-bold text-[13px] shadow-sm active:scale-95 transition-all">
-                            <Navigation size={16} /> Open Terminal
-                         </button>
-                      </div>
-                  </div>
-               ) : (
-                  <>
-                     <div className="flex items-center justify-between mb-5">
-                        <h3 className="text-[18px] font-bold text-navy tracking-tight">Orders</h3>
-                     </div>
-                     <AnimatePresence mode="wait">
-                        {isOnline ? (
-                           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
-                              {/* ── HIGH-FIDELITY OPPORTUNITY CARD ── */}
-                              <div className="p-6 bg-white border-2 border-slate-50 rounded-[1.5rem] shadow-xl shadow-navy/5 flex flex-col gap-5 group relative overflow-hidden active:scale-[0.98] transition-all cursor-pointer">
-                                 {/* Alert Beacon */}
-                                 <div className="absolute top-0 right-0 p-4">
-                                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
+               <AnimatePresence mode="wait">
+                  {isOnline ? (
+                     <motion.div 
+                        key="online-content"
+                        initial={{ opacity: 0, y: 10 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        exit={{ opacity: 0, y: -10 }}
+                     >
+                        {hasActive ? (
+                           <motion.div 
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="bg-emerald-50/30 border border-emerald-100 rounded-[2.5rem] p-7 shadow-xl shadow-emerald-500/5 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all"
+                              onClick={() => router.push('/run/active')}
+                           >
+                              <div className="absolute top-0 right-0 p-5">
+                                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
+                              </div>
+
+                              <div className="relative z-10">
+                                 <div className="flex items-center gap-2 mb-6">
+                                    <span className="px-3 py-1 bg-emerald-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Order Accepted</span>
+                                    <span className="text-[10px] font-bold text-emerald-600/50 uppercase tracking-widest">#{activeMissions[0]?.id || 'CODEP-0000'}</span>
                                  </div>
 
+                                 <div className="flex items-center gap-4 mb-8">
+                                    <div className="w-14 h-14 rounded-2xl bg-white border border-emerald-100 p-0.5 shadow-sm">
+                                       <img 
+                                         src={activeMissions[0]?.customer?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${activeMissions[0]?.customer?.name || 'User'}`} 
+                                         className="w-full h-full object-cover rounded-xl" 
+                                       />
+                                    </div>
+                                    <div>
+                                       <p className="text-[11px] font-black text-emerald-600/40 uppercase tracking-[0.2em] mb-0.5">Assigned Customer</p>
+                                       <h3 className="text-[20px] font-bold text-navy tracking-tight">{activeMissions[0]?.customer?.name || 'Student Client'}</h3>
+                                    </div>
+                                 </div>
+
+                                 <div className="space-y-6 relative mb-8">
+                                    <div className="absolute left-[11px] top-6 bottom-6 w-0.5 border-l-2 border-emerald-200/50 border-dashed" />
+                                    <div className="flex items-start gap-4 relative z-10">
+                                       <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black shrink-0 shadow-lg shadow-emerald-500/20">1#</div>
+                                       <div>
+                                          <p className="text-[13px] font-bold text-navy leading-none">Pickup at {activeMissions[0]?.from || 'Vendor'}</p>
+                                          <p className="text-[11px] font-medium text-slate-400 mt-1">Institutional Source</p>
+                                       </div>
+                                    </div>
+                                    <div className="flex items-start gap-4 relative z-10">
+                                       <div className="w-6 h-6 rounded-full bg-white text-slate-300 flex items-center justify-center text-[10px] font-black shrink-0 border border-slate-100">2#</div>
+                                       <div>
+                                          <p className="text-[13px] font-bold text-navy leading-none">Deliver to {activeMissions[0]?.to || 'Destination'}</p>
+                                          <p className="text-[11px] font-medium text-slate-400 mt-1">Campus Drop-off</p>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <button className="w-full bg-[#0A0F1E] text-white h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-[14px] shadow-lg shadow-navy/20 active:scale-95 transition-all">
+                                    <Navigation size={18} strokeWidth={2.5} /> Resume Mission Terminal
+                                 </button>
+                              </div>
+                              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+                           </motion.div>
+                        ) : (
+                           <div className="space-y-4">
+                              <div className="flex items-center justify-between mb-5 px-1">
+                                 <h3 className="text-[18px] font-bold text-navy tracking-tight">Active Pulse</h3>
+                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-500 rounded-full">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Live Orders</span>
+                                 </div>
+                              </div>
+                              <div className="p-7 bg-white border border-slate-100 rounded-[2.5rem] shadow-xl shadow-navy/5 flex flex-col gap-6 group relative overflow-hidden active:scale-[0.98] transition-all cursor-pointer">
                                  <div className="flex justify-between items-start gap-4">
                                     <div className="flex-1 min-w-0 space-y-3">
-                                       <div className="inline-block px-2 py-0.5 bg-blue-500 relative">
-                                          <div className="absolute -top-1 -left-1 w-1 h-1 bg-white" />
-                                          <div className="absolute -top-1 -right-1 w-1 h-1 bg-white" />
-                                          <div className="absolute -bottom-1 -left-1 w-1 h-1 bg-white" />
-                                          <div className="absolute -bottom-1 -right-1 w-1 h-1 bg-white" />
-                                          <span className="text-[9px] font-black uppercase tracking-widest text-white relative z-10">New Order</span>
+                                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-navy text-white rounded-lg">
+                                          <Zap size={10} fill="currentColor" />
+                                          <span className="text-[9px] font-black uppercase tracking-widest relative z-10">Flash Hustle</span>
                                        </div>
-                                       <h4 className="text-[18px] font-bold text-navy leading-tight truncate">Nasi Lemak Ayam + Iced Milo</h4>
+                                       <h4 className="text-[22px] font-bold text-navy leading-tight tracking-tight">Nasi Lemak Ayam + Iced Milo</h4>
                                        <div className="flex items-center gap-2 text-slate-400">
-                                          <MapPin size={12} className="text-slate-300" />
-                                          <p className="text-[12px] font-medium truncate">Cafe Block A → Library East</p>
+                                          <MapPin size={14} className="text-blue-500" />
+                                          <p className="text-[13px] font-bold text-slate-500">Cafe Block A → Library East</p>
                                        </div>
                                     </div>
                                     <div className="text-right shrink-0">
-                                       <p className="text-[20px] font-black text-navy tracking-tighter leading-none whitespace-nowrap">+RM 4.50</p>
-                                       <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-2 whitespace-nowrap">Instant Payout</p>
+                                       <p className="text-[24px] font-black text-navy tracking-tighter leading-none whitespace-nowrap">+RM 4.50</p>
+                                       <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-2 whitespace-nowrap">Instant Ledger</p>
                                     </div>
                                  </div>
-
-                                 <div className="grid grid-cols-3 gap-2 pt-2">
-                                    <div className="bg-slate-50 rounded-2xl p-3 text-center">
-                                       <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Dist</p>
-                                       <p className="text-[12px] font-bold text-navy">450m</p>
+                                 <div className="grid grid-cols-3 gap-3">
+                                    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50">
+                                       <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Range</p>
+                                       <p className="text-[13px] font-bold text-navy">450m</p>
                                     </div>
-                                    <div className="bg-slate-50 rounded-2xl p-3 text-center">
-                                       <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Est</p>
-                                       <p className="text-[12px] font-bold text-navy">8 min</p>
+                                    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50">
+                                       <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Window</p>
+                                       <p className="text-[13px] font-bold text-navy">8 min</p>
                                     </div>
-                                    <div className="bg-slate-50 rounded-2xl p-3 text-center">
+                                    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50">
                                        <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Load</p>
-                                       <p className="text-[12px] font-bold text-navy">Light</p>
+                                       <p className="text-[13px] font-bold text-navy">Light</p>
                                     </div>
                                  </div>
-
-                                 <button 
-                                    onClick={handleAcceptOrder}
-                                    disabled={isAccepting}
-                                    className="w-full h-12 bg-navy text-white rounded-2xl font-bold text-[13px] shadow-lg shadow-navy/20 active:scale-95 transition-all disabled:opacity-50"
-                                 >
-                                    {isAccepting ? 'Accepting...' : 'Accept Order'}
+                                 <button onClick={handleAcceptOrder} disabled={isAccepting} className="w-full h-14 bg-navy text-white rounded-2xl font-bold text-[14px] shadow-lg shadow-navy/20 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3">
+                                    {isAccepting ? 'Synchronizing...' : <>Accept Directives <ChevronRight size={18}/></>}
                                  </button>
+                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none" />
                               </div>
-                           </motion.div>
-                        ) : (
-                           <div className="bg-slate-50 rounded-[1.5rem] p-12 text-center border border-dashed border-slate-200">
-                              <p className="text-[15px] font-semibold text-slate-500">You're currently resting</p>
-                              <p className="text-[13px] text-slate-400 mt-1.5 font-medium">Change your status to start receiving orders.</p>
                            </div>
                         )}
-                     </AnimatePresence>
-                  </>
-               )}
+                     </motion.div>
+                  ) : (
+                     <motion.div 
+                        key="offline-content"
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }} 
+                        exit={{ opacity: 0 }}
+                        className="bg-slate-50/50 rounded-[2.5rem] py-16 px-8 text-center border border-dashed border-slate-200"
+                     >
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-slate-50">
+                           <Power size={24} className="text-slate-200" />
+                        </div>
+                        <p className="text-[17px] font-bold text-navy tracking-tight">Terminal Offline</p>
+                        <p className="text-[13px] text-slate-400 mt-2 font-medium leading-relaxed">Activate your working status to receive institutional delivery directives.</p>
+                     </motion.div>
+                  )}
+               </AnimatePresence>
             </div>
 
          </div>
