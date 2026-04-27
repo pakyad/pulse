@@ -4,25 +4,91 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
-import { ShoppingBag, Laptop, BookOpen, Shirt, Box, Sparkles, Zap } from 'lucide-react';
+import { ShoppingBag, Laptop, BookOpen, Shirt, Box, Sparkles, Zap, ChevronLeft, Search, Plus } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SearchOverlay from '@/components/shared/SearchOverlay';
+import CreateListing from '@/components/CreateListing';
+import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 
-// ── Premium 3D Voxel-Style Categories (Full-Color Pill) ──
+const PixelAll = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
+    <rect x="4" y="4" width="2" height="2" fill="currentColor" />
+    <rect x="9" y="4" width="2" height="2" fill="currentColor" />
+    <rect x="14" y="4" width="2" height="2" fill="currentColor" />
+    <rect x="4" y="9" width="2" height="2" fill="currentColor" />
+    <rect x="9" y="9" width="2" height="2" fill="currentColor" />
+    <rect x="14" y="9" width="2" height="2" fill="currentColor" />
+    <rect x="4" y="14" width="2" height="2" fill="currentColor" />
+    <rect x="9" y="14" width="2" height="2" fill="currentColor" />
+    <rect x="14" y="14" width="2" height="2" fill="currentColor" />
+  </svg>
+);
+
+const PixelOfficial = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
+    <rect x="4" y="6" width="12" height="10" fill="currentColor" opacity="0.8" />
+    <rect x="6" y="8" width="8" height="6" fill="white" opacity="0.4" />
+    <rect x="8" y="3" width="4" height="4" fill="currentColor" />
+  </svg>
+);
+
+const PixelTech = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
+    <rect x="3" y="5" width="14" height="10" fill="currentColor" opacity="0.8" />
+    <rect x="5" y="7" width="10" height="6" fill="white" opacity="0.3" />
+    <rect x="7" y="16" width="6" height="1" fill="currentColor" />
+  </svg>
+);
+
+const PixelBooks = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
+    <rect x="4" y="4" width="5" height="12" fill="currentColor" opacity="0.8" />
+    <rect x="11" y="4" width="5" height="12" fill="currentColor" opacity="0.8" />
+    <rect x="5" y="6" width="3" height="1" fill="white" opacity="0.3" />
+    <rect x="12" y="8" width="3" height="1" fill="white" opacity="0.3" />
+  </svg>
+);
+
+const PixelApparel = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
+    <rect x="6" y="4" width="8" height="12" fill="currentColor" opacity="0.8" />
+    <rect x="3" y="6" width="14" height="4" fill="currentColor" opacity="0.8" />
+    <rect x="9" y="4" width="2" height="2" fill="white" opacity="0.3" />
+  </svg>
+);
+
+const PixelMisc = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
+    <rect x="4" y="4" width="12" height="12" fill="currentColor" opacity="0.8" />
+    <rect x="6" y="6" width="8" height="8" fill="white" opacity="0.2" />
+    <rect x="9" y="2" width="2" height="4" fill="currentColor" />
+  </svg>
+);
+
+const PixelServices = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
+    <rect x="9" y="3" width="2" height="14" fill="currentColor" opacity="0.8" />
+    <rect x="3" y="9" width="14" height="2" fill="currentColor" opacity="0.8" />
+    <rect x="6" y="6" width="8" height="8" fill="currentColor" opacity="0.2" />
+  </svg>
+);
+
+// ── Relaxed "Clay" Palette Categories ──
 const CATEGORIES = [
-  { id: 'store', label: 'Official', filter: 'Official', icon: ShoppingBag, color: 'bg-[#1877F2]', shadow: 'bg-[#1E40AF]' }, 
-  { id: 'tech', label: 'Tech', filter: 'Tech', icon: Laptop, color: 'bg-[#4A5568]', shadow: 'bg-[#334155]' }, 
-  { id: 'books', label: 'Books', filter: 'Books', icon: BookOpen, color: 'bg-[#9B51E0]', shadow: 'bg-[#581C87]' }, 
-  { id: 'apparel', label: 'Apparel', filter: 'Merch', icon: Shirt, color: 'bg-[#E83E8C]', shadow: 'bg-[#BE185D]' }, 
-  { id: 'misc', label: 'Misc', filter: 'Misc', icon: Box, color: 'bg-[#F2994A]', shadow: 'bg-[#C2410C]' }, 
-  { id: 'services', label: 'Services', filter: 'Services', icon: Sparkles, color: 'bg-[#27AE60]', shadow: 'bg-[#166534]' }, 
+  { id: 'all', label: 'All', filter: null, icon: PixelAll, color: 'bg-slate-100 text-slate-800 border-slate-300' }, 
+  { id: 'store', label: 'Official', filter: 'Official', icon: PixelOfficial, color: 'bg-blue-50 text-blue-700 border-blue-200' }, 
+  { id: 'tech', label: 'Tech', filter: 'Tech', icon: PixelTech, color: 'bg-[#F0F4F8] text-slate-700 border-slate-300' }, 
+  { id: 'books', label: 'Books', filter: 'Books', icon: PixelBooks, color: 'bg-purple-50 text-purple-700 border-purple-200' }, 
+  { id: 'apparel', label: 'Apparel', filter: 'Merch', icon: PixelApparel, color: 'bg-[#FDF2F2] text-pink-700 border-pink-200' }, 
+  { id: 'misc', label: 'Misc', filter: 'Misc', icon: PixelMisc, color: 'bg-orange-50 text-orange-700 border-orange-200' }, 
+  { id: 'services', label: 'Services', filter: 'Services', icon: PixelServices, color: 'bg-emerald-50 text-emerald-700 border-emerald-200' }, 
 ];
 
 const OFFICIAL_CAMPAIGNS = [
-  { id: 'camp1', club_name: 'Badminton Club', tag: 'Merch Drop', title: '2026 Varsity Jerseys Pre-Order', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=BC', tagColor: 'bg-blue-50 text-blue-600' },
-  { id: 'camp2', club_name: 'Basketball Club', tag: 'Selections', title: 'Open Tryouts for Campus Team', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=BB', tagColor: 'bg-orange-50 text-orange-600' },
-  { id: 'camp3', club_name: 'MIDI Council', tag: 'Tickets', title: 'Final Year Dinner Registration', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=MD', tagColor: 'bg-purple-50 text-purple-600' }
+  { id: 'camp1', club_name: 'Badminton Club', initials: 'BC', tag: 'Merch Drop', title: '2026 Varsity Jerseys Pre-Order', tagColor: 'bg-blue-50/50 text-blue-500' },
+  { id: 'camp2', club_name: 'Basketball Club', initials: 'BB', tag: 'Selections', title: 'Open Tryouts for Campus Team', tagColor: 'bg-orange-50/50 text-orange-500' },
+  { id: 'camp3', club_name: 'MIDI Council', initials: 'MD', tag: 'Tickets', title: 'Final Year Dinner Registration', tagColor: 'bg-purple-50/50 text-purple-500' }
 ];
 
 const DISCOVERY_FALLBACK = [
@@ -41,8 +107,16 @@ export default function MarketplacePage() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activeItemsCount, setActiveItemsCount] = useState(0);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [showSellLabel, setShowSellLabel] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const handleScroll = () => setShowSellLabel(window.scrollY < 100);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((user) => {
@@ -76,31 +150,66 @@ export default function MarketplacePage() {
 
   return (
     <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#1A1A1A]">
-      <div className="pt-40 space-y-12 pb-24">
-
-        {/* ── BROWSE CATEGORIES ── */}
-        <div className="pl-6">
-          <div className="flex items-center justify-between pr-6 mb-4">
-            <h3 className="text-[18px] font-bold text-navy tracking-tight">Browse Categories</h3>
+      
+      {/* ── FIXED NAV ── */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b border-slate-50">
+        <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
+          <ChevronLeft size={28} strokeWidth={2} />
+        </button>
+        <div className="flex-1">
+          <div className="relative group">
+            <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50 border border-slate-100 rounded-full flex items-center px-4 gap-3">
+              <Search size={18} className="text-slate-300" />
+              <span className="text-[13px] font-bold text-slate-300">Search Marketplace</span>
+            </button>
+            <AnimatePresence>
+              {showSellLabel && (
+                <motion.button 
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  onClick={() => setIsCreateOpen(true)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 py-1 px-3 bg-white/80 rounded-full border border-slate-100 shadow-sm hover:border-accent group-hover:bg-white transition-all"
+                >
+                  <Sparkles size={12} className="text-accent" />
+                  <span className="text-[10px] font-bold text-navy/40">Sell something?</span>
+                </motion.button>
+              )}
+            </AnimatePresence>
           </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-8 pr-6 pt-2">
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <AvatarDropdown 
+            photoUrl={profile?.photo_url} 
+            userName={profile?.full_name || 'P'} 
+          />
+        </div>
+      </nav>
+
+      <div className="pt-40 space-y-12">
+
+        {/* ── BROWSE CATEGORIES (NEO-RETRO PIXEL OVERHAUL) ── */}
+        <div className="pl-8">
+          <div className="flex items-center justify-between pr-8 mb-5">
+            <h3 className="text-[17px] font-bold text-navy tracking-tight">Browse Categories</h3>
+          </div>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-6 pr-8">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                className={`relative cursor-pointer shrink-0 transition-opacity ${activeCategory === cat.filter ? 'opacity-100' : activeCategory ? 'opacity-40 hover:opacity-100' : 'opacity-100'} group h-[48px]`}
+                className={`relative cursor-pointer shrink-0 h-[48px] px-6 rounded-2xl border transition-all duration-200 flex items-center justify-center gap-3 ${
+                  activeCategory === cat.filter 
+                    ? `${cat.color} border-2 translate-y-[3px] translate-x-[2px] shadow-none ring-2 ring-inset ring-white/30` 
+                    : `bg-[#FDFDFD] border-slate-100 text-slate-400 hover:border-slate-200 shadow-[3px_4px_0_0_rgba(0,0,0,0.04)] ring-2 ring-inset ring-slate-50/50`
+                }`}
               >
-                 {/* 3D Base (Shadow/Extrusion) */}
-                 <div className={`absolute inset-0 translate-y-1.5 translate-x-1 rounded-full ${cat.shadow} transition-all duration-300 group-hover:translate-y-2.5 group-hover:translate-x-1.5`} />
-                 
-                 {/* Main Block (Full Color Pill) */}
-                 <div className={`relative h-full px-6 rounded-full ${cat.color} border-2 border-black/10 flex items-center justify-center gap-3 transition-all duration-300 group-hover:-translate-y-1 group-hover:-translate-x-0.5 group-active:translate-y-0.5 group-active:translate-x-0.5 shadow-inner`}>
-                    <div className="absolute inset-0 bg-black/5 rounded-full pointer-events-none" />
-                    <cat.icon size={18} strokeWidth={2.5} className={`text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.15)] group-hover:scale-110 transition-transform duration-300 relative z-10`} />
-                    <span className="text-[14px] font-bold text-white whitespace-nowrap pt-0.5 drop-shadow-[1px_1px_0_rgba(0,0,0,0.15)] relative z-10">
-                      {cat.label}
-                    </span>
-                 </div>
+                <div className={`${activeCategory === cat.filter ? 'text-current' : 'text-slate-300'}`}>
+                  <cat.icon />
+                </div>
+                <span className="text-[13px] font-medium whitespace-nowrap tracking-wider">
+                  {cat.label}
+                </span>
               </button>
             ))}
           </div>
@@ -118,20 +227,19 @@ export default function MarketplacePage() {
                 <motion.div
                   key={camp.id}
                   whileTap={{ scale: 0.98 }}
-                  className="shrink-0 w-[240px] p-5 rounded-[2rem] bg-white border border-slate-100 shadow-sm flex flex-col justify-between min-h-[140px] group cursor-pointer hover:border-slate-200 transition-all"
+                  className="shrink-0 w-[260px] p-7 rounded-[2.5rem] bg-[#FDFDFD] border border-slate-100 flex flex-col justify-between min-h-[160px] group cursor-pointer hover:border-slate-200 transition-all"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${camp.tagColor}`}>
+                  <div className="flex items-start mb-6">
+                     <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest ${camp.tagColor} opacity-70`}>
                        {camp.tag}
                      </span>
-                     <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
-                        <img src={camp.logo} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                     </div>
                   </div>
                   
-                  <div>
-                    <p className="text-[12px] font-medium text-slate-400 mb-1">{camp.club_name}</p>
-                    <h4 className="text-[16px] font-bold text-navy leading-snug tracking-tight">
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-medium text-slate-300 uppercase tracking-wider">
+                      {camp.club_name} <span className="opacity-40">({camp.initials})</span>
+                    </p>
+                    <h4 className="text-[15px] font-bold text-navy leading-tight tracking-tight">
                       {camp.title}
                     </h4>
                   </div>
@@ -149,33 +257,6 @@ export default function MarketplacePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-10">
-            {!activeCategory && (
-              <motion.div
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push(`/marketplace/rog-zephyrus-special`)}
-                className="flex flex-col cursor-pointer group"
-              >
-                <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-slate-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-3">
-                  <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=600" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                </div>
-                <div className="space-y-1.5 px-0.5">
-                  <div className="flex justify-between items-start gap-2">
-                    <h4 className="text-[15px] font-bold text-gray-900 leading-snug flex-1">ROG Zephyrus G14<br/>(2026) GA403</h4>
-                    <p className="text-[12px] font-medium text-[#9CA3AF] shrink-0 mt-0.5">3h ago</p>
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0">
-                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Abu" className="w-full h-full rounded-full object-cover" />
-                      </div>
-                      <p className="text-[12px] font-medium text-[#6B7280] truncate max-w-[80px]">AbuCutiepie</p>
-                    </div>
-                    <p className="text-[15px] font-bold text-gray-900 leading-none">RM 13,999</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
             {discoveryItems.map((item) => (
               <motion.div
                 key={item.id}
@@ -183,30 +264,42 @@ export default function MarketplacePage() {
                 onClick={() => router.push(`/marketplace/${item.id}`)}
                 className="flex flex-col cursor-pointer group"
               >
-                <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-slate-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-3">
+                {/* Strict 1:1 Square Aspect Ratio */}
+                <div className="relative aspect-square bg-[#FDFDFD] rounded-2xl overflow-hidden border border-slate-50 shadow-sm mb-3">
                   <img src={item.image_url} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={item.title} />
-                  <div className="absolute top-2 left-2 w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <div className="grid grid-cols-2 gap-0.5">
-                       <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                       <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                       <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                       <div className="w-1.5 h-1.5 bg-slate-200 rounded-full" />
+                  
+                  {/* Subtle Condition Indicator */}
+                  <div className="absolute top-2 left-2">
+                    <div className="flex gap-0.5 opacity-40">
+                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                     </div>
                   </div>
                 </div>
-                <div className="space-y-1.5 px-0.5">
-                  <div className="flex justify-between items-start gap-2">
-                    <h4 className="text-[15px] font-bold text-gray-900 leading-snug flex-1 line-clamp-2">{item.title}</h4>
-                    <p className="text-[12px] font-medium text-[#9CA3AF] shrink-0 mt-0.5">{item.time_ago || '2d ago'}</p>
+
+                <div className="px-1 space-y-1">
+                  <div className="flex justify-between items-start gap-1">
+                    <h4 className="text-[14px] font-semibold text-navy leading-tight line-clamp-1 flex-1">
+                      {item.title}
+                    </h4>
+                    <span className="text-[10px] font-medium text-slate-300 shrink-0">
+                      {item.time_ago || '2d'}
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${item.is_official ? 'bg-blue-100' : 'bg-slate-100'}`}>
-                        <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name}`} className="w-full h-full rounded-full object-cover" />
+                  
+                  <div className="flex items-center justify-between pt-0.5">
+                    <p className="text-[15px] font-bold text-navy">
+                      <span className="text-[10px] opacity-40 font-medium mr-0.5">RM</span>
+                      {Number(item.price).toLocaleString()}
+                    </p>
+                    <div className="flex items-center gap-1.5 opacity-60">
+                      <p className="text-[10px] font-medium text-slate-400 truncate max-w-[60px]">
+                        {item.seller_name}
+                      </p>
+                      <div className="w-4 h-4 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                        <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name}`} className="w-full h-full object-cover" />
                       </div>
-                      <p className="text-[12px] font-medium text-[#6B7280] truncate max-w-[80px]">{item.seller_name}</p>
                     </div>
-                    <p className="text-[15px] font-bold text-gray-900 leading-none">RM {Number(item.price).toFixed(0)}</p>
                   </div>
                 </div>
               </motion.div>
@@ -219,6 +312,52 @@ export default function MarketplacePage() {
 
 
       
+      <AnimatePresence>
+        {isCreateOpen && profile && (
+          <CreateListing 
+            userId={auth.currentUser?.uid || ''} 
+            role={profile.role || 'STUDENT'} 
+            onClose={() => setIsCreateOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
+
+      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+      {/* ── MORPHING SELL FAB ── */}
+      <motion.button
+        layout
+        onClick={() => setIsCreateOpen(true)}
+        initial={false}
+        animate={{
+          width: showSellLabel ? 110 : 56,
+          height: 56,
+          borderRadius: 28,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 260,
+          damping: 20
+        }}
+        className="fixed bottom-10 right-8 z-[90] bg-navy text-white shadow-2xl flex items-center justify-center overflow-hidden hover:scale-105 active:scale-95 transition-transform"
+      >
+        <motion.div className="flex items-center gap-3 px-6">
+          <Plus size={24} className="shrink-0" />
+          <AnimatePresence mode="wait">
+            {showSellLabel && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="text-[14px] font-bold whitespace-nowrap"
+              >
+                Sell
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </motion.button>
+
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

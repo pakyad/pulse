@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
-import { Bell, Settings, Search, ChevronLeft, ChevronRight, Activity, Shield, AlertTriangle, Clock, CheckCircle, BookOpen, CalendarDays, Home, Users, ArrowRight } from 'lucide-react';
+import { Bell, Settings, Search, ChevronLeft, ChevronRight, Activity, Shield, AlertTriangle, Clock, CheckCircle, BookOpen, CalendarDays, Home, Users, ArrowRight, Plus, Sparkles } from 'lucide-react';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import CreateListing from '@/components/CreateListing';
 
 // ── Pulse Bulletin Data ──
 const PRIORITY_CARD = {
@@ -50,12 +51,9 @@ const ACADEMIC_ALERTS = [
 ];
 
 const FACILITIES = [
-  { id: 'f1', name: 'Library East', status: 'open',    hours: '24/7',      color: 'bg-emerald-500' },
-  { id: 'f2', name: 'Lab A-301',    status: 'open',    hours: '8AM–10PM',  color: 'bg-emerald-500' },
-  { id: 'f3', name: 'Cafeteria',    status: 'limited', hours: 'Until 3PM', color: 'bg-amber-400'   },
-  { id: 'f4', name: 'IT Helpdesk',  status: 'open',    hours: '9AM–5PM',   color: 'bg-emerald-500' },
-  { id: 'f5', name: 'Prayer Room',  status: 'open',    hours: 'All day',   color: 'bg-emerald-500' },
-  { id: 'f6', name: 'Sports Hall',  status: 'closed',  hours: 'Renovation',color: 'bg-red-400'     },
+  { id: 'f1', name: 'Library East', status: 'Available Now', seats: '14/20', available: true, color: 'bg-emerald-500' },
+  { id: 'f2', name: 'Lab A-301',    status: 'Available Now', seats: '8/30',  available: true, color: 'bg-emerald-500' },
+  { id: 'f3', name: 'Auditorium',  status: 'Available Now', seats: '0/200', available: false, color: 'bg-amber-400'   },
 ];
 
 const NEWS_FEED = [
@@ -92,7 +90,24 @@ export default function PulseBulletinPage() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [profile, setProfile] = useState<any>(null);
   const [expandedAlert, setExpandedAlert] = useState<string | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<any>(null);
+  const [selectedDuration, setSelectedDuration] = useState('1h');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [scrollDir, setScrollDir] = useState<'up' | 'down'>('up');
+  const [showSellLabel, setShowSellLabel] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    let lastScroll = 0;
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+      setShowSellLabel(currentScroll < 100);
+      setScrollDir(currentScroll > lastScroll ? 'down' : 'up');
+      lastScroll = currentScroll;
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => {
@@ -113,10 +128,26 @@ export default function PulseBulletinPage() {
           <ChevronLeft size={28} strokeWidth={2} />
         </button>
         <div className="flex-1">
-          <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50 border border-slate-100 rounded-full flex items-center px-4 gap-3">
-            <Search size={18} className="text-slate-300" />
-            <span className="text-[13px] font-bold text-slate-300">Search Pulse</span>
-          </button>
+          <div className="relative group">
+            <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50 border border-slate-100 rounded-full flex items-center px-4 gap-3">
+              <Search size={18} className="text-slate-300" />
+              <span className="text-[13px] font-bold text-slate-300">Search Pulse</span>
+            </button>
+            <AnimatePresence>
+              {showSellLabel && (
+                <motion.button 
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  onClick={() => setIsCreateOpen(true)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 py-1 px-3 bg-white/80 rounded-full border border-slate-100 shadow-sm hover:border-accent group-hover:bg-white transition-all"
+                >
+                  <Sparkles size={12} className="text-accent" />
+                  <span className="text-[10px] font-bold text-navy/40">Got something for campus?</span>
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <button onClick={() => router.push('/activity')} className="relative p-2 active:scale-90 text-navy/40 hover:text-navy">
@@ -191,33 +222,29 @@ export default function PulseBulletinPage() {
           </div>
         </div>
 
-        {/* ── ACADEMIC EKG ── */}
+        {/* ── ACADEMIC ALERTS (QUIET STREAM) ── */}
         <div className="px-5">
           <div className="flex items-center gap-2 mb-6">
-            <h3 className="text-[18px] font-bold text-navy tracking-tight">Academic Alerts</h3>
+            <h3 className="text-[17px] font-bold text-navy tracking-tight">Academic Alerts</h3>
           </div>
-          <div className="bg-white border border-slate-100 rounded-4xl overflow-hidden shadow-sm">
-            {ACADEMIC_ALERTS.map((alert, i) => (
+          <div className="space-y-6">
+            {ACADEMIC_ALERTS.map((alert) => (
               <div key={alert.id}>
                 <button
                   onClick={() => setExpandedAlert(expandedAlert === alert.id ? null : alert.id)}
-                  className={`w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50/80 transition-all text-left ${i < ACADEMIC_ALERTS.length - 1 ? 'border-b border-slate-50' : ''}`}
+                  className="w-full flex items-start gap-4 transition-all text-left"
                 >
-                  <div className={`w-9 h-9 ${alert.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
-                    <alert.icon size={16} className={alert.iconColor} />
-                  </div>
+                  {/* Minimalist Colored Dot instead of Icon */}
+                  <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${alert.iconColor.replace('text-', 'bg-')}`} />
+                  
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[13px] font-semibold text-navy leading-tight truncate">{alert.title}</p>
-                      {alert.urgent && <div className="w-2 h-2 rounded-full bg-accent shrink-0" />}
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{alert.category}</span>
-                      <span className="text-[9px] text-slate-300">·</span>
-                      <span className="text-[10px] text-slate-400 font-medium">{alert.time}</span>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className={`text-[14px] ${alert.urgent ? 'font-bold' : 'font-semibold'} text-navy leading-snug`}>
+                        {alert.title}
+                      </p>
+                      <span className="text-[10px] text-slate-300 font-medium whitespace-nowrap">{alert.time}</span>
                     </div>
                   </div>
-                  <ChevronRight size={14} className={`text-slate-200 transition-transform shrink-0 ${expandedAlert === alert.id ? 'rotate-90' : ''}`} />
                 </button>
                 <AnimatePresence>
                   {expandedAlert === alert.id && (
@@ -225,14 +252,13 @@ export default function PulseBulletinPage() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <div className={`px-5 pb-4 pt-2 ${i < ACADEMIC_ALERTS.length - 1 ? 'border-b border-slate-50' : ''}`}>
-                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed ml-13">
-                          This is an official academic alert from the UniKL Registrar's Office. Please log into the student portal for full details and any action required.
+                      <div className="pl-6 pb-2 pt-3">
+                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed border-l-2 border-slate-50 pl-4">
+                          Official academic alert from the UniKL Registrar's Office. Please log into the student portal for full details.
                         </p>
-                        <button className="mt-3 text-[11px] font-bold text-accent">Open Portal →</button>
+                        <button className="mt-3 ml-4 text-[11px] font-bold text-accent">Open Portal →</button>
                       </div>
                     </motion.div>
                   )}
@@ -242,19 +268,41 @@ export default function PulseBulletinPage() {
           </div>
         </div>
 
-        {/* ── FACILITY LEDGER ── */}
+        {/* ── FACILITY BOOKINGS (THE FRICTIONLESS RESERVE) ── */}
         <div>
-          <div className="px-5 mb-6 flex items-center gap-2">
-            <h3 className="text-[18px] font-bold text-navy tracking-tight">Facility Status</h3>
+          <div className="px-5">
+            <div className="flex items-center gap-2 mb-6">
+              <h3 className="text-[17px] font-bold text-navy tracking-tight">Facility Bookings</h3>
+            </div>
           </div>
-          <div className="flex gap-3 overflow-x-auto px-5 no-scrollbar pb-1">
+          <div className="flex gap-3 overflow-x-auto px-5 no-scrollbar pb-4">
             {FACILITIES.map((f) => (
-              <div key={f.id} className="shrink-0 w-[130px] bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
-                <div className={`w-2.5 h-2.5 rounded-full ${f.color} mb-3`} />
-                <p className="text-[13px] font-bold text-navy leading-tight">{f.name}</p>
-                <p className="text-[10px] text-slate-400 font-medium mt-1">{STATUS_LABEL[f.status]}</p>
-                <p className="text-[9px] font-bold text-slate-300 mt-0.5 uppercase tracking-widest">{f.hours}</p>
-              </div>
+              <motion.button
+                key={f.id}
+                whileTap={f.available ? { scale: 0.96 } : {}}
+                onClick={() => f.available && setSelectedRoom(f)}
+                className={`shrink-0 w-[125px] p-5 rounded-[2.5rem] border text-left flex flex-col justify-between min-h-[160px] transition-all shadow-sm ${
+                  f.available 
+                    ? 'bg-[#F4FBF7] border-emerald-100/20 opacity-100' // Soft Mint
+                    : 'bg-[#F2F2F7] border-slate-200/40 opacity-60'   // Warm Grey / Receded
+                } ${!f.available ? 'cursor-not-allowed' : ''}`}
+              >
+                <div>
+                  <h4 className="text-[12px] font-medium text-navy/90 leading-tight mb-1">{f.name}</h4>
+                  <p className={`text-[10px] font-semibold ${f.available ? 'text-emerald-500' : 'text-slate-400'}`}>
+                    {f.available ? f.status : 'Fully Booked'}
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[14px] font-bold text-navy">{f.seats.split('/')[0]}</span>
+                    <span className="text-[10px] text-navy/30 font-medium tracking-tighter">/ {f.seats.split('/')[1]} seats</span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-medium mt-2 tracking-tight">
+                    {f.available ? 'Tap to reserve' : 'Check later'}
+                  </p>
+                </div>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -267,30 +315,28 @@ export default function PulseBulletinPage() {
               <motion.div
                 key={item.id}
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-[#F6F7F9] rounded-[1.5rem] p-6 relative overflow-hidden flex items-center justify-between cursor-pointer border border-slate-50"
+                className={`w-full ${item.circleBg} rounded-[2rem] p-7 relative overflow-hidden flex items-center justify-between cursor-pointer border border-white/40 shadow-sm`}
               >
                 {/* Left Side Content */}
-                <div className="relative z-10 w-[60%]">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">
+                <div className="relative z-10 w-[65%]">
+                  <span className="text-[10px] font-black text-navy/30 uppercase tracking-[0.2em] mb-2 block">
                     {item.tag}
                   </span>
-                  <h4 className="text-[17px] font-bold text-navy mb-1.5 leading-tight">{item.title}</h4>
-                  <p className="text-[13px] text-[#6B7280] font-medium">{item.time}</p>
+                  <h4 className="text-[18px] font-bold text-navy mb-2 leading-[1.2] tracking-tight">{item.title}</h4>
+                  <p className="text-[13px] text-navy/40 font-semibold">{item.time}</p>
                 </div>
 
                 {/* Right Side Graphic */}
-                <div className="absolute right-0 top-0 bottom-0 w-[45%] flex items-center justify-end pointer-events-none pr-6">
-                   {/* Soft Circle Background (Overflowing) */}
-                   <div className={`absolute right-[-15%] top-1/2 -translate-y-1/2 w-[120%] aspect-square rounded-full ${item.circleBg}`} />
-                   {/* Premium Framed Image */}
-                   <div className="relative z-10 w-[64px] h-[64px] bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] overflow-hidden border-4 border-white">
-                      <img src={item.img} className="w-full h-full object-cover" alt={item.title} />
+                <div className="relative shrink-0">
+                   {/* Premium Framed Image - Solid and High Contrast */}
+                   <div className="w-[80px] h-[80px] bg-white rounded-2xl shadow-[0_12px_24px_rgba(0,0,0,0.08)] overflow-hidden border-[6px] border-white">
+                      <img src={item.img} className="w-full h-full object-cover contrast-[1.1]" alt={item.title} />
                    </div>
                 </div>
               </motion.div>
             ))}
           </div>
-          <button className="w-full mt-6 h-14 border border-slate-100 rounded-2xl text-[12px] font-bold text-slate-400 uppercase tracking-widest active:scale-95 transition-all bg-white shadow-sm hover:bg-slate-50">
+          <button className="w-full mt-8 h-12 border border-slate-100/50 rounded-2xl text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] active:scale-95 transition-all bg-white hover:bg-slate-50/50">
             Load More
           </button>
         </div>
@@ -298,6 +344,111 @@ export default function PulseBulletinPage() {
       </div>
 
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+      {/* ── RESERVATION BOTTOM SHEET (THE FRICTIONLESS RESERVE) ── */}
+      <AnimatePresence>
+        {selectedRoom && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedRoom(null)}
+              className="fixed inset-0 bg-navy/20 backdrop-blur-sm z-[110]" 
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[3rem] p-8 pb-12 z-[120] shadow-2xl"
+            >
+              <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-8" />
+              <div className="mb-8">
+                <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">Reservation</p>
+                <h3 className="text-[24px] font-bold text-navy">{selectedRoom.name}</h3>
+                <p className="text-[14px] text-slate-400 font-medium">Select your duration</p>
+              </div>
+
+              <div className="flex gap-3 mb-10 overflow-x-auto no-scrollbar">
+                {['30m', '1h', '2h', '3h', '4h'].map((time) => (
+                  <button 
+                    key={time} 
+                    onClick={() => setSelectedDuration(time)}
+                    className={`shrink-0 w-20 h-20 rounded-3xl border flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      selectedDuration === time 
+                        ? 'bg-navy text-white border-navy shadow-lg shadow-navy/20' 
+                        : 'bg-slate-50 text-navy/40 border-slate-100 hover:border-slate-200'
+                    }`}
+                  >
+                    <span className="text-[16px] font-bold">{time.replace('m', '').replace('h', '')}</span>
+                    <span className="text-[10px] font-black uppercase opacity-60">{time.includes('m') ? 'min' : 'hrs'}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <button 
+                  onClick={() => setSelectedRoom(null)}
+                  className="w-full h-16 bg-navy text-white rounded-2xl text-[15px] font-bold shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
+                  Confirm Booking <ArrowRight size={18} />
+                </button>
+                <button 
+                  onClick={() => setSelectedRoom(null)}
+                  className="w-full h-12 text-slate-300 text-[13px] font-bold hover:text-navy/40 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isCreateOpen && profile && (
+          <CreateListing 
+            userId={auth.currentUser?.uid || ''} 
+            role={profile.role || 'STUDENT'} 
+            onClose={() => setIsCreateOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── MORPHING SELL FAB (THE GHOST TRIGGER) ── */}
+      <motion.button
+        layout
+        onClick={() => setIsCreateOpen(true)}
+        initial={false}
+        animate={{
+          width: showSellLabel ? 110 : 56,
+          height: 56,
+          borderRadius: 28,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 260,
+          damping: 20
+        }}
+        className="fixed bottom-10 right-8 z-[90] bg-navy text-white shadow-2xl flex items-center justify-center overflow-hidden hover:scale-105 active:scale-95 transition-transform"
+      >
+        <motion.div className="flex items-center gap-3 px-6">
+          <Plus size={24} className="shrink-0" />
+          <AnimatePresence mode="wait">
+            {showSellLabel && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="text-[14px] font-bold whitespace-nowrap"
+              >
+                Sell
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </motion.button>
+
     </main>
   );
 }

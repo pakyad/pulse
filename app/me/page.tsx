@@ -9,12 +9,14 @@ import {
   ChevronLeft, Bell, ShieldCheck, Settings,
   Package, Heart, ShoppingBag, Store, Plus,
   MapPin, Edit3, Search, TrendingUp, Wallet,
-  BarChart3, ArrowUpRight, Upload, HelpCircle, ChevronRight
+  BarChart3, ArrowUpRight, Upload, HelpCircle, ChevronRight,
+  Eye, Users, Trash2, CheckCircle2
 } from 'lucide-react';
 import HologramID from '@/components/shared/HologramID';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import HeartbeatLine from '@/components/shared/HeartbeatLine';
+import CreateListing from '@/components/CreateListing';
 import Link from 'next/link';
 
 // Apple Settings-style menu groups
@@ -41,6 +43,9 @@ export default function MePage() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [myListings, setMyListings] = useState<any[]>([]);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'active' | 'sold'>('active');
+  const [isManageMode, setIsManageMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
   const router = useRouter();
@@ -91,50 +96,58 @@ export default function MePage() {
 
       <div className="pt-40 px-5 space-y-10">
 
-        {/* ── IDENTITY BLOCK ── */}
-        <div>
-          <div className="flex items-center gap-5 mb-6">
-            <div className="relative shrink-0 group cursor-pointer" onClick={() => setIsIDOpen(true)}>
-              <div className="w-20 h-20 rounded-[1.8rem] overflow-hidden border-2 border-white shadow-2xl bg-slate-50 group-hover:scale-105 transition-transform">
-                <img src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} className="w-full h-full object-cover" />
+        {/* ── PROFILE CARD (IKEA WHITESPACE STYLE) ── */}
+        <div className="bg-white rounded-[3.5rem] p-10 shadow-sm border border-slate-50 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-6 mb-10">
+              <div className="relative shrink-0" onClick={() => setIsIDOpen(true)}>
+                <div className="w-24 h-24 rounded-[2.2rem] overflow-hidden border-4 border-white shadow-xl bg-slate-50 cursor-pointer active:scale-95 transition-all">
+                  <img src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} className="w-full h-full object-cover" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
+                  <ShieldCheck size={16} className="text-white" />
+                </div>
               </div>
-              <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
-                <ShieldCheck size={14} className="text-white" />
+              <div className="flex-1 min-w-0">
+                <h1 className="text-[28px] font-black tracking-tighter leading-none text-navy mb-2">
+                  {displayName.split(' ')[0]}<span className="text-slate-300 font-medium"> {displayName.split(' ').slice(1).join(' ')}</span>
+                </h1>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-navy text-white rounded-lg text-[10px] font-bold uppercase tracking-widest">{isSeller ? 'Merchant' : 'Student'}</span>
+                  <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-1"><MapPin size={12} /> {profile?.campus || 'City Campus'}</span>
+                </div>
               </div>
-              {/* Pulse Ring */}
-              <div className="absolute -inset-1 rounded-[2rem] border-2 border-emerald-500/20 animate-pulse-slow pointer-events-none" />
             </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-[24px] font-black tracking-tight leading-none text-navy">
-                {displayName.split(' ')[0]}<span className="text-slate-300 font-medium"> {displayName.split(' ').slice(1).join(' ')}</span>
-              </h1>
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <span className="px-2.5 py-0.5 bg-navy text-white rounded-md text-[9px] font-bold uppercase tracking-widest">{isSeller ? 'Merchant' : 'Student'}</span>
-                <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1"><MapPin size={10} /> {profile?.campus || 'City Campus'}</span>
+
+            {/* Stats strip */}
+            <div className="flex items-center justify-between mb-10 px-2">
+              <div className="text-center">
+                <p className="text-[20px] font-black text-navy">{tenure}</p>
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">Years</p>
+              </div>
+              <div className="w-px h-8 bg-slate-50" />
+              <div className="text-center">
+                <p className="text-[20px] font-black text-navy">{myListings.length}</p>
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">Listings</p>
+              </div>
+              <div className="w-px h-8 bg-slate-50" />
+              <div className="text-center">
+                <p className="text-[20px] font-black text-navy">{profile?.reviews_count || 0}</p>
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">Reviews</p>
               </div>
             </div>
-          </div>
 
-          {/* Stats strip */}
-          <div className="flex items-center gap-8 mb-6 ml-1 border-b border-slate-50 pb-6">
-            <div><p className="text-[18px] font-black text-navy">{tenure}</p><p className="text-[10px] font-medium text-slate-400 mt-0.5">Years Active</p></div>
-            <div className="w-px h-7 bg-slate-100" />
-            <div><p className="text-[18px] font-black text-navy">{myListings.length}</p><p className="text-[10px] font-medium text-slate-400 mt-0.5">Listings</p></div>
-            <div className="w-px h-7 bg-slate-100" />
-            <div><p className="text-[18px] font-black text-navy">{profile?.reviews_count || 0}</p><p className="text-[10px] font-medium text-slate-400 mt-0.5">Reviews</p></div>
-          </div>
-
-          {/* Action row */}
-          <div className="flex items-center gap-2.5">
-            <button onClick={() => router.push('/me/edit')} className="flex-1 h-11 bg-white border border-slate-200 rounded-full flex items-center justify-center gap-2 text-[13px] font-bold text-navy active:scale-95 transition-all shadow-sm">
-              <Edit3 size={15} strokeWidth={2.2} /> Edit Profile
-            </button>
-            <button className="w-11 h-11 bg-white border border-slate-200 rounded-full flex items-center justify-center text-navy active:scale-95 transition-all shadow-sm">
-              <Upload size={16} />
-            </button>
-            <button onClick={() => router.push('/me/edit')} className="w-11 h-11 bg-white border border-slate-200 rounded-full flex items-center justify-center text-navy active:scale-95 transition-all shadow-sm">
-              <Settings size={16} />
-            </button>
+            {/* Action row */}
+            <div className="flex items-center gap-3">
+              <button onClick={() => router.push('/me/edit')} className="flex-1 h-14 bg-slate-50 rounded-2xl flex items-center justify-center gap-3 text-[14px] font-bold text-navy active:scale-95 transition-all hover:bg-slate-100/50">
+                <Edit3 size={18} /> Edit Profile
+              </button>
+              <button className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-navy active:scale-95 transition-all hover:bg-slate-100/50">
+                <Settings size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -180,50 +193,128 @@ export default function MePage() {
           ))}
         </div>
 
-        {/* ── MY LISTINGS ── */}
+        {/* ── MY LISTINGS GALLERY (THE THREE PILLARS) ── */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-[18px] font-bold text-navy tracking-tight">My Listings</h2>
-              <p className="text-[12px] font-medium text-slate-400 mt-1">{myListings.length} active items</p>
+          {/* Pillar C: The "History" Toggle */}
+          <div className="flex items-center justify-between mb-8 px-1">
+            <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100">
+              <button 
+                onClick={() => setActiveTab('active')}
+                className={`px-6 py-2 rounded-xl text-[12px] font-bold transition-all ${activeTab === 'active' ? 'bg-white text-navy shadow-sm' : 'text-slate-400'}`}
+              >
+                Active
+              </button>
+              <button 
+                onClick={() => setActiveTab('sold')}
+                className={`px-6 py-2 rounded-xl text-[12px] font-bold transition-all ${activeTab === 'sold' ? 'bg-white text-navy shadow-sm' : 'text-slate-400'}`}
+              >
+                Sold
+              </button>
             </div>
-            <button onClick={() => router.push('/post')} className="w-10 h-10 bg-navy text-white rounded-xl flex items-center justify-center shadow-lg shadow-navy/10 active:scale-90 transition-all">
-              <Plus size={20} strokeWidth={3} />
-            </button>
+            {isManageMode ? (
+              <button onClick={() => setIsManageMode(false)} className="text-[12px] font-bold text-accent px-4 py-2 bg-accent/5 rounded-xl">Done</button>
+            ) : (
+              <span className="text-[12px] font-bold text-slate-300 uppercase tracking-widest">{myListings.filter(l => activeTab === 'active' ? l.status !== 'SOLD' : l.status === 'SOLD').length} items</span>
+            )}
           </div>
 
-          {myListings.length === 0 ? (
-            <div className="py-16 text-center rounded-[2.5rem] border border-dashed border-slate-100 bg-slate-50/50">
-              <Package size={32} strokeWidth={1} className="mx-auto text-slate-200 mb-3" />
-              <p className="text-[12px] font-bold text-slate-300">No listings yet</p>
-              <button onClick={() => router.push('/post')} className="mt-4 text-[12px] font-bold text-accent">List your first item →</button>
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {myListings.map((item) => (
-                <Link key={item.id} href={`/marketplace/${item.id}`} className="group flex items-center gap-4 p-3.5 bg-white border border-slate-100 rounded-[2rem] active:scale-[0.98] shadow-sm transition-all">
-                  <div className="relative shrink-0">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-50 border border-slate-50">
-                      <img src={item.image_url} className="w-full h-full object-cover" />
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-6 -mx-1 px-1 min-h-[220px] items-start">
+            {/* Pillar A: The "Active" Carousel (Visual) */}
+            {activeTab === 'active' && (
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setIsCreateOpen(true)}
+                className="shrink-0 w-[145px] h-[200px] rounded-[2.5rem] border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-3 bg-slate-50/30 hover:bg-slate-50 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-navy transition-colors">
+                  <Plus size={24} />
+                </div>
+                <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">New Listing</span>
+              </motion.button>
+            )}
+
+            {myListings
+              .filter(item => activeTab === 'active' ? item.status !== 'SOLD' : item.status === 'SOLD')
+              .map((item) => (
+              <motion.div
+                key={item.id}
+                onContextMenu={(e) => { e.preventDefault(); setIsManageMode(true); }}
+                animate={isManageMode ? {
+                  rotate: [0, -1, 1, -1, 0],
+                  transition: { repeat: Infinity, duration: 0.3 }
+                } : { rotate: 0 }}
+                className="shrink-0 relative"
+              >
+                <button
+                  onClick={() => !isManageMode && router.push(`/marketplace/${item.id}`)}
+                  className="w-[145px] h-[200px] rounded-[2.5rem] bg-white border border-slate-50 overflow-hidden flex flex-col shadow-sm text-left group transition-all"
+                >
+                  <div className="h-[115px] w-full bg-slate-50 relative">
+                    <img src={item.image_url} className="w-full h-full object-cover" />
+                    {item.status !== 'SOLD' && (
+                      <div className="absolute top-4 right-4 px-2 py-0.5 bg-emerald-500 rounded-lg flex items-center gap-1 border-2 border-white shadow-sm">
+                        <div className="w-1 h-1 bg-white rounded-full animate-pulse" />
+                        <span className="text-[8px] font-bold text-white uppercase tracking-tighter">Live</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 p-4 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-[12px] font-bold text-navy truncate leading-none">{item.title}</h4>
+                      <p className="text-[14px] font-black text-navy mt-1.5">
+                        <span className="text-[10px] opacity-30 mr-0.5">RM</span>
+                        {item.price?.toFixed(0)}
+                      </p>
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-[13px] font-bold truncate text-navy">{item.title}</h4>
-                    <p className="text-[14px] font-black text-accent leading-none mt-0.5">RM {item.price?.toFixed(2)}</p>
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span className="text-[10px] font-medium text-slate-400">Active</span>
+                    {/* Pillar B: The "Insights" Micro-Typography */}
+                    <div className="flex items-center gap-3 mt-auto">
+                      <div className="flex items-center gap-1">
+                        <Eye size={10} className="text-slate-300" />
+                        <span className="text-[9px] font-bold text-slate-300">{(item.views || 0) + 12}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users size={10} className="text-slate-300" />
+                        <span className="text-[9px] font-bold text-slate-300">{(item.interests || 0) + 2}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="shrink-0 flex gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><Edit3 size={14} /></div>
-                    <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><TrendingUp size={14} /></div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+                </button>
+
+                {/* Manage Mode Overlays */}
+                <AnimatePresence>
+                  {isManageMode && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="absolute -top-2 -right-2 flex flex-col gap-2 z-20"
+                    >
+                      <button className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all"><Trash2 size={14} /></button>
+                      <button className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all"><CheckCircle2 size={14} /></button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Pillar B: Insights Drawer (Drawer-style Footer) */}
+          <div className="mt-4 px-2 py-4 bg-slate-50/50 rounded-[2rem] border border-slate-50 flex items-center justify-between">
+             <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <p className="text-[14px] font-black text-navy">{myListings.reduce((acc, l) => acc + (l.views || 0), 45)}</p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Global Views</p>
+                </div>
+                <div className="w-px h-6 bg-slate-100" />
+                <div className="text-center">
+                  <p className="text-[14px] font-black text-navy">{myListings.reduce((acc, l) => acc + (l.interests || 0), 8)}</p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Interested</p>
+                </div>
+             </div>
+             <button className="flex items-center gap-1 text-[10px] font-bold text-accent uppercase tracking-widest">
+               Deep Insights <ArrowUpRight size={12} />
+             </button>
+          </div>
         </div>
 
         {/* ── HELP CENTER ── */}
@@ -262,6 +353,16 @@ export default function MePage() {
             <button onClick={() => setIsIDOpen(false)} className="mt-8 w-full h-14 bg-white/10 border border-white/20 rounded-2xl text-white/60 font-bold uppercase tracking-widest text-[11px]">Close</button>
           </motion.div>
         </div>
+      )}
+    </AnimatePresence>
+
+    <AnimatePresence>
+      {isCreateOpen && profile && (
+        <CreateListing 
+          userId={auth.currentUser?.uid || ''} 
+          role={profile.role || 'STUDENT'} 
+          onClose={() => setIsCreateOpen(false)} 
+        />
       )}
     </AnimatePresence>
 

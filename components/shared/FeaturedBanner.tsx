@@ -21,7 +21,7 @@ interface FeaturedBannerProps {
   height?: string;
 }
 
-export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 'h-[180px]' }: FeaturedBannerProps) {
+export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 'h-[144px]' }: FeaturedBannerProps) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const router = useRouter();
@@ -57,25 +57,9 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
             className="absolute inset-0 flex flex-col justify-end p-6"
             style={{ backgroundColor: slide.bgColor || '#4A5D23' }}
           >
-            {/* Abstract Graphic Background (Overlapping Squares) */}
-            <div className="absolute right-[-20px] top-[10%] pointer-events-none opacity-80 mix-blend-overlay">
-               <motion.div 
-                 animate={{ rotate: 15 }}
-                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                 className="absolute right-12 top-4 w-40 h-40 rounded-[2.5rem] bg-white/20 border border-white/30 backdrop-blur-sm"
-               />
-               <motion.div 
-                 animate={{ rotate: -10 }}
-                 transition={{ duration: 15, repeat: Infinity, ease: "linear", repeatType: "reverse" }}
-                 className="absolute right-4 top-8 w-40 h-40 rounded-[2.5rem] bg-white/20 border border-white/30 backdrop-blur-md"
-               />
-               <motion.div 
-                 animate={{ rotate: 5 }}
-                 className="relative right-0 top-12 w-40 h-40 rounded-[2.5rem] bg-white/30 border border-white/40 backdrop-blur-lg flex items-center justify-center shadow-2xl"
-               >
-                  <div className="w-16 h-16 rounded-2xl border-2 border-white/40" />
-               </motion.div>
-            </div>
+            {/* Minimalist Organic Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-transparent opacity-40 pointer-events-none" />
+
 
             {/* Content Area */}
             <div className="relative z-10 flex items-end justify-between w-full">

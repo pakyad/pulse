@@ -17,19 +17,19 @@ const HERO_SLIDES: BannerSlide[] = [
     id: 'h1', ctaPath: '/pulse',
     headline: "Synchronize Your Stipend",
     subline: 'Check your MARA allowance status & payment schedule',
-    bgColor: '#4A5D23' // Olive Green
+    bgColor: '#A3B18A' // Muted Sage
   },
   {
     id: 'h2', ctaPath: '/pulse',
     headline: "Clear Outstanding Fees",
     subline: 'Your Semester 4 tuition clearance is pending authorization.',
-    bgColor: '#1E293B' // Navy Slate
+    bgColor: '#344E41' // Deep Forest/Organic Green
   },
   {
     id: 'h3', ctaPath: '/pulse',
     headline: "Final Results Published",
     subline: 'Your academic transcript for Sem 3 is now officially available.',
-    bgColor: '#8B5CF6' // Purple
+    bgColor: '#588157' // Moss Green
   },
 ];
 
@@ -40,9 +40,9 @@ const ANNOUNCEMENTS_FALLBACK = [
 ];
 
 const MARKET_FALLBACK = [
-  { id: 'f1', title: 'Calculus III Ref Pack', price: 45, img: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400', seller: 'MIIT Academic' },
-  { id: 'f2', title: 'Keychron K2 Pro', price: 280, img: 'https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=400', seller: 'Elite Tech' },
-  { id: 'f3', title: 'BAC Official Jersey', price: 95, img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller: 'BAC Club' },
+  { id: 'f1', title: 'Analog Study Pack', price: 45, img: 'https://images.unsplash.com/photo-1497005367839-6e8464697e19?q=80&w=400', seller: 'MIIT Academic' },
+  { id: 'f2', title: 'Mechanical Setup', price: 280, img: 'https://images.unsplash.com/photo-1618335829737-2228ad30662b?q=80&w=400', seller: 'Elite Tech' },
+  { id: 'f3', title: 'Varsity Varsity', price: 95, img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller: 'BAC Club' },
 ];
 
 const SPOTLIGHT_FALLBACK = [
@@ -118,8 +118,9 @@ export default function PulseHome() {
   const displayItems = (liveItems.length > 0 ? liveItems : MARKET_FALLBACK)
     .filter(item => {
       const title = item.title?.toLowerCase() || '';
-      const passesOfficial = liveItems.length > 0 ? item.is_official === true : true;
-      return passesOfficial && !title.includes('roti') && !title.includes('murtabak') && !title.includes('canai');
+      // Only filter by 'is_official' if we actually have live items to show
+      const passesOfficial = liveItems.length > 0 ? (item.is_official === true) : true;
+      return passesOfficial && !title.includes('roti') && !title.includes('murtabak');
     });
   const displayAnnouncements = announcements.length > 0
     ? announcements.map(a => ({ ...a, tag: a.category || 'NEWS', path: '/pulse' }))
@@ -142,7 +143,7 @@ export default function PulseHome() {
           <ServiceGrid />
         </div>
 
-        {/* ── WHAT'S HAPPENING ── */}
+        {/* ── WHAT'S HAPPENING (EDITORIAL ASYMMETRIC) ── */}
         <div>
           <div className="flex justify-between items-baseline mb-5">
             <h3 className="text-[17px] font-bold text-navy tracking-tight">What's happening</h3>
@@ -150,21 +151,23 @@ export default function PulseHome() {
               View all
             </button>
           </div>
-          <div className="flex gap-4 -mx-6 px-6 overflow-x-auto no-scrollbar pb-1">
-            {SPOTLIGHT_FALLBACK.map((item) => (
+          <div className="flex gap-4 -mx-8 px-8 overflow-x-auto no-scrollbar pb-1">
+            {SPOTLIGHT_FALLBACK.map((item, idx) => (
               <motion.div
                 key={item.id}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => router.push('/pulse')}
-                className="shrink-0 w-[240px] cursor-pointer group"
+                className={`shrink-0 ${idx === 0 ? 'w-[280px]' : 'w-[200px]'} cursor-pointer group`}
               >
-                <div className="w-full h-[140px] bg-slate-50 rounded-4xl overflow-hidden mb-3 border border-slate-100 shadow-sm relative">
+                <div className="w-full h-[140px] bg-slate-50 rounded-3xl overflow-hidden mb-3 border border-slate-100 shadow-sm relative">
                   <img src={item.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.title} />
-                  <div className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm">
-                    <span className={`text-[8px] font-black uppercase tracking-widest ${TAG_COLORS[item.tag] || 'text-slate-500'}`}>{item.tag}</span>
-                  </div>
                 </div>
-                <h4 className="text-[14px] font-bold text-navy leading-tight truncate px-1 mt-1">{item.title}</h4>
+                <div className="px-1">
+                  <span className={`text-[10px] font-medium uppercase tracking-widest ${TAG_COLORS[item.tag]?.split(' ')[1] || 'text-slate-400'} opacity-70 mb-1 block`}>
+                    {item.tag}
+                  </span>
+                  <h4 className="text-[14px] font-semibold text-navy leading-tight truncate">{item.title}</h4>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -190,16 +193,17 @@ export default function PulseHome() {
                 onClick={() => router.push(`/marketplace/${item.id}`)}
                 className="shrink-0 w-[150px] cursor-pointer group"
               >
-                {/* IKEA Style Card: White, Padded, Shadowed */}
-                <div className="w-full aspect-[5/4] bg-white rounded-xl overflow-hidden mb-3 border border-slate-100 shadow-sm flex items-center justify-center p-3 relative">
+                {/* Borderless IKEA Design: Hardened for Safari aspect-ratio support */}
+                <div className="w-full aspect-[5/4] min-h-[120px] rounded-2xl overflow-hidden mb-3 relative bg-slate-50/50 group-hover:shadow-md transition-all duration-500">
                   <img 
                     src={item.image_url || item.img || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400'} 
-                    className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 block" 
                     alt={item.title} 
+                    loading="lazy"
                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400'; }}
                   />
                   <div className="absolute top-2 right-2">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-sm" />
                   </div>
                 </div>
                 
@@ -219,7 +223,7 @@ export default function PulseHome() {
           </div>
         </div>
 
-        {/* ── CAMPUS CLUBS (PREMIUM PILLS PROTOCOL) ── */}
+        {/* ── CAMPUS CLUBS (MINIMALIST MONOCHROME) ── */}
         <div>
           <div className="flex justify-between items-baseline mb-5">
             <h3 className="text-[17px] font-bold text-navy tracking-tight">Campus clubs</h3>
@@ -227,16 +231,16 @@ export default function PulseHome() {
           </div>
           <div className="flex gap-3 -mx-8 px-8 overflow-x-auto no-scrollbar pb-2">
             {[
-              { id: 'c1', name: 'MIIT', style: 'bg-blue-50/80 text-blue-600 border-blue-100/50', icon: <Cpu size={16} /> },
-              { id: 'c2', name: 'UBIS', style: 'bg-emerald-50/80 text-emerald-600 border-emerald-100/50', icon: <BarChart3 size={16} /> },
-              { id: 'c3', name: 'MIDI', style: 'bg-purple-50/80 text-purple-600 border-purple-100/50', icon: <Monitor size={16} /> },
-              { id: 'c4', name: 'SRC', style: 'bg-rose-50/80 text-rose-600 border-rose-100/50', icon: <Video size={16} /> },
+              { id: 'c1', name: 'MIIT', activeStyle: 'hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100', icon: <Cpu size={16} /> },
+              { id: 'c2', name: 'UBIS', activeStyle: 'hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100', icon: <BarChart3 size={16} /> },
+              { id: 'c3', name: 'MIDI', activeStyle: 'hover:bg-purple-50 hover:text-purple-600 hover:border-purple-100', icon: <Monitor size={16} /> },
+              { id: 'c4', name: 'SRC',  activeStyle: 'hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100', icon: <Video size={16} /> },
             ].map((club) => (
               <motion.div
                 key={club.id}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => router.push('/pulse')}
-                className={`shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl border cursor-pointer transition-all ${club.style}`}
+                className={`shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-slate-50 bg-slate-50/50 text-navy/60 cursor-pointer transition-all ${club.activeStyle}`}
               >
                  {club.icon}
                  <span className="text-[13px] font-medium tracking-tight">{club.name}</span>
@@ -292,7 +296,10 @@ export default function PulseHome() {
                 <div className="px-2 space-y-1">
                   <h4 className="text-[13px] font-bold text-navy leading-tight line-clamp-1">{item.title}</h4>
                   <div className="flex items-center justify-between">
-                    <p className="text-[15px] font-black text-accent">RM {item.price}</p>
+                    <p className="text-[16px] font-bold text-accent">
+                      <span className="text-[10px] opacity-40 font-medium mr-0.5 tracking-tighter">RM</span>
+                      {item.price}
+                    </p>
                     <ArrowUpRight size={14} className="text-slate-200 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </div>
