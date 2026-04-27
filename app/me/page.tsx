@@ -10,8 +10,10 @@ import {
   Package, Heart, ShoppingBag, Store, Plus,
   MapPin, Edit3, Search, TrendingUp, Wallet,
   BarChart3, ArrowUpRight, Upload, HelpCircle, ChevronRight,
-  Eye, Users, Trash2, CheckCircle2
+  Eye, Users, Trash2, CheckCircle2,
+  X, Info, Sparkles, MoreHorizontal
 } from 'lucide-react';
+import { markItemAsSold, deleteItemListing } from '@/lib/marketplace-utils';
 import HologramID from '@/components/shared/HologramID';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -46,6 +48,7 @@ export default function MePage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'sold'>('active');
   const [isManageMode, setIsManageMode] = useState(false);
+  const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
   const router = useRouter();
@@ -69,6 +72,24 @@ export default function MePage() {
   const joinYear = profile?.created_at ? new Date(profile.created_at?.seconds * 1000).getFullYear() : 2024;
   const tenure = new Date().getFullYear() - joinYear || 1;
 
+  const handleMarkAsSold = async (itemId: string) => {
+    try {
+      await markItemAsSold(itemId);
+      // Success feedback could go here
+    } catch (error) {
+      console.error("Failed to mark as sold:", error);
+    }
+  };
+
+  const handleDeleteItem = async (itemId: string) => {
+    if (!window.confirm("Purge this listing from the registry? This cannot be undone.")) return;
+    try {
+      await deleteItemListing(itemId);
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-navy/10 border-t-navy rounded-full animate-spin" />
@@ -77,7 +98,7 @@ export default function MePage() {
 
   return (
     <>
-    <main className="min-h-screen bg-[#FDFDFD] pb-24 font-sans antialiased text-navy">
+    <main className="min-h-screen bg-white pb-24 font-sans antialiased text-navy">
       
       {/* ── MINIMAL INBOX ONLY ── */}
       <div className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex justify-end pointer-events-none">
@@ -96,14 +117,17 @@ export default function MePage() {
 
       <div className="pt-40 px-5 space-y-10">
 
-        {/* ── PROFILE CARD (IKEA WHITESPACE STYLE) ── */}
-        <div className="bg-white rounded-[3.5rem] p-10 shadow-sm border border-slate-50 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+        {/* ── PROFILE CARD (DISCIPLINED GALLERY STYLE) ── */}
+        <motion.div 
+          animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? -20 : 0 }}
+          className="bg-white rounded-2xl p-8 border border-[#EAEAEA] relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/30 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
           
           <div className="relative z-10">
-            <div className="flex items-center gap-6 mb-10">
+            <div className="flex items-center gap-6 mb-8">
               <div className="relative shrink-0" onClick={() => setIsIDOpen(true)}>
-                <div className="w-24 h-24 rounded-[2.2rem] overflow-hidden border-4 border-white shadow-xl bg-slate-50 cursor-pointer active:scale-95 transition-all">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#EAEAEA] bg-slate-50 cursor-pointer active:scale-95 transition-all">
                   <img src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
@@ -141,37 +165,43 @@ export default function MePage() {
 
             {/* Action row */}
             <div className="flex items-center gap-3">
-              <button onClick={() => router.push('/me/edit')} className="flex-1 h-14 bg-slate-50 rounded-2xl flex items-center justify-center gap-3 text-[14px] font-bold text-navy active:scale-95 transition-all hover:bg-slate-100/50">
-                <Edit3 size={18} /> Edit Profile
+              <button onClick={() => router.push('/me/edit')} className="flex-1 h-12 bg-white border border-[#EAEAEA] rounded-2xl flex items-center justify-center gap-3 text-[13px] font-bold text-navy active:scale-95 transition-all hover:bg-slate-50">
+                <Edit3 size={16} /> Edit Profile
               </button>
-              <button className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-navy active:scale-95 transition-all hover:bg-slate-100/50">
-                <Settings size={20} />
+              <button className="w-12 h-12 bg-white border border-[#EAEAEA] rounded-2xl flex items-center justify-center text-navy active:scale-95 transition-all hover:bg-slate-50">
+                <Settings size={18} />
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── STAT BENTO ── */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-navy rounded-[2rem] p-5 aspect-square flex flex-col justify-between shadow-xl shadow-navy/15 relative overflow-hidden">
+        <motion.div 
+          animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? 20 : 0 }}
+          className="grid grid-cols-2 gap-3"
+        >
+          <div className="bg-navy rounded-2xl p-6 aspect-square flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 opacity-40">
                <HeartbeatLine color="#3B82F6" speed={3} />
             </div>
             <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center relative z-10"><Wallet size={18} className="text-white" /></div>
             <div className="relative z-10"><p className="text-[10px] font-medium text-white/40 mb-1">Balance</p><h3 className="text-[22px] font-black text-white leading-none">RM {(profile?.balance || 0).toFixed(2)}</h3></div>
           </div>
-          <div className="bg-white border border-slate-100 rounded-[2rem] p-5 aspect-square flex flex-col justify-between shadow-sm">
+          <div className="bg-white border border-[#EAEAEA] rounded-2xl p-6 aspect-square flex flex-col justify-between">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center"><TrendingUp size={18} className="text-emerald-500" /></div>
             <div><p className="text-[10px] font-medium text-slate-400 mb-1">Total Sold</p><h3 className="text-[22px] font-black text-navy leading-none">RM {((profile?.total_sold || 0) * 15).toFixed(2)}</h3></div>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── APPLE SETTINGS-STYLE MENU ── */}
-        <div className="space-y-3">
+        <motion.div 
+          animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? 40 : 0 }}
+          className="space-y-3"
+        >
           {MENU_GROUPS.map((group) => (
             <div key={group.label}>
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2.5 ml-1">{group.label}</p>
-              <div className="bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm">
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-8 mb-3 ml-1">{group.label}</p>
+              <div className="bg-white border border-[#EAEAEA] rounded-2xl overflow-hidden">
                 {group.items.map((item, i) => (
                   <button
                     key={item.label}
@@ -191,22 +221,22 @@ export default function MePage() {
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* ── MY LISTINGS GALLERY (THE THREE PILLARS) ── */}
         <div>
           {/* Pillar C: The "History" Toggle */}
-          <div className="flex items-center justify-between mb-8 px-1">
-            <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100">
+          <div className="flex items-center justify-between mt-12 mb-8 px-1">
+            <div className="flex bg-slate-50 p-1 rounded-2xl border border-[#EAEAEA]">
               <button 
                 onClick={() => setActiveTab('active')}
-                className={`px-6 py-2 rounded-xl text-[12px] font-bold transition-all ${activeTab === 'active' ? 'bg-white text-navy shadow-sm' : 'text-slate-400'}`}
+                className={`px-6 py-2 rounded-xl text-[12px] font-bold transition-all ${activeTab === 'active' ? 'bg-white text-navy' : 'text-slate-400'}`}
               >
                 Active
               </button>
               <button 
                 onClick={() => setActiveTab('sold')}
-                className={`px-6 py-2 rounded-xl text-[12px] font-bold transition-all ${activeTab === 'sold' ? 'bg-white text-navy shadow-sm' : 'text-slate-400'}`}
+                className={`px-6 py-2 rounded-xl text-[12px] font-bold transition-all ${activeTab === 'sold' ? 'bg-white text-navy' : 'text-slate-400'}`}
               >
                 Sold
               </button>
@@ -222,14 +252,15 @@ export default function MePage() {
             {/* Pillar A: The "Active" Carousel (Visual) */}
             {activeTab === 'active' && (
               <motion.button
+                layoutId="create-listing-canvas"
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setIsCreateOpen(true)}
-                className="shrink-0 w-[145px] h-[200px] rounded-[2.5rem] border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-3 bg-slate-50/30 hover:bg-slate-50 transition-all group"
+                className="shrink-0 w-[145px] h-[200px] rounded-2xl border border-dashed border-[#EAEAEA] flex flex-col items-center justify-center gap-3 bg-slate-50/30 hover:bg-slate-50 transition-all group z-50"
               >
-                <div className="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-navy transition-colors">
-                  <Plus size={24} />
+                <div className="w-10 h-10 rounded-full border border-[#EAEAEA] flex items-center justify-center text-slate-300 group-hover:text-navy transition-colors">
+                  <Plus size={20} />
                 </div>
-                <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">New Listing</span>
+                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">New Listing</span>
               </motion.button>
             )}
 
@@ -239,46 +270,41 @@ export default function MePage() {
               <motion.div
                 key={item.id}
                 onContextMenu={(e) => { e.preventDefault(); setIsManageMode(true); }}
+                layout
                 animate={isManageMode ? {
-                  rotate: [0, -1, 1, -1, 0],
-                  transition: { repeat: Infinity, duration: 0.3 }
+                  rotate: [0, -0.5, 0.5, -0.5, 0],
+                  transition: { repeat: Infinity, duration: 0.4 }
                 } : { rotate: 0 }}
+                exit={{ scale: 0.8, opacity: 0 }}
                 className="shrink-0 relative"
               >
-                <button
-                  onClick={() => !isManageMode && router.push(`/marketplace/${item.id}`)}
-                  className="w-[145px] h-[200px] rounded-[2.5rem] bg-white border border-slate-50 overflow-hidden flex flex-col shadow-sm text-left group transition-all"
+                <div
+                  className="w-[145px] h-[200px] rounded-2xl bg-white border border-[#EAEAEA] overflow-hidden flex flex-col text-left group transition-all"
                 >
-                  <div className="h-[115px] w-full bg-slate-50 relative">
-                    <img src={item.image_url} className="w-full h-full object-cover" />
+                  <div className="h-[115px] w-full bg-slate-50 relative overflow-hidden">
+                    <img 
+                      src={item.image_url} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      onClick={() => !isManageMode && router.push(`/marketplace/${item.id}`)}
+                    />
                     {item.status !== 'SOLD' && (
-                      <div className="absolute top-4 right-4 px-2 py-0.5 bg-emerald-500 rounded-lg flex items-center gap-1 border-2 border-white shadow-sm">
-                        <div className="w-1 h-1 bg-white rounded-full animate-pulse" />
-                        <span className="text-[8px] font-bold text-white uppercase tracking-tighter">Live</span>
+                      <div className="absolute top-3 right-3 px-2 py-0.5 bg-white border border-[#EAEAEA] rounded-lg flex items-center gap-1">
+                        <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+                        <span className="text-[8px] font-bold text-navy uppercase tracking-tighter">Live</span>
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 p-4 flex flex-col justify-between">
-                    <div>
-                      <h4 className="text-[12px] font-bold text-navy truncate leading-none">{item.title}</h4>
-                      <p className="text-[14px] font-black text-navy mt-1.5">
-                        <span className="text-[10px] opacity-30 mr-0.5">RM</span>
-                        {item.price?.toFixed(0)}
-                      </p>
+                  <div className="flex-1 p-4 flex flex-col">
+                    <div className="flex items-start justify-between gap-1">
+                      <h4 className="text-[12px] font-bold text-navy truncate leading-none flex-1">{item.title}</h4>
+                      <ListingTooltip item={item} />
                     </div>
-                    {/* Pillar B: The "Insights" Micro-Typography */}
-                    <div className="flex items-center gap-3 mt-auto">
-                      <div className="flex items-center gap-1">
-                        <Eye size={10} className="text-slate-300" />
-                        <span className="text-[9px] font-bold text-slate-300">{(item.views || 0) + 12}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users size={10} className="text-slate-300" />
-                        <span className="text-[9px] font-bold text-slate-300">{(item.interests || 0) + 2}</span>
-                      </div>
-                    </div>
+                    <p className="text-[14px] font-black text-navy mt-auto">
+                      <span className="text-[10px] opacity-30 mr-0.5">RM</span>
+                      {item.price?.toFixed(0)}
+                    </p>
                   </div>
-                </button>
+                </div>
 
                 {/* Manage Mode Overlays */}
                 <AnimatePresence>
@@ -289,8 +315,18 @@ export default function MePage() {
                       exit={{ opacity: 0, scale: 0.8 }}
                       className="absolute -top-2 -right-2 flex flex-col gap-2 z-20"
                     >
-                      <button className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all"><Trash2 size={14} /></button>
-                      <button className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all"><CheckCircle2 size={14} /></button>
+                      <button 
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all hover:bg-red-600"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <button 
+                        onClick={() => handleMarkAsSold(item.id)}
+                        className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all hover:bg-emerald-600"
+                      >
+                        <CheckCircle2 size={14} />
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -298,8 +334,8 @@ export default function MePage() {
             ))}
           </div>
 
-          {/* Pillar B: Insights Drawer (Drawer-style Footer) */}
-          <div className="mt-4 px-2 py-4 bg-slate-50/50 rounded-[2rem] border border-slate-50 flex items-center justify-between">
+          {/* Pillar B: Insights Drawer (Disciplined Design) */}
+          <div className="mt-4 px-2 py-5 bg-white rounded-2xl border border-[#EAEAEA] flex items-center justify-between">
              <div className="flex items-center gap-4">
                 <div className="text-center">
                   <p className="text-[14px] font-black text-navy">{myListings.reduce((acc, l) => acc + (l.views || 0), 45)}</p>
@@ -311,22 +347,25 @@ export default function MePage() {
                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Interested</p>
                 </div>
              </div>
-             <button className="flex items-center gap-1 text-[10px] font-bold text-accent uppercase tracking-widest">
+             <button 
+               onClick={() => setIsInsightsOpen(true)}
+               className="flex items-center gap-1 text-[10px] font-bold text-accent uppercase tracking-widest active:scale-95 transition-all"
+             >
                Deep Insights <ArrowUpRight size={12} />
              </button>
           </div>
         </div>
 
         {/* ── HELP CENTER ── */}
-        <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-6">
+        <div className="bg-white border border-[#EAEAEA] rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-navy shadow-sm"><HelpCircle size={18} /></div>
+            <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-navy"><HelpCircle size={18} /></div>
             <div>
               <h3 className="text-[14px] font-bold text-navy">Help Center</h3>
               <p className="text-[11px] text-slate-400 font-medium">Support & institutional guides</p>
             </div>
           </div>
-          <button className="w-full bg-white border border-slate-100 h-12 rounded-2xl text-[12px] font-bold text-navy active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2">
+          <button className="w-full bg-white border border-[#EAEAEA] h-12 rounded-2xl text-[12px] font-bold text-navy active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-slate-50">
             Get Assistance <ChevronRight size={14} className="text-slate-200" />
           </button>
         </div>
@@ -335,7 +374,7 @@ export default function MePage() {
         {user && (
           <button
             onClick={() => auth.signOut().then(() => router.push('/auth'))}
-            className="w-full h-12 bg-white border border-slate-100 rounded-2xl text-[12px] font-bold text-slate-400 uppercase tracking-widest active:scale-95 transition-all shadow-sm"
+            className="w-full h-12 bg-white border border-[#EAEAEA] rounded-2xl text-[12px] font-bold text-slate-400 uppercase tracking-widest active:scale-95 transition-all"
           >
             Sign Out
           </button>
@@ -367,6 +406,118 @@ export default function MePage() {
     </AnimatePresence>
 
     <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+    {/* ── DEEP INSIGHTS DRAWER ── */}
+    <AnimatePresence>
+      {isInsightsOpen && (
+        <div className="fixed inset-0 z-[400] flex items-end justify-center">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            onClick={() => setIsInsightsOpen(false)} 
+            className="absolute inset-0 bg-navy/20 backdrop-blur-sm" 
+          />
+          <motion.div 
+            initial={{ y: "100%" }} 
+            animate={{ y: 0 }} 
+            exit={{ y: "100%" }} 
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="relative z-10 w-full max-w-lg bg-white rounded-t-2xl p-10 border-x border-t border-[#EAEAEA] overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl -mr-16 -mt-16" />
+            
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-[20px] font-black tracking-tighter text-navy flex items-center gap-3">
+                <BarChart3 className="text-accent" size={20} /> Market Performance
+              </h2>
+              <button onClick={() => setIsInsightsOpen(false)} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-navy/40 active:scale-90 transition-all">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-6 bg-white border border-[#EAEAEA] rounded-2xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Conversion Rate</p>
+                  <h3 className="text-[24px] font-black text-navy">12.4%</h3>
+                  <div className="mt-2 flex items-center gap-1 text-emerald-500 font-bold text-[10px]">
+                    <TrendingUp size={10} /> +2.1%
+                  </div>
+                </div>
+                <div className="p-6 bg-white border border-[#EAEAEA] rounded-2xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Avg. Response</p>
+                  <h3 className="text-[24px] font-black text-navy">4m</h3>
+                  <div className="mt-2 flex items-center gap-1 text-emerald-500 font-bold text-[10px]">
+                    <Sparkles size={10} /> Elite
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-8 bg-navy rounded-2xl text-white relative overflow-hidden">
+                <div className="relative z-10">
+                  <h4 className="text-[13px] font-bold mb-3 tracking-tight">Bro's Strategy Tip</h4>
+                  <p className="text-[12px] text-white/70 leading-relaxed">
+                    Boosting price by 5% on Sundays usually yields 15% higher handshake velocity.
+                  </p>
+                </div>
+                <div className="absolute bottom-0 right-0 opacity-10">
+                  <Info size={100} strokeWidth={1} />
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setIsInsightsOpen(false)}
+                className="w-full h-14 bg-navy text-white rounded-xl font-bold uppercase tracking-widest text-[11px] active:scale-95 transition-all"
+              >
+                Acknowledge Strategy
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
     </>
+  );
+}
+
+function ListingTooltip({ item }: { item: any }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="relative">
+      <button 
+        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+        className="p-1 hover:bg-slate-50 rounded-full transition-colors text-slate-200 hover:text-navy"
+      >
+        <Info size={14} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <div className="fixed inset-0 z-[100]" onClick={() => setIsOpen(false)} />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              className="absolute bottom-full right-0 mb-2 z-[110] w-32 bg-white/70 backdrop-blur-md border border-[#EAEAEA] rounded-xl p-3 shadow-2xl pointer-events-none"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Eye size={10} className="text-slate-400" />
+                  <span className="text-[10px] font-bold text-navy">{(item.views || 0) + 12}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Users size={10} className="text-slate-400" />
+                  <span className="text-[10px] font-bold text-navy">{(item.interests || 0) + 2}</span>
+                </div>
+              </div>
+              <div className="absolute top-full right-3 w-2 h-2 bg-white/70 border-r border-b border-[#EAEAEA] rotate-45 -mt-1" />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

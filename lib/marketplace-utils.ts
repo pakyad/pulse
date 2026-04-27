@@ -21,7 +21,8 @@ export const createItemListing = async (userId: string, role: string, itemData: 
   }
 
   // 2. Tactical Asset Management (Firebase Storage)
-  // Store images in a structured path: items/{userId}/{timestamp}_{filename}
+  if (!imageFile) throw new Error("Visual asset required for registry entry.");
+  
   const fileExt = imageFile.name.split('.').pop();
   const fileName = `${Date.now()}.${fileExt}`;
   const storageRef = ref(storage, `items/${userId}/${fileName}`);
@@ -59,4 +60,25 @@ export const subscribeToMarketplace = (callback: (items: any[]) => void) => {
     }));
     callback(items);
   });
+};
+
+/**
+ * Transition an item to SOLD status.
+ */
+export const markItemAsSold = async (itemId: string) => {
+  const { doc, updateDoc } = await import("firebase/firestore");
+  const itemRef = doc(db, "items", itemId);
+  return await updateDoc(itemRef, {
+    status: 'SOLD',
+    sold_at: new Date().toISOString()
+  });
+};
+
+/**
+ * Remove a listing from the registry.
+ */
+export const deleteItemListing = async (itemId: string) => {
+  const { doc, deleteDoc } = await import("firebase/firestore");
+  const itemRef = doc(db, "items", itemId);
+  return await deleteDoc(itemRef);
 };
