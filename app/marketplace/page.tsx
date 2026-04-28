@@ -188,26 +188,26 @@ export default function MarketplacePage() {
 
       <div className="pt-40 space-y-12">
 
-        {/* ── BROWSE CATEGORIES (NEO-RETRO PIXEL OVERHAUL) ── */}
+        {/* ── BROWSE CATEGORIES (MICRO PILL OVERHAUL) ── */}
         <div className="pl-8">
-          <div className="flex items-center justify-between pr-8 mb-5">
-            <h3 className="text-[17px] font-bold text-navy tracking-tight">Browse Categories</h3>
+          <div className="flex items-center justify-between pr-8 mb-4">
+            <h3 className="text-[16px] font-bold text-navy tracking-tight">Browse Categories</h3>
           </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-6 pr-8">
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-6 pr-8">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                className={`relative cursor-pointer shrink-0 h-[48px] px-6 rounded-2xl border transition-all duration-200 flex items-center justify-center gap-3 ${
+                className={`relative cursor-pointer shrink-0 h-[36px] px-4 rounded-full border transition-all duration-200 flex items-center justify-center gap-2 ${
                   activeCategory === cat.filter 
-                    ? `${cat.color} border-2 translate-y-[3px] translate-x-[2px] shadow-none ring-2 ring-inset ring-white/30` 
-                    : `bg-[#FDFDFD] border-slate-100 text-slate-400 hover:border-slate-200 shadow-[3px_4px_0_0_rgba(0,0,0,0.04)] ring-2 ring-inset ring-slate-50/50`
+                    ? `bg-navy text-white border-navy shadow-md shadow-navy/10` 
+                    : `bg-white border-slate-100 text-navy hover:border-slate-200`
                 }`}
               >
-                <div className={`${activeCategory === cat.filter ? 'text-current' : 'text-slate-300'}`}>
+                <div className={`scale-[0.8] ${activeCategory === cat.filter ? 'text-white' : 'text-navy/40'}`}>
                   <cat.icon />
                 </div>
-                <span className="text-[13px] font-medium whitespace-nowrap tracking-wider">
+                <span className="text-[11px] font-bold whitespace-nowrap tracking-tight">
                   {cat.label}
                 </span>
               </button>
