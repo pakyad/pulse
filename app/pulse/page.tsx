@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
-import { Bell, Settings, Search, ChevronLeft, ChevronRight, Activity, Shield, AlertTriangle, Clock, CheckCircle, BookOpen, CalendarDays, Home, Users, ArrowRight, Plus, Sparkles } from 'lucide-react';
+import { Bell, Settings, Search, ChevronLeft, ChevronRight, Activity, Shield, AlertTriangle, Clock, CheckCircle, BookOpen, CalendarDays, Home, Users, ArrowRight, Plus, Sparkles, Map as MapIcon } from 'lucide-react';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import CreateListing from '@/components/CreateListing';
@@ -164,7 +164,7 @@ export default function PulseBulletinPage() {
       <div className="pt-28 space-y-10 pb-12">
 
         {/* ── EDITORIAL HEADER ── */}
-        <div className="px-5">
+        <div className="px-6">
           <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Pulse Bulletin</p>
           <div className="flex items-center gap-2 mt-1">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -172,34 +172,55 @@ export default function PulseBulletinPage() {
           </div>
         </div>
 
-        {/* ── PRIORITY CARD (FeaturedBanner Style) ── */}
-        <div className="px-5">
-          <motion.div whileTap={{ scale: 0.98 }} className="relative rounded-[2.5rem] overflow-hidden bg-purple-500 p-8 flex flex-col justify-between shadow-sm cursor-pointer min-h-[220px]">
+        {/* ── PRIORITY CARD (Purple Banner: 180px) ── */}
+        <div className="px-6">
+          <motion.div whileTap={{ scale: 0.98 }} className="relative rounded-[2rem] overflow-hidden bg-purple-500 p-8 flex flex-col justify-between shadow-sm cursor-pointer h-[180px]">
              {/* Subtle internal texture/pattern */}
              <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-             <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+             <div className="relative z-10 flex flex-col h-full justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
                   <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">{PRIORITY_CARD.tag}</span>
                 </div>
                 <div>
-                  <h2 className="text-white text-[28px] font-bold leading-tight tracking-tight mb-2">{PRIORITY_CARD.headline}</h2>
-                  <p className="text-white/80 text-[13px] font-medium leading-snug line-clamp-2 max-w-[260px] mb-6">{PRIORITY_CARD.body}</p>
-                  <button className="px-6 py-3 bg-white text-navy text-[13px] font-bold rounded-[1rem] shadow-sm active:scale-95 transition-all flex items-center gap-2 w-fit">
-                    {PRIORITY_CARD.cta} <ArrowRight size={16} />
-                  </button>
+                  <h2 className="text-white text-[24px] font-bold leading-tight tracking-tight mb-2">{PRIORITY_CARD.headline}</h2>
+                  <p className="text-white/80 text-[11px] font-medium leading-snug line-clamp-1 max-w-[260px]">{PRIORITY_CARD.body}</p>
                 </div>
              </div>
           </motion.div>
         </div>
 
+        {/* ── 1. LIVE STATUS RIBBON (Seamless Entry Points) ── */}
+        <div className="space-y-3">
+          <div className="px-6 flex items-center justify-between">
+            <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Live Status</h3>
+            <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-widest">Tap to Reserve</p>
+          </div>
+          <div className="flex gap-2 overflow-x-auto px-6 no-scrollbar">
+            {FACILITIES.map((f) => (
+              <motion.button
+                key={f.id}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setSelectedRoom(f)}
+                className="shrink-0 h-[56px] px-4 rounded-[12px] border border-slate-50 bg-white flex items-center gap-3 shadow-sm"
+              >
+                <div className={`w-2 h-2 rounded-full ${f.available ? 'bg-teal-500 animate-pulse' : 'bg-red-500'}`} />
+                <div className="flex flex-col text-left">
+                  <p className="text-[14px] font-bold text-navy leading-none mb-1">{f.name}: {f.seats}</p>
+                  <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-widest">{f.available ? 'Available' : 'Full'}</p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
         {/* ── CAMPUS LIFE ── */}
         <div>
-          <div className="px-5 mb-6">
+          <div className="px-6 mb-6">
             <h3 className="text-[18px] font-bold text-navy tracking-tight">Campus Life</h3>
-            <p className="text-[12px] text-slate-400 font-medium mt-0.5">Events, notices & club activity</p>
+            <p className="text-[11px] text-[#8E8E93] font-medium mt-0.5">Events, notices & club activity</p>
           </div>
-          <div className="flex gap-4 overflow-x-auto px-5 no-scrollbar pb-1">
+          <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar pb-1">
             {CAMPUS_LIFE.map((item) => (
               <motion.div
                 key={item.id}
@@ -222,27 +243,27 @@ export default function PulseBulletinPage() {
           </div>
         </div>
 
-        {/* ── ACADEMIC ALERTS (QUIET STREAM) ── */}
-        <div className="px-5">
+        {/* ── ACADEMIC ALERTS (EDITORIAL MINIMALISM) ── */}
+        <div className="px-6">
           <div className="flex items-center gap-2 mb-6">
-            <h3 className="text-[17px] font-bold text-navy tracking-tight">Academic Alerts</h3>
+            <h3 className="text-[18px] font-bold text-navy tracking-tight">Academic Alerts</h3>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-1">
             {ACADEMIC_ALERTS.map((alert) => (
-              <div key={alert.id}>
+              <div key={alert.id} className="py-3 border-b border-slate-50 last:border-0">
                 <button
                   onClick={() => setExpandedAlert(expandedAlert === alert.id ? null : alert.id)}
-                  className="w-full flex items-start gap-4 transition-all text-left"
+                  className="w-full flex items-center gap-4 transition-all text-left"
                 >
-                  {/* Minimalist Colored Dot instead of Icon */}
-                  <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${alert.iconColor.replace('text-', 'bg-')}`} />
+                  {/* Minimalist Colored Dot */}
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${alert.iconColor.replace('text-', 'bg-')}`} />
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <p className={`text-[14px] ${alert.urgent ? 'font-bold' : 'font-semibold'} text-navy leading-snug`}>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[13px] font-bold text-navy leading-snug truncate">
                         {alert.title}
                       </p>
-                      <span className="text-[10px] text-slate-300 font-medium whitespace-nowrap">{alert.time}</span>
+                      <span className="text-[13px] text-[#8E8E93] font-bold whitespace-nowrap">{alert.time}</span>
                     </div>
                   </div>
                 </button>
@@ -254,11 +275,11 @@ export default function PulseBulletinPage() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="pl-6 pb-2 pt-3">
-                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed border-l-2 border-slate-50 pl-4">
-                          Official academic alert from the UniKL Registrar's Office. Please log into the student portal for full details.
+                      <div className="pl-6 pt-3">
+                        <p className="text-[11px] text-[#8E8E93] font-medium leading-relaxed">
+                          Official academic alert from the UniKL Registrar's Office.
                         </p>
-                        <button className="mt-3 ml-4 text-[11px] font-bold text-accent">Open Portal →</button>
+                        <button className="mt-2 text-[11px] font-bold text-accent">Open Portal →</button>
                       </div>
                     </motion.div>
                   )}
@@ -268,77 +289,57 @@ export default function PulseBulletinPage() {
           </div>
         </div>
 
-        {/* ── FACILITY BOOKINGS (THE FRICTIONLESS RESERVE) ── */}
-        <div>
-          <div className="px-5">
-            <div className="flex items-center gap-2 mb-6">
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">Facility Bookings</h3>
-            </div>
-          </div>
-          <div className="flex gap-3 overflow-x-auto px-5 no-scrollbar pb-4">
-            {FACILITIES.map((f) => (
-              <motion.button
-                key={f.id}
-                whileTap={f.available ? { scale: 0.96 } : {}}
-                onClick={() => f.available && setSelectedRoom(f)}
-                className={`shrink-0 w-[125px] p-5 rounded-[2.5rem] border text-left flex flex-col justify-between min-h-[160px] transition-all shadow-sm ${
-                  f.available 
-                    ? 'bg-[#F4FBF7] border-emerald-100/20 opacity-100' // Soft Mint
-                    : 'bg-[#F2F2F7] border-slate-200/40 opacity-60'   // Warm Grey / Receded
-                } ${!f.available ? 'cursor-not-allowed' : ''}`}
-              >
-                <div>
-                  <h4 className="text-[12px] font-medium text-navy/90 leading-tight mb-1">{f.name}</h4>
-                  <p className={`text-[10px] font-semibold ${f.available ? 'text-emerald-500' : 'text-slate-400'}`}>
-                    {f.available ? f.status : 'Fully Booked'}
-                  </p>
-                </div>
-                <div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-[14px] font-bold text-navy">{f.seats.split('/')[0]}</span>
-                    <span className="text-[10px] text-navy/30 font-medium tracking-tighter">/ {f.seats.split('/')[1]} seats</span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 font-medium mt-2 tracking-tight">
-                    {f.available ? 'Tap to reserve' : 'Check later'}
-                  </p>
-                </div>
-              </motion.button>
-            ))}
-          </div>
+        {/* ── 2. DIRECTORY QUICK-ACCESS (Icon Grid) ── */}
+        <div className="px-6 space-y-6">
+           <h3 className="text-[18px] font-bold text-navy tracking-tight">Directory</h3>
+           <div className="grid grid-cols-4 gap-4">
+              {[
+                { icon: MapIcon, label: 'Campus Map', path: '/map' },
+                { icon: Users, label: 'Staff Contacts', path: '/contacts' },
+                { icon: Activity, label: 'Bus Tracker', path: '/bus' },
+                { icon: BookOpen, label: 'Café Menu', path: '/cafe' },
+              ].map((item) => (
+                <button 
+                  key={item.label}
+                  onClick={() => router.push(item.path)}
+                  className="flex flex-col items-center gap-3 active:scale-90 transition-all"
+                >
+                  <item.icon size={24} strokeWidth={1.5} className="text-navy/40" />
+                  <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-tighter whitespace-nowrap">{item.label}</span>
+                </button>
+              ))}
+           </div>
         </div>
 
-        {/* ── INSTITUTIONAL REGISTRY (Blinkist Editorial Layout) ── */}
-        <div className="px-5">
-          <h3 className="text-[20px] font-bold text-navy tracking-tight mb-6">Institutional Registry</h3>
-          <div className="flex flex-col gap-4">
+
+        {/* ── 3. ACTIONABLE INSTITUTIONAL REGISTRY (Slim Design: 60px) ── */}
+        <div className="px-6 pb-24">
+          <h3 className="text-[18px] font-bold text-navy tracking-tight mb-6">Institutional Registry</h3>
+          <div className="flex flex-col gap-3">
             {NEWS_FEED.map((item) => (
               <motion.div
                 key={item.id}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full ${item.circleBg} rounded-[2rem] p-7 relative overflow-hidden flex items-center justify-between cursor-pointer border border-white/40 shadow-sm`}
+                className="w-full h-[64px] bg-white border border-slate-50 rounded-[12px] px-4 flex items-center justify-between cursor-pointer active:bg-slate-50 transition-all relative group"
               >
                 {/* Left Side Content */}
-                <div className="relative z-10 w-[65%]">
-                  <span className="text-[10px] font-black text-navy/30 uppercase tracking-[0.2em] mb-2 block">
-                    {item.tag}
-                  </span>
-                  <h4 className="text-[18px] font-bold text-navy mb-2 leading-[1.2] tracking-tight">{item.title}</h4>
-                  <p className="text-[13px] text-navy/40 font-semibold">{item.time}</p>
+                <div className="flex flex-col min-w-0 pr-12">
+                  <h4 className="text-[13px] font-bold text-navy leading-tight line-clamp-1">{item.title}</h4>
+                  <p className="text-[11px] text-[#8E8E93] font-medium uppercase tracking-wider">{item.tag} · {item.time}</p>
                 </div>
 
-                {/* Right Side Graphic */}
-                <div className="relative shrink-0">
-                   {/* Premium Framed Image - Solid and High Contrast */}
-                   <div className="w-[80px] h-[80px] bg-white rounded-2xl shadow-[0_12px_24px_rgba(0,0,0,0.08)] overflow-hidden border-[6px] border-white">
-                      <img src={item.img} className="w-full h-full object-cover contrast-[1.1]" alt={item.title} />
-                   </div>
+                {/* Ghost Action Button (Deep Link) */}
+                <button className="absolute right-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all px-2 py-1 bg-slate-50 rounded-md flex items-center gap-1.5 border border-slate-100">
+                  <span className="text-[9px] font-black text-navy uppercase tracking-tighter">View ↗</span>
+                </button>
+
+                {/* Right Side Graphic (Tiny) */}
+                <div className="w-10 h-10 rounded-[8px] overflow-hidden border border-slate-100 shrink-0 ml-4">
+                  <img src={item.img} className="w-full h-full object-cover" alt={item.title} />
                 </div>
               </motion.div>
             ))}
           </div>
-          <button className="w-full mt-8 h-12 border border-slate-100/50 rounded-2xl text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] active:scale-95 transition-all bg-white hover:bg-slate-50/50">
-            Load More
-          </button>
         </div>
 
       </div>
