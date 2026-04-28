@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
-import { onSnapshot, doc, collection, query, where } from 'firebase/firestore';
+import { onSnapshot, doc, collection, query, where, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, Bell, ShieldCheck, Settings,
@@ -11,7 +11,7 @@ import {
   MapPin, Edit3, Search, TrendingUp, Wallet,
   BarChart3, ArrowUpRight, Upload, HelpCircle, ChevronRight,
   Eye, Users, Trash2, CheckCircle2,
-  X, Info, Sparkles, MoreHorizontal, Footprints
+  X, Info, Sparkles, MoreHorizontal, Footprints, User
 } from 'lucide-react';
 import { markItemAsSold, deleteItemListing } from '@/lib/marketplace-utils';
 import HologramID from '@/components/shared/HologramID';
@@ -62,6 +62,7 @@ export default function MePage() {
   const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [isAvatarSheetOpen, setIsAvatarSheetOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -146,45 +147,56 @@ export default function MePage() {
         </button>
       </div>
 
-      <div className="pt-24 px-8 space-y-12">
+      <div className="pt-24 px-6 space-y-12">
 
-        {/* ── IDENTITY ALIGNMENT (IKEA-Refined Row) ── */}
+        {/* ── IDENTITY ALIGNMENT (Compact Overhaul) ── */}
         <motion.div 
           animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? -20 : 0 }}
-          className="flex flex-col gap-8"
+          className="flex flex-col"
         >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-5">
-              <motion.button 
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsIDOpen(true)}
-                className="relative w-16 h-16 rounded-full overflow-hidden border border-[#F2F2F7] bg-slate-50 group"
-              >
-                <img 
-                  src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} 
-                  className="w-full h-full object-cover" 
-                />
-                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Plus size={14} className="text-white/80" />
-                </div>
-              </motion.button>
+              {/* Overhauled Avatar with Micro-Refinement */}
+              <div className="relative">
+                <motion.button 
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsIDOpen(true)}
+                  className="w-[56px] h-[56px] rounded-full overflow-hidden border border-[#F2F2F7] bg-slate-50"
+                >
+                  <img 
+                    src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} 
+                    className="w-full h-full object-cover" 
+                  />
+                </motion.button>
+                
+                {/* Micro Pencil Action (20px) */}
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => {
+                    setIsAvatarSheetOpen(true);
+                    if (window.navigator.vibrate) window.navigator.vibrate(5);
+                  }}
+                  className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-white rounded-full border-[0.5px] border-[#E5E5EA] flex items-center justify-center text-navy/60"
+                >
+                  <Edit3 size={10} strokeWidth={2.4} />
+                </motion.button>
+              </div>
               
               <div className="flex flex-col">
-                <h1 className="text-[20px] font-bold text-black tracking-[-0.01em] leading-tight">
+                <h1 className="text-[18px] font-semibold text-black tracking-tight leading-tight">
                   {displayName}
                 </h1>
-                <p className="text-[11px] font-normal text-[#8E8E93] tracking-wide">
+                <p className="text-[11px] font-normal text-[#8E8E93] tracking-normal mt-0.5">
                   {profile?.student_id || 'Pulse Resident'}
                 </p>
 
-                {/* Matured Edit Profile Button */}
+                {/* Slim Edit Profile Button (110x28px) */}
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => router.push('/me/edit')}
-                  className="mt-2 w-[120px] h-[32px] rounded-full bg-[#F2F2F7] flex items-center justify-center gap-2 transition-all"
+                  className="mt-3 w-[110px] h-[28px] rounded-full bg-[#F5F5F7] flex items-center justify-center transition-all shadow-none"
                 >
-                  <Edit3 size={14} strokeWidth={2} className="text-[#1D1D1F]" />
-                  <span className="text-[12px] font-semibold text-[#1D1D1F] font-sans">Edit Profile</span>
+                  <span className="text-[12px] font-semibold text-[#1D1D1F]">Edit Profile</span>
                 </motion.button>
               </div>
             </div>
@@ -193,7 +205,7 @@ export default function MePage() {
             <motion.button 
               whileTap={{ scale: 0.97 }}
               onClick={() => router.push('/me/edit')} 
-              className="w-8 h-8 rounded-full bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] transition-all"
+              className="w-8 h-8 rounded-full bg-[#F5F5F7] flex items-center justify-center text-[#1D1D1F] transition-all"
             >
               <Settings size={18} strokeWidth={1.5} />
             </motion.button>
@@ -203,7 +215,7 @@ export default function MePage() {
         {/* ── FLOATING STATS (Zero-Container Architecture) ── */}
         <motion.div 
           animate={{ opacity: isCreateOpen ? 0 : 1 }}
-          className="flex items-center justify-between px-2"
+          className="flex items-center justify-between px-2 !mt-8"
         >
           <div className="flex-1 text-center">
             <p className="text-[24px] font-bold text-black tracking-[-0.02em]">{tenure}</p>
@@ -552,12 +564,74 @@ export default function MePage() {
         </div>
       )}
     </AnimatePresence>
+    <AvatarSelectorSheet 
+      isOpen={isAvatarSheetOpen} 
+      onClose={() => setIsAvatarSheetOpen(false)}
+      currentAvatar={profile?.photo_url}
+      onSelect={async (url) => {
+        if (!user) return;
+        await updateDoc(doc(db, 'users', user.uid), { photo_url: url });
+        setIsAvatarSheetOpen(false);
+      }}
+    />
     <RunnerEnrollmentSheet 
       isOpen={isEnrollmentOpen} 
       onClose={() => setIsEnrollmentOpen(false)} 
       onComplete={() => {}}
     />
     </>
+  );
+}
+
+function AvatarSelectorSheet({ isOpen, onClose, currentAvatar, onSelect }: any) {
+  const AVATAR_SEEDS = ['Felix', 'Amirul', 'Sarah', 'Danish', 'Iyad', 'Farhan', 'Muhaimizu', 'Ariff', 'Aria'];
+  
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[500] flex items-end justify-center">
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-navy/20 backdrop-blur-[2px]" 
+          />
+          <motion.div 
+            initial={{ y: "100%" }} 
+            animate={{ y: 0 }} 
+            exit={{ y: "100%" }} 
+            transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+            className="relative z-10 w-full max-w-lg bg-white rounded-t-[32px] p-8 pb-12 border-t border-[#EAEAEA]"
+          >
+            <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto mb-8" />
+            
+            <h2 className="text-[18px] font-bold text-navy mb-8 text-center tracking-tight">Identity Hub</h2>
+
+            <div className="grid grid-cols-3 gap-6 mb-10 px-4">
+              {AVATAR_SEEDS.map((seed) => {
+                const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+                return (
+                  <motion.button
+                    key={seed}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => onSelect(url)}
+                    className={`aspect-square rounded-[24px] overflow-hidden border-2 transition-all ${
+                      currentAvatar === url ? 'border-accent bg-accent/5' : 'border-[#F2F2F7] bg-slate-50'
+                    }`}
+                  >
+                    <img src={url} className="w-full h-full object-cover" />
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            <button className="w-full h-14 bg-slate-50 rounded-[18px] flex items-center justify-center gap-3 text-[13px] font-bold text-navy active:scale-[0.98] transition-all">
+              <Upload size={16} strokeWidth={2.5} />
+              Upload from Gallery
+            </button>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
 
