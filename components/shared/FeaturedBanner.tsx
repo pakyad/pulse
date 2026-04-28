@@ -13,6 +13,7 @@ export interface BannerSlide {
   ctaText?: string;
   ctaPath: string;
   bgColor?: string;
+  onClick?: () => void;
 }
 
 interface FeaturedBannerProps {
@@ -70,7 +71,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
                
                {/* Square CTA Button */}
                <button
-                 onClick={() => router.push(slide.ctaPath)}
+                 onClick={() => slide.onClick ? slide.onClick() : router.push(slide.ctaPath)}
                  className="shrink-0 w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50"
                >
                  <ArrowUpRight size={20} className="text-black" strokeWidth={2} />

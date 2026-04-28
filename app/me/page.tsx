@@ -19,6 +19,7 @@ import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import HeartbeatLine from '@/components/shared/HeartbeatLine';
 import CreateListing from '@/components/CreateListing';
+import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
 import Link from 'next/link';
 
 // Apple Settings-style menu groups
@@ -49,6 +50,7 @@ export default function MePage() {
   const [activeTab, setActiveTab] = useState<'active' | 'sold'>('active');
   const [isManageMode, setIsManageMode] = useState(false);
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+  const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
   const router = useRouter();
@@ -219,6 +221,30 @@ export default function MePage() {
                   </button>
                 ))}
               </div>
+
+              {/* Professional Status Row (Below Commerce) */}
+              {group.label === 'Commerce' && (
+                <div className="mt-8">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-3 ml-1">Professional Status</p>
+                  <button
+                    onClick={() => setIsEnrollmentOpen(true)}
+                    className="w-full flex items-center justify-between px-5 py-4 bg-white border border-[#EAEAEA] rounded-2xl hover:bg-slate-50 active:bg-slate-100 transition-all group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
+                        <Users size={17} className="text-teal-600" />
+                      </div>
+                      <span className="text-[14px] font-semibold text-navy">Campus Runner Status</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${profile?.runner_status === 'active' ? 'bg-teal-500 text-white' : 'bg-teal-50 text-teal-600 border border-teal-100'}`}>
+                        {profile?.runner_status === 'active' ? 'Active' : 'Apply'}
+                      </div>
+                      <ChevronRight size={16} className="text-slate-200" />
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </motion.div>
@@ -477,6 +503,11 @@ export default function MePage() {
         </div>
       )}
     </AnimatePresence>
+    <RunnerEnrollmentSheet 
+      isOpen={isEnrollmentOpen} 
+      onClose={() => setIsEnrollmentOpen(false)} 
+      onComplete={() => {}}
+    />
     </>
   );
 }

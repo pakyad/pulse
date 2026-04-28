@@ -2,299 +2,327 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { 
-  Clock, ShieldAlert, FileText, Globe, Home, Zap, Package, 
-  ChevronRight, Activity, TrendingUp, Search, ChevronLeft, 
-  Bell, MapPin, Flame, Power, Navigation, Phone, X, 
-  Wallet, History, ShieldCheck, HelpCircle, Settings as SettingsIcon,
-  LayoutGrid
+  ChevronLeft, 
+  Bell, 
+  X,
+  Loader2,
+  Navigation,
+  MapPin,
+  Camera,
+  Package
 } from 'lucide-react';
-import RunnerOnboarding from './onboarding/page'; 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
-import SearchOverlay from '@/components/shared/SearchOverlay';
+import RunnerDashboard from './RunnerDashboard'; 
 
-function RunnerDashboard({ profile }: { profile: any }) {
-   const router = useRouter();
-   const [isSearchOpen, setIsSearchOpen] = useState(false);
-   const [isOnline, setIsOnline] = useState(false);
-   const [isAccepting, setIsAccepting] = useState(false);
-   const activeMissions = profile?.current_missions || [];
-   const hasActive = activeMissions.length > 0;
+// ── VOXEL ICON SYNCHRONIZATION ──
+const VoxelFood = ({ className, size = 24 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect x="4" y="14" width="16" height="4" fill="currentColor" rx="1" />
+    <rect x="6" y="8" width="4" height="6" fill="currentColor" opacity="0.8" rx="1" />
+    <rect x="12" y="6" width="6" height="8" fill="currentColor" opacity="0.6" rx="1" />
+  </svg>
+);
 
-    const handleAcceptOrder = async () => {
-      if (!auth.currentUser) return;
-      setIsAccepting(true);
-      try {
-         const userRef = doc(db, 'users', auth.currentUser.uid);
-         await setDoc(userRef, {
-            current_missions: [{
-               id: 'CODEP-8821',
-               title: 'Nasi Lemak Ayam + Iced Milo',
-               items: [
-                  { name: 'Nasi Lemak Ayam', qty: 1, price: 8.50 },
-                  { name: 'Iced Milo', qty: 1, price: 3.00 }
-               ],
-               from: 'Cafe Block A',
-               from_instructions: 'Go to the side counter and ask for Order #CODEP-8821.',
-               to: 'Library East',
-               to_instructions: 'I am wearing a red shirt. Leave at the main entrance desk if not seen.',
-               customer: {
-                  name: 'Amirul H.',
-                  phone: '012-3456789',
-                  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
-               },
-               payout: 4.50,
-               status: 'active',
-               step: 1,
-               started_at: new Date().toISOString()
-            }]
-         }, { merge: true });
-         // We don't navigate immediately so the user can see the "Accepted" state on the dashboard
-         // But the profile listener will trigger hasActive update
-      } catch (error) {
-         console.error("Failed to accept order:", error);
-      } finally {
-         setIsAccepting(false);
-      }
-   };
+const VoxelLogistics = ({ className, size = 24 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect x="2" y="10" width="16" height="8" fill="currentColor" rx="1" />
+    <rect x="14" y="6" width="8" height="12" fill="currentColor" opacity="0.6" rx="1" />
+    <rect x="4" y="18" width="4" height="2" fill="currentColor" rx="0.5" />
+    <rect x="12" y="18" width="4" height="2" fill="currentColor" rx="0.5" />
+  </svg>
+);
 
-   return (
-      <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy max-w-md mx-auto border-x border-slate-50 shadow-sm">
-         
-         {/* ── FIXED NAV ── */}
-         <nav className="fixed top-0 left-0 right-0 z-50 px-5 pt-12 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50 max-w-md mx-auto">
-            <button onClick={() => router.push('/home')} className="p-1 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
-               <ChevronLeft size={28} strokeWidth={2} />
-            </button>
-            <h1 className="text-[22px] font-bold tracking-tight flex-1">Carrier Hub</h1>
-            <div className="flex items-center gap-2 shrink-0">
-               <button onClick={() => router.push('/run/wallet')} className="relative p-2 active:scale-90 text-navy/40 hover:text-navy">
-                  <LayoutGrid size={22} strokeWidth={2} />
-               </button>
-               <button onClick={() => router.push('/activity')} className="relative p-2 active:scale-90 text-navy/40 hover:text-navy">
-                  <Bell size={22} strokeWidth={2} />
-               </button>
-               <AvatarDropdown 
-                  photoUrl={profile?.photo_url} 
-                  userName={profile?.full_name || 'Pulse'} 
-               />
-            </div>
-         </nav>
+const VoxelBooks = ({ className, size = 24 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect x="4" y="4" width="4" height="16" fill="currentColor" rx="1" />
+    <rect x="10" y="4" width="4" height="16" fill="currentColor" opacity="0.8" rx="1" />
+    <rect x="16" y="4" width="4" height="16" fill="currentColor" opacity="0.6" rx="1" />
+  </svg>
+);
 
-         <div className="pt-28 px-5 space-y-8 pb-12">
-            
-            {/* ── 1. WORKING STATUS (Flat Layout) ── */}
-            <div className="flex items-center justify-between py-2 px-1">
-               <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isOnline ? 'bg-navy text-white shadow-[0_0_20px_rgba(10,15,30,0.2)]' : 'bg-slate-50 text-slate-300'}`}>
-                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="butt">
-                        <path d="M4 14h2v-2h2v-2h2V8h2v2h2v2h2v2h2v2h2v2h-2v-2h-2v-2h-2v-2h-2v2H8v2H6v2H4v-2z" />
-                        <path d="M10 18h4v2h-4v-2z" className={isOnline ? 'animate-pulse' : ''} />
-                     </svg>
-                  </div>
-                  <div className="flex flex-col">
-                     <h3 className="text-[18px] font-bold text-navy tracking-tight">Working Status</h3>
-                  </div>
-               </div>
-               <button 
-                  onClick={() => setIsOnline(!isOnline)}
-                  className={`w-[60px] h-[32px] rounded-full relative transition-all duration-300 ${isOnline ? 'bg-emerald-500 shadow-[0_4px_12px_rgba(16,185,129,0.2)]' : 'bg-slate-200 shadow-inner'}`}
-               >
-                  <motion.div 
-                     layout 
-                     className="w-6 h-6 bg-white rounded-full absolute top-1 shadow-[0_2px_4px_rgba(0,0,0,0.1)] flex items-center justify-center transition-all"
-                     initial={false} 
-                     animate={{ x: isOnline ? 30 : 4 }} 
-                  >
-                     {isOnline && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                  </motion.div>
-               </button>
-            </div>
+const VoxelErrands = ({ className, size = 24 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect x="8" y="4" width="8" height="8" fill="currentColor" rx="1" />
+    <rect x="4" y="14" width="16" height="6" fill="currentColor" opacity="0.6" rx="1" />
+  </svg>
+);
 
-            {/* ── 2. PERFORMANCE BENTO ── */}
-            <div className="grid grid-cols-2 gap-3">
-               <div className="bg-[#0A0F1E] rounded-[1.3rem] p-5 flex flex-col justify-between shadow-xl shadow-navy/10 min-h-[150px]">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Total Balance</p>
-                  <div>
-                     <p className="text-[26px] font-bold text-white tracking-tight">RM {(profile?.balance || 45.00).toFixed(2)}</p>
-                     <button onClick={() => router.push('/run/wallet')} className="text-[11px] font-bold text-white/60 mt-2 flex items-center gap-1">Manage Wallet <ChevronRight size={12}/></button>
-                  </div>
-               </div>
-               <div className="bg-white border border-slate-100 rounded-[1.3rem] p-5 flex flex-col justify-between shadow-sm min-h-[150px]">
-                  <div className="flex items-center gap-2">
-                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400">
-                        <path d="M12 2v2h2v2h2v2h2v2h2v2h-2v2h-2v2h-2v2h-2v2h-2v-2H8v-2H6v-2H4v-2H2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2z" />
-                     </svg>
-                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Rating</p>
-                  </div>
-                  <div>
-                     <p className="text-[26px] font-bold text-navy tracking-tight">4.98%</p>
-                     <p className="text-[11px] font-bold text-emerald-500 mt-2 flex items-center gap-1">Elite Status <TrendingUp size={12}/></p>
-                  </div>
-               </div>
-            </div>
+const SERVICES = [
+  { 
+    id: 'food', 
+    label: 'Food & Cravings', 
+    icon: VoxelFood, 
+    height: 'h-[240px]',
+    color: 'bg-[#F59E0B]',
+    shadow: 'bg-[#B45309]',
+    tags: []
+  },
+  { 
+    id: 'parcels', 
+    label: 'Parcel & Mail', 
+    icon: VoxelLogistics, 
+    height: 'h-[180px]',
+    color: 'bg-[#64748B]',
+    shadow: 'bg-[#334155]',
+    tags: ['Pickup', 'Drop-off']
+  },
+  { 
+    id: 'academic', 
+    label: 'Academic Print', 
+    icon: VoxelBooks, 
+    height: 'h-[210px]',
+    color: 'bg-[#6366F1]',
+    shadow: 'bg-[#3730A3]',
+    tags: ['Printing', 'Binding', 'Lab Delivery']
+  },
+  { 
+    id: 'errands', 
+    label: 'Custom Errands', 
+    icon: VoxelErrands, 
+    height: 'h-[140px]',
+    color: 'bg-[#A855F7]',
+    shadow: 'bg-[#7E22CE]',
+    tags: ['Personal Shopping', 'Queue Assist', 'Document Drop']
+  },
+];
 
-            {/* ── 3. MISSION TERMINAL ── */}
-            <div>
-               <AnimatePresence mode="wait">
-                  {isOnline ? (
-                     <motion.div 
-                        key="online-content"
-                        initial={{ opacity: 0, y: 10 }} 
-                        animate={{ opacity: 1, y: 0 }} 
-                        exit={{ opacity: 0, y: -10 }}
-                     >
-                        {hasActive ? (
-                           <motion.div 
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              className="bg-emerald-50/30 border border-emerald-100 rounded-[2.5rem] p-7 shadow-xl shadow-emerald-500/5 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all"
-                              onClick={() => router.push('/run/active')}
-                           >
-                              <div className="absolute top-0 right-0 p-5">
-                                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
-                              </div>
+const UNIKL_HOTSPOTS = ["Cafe Block A", "MIIT Level 2", "Lobby", "Library", "Starbucks", "West Wing"];
 
-                              <div className="relative z-10">
-                                 <div className="flex items-center gap-2 mb-6">
-                                    <span className="px-3 py-1 bg-emerald-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest">Order Accepted</span>
-                                    <span className="text-[10px] font-bold text-emerald-600/50 uppercase tracking-widest">#{activeMissions[0]?.id || 'CODEP-0000'}</span>
-                                 </div>
+const SPRING = { type: 'spring', stiffness: 400, damping: 25 };
 
-                                 <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-14 h-14 rounded-2xl bg-white border border-emerald-100 p-0.5 shadow-sm">
-                                       <img 
-                                         src={activeMissions[0]?.customer?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${activeMissions[0]?.customer?.name || 'User'}`} 
-                                         className="w-full h-full object-cover rounded-xl" 
-                                       />
-                                    </div>
-                                    <div>
-                                       <p className="text-[11px] font-black text-emerald-600/40 uppercase tracking-[0.2em] mb-0.5">Assigned Customer</p>
-                                       <h3 className="text-[20px] font-bold text-navy tracking-tight">{activeMissions[0]?.customer?.name || 'Student Client'}</h3>
-                                    </div>
-                                 </div>
-
-                                 <div className="space-y-6 relative mb-8">
-                                    <div className="absolute left-[11px] top-6 bottom-6 w-0.5 border-l-2 border-emerald-200/50 border-dashed" />
-                                    <div className="flex items-start gap-4 relative z-10">
-                                       <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black shrink-0 shadow-lg shadow-emerald-500/20">1#</div>
-                                       <div>
-                                          <p className="text-[13px] font-bold text-navy leading-none">Pickup at {activeMissions[0]?.from || 'Vendor'}</p>
-                                          <p className="text-[11px] font-medium text-slate-400 mt-1">Institutional Source</p>
-                                       </div>
-                                    </div>
-                                    <div className="flex items-start gap-4 relative z-10">
-                                       <div className="w-6 h-6 rounded-full bg-white text-slate-300 flex items-center justify-center text-[10px] font-black shrink-0 border border-slate-100">2#</div>
-                                       <div>
-                                          <p className="text-[13px] font-bold text-navy leading-none">Deliver to {activeMissions[0]?.to || 'Destination'}</p>
-                                          <p className="text-[11px] font-medium text-slate-400 mt-1">Campus Drop-off</p>
-                                       </div>
-                                    </div>
-                                 </div>
-
-                                 <button className="w-full bg-[#0A0F1E] text-white h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-[14px] shadow-lg shadow-navy/20 active:scale-95 transition-all">
-                                    <Navigation size={18} strokeWidth={2.5} /> Resume Mission Terminal
-                                 </button>
-                              </div>
-                              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-                           </motion.div>
-                        ) : (
-                           <div className="space-y-4">
-                              <div className="flex items-center justify-between mb-5 px-1">
-                                 <h3 className="text-[18px] font-bold text-navy tracking-tight">Active Pulse</h3>
-                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-500 rounded-full">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Live Orders</span>
-                                 </div>
-                              </div>
-                              <div className="p-7 bg-white border border-slate-100 rounded-[2.5rem] shadow-xl shadow-navy/5 flex flex-col gap-6 group relative overflow-hidden active:scale-[0.98] transition-all cursor-pointer">
-                                 <div className="flex justify-between items-start gap-4">
-                                    <div className="flex-1 min-w-0 space-y-3">
-                                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-navy text-white rounded-lg">
-                                          <Zap size={10} fill="currentColor" />
-                                          <span className="text-[9px] font-black uppercase tracking-widest relative z-10">Flash Hustle</span>
-                                       </div>
-                                       <h4 className="text-[22px] font-bold text-navy leading-tight tracking-tight">Nasi Lemak Ayam + Iced Milo</h4>
-                                       <div className="flex items-center gap-2 text-slate-400">
-                                          <MapPin size={14} className="text-blue-500" />
-                                          <p className="text-[13px] font-bold text-slate-500">Cafe Block A → Library East</p>
-                                       </div>
-                                    </div>
-                                    <div className="text-right shrink-0">
-                                       <p className="text-[24px] font-black text-navy tracking-tighter leading-none whitespace-nowrap">+RM 4.50</p>
-                                       <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-2 whitespace-nowrap">Instant Ledger</p>
-                                    </div>
-                                 </div>
-                                 <div className="grid grid-cols-3 gap-3">
-                                    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50">
-                                       <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Range</p>
-                                       <p className="text-[13px] font-bold text-navy">450m</p>
-                                    </div>
-                                    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50">
-                                       <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Window</p>
-                                       <p className="text-[13px] font-bold text-navy">8 min</p>
-                                    </div>
-                                    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100/50">
-                                       <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Load</p>
-                                       <p className="text-[13px] font-bold text-navy">Light</p>
-                                    </div>
-                                 </div>
-                                 <button onClick={handleAcceptOrder} disabled={isAccepting} className="w-full h-14 bg-navy text-white rounded-2xl font-bold text-[14px] shadow-lg shadow-navy/20 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3">
-                                    {isAccepting ? 'Synchronizing...' : <>Accept Directives <ChevronRight size={18}/></>}
-                                 </button>
-                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none" />
-                              </div>
-                           </div>
-                        )}
-                     </motion.div>
-                  ) : (
-                     <motion.div 
-                        key="offline-content"
-                        initial={{ opacity: 0 }} 
-                        animate={{ opacity: 1 }} 
-                        exit={{ opacity: 0 }}
-                        className="bg-slate-50/50 rounded-[2.5rem] py-16 px-8 text-center border border-dashed border-slate-200"
-                     >
-                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-slate-50">
-                           <Power size={24} className="text-slate-200" />
-                        </div>
-                        <p className="text-[17px] font-bold text-navy tracking-tight">Terminal Offline</p>
-                        <p className="text-[13px] text-slate-400 mt-2 font-medium leading-relaxed">Activate your working status to receive institutional delivery directives.</p>
-                     </motion.div>
-                  )}
-               </AnimatePresence>
-            </div>
-
-         </div>
-         <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-      </main>
-   );
-}
+// ── VOXEL CONTAINER COMPONENT (Standardized from Hub) ──
+const VoxelCard = ({ id, label, Icon, height, color, shadow, onClick, isHero = false, isWide = false }: any) => (
+  <motion.button 
+    layoutId={`card-${id}`}
+    onClick={onClick}
+    className={`relative w-full ${height} group transition-all duration-300 active:scale-[0.98] cursor-pointer`}
+  >
+    {/* 3D Base (Shadow/Extrusion) */}
+    <div className={`absolute inset-0 translate-y-2 translate-x-1.5 rounded-[22px] ${shadow} transition-all duration-300 group-hover:translate-y-3 group-hover:translate-x-2`} />
+    
+    {/* Main Voxel Block */}
+    <div className={`absolute inset-0 rounded-[22px] ${color} border border-white/20 p-8 flex flex-col justify-between overflow-hidden transition-all duration-200 group-hover:-translate-y-1 shadow-xl`}>
+       {(isHero || isWide) && <Icon className="absolute top-1/2 right-[-20px] -translate-y-1/2 text-white opacity-[0.08] scale-[5]" />}
+       
+       <div className="relative z-10">
+          <Icon className="text-white mb-4" size={24} />
+       </div>
+       
+       <div className="relative z-10">
+          <h4 className={`text-white font-bold tracking-tight leading-tight ${isHero ? 'text-[24px]' : 'text-[18px]'}`}>
+             {label.split(' ').length > 2 || isWide ? label : <>{label.split(' ')[0]} <br/> {label.split(' ').slice(1).join(' ')}</>}
+          </h4>
+       </div>
+    </div>
+  </motion.button>
+);
 
 export default function RunHub() {
-  const router = useRouter();
-  const [status, setStatus] = useState<'loading' | 'unverified' | 'pending' | 'verified'>('loading');
-  const [profile, setProfile] = useState<any>(null);
+    const router = useRouter();
+    const [view, setView] = useState<'consumer' | 'carrier'>('consumer');
+    const [profile, setProfile] = useState<any>(null);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [status, setStatus] = useState<'loading' | 'verified'>('loading');
+    
+    const [form, setForm] = useState({ source: '', target: '', urgency: 'Standard' });
 
-  useEffect(() => {
-    let unsubProfile: (() => void) | undefined;
-    const unsub = auth.onAuthStateChanged(async (user) => {
-      if (!user) { setStatus('verified'); return; }
-      try {
-        const docRef = doc(db, "users", user.uid);
-        unsubProfile = onSnapshot(docRef, (docSnap) => {
-           if (docSnap.exists()) {
-             setProfile(docSnap.data());
-             setStatus('verified'); 
-           } else { setStatus('verified'); }
+    useEffect(() => {
+        const unsub = auth.onAuthStateChanged(user => {
+            if (user) {
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                  setProfile(snap.data());
+                  setStatus('verified');
+                });
+            } else { setStatus('verified'); }
         });
-      } catch (error) { setStatus('verified'); }
-    });
-    return () => { unsub(); if (unsubProfile) unsubProfile(); };
-  }, []);
+        return () => unsub();
+    }, []);
 
-  if (status === 'loading') return <main className="min-h-screen bg-[#FDFDFD] flex items-center justify-center"><div className="w-8 h-8 border-4 border-navy/20 border-t-navy rounded-full animate-spin" /></main>;
-  return <>{status === 'verified' ? <RunnerDashboard profile={profile} /> : <RunnerOnboarding />}</>;
+    const isFormComplete = form.source && form.target;
+
+    if (status === 'loading') return <main className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-navy" /></main>;
+
+    if (view === 'carrier' && profile?.runner_status === 'active') {
+        return <RunnerDashboard profile={profile} onBack={() => setView('consumer')} />;
+    }
+
+    return (
+       <main className="min-h-screen bg-white pb-32 font-sans antialiased text-navy overflow-x-hidden">
+          
+          <nav className="fixed top-0 left-0 right-0 z-[60] px-8 pt-12 pb-6 flex items-center justify-between bg-white/80 backdrop-blur-xl">
+             <div className="flex items-center gap-4">
+                <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all"><ChevronLeft size={24} /></button>
+                <h1 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">Run Terminal</h1>
+             </div>
+             <div className="flex items-center gap-4">
+                <button className="text-slate-300 active:scale-90 transition-all relative">
+                    <Bell size={20} />
+                    <div className="absolute top-0 right-0 w-2 h-2 bg-accent rounded-full border-2 border-white" />
+                </button>
+                <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
+             </div>
+          </nav>
+
+          <div className="pt-32 px-8 space-y-12">
+             
+             <LayoutGroup>
+                <section className="space-y-10">
+                   <div className="space-y-2">
+                      <h2 className="text-[32px] font-bold tracking-tightest leading-[1.1] text-navy">
+                        Logistics <br/>Directives
+                      </h2>
+                      <p className="text-[13px] text-slate-400 font-medium tracking-tight">Select your operational sector below.</p>
+                   </div>
+                   
+                   {/* ── PIXELATE (VOXEL) ASYMMETRICAL LAYOUT ── */}
+                   <div className="space-y-6">
+                      {/* Hero Slate: Food & Cravings */}
+                      <VoxelCard 
+                        {...SERVICES[0]} 
+                        Icon={VoxelFood}
+                        isHero={true} 
+                        onClick={() => setSelectedId('food')} 
+                      />
+
+                      <div className="flex gap-5 items-start">
+                         {/* Parcel & Mail */}
+                         <VoxelCard 
+                           {...SERVICES[1]} 
+                           Icon={VoxelLogistics}
+                           onClick={() => setSelectedId('parcels')} 
+                         />
+
+                         {/* Academic Print */}
+                         <VoxelCard 
+                           {...SERVICES[2]} 
+                           Icon={VoxelBooks}
+                           onClick={() => setSelectedId('academic')} 
+                         />
+                      </div>
+
+                      {/* Custom Errands (Wide Anchor) */}
+                      <VoxelCard 
+                        {...SERVICES[3]} 
+                        Icon={VoxelErrands}
+                        isWide={true}
+                        onClick={() => setSelectedId('errands')} 
+                      />
+                   </div>
+                </section>
+             </LayoutGroup>
+
+             <AnimatePresence>
+                {selectedId && (
+                   <motion.div 
+                     layoutId={`card-${selectedId}`}
+                     transition={SPRING}
+                     className="fixed inset-0 z-[100] bg-white flex flex-col p-8 overflow-y-auto no-scrollbar"
+                   >
+                      <div className="flex justify-between items-start mb-12 pt-4">
+                         <div className="space-y-4">
+                            <div className="flex items-center gap-4">
+                               {selectedId === 'food' && <VoxelFood className="text-navy" size={28} />}
+                               {selectedId === 'parcels' && <VoxelLogistics className="text-navy" size={28} />}
+                               {selectedId === 'academic' && <VoxelBooks className="text-navy" size={28} />}
+                               {selectedId === 'errands' && <VoxelErrands className="text-navy" size={28} />}
+                               <h2 className="text-[28px] font-bold tracking-tightest">{SERVICES.find(s => s.id === selectedId)?.label}</h2>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-2">
+                               {SERVICES.find(s => s.id === selectedId)?.tags.map(tag => (
+                                  <span key={tag} className="px-4 py-2 bg-[#F5F5F7] text-navy/40 text-[11px] font-bold rounded-lg uppercase tracking-wider">
+                                     {tag}
+                                  </span>
+                               ))}
+                            </div>
+                         </div>
+                         <button onClick={() => { setSelectedId(null); }} className="p-3 bg-slate-50 rounded-full text-navy/20 active:scale-90 transition-all"><X size={24}/></button>
+                      </div>
+
+                      <div className="flex-1 space-y-16 pb-32">
+                         <section className="space-y-6">
+                            <h4 className="text-[10px] font-black text-[#86868B] uppercase tracking-[2px]">Where is the {selectedId}?</h4>
+                            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-8 px-8">
+                               {UNIKL_HOTSPOTS.map(spot => (
+                                  <button 
+                                    key={spot}
+                                    onClick={() => setForm({ ...form, source: spot })}
+                                    className={`px-8 py-5 rounded-[16px] text-[15px] font-bold whitespace-nowrap transition-all duration-300 ${form.source === spot ? 'bg-[#1D1D1F] text-white shadow-xl shadow-navy/20' : 'bg-[#F5F5F7] text-[#86868B]'}`}
+                                  >
+                                     {spot}
+                                  </button>
+                               ))}
+                            </div>
+                         </section>
+
+                         <motion.section 
+                           initial={{ opacity: 0, y: 20 }}
+                           animate={{ opacity: form.source ? 1 : 0.3, y: form.source ? 0 : 20 }}
+                           className="space-y-6"
+                         >
+                            <h4 className="text-[10px] font-black text-[#86868B] uppercase tracking-[2px]">Operational Target</h4>
+                            <div className="flex gap-4">
+                               <button 
+                                 onClick={() => setForm({ ...form, target: 'Current GPS' })}
+                                 className={`flex-1 h-20 rounded-[16px] flex flex-col items-center justify-center gap-2 font-bold text-[14px] transition-all ${form.target === 'Current GPS' ? 'bg-[#1D1D1F] text-white' : 'bg-[#F5F5F7] text-[#86868B]'}`}
+                               >
+                                  <Navigation size={20} /> Use My Location
+                               </button>
+                               <button 
+                                 onClick={() => setForm({ ...form, target: 'Manual Selection' })}
+                                 className={`flex-1 h-20 rounded-[16px] flex flex-col items-center justify-center gap-2 font-bold text-[14px] transition-all ${form.target === 'Manual Selection' ? 'bg-[#1D1D1F] text-white' : 'bg-[#F5F5F7] text-[#86868B]'}`}
+                               >
+                                  <MapPin size={20} /> Set Manually
+                               </button>
+                            </div>
+                         </motion.section>
+
+                         <motion.section 
+                           initial={{ opacity: 0 }}
+                           animate={{ opacity: form.target ? 1 : 0 }}
+                           className="space-y-6"
+                         >
+                            <h4 className="text-[10px] font-black text-[#86868B] uppercase tracking-[2px]">Verification</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                               <button className="h-20 rounded-[16px] bg-[#F5F5F7] border border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 text-[#86868B] font-bold text-[12px]">
+                                  <Camera size={20} /> Attachment
+                               </button>
+                               <button className="h-20 rounded-[16px] bg-[#F5F5F7] border border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 text-[#86868B] font-bold text-[12px]">
+                                  <Package size={20} /> Size Protocol
+                               </button>
+                            </div>
+                         </motion.section>
+                      </div>
+
+                      <div className="fixed bottom-0 left-0 right-0 p-8 bg-white/80 backdrop-blur-xl border-t border-slate-50 flex items-center justify-between">
+                         <div className="space-y-1">
+                            <p className="text-[10px] font-black text-[#86868B] uppercase tracking-[2px]">Energy Fee</p>
+                            <p className="text-[24px] font-bold text-[#1D1D1F]">RM 4.50</p>
+                         </div>
+                         <button 
+                           disabled={!isFormComplete}
+                           className={`h-16 px-10 rounded-[20px] font-black text-[14px] tracking-widest uppercase transition-all duration-500 ${isFormComplete ? 'bg-[#1D1D1F] text-white shadow-2xl' : 'bg-slate-50 text-slate-200'}`}
+                         >
+                            Initiate Sequence
+                         </button>
+                      </div>
+                   </motion.div>
+                )}
+             </AnimatePresence>
+
+             <footer className="pt-20 pb-10 flex flex-col items-center">
+                <button 
+                  onClick={() => router.push('/run/onboarding')}
+                  className="text-[12px] font-bold text-navy/30 hover:text-navy transition-all uppercase tracking-[1.5px]"
+                >
+                   Apply to be a Runner
+                </button>
+             </footer>
+
+          </div>
+       </main>
+    );
 }
