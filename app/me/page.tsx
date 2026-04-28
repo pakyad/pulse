@@ -151,36 +151,53 @@ export default function MePage() {
         {/* ── IDENTITY ALIGNMENT (IKEA-Refined Row) ── */}
         <motion.div 
           animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? -20 : 0 }}
-          className="flex items-center justify-between"
+          className="flex flex-col gap-8"
         >
-          <div className="flex items-center gap-5">
-            <motion.button 
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsIDOpen(true)}
-              className="relative w-16 h-16 rounded-full overflow-hidden border border-[#F2F2F7] bg-slate-50 group"
-            >
-              <img 
-                src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} 
-                className="w-full h-full object-cover" 
-              />
-              <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Plus size={14} className="text-white/80" />
-              </div>
-            </motion.button>
-            
-            <div className="flex flex-col">
-              <h1 className="text-[20px] font-bold text-black tracking-[-0.01em] leading-tight">
-                {displayName}
-              </h1>
-              <p className="text-[11px] font-normal text-[#8E8E93] tracking-wide">
-                {profile?.student_id || 'Pulse Resident'}
-              </p>
-            </div>
-          </div>
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-5">
+              <motion.button 
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsIDOpen(true)}
+                className="relative w-16 h-16 rounded-full overflow-hidden border border-[#F2F2F7] bg-slate-50 group"
+              >
+                <img 
+                  src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} 
+                  className="w-full h-full object-cover" 
+                />
+                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Plus size={14} className="text-white/80" />
+                </div>
+              </motion.button>
+              
+              <div className="flex flex-col">
+                <h1 className="text-[20px] font-bold text-black tracking-[-0.01em] leading-tight">
+                  {displayName}
+                </h1>
+                <p className="text-[11px] font-normal text-[#8E8E93] tracking-wide">
+                  {profile?.student_id || 'Pulse Resident'}
+                </p>
 
-          <button onClick={() => router.push('/me/edit')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy active:scale-90 transition-all">
-            <Settings size={18} strokeWidth={1.5} />
-          </button>
+                {/* Matured Edit Profile Button */}
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => router.push('/me/edit')}
+                  className="mt-2 w-[120px] h-[32px] rounded-full bg-[#F2F2F7] flex items-center justify-center gap-2 transition-all"
+                >
+                  <Edit3 size={14} strokeWidth={2} className="text-[#1D1D1F]" />
+                  <span className="text-[12px] font-semibold text-[#1D1D1F] font-sans">Edit Profile</span>
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Refined Settings Circle */}
+            <motion.button 
+              whileTap={{ scale: 0.97 }}
+              onClick={() => router.push('/me/edit')} 
+              className="w-8 h-8 rounded-full bg-[#F2F2F7] flex items-center justify-center text-[#1D1D1F] transition-all"
+            >
+              <Settings size={18} strokeWidth={1.5} />
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* ── FLOATING STATS (Zero-Container Architecture) ── */}
