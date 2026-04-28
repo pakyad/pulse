@@ -69,18 +69,31 @@ export default function MePage() {
     const u = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
       if (!currentUser) { setLoading(false); return; }
-      onSnapshot(doc(db, 'users', currentUser.uid), s => { if (s.exists()) setProfile(s.data()); setLoading(false); });
+      onSnapshot(doc(db, 'users', currentUser.uid), 
+        s => { if (s.exists()) setProfile(s.data()); setLoading(false); },
+        err => { console.error("[Pulse Registry] Profile Sync Error:", err); setLoading(false); }
+      );
+
       const nq = query(collection(db, 'transactions'), where('buyer_id', '==', currentUser.uid), where('status', '==', 'PENDING'));
-      onSnapshot(nq, s => setNotificationCount(s.docs.length));
+      onSnapshot(nq, 
+        s => setNotificationCount(s.docs.length),
+        err => console.error("[Pulse Registry] Transaction Listener Error:", err)
+      );
+
       const lq = query(collection(db, 'items'), where('seller_id', '==', currentUser.uid));
-      onSnapshot(lq, s => {
-        const live = s.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Merge live data with high-fidelity dummy data for a rich UI experience
-        const merged = [...live, ...DUMMY_LISTINGS];
-        // Ensure unique IDs if there's any overlap (unlikely with 'd' prefix)
-        setMyListings(merged);
-        setLoading(false);
-      });
+      onSnapshot(lq, 
+        s => {
+          const live = s.docs.map(d => ({ id: d.id, ...d.data() }));
+          const merged = [...live, ...DUMMY_LISTINGS];
+          setMyListings(merged);
+          setLoading(false);
+        },
+        err => {
+          console.error("[Pulse Registry] Items Listener Error:", err);
+          setMyListings(DUMMY_LISTINGS); // Fallback to dummy data
+          setLoading(false);
+        }
+      );
     });
     return () => u();
   }, []);
@@ -406,16 +419,15 @@ export default function MePage() {
                           )}
                         </div>
                         
-                        <div className="text-right">
-                          {item.status === 'SOLD' ? (
-                            <span className="text-[10px] font-bold text-[#999999] uppercase tracking-widest line-through">SOLD</span>
-                          ) : (
-                            <p className="text-[15px] font-black text-[#1D1D1F] tracking-tighter leading-none">
-                              <span className="opacity-20 mr-0.5">RM</span>
-                              {item.price?.toLocaleString()}
-                            </p>
-                          )}
-                        </div>
+                          <div className="text-right">
+                            {item.status === 'SOLD' ? (
+                              <span className="text-[10px] font-bold text-[#999999] uppercase tracking-widest line-through">SOLD</span>
+                            ) : (
+                              <p className="text-[15px] font-black text-[#1D1D1F] tracking-tighter leading-none">
+                                RM {item.price?.toLocaleString()}
+                              </p>
+                            )}
+                          </div>
                       </div>
                     </div>
 

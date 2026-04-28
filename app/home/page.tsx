@@ -167,7 +167,7 @@ export default function PulseHome() {
                   <img src={item.image_url || item.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 block" alt={item.title} />
                 </div>
                 <h4 className="text-[13px] font-medium text-navy leading-tight line-clamp-1 mb-0.5">{item.title}</h4>
-                <p className="text-[14px] font-bold text-navy">RM {Number(item.price).toFixed(0)}</p>
+                <p className="text-[14px] font-black text-navy leading-none tracking-tighter mt-1">RM {Number(item.price).toLocaleString()}</p>
               </motion.div>
             ))}
           </div>
@@ -208,7 +208,7 @@ export default function PulseHome() {
                 </div>
                 <div className="px-2 space-y-1">
                   <h4 className="text-[13px] font-bold text-navy leading-tight line-clamp-1">{item.title}</h4>
-                  <p className="text-[16px] font-bold text-accent">RM {item.price}</p>
+                  <p className="text-[16px] font-black text-accent leading-none tracking-tighter">RM {item.price.toLocaleString()}</p>
                 </div>
               </motion.div>
             ))}

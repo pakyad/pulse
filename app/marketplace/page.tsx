@@ -288,9 +288,8 @@ export default function MarketplacePage() {
                   </div>
                   
                   <div className="flex items-center justify-between pt-0.5">
-                    <p className="text-[15px] font-bold text-navy">
-                      <span className="text-[10px] opacity-40 font-medium mr-0.5">RM</span>
-                      {Number(item.price).toLocaleString()}
+                    <p className="text-[15px] font-black text-navy leading-none tracking-tighter">
+                      RM {Number(item.price).toLocaleString()}
                     </p>
                     <div className="flex items-center gap-1.5 opacity-60">
                       <p className="text-[10px] font-medium text-slate-400 truncate max-w-[60px]">
