@@ -11,7 +11,7 @@ import {
   MapPin, Edit3, Search, TrendingUp, Wallet,
   BarChart3, ArrowUpRight, Upload, HelpCircle, ChevronRight,
   Eye, Users, Trash2, CheckCircle2,
-  X, Info, Sparkles, MoreHorizontal
+  X, Info, Sparkles, MoreHorizontal, Footprints
 } from 'lucide-react';
 import { markItemAsSold, deleteItemListing } from '@/lib/marketplace-utils';
 import HologramID from '@/components/shared/HologramID';
@@ -222,19 +222,22 @@ export default function MePage() {
                 ))}
               </div>
 
-              {/* Professional Status Row (Below Commerce) */}
-              {group.label === 'Commerce' && (
+              {/* Campus Careers Section (Below Analytics) */}
+              {group.label === 'Analytics' && (
                 <div className="mt-8">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-3 ml-1">Professional Status</p>
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-3 ml-1">Campus Careers</p>
                   <button
                     onClick={() => setIsEnrollmentOpen(true)}
                     className="w-full flex items-center justify-between px-5 py-4 bg-white border border-[#EAEAEA] rounded-2xl hover:bg-slate-50 active:bg-slate-100 transition-all group"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
-                        <Users size={17} className="text-teal-600" />
+                      <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">
+                        <Footprints size={17} className="text-slate-400" />
                       </div>
-                      <span className="text-[14px] font-semibold text-navy">Campus Runner Status</span>
+                      <div className="flex flex-col text-left">
+                        <span className="text-[14px] font-medium text-navy">Become a Pulse Runner</span>
+                        <span className="text-[11px] text-slate-400">Verify your transport and start earning while you walk.</span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${profile?.runner_status === 'active' ? 'bg-teal-500 text-white' : 'bg-teal-50 text-teal-600 border border-teal-100'}`}>

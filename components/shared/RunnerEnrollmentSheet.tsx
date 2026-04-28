@@ -46,10 +46,10 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: R
             className="absolute inset-0 bg-navy/20 backdrop-blur-sm"
           />
           <motion.div 
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             className="relative z-10 w-full max-w-lg bg-white rounded-t-[32px] p-10 border-x border-t border-[#EAEAEA] shadow-2xl overflow-hidden min-h-[50vh]"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl -mr-16 -mt-16" />
@@ -73,7 +73,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: R
                     </div>
 
                     <div className="space-y-2">
-                       <h2 className="text-[24px] font-black tracking-tightest">How will you deliver?</h2>
+                       <h2 className="text-[24px] font-black tracking-tightest">How do you navigate UniKL?</h2>
                        <p className="text-[14px] text-slate-400 font-medium">Select your primary mode of transit.</p>
                     </div>
 

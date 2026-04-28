@@ -115,8 +115,8 @@ export default function PulseHome() {
       id: 'h-runner',
       ctaPath: '#',
       headline: "Earn on your schedule.",
-      subline: "Join the MIIT Runner network and turn your campus walks into earnings.",
-      bgColor: '#7D8491', // Soft Slate Blue
+      subline: "Join the MIIT Runner network to support your peers.",
+      bgColor: '#A3B18A', // Muted Green (Parity with Stipend Banner)
       onClick: () => setIsEnrollmentOpen(true)
     }
   ];

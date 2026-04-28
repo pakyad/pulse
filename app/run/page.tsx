@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
 import RunnerDashboard from './RunnerDashboard'; 
 
 // ── VOXEL ICON SYNCHRONIZATION ──
@@ -126,6 +127,7 @@ export default function RunHub() {
     const [profile, setProfile] = useState<any>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [status, setStatus] = useState<'loading' | 'verified'>('loading');
+    const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
     
     const [form, setForm] = useState({ source: '', target: '', urgency: 'Standard' });
 
@@ -313,14 +315,23 @@ export default function RunHub() {
                 )}
              </AnimatePresence>
 
+             {/* ── RUNNER GHOST CARD (The "Easter Egg") ── */}
              <footer className="pt-20 pb-10 flex flex-col items-center">
                 <button 
-                  onClick={() => router.push('/run/onboarding')}
-                  className="text-[12px] font-bold text-navy/30 hover:text-navy transition-all uppercase tracking-[1.5px]"
+                  onClick={() => setIsEnrollmentOpen(true)}
+                  className="w-full p-8 rounded-[24px] border border-dashed border-[#E5E5E5] bg-transparent transition-all active:scale-[0.98] group"
                 >
-                   Apply to be a Runner
+                   <p className="text-[13px] font-medium text-slate-400">
+                      Interested in helping the campus? <span className="text-teal-500 font-bold ml-1 hover:underline underline-offset-4 tracking-tight">View Runner Requirements</span>
+                   </p>
                 </button>
              </footer>
+
+             <RunnerEnrollmentSheet 
+                isOpen={isEnrollmentOpen} 
+                onClose={() => setIsEnrollmentOpen(false)} 
+                onComplete={() => {}} 
+             />
 
           </div>
        </main>
