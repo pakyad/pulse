@@ -40,6 +40,15 @@ const MENU_GROUPS = [
   },
 ];
 
+// ── High-Fidelity Dummy Listings (Institution Seed) ──
+const DUMMY_LISTINGS = [
+  { id: 'd1', title: 'M2 MacBook Air', price: 3200, status: 'ACTIVE', category: 'Tech', views: 842, interests: 45, image_url: 'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?q=80&w=400' },
+  { id: 'd2', title: 'MIIT Official Hoodie', price: 85, status: 'ACTIVE', category: 'Apparel', views: 120, interests: 12, image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400' },
+  { id: 'd3', title: 'Software Engineering Principles', price: 45, status: 'ACTIVE', category: 'Books', views: 32, interests: 4, image_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=400' },
+  { id: 'd4', title: 'Sony WH-1000XM5', price: 950, status: 'ACTIVE', category: 'Tech', views: 215, interests: 28, image_url: 'https://images.unsplash.com/photo-1618335829737-2228ad30662b?q=80&w=400' },
+  { id: 'd5', title: 'Logitech G Pro Mouse', price: 150, status: 'SOLD', category: 'Tech', views: 180, interests: 15, image_url: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=400' },
+];
+
 export default function MePage() {
   const [isIDOpen, setIsIDOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -64,7 +73,14 @@ export default function MePage() {
       const nq = query(collection(db, 'transactions'), where('buyer_id', '==', currentUser.uid), where('status', '==', 'PENDING'));
       onSnapshot(nq, s => setNotificationCount(s.docs.length));
       const lq = query(collection(db, 'items'), where('seller_id', '==', currentUser.uid));
-      onSnapshot(lq, s => setMyListings(s.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => d.is_active !== false)));
+      onSnapshot(lq, s => {
+        const live = s.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Merge live data with high-fidelity dummy data for a rich UI experience
+        const merged = [...live, ...DUMMY_LISTINGS];
+        // Ensure unique IDs if there's any overlap (unlikely with 'd' prefix)
+        setMyListings(merged);
+        setLoading(false);
+      });
     });
     return () => u();
   }, []);
@@ -252,136 +268,170 @@ export default function MePage() {
           ))}
         </motion.div>
 
-        {/* ── MY LISTINGS GALLERY (THE THREE PILLARS) ── */}
-        <div>
-          {/* Pillar C: The "History" Toggle */}
-          <div className="flex items-center justify-between mt-12 mb-8 px-1">
-            <div className="flex bg-slate-50 p-1 rounded-2xl border border-[#EAEAEA]">
-              <button 
-                onClick={() => setActiveTab('active')}
-                className={`px-6 py-2 rounded-xl text-[12px] font-bold transition-all ${activeTab === 'active' ? 'bg-white text-navy' : 'text-slate-400'}`}
-              >
-                Active
-              </button>
-              <button 
-                onClick={() => setActiveTab('sold')}
-                className={`px-6 py-2 rounded-xl text-[12px] font-bold transition-all ${activeTab === 'sold' ? 'bg-white text-navy' : 'text-slate-400'}`}
-              >
-                Sold
-              </button>
+        {/* ── MERCHANT INVENTORY SECTION (High-Density Minimalism) ── */}
+        <div className="px-6 space-y-12">
+          
+          {/* ── THE ANALYTICS STRIP (IKEA Logic) ── */}
+          <div className="bg-white border border-[#F2F2F7] rounded-[14px] p-5 flex items-center justify-between shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Global Views</span>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-[18px] font-bold text-navy leading-none tracking-tight">
+                    {myListings.reduce((acc, l) => acc + (l.views || 0), 0).toLocaleString()}
+                  </h3>
+                  <div className="w-px h-3 bg-slate-50" />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Interested</span>
+                <h3 className="text-[18px] font-bold text-navy leading-none tracking-tight">
+                  {myListings.reduce((acc, l) => acc + (l.interests || 0), 0).toLocaleString()}
+                </h3>
+              </div>
             </div>
-            {isManageMode ? (
-              <button onClick={() => setIsManageMode(false)} className="text-[12px] font-bold text-accent px-4 py-2 bg-accent/5 rounded-xl">Done</button>
-            ) : (
-              <span className="text-[12px] font-bold text-slate-300 uppercase tracking-widest">{myListings.filter(l => activeTab === 'active' ? l.status !== 'SOLD' : l.status === 'SOLD').length} items</span>
-            )}
+            
+            <button 
+              onClick={() => setIsInsightsOpen(true)}
+              className="h-8 px-3 bg-slate-50 rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-navy hover:bg-slate-100 transition-all"
+            >
+              Performance <ArrowUpRight size={14} strokeWidth={1.5} className="text-navy/30" />
+            </button>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-6 -mx-1 px-1 min-h-[220px] items-start">
-            {/* Pillar A: The "Active" Carousel (Visual) */}
-            {activeTab === 'active' && (
-              <motion.button
-                layoutId="create-listing-canvas"
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setIsCreateOpen(true)}
-                className="shrink-0 w-[145px] h-[200px] rounded-2xl border border-dashed border-[#EAEAEA] flex flex-col items-center justify-center gap-3 bg-slate-50/30 hover:bg-slate-50 transition-all group z-50"
-              >
-                <div className="w-10 h-10 rounded-full border border-[#EAEAEA] flex items-center justify-center text-slate-300 group-hover:text-navy transition-colors">
-                  <Plus size={20} />
-                </div>
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">New Listing</span>
-              </motion.button>
-            )}
-
-            {myListings
-              .filter(item => activeTab === 'active' ? item.status !== 'SOLD' : item.status === 'SOLD')
-              .map((item) => (
-              <motion.div
-                key={item.id}
-                onContextMenu={(e) => { e.preventDefault(); setIsManageMode(true); }}
-                layout
-                animate={isManageMode ? {
-                  rotate: [0, -0.5, 0.5, -0.5, 0],
-                  transition: { repeat: Infinity, duration: 0.4 }
-                } : { rotate: 0 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="shrink-0 relative"
-              >
-                <div
-                  className="w-[145px] h-[200px] rounded-2xl bg-white border border-[#EAEAEA] overflow-hidden flex flex-col text-left group transition-all"
+          <div className="space-y-8">
+            {/* ── THE SEGMENTED SLIDING CONTROL (Precision Scaling) ── */}
+            <div className="flex items-center justify-between px-1">
+              <div className="flex bg-slate-50 p-0.5 rounded-[14px] w-40">
+                <button 
+                  onClick={() => setActiveTab('active')}
+                  className={`flex-1 py-1.5 rounded-[11px] text-[11px] font-bold transition-all ${activeTab === 'active' ? 'bg-white text-navy shadow-sm' : 'text-slate-400'}`}
                 >
-                  <div className="h-[115px] w-full bg-slate-50 relative overflow-hidden">
-                    <img 
-                      src={item.image_url} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                      onClick={() => !isManageMode && router.push(`/marketplace/${item.id}`)}
-                    />
-                    {item.status !== 'SOLD' && (
-                      <div className="absolute top-3 right-3 px-2 py-0.5 bg-white border border-[#EAEAEA] rounded-lg flex items-center gap-1">
-                        <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                        <span className="text-[8px] font-bold text-navy uppercase tracking-tighter">Live</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 p-4 flex flex-col">
-                    <div className="flex items-start justify-between gap-1">
-                      <h4 className="text-[12px] font-bold text-navy truncate leading-none flex-1">{item.title}</h4>
-                      <ListingTooltip item={item} />
-                    </div>
-                    <p className="text-[14px] font-black text-navy mt-auto">
-                      <span className="text-[10px] opacity-30 mr-0.5">RM</span>
-                      {item.price?.toFixed(0)}
-                    </p>
-                  </div>
-                </div>
+                  Active
+                </button>
+                <button 
+                  onClick={() => setActiveTab('sold')}
+                  className={`flex-1 py-1.5 rounded-[11px] text-[11px] font-bold transition-all ${activeTab === 'sold' ? 'bg-white text-navy shadow-sm' : 'text-slate-400'}`}
+                >
+                  Sold
+                </button>
+              </div>
+              
+              {!isManageMode && (
+                <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest">
+                  {myListings.filter(l => activeTab === 'active' ? l.status !== 'SOLD' : l.status === 'SOLD').length} Registry
+                </span>
+              )}
+            </div>
 
-                {/* Manage Mode Overlays */}
-                <AnimatePresence>
-                  {isManageMode && (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="absolute -top-2 -right-2 flex flex-col gap-2 z-20"
+            {/* ── THE INVENTORY GRID (Editorial Vertical Rhythm) ── */}
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={activeTab}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="grid grid-cols-2 gap-x-3 gap-y-12 pb-32"
+              >
+                {/* Index 0: The Minimal Lead */}
+                {activeTab === 'active' && (
+                  <div className="flex flex-col gap-2">
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIsCreateOpen(true)}
+                      className="aspect-square rounded-[8px] bg-white flex items-center justify-center group relative border border-[#F2F2F7] shadow-[0_8px_24px_rgba(0,0,0,0.02)]"
                     >
-                      <button 
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all hover:bg-red-600"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                      <button 
-                        onClick={() => handleMarkAsSold(item.id)}
-                        className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all hover:bg-emerald-600"
-                      >
-                        <CheckCircle2 size={14} />
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
+                      <Plus size={20} strokeWidth={1.5} className="text-slate-200 group-hover:text-navy transition-colors" />
+                    </motion.button>
+                    <div className="px-0.5 mt-2">
+                       <p className="text-[13px] font-bold text-navy tracking-[-0.02em]">Add Listing</p>
+                    </div>
+                  </div>
+                )}
 
-          {/* Pillar B: Insights Drawer (Disciplined Design) */}
-          <div className="mt-4 px-2 py-5 bg-white rounded-2xl border border-[#EAEAEA] flex items-center justify-between">
-             <div className="flex items-center gap-4">
-                <div className="text-center">
-                  <p className="text-[14px] font-black text-navy">{myListings.reduce((acc, l) => acc + (l.views || 0), 45)}</p>
-                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Global Views</p>
-                </div>
-                <div className="w-px h-6 bg-slate-100" />
-                <div className="text-center">
-                  <p className="text-[14px] font-black text-navy">{myListings.reduce((acc, l) => acc + (l.interests || 0), 8)}</p>
-                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Interested</p>
-                </div>
-             </div>
-             <button 
-               onClick={() => setIsInsightsOpen(true)}
-               className="flex items-center gap-1 text-[10px] font-bold text-accent uppercase tracking-widest active:scale-95 transition-all"
-             >
-               Deep Insights <ArrowUpRight size={12} />
-             </button>
+                {myListings
+                  .filter(item => activeTab === 'active' ? item.status !== 'SOLD' : item.status === 'SOLD')
+                  .map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    onContextMenu={(e) => { e.preventDefault(); setIsManageMode(true); }}
+                    className="relative cursor-pointer group"
+                    onClick={() => !isManageMode && router.push(`/marketplace/${item.id}`)}
+                  >
+                    {/* Visual Box (Scaled-down Square) */}
+                    <div className="aspect-square rounded-[8px] overflow-hidden bg-slate-50 relative mb-2 shadow-[0_8px_24px_rgba(0,0,0,0.02)] border border-[#F2F2F7]">
+                      <motion.img 
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                        src={item.image_url} 
+                        className={`w-full h-full object-cover ${item.status === 'SOLD' ? 'blur-[1px] grayscale opacity-60' : ''}`}
+                        loading="lazy"
+                      />
+                      
+                      <AnimatePresence>
+                        {isManageMode && (
+                          <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                            className="absolute top-2 right-2 w-5 h-5 bg-navy text-white rounded-full flex items-center justify-center shadow-md"
+                          >
+                            <CheckCircle2 size={10} strokeWidth={3} />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Information Block (High-Density Type) */}
+                    <div className="px-0.5 space-y-2">
+                      {/* Primary Row */}
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="text-[13px] font-bold text-[#1D1D1F] leading-tight line-clamp-1 flex-1 tracking-[-0.02em]">{item.title}</h4>
+                        <span className="text-[9px] text-[#999999] font-normal mt-0.5">3h</span>
+                      </div>
+
+                      {/* Secondary Row (The Signature Identity) */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 overflow-hidden">
+                          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.seller_name || 'Pulse'}`} className="w-3.5 h-3.5 rounded-full bg-slate-100 shrink-0" />
+                          
+                          {item.is_official ? (
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-accent/5 rounded-md">
+                              <Zap size={6} className="text-accent" />
+                              <span className="text-[8px] font-bold text-accent uppercase tracking-tighter">Official</span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-[#666666] font-medium truncate opacity-60">{item.seller_name || 'Pulse'}</span>
+                          )}
+                        </div>
+                        
+                        <div className="text-right">
+                          {item.status === 'SOLD' ? (
+                            <span className="text-[10px] font-bold text-[#999999] uppercase tracking-widest line-through">SOLD</span>
+                          ) : (
+                            <p className="text-[15px] font-black text-[#1D1D1F] tracking-tighter leading-none">
+                              <span className="opacity-20 mr-0.5">RM</span>
+                              {item.price?.toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Delete */}
+                    {isManageMode && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
+                        className="absolute -top-1.5 -left-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md border-2 border-white z-10"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    )}
+                  </motion.div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
 
