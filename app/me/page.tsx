@@ -269,7 +269,7 @@ export default function MePage() {
         </motion.div>
 
         {/* ── MERCHANT INVENTORY SECTION (High-Density Minimalism) ── */}
-        <div className="px-6 space-y-12">
+        <div className="px-6 space-y-8">
           
           {/* ── THE ANALYTICS STRIP (IKEA Logic) ── */}
           <div className="bg-white border border-[#F2F2F7] rounded-[14px] p-5 flex items-center justify-between shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
@@ -299,7 +299,7 @@ export default function MePage() {
             </button>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* ── THE SEGMENTED SLIDING CONTROL (Precision Scaling) ── */}
             <div className="flex items-center justify-between px-1">
               <div className="flex bg-slate-50 p-0.5 rounded-[14px] w-40">
@@ -331,7 +331,7 @@ export default function MePage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="grid grid-cols-2 gap-x-3 gap-y-12 pb-32"
+                className="grid grid-cols-2 gap-x-3 gap-y-6 pb-32"
               >
                 {/* Index 0: The Minimal Lead */}
                 {activeTab === 'active' && (
