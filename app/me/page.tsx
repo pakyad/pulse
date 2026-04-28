@@ -146,173 +146,140 @@ export default function MePage() {
         </button>
       </div>
 
-      <div className="pt-40 px-5 space-y-10">
+      <div className="pt-24 px-8 space-y-12">
 
-        {/* ── PROFILE CARD (DISCIPLINED GALLERY STYLE) ── */}
+        {/* ── IDENTITY ALIGNMENT (IKEA-Refined Row) ── */}
         <motion.div 
           animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? -20 : 0 }}
-          className="bg-white rounded-2xl p-8 border border-[#EAEAEA] relative overflow-hidden group"
+          className="flex items-center justify-between"
         >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/30 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center gap-6 mb-8">
-              <div className="relative shrink-0" onClick={() => setIsIDOpen(true)}>
-                <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#EAEAEA] bg-slate-50 cursor-pointer active:scale-95 transition-all">
-                  <img src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} className="w-full h-full object-cover" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
-                  <ShieldCheck size={16} className="text-white" />
-                </div>
+          <div className="flex items-center gap-5">
+            <motion.button 
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsIDOpen(true)}
+              className="relative w-16 h-16 rounded-full overflow-hidden border border-[#F2F2F7] bg-slate-50 group"
+            >
+              <img 
+                src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} 
+                className="w-full h-full object-cover" 
+              />
+              <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Plus size={14} className="text-white/80" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="text-[28px] font-black tracking-tighter leading-none text-navy mb-2">
-                  {displayName.split(' ')[0]}<span className="text-slate-300 font-medium"> {displayName.split(' ').slice(1).join(' ')}</span>
-                </h1>
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 bg-navy text-white rounded-lg text-[10px] font-bold uppercase tracking-widest">{isSeller ? 'Merchant' : 'Student'}</span>
-                  <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-1"><MapPin size={12} /> {profile?.campus || 'City Campus'}</span>
-                </div>
-              </div>
+            </motion.button>
+            
+            <div className="flex flex-col">
+              <h1 className="text-[20px] font-bold text-black tracking-[-0.01em] leading-tight">
+                {displayName}
+              </h1>
+              <p className="text-[11px] font-normal text-[#8E8E93] tracking-wide">
+                {profile?.student_id || 'Pulse Resident'}
+              </p>
             </div>
+          </div>
 
-            {/* Stats strip */}
-            <div className="flex items-center justify-between mb-10 px-2">
-              <div className="text-center">
-                <p className="text-[20px] font-black text-navy">{tenure}</p>
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">Years</p>
-              </div>
-              <div className="w-px h-8 bg-slate-50" />
-              <div className="text-center">
-                <p className="text-[20px] font-black text-navy">{myListings.length}</p>
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">Listings</p>
-              </div>
-              <div className="w-px h-8 bg-slate-50" />
-              <div className="text-center">
-                <p className="text-[20px] font-black text-navy">{profile?.reviews_count || 0}</p>
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">Reviews</p>
-              </div>
-            </div>
+          <button onClick={() => router.push('/me/edit')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy active:scale-90 transition-all">
+            <Settings size={18} strokeWidth={1.5} />
+          </button>
+        </motion.div>
 
-            {/* Action row */}
-            <div className="flex items-center gap-3">
-              <button onClick={() => router.push('/me/edit')} className="flex-1 h-12 bg-white border border-[#EAEAEA] rounded-2xl flex items-center justify-center gap-3 text-[13px] font-bold text-navy active:scale-95 transition-all hover:bg-slate-50">
-                <Edit3 size={16} /> Edit Profile
-              </button>
-              <button className="w-12 h-12 bg-white border border-[#EAEAEA] rounded-2xl flex items-center justify-center text-navy active:scale-95 transition-all hover:bg-slate-50">
-                <Settings size={18} />
-              </button>
-            </div>
+        {/* ── FLOATING STATS (Zero-Container Architecture) ── */}
+        <motion.div 
+          animate={{ opacity: isCreateOpen ? 0 : 1 }}
+          className="flex items-center justify-between px-2"
+        >
+          <div className="flex-1 text-center">
+            <p className="text-[24px] font-bold text-black tracking-[-0.02em]">{tenure}</p>
+            <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Tenure</p>
+          </div>
+          <div className="w-[0.5px] h-6 bg-[#E5E5EA]" />
+          <div className="flex-1 text-center">
+            <p className="text-[24px] font-bold text-black tracking-[-0.02em]">{myListings.length}</p>
+            <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Listings</p>
+          </div>
+          <div className="w-[0.5px] h-6 bg-[#E5E5EA]" />
+          <div className="flex-1 text-center">
+            <p className="text-[24px] font-bold text-black tracking-[-0.02em]">RM {(profile?.balance || 0).toFixed(0)}</p>
+            <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Credit</p>
           </div>
         </motion.div>
 
-        {/* ── STAT BENTO ── */}
+        {/* ── ME SERVICES (Minimal List Architecture) ── */}
         <motion.div 
           animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? 20 : 0 }}
-          className="grid grid-cols-2 gap-3"
+          className="space-y-1"
         >
-          <div className="bg-navy rounded-2xl p-6 aspect-square flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 opacity-40">
-               <HeartbeatLine color="#3B82F6" speed={3} />
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center relative z-10"><Wallet size={18} className="text-white" /></div>
-            <div className="relative z-10"><p className="text-[10px] font-medium text-white/40 mb-1">Balance</p><h3 className="text-[22px] font-black text-white leading-none">RM {(profile?.balance || 0).toFixed(2)}</h3></div>
-          </div>
-          <div className="bg-white border border-[#EAEAEA] rounded-2xl p-6 aspect-square flex flex-col justify-between">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center"><TrendingUp size={18} className="text-emerald-500" /></div>
-            <div><p className="text-[10px] font-medium text-slate-400 mb-1">Total Sold</p><h3 className="text-[22px] font-black text-navy leading-none">RM {((profile?.total_sold || 0) * 15).toFixed(2)}</h3></div>
-          </div>
-        </motion.div>
-
-        {/* ── APPLE SETTINGS-STYLE MENU ── */}
-        <motion.div 
-          animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? 40 : 0 }}
-          className="space-y-3"
-        >
-          {MENU_GROUPS.map((group) => (
-            <div key={group.label}>
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-8 mb-3 ml-1">{group.label}</p>
-              <div className="bg-white border border-[#EAEAEA] rounded-2xl overflow-hidden">
-                {group.items.map((item, i) => (
-                  <button
-                    key={item.label}
-                    onClick={() => router.push(item.path)}
-                    className={`w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50/80 active:bg-slate-50 transition-all text-left group ${i < group.items.length - 1 ? 'border-b border-slate-50' : ''}`}
-                  >
-                    <div className={`w-9 h-9 ${item.bg} rounded-xl flex items-center justify-center shrink-0`}>
-                      <item.icon size={17} className={item.color} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-semibold text-navy leading-none">{item.label}</p>
-                      <p className="text-[11px] text-slate-400 font-medium mt-0.5">{item.desc}</p>
-                    </div>
-                    <ChevronRight size={16} className="text-slate-200 group-hover:text-slate-400 transition-all shrink-0" />
-                  </button>
-                ))}
+          {MENU_GROUPS.flatMap(g => g.items).map((item) => (
+            <button
+              key={item.label}
+              onClick={() => router.push(item.path)}
+              className="w-full flex items-center justify-between py-4 group active:opacity-60 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <item.icon size={20} strokeWidth={1.5} className="text-slate-400 group-hover:text-navy transition-colors" />
+                <span className="text-[14px] font-semibold text-navy tracking-[-0.01em]">{item.label}</span>
               </div>
-
-              {/* Campus Careers Section (Below Analytics) */}
-              {group.label === 'Analytics' && (
-                <div className="mt-8">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-3 ml-1">Campus Careers</p>
-                  <button
-                    onClick={() => setIsEnrollmentOpen(true)}
-                    className="w-full flex items-center justify-between px-5 py-4 bg-white border border-[#EAEAEA] rounded-2xl hover:bg-slate-50 active:bg-slate-100 transition-all group"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">
-                        <Footprints size={17} className="text-slate-400" />
-                      </div>
-                      <div className="flex flex-col text-left">
-                        <span className="text-[14px] font-medium text-navy">Become a Pulse Runner</span>
-                        <span className="text-[11px] text-slate-400">Verify your transport and start earning while you walk.</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${profile?.runner_status === 'active' ? 'bg-teal-500 text-white' : 'bg-teal-50 text-teal-600 border border-teal-100'}`}>
-                        {profile?.runner_status === 'active' ? 'Active' : 'Apply'}
-                      </div>
-                      <ChevronRight size={16} className="text-slate-200" />
-                    </div>
-                  </button>
-                </div>
-              )}
-            </div>
+              <ChevronRight size={16} className="text-slate-300" />
+            </button>
           ))}
+
+          {/* Special Carrier Entry */}
+          <button
+            onClick={() => setIsEnrollmentOpen(true)}
+            className="w-full flex items-center justify-between py-5 mt-4 bg-slate-50/50 px-5 rounded-[10px] group active:scale-[0.98] transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <Footprints size={20} strokeWidth={1.5} className="text-teal-500" />
+              <div className="flex flex-col text-left">
+                <span className="text-[14px] font-bold text-navy">Become a Pulse Runner</span>
+                <span className="text-[10px] text-slate-400 font-medium">Verify & start earning credits</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+               <div className="px-2 py-0.5 bg-teal-50 text-teal-600 rounded-md text-[9px] font-bold uppercase tracking-widest border border-teal-100">
+                  Join
+               </div>
+               <ChevronRight size={16} className="text-slate-300" />
+            </div>
+          </button>
         </motion.div>
 
         {/* ── MERCHANT INVENTORY SECTION (High-Density Minimalism) ── */}
-        <div className="px-6 space-y-8">
+        <div className="px-6 space-y-6">
           
-          {/* ── THE ANALYTICS STRIP (IKEA Logic) ── */}
-          <div className="bg-white border border-[#F2F2F7] rounded-[14px] p-5 flex items-center justify-between shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-            <div className="flex items-center gap-6">
-              <div className="flex flex-col">
-                <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Global Views</span>
-                <div className="flex items-center gap-3">
-                  <h3 className="text-[18px] font-bold text-navy leading-none tracking-tight">
-                    {myListings.reduce((acc, l) => acc + (l.views || 0), 0).toLocaleString()}
-                  </h3>
-                  <div className="w-px h-3 bg-slate-50" />
-                </div>
+          {/* ── THE HIGH-FIDELITY STATUS CARD (Spatial Layering) ── */}
+          <div className="bg-white border border-[#F2F2F7] rounded-[20px] px-6 py-5 flex items-center justify-between shadow-[0_10px_40px_rgba(0,0,0,0.03)]">
+            <div className="flex items-center flex-1">
+              {/* Zone 1: Global Reach */}
+              <div className="flex-1">
+                <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-[0.1em] mb-1.5">Global Reach</p>
+                <h3 className="text-[22px] font-semibold text-[#1D1D1F] leading-none tracking-tight">
+                  {myListings.reduce((acc, l) => acc + (l.views || 0), 0).toLocaleString()}
+                </h3>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Interested</span>
-                <h3 className="text-[18px] font-bold text-navy leading-none tracking-tight">
+
+              {/* Divider */}
+              <div className="w-px h-6 bg-[#E5E5EA] mx-6" />
+
+              {/* Zone 2: Potential Leads */}
+              <div className="flex-1">
+                <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-[0.1em] mb-1.5">Potential Leads</p>
+                <h3 className="text-[22px] font-semibold text-[#1D1D1F] leading-none tracking-tight">
                   {myListings.reduce((acc, l) => acc + (l.interests || 0), 0).toLocaleString()}
                 </h3>
               </div>
             </div>
             
+            {/* Zone 3: The Action Circle */}
             <button 
               onClick={() => setIsInsightsOpen(true)}
-              className="h-8 px-3 bg-slate-50 rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-navy hover:bg-slate-100 transition-all"
+              className="w-8 h-8 bg-[#F2F2F7] rounded-full flex items-center justify-center transition-all active:scale-90 hover:bg-[#E5E5EA]"
             >
-              Performance <ArrowUpRight size={14} strokeWidth={1.5} className="text-navy/30" />
+              <ArrowUpRight size={14} strokeWidth={2.5} className="text-[#1D1D1F]" />
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="mt-6 space-y-6">
             {/* ── THE SEGMENTED SLIDING CONTROL (Precision Scaling) ── */}
             <div className="flex items-center justify-between px-1">
               <div className="flex bg-slate-50 p-0.5 rounded-[14px] w-40">
@@ -331,7 +298,7 @@ export default function MePage() {
               </div>
               
               {!isManageMode && (
-                <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-[0.1em]">
                   {myListings.filter(l => activeTab === 'active' ? l.status !== 'SOLD' : l.status === 'SOLD').length} Registry
                 </span>
               )}
