@@ -11,7 +11,8 @@ import {
   Navigation,
   MapPin,
   Camera,
-  Package
+  Package,
+  ChevronDown
 } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -128,6 +129,7 @@ export default function RunHub() {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [status, setStatus] = useState<'loading' | 'verified'>('loading');
     const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
+    const [isRequirementsOpen, setIsRequirementsOpen] = useState(false);
     
     const [form, setForm] = useState({ source: '', target: '', urgency: 'Standard' });
 
@@ -154,7 +156,7 @@ export default function RunHub() {
     return (
        <main className="min-h-screen bg-white pb-32 font-sans antialiased text-navy overflow-x-hidden">
           
-          <nav className="fixed top-0 left-0 right-0 z-[60] px-8 pt-12 pb-6 flex items-center justify-between bg-white/80 backdrop-blur-xl">
+          <nav className="fixed top-0 left-0 right-0 z-[60] px-8 pt-4 pb-6 flex items-center justify-between bg-white/80 backdrop-blur-xl">
              <div className="flex items-center gap-4">
                 <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all"><ChevronLeft size={24} /></button>
                 <h1 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">Run Terminal</h1>
@@ -168,7 +170,7 @@ export default function RunHub() {
              </div>
           </nav>
 
-          <div className="pt-32 px-8 space-y-12">
+          <div className="pt-20 px-8 space-y-12">
              
              <LayoutGroup>
                 <section className="space-y-10">
@@ -315,16 +317,58 @@ export default function RunHub() {
                 )}
              </AnimatePresence>
 
-             {/* ── RUNNER GHOST CARD (The "Easter Egg") ── */}
-             <footer className="pt-20 pb-10 flex flex-col items-center">
-                <button 
-                  onClick={() => setIsEnrollmentOpen(true)}
-                  className="w-full p-8 rounded-[24px] border border-dashed border-[#E5E5E5] bg-transparent transition-all active:scale-[0.98] group"
-                >
-                   <p className="text-[13px] font-medium text-slate-400">
-                      Interested in helping the campus? <span className="text-teal-500 font-bold ml-1 hover:underline underline-offset-4 tracking-tight">View Runner Requirements</span>
-                   </p>
-                </button>
+             {/* ── RUNNER REQUIREMENTS (Hairline Accordion) ── */}
+             <footer className="pt-20 pb-10">
+                <div className="border-y border-[#E5E5EA] border-[0.5px]">
+                   <button 
+                     onClick={() => setIsRequirementsOpen(!isRequirementsOpen)}
+                     className="w-full h-[44px] flex items-center justify-between bg-transparent hover:bg-[#F9F9FB] transition-colors px-1"
+                   >
+                      <span className="text-[12px] font-medium text-[#8E8E93] tracking-tight">Interested in helping the campus?</span>
+                      <motion.div
+                        animate={{ rotate: isRequirementsOpen ? 180 : 0 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                         <ChevronDown size={12} strokeWidth={2} className="text-[#8E8E93]" />
+                      </motion.div>
+                   </button>
+                   
+                   <AnimatePresence>
+                      {isRequirementsOpen && (
+                         <motion.div
+                           initial={{ height: 0, opacity: 0 }}
+                           animate={{ height: 'auto', opacity: 1 }}
+                           exit={{ height: 0, opacity: 0 }}
+                           transition={{ duration: 0.3, ease: "easeOut" }}
+                           className="overflow-hidden"
+                         >
+                            <div className="pb-6 pt-2 px-1 space-y-4">
+                               <ul className="space-y-2">
+                                  {[
+                                     "Active student status at UniKL MIIT.",
+                                     "Verified Student ID and contact details.",
+                                     "Zero active strikes in the Pulse community registry."
+                                  ].map((text, i) => (
+                                     <li key={i} className="flex items-start gap-2">
+                                        <div className="w-1 h-1 rounded-full bg-teal-500 mt-1.5 shrink-0" />
+                                        <span className="text-[9px] font-normal text-[#8E8E93] leading-[1.4] tracking-tight">
+                                           {text}
+                                        </span>
+                                     </li>
+                                  ))}
+                               </ul>
+                               
+                               <button 
+                                 onClick={() => setIsEnrollmentOpen(true)}
+                                 className="w-[100px] h-[32px] bg-navy text-white text-[10px] font-bold rounded-[14px] active:scale-95 transition-all shadow-lg shadow-navy/10"
+                               >
+                                  Apply Now
+                               </button>
+                            </div>
+                         </motion.div>
+                      )}
+                   </AnimatePresence>
+                </div>
              </footer>
 
              <RunnerEnrollmentSheet 

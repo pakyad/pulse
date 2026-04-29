@@ -132,22 +132,34 @@ export default function MePage() {
     <>
     <main className="min-h-screen bg-white pb-24 font-sans antialiased text-navy">
       
-      {/* ── MINIMAL INBOX ONLY ── */}
-      <div className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex justify-end pointer-events-none">
-        <button 
-          onClick={() => router.push('/activity')} 
-          className="relative p-2 active:scale-90 text-navy/40 hover:text-navy pointer-events-auto bg-white/50 backdrop-blur-sm rounded-full shadow-sm border border-slate-50"
-        >
-          <Bell size={22} strokeWidth={2} />
-          {notificationCount > 0 && (
-            <div className="absolute top-1.5 right-1.5 bg-accent text-white text-[8px] font-black h-3.5 w-3.5 rounded-full flex items-center justify-center border-2 border-[#FDFDFD]">
-              {notificationCount}
-            </div>
-          )}
+      {/* ── OPTICAL NAV (Pulse Standard) ── */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] px-6 pt-8 pb-4 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b border-[#F2F2F7]">
+        <button onClick={() => router.back()} className="p-1 -ml-1 text-navy/30 hover:text-navy transition-all active:scale-90">
+          <ChevronLeft size={24} strokeWidth={2.5} />
         </button>
-      </div>
+        <div className="flex-1">
+          <button 
+            onClick={() => setIsSearchOpen(true)} 
+            className="w-full h-10 bg-[#F5F5F7] rounded-full flex items-center px-4 gap-3 transition-all active:scale-[0.98]"
+          >
+            <Search size={16} className="text-[#8E8E93]" />
+            <span className="text-[13px] font-medium text-[#8E8E93]">Search Pulse</span>
+          </button>
+        </div>
+        <div className="flex items-center gap-4 shrink-0">
+          <button onClick={() => router.push('/activity')} className="relative p-1 text-navy/30 hover:text-navy transition-all active:scale-90">
+            <Bell size={20} strokeWidth={2.5} />
+            {notificationCount > 0 && (
+              <div className="absolute -top-0.5 -right-0.5 bg-[#FF3B30] text-white text-[8px] font-bold h-3.5 w-3.5 rounded-full flex items-center justify-center border-2 border-white">
+                {notificationCount}
+              </div>
+            )}
+          </button>
+          <AvatarDropdown photoUrl={profile?.photo_url} userName={displayName} />
+        </div>
+      </nav>
 
-      <div className="pt-24 px-6 space-y-12">
+      <div className="pt-28 px-6 space-y-12">
 
         {/* ── IDENTITY ALIGNMENT (Compact Overhaul) ── */}
         <motion.div 

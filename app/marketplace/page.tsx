@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
-import { ShoppingBag, Laptop, BookOpen, Shirt, Box, Sparkles, Zap, ChevronLeft, Search, Plus } from 'lucide-react';
+import { ShoppingBag, Laptop, BookOpen, Shirt, Box, Sparkles, Zap, ChevronLeft, Search, Plus, ArrowUpRight } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import CreateListing from '@/components/CreateListing';
@@ -86,18 +86,18 @@ const CATEGORIES = [
 ];
 
 const OFFICIAL_CAMPAIGNS = [
-  { id: 'camp1', club_name: 'Badminton Club', initials: 'BC', tag: 'Merch Drop', title: '2026 Varsity Jerseys Pre-Order', tagColor: 'bg-blue-50/50 text-blue-500' },
-  { id: 'camp2', club_name: 'Basketball Club', initials: 'BB', tag: 'Selections', title: 'Open Tryouts for Campus Team', tagColor: 'bg-orange-50/50 text-orange-500' },
-  { id: 'camp3', club_name: 'MIDI Council', initials: 'MD', tag: 'Tickets', title: 'Final Year Dinner Registration', tagColor: 'bg-purple-50/50 text-purple-500' }
+  { id: 'camp1', club_name: 'Badminton Club', initials: 'BC', tag: 'Merch Drop', title: '2026 Varsity Jerseys Pre-Order', color: 'bg-[#0F172A]', accent: 'text-blue-400', theme: 'Badminton' },
+  { id: 'camp2', club_name: 'Basketball Club', initials: 'BB', tag: 'Selections', title: 'Open Tryouts for Campus Team', color: 'bg-[#EA580C]', accent: 'text-orange-100', theme: 'Basketball' },
+  { id: 'camp3', club_name: 'MIDI Council', initials: 'MD', tag: 'Tickets', title: 'Final Year Dinner Registration', color: 'bg-[#4F46E5]', accent: 'text-indigo-200', theme: 'Digital' }
 ];
 
 const DISCOVERY_FALLBACK = [
-  { id: 'd1', title: 'Entrepreneurship for Students', price: 42, image_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400', seller_name: 'Official Store', time_ago: '2d ago', is_official: true },
-  { id: 'd2', title: 'Software Engineering Principles', price: 85, image_url: 'https://images.unsplash.com/photo-1550439062-609e1531270e?q=80&w=400', seller_name: 'Student', time_ago: '2d ago' },
-  { id: 'd3', title: 'Data Structures in Java', price: 75, image_url: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=400', seller_name: 'Student', time_ago: '2d ago' },
-  { id: 'd4', title: 'MUET Complete Reference 2026', price: 38, image_url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=400', seller_name: 'Official Store', time_ago: '2d ago', is_official: true },
-  { id: 'd5', title: 'Introduction to Algorithms (CLRS)', price: 210, image_url: 'https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=400', seller_name: 'Student', time_ago: '2d ago' },
-  { id: 'd6', title: 'Milk and Honey', price: 28, image_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400', seller_name: 'Student', time_ago: '2d ago' },
+  { id: 'd1', title: 'UniKL Premium Lanyard (Black Edition)', price: 15, image_url: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?q=80&w=400', seller_name: 'Official Store', time_ago: '1h ago', is_official: true },
+  { id: 'd2', title: 'Casio Scientific Calculator fx-570MS', price: 45, image_url: 'https://images.unsplash.com/photo-1574607383476-f517f220d356?q=80&w=400', seller_name: 'Student', time_ago: '3h ago' },
+  { id: 'd3', title: 'Engineering Graphics Drafting Set', price: 120, image_url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=400', seller_name: 'Student', time_ago: '5h ago' },
+  { id: 'd4', title: 'Pulse Campus Life Hoodie (Oversized)', price: 85, image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller_name: 'Official Store', time_ago: '1d ago', is_official: true },
+  { id: 'd5', title: 'Mechanical Keyboard (Silent Brown Switches)', price: 210, image_url: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=400', seller_name: 'Student', time_ago: '1d ago' },
+  { id: 'd6', title: 'Python Programming: A Modern Approach', price: 38, image_url: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=400', seller_name: 'Student', time_ago: '2d ago' },
 ];
 
 export default function MarketplacePage() {
@@ -152,7 +152,7 @@ export default function MarketplacePage() {
     <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#1A1A1A]">
       
       {/* ── FIXED NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-8 pb-4 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b border-slate-50">
+      <nav className="fixed top-0 left-0 right-0 z-[100] px-5 pt-4 pb-4 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b border-slate-50">
         <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
           <ChevronLeft size={28} strokeWidth={2} />
         </button>
@@ -186,14 +186,64 @@ export default function MarketplacePage() {
         </div>
       </nav>
 
-      <div className="pt-40 space-y-12">
+      <div className="pt-20 space-y-12">
 
-        {/* ── BROWSE CATEGORIES (MICRO PILL OVERHAUL) ── */}
-        <div className="pl-8">
-          <div className="flex items-center justify-between pr-8 mb-4">
-            <h3 className="text-[16px] font-bold text-navy tracking-tight">Browse Categories</h3>
+        {/* ── 1. OFFICIAL CAMPAIGNS (HYPER-BRIGHT NEON) ── */}
+        {!activeCategory && (
+          <div className="!mt-0">
+            <div className="px-8 mb-6 flex items-baseline justify-between">
+              <div>
+                <h3 className="text-[20px] font-bold text-navy tracking-tight">University's Drop</h3>
+                <p className="text-[12px] text-slate-400 font-medium mt-1">Official campus collective</p>
+              </div>
+            </div>
+            <div className="flex gap-4 overflow-x-auto px-8 no-scrollbar pb-6">
+              {OFFICIAL_CAMPAIGNS.map((camp) => (
+                <motion.div
+                  key={camp.id}
+                  whileTap={{ scale: 0.98 }}
+                  className={`shrink-0 w-[280px] p-8 rounded-[2.5rem] ${camp.color} text-white flex flex-col justify-between min-h-[200px] group cursor-pointer transition-all overflow-hidden relative border border-white/10`}
+                >
+                  {/* Thematic Background Accent */}
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
+                    <span className="text-[120px] font-black leading-none tracking-tighter select-none">{camp.initials}</span>
+                  </div>
+
+                  {/* Neon Pixel Accent */}
+                  <div className="relative z-10 flex items-start justify-between">
+                     <div className="flex flex-col gap-1">
+                       <span className={`pl-2 border-l-2 border-white text-[8px] font-black uppercase tracking-[0.3em] text-white/90`}>
+                         {camp.tag}
+                       </span>
+                     </div>
+                  </div>
+                  
+                  <div className="relative z-10 space-y-2 mt-auto">
+                    <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em]">
+                      {camp.club_name}
+                    </p>
+                    <h4 className="text-[18px] font-bold text-white leading-tight tracking-tight pr-4">
+                      {camp.title}
+                    </h4>
+                  </div>
+
+                  <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    <ArrowUpRight size={18} className="text-white" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
-          <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-6 pr-8">
+        )}
+
+        {/* ── 2. DISCOVERY HEADER ── */}
+        <div className="px-8 !mt-12">
+          <h3 className="text-[20px] font-bold text-navy tracking-tight">Discovery</h3>
+        </div>
+
+        {/* ── 3. CATEGORY PICKER (MICRO PILLS) ── */}
+        <div className="!mt-2">
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar pl-8 pr-8 pb-2">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
@@ -215,95 +265,85 @@ export default function MarketplacePage() {
           </div>
         </div>
 
-        {/* ── OFFICIAL CAMPAIGNS (Clubs & Merchants) ── */}
-        {!activeCategory && (
-          <div className="mt-2 border-t border-slate-100 pt-10">
-            <div className="px-6 mb-6">
-              <h3 className="text-[18px] font-bold text-navy tracking-tight">Official Campaigns</h3>
-              <p className="text-[13px] text-slate-400 font-medium mt-0.5">Exclusive drops from campus clubs</p>
-            </div>
-            <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar pb-6">
-              {OFFICIAL_CAMPAIGNS.map((camp) => (
-                <motion.div
-                  key={camp.id}
-                  whileTap={{ scale: 0.98 }}
-                  className="shrink-0 w-[260px] p-7 rounded-[2.5rem] bg-[#FDFDFD] border border-slate-100 flex flex-col justify-between min-h-[160px] group cursor-pointer hover:border-slate-200 transition-all"
-                >
-                  <div className="flex items-start mb-6">
-                     <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest ${camp.tagColor} opacity-70`}>
-                       {camp.tag}
-                     </span>
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <p className="text-[11px] font-medium text-slate-300 uppercase tracking-wider">
-                      {camp.club_name} <span className="opacity-40">({camp.initials})</span>
-                    </p>
-                    <h4 className="text-[15px] font-bold text-navy leading-tight tracking-tight">
-                      {camp.title}
-                    </h4>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── DISCOVERY GRID ── */}
-        <div className="px-6 mt-12">
-          <div className="mb-6 px-1">
-            <h3 className="text-[18px] font-bold text-navy tracking-tight">Discovery</h3>
-            <p className="text-[12px] text-slate-400 font-medium mt-1">All campus listings</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10">
-            {discoveryItems.map((item) => (
-              <motion.div
-                key={item.id}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push(`/marketplace/${item.id}`)}
-                className="flex flex-col cursor-pointer group"
-              >
-                {/* Strict 1:1 Square Aspect Ratio */}
-                <div className="relative aspect-square bg-[#FDFDFD] rounded-2xl overflow-hidden border border-slate-50 shadow-sm mb-3">
-                  <img src={item.image_url} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={item.title} />
-                  
-                  {/* Subtle Condition Indicator */}
-                  <div className="absolute top-2 left-2">
-                    <div className="flex gap-0.5 opacity-40">
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="px-1 space-y-1">
-                  <div className="flex justify-between items-start gap-1">
-                    <h4 className="text-[14px] font-semibold text-navy leading-tight line-clamp-1 flex-1">
-                      {item.title}
-                    </h4>
-                    <span className="text-[10px] font-medium text-slate-300 shrink-0">
-                      {item.time_ago || '2d'}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-0.5">
-                    <p className="text-[15px] font-black text-navy leading-none tracking-tighter">
-                      RM {Number(item.price).toLocaleString()}
-                    </p>
-                    <div className="flex items-center gap-1.5 opacity-60">
-                      <p className="text-[10px] font-medium text-slate-400 truncate max-w-[60px]">
-                        {item.seller_name}
-                      </p>
-                      <div className="w-4 h-4 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
-                        <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name}`} className="w-full h-full object-cover" />
+        {/* ── 4. DISCOVERY GRID (DYNAMIC EDITORIAL RHYTHM) ── */}
+        <div className="-mt-4">
+          {Array.from({ length: Math.ceil(discoveryItems.length / 16) }).map((_, chunkIndex) => (
+            <div key={chunkIndex} className="space-y-2">
+              <section className="px-6 space-y-6">
+                <div className="grid grid-cols-2 gap-x-2.5 gap-y-10">
+                  {discoveryItems.slice(chunkIndex * 16, (chunkIndex + 1) * 16).map((item) => (
+                    <motion.div
+                      key={item.id}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => router.push(`/marketplace/${item.id}`)}
+                      className="flex flex-col cursor-pointer group"
+                    >
+                      <div className="relative aspect-square bg-slate-50 rounded-xl overflow-hidden border border-slate-50 shadow-sm mb-3">
+                        <img 
+                          src={item.image_url} 
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                          alt={item.title} 
+                          onError={(e: any) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1621944190310-e3cca1564bd7?q=80&w=400';
+                            e.target.onerror = null;
+                          }}
+                        />
+                        {loading && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-100 to-slate-50 animate-shimmer" />
+                        )}
                       </div>
-                    </div>
-                  </div>
+                      <div className="px-1.5 space-y-2">
+                        <div className="flex justify-between items-start gap-2">
+                          <h4 className="text-[14px] font-bold text-navy leading-snug line-clamp-2 flex-1 tracking-tight">{item.title}</h4>
+                          <span className="text-[10px] font-medium text-slate-300 shrink-0 mt-0.5">{item.time_ago || '2d'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-full overflow-hidden bg-slate-100 shrink-0">
+                              <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name}`} className="w-full h-full object-cover" alt="" />
+                            </div>
+                            <span className="text-[11px] font-medium text-slate-400 truncate max-w-[70px]">{item.seller_name}</span>
+                          </div>
+                          <p className="text-[16px] font-black text-navy leading-none tracking-tighter">RM {Number(item.price).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </section>
+
+              {/* Dynamic Institutional Interrupter (Fully Centered & Compact) */}
+              {discoveryItems.length > (chunkIndex + 1) * 16 && (
+                <section className="px-6 !mt-6 mb-8">
+                  <motion.div 
+                    whileTap={{ scale: 0.98 }}
+                    className={`rounded-[2rem] p-6 flex flex-col items-center text-center cursor-pointer group border border-white/10 ${
+                      chunkIndex % 3 === 0 ? 'bg-[#6366F1] text-white' : 
+                      chunkIndex % 3 === 1 ? 'bg-[#10B981] text-white' : 
+                      'bg-[#F43F5E] text-white'
+                    }`}
+                  >
+                     <div className="space-y-1.5 mb-4">
+                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em]">Institutional Sync</p>
+                        <h3 className="text-[17px] font-bold tracking-tight px-4 leading-tight">
+                          {chunkIndex % 3 === 0 ? 'Need a Pulse Runner?' : 
+                           chunkIndex % 3 === 1 ? 'Join the Official Store' : 
+                           'Campus Safety Protocol'}
+                        </h3>
+                        <p className="text-[11px] text-white/60 font-medium px-6">
+                          {chunkIndex % 3 === 0 ? 'Instant logistics and printing support.' : 
+                           chunkIndex % 3 === 1 ? 'Verified listings from campus clubs.' : 
+                           'Report suspicious activities to security.'}
+                        </p>
+                     </div>
+                     <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white group-hover:bg-white group-hover:text-navy transition-all">
+                        <ArrowUpRight size={18} />
+                     </div>
+                  </motion.div>
+                </section>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -360,6 +400,14 @@ export default function MarketplacePage() {
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 1.5s infinite;
+        }
       `}</style>
     </main>
   );
