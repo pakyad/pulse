@@ -30,7 +30,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       className="flex flex-col cursor-pointer group"
     >
       {/* ── IMAGE BOX ── */}
-      <div className="relative aspect-square bg-[#FDFDFD] rounded-[14px] overflow-hidden mb-3 border border-[#E5E5E5] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="relative aspect-square bg-[#FDFDFD] rounded-[8px] overflow-hidden mb-3 border border-[#E5E5E5] shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
         <motion.img 
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
