@@ -66,7 +66,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
   const isFormValid = images.length > 0 && form.title && form.price && form.category && form.condition;
 
   return (
-    <div className="fixed inset-0 z-[300] flex flex-col bg-[#F9F9F9] overflow-hidden font-sans antialiased text-[#222222]">
+    <div className="fixed inset-0 z-[1000] flex flex-col bg-[#F9F9F9] overflow-hidden font-sans antialiased text-[#222222]">
       
       {/* ── TOP NAV ── */}
       <div className="flex justify-between items-center px-6 pt-12 pb-4 bg-white">
@@ -76,7 +76,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
         <button className="text-[15px] font-bold text-[#222222]">Post all <span className="ml-1 text-slate-300">›</span></button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar bg-white">
+      <div className="flex-1 overflow-y-auto no-scrollbar bg-white pb-20">
         
         {/* ── LISTING HEADER ── */}
         <div className="px-6 py-6 flex justify-between items-end">
@@ -158,70 +158,64 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
           </div>
         </section>
 
-        {/* ── LOGISTICS ── */}
-        <section className="bg-slate-50/50 pt-10 pb-40">
-           <div className="px-6 space-y-8">
-              <div className="flex items-center justify-between">
-                <h4 className="text-[16px] font-bold text-[#222222]">Meet-up</h4>
-                <button 
-                  onClick={() => setForm({...form, meetup_enabled: !form.meetup_enabled})}
-                  className={`w-12 h-7 rounded-full transition-all relative ${form.meetup_enabled ? 'bg-[#00927C]' : 'bg-slate-200'}`}
-                >
-                  <motion.div animate={{ x: form.meetup_enabled ? 22 : 4 }} className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm" />
-                </button>
+        {/* ── FULFILLMENT (Logistics Sync) ── */}
+        <section className="px-6">
+           <p className="text-[14px] font-bold text-[#222222] mb-4">Fulfillment</p>
+           <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+              {/* Meet-up Row */}
+              <div className="p-4 border-b border-slate-200/50">
+                 <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                       <Handshake size={18} className="text-slate-400" />
+                       <span className="text-[15px] font-bold text-[#222222]">Meet-up</span>
+                    </div>
+                    <button 
+                      onClick={() => setForm({...form, meetup_enabled: !form.meetup_enabled})}
+                      className={`w-11 h-6 rounded-full transition-all relative ${form.meetup_enabled ? 'bg-[#00927C]' : 'bg-slate-200'}`}
+                    >
+                      <motion.div animate={{ x: form.meetup_enabled ? 22 : 4 }} className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
+                    </button>
+                 </div>
+                 {form.meetup_enabled && (
+                    <div className="ml-7 flex items-center justify-between">
+                       <p className="text-[13px] text-slate-500 font-medium truncate pr-4">{form.meetup_location}</p>
+                       <button className="text-[12px] font-bold text-[#00927C] shrink-0">Edit</button>
+                    </div>
+                 )}
               </div>
 
-              {form.meetup_enabled && (
-                <div className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4">
-                   <div className="flex items-start gap-4">
-                      <MapPin size={20} className="text-[#222222] mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-[15px] font-bold text-[#222222]">2 locations</p>
-                        <p className="text-[14px] text-slate-500 font-medium">{form.meetup_location}</p>
-                        <button className="text-[14px] font-bold text-[#00927C] mt-2">Edit</button>
-                      </div>
-                   </div>
-                </div>
-              )}
-
-              <div className="h-[1px] w-full bg-slate-100/50" />
-
-              <div className="flex items-center justify-between">
-                <h4 className="text-[16px] font-bold text-[#222222]">Delivery</h4>
-                <button 
-                  onClick={() => setForm({...form, delivery_enabled: !form.delivery_enabled})}
-                  className={`w-12 h-7 rounded-full transition-all relative ${form.delivery_enabled ? 'bg-[#00927C]' : 'bg-slate-200'}`}
-                >
-                  <motion.div animate={{ x: form.delivery_enabled ? 22 : 4 }} className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm" />
-                </button>
+              {/* Delivery Row */}
+              <div className="p-4">
+                 <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                       <Truck size={18} className="text-slate-400" />
+                       <span className="text-[15px] font-bold text-[#222222]">Delivery</span>
+                    </div>
+                    <button 
+                      onClick={() => setForm({...form, delivery_enabled: !form.delivery_enabled})}
+                      className={`w-11 h-6 rounded-full transition-all relative ${form.delivery_enabled ? 'bg-[#00927C]' : 'bg-slate-200'}`}
+                    >
+                      <motion.div animate={{ x: form.delivery_enabled ? 22 : 4 }} className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
+                    </button>
+                 </div>
+                 {form.delivery_enabled && (
+                    <div className="ml-7 flex items-center justify-between">
+                       <p className="text-[13px] text-slate-500 font-medium">Standard (2-4 days)</p>
+                       <button className="text-[12px] font-bold text-[#00927C] shrink-0">Config</button>
+                    </div>
+                 )}
               </div>
-
-              {form.delivery_enabled && (
-                <div className="space-y-4">
-                   <div className="flex items-center gap-3">
-                      <MapPin size={18} className="text-slate-300" />
-                      <p className="text-[14px] text-slate-500 font-medium">Ship from: 53000</p>
-                   </div>
-                   <div className="bg-white rounded-2xl p-6 border border-slate-100">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-[14px] font-bold text-[#222222]">Pulse Official Delivery <Info size={14} className="inline ml-1 text-slate-300" /></p>
-                      </div>
-                      <p className="text-[13px] text-slate-500 font-medium mb-4">Enabled: Standard (2-4 working days)</p>
-                      <button className="text-[14px] font-bold text-[#00927C]">Edit delivery methods</button>
-                   </div>
-                </div>
-              )}
            </div>
         </section>
       </div>
 
-      {/* ── STICKY FOOTER ── */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/95 backdrop-blur-xl border-t border-slate-100">
+      {/* ── STICKY FOOTER ACTION ── */}
+      <div className="relative z-50 p-6 bg-white border-t border-slate-100">
         <motion.button 
           whileTap={isFormValid ? { scale: 0.96 } : {}}
           onClick={handleUpload}
           disabled={loading || !isFormValid}
-          className={`w-full h-14 rounded-lg font-bold text-[16px] transition-all duration-300 ${
+          className={`w-full h-14 rounded-xl font-bold text-[16px] transition-all duration-300 ${
             isFormValid ? 'bg-[#00927C] text-white shadow-lg' : 'bg-slate-100 text-slate-300'
           }`}
         >
@@ -251,7 +245,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                 <div className="w-6" />
               </div>
 
-              <div className="flex-1 overflow-y-auto no-scrollbar px-8 pb-10">
+              <div className="flex-1 overflow-y-auto no-scrollbar px-8 pb-32">
                 {sheet === 'category' && (
                   <div className="space-y-2">
                     <div className="bg-slate-50 rounded-xl px-4 py-3 mb-4 flex items-center gap-3 border border-slate-100">
