@@ -7,6 +7,7 @@ import { doc, getDoc, collection, query, where, getDocs, orderBy } from 'firebas
 import { ArrowLeft, ShieldCheck, Package, MapPin, ExternalLink, Store } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import ProductCard from '@/components/shared/ProductCard';
 
 export default function PublicProfile() {
   const { id } = useParams();
@@ -233,36 +234,15 @@ export default function PublicProfile() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            {listings.map((item, i) => (
-              <motion.div
+            {listings.map((item) => (
+              <ProductCard
                 key={item.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <Link href={`/marketplace/${item.id}`} className="group block bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 active:scale-[0.98]">
-                  {/* Item image */}
-                  <div className="aspect-square w-full overflow-hidden bg-slate-50">
-                    <img
-                      src={item.image_url || `https://via.placeholder.com/400?text=${item.title}`}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                  </div>
-                  {/* Item info */}
-                  <div className="p-4">
-                    <p className="text-[13px] font-bold text-navy leading-tight line-clamp-1 mb-1">{item.title}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[14px] font-black text-navy">RM {item.price?.toFixed(2)}</span>
-                      {item.stock_count !== undefined && (
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${item.stock_count > 0 ? 'text-emerald-500 bg-emerald-50' : 'text-red-400 bg-red-50'}`}>
-                          {item.stock_count > 0 ? `${item.stock_count} left` : 'Sold out'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
+                item={{
+                  ...item,
+                  seller_name: displayName // Use profile name
+                }}
+                onClick={() => router.push(`/marketplace/${item.id}`)}
+              />
             ))}
           </div>
         )}

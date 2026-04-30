@@ -5,17 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
   MapPin, 
-  Clock, 
   ChevronLeft, 
   Plus, 
   Filter, 
   Package, 
   Camera, 
   CheckCircle2,
-  ArrowRight,
   ShieldCheck
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import ProductCard from '@/components/shared/ProductCard';
 
 const FOUND_ITEMS = [
   { id: 1, title: "Matric Card (MIIT)", location: "Level 4 Labs", time: "1h ago", img: "https://images.unsplash.com/photo-1611095773767-114b510d16f8?q=80&w=1000&auto=format&fit=crop", status: "VERIFIED" },
@@ -108,49 +107,19 @@ export default function FoundHub() {
               </div>
            </div>
 
-           <div className="grid grid-cols-1 gap-4">
-              {FOUND_ITEMS.map((item, i) => (
-                <motion.div 
+           <div className="grid grid-cols-2 gap-x-3 gap-y-10">
+              {FOUND_ITEMS.map((item) => (
+                <ProductCard
                   key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  whileHover={{ y: -5 }}
-                  className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row group cursor-pointer hover:shadow-2xl hover:shadow-navy/5 transition-all"
-                >
-                   <div className="w-full md:w-40 aspect-square md:aspect-auto overflow-hidden relative bg-slate-50">
-                      <img src={item.img} className="w-full h-full object-cover transition-all duration-700" alt="" />
-                      <div className="absolute top-3 left-3">
-                         <div className="px-2 py-0.5 bg-white/90 backdrop-blur-md rounded-full border border-white/20 shadow-sm">
-                            <p className="text-[9px] font-bold text-navy uppercase tracking-widest">{item.status}</p>
-                         </div>
-                      </div>
-                   </div>
-                   <div className="flex-1 p-6 flex flex-col justify-between">
-                      <div className="space-y-1">
-                         <div className="flex items-center gap-2 mb-1">
-                            <Clock size={12} className="text-slate-300" />
-                            <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{item.time}</p>
-                         </div>
-                         <h4 className="text-[18px] font-bold text-navy leading-tight tracking-widest group-hover:text-amber-600 transition-colors">{item.title}</h4>
-                         <div className="flex items-center gap-2 pt-1 text-slate-400">
-                            <MapPin size={14} strokeWidth={1.5} />
-                            <p className="text-[13px] font-medium leading-none">{item.location}</p>
-                         </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-50">
-                         <div className="flex items-center gap-2 text-green-600">
-                            <ShieldCheck size={14} />
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Ready to Claim</span>
-                         </div>
-                         <button className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-navy group-hover:translate-x-2 transition-transform">
-                            Claim <ArrowRight size={16} />
-                         </button>
-                      </div>
-                   </div>
-                </motion.div>
+                  item={{
+                    ...item,
+                    image_url: item.img,
+                    time_ago: item.time,
+                    subtitle: item.location,
+                    badge: item.status
+                  }}
+                  onClick={() => {}}
+                />
               ))}
            </div>
         </section>

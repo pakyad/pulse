@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import ProductCard from '@/components/shared/ProductCard';
 
 
 const PixelAll = () => (
@@ -92,12 +93,12 @@ const OFFICIAL_CAMPAIGNS = [
 ];
 
 const DISCOVERY_FALLBACK = [
-  { id: 'd1', title: 'UniKL Premium Lanyard (Black Edition)', price: 15, image_url: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?q=80&w=400', seller_name: 'Official Store', time_ago: '1h ago', is_official: true, category: 'Official' },
-  { id: 'd2', title: 'Casio Scientific Calculator fx-570MS', price: 45, image_url: 'https://images.unsplash.com/photo-1574607383476-f517f220d356?q=80&w=400', seller_name: 'Student', time_ago: '3h ago', category: 'Tech' },
-  { id: 'd3', title: 'Engineering Graphics Drafting Set', price: 120, image_url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=400', seller_name: 'Student', time_ago: '5h ago', category: 'Misc' },
-  { id: 'd4', title: 'Pulse Campus Life Hoodie (Oversized)', price: 85, image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller_name: 'Official Store', time_ago: '1d ago', is_official: true, category: 'Merch' },
-  { id: 'd5', title: 'Mechanical Keyboard (Silent Brown Switches)', price: 210, image_url: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=400', seller_name: 'Student', time_ago: '1d ago', category: 'Tech' },
-  { id: 'd6', title: 'Python Programming: A Modern Approach', price: 38, image_url: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=400', seller_name: 'Student', time_ago: '2d ago', category: 'Books' },
+  { id: 'd1', title: 'UniKL Premium Lanyard', price: 15, image_url: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?q=80&w=400', seller_name: 'Official Store', time_ago: '1h ago', is_official: true, category: 'Official' },
+  { id: 'd2', title: 'Casio Scientific Calculator', price: 45, image_url: 'https://images.unsplash.com/photo-1574607383476-f517f220d356?q=80&w=400', seller_name: 'Iyad Mohmad', time_ago: '3h ago', is_official: false, category: 'Tech' },
+  { id: 'd3', title: 'Engineering Drafting Set', price: 120, image_url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=400', seller_name: 'Aiman Hafiz', time_ago: '5h ago', is_official: false, category: 'Misc' },
+  { id: 'd4', title: 'Pulse Campus Hoodie', price: 85, image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller_name: 'Official Store', time_ago: '1d ago', is_official: true, category: 'Merch' },
+  { id: 'd5', title: 'Mechanical Keyboard', price: 210, image_url: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=400', seller_name: 'Zulhelmi', time_ago: '1d ago', is_official: false, category: 'Tech' },
+  { id: 'd6', title: 'Python Programming Book', price: 38, image_url: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=400', seller_name: 'Sarah Lee', time_ago: '2d ago', is_official: false, category: 'Books' },
 ];
 
 export default function MarketplacePage() {
@@ -286,42 +287,11 @@ export default function MarketplacePage() {
                 <section className="px-6 space-y-6">
                   <div className="grid grid-cols-2 gap-x-2.5 gap-y-10">
                     {discoveryItems.slice(chunkIndex * 16, (chunkIndex + 1) * 16).map((item) => (
-                      <motion.div
+                      <ProductCard
                         key={item.id}
-                        whileTap={{ scale: 0.98 }}
+                        item={item}
                         onClick={() => router.push(`/marketplace/${item.id}`)}
-                        className="flex flex-col cursor-pointer group bg-white rounded-[22px] p-4 border border-[#F2F2F7]"
-                      >
-                        <div className="relative aspect-square bg-slate-50 rounded-[18px] overflow-hidden mb-4 p-2">
-                          <img 
-                            src={item.image_url} 
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 rounded-[12px]" 
-                            alt={item.title} 
-                            onError={(e: any) => {
-                              e.target.src = 'https://images.unsplash.com/photo-1621944190310-e3cca1564bd7?q=80&w=400';
-                              e.target.onerror = null;
-                            }}
-                          />
-                          {loading && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-100 to-slate-50 animate-shimmer" />
-                          )}
-                        </div>
-                        <div className="px-1.5 space-y-2">
-                          <div className="flex justify-between items-start gap-2">
-                            <h4 className="text-[14px] font-bold text-navy leading-snug line-clamp-2 flex-1 tracking-tight">{item.title}</h4>
-                            <span className="text-[10px] font-medium text-slate-300 shrink-0 mt-0.5">{item.time_ago || '2d'}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 rounded-full overflow-hidden bg-slate-100 shrink-0">
-                                <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name}`} className="w-full h-full object-cover" alt="" />
-                              </div>
-                              <span className="text-[11px] font-medium text-slate-400 truncate max-w-[70px]">{item.seller_name}</span>
-                            </div>
-                            <p className="text-[16px] font-black text-navy leading-none tracking-tighter">RM {Number(item.price).toLocaleString()}</p>
-                          </div>
-                        </div>
-                      </motion.div>
+                      />
                     ))}
                   </div>
                 </section>

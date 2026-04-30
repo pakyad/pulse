@@ -21,6 +21,7 @@ import HeartbeatLine from '@/components/shared/HeartbeatLine';
 import CreateListing from '@/components/CreateListing';
 import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
 import Link from 'next/link';
+import ProductCard from '@/components/shared/ProductCard';
 
 // Apple Settings-style menu groups
 const MENU_GROUPS = [
@@ -388,83 +389,15 @@ export default function MePage() {
                 {myListings
                   .filter(item => activeTab === 'active' ? item.status !== 'SOLD' : item.status === 'SOLD')
                   .map((item) => (
-                  <motion.div
-                    key={item.id}
-                    layout
-                    onContextMenu={(e) => { e.preventDefault(); setIsManageMode(true); }}
-                    className="relative cursor-pointer group"
-                    onClick={() => !isManageMode && router.push(`/marketplace/${item.id}`)}
-                  >
-                    {/* Visual Box (Scaled-down Square) */}
-                    <div className="aspect-square rounded-[8px] overflow-hidden bg-slate-50 relative mb-2 shadow-[0_8px_24px_rgba(0,0,0,0.02)] border border-[#F2F2F7]">
-                      <motion.img 
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                        src={item.image_url} 
-                        className={`w-full h-full object-cover ${item.status === 'SOLD' ? 'blur-[1px] grayscale opacity-60' : ''}`}
-                        loading="lazy"
-                      />
-                      
-                      <AnimatePresence>
-                        {isManageMode && (
-                          <motion.div 
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                            className="absolute top-2 right-2 w-5 h-5 bg-navy text-white rounded-full flex items-center justify-center shadow-md"
-                          >
-                            <CheckCircle2 size={10} strokeWidth={3} />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-
-                    {/* Information Block (High-Density Type) */}
-                    <div className="px-0.5 space-y-2">
-                      {/* Primary Row */}
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-[13px] font-bold text-[#1D1D1F] leading-tight line-clamp-1 flex-1 tracking-[-0.02em]">{item.title}</h4>
-                        <span className="text-[9px] text-[#999999] font-normal mt-0.5">3h</span>
-                      </div>
-
-                      {/* Secondary Row (The Signature Identity) */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 overflow-hidden">
-                          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.seller_name || 'Pulse'}`} className="w-3.5 h-3.5 rounded-full bg-slate-100 shrink-0" />
-                          
-                          {item.is_official ? (
-                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-accent/5 rounded-md">
-                              <Zap size={6} className="text-accent" />
-                              <span className="text-[8px] font-bold text-accent uppercase tracking-tighter">Official</span>
-                            </div>
-                          ) : (
-                            <span className="text-[10px] text-[#666666] font-medium truncate opacity-60">{item.seller_name || 'Pulse'}</span>
-                          )}
-                        </div>
-                        
-                          <div className="text-right">
-                            {item.status === 'SOLD' ? (
-                              <span className="text-[10px] font-bold text-[#999999] uppercase tracking-widest line-through">SOLD</span>
-                            ) : (
-                              <p className="text-[15px] font-black text-[#1D1D1F] tracking-tighter leading-none">
-                                RM {item.price?.toLocaleString()}
-                              </p>
-                            )}
-                          </div>
-                      </div>
-                    </div>
-
-                    {/* Quick Delete */}
-                    {isManageMode && (
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
-                        className="absolute -top-1.5 -left-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md border-2 border-white z-10"
-                      >
-                        <Trash2 size={10} />
-                      </button>
-                    )}
-                  </motion.div>
-                ))}
+                    <ProductCard
+                      key={item.id}
+                      item={{
+                        ...item,
+                        seller_name: displayName // Use current user's name
+                      }}
+                      onClick={() => !isManageMode && router.push(`/marketplace/${item.id}`)}
+                    />
+                  ))}
               </motion.div>
             </AnimatePresence>
           </div>

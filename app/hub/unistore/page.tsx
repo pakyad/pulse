@@ -7,6 +7,7 @@ import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/fir
 import { ChevronLeft, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import ProductCard from '@/components/shared/ProductCard';
 
 // ── Fallback Club Merchandise ──────────────────────────────────────────────
 const CLUB_FALLBACK = [
@@ -143,42 +144,17 @@ export default function UniStorePage() {
             {[1,2,3,4].map(n => <div key={n} className="aspect-3/4 bg-slate-50 rounded-2xl animate-pulse" />)}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8">
-            {displayed.map((item, i) => (
-              <motion.div
+          <div className="grid grid-cols-2 gap-x-3 gap-y-10">
+            {displayed.map((item) => (
+              <ProductCard
                 key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04 }}
-                whileTap={{ scale: 0.97 }}
+                item={{
+                  ...item,
+                  image_url: item.image_url || item.img,
+                  is_official: true
+                }}
                 onClick={() => router.push(`/marketplace/${item.id}`)}
-                className="group cursor-pointer"
-              >
-                {/* Image */}
-                <div className="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-slate-50 border border-slate-100">
-                  <img
-                    src={item.image_url || item.img}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    alt={item.title}
-                  />
-                  {/* Verified badge */}
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm">
-                    <ShieldCheck size={9} className="text-emerald-500" />
-                    <span className="text-[8px] font-black text-navy uppercase tracking-wider">Official</span>
-                  </div>
-                  {/* Category tag */}
-                  <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-navy/80 backdrop-blur-sm rounded-md">
-                    <span className="text-[8px] font-black text-white uppercase tracking-widest">{item.category}</span>
-                  </div>
-                </div>
-
-                {/* Product Info — name → price → seller */}
-                <div className="space-y-0.5 px-0.5">
-                  <h4 className="text-[13px] font-bold text-navy leading-snug line-clamp-2">{item.title}</h4>
-                  <p className="text-[16px] font-black text-navy">RM {Number(item.price).toFixed(0)}</p>
-                  <p className="text-[11px] font-medium text-slate-400">{item.seller_name || 'UniKL Club'}</p>
-                </div>
-              </motion.div>
+              />
             ))}
           </div>
         )}

@@ -11,6 +11,7 @@ import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, orderBy, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
+import ProductCard from '@/components/shared/ProductCard';
 
 // ── Fallback data (used when Firestore has no campaigns/announcements) ──
 const HERO_SLIDES: BannerSlide[] = [
@@ -41,9 +42,9 @@ const ANNOUNCEMENTS_FALLBACK = [
 ];
 
 const MARKET_FALLBACK = [
-  { id: 'f1', title: 'Analog Study Pack', price: 45, img: 'https://images.unsplash.com/photo-1497005367839-6e8464697e19?q=80&w=400', seller: 'MIIT Academic' },
-  { id: 'f2', title: 'Mechanical Setup', price: 280, img: 'https://images.unsplash.com/photo-1618335829737-2228ad30662b?q=80&w=400', seller: 'Elite Tech' },
-  { id: 'f3', title: 'Varsity Varsity', price: 95, img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller: 'BAC Club' },
+  { id: 'f1', title: 'Analog Study Pack', price: 45, img: 'https://images.unsplash.com/photo-1497005367839-6e8464697e19?q=80&w=400', seller_name: 'Academic Dept', is_official: true },
+  { id: 'f2', title: 'Mechanical Setup', price: 280, img: 'https://images.unsplash.com/photo-1618335829737-2228ad30662b?q=80&w=400', seller_name: 'Elite Tech', is_official: false },
+  { id: 'f3', title: 'Varsity Varsity', price: 95, img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller_name: 'BAC Club', is_official: true },
 ];
 
 const SPOTLIGHT_FALLBACK = [
@@ -60,10 +61,10 @@ const TAG_COLORS: Record<string, string> = {
 };
 
 const ESSENTIALS_FALLBACK = [
-  { id: 'e1', title: 'Stationery Master Pack', price: 25, img: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=400', tag: 'ACADEMIC' },
-  { id: 'e2', title: 'Official MIIT Lab Coat', price: 65, img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400', tag: 'REQUIRED' },
-  { id: 'e3', title: 'Pulse Gym Stringer', price: 40, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=400', tag: 'FITNESS' },
-  { id: 'e4', title: 'Calculus Cheat Sheet', price: 12, img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=400', tag: 'EXAMS' },
+  { id: 'e1', title: 'Stationery Master Pack', price: 25, img: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=400', tag: 'ACADEMIC', is_official: false },
+  { id: 'e2', title: 'Official MIIT Lab Coat', price: 65, img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400', tag: 'REQUIRED', is_official: true },
+  { id: 'e3', title: 'Pulse Gym Stringer', price: 40, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=400', tag: 'FITNESS', is_official: true },
+  { id: 'e4', title: 'Calculus Cheat Sheet', price: 12, img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=400', tag: 'EXAMS', is_official: false },
 ];
 
 export default function PulseHome() {
@@ -162,13 +163,12 @@ export default function PulseHome() {
           </div>
           <div className="flex gap-4 -mx-8 px-8 overflow-x-auto no-scrollbar pb-2">
             {displayItems.slice(0, 6).map((item) => (
-              <motion.div key={item.id} whileTap={{ scale: 0.98 }} onClick={() => router.push(`/marketplace/${item.id}`)} className="shrink-0 w-[150px] cursor-pointer group">
-                <div className="w-full aspect-[5/4] min-h-[120px] rounded-2xl overflow-hidden mb-3 relative bg-slate-50/50 group-hover:shadow-md transition-all duration-500">
-                  <img src={item.image_url || item.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 block" alt={item.title} />
-                </div>
-                <h4 className="text-[13px] font-medium text-navy leading-tight line-clamp-1 mb-0.5">{item.title}</h4>
-                <p className="text-[14px] font-black text-navy leading-none tracking-tighter mt-1">RM {Number(item.price).toLocaleString()}</p>
-              </motion.div>
+              <div key={item.id} className="shrink-0 w-[180px]">
+                <ProductCard 
+                  item={item} 
+                  onClick={() => router.push(`/marketplace/${item.id}`)} 
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -200,17 +200,18 @@ export default function PulseHome() {
             <h3 className="text-[17px] font-bold text-navy tracking-tight">The essentials</h3>
             <button onClick={() => router.push('/marketplace')} className="text-[13px] font-medium text-slate-400 hover:text-navy transition-colors">See all</button>
           </div>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-12 items-start pt-4">
-            {ESSENTIALS_FALLBACK.map((item, index) => (
-              <motion.div key={item.id} animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 }} whileTap={{ scale: 0.98 }} onClick={() => router.push('/marketplace')} className={`group cursor-pointer relative ${index % 2 === 1 ? 'mt-10' : ''}`}>
-                <div className="relative aspect-4/5 rounded-[2.5rem] overflow-hidden mb-4 glass-card border-white/40 shadow-xl shadow-navy/5 transition-all duration-500">
-                  <img src={item.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={item.title} />
-                </div>
-                <div className="px-2 space-y-1">
-                  <h4 className="text-[13px] font-bold text-navy leading-tight line-clamp-1">{item.title}</h4>
-                  <p className="text-[16px] font-black text-accent leading-none tracking-tighter">RM {item.price.toLocaleString()}</p>
-                </div>
-              </motion.div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-10 pt-4">
+            {ESSENTIALS_FALLBACK.map((item) => (
+              <ProductCard
+                key={item.id}
+                item={{
+                  ...item,
+                  image_url: item.img, // Mapping fallback key
+                  seller_name: 'Official Store',
+                  is_official: true
+                }}
+                onClick={() => router.push('/marketplace')}
+              />
             ))}
           </div>
         </div>
