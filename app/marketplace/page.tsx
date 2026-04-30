@@ -15,36 +15,36 @@ import ProductCard from '@/components/shared/ProductCard';
 const PixelAll = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
     <rect x="4" y="4" width="2" height="2" fill="currentColor" />
-    <rect x="9" y="4" width="2" height="2" fill="currentColor" />
-    <rect x="14" y="4" width="2" height="2" fill="currentColor" />
-    <rect x="4" y="9" width="2" height="2" fill="currentColor" />
+    <rect x="9" y="4" width="2" height="2" fill="currentColor" opacity="0.6" />
+    <rect x="14" y="4" width="2" height="2" fill="currentColor" opacity="0.4" />
+    <rect x="4" y="9" width="2" height="2" fill="currentColor" opacity="0.6" />
     <rect x="9" y="9" width="2" height="2" fill="currentColor" />
-    <rect x="14" y="9" width="2" height="2" fill="currentColor" />
-    <rect x="4" y="14" width="2" height="2" fill="currentColor" />
-    <rect x="9" y="14" width="2" height="2" fill="currentColor" />
+    <rect x="14" y="9" width="2" height="2" fill="currentColor" opacity="0.6" />
+    <rect x="4" y="14" width="2" height="2" fill="currentColor" opacity="0.4" />
+    <rect x="9" y="14" width="2" height="2" fill="currentColor" opacity="0.6" />
     <rect x="14" y="14" width="2" height="2" fill="currentColor" />
   </svg>
 );
 
 const PixelOfficial = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
-    <rect x="4" y="6" width="12" height="10" fill="currentColor" opacity="0.8" />
-    <rect x="6" y="8" width="8" height="6" fill="white" opacity="0.4" />
-    <rect x="8" y="3" width="4" height="4" fill="currentColor" />
+    <rect x="4" y="6" width="12" height="10" fill="currentColor" />
+    <rect x="6" y="8" width="8" height="6" fill="white" opacity="0.3" />
+    <rect x="8" y="3" width="4" height="4" fill="currentColor" opacity="0.8" />
   </svg>
 );
 
 const PixelTech = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
-    <rect x="3" y="5" width="14" height="10" fill="currentColor" opacity="0.8" />
-    <rect x="5" y="7" width="10" height="6" fill="white" opacity="0.3" />
-    <rect x="7" y="16" width="6" height="1" fill="currentColor" />
+    <rect x="3" y="5" width="14" height="10" fill="currentColor" />
+    <rect x="5" y="7" width="10" height="6" fill="white" opacity="0.2" />
+    <rect x="7" y="16" width="6" height="1" fill="currentColor" opacity="0.5" />
   </svg>
 );
 
 const PixelBooks = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
-    <rect x="4" y="4" width="5" height="12" fill="currentColor" opacity="0.8" />
+    <rect x="4" y="4" width="5" height="12" fill="currentColor" />
     <rect x="11" y="4" width="5" height="12" fill="currentColor" opacity="0.8" />
     <rect x="5" y="6" width="3" height="1" fill="white" opacity="0.3" />
     <rect x="12" y="8" width="3" height="1" fill="white" opacity="0.3" />
@@ -53,7 +53,7 @@ const PixelBooks = () => (
 
 const PixelApparel = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
-    <rect x="6" y="4" width="8" height="12" fill="currentColor" opacity="0.8" />
+    <rect x="6" y="4" width="8" height="12" fill="currentColor" />
     <rect x="3" y="6" width="14" height="4" fill="currentColor" opacity="0.8" />
     <rect x="9" y="4" width="2" height="2" fill="white" opacity="0.3" />
   </svg>
@@ -61,29 +61,29 @@ const PixelApparel = () => (
 
 const PixelMisc = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
-    <rect x="4" y="4" width="12" height="12" fill="currentColor" opacity="0.8" />
+    <rect x="4" y="4" width="12" height="12" fill="currentColor" />
     <rect x="6" y="6" width="8" height="8" fill="white" opacity="0.2" />
-    <rect x="9" y="2" width="2" height="4" fill="currentColor" />
+    <rect x="9" y="2" width="2" height="4" fill="currentColor" opacity="0.8" />
   </svg>
 );
 
 const PixelServices = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="image-rendering-pixelated">
-    <rect x="9" y="3" width="2" height="14" fill="currentColor" opacity="0.8" />
-    <rect x="3" y="9" width="14" height="2" fill="currentColor" opacity="0.8" />
-    <rect x="6" y="6" width="8" height="8" fill="currentColor" opacity="0.2" />
+    <rect x="9" y="3" width="2" height="14" fill="currentColor" />
+    <rect x="3" y="9" width="14" height="2" fill="currentColor" />
+    <rect x="6" y="6" width="8" height="8" fill="white" opacity="0.2" />
   </svg>
 );
 
-// ── Relaxed "Clay" Palette Categories ──
+// ── Pixel-Perfect Category Definitions (Voxel Vibe) ──
 const CATEGORIES = [
-  { id: 'all', label: 'All', filter: null, icon: PixelAll, color: 'bg-slate-100 text-slate-800 border-slate-300' }, 
-  { id: 'store', label: 'Official', filter: 'Official', icon: PixelOfficial, color: 'bg-blue-50 text-blue-700 border-blue-200' }, 
-  { id: 'tech', label: 'Tech', filter: 'Tech', icon: PixelTech, color: 'bg-[#F0F4F8] text-slate-700 border-slate-300' }, 
-  { id: 'books', label: 'Books', filter: 'Books', icon: PixelBooks, color: 'bg-purple-50 text-purple-700 border-purple-200' }, 
-  { id: 'apparel', label: 'Apparel', filter: 'Merch', icon: PixelApparel, color: 'bg-[#FDF2F2] text-pink-700 border-pink-200' }, 
-  { id: 'misc', label: 'Misc', filter: 'Misc', icon: PixelMisc, color: 'bg-orange-50 text-orange-700 border-orange-200' }, 
-  { id: 'services', label: 'Services', filter: 'Services', icon: PixelServices, color: 'bg-emerald-50 text-emerald-700 border-emerald-200' }, 
+  { id: 'all', label: 'All', filter: null, icon: PixelAll, active: 'bg-[#0A0F2C] text-white border-[#0A0F2C]', inactive: 'bg-white text-navy/40 border-slate-100' }, 
+  { id: 'store', label: 'Official', filter: 'Official', icon: PixelOfficial, active: 'bg-[#3B82F6] text-white border-[#1E40AF]', inactive: 'bg-[#EFF6FF] text-[#3B82F6] border-[#DBEAFE]' }, 
+  { id: 'tech', label: 'Tech', filter: 'Tech', icon: PixelTech, active: 'bg-[#64748B] text-white border-[#334155]', inactive: 'bg-[#F8FAFC] text-[#64748B] border-[#F1F5F9]' }, 
+  { id: 'books', label: 'Books', filter: 'Books', icon: PixelBooks, active: 'bg-[#8B5CF6] text-white border-[#5B21B6]', inactive: 'bg-[#F5F3FF] text-[#8B5CF6] border-[#EDE9FE]' }, 
+  { id: 'apparel', label: 'Apparel', filter: 'Merch', icon: PixelApparel, active: 'bg-[#EC4899] text-white border-[#9D174D]', inactive: 'bg-[#FDF2F8] text-[#EC4899] border-[#FCE7F3]' }, 
+  { id: 'misc', label: 'Misc', filter: 'Misc', icon: PixelMisc, active: 'bg-[#F59E0B] text-white border-[#92400E]', inactive: 'bg-[#FFFBEB] text-[#F59E0B] border-[#FEF3C7]' }, 
+  { id: 'services', label: 'Services', filter: 'Services', icon: PixelServices, active: 'bg-[#10B981] text-white border-[#065F46]', inactive: 'bg-[#ECFDF5] text-[#10B981] border-[#D1FAE5]' }, 
 ];
 
 const OFFICIAL_CAMPAIGNS = [
@@ -93,12 +93,27 @@ const OFFICIAL_CAMPAIGNS = [
 ];
 
 const DISCOVERY_FALLBACK = [
-  { id: 'd1', title: 'UniKL Premium Lanyard', price: 15, image_url: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?q=80&w=400', seller_name: 'Official Store', time_ago: '1h ago', is_official: true, category: 'Official' },
   { id: 'd2', title: 'Casio Scientific Calculator', price: 45, image_url: 'https://images.unsplash.com/photo-1574607383476-f517f220d356?q=80&w=400', seller_name: 'Iyad Mohmad', time_ago: '3h ago', is_official: false, category: 'Tech' },
+  { id: 'd1', title: 'UniKL Premium Lanyard', price: 15, image_url: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?q=80&w=400', seller_name: 'MIIT Society', time_ago: '1h ago', is_official: true, category: 'Official' },
+  { id: 'd18', title: 'MIIT Exclusive Windbreaker', price: 120, image_url: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=400', seller_name: 'MIDI Council', time_ago: '5h ago', is_official: true, category: 'Merch' },
   { id: 'd3', title: 'Engineering Drafting Set', price: 120, image_url: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=400', seller_name: 'Aiman Hafiz', time_ago: '5h ago', is_official: false, category: 'Misc' },
-  { id: 'd4', title: 'Pulse Campus Hoodie', price: 85, image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller_name: 'Official Store', time_ago: '1d ago', is_official: true, category: 'Merch' },
-  { id: 'd5', title: 'Mechanical Keyboard', price: 210, image_url: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=400', seller_name: 'Zulhelmi', time_ago: '1d ago', is_official: false, category: 'Tech' },
+  { id: 'd4', title: 'Pulse Campus Hoodie', price: 85, image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller_name: 'Student Council', time_ago: '1d ago', is_official: true, category: 'Merch' },
+  { id: 'd11', title: 'Noise Cancelling Headphones', price: 350, image_url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400', seller_name: 'Arif Luqman', time_ago: '1d ago', is_official: false, category: 'Tech' },
+  { id: 'd17', title: 'Organic Chemistry Model Kit', price: 65, image_url: 'https://images.unsplash.com/photo-1532187863486-abf51ad95999?q=80&w=400', seller_name: 'Science Dept', time_ago: '2h ago', is_official: true, category: 'Official' },
+  { id: 'd7', title: 'Hydro Flask 32oz (White)', price: 110, image_url: 'https://images.unsplash.com/photo-1602143303410-7199d13f8ed3?q=80&w=400', seller_name: 'Farah Aqilah', time_ago: '4h ago', is_official: false, category: 'Misc' },
   { id: 'd6', title: 'Python Programming Book', price: 38, image_url: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=400', seller_name: 'Sarah Lee', time_ago: '2d ago', is_official: false, category: 'Books' },
+  { id: 'd8', title: 'iPad Pro 11-inch (M1)', price: 2800, image_url: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=400', seller_name: 'Khairul Nizam', time_ago: '6h ago', is_official: false, category: 'Tech' },
+  { id: 'd16', title: 'Professional Resume Design', price: 25, image_url: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=400', seller_name: 'Design Club', time_ago: '1d ago', is_official: false, category: 'Services' },
+  { id: 'd5', title: 'Mechanical Keyboard', price: 210, image_url: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=400', seller_name: 'Zulhelmi', time_ago: '1d ago', is_official: false, category: 'Tech' },
+  { id: 'd20', title: 'Campus Photography Service', price: 50, image_url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=400', seller_name: 'Media Club', time_ago: '1d ago', is_official: false, category: 'Services' },
+  { id: 'd9', title: 'Calculus IV Solution Manual', price: 20, image_url: 'https://images.unsplash.com/photo-1491841573634-28140fc7ced7?q=80&w=400', seller_name: 'Danish Fitri', time_ago: '8h ago', is_official: false, category: 'Books' },
+  { id: 'd10', title: 'Denim Jacket (Unisex)', price: 55, image_url: 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?q=80&w=400', seller_name: 'Haziqah', time_ago: '12h ago', is_official: false, category: 'Merch' },
+  { id: 'd19', title: 'UI/UX Mobile Design Course', price: 0, image_url: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?q=80&w=400', seller_name: 'Google DSC', time_ago: '1d ago', is_official: false, category: 'Services' },
+  { id: 'd12', title: 'Dorm Desk Lamp (LED)', price: 35, image_url: 'https://images.unsplash.com/photo-1534073828943-f801091bb18c?q=80&w=400', seller_name: 'Amirul', time_ago: '1d ago', is_official: false, category: 'Misc' },
+  { id: 'd13', title: 'Java Software Engineering Kit', price: 150, image_url: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=400', seller_name: 'Zulhelmi', time_ago: '2d ago', is_official: false, category: 'Tech' },
+  { id: 'd14', title: 'Vintage Polo Tee', price: 30, image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400', seller_name: 'Syazwan', time_ago: '2d ago', is_official: false, category: 'Merch' },
+  { id: 'd15', title: 'Data Structures & Algorithms', price: 50, image_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=400', seller_name: 'Nurul Izzah', time_ago: '3d ago', is_official: false, category: 'Books' },
+  { id: 'd21', title: 'Discrete Mathematics Textbook', price: 40, image_url: 'https://images.unsplash.com/photo-1543004629-142a2ec95393?q=80&w=400', seller_name: 'Ali Imran', time_ago: '2d ago', is_official: false, category: 'Books' },
 ];
 
 export default function MarketplacePage() {
@@ -144,9 +159,26 @@ export default function MarketplacePage() {
   }, []);
 
   const discoveryItems = useMemo(() => {
-    const list = items.length > 0 ? items : DISCOVERY_FALLBACK;
-    if (!activeCategory) return list;
-    return list.filter(i => i.category?.toLowerCase() === activeCategory.toLowerCase());
+    // Combine real Firestore items with demo fallbacks for a populated demo feel
+    const combinedList = [...items];
+    
+    // Only add fallbacks that don't conflict with real item IDs
+    DISCOVERY_FALLBACK.forEach(fb => {
+      if (!items.find(i => i.id === fb.id)) {
+        combinedList.push(fb);
+      }
+    });
+
+    if (!activeCategory) return combinedList;
+    
+    return combinedList.filter(i => {
+      const catMatch = i.category?.toLowerCase() === activeCategory.toLowerCase();
+      // Special case: Official tab shows all institutional items regardless of sub-category
+      if (activeCategory.toLowerCase() === 'official') {
+        return catMatch || i.is_official === true;
+      }
+      return catMatch;
+    });
   }, [items, activeCategory]);
 
   return (
@@ -246,13 +278,13 @@ export default function MarketplacePage() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                className={`relative cursor-pointer shrink-0 h-[36px] px-4 rounded-full border transition-all duration-200 flex items-center justify-center gap-2 ${
+                className={`relative cursor-pointer shrink-0 h-[36px] px-4 rounded-full border transition-all duration-300 flex items-center justify-center gap-2 shadow-sm active:scale-95 ${
                   activeCategory === cat.filter 
-                    ? `bg-navy text-white border-navy shadow-md shadow-navy/10` 
-                    : `bg-white border-slate-100 text-navy hover:border-slate-200`
+                    ? `${cat.active} shadow-md` 
+                    : `${cat.inactive} hover:border-slate-300`
                 }`}
               >
-                <div className={`scale-[0.8] ${activeCategory === cat.filter ? 'text-white' : 'text-navy/40'}`}>
+                <div className={`scale-[0.85] transition-transform duration-300 ${activeCategory === cat.filter ? 'scale-[1.0]' : ''}`}>
                   <cat.icon />
                 </div>
                 <span className="text-[11px] font-bold whitespace-nowrap tracking-tight">
