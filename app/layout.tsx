@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={pjs.className}>
+    <html lang="en" className={pjs.className} suppressHydrationWarning>
       <body className={`${pjs.className} min-h-screen relative antialiased`}>
         {/* Breathing background layer */}
         <div className="aura-bg fixed inset-0 pointer-events-none animate-mesh-aura" />

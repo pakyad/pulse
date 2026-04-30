@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { onSnapshot, doc, collection, query, where, updateDoc } from 'firebase/firestore';
@@ -27,7 +27,7 @@ const MENU_GROUPS = [
   {
     label: 'Commerce',
     items: [
-      { icon: ShoppingBag, color: 'text-purple-500', bg: 'bg-purple-50', label: 'Orders', desc: 'Your handshake history', path: '/activity' },
+      { icon: ShoppingBag, color: 'text-purple-500', bg: 'bg-purple-50', label: 'Orders', desc: 'Your handshake history', path: '/me/orders' },
       { icon: Store,       color: 'text-blue-500',   bg: 'bg-blue-50',   label: 'My Store', desc: 'Manage your listings', path: '/merchant' },
       { icon: Heart,       color: 'text-rose-500',   bg: 'bg-rose-50',   label: 'Saved Items', desc: 'Marketplace vault', path: '/me/saved' },
     ],
@@ -63,6 +63,7 @@ export default function MePage() {
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
   const [isAvatarSheetOpen, setIsAvatarSheetOpen] = useState(false);
+  const inventoryRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -250,43 +251,57 @@ export default function MePage() {
           animate={{ opacity: isCreateOpen ? 0 : 1, y: isCreateOpen ? 20 : 0 }}
           className="space-y-1"
         >
-          {MENU_GROUPS.flatMap(g => g.items).map((item) => (
-            <button
-              key={item.label}
-              onClick={() => router.push(item.path)}
-              className="w-full flex items-center justify-between py-4 group active:opacity-60 transition-all"
-            >
-              <div className="flex items-center gap-4">
-                <item.icon size={20} strokeWidth={1.5} className="text-slate-400 group-hover:text-navy transition-colors" />
-                <span className="text-[14px] font-semibold text-navy tracking-[-0.01em]">{item.label}</span>
-              </div>
-              <ChevronRight size={16} className="text-slate-300" />
-            </button>
-          ))}
+          <div className="space-y-[0.5px] bg-[#F2F2F7] rounded-[24px] overflow-hidden border-[0.5px] border-[#F2F2F7]">
+            {MENU_GROUPS.flatMap(g => g.items).map((item) => (
+              <motion.button
+                key={item.label}
+                whileTap={{ backgroundColor: '#F9F9FB' }}
+                onClick={() => {
+                  if (item.label === 'My Store') {
+                    inventoryRef.current?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    router.push(item.path);
+                  }
+                }}
+                className="w-full bg-white flex items-center justify-between p-5 text-left transition-colors group"
+              >
+                <div className="flex items-center gap-4">
+                  <item.icon size={22} strokeWidth={2} className="text-slate-300 group-hover:text-navy transition-colors" />
+                  <div className="flex flex-col">
+                    <span className="text-[15px] font-bold text-navy tracking-tight">{item.label}</span>
+                    <span className="text-[11px] text-slate-400 font-medium">{item.desc}</span>
+                  </div>
+                </div>
+                <ChevronRight size={18} className="text-[#F2F2F7]" strokeWidth={3} />
+              </motion.button>
+            ))}
+          </div>
 
           {/* Special Carrier Entry */}
-          <button
+          <motion.button
+            whileTap={{ backgroundColor: '#F9F9FB' }}
             onClick={() => setIsEnrollmentOpen(true)}
-            className="w-full flex items-center justify-between py-5 mt-4 bg-slate-50/50 px-5 rounded-[10px] group active:scale-[0.98] transition-all"
+            className="w-full flex items-center justify-between p-5 mt-4 bg-white rounded-[24px] border-[0.5px] border-[#F2F2F7] shadow-[0_8px_30px_rgba(0,0,0,0.02)] group active:scale-[0.98] transition-all"
           >
             <div className="flex items-center gap-4">
-              <Footprints size={20} strokeWidth={1.5} className="text-teal-500" />
+              <div className="w-11 h-11 rounded-full bg-teal-50 flex items-center justify-center text-teal-600">
+                <Footprints size={22} strokeWidth={2} />
+              </div>
               <div className="flex flex-col text-left">
-                <span className="text-[14px] font-bold text-navy">Become a Pulse Runner</span>
-                <span className="text-[10px] text-slate-400 font-medium">Verify & start earning credits</span>
+                <span className="text-[15px] font-bold text-navy tracking-tight">Become a Pulse Runner</span>
+                <span className="text-[11px] text-slate-400 font-medium">Verify & start earning credits</span>
               </div>
             </div>
             <div className="flex items-center gap-3">
-               <div className="px-2 py-0.5 bg-teal-50 text-teal-600 rounded-md text-[9px] font-bold uppercase tracking-widest border border-teal-100">
+               <div className="px-3 py-1 bg-teal-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest">
                   Join
                </div>
-               <ChevronRight size={16} className="text-slate-300" />
             </div>
-          </button>
+          </motion.button>
         </motion.div>
 
         {/* ── MERCHANT INVENTORY SECTION (High-Density Minimalism) ── */}
-        <div className="px-6 space-y-6">
+        <div ref={inventoryRef} className="px-6 space-y-6">
           
           {/* ── THE HIGH-FIDELITY STATUS CARD (Spatial Layering) ── */}
           <div className="bg-white border border-[#F2F2F7] rounded-[20px] px-6 py-5 flex items-center justify-between shadow-[0_10px_40px_rgba(0,0,0,0.03)]">
@@ -468,16 +483,6 @@ export default function MePage() {
             Get Assistance <ChevronRight size={14} className="text-slate-200" />
           </button>
         </div>
-
-        {/* ── SIGN OUT ── */}
-        {user && (
-          <button
-            onClick={() => auth.signOut().then(() => router.push('/auth'))}
-            className="w-full h-12 bg-white border border-[#EAEAEA] rounded-2xl text-[12px] font-bold text-slate-400 uppercase tracking-widest active:scale-95 transition-all"
-          >
-            Sign Out
-          </button>
-        )}
 
       </div>
     </main>

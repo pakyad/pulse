@@ -9,7 +9,8 @@ import {
   Bell, Search, ChevronLeft, Activity, 
   ArrowRight, Plus, Map as MapIcon, Zap,
   Users, BookOpen, Coffee, Bus, Cloud, Train, AlertCircle,
-  ChevronDown
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -76,9 +77,6 @@ export default function PulseBulletinPage() {
   const [announcementIndex, setAnnouncementIndex] = useState(0);
   const [facilities, setFacilities] = useState<any[]>(INITIAL_FACILITIES);
   const [busCount, setBusCount] = useState<string>('Live');
-  const [isRequirementsOpen, setIsRequirementsOpen] = useState(false);
-  const [isDirectoryOpen, setIsDirectoryOpen] = useState(false);
-  const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -154,223 +152,105 @@ export default function PulseBulletinPage() {
               </div>
             )}
           </button>
-          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'P'} />
+          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
         </div>
       </nav>
 
-      <div className="pt-24 space-y-10">
-
-        {/* ── PRIORITY ANNOUNCEMENTS (Official Banner Slider) ── */}
-        <div className="px-6">
-          <div className="relative rounded-[2rem] overflow-hidden bg-purple-500 h-[180px] cursor-pointer group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-            
-            <AnimatePresence mode="wait">
-              <motion.div 
-                key={announcementIndex}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 flex flex-col h-full justify-between p-8"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                    <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">{ANNOUNCEMENTS[announcementIndex].tag}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    {ANNOUNCEMENTS.map((_, i) => (
-                      <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === announcementIndex ? 'w-4 bg-white' : 'w-1 bg-white/30'}`} />
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h2 className="text-white text-[22px] font-bold leading-tight tracking-tight mb-2">{ANNOUNCEMENTS[announcementIndex].headline}</h2>
-                  <p className="text-white/80 text-[11px] font-medium leading-snug line-clamp-2 max-w-[260px]">{ANNOUNCEMENTS[announcementIndex].body}</p>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* ── 1. CAMPUS LIFE (VISUAL LAYER - PRIMARY) ── */}
+      {/* ── Pulse Bulletin ── */}
+      <div className="pt-24 px-6 space-y-12">
+        
         <section className="space-y-6">
-          <div className="px-6">
-            <h2 className="text-[20px] font-bold text-[#1D1D1F] tracking-tight">Campus Life</h2>
-          </div>
-          <div className="flex gap-3 overflow-x-auto px-6 no-scrollbar pb-2">
-            {CAMPUS_LIFE_CAROUSEL.map((item) => (
-              <motion.div
-                key={item.id}
-                whileTap={{ scale: 0.97 }}
-                className="shrink-0 w-52 aspect-[3/4.5] rounded-3xl overflow-hidden relative group cursor-pointer"
-              >
-                <img src={item.img} className="w-full h-full object-cover" alt={item.title} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute top-4 left-4">
-                  <div className="px-2.5 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
-                    <span className="text-[8px] font-black text-white uppercase tracking-widest">{item.status}</span>
-                  </div>
-                </div>
-                <div className="absolute bottom-5 left-5 right-5">
-                  <span className="text-[8px] font-black text-white/60 uppercase tracking-[0.2em] mb-1.5 block">{item.tag}</span>
-                  <h3 className="text-[15px] font-bold text-white leading-tight">{item.title}</h3>
-                </div>
-              </motion.div>
-            ))}
+          <h2 className="text-[18px] font-bold text-navy">Pulse Bulletin</h2>
+          <div className="relative h-[180px] bg-[#5C7CFA] rounded-[22px] p-8 overflow-hidden shadow-xl shadow-indigo-100">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl" />
+             <AnimatePresence mode="wait">
+                <motion.div
+                  key={announcementIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-4"
+                >
+                   <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em]">{ANNOUNCEMENTS[announcementIndex].tag}</span>
+                   <h3 className="text-[22px] font-bold text-white leading-tight">{ANNOUNCEMENTS[announcementIndex].headline}</h3>
+                   <p className="text-[13px] text-white/80 font-medium line-clamp-2">{ANNOUNCEMENTS[announcementIndex].body}</p>
+                </motion.div>
+             </AnimatePresence>
+             <div className="absolute bottom-8 right-8 flex gap-1.5">
+                {ANNOUNCEMENTS.map((_, i) => (
+                  <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === announcementIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/30'}`} />
+                ))}
+             </div>
           </div>
         </section>
 
-        {/* ── 2. FACILITY BOOKING (INVISIBLE UTILITY LAYER) ── */}
-        <section className="space-y-6">
-          <div className="px-6">
-            <h2 className="text-[20px] font-bold text-[#1D1D1F] tracking-tight">Facility Booking</h2>
-          </div>
-          <div className="flex flex-col">
-            {facilities.map((f, i) => (
-              <button
-                key={f.id}
-                onClick={() => setSelectedRoom(f)}
-                className={`w-full h-[52px] px-6 flex items-center justify-between group active:bg-[#F9F9FB] transition-all border-t border-[#F2F2F7] border-[0.5px] ${i === facilities.length - 1 ? 'border-b' : ''}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#14B8A6]" />
-                  <span className="text-[13px] font-medium text-[#1D1D1F]">{f.name}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[12px] font-bold text-[#8E8E93] opacity-40">{f.count}</span>
-                  <span className="text-[11px] font-bold text-[#007AFF] tracking-tight">Reserve ↗</span>
-                </div>
-              </button>
-            ))}
+        {/* ── Campus Updates ── */}
+        <section className="space-y-8">
+          <h2 className="text-[18px] font-bold text-navy">Campus Updates</h2>
+          <div className="grid grid-cols-12 gap-4">
+             {MOSAIC_TILES.map(tile => (
+                <button 
+                  key={tile.id} 
+                  onClick={() => router.push(tile.path)}
+                  className={`${tile.span} ${tile.color} rounded-[22px] p-6 flex flex-col justify-between group active:scale-[0.98] transition-all`}
+                >
+                   <tile.icon className={`${tile.textColor}`} size={24} />
+                   <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-[0.1em] opacity-40 mb-1">{tile.id === 't2' ? busCount : 'Pulse'}</p>
+                      <h4 className={`text-[15px] font-bold text-navy`}>{tile.label}</h4>
+                   </div>
+                </button>
+             ))}
           </div>
         </section>
 
-        {/* ── 3. STACKED ACCORDION SYSTEM (DIRECTORY & ALERTS) ── */}
-        <section className="px-6 !mt-12 space-y-0">
-          
-          {/* Item 1: Campus Directory */}
-          <div className="border-t border-[#F2F2F7] border-[0.5px]">
-            <button 
-              onClick={() => setIsDirectoryOpen(!isDirectoryOpen)}
-              className="w-full py-5 flex items-center justify-between bg-transparent transition-all"
-            >
-              <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight">Campus Directory</h3>
-              <motion.div animate={{ rotate: isDirectoryOpen ? 180 : 0 }}>
-                 <ChevronDown size={14} className="text-[#1D1D1F]" />
-              </motion.div>
-            </button>
-            <AnimatePresence>
-              {isDirectoryOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden pb-8"
+        {/* ── Visual Stream ── */}
+        <section className="space-y-6">
+           <div className="flex items-baseline justify-between">
+              <h2 className="text-[18px] font-bold text-navy">Campus Life</h2>
+              <button className="text-[12px] font-medium text-[#8E8E93]">View All</button>
+           </div>
+           <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-6 px-6">
+              {CAMPUS_LIFE_CAROUSEL.map(item => (
+                <motion.div 
+                  key={item.id}
+                  className="relative shrink-0 w-[240px] h-[300px] rounded-[22px] overflow-hidden group cursor-pointer"
                 >
-                  <div className="grid grid-cols-12 gap-2.5 pt-2">
-                    {MOSAIC_TILES.map((tile) => (
-                      <motion.button
-                        key={tile.id}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => router.push(tile.path)}
-                        className={`${tile.span} ${tile.color} rounded-2xl p-5 flex flex-col justify-between relative`}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className={`${tile.textColor}`}>
-                            <tile.icon size={22} strokeWidth={2.5} />
-                          </div>
-                          {tile.id === 't2' && (
-                            <div className="px-2 py-1 bg-white/50 backdrop-blur-sm rounded-full border border-white/20">
-                              <span className={`text-[9px] font-black uppercase tracking-widest ${tile.textColor}`}>{busCount}</span>
-                            </div>
-                          )}
-                        </div>
-                        <span className={`text-[13px] font-bold tracking-tight ${tile.textColor}`}>{tile.label}</span>
-                      </motion.button>
-                    ))}
+                  <img src={item.img} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={item.title} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute top-5 left-5">
+                    <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[9px] font-bold text-white uppercase tracking-wider">{item.status}</span>
+                  </div>
+                  <div className="absolute bottom-5 left-5 right-5">
+                    <span className="text-[8px] font-black text-white/60 uppercase tracking-[0.2em] mb-1.5 block">{item.tag}</span>
+                    <h3 className="text-[15px] font-bold text-white leading-tight">{item.title}</h3>
                   </div>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              ))}
+           </div>
+        </section>
 
-          {/* Item 2: Academic Alerts */}
-          <div className="border-t border-[#F2F2F7] border-[0.5px]">
-            <button 
-              onClick={() => setIsAlertsOpen(!isAlertsOpen)}
-              className="w-full py-5 flex items-center justify-between bg-transparent transition-all"
-            >
-              <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight">Academic Alerts</h3>
-              <motion.div animate={{ rotate: isAlertsOpen ? 180 : 0 }}>
-                 <ChevronDown size={14} className="text-[#1D1D1F]" />
-              </motion.div>
-            </button>
-            <AnimatePresence>
-              {isAlertsOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden pb-8"
-                >
-                  <div className="space-y-5 pt-2">
-                    {ACADEMIC_ALERTS.map((alert) => (
-                      <div key={alert.id} className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3">
-                          <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#FF9500]" />
-                          <p className="text-[13px] font-medium text-[#1D1D1F] leading-snug">{alert.title}</p>
-                        </div>
-                        <span className="text-[11px] font-bold text-[#8E8E93] whitespace-nowrap opacity-40">{alert.time}</span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        {/* ── Facility Booking ── */}
+        <section className="space-y-6">
+          <h2 className="text-[18px] font-bold text-navy">Facility Booking</h2>
+          <div className="space-y-2">
+             {facilities.map(item => (
+               <button 
+                 key={item.id}
+                 onClick={() => setSelectedRoom(item)}
+                 className="w-full h-16 px-6 bg-white border border-[#F2F2F7] rounded-[22px] flex items-center justify-between group active:scale-[0.98] transition-all"
+               >
+                 <div className="flex flex-col items-start">
+                   <h4 className="text-[14px] font-bold text-navy">{item.name}</h4>
+                   <p className="text-[11px] text-slate-400 font-medium">Capacity: {item.count}</p>
+                 </div>
+                 <div className="flex items-center gap-3">
+                   <div className={`w-2 h-2 rounded-full ${item.status === 'available' ? 'bg-[#34C759]' : 'bg-[#FF3B30]'}`} />
+                   <ChevronRight size={18} className="text-slate-200 group-hover:text-navy" />
+                 </div>
+               </button>
+             ))}
           </div>
-
-          {/* Item 3: Runner Requirements */}
-          <div className="border-y border-[#F2F2F7] border-[0.5px]">
-            <button 
-              onClick={() => setIsRequirementsOpen(!isRequirementsOpen)}
-              className="w-full py-5 flex items-center justify-between bg-transparent transition-all"
-            >
-              <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight">Runner Requirements</h3>
-              <motion.div animate={{ rotate: isRequirementsOpen ? 180 : 0 }}>
-                 <ChevronDown size={14} className="text-[#1D1D1F]" />
-              </motion.div>
-            </button>
-            <AnimatePresence>
-              {isRequirementsOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden pb-8"
-                >
-                  <div className="space-y-6 pt-2">
-                    <div className="grid grid-cols-1 gap-5">
-                      <div>
-                        <p className="text-[11px] font-bold text-[#1D1D1F] uppercase tracking-wider mb-1">Academic</p>
-                        <p className="text-[11px] font-normal text-[#8E8E93] leading-[1.6]">Minimum GPA 2.0, no active disciplinary records.</p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] font-bold text-[#1D1D1F] uppercase tracking-wider mb-1">Logistics</p>
-                        <p className="text-[11px] font-normal text-[#8E8E93] leading-[1.6]">Valid student ID, access to Block A/B/C.</p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] font-bold text-[#1D1D1F] uppercase tracking-wider mb-1">Conduct</p>
-                        <p className="text-[11px] font-normal text-[#8E8E93] leading-[1.6]">Adherence to the UniKL Student Code of Conduct.</p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => setIsEnrollmentOpen(true)}
-                      className="inline-flex items-center justify-center px-6 h-8 border border-[#1D1D1F] text-[#1D1D1F] text-[10px] font-bold rounded-full hover:bg-[#1D1D1F] hover:text-white transition-all active:scale-95"
-                    >
-                      Apply to be a Runner
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
         </section>
       </div>
 
@@ -404,7 +284,7 @@ export default function PulseBulletinPage() {
                   <button 
                     key={time} 
                     onClick={() => setSelectedDuration(time)}
-                    className={`shrink-0 w-20 h-20 rounded-2xl border flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    className={`shrink-0 w-20 h-20 rounded-2xl border flex flex-col items-center justify-center transition-all active:scale-[0.98] ${
                       selectedDuration === time 
                         ? 'bg-[#1D1D1F] text-white border-[#1D1D1F]' 
                         : 'bg-[#F5F5F7] text-[#1D1D1F]/40 border-transparent'
@@ -444,30 +324,6 @@ export default function PulseBulletinPage() {
           />
         )}
       </AnimatePresence>
-
-      {/* ── GHOST TRIGGER FAB ── */}
-      <motion.button
-        layout
-        onClick={() => setIsCreateOpen(true)}
-        initial={false}
-        animate={{ width: showSellLabel ? 110 : 52, height: 52, borderRadius: 26 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="fixed bottom-10 right-8 z-[90] bg-[#1D1D1F] text-white flex items-center justify-center overflow-hidden active:scale-95 transition-transform shadow-lg shadow-black/5"
-      >
-        <motion.div className="flex items-center gap-3 px-6">
-          <Plus size={20} strokeWidth={3} className="shrink-0" />
-          <AnimatePresence mode="wait">
-            {showSellLabel && (
-              <motion.span
-                initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
-                className="text-[13px] font-bold whitespace-nowrap"
-              >
-                Sell
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </motion.button>
 
     </main>
   );

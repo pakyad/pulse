@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { Train, Coffee, Cloud } from 'lucide-react';
+import { Train, Coffee, Activity } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
@@ -56,8 +56,8 @@ export default function CampusVitals() {
         </div>
         <div className="w-[1px] h-3 bg-[#F2F2F7]" />
         <div className="flex items-center gap-2">
-          <Cloud size={10} className="text-[#5AC8FA]" />
-          <span className="text-[9px] font-medium text-[#1D1D1F]">{weather.temp.toFixed(0)}°C {weather.condition}</span>
+          <Activity size={10} className="text-[#5AC8FA]" />
+          <span className="text-[9px] font-medium text-[#1D1D1F]">Active Runs: 12</span>
         </div>
       </div>
     </div>

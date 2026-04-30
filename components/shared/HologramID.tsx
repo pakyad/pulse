@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { QrCode, User, ShieldCheck, MapPin } from 'lucide-react';
 
@@ -119,10 +119,10 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
 
       {/* Tailwind handles standard 3D transforms, but backface-hidden/perspective often needs custom classes in globals.css */}
       <style jsx>{`
-        .perspective-1000 { perspective: 1000px; }
-        .preserve-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
+        .perspective-1000 { perspective: 1000px; -webkit-perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
       `}</style>
     </div>
   );

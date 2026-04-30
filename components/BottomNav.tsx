@@ -46,8 +46,8 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-100 bg-white border-t border-[#E5E5E5] pb-2 shadow-[0_-1px_10px_rgba(0,0,0,0.02)]">
-      <div className="flex justify-around items-end h-[60px] max-w-lg mx-auto px-4">
+    <nav className="fixed bottom-0 left-0 right-0 z-100 bg-white border-t border-[#E5E5E5] shadow-[0_-1px_10px_rgba(0,0,0,0.02)] pt-2 pb-[calc(8px+env(safe-area-inset-bottom))] px-safe">
+      <div className="flex justify-around items-end h-[56px] max-w-lg mx-auto px-4">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
           const Icon = item.icon;
@@ -56,40 +56,39 @@ export default function BottomNav() {
             <Link 
                 key={item.name} 
                 href={item.path} 
-                className="flex-1 flex flex-col items-center justify-center relative py-1 transition-all active:scale-95 duration-200"
+                className="flex-1 flex flex-col items-center justify-center relative transition-all active:scale-95 duration-200"
+                style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               
               {/* Notification Badge */}
-              {item.badge !== undefined && item.badge > 0 && (
+              {item.name === 'Me' && notificationCount > 0 && (
                 <div className="absolute top-0 right-1/4 bg-[#FF3B30] text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10">
-                  {item.badge}
+                  {notificationCount}
                 </div>
               )}
 
               {/* Icon Container with Center Highlight logic */}
-              <div className={`p-2 rounded-full mb-0.5 transition-all duration-300 ${item.isCenter ? (isActive ? 'bg-blue-500/10' : 'bg-blue-50/50') : ''}`}>
+              <div className={`p-2 rounded-full mb-0.5 transition-all duration-300 ${item.isCenter ? (isActive ? 'bg-teal-500/10' : 'bg-slate-50/50') : ''}`}>
                 <Icon 
                   size={24} 
-                  strokeWidth={isActive ? 2.5 : 2}
-                  className={isActive ? 'text-[#007AFF]' : 'text-[#8E8E93]'} 
+                  strokeWidth={1.5}
+                  className={isActive ? 'text-[#14B8A6]' : 'text-[#8E8E93]'} 
                 />
               </div>
 
               {/* Label */}
-              <span className={`text-[10px] font-black  transition-colors ${isActive ? 'text-[#007AFF]' : 'text-[#8E8E93]'}`}>
+              <span className={`text-[10px] font-bold transition-colors ${isActive ? 'text-[#14B8A6]' : 'text-[#8E8E93]'}`}>
                 {item.name}
               </span>
 
-              {/* iOS Active Indicator Dot */}
+              {/* iOS Active Indicator Dot (4px) */}
               {isActive && !item.isCenter && (
-                <div className="w-1 h-1 bg-[#007AFF] rounded-full mt-0.5" />
+                <div className="w-1 h-1 bg-[#14B8A6] rounded-full mt-0.5" />
               )}
             </Link>
           );
         })}
       </div>
-      {/* Home Indicator line (iOS Style) */}
-      <div className="h-1 w-32 bg-[#E5E5E5] rounded-full mx-auto mt-3" />
     </nav>
   );
 }

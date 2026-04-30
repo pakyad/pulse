@@ -78,7 +78,7 @@ export default function NavigationGate() {
   }, [pathname, router]);
 
   // Only hide the global header on auth pages, root ('/'), me ('/me'), merchant/admin terminals, and active mission terminal.
-  const hideHeader = isAuthPage || pathname === '/' || pathname === '/me' || pathname === '/merchant' || pathname?.startsWith('/hub') || pathname?.startsWith('/run/active');
+  const hideHeader = isAuthPage || pathname === '/' || pathname === '/me' || pathname === '/merchant' || pathname?.startsWith('/hub') || pathname?.startsWith('/run/active') || pathname?.startsWith('/me/orders');
   const isMerchantTerminal = pathname?.startsWith('/merchant');
   const isRunTerminal = pathname?.startsWith('/run');
   const isActiveMission = pathname?.startsWith('/run/active');

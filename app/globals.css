@@ -37,6 +37,10 @@
     @apply font-sans antialiased;
     letter-spacing: -0.01em;
     min-height: 100svh; /* Safari specific height guard */
+    -webkit-overflow-scrolling: touch;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }
 
