@@ -147,7 +147,7 @@ export default function AuthPage() {
 
                <div className="pt-6 text-center">
                   <p className="text-[14px] text-gray-500 mb-1">Haven't signed up yet?</p>
-                  <button onClick={() => setView('register')} className="text-[14px] text-[#0A66C2] font-medium hover:underline">
+                  <button onClick={() => router.push('/auth/signup')} className="text-[14px] text-[#0A66C2] font-medium hover:underline">
                      Create an account
                   </button>
                </div>
@@ -159,38 +159,40 @@ export default function AuthPage() {
           <motion.div 
             key="login" 
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-            className="flex flex-col min-h-screen px-6 py-6 max-w-md mx-auto w-full"
+            className="flex flex-col min-h-screen px-6 py-12 max-w-md mx-auto w-full"
           >
-            <div className="flex items-center justify-between mb-8">
-               <button onClick={() => setView('landing')} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all active:scale-90">
-                  <ChevronLeft size={24} className="text-black" />
+            <div className="flex items-center justify-between mb-12 relative">
+               <button onClick={() => setView('landing')} className="w-10 h-10 rounded-full bg-[#F2F8FF] flex items-center justify-center transition-all active:scale-90">
+                  <ChevronLeft size={20} className="text-black" strokeWidth={3} />
                </button>
                <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">Sign in</h1>
                <div className="w-10" />
             </div>
 
             <div className="space-y-6 flex-1 mt-4">
-               {error && <div className="p-4 bg-red-50 text-red-600 rounded-xl text-[14px] font-medium border border-red-100">{error}</div>}
+               {error && <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-[14px] font-medium border border-red-100">{error}</div>}
                
                <div className="space-y-2">
-                  <label className="text-[14px] font-medium text-gray-700 ml-1">Email or username</label>
+                  <label className="text-[14px] font-semibold text-black ml-4">Email or username</label>
                   <input 
                     type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all"
+                    placeholder="iyad.mohmad@s.unikl.edu.my"
+                    className="w-full h-[60px] px-8 bg-[#F2F8FF] border-none rounded-full text-[15px] font-medium outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all"
                   />
                </div>
 
                <div className="space-y-2">
-                  <label className="text-[14px] font-medium text-gray-700 ml-1">Password</label>
+                  <label className="text-[14px] font-semibold text-black ml-4">Password</label>
                   <input 
                     type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                    className="w-full py-4 px-6 bg-white border border-gray-300 rounded-2xl text-[16px] outline-none focus:border-black transition-all"
+                    placeholder="••••••••"
+                    className="w-full h-[60px] px-8 bg-[#F2F8FF] border-none rounded-full text-[15px] font-medium outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all"
                   />
                </div>
 
                <button 
                  onClick={handleLogin} disabled={loading}
-                 className="w-full py-4 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-[2rem] font-semibold text-[16px] shadow-sm active:scale-95 transition-all flex items-center justify-center mt-4"
+                 className="w-full h-[60px] bg-[#0A66C2] hover:bg-[#004182] text-white rounded-full font-bold text-[16px] shadow-lg shadow-[#0A66C2]/10 active:scale-95 transition-all flex items-center justify-center mt-4"
                >
                  {loading ? <Loader2 className="animate-spin" size={24} /> : 'Sign in'}
                </button>
