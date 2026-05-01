@@ -75,48 +75,37 @@ function MarziaDeliverySheet({
         onClick={(e) => e.stopPropagation()}
         className="w-full bg-[#FDFDFD] rounded-t-4xl overflow-hidden"
       >
-        {/* Marzia handle + header */}
-        <div className="px-6 pt-5 pb-4 border-b border-slate-50">
-          <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-[20px] font-bold text-navy leading-tight">How do you want it?</h2>
-              <p className="text-[13px] text-slate-400 font-medium mt-0.5">
-                {item.title} · <span className="text-navy font-bold">RM {Number(item.price).toFixed(2)}</span>
-              </p>
-            </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mt-0.5">
+        {/* Sheet Header — Institutional Sync */}
+        <div className="px-8 pt-6 pb-6 border-b-[0.5px] border-slate-50">
+          <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto mb-6" />
+          <div className="flex items-center justify-between">
+            <h2 className="text-[18px] font-bold text-navy tracking-tight">Fulfillment Selection</h2>
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
               <X size={14} />
             </button>
           </div>
         </div>
 
-        <div className="px-6 py-5 space-y-3">
+        <div className="px-8 py-8 space-y-3">
           {/* Choice A — Collect */}
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => setChoice('SELF_COLLECT')}
-            className={`w-full p-4 rounded-2xl border-2 text-left transition-all flex items-center gap-4 ${
+            className={`w-full min-h-[72px] p-4 rounded-2xl border-[0.5px] text-left transition-all flex items-center gap-4 ${
               choice === 'SELF_COLLECT'
-                ? 'border-navy bg-navy'
-                : 'border-slate-100 bg-white hover:border-slate-200'
+                ? 'border-black bg-black text-white'
+                : 'border-slate-100 bg-white text-navy'
             }`}
           >
-            {/* Josh voxel icon */}
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center relative ${
-              choice === 'SELF_COLLECT' ? 'bg-white/10' : 'bg-slate-50 border border-slate-100'
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+              choice === 'SELF_COLLECT' ? 'bg-white/10' : 'bg-slate-50'
             }`}>
-              <div className={`absolute bottom-0.5 right-0.5 w-3 h-3 rounded-sm ${
-                choice === 'SELF_COLLECT' ? 'bg-white/20' : 'bg-slate-200'
-              }`} />
-              <ShoppingBag size={20} className={choice === 'SELF_COLLECT' ? 'text-white' : 'text-navy'} />
+              <ShoppingBag size={18} />
             </div>
             <div>
-              <p className={`text-[15px] font-bold leading-none ${choice === 'SELF_COLLECT' ? 'text-white' : 'text-navy'}`}>
-                I'll collect it
-              </p>
-              <p className={`text-[12px] font-medium mt-1 ${choice === 'SELF_COLLECT' ? 'text-white/50' : 'text-slate-400'}`}>
-                Meet the seller, scan to confirm
+              <p className="text-[14px] font-bold leading-none">Self-Collection</p>
+              <p className={`text-[12px] font-normal mt-1 opacity-60`}>
+                Direct handover at campus hotspots
               </p>
             </div>
           </motion.button>
@@ -125,66 +114,56 @@ function MarziaDeliverySheet({
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => setChoice('RUNNER')}
-            className={`w-full p-4 rounded-2xl border-2 text-left transition-all flex items-center gap-4 ${
+            className={`w-full min-h-[72px] p-4 rounded-2xl border-[0.5px] text-left transition-all flex items-center gap-4 ${
               choice === 'RUNNER'
-                ? 'border-accent bg-accent'
-                : 'border-slate-100 bg-white hover:border-slate-200'
+                ? 'border-black bg-black text-white'
+                : 'border-slate-100 bg-white text-navy'
             }`}
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center relative ${
-              choice === 'RUNNER' ? 'bg-white/10' : 'bg-blue-50 border border-blue-100'
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+              choice === 'RUNNER' ? 'bg-white/10' : 'bg-slate-50'
             }`}>
-              <div className={`absolute bottom-0.5 right-0.5 w-3 h-3 rounded-sm ${
-                choice === 'RUNNER' ? 'bg-white/20' : 'bg-blue-100'
-              }`} />
-              <Truck size={20} className={choice === 'RUNNER' ? 'text-white' : 'text-accent'} />
+              <Truck size={18} />
             </div>
             <div>
-              <p className={`text-[15px] font-bold leading-none ${choice === 'RUNNER' ? 'text-white' : 'text-navy'}`}>
-                Deliver to me
-              </p>
-              <p className={`text-[12px] font-medium mt-1 ${choice === 'RUNNER' ? 'text-white/50' : 'text-slate-400'}`}>
-                A runner brings it to your spot
+              <p className="text-[14px] font-bold leading-none">Institutional Runner</p>
+              <p className={`text-[12px] font-normal mt-1 opacity-60`}>
+                Delivery via verified peer network
               </p>
             </div>
           </motion.button>
 
-          {/* Location picker — only when runner chosen */}
+          {/* Location Grid — Black Selection */}
           <AnimatePresence>
             {choice === 'RUNNER' && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="pt-4 space-y-3"
               >
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-1">
-                  Drop-off spot
-                </p>
-                <div className="grid grid-cols-3 gap-2">
+                <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Select Hub</p>
+                <div className="grid grid-cols-2 gap-2">
                   {DROP_OFF_SPOTS.map((spot) => (
-                    <motion.button
+                    <button
                       key={spot.id}
-                      whileTap={{ scale: 0.95 }}
                       onClick={() => setLocation(spot.id)}
-                      className={`p-3 rounded-xl border text-left transition-all ${
+                      className={`h-[56px] px-4 rounded-xl border-[0.5px] text-left transition-all ${
                         location === spot.id
-                          ? 'bg-navy border-navy'
-                          : 'bg-white border-slate-100 hover:border-slate-200'
+                          ? 'bg-black border-black text-white'
+                          : 'bg-white border-slate-100 text-navy'
                       }`}
                     >
-                      <MapPin size={11} className={location === spot.id ? 'text-white mb-1' : 'text-slate-300 mb-1'} />
-                      <p className={`text-[11px] font-bold leading-none ${location === spot.id ? 'text-white' : 'text-navy'}`}>
-                        {spot.label}
-                      </p>
-                    </motion.button>
+                      <p className="text-[13px] font-bold leading-tight">{spot.label}</p>
+                      <p className={`text-[11px] font-normal opacity-50`}>{spot.sub}</p>
+                    </button>
                   ))}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Confirm CTA */}
+          {/* Confirm CTA — Black */}
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.97 }}
@@ -194,12 +173,12 @@ function MarziaDeliverySheet({
               const loc = choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : undefined;
               onConfirm(choice, loc);
             }}
-            className="w-full h-[60px] bg-navy text-white rounded-2xl font-bold text-[15px] flex items-center justify-center gap-3 disabled:opacity-40 transition-all shadow-xl shadow-navy/15 mt-2"
+            className="w-full h-[60px] bg-black text-white rounded-2xl font-bold text-[15px] flex items-center justify-center gap-3 disabled:opacity-40 transition-all shadow-none mt-2"
           >
             {loading
               ? <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" />
               : !choice
-              ? <span className="text-white/50">Choose an option above</span>
+              ? <span className="text-white/30">Select fulfillment method</span>
               : <>
                   <ShoppingBag size={18} />
                   Confirm — RM {Number(item.price).toFixed(2)}
@@ -282,7 +261,7 @@ export default function ItemDetails() {
         });
       });
       setShowDeliverySheet(false);
-      router.push('/activity');
+      router.push('/me/orders');
     } catch (e: any) {
       alert(e.message || 'Something went wrong. Please try again.');
     } finally {
@@ -308,172 +287,130 @@ export default function ItemDetails() {
   const isOutOfStock = stock <= 0;
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] font-sans text-navy antialiased">
+    <div className="min-h-screen bg-white font-sans text-navy antialiased">
 
-      {/* ── NAV (floats over image) ── */}
-      <nav className="fixed top-0 left-0 right-0 z-100 px-5 pt-8 pb-3 flex items-center justify-between">
-        {/* Josh back button — voxel pod with 3D base */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => router.back()}
-          className="relative"
-        >
-          <div className="absolute inset-0 translate-y-0.5 translate-x-0.5 rounded-2xl bg-black/10" />
-          <div className="relative w-10 h-10 bg-white/90 backdrop-blur-md rounded-2xl border border-white/40 flex items-center justify-center shadow-lg">
-            <ChevronLeft size={20} strokeWidth={2.5} className="text-navy" />
-          </div>
-        </motion.button>
+      {/* ── MINIMAL NAVIGATION CONTROL ── */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={() => router.back()}
+        className="fixed top-8 left-6 z-[110] p-2 rounded-xl bg-white/80 backdrop-blur-xl border-[0.5px] border-slate-100 flex items-center justify-center text-navy shadow-sm"
+      >
+        <ChevronLeft size={28} strokeWidth={2} />
+      </motion.button>
 
-        <div className="flex items-center gap-2">
-          {/* Bell */}
-          <motion.button whileTap={{ scale: 0.9 }} onClick={() => router.push('/activity')} className="relative">
-            <div className="absolute inset-0 translate-y-0.5 translate-x-0.5 rounded-2xl bg-black/10" />
-            <div className="relative w-10 h-10 bg-white/90 backdrop-blur-md rounded-2xl border border-white/40 flex items-center justify-center shadow-lg">
-              <Bell size={18} strokeWidth={2} className="text-navy" />
-              {notificationCount > 0 && (
-                <div className="absolute -top-1 -right-1 bg-accent text-white text-[7px] font-black h-3.5 w-3.5 rounded-full flex items-center justify-center border-2 border-[#FDFDFD]">
-                  {notificationCount}
-                </div>
-              )}
-            </div>
-          </motion.button>
-
-          {/* Heart */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setLiked(!liked)}
-            className="relative"
-          >
-            <div className="absolute inset-0 translate-y-0.5 translate-x-0.5 rounded-2xl bg-black/10" />
-            <div className="relative w-10 h-10 bg-white/90 backdrop-blur-md rounded-2xl border border-white/40 flex items-center justify-center shadow-lg">
-              <Heart
-                size={18}
-                strokeWidth={2}
-                className={liked ? 'fill-red-500 text-red-500' : 'text-navy'}
-              />
-            </div>
-          </motion.button>
-
-          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
-        </div>
-      </nav>
-
-      {/* ── HERO IMAGE — Josh: full bleed, immersive ── */}
-      <div className="relative w-full h-[55vh] bg-slate-100 overflow-hidden">
+      {/* ── RAW-HD PRODUCT CANVAS ── */}
+      <div className="relative w-full aspect-square bg-[#F8F9FA] overflow-hidden">
         {item.image_url && (
-          <motion.img
-            initial={{ scale: 1.05 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+          <img
             src={item.image_url}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             alt={item.title}
           />
         )}
-        {/* Gradient fade to sheet */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-[#FDFDFD]" />
       </div>
 
-      {/* ── CONTENT SHEET — sits directly under the image, no overlap hack ── */}
-      <div className="bg-[#FDFDFD] px-6 pt-6 pb-4">
-
-        {/* Josh Category Badge */}
-        <div className="flex items-center gap-3 mb-5">
-          {/* Josh voxel badge — blocky, pixelated aesthetic */}
-          <div className="relative">
-            <div className="absolute inset-0 translate-y-0.5 translate-x-0.5 rounded-xl bg-accent/20" />
-            <div className="relative px-3 py-1.5 bg-white border border-accent/20 rounded-xl">
-              <span className="text-[9px] font-black text-accent uppercase tracking-[0.2em]">
-                {item.category || 'Essential'}
-              </span>
-            </div>
+      {/* ── INSTITUTIONAL PRODUCT DATASHEET ── */}
+      <div className="px-6 pt-10 pb-48 space-y-12">
+        
+        {/* Prime Metrics */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-start">
+            <h1 className="text-[20px] font-bold text-navy tracking-tight leading-tight max-w-[75%]">
+              {item.title}
+            </h1>
+            <p className="text-[22px] font-bold text-navy tabular-nums">
+              RM {Number(item.price).toFixed(2)}
+            </p>
           </div>
-
-          {/* Rating */}
-          <div className="flex items-center gap-1">
-            <Star size={11} className="text-amber-400 fill-amber-400" />
-            <span className="text-[11px] font-bold text-navy">4.9</span>
-          </div>
-
-          <div className="ml-auto">
-            <JoshStockBadge stock={stock} />
+          
+          <div className="flex items-center gap-2">
+             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+             <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">
+                Institutional Registry: Active
+             </p>
           </div>
         </div>
 
-        {/* ── Title + Price — Josh: BIG, direct ── */}
-        <h1 className="text-[28px] font-bold leading-tight tracking-widest text-navy mb-2">
-          {item.title}
-        </h1>
-
-        <div className="flex items-baseline gap-2 mb-8">
-          <span className="text-[36px] font-black text-navy tabular-nums leading-none">
-            RM {Number(item.price).toFixed(2)}
-          </span>
+        {/* System Specifications (Auto-Description Logic) */}
+        <div className="space-y-1">
+           <h3 className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Specifications</h3>
+           <div className="grid grid-cols-1 border-t-[0.5px] border-slate-100">
+              {[
+                { label: 'Condition', value: item.condition || 'Institutional Standard' },
+                { label: 'Category', value: `${item.category} / ${item.subCategory || 'General'}` },
+                { label: 'Fulfillment', value: (item.meetup_enabled ? 'Meet-up' : '') + (item.meetup_enabled && item.delivery_enabled ? ' & ' : '') + (item.delivery_enabled ? 'Delivery' : '') },
+                { label: 'Location', value: item.meetup_location || 'Campus Wide' },
+              ].map((spec, i) => (
+                <div key={i} className="flex justify-between py-4 border-b-[0.5px] border-slate-50">
+                   <span className="text-[13px] font-medium text-slate-400">{spec.label}</span>
+                   <span className="text-[13px] font-bold text-navy">{spec.value}</span>
+                </div>
+              ))}
+           </div>
         </div>
 
-        {/* ── Description — only if it exists ── */}
+        {/* Narrative Description */}
         {item.description && (
-          <div className="mb-8">
-            <p className="text-[14px] text-slate-500 leading-relaxed font-medium">{item.description}</p>
+          <div className="space-y-3">
+            <h3 className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">Provenance</h3>
+            <p className="text-[14px] text-slate-500 leading-relaxed font-medium italic">
+              "{item.description}"
+            </p>
           </div>
         )}
 
-        {/* ── Seller Row — Ian-precision, not a big card ── */}
-        <Link
-          href={item.seller_id ? `/profile/${item.seller_id}` : '#'}
-          className="flex items-center gap-3 py-4 border-t border-b border-slate-50 group mb-8"
-        >
-          <div className="relative">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-100 overflow-hidden flex items-center justify-center text-slate-400 font-bold text-base">
-              {item.seller_photo
-                ? <img src={item.seller_photo} className="w-full h-full object-cover" alt="Seller" />
-                : item.seller_name?.[0] || 'S'}
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#FDFDFD]" />
-          </div>
-          <div className="flex-1">
-            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-0.5">Sold by</p>
-            <p className="text-[14px] font-bold text-navy group-hover:text-accent transition-colors leading-none">
-              {item.seller_name || 'Verified Student'}
-            </p>
-          </div>
-          <ShieldCheck size={16} className="text-emerald-400" />
-        </Link>
-
-        {/* Safe bottom padding so content clears the fixed buy bar */}
-        {/* Bottom nav ≈ 88px + buy bar ≈ 80px = 168px total */}
-        <div className="h-[168px]" />
+        {/* Seller Trust Module */}
+        <div className="pt-8 flex items-center justify-between border-t-[0.5px] border-slate-100">
+           <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-slate-50 border-[0.5px] border-slate-100 overflow-hidden flex items-center justify-center">
+                {item.seller_photo ? (
+                  <img src={item.seller_photo} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[12px] font-bold text-slate-300">{item.seller_name?.[0]}</span>
+                )}
+              </div>
+              <div>
+                <p className="text-[14px] font-bold text-navy">{item.seller_name || 'Verified Student'}</p>
+                <div className="flex items-center gap-1">
+                   <Star size={10} className="fill-amber-400 text-amber-400" />
+                   <span className="text-[11px] font-bold text-slate-400">4.9 · Marketplace Vetted</span>
+                </div>
+              </div>
+           </div>
+           <ShieldCheck size={18} className="text-emerald-500" />
+        </div>
       </div>
 
-      {/* ── FIXED BUY BAR ── 
-           Positioned at bottom-[88px] to sit ABOVE the bottom nav (≈88px tall).
-           Josh: bouncy spring on tap. Clear "Buy Now" CTA. Always visible. ── */}
-      <div
-        className="fixed left-0 right-0 z-[90] px-5 py-3 bg-[#FDFDFD]/95 backdrop-blur-xl border-t border-slate-100"
-        style={{ bottom: '88px' }}
-      >
+      {/* ── INTEGRATED BUYING FLOW TRIGGER ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-[100] px-6 py-8 bg-white/90 backdrop-blur-2xl border-t-[0.5px] border-slate-100 flex gap-3">
         <motion.button
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.97, y: 2 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+          whileTap={{ scale: 0.95 }}
+          className="w-14 h-14 rounded-full border-[0.5px] border-slate-200 flex items-center justify-center text-navy hover:bg-slate-50 transition-colors"
+        >
+          <MessageSquare size={20} strokeWidth={1.5} />
+        </motion.button>
+
+        <motion.button
+          whileTap={{ scale: 0.98 }}
           disabled={isOutOfStock || loading}
           onClick={() => setShowDeliverySheet(true)}
-          className={`w-full h-[58px] rounded-2xl font-bold text-[16px] flex items-center justify-center gap-3 transition-all shadow-xl ${
+          className={`flex-1 h-14 rounded-full font-bold text-[15px] flex items-center justify-center transition-all ${
             isOutOfStock
-              ? 'bg-slate-100 text-slate-300 shadow-none cursor-not-allowed'
-              : 'bg-navy text-white shadow-navy/20 active:shadow-none'
+              ? 'bg-slate-100 text-slate-300'
+              : 'bg-black text-white shadow-none'
           }`}
         >
-          {loading
-            ? <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" />
-            : isOutOfStock
-            ? 'Out of Stock'
-            : <><ShoppingBag size={20} /> Buy Now — RM {Number(item.price).toFixed(2)}</>
-          }
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" />
+          ) : isOutOfStock ? (
+            'Closed'
+          ) : (
+            <>Order Now — RM {Number(item.price).toFixed(2)}</>
+          )}
         </motion.button>
       </div>
 
-      {/* ── Marzia Delivery Sheet ── */}
+      {/* ── DELIVERY SHEET (Marzia Flow) ── */}
       <AnimatePresence>
         {showDeliverySheet && (
           <MarziaDeliverySheet

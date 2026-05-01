@@ -216,7 +216,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
           onClick={handleUpload}
           disabled={loading || !isFormValid}
           className={`w-full h-14 rounded-xl font-bold text-[16px] transition-all duration-300 ${
-            isFormValid ? 'bg-[#00927C] text-white shadow-lg' : 'bg-slate-100 text-slate-300'
+            isFormValid ? 'bg-black text-white' : 'bg-slate-100 text-slate-300'
           }`}
         >
           {loading ? 'Posting...' : 'List it!'}
@@ -237,67 +237,79 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] z-[500] flex flex-col max-h-[85vh] shadow-2xl"
             >
-              <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto my-4" />
-              
-              <div className="px-8 pb-6 flex items-center justify-between">
-                <button onClick={() => setSheet(null)}><X size={24} className="text-[#222222]" /></button>
-                <h3 className="text-[17px] font-bold text-[#222222] capitalize">{sheet}</h3>
-                <div className="w-6" />
+              {/* Institutional Sheet Header */}
+              <div className="px-8 pt-6 pb-6 border-b-[0.5px] border-slate-50">
+                <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto mb-6" />
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[18px] font-bold text-navy tracking-tight capitalize">{sheet}</h3>
+                  <button onClick={() => setSheet(null)}>
+                    <X size={18} className="text-slate-300" />
+                  </button>
+                </div>
               </div>
 
               <div className="flex-1 overflow-y-auto no-scrollbar px-8 pb-32">
                 {sheet === 'category' && (
-                  <div className="space-y-2">
-                    <div className="bg-slate-50 rounded-xl px-4 py-3 mb-4 flex items-center gap-3 border border-slate-100">
-                      <Search size={18} className="text-slate-300" />
-                      <input placeholder="Search for a category" className="bg-transparent text-[15px] font-medium focus:outline-none w-full" />
+                  <div className="space-y-3 pt-6">
+                    <div className="bg-slate-50 rounded-xl px-4 py-3 mb-6 flex items-center gap-3 border-[0.5px] border-slate-100">
+                      <Search size={16} className="text-slate-300" />
+                      <input placeholder="Search Marketplace" className="bg-transparent text-[14px] font-medium focus:outline-none w-full" />
                     </div>
                     {CATEGORIES.map(cat => (
                       <button 
                         key={cat.id} 
                         onClick={() => { setForm({...form, category: cat.label}); setSheet('subcategory'); }}
-                        className="w-full py-4 text-left flex items-center justify-between border-b border-slate-50 group active:bg-slate-50 transition-all"
+                        className="w-full min-h-[72px] px-5 py-4 text-left flex items-center justify-between border-[0.5px] border-slate-50 rounded-2xl bg-white hover:bg-slate-50 transition-all"
                       >
                         <div className="flex items-center gap-4">
                           <span className="text-[20px]">{cat.icon}</span>
-                          <span className="text-[15px] font-medium">{cat.label}</span>
+                          <div className="flex flex-col">
+                            <span className="text-[14px] font-bold text-navy leading-none">{cat.label}</span>
+                            <span className="text-[12px] font-normal text-slate-400 mt-1">Browse active listings</span>
+                          </div>
                         </div>
-                        <ChevronRight size={18} className="text-slate-300 group-hover:translate-x-1 transition-all" />
+                        <ChevronRight size={16} className="text-slate-200" />
                       </button>
                     ))}
                   </div>
                 )}
 
                 {sheet === 'subcategory' && (
-                  <div className="space-y-2">
-                     <h4 className="text-[24px] font-bold text-[#222222] mb-6">{form.category}</h4>
+                  <div className="space-y-2 pt-6">
+                     <h4 className="text-[12px] font-black text-slate-300 uppercase tracking-widest mb-4">{form.category}</h4>
                      {CATEGORIES.find(c => c.label === form.category)?.subs.map(sub => (
                        <button 
                          key={sub}
                          onClick={() => { setForm({...form, subCategory: sub}); setSheet(null); }}
-                         className="w-full py-5 text-left flex items-center justify-between border-b border-slate-50 group active:bg-slate-50 transition-all"
+                         className="w-full min-h-[72px] px-5 py-4 text-left flex items-center justify-between border-[0.5px] border-slate-50 rounded-2xl bg-white hover:bg-slate-50 transition-all"
                        >
-                         <span className="text-[15px] font-medium">{sub}</span>
-                         <ChevronRight size={18} className="text-slate-300 group-hover:translate-x-1 transition-all" />
+                         <span className="text-[14px] font-bold text-navy">{sub}</span>
+                         <ChevronRight size={16} className="text-slate-200" />
                        </button>
                      ))}
                   </div>
                 )}
 
                 {sheet === 'condition' && (
-                  <div className="space-y-4">
+                  <div className="space-y-3 pt-6">
                     {CONDITIONS.map(cond => (
                       <button 
                         key={cond.label} 
                         onClick={() => { setForm({...form, condition: cond.label}); setSheet(null); }}
-                        className="w-full py-5 text-left flex items-start justify-between gap-4 group border-b border-slate-50"
+                        className={`w-full min-h-[72px] px-5 py-4 text-left flex items-center justify-between border-[0.5px] rounded-2xl transition-all ${
+                          form.condition === cond.label 
+                            ? 'bg-navy border-navy text-white' 
+                            : 'bg-white border-slate-50 text-navy'
+                        }`}
                       >
                         <div className="flex-1">
-                          <p className="text-[15px] font-bold text-[#222222] mb-1">{cond.label}</p>
-                          <p className="text-[13px] text-slate-500 font-medium leading-snug">{cond.desc}</p>
+                          <p className="text-[14px] font-bold leading-none">{cond.label}</p>
+                          <p className={`text-[12px] font-normal mt-1 opacity-60 leading-tight`}>{cond.desc}</p>
                         </div>
-                        <div className={`w-6 h-6 rounded-full border-2 mt-1 flex items-center justify-center transition-all ${form.condition === cond.label ? 'border-[#00927C] bg-[#00927C]' : 'border-slate-200'}`}>
-                           {form.condition === cond.label && <Check size={14} className="text-white" />}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                          form.condition === cond.label ? 'border-white bg-white/20' : 'border-slate-100'
+                        }`}>
+                           {form.condition === cond.label && <Check size={12} className="text-white" />}
                         </div>
                       </button>
                     ))}
