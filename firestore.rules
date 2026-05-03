@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ── INSTITUTIONAL HELPERS ──
+    function isSignedIn() { return request.auth != null; }
+    function getUserData() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasRole(role) { return isSignedIn() && getUserData().role == role; }
+    function isVerifiedRunner() { return isSignedIn() && getUserData().is_verified_runner == true; }
+
+    // ── GLOBAL ADMIN OVERRIDE ──
+    match /{document=**} {
+      allow read, write: if hasRole('ADMIN');
+    }
+
+    // ── USER PROFILES ──
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == userId || hasRole('ADMIN'));
+    }
+
+    // ── MARKETPLACE ITEMS ──
+    match /items/{itemId} {
+      allow read: if true; 
+      allow create: if isSignedIn() && (hasRole('STUDENT') || hasRole('CLUB'));
+      allow update, delete: if isSignedIn() && (
+        resource.data.seller_id == request.auth.uid || hasRole('ADMIN')
+      );
+    }
+
+    // ── UNIFIED ORDERS & LOGISTICS ──
+    match /orders/{orderId} {
+      allow read: if isSignedIn() && (
+        resource.data.buyer_id == request.auth.uid || 
+        resource.data.seller_id == request.auth.uid ||
+        resource.data.runner_id == request.auth.uid ||
+        (isVerifiedRunner() && resource.data.status == 'WAITING_FOR_RUNNER') ||
+        hasRole('ADMIN')
+      );
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (
+        resource.data.seller_id == request.auth.uid || 
+        resource.data.runner_id == request.auth.uid ||
+        (isVerifiedRunner() && resource.data.status == 'WAITING_FOR_RUNNER') ||
+        hasRole('ADMIN')
+      );
+    }
+
+    // ── SYSTEM REGISTRIES ──
+    match /campaigns/{id} { allow read: if true; allow write: if hasRole('ADMIN'); }
+    match /announcements/{id} { allow read: if true; allow write: if hasRole('ADMIN'); }
+    
+    match /transactions/{id} { 
+      allow read: if isSignedIn() && (resource.data.buyer_id == request.auth.uid || hasRole('ADMIN'));
+      allow create: if isSignedIn(); 
+    }
+
+    // Legacy Support (Optional)
+    match /delivery_jobs/{id} { allow read, write: if isSignedIn() && hasRole('ADMIN'); }
+  }
+}

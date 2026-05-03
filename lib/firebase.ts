@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, setPersistence, inMemoryPersistence } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -18,6 +19,7 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+const functions = getFunctions(app);
 
 // ZERO-DISK PERSISTENCE PROTOCOL
 // Forces the identity session to reside in RAM only, bypassing the full C: drive.
@@ -26,4 +28,4 @@ if (typeof window !== 'undefined') {
     .catch((err) => console.error("Persistence Handshake Failed:", err));
 }
 
-export { db, auth, storage };
+export { db, auth, storage, functions };

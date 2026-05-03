@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth, db } from '@/lib/firebase';
+import { auth, db, functions } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { 
   ChevronLeft, 
   Bell, 
@@ -187,6 +188,7 @@ export default function RunModule() {
     const [currentStep, setCurrentStep] = useState(0);
     const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
     const [isFAQOpen, setIsFAQOpen] = useState<number | null>(null);
+    const [submitting, setSubmitting] = useState(false);
 
     // Deep Form State
     const [form, setForm] = useState<any>({
@@ -221,6 +223,38 @@ export default function RunModule() {
 
     const next = () => setCurrentStep(s => s + 1);
     const back = () => { if(currentStep > 0) setCurrentStep(s => s - 1); else setActiveService(null); };
+
+    const handleFinalizeDirective = async () => {
+        if (!auth.currentUser) { router.push('/auth'); return; }
+        setSubmitting(true);
+        try {
+            const createRunFn = httpsCallable(functions, 'createRunDirective');
+            
+            // Map form state to registry format
+            const payload = {
+                serviceId: activeService.id,
+                label: activeService.label,
+                source: form.source || activeService.desc.split(',')[0],
+                dest: form.destination || form.handoff || form.pickupNode || 'Campus Hub',
+                fee: 4.50, // Standardized fee
+                items: form.items || form.errandBrief || form.docUrl || 'Standard Logistics Item',
+                instructions: form.items || form.errandBrief || 'N/A',
+                type: activeService.id.toUpperCase(),
+                zone: 'ALL ZONES'
+            };
+
+            const result: any = await createRunFn(payload);
+            const orderId = result.data.orderId;
+            
+            setActiveService(null);
+            router.push(`/orders/success?id=${orderId}`);
+        } catch (e: any) {
+            console.error("RUN_DIRECTIVE_FAILED:", e);
+            alert(e.message || "Registry update failed.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     if (status === 'loading') return <div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-navy" /></div>;
 
@@ -502,11 +536,18 @@ export default function RunModule() {
                       {/* Dynamic Primary Action */}
                       {(currentStep === 1 || (currentStep === 3 && activeService.id !== 'errands')) && (
                          <button 
-                           onClick={() => { if(currentStep < 3) next(); else setActiveService(null); }}
-                           className="w-full h-[64px] bg-navy text-white rounded-[22px] font-bold text-[15px] tracking-tight active:scale-[0.98] transition-all shadow-xl shadow-navy/10 flex items-center justify-center gap-3"
+                           disabled={submitting}
+                           onClick={() => { if(currentStep < 3) next(); else handleFinalizeDirective(); }}
+                           className="w-full h-[64px] bg-navy text-white rounded-[22px] font-bold text-[15px] tracking-tight active:scale-[0.98] transition-all shadow-xl shadow-navy/10 flex items-center justify-center gap-3 disabled:opacity-50"
                          >
-                            {currentStep === 3 ? 'Finalize Directive' : 'Confirm & Proceed'}
-                            <ArrowRight size={18} />
+                            {submitting ? (
+                                <Loader2 className="animate-spin" size={20} />
+                            ) : (
+                                <>
+                                    {currentStep === 3 ? 'Finalize Directive' : 'Confirm & Proceed'}
+                                    <ArrowRight size={18} />
+                                </>
+                            )}
                          </button>
                       )}
                    </div>

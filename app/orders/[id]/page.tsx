@@ -8,7 +8,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { 
   ChevronLeft, CheckCircle2, Circle, HelpCircle, 
   ChevronRight, Package, Truck, Check, ShieldCheck, Star,
-  MessageSquare, Loader2, Bell, X, Info, Phone, Store
+  MessageSquare, Loader2, Bell, X, Info, Phone, Store, ArrowRight, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { updateOrderStatus } from '@/lib/marketplace-utils';
@@ -73,8 +73,8 @@ export default function OrderDetailPage() {
   };
 
   const getPulseState = (status: string): 'ordered' | 'preparing' | 'delivered' => {
-    if (['COMPLETED', 'COLLECTED'].includes(status)) return 'delivered';
-    if (['PENDING', 'CONFIRMED'].includes(status)) return 'ordered';
+    if (['COMPLETED', 'COLLECTED', 'DELIVERED'].includes(status)) return 'delivered';
+    if (['PENDING', 'CONFIRMED', 'PENDING_VENDOR'].includes(status)) return 'ordered';
     return 'preparing';
   };
 

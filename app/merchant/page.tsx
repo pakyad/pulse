@@ -15,6 +15,7 @@ import dynamic from "next/dynamic";
 const HandshakeQR = dynamic(() => import("@/components/HandshakeQR"), { ssr: false });
 import QRScanner from "@/components/merchant/QRScanner";
 import HeartbeatLine from "@/components/shared/HeartbeatLine";
+import ReceiptViewer from "@/components/merchant/ReceiptViewer";
 
 type Tab = "hub" | "inventory" | "orders" | "analytics" | "settings";
 
@@ -34,6 +35,7 @@ export default function MerchantTerminal() {
   const [loading, setLoading] = useState(true);
   const [isStoreOpen, setIsStoreOpen] = useState(true);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [viewingReceipt, setViewingReceipt] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -59,6 +61,11 @@ export default function MerchantTerminal() {
   const activeOrders = useMemo(() => orders.filter(o => ["PENDING_VENDOR", "WAITING_FOR_RUNNER", "RUNNER_EN_ROUTE_TO_VENDOR", "IN_TRANSIT"].includes(o.status)), [orders]);
 
   const handleAcceptOrder = async (orderId: string) => { await updateDoc(doc(db, "orders", orderId), { status: "WAITING_FOR_RUNNER" }); };
+  const handleDeclineOrder = async (orderId: string) => { 
+    if (confirm("Decline this order? Funds will need to be manually refunded if already paid.")) {
+      await updateDoc(doc(db, "orders", orderId), { status: "DECLINED" }); 
+    }
+  };
   const handleSignOut = async () => { await auth.signOut(); router.push("/auth"); };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#F9F9FB]"><div className="w-8 h-8 border-2 border-[#00C4B4] border-t-transparent rounded-full animate-spin" /></div>;
@@ -182,20 +189,52 @@ export default function MerchantTerminal() {
                </div>
 
                <div className="space-y-4">
-                  {activeOrders.map(o => (
+                   {activeOrders.map(o => (
                     <div key={o.id} className="bg-white border border-[#F2F2F7] rounded-2xl p-8 flex items-center justify-between">
                        <div className="flex items-center gap-6">
                           <div className="w-14 h-14 bg-[#F9F9FB] rounded-xl overflow-hidden flex items-center justify-center text-[#8E8E93]">
                              {o.image_url ? <img src={o.image_url} className="w-full h-full object-cover" /> : <Package size={24} />}
                           </div>
                           <div>
-                             <h4 className="text-[16px] font-bold text-[#1C1C1E]">{o.title}</h4>
-                             <p className="text-[13px] text-[#8E8E93] mt-1">Order #{o.id.slice(0,8)}</p>
+                             <div className="flex items-center gap-2">
+                               <h4 className="text-[16px] font-bold text-[#1C1C1E]">{o.title}</h4>
+                               <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ${
+                                 o.delivery_type === 'RUNNER' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
+                               }`}>
+                                 {o.delivery_type === 'RUNNER' ? 'Runner' : 'Collect'}
+                               </span>
+                             </div>
+                             <p className="text-[12px] font-medium text-[#8E8E93] mt-1">
+                               From {o.buyer_name} {o.drop_off_location ? `• ${o.drop_off_location}` : ''}
+                             </p>
                           </div>
                        </div>
-                       <div className="flex items-center gap-12">
-                          <p className="text-[18px] font-bold text-[#1C1C1E]">RM {o.price}</p>
-                          <button onClick={() => handleAcceptOrder(o.id)} className="bg-[#1C1C1E] text-white px-8 py-3 rounded-xl font-bold text-[14px]">Accept</button>
+                       <div className="flex items-center gap-8">
+                          <div className="text-right">
+                             <p className="text-[18px] font-bold text-[#1C1C1E]">RM {Number(o.price).toFixed(2)}</p>
+                             {o.receipt_url && (
+                               <button 
+                                 onClick={() => setViewingReceipt(o)}
+                                 className="text-[11px] font-bold text-[#00C4B4] uppercase tracking-widest hover:underline"
+                                >
+                                 View Receipt
+                               </button>
+                             )}
+                          </div>
+                          <div className="flex flex-col gap-2">
+                             <button 
+                               onClick={() => handleAcceptOrder(o.id)} 
+                               className="bg-[#1C1C1E] text-white px-8 py-3 rounded-xl font-bold text-[14px] hover:bg-black transition-all"
+                             >
+                               Accept
+                             </button>
+                             <button 
+                               onClick={() => handleDeclineOrder(o.id)} 
+                               className="text-[11px] font-bold text-red-400 uppercase tracking-widest hover:text-red-600 transition-colors"
+                             >
+                               Decline
+                             </button>
+                          </div>
                        </div>
                     </div>
                   ))}
@@ -258,6 +297,15 @@ export default function MerchantTerminal() {
 
         </div>
       </div>
+
+      <ReceiptViewer 
+        isOpen={!!viewingReceipt}
+        onClose={() => setViewingReceipt(null)}
+        imageUrl={viewingReceipt?.receipt_url}
+        orderId={viewingReceipt?.id || ""}
+        amount={Number(viewingReceipt?.price || 0)}
+        timestamp={viewingReceipt?.created_at}
+      />
     </main>
   );
 }
