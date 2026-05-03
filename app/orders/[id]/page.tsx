@@ -38,7 +38,7 @@ export default function OrderDetailPage() {
         return;
       }
       setUserId(user.uid);
-      const txRef = doc(db, 'transactions', id as string);
+      const txRef = doc(db, 'orders', id as string);
       unsub = onSnapshot(txRef, (snap) => {
         if (snap.exists()) {
           const data = snap.data();
@@ -150,12 +150,34 @@ export default function OrderDetailPage() {
           <div className="flex justify-between items-baseline px-2">
             <h3 className="text-[18px] font-black text-navy uppercase tracking-tightest">Real-time Pulse</h3>
             <div className="flex items-center gap-2">
-               <div className="w-2 h-2 rounded-full bg-navy animate-pulse" />
+               <div className="w-2 h-2 rounded-full bg-[#00C4B4] animate-pulse" />
                <span className="text-[10px] font-black text-navy uppercase tracking-widest">Live Sync</span>
             </div>
           </div>
-          <div className="bg-white border border-slate-100 rounded-[3rem] p-10 shadow-sm">
+          <div className="bg-white border border-[#F2F2F7] rounded-[3rem] p-10 shadow-sm space-y-8">
             <PulseLine state={pulseState} />
+            
+            {/* Proof Gallery */}
+            {(tx.pickup_photo_url || tx.dropoff_photo_url) && (
+              <div className="grid grid-cols-2 gap-4 pt-8 border-t border-[#F2F2F7]">
+                {tx.pickup_photo_url && (
+                  <div className="space-y-3">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Pickup Proof</p>
+                    <div className="aspect-square rounded-2xl overflow-hidden border border-[#F2F2F7]">
+                      <img src={tx.pickup_photo_url} className="w-full h-full object-cover" alt="Pickup" />
+                    </div>
+                  </div>
+                )}
+                {tx.dropoff_photo_url && (
+                  <div className="space-y-3">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Delivery Proof</p>
+                    <div className="aspect-square rounded-2xl overflow-hidden border border-[#F2F2F7]">
+                      <img src={tx.dropoff_photo_url} className="w-full h-full object-cover" alt="Delivery" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
 

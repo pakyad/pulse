@@ -8,7 +8,7 @@ import {
   BarChart2, Package, ShoppingBag, User, Plus, Camera, 
   ChevronRight, Truck, CheckCircle2, Trash2, 
   Home, LogOut, RefreshCw, X, Zap, LayoutDashboard, 
-  Settings, ArrowUpRight, Clock, ShieldCheck, HelpCircle
+  Settings, ArrowUpRight, Clock, ShieldCheck, HelpCircle, Wallet
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -16,23 +16,23 @@ const HandshakeQR = dynamic(() => import("@/components/HandshakeQR"), { ssr: fal
 import QRScanner from "@/components/merchant/QRScanner";
 import HeartbeatLine from "@/components/shared/HeartbeatLine";
 
-type Tab = "hub" | "inventory" | "orders" | "settings";
+type Tab = "hub" | "inventory" | "orders" | "analytics" | "settings";
 
 const STATUS_MAP: Record<string, { label: string; dot: string; border: string; color: string; action?: boolean }> = {
-  PENDING: { label: "Pickup required", dot: "bg-amber-400 animate-pulse", border: "border-l-amber-400", color: "text-amber-600", action: true },
-  AWAITING_RUNNER: { label: "Dispatching", dot: "bg-blue-400 animate-pulse", border: "border-l-blue-400", color: "text-blue-600" },
-  ON_THE_WAY: { label: "Transit", dot: "bg-violet-400 animate-pulse", border: "border-l-violet-400", color: "text-violet-600" },
-  COLLECTED: { label: "Fulfilled", dot: "bg-emerald-400", border: "border-l-emerald-400", color: "text-emerald-600" },
-  COMPLETE: { label: "Fulfilled", dot: "bg-emerald-400", border: "border-l-emerald-400", color: "text-emerald-600" },
+  PENDING_VENDOR: { label: "New Order", dot: "bg-amber-400 animate-pulse", border: "border-l-amber-400", color: "text-amber-600", action: true },
+  WAITING_FOR_RUNNER: { label: "Awaiting Runner", dot: "bg-blue-400 animate-pulse", border: "border-l-blue-400", color: "text-blue-600" },
+  RUNNER_EN_ROUTE_TO_VENDOR: { label: "Runner Coming", dot: "bg-[#00C4B4] animate-pulse", border: "border-l-[#00C4B4]", color: "text-[#00C4B4]" },
+  IN_TRANSIT: { label: "In Transit", dot: "bg-violet-400 animate-pulse", border: "border-l-violet-400", color: "text-violet-600" },
+  DELIVERED: { label: "Delivered", dot: "bg-emerald-400", border: "border-l-emerald-400", color: "text-emerald-600" },
 };
 
 export default function MerchantTerminal() {
-  const [activeTab, setActiveTab] = useState<Tab>("hub");
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'inventory' | 'ledger'>('overview');
   const [merchant, setMerchant] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showQRFor, setShowQRFor] = useState<string | null>(null);
+  const [isStoreOpen, setIsStoreOpen] = useState(true);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const router = useRouter();
 
@@ -40,21 +40,13 @@ export default function MerchantTerminal() {
     const unsub = auth.onAuthStateChanged(async (user) => {
       if (!user) { router.push("/auth"); return; }
       const snap = await getDoc(doc(db, "users", user.uid));
-      if (!snap.exists()) {
-        // Handle case where user profile doesn't exist but auth does
-        setMerchant({ full_name: user.displayName || "Merchant", email: user.email, uid: user.uid });
-      } else {
-        setMerchant({ ...snap.data(), uid: user.uid });
-      }
+      setMerchant(snap.exists() ? { ...snap.data(), uid: user.uid } : { full_name: user.displayName || "Merchant", email: user.email, uid: user.uid });
       
-      const qI = query(collection(db, "items"), where("seller_id", "==", user.uid), where("status", "==", "active"));
-      const unsubItems = onSnapshot(qI, (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+      const unsubItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid), where("status", "==", "active")), 
+        (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-      const qO = query(collection(db, "transactions"), where("seller_id", "==", user.uid));
-      const unsubOrders = onSnapshot(qO, (s) => {
-        const docs = s.docs.map(d => ({ id: d.id, ...d.data() }));
-        docs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        setOrders(docs);
+      const unsubOrders = onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
+        setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
         setLoading(false);
       });
 
@@ -63,266 +55,209 @@ export default function MerchantTerminal() {
     return () => unsub();
   }, [router]);
 
-  const revenue = useMemo(() => orders.filter(o => ["COLLECTED", "COMPLETE"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
-  const activeOrders = useMemo(() => orders.filter(o => ["PENDING", "AWAITING_RUNNER", "ON_THE_WAY"].includes(o.status)), [orders]);
+  const revenue = useMemo(() => orders.filter(o => ["DELIVERED"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
+  const activeOrders = useMemo(() => orders.filter(o => ["PENDING_VENDOR", "WAITING_FOR_RUNNER", "RUNNER_EN_ROUTE_TO_VENDOR", "IN_TRANSIT"].includes(o.status)), [orders]);
 
-  const restock = async (id: string, cur: number) => { await updateDoc(doc(db, "items", id), { stock_count: cur + 10 }); };
-  const archive = async (id: string) => { if (confirm("Archive this asset?")) await updateDoc(doc(db, "items", id), { status: "archived" }); };
+  const handleAcceptOrder = async (orderId: string) => { await updateDoc(doc(db, "orders", orderId), { status: "WAITING_FOR_RUNNER" }); };
+  const handleSignOut = async () => { await auth.signOut(); router.push("/auth"); };
 
-  const handleScan = async (txId: string) => {
-    setIsScannerOpen(false);
-    const o = orders.find(x => x.id === txId && x.status === "PENDING");
-    if (!o) return;
-    await updateDoc(doc(db, "transactions", txId), { status: "COLLECTED", completed_at: new Date().toISOString() });
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await auth.signOut();
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = "/auth";
-    } catch (e) {
-      window.location.href = "/auth";
-    }
-  };
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#FDFDFD]"><div className="w-10 h-10 border-4 border-navy/10 border-t-navy rounded-full animate-spin" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#F9F9FB]"><div className="w-8 h-8 border-2 border-[#00C4B4] border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
+    <main className="min-h-screen bg-[#F9F9FB] flex font-sans text-[#1C1C1E] antialiased">
       
-      {/* ── Fixed Josh Header ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 pt-10 pb-4 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
-        <div className="max-w-[480px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-navy flex items-center justify-center text-white shadow-lg shadow-navy/20">
-              <Zap size={20} />
-            </div>
-            <h1 className="text-[18px] font-black tracking-widest uppercase tracking-widest">Terminal</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <motion.button 
-              whileTap={{ scale: 0.9 }} 
-              onClick={() => router.push("/home")}
-              className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"
+      {/* ── PERSISTENT SIDEBAR ── */}
+      <nav className="w-80 bg-white border-r border-[#F2F2F7] flex flex-col fixed inset-y-0 z-50">
+        <div className="p-8 pb-12">
+           <h1 className="text-[20px] font-bold tracking-tight">Kelab Bola UniKL</h1>
+           <p className="text-[11px] font-medium text-[#8E8E93] uppercase tracking-widest mt-1">Institutional Vendor</p>
+        </div>
+
+        <div className="flex-1 px-4 space-y-1">
+          {[
+            { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+            { id: 'orders', label: 'Order Desk', icon: ShoppingBag },
+            { id: 'inventory', label: 'Inventory', icon: Package },
+            { id: 'ledger', label: 'Ledger', icon: Wallet },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id as any)}
+              className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl transition-all ${
+                activeTab === item.id 
+                  ? 'bg-[#F9F9FB] text-[#1C1C1E] font-bold border-l-4 border-[#00C4B4]' 
+                  : 'text-[#8E8E93] hover:text-[#1C1C1E]'
+              }`}
             >
-              <Home size={18} />
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }} 
-              onClick={handleSignOut}
-              className="w-12 h-12 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-200"
-            >
-              <LogOut size={20} strokeWidth={3} />
-            </motion.button>
-          </div>
+              <item.icon size={20} />
+              <span className="text-[15px]">{item.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="p-8 border-t border-[#F2F2F7] space-y-6">
+           <div className="flex items-center justify-between">
+              <span className="text-[14px] font-semibold">Store Open</span>
+              <button 
+                onClick={() => setIsStoreOpen(!isStoreOpen)}
+                className={`w-12 h-6 rounded-full transition-all relative p-1 ${isStoreOpen ? 'bg-[#00C4B4]' : 'bg-slate-200'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full transition-all ${isStoreOpen ? 'translate-x-6' : 'translate-x-0'}`} />
+              </button>
+           </div>
+           <button onClick={handleSignOut} className="w-full py-4 text-left flex items-center gap-4 text-[#8E8E93] hover:text-red-500 transition-colors">
+              <LogOut size={20} />
+              <span className="text-[15px] font-medium">Sign Out</span>
+           </button>
         </div>
       </nav>
 
-      <div className="max-w-[480px] mx-auto px-6 pt-28">
-        
-        {/* Profile Card Summary */}
-        <header className="mb-10 p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden shrink-0 border border-slate-50">
-            <img src={merchant?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${merchant?.full_name}`} className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <h2 className="text-[18px] font-black text-navy">{merchant?.full_name}</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Verified Merchant</span>
+      {/* ── WORKSPACE CANVAS ── */}
+      <div className="flex-1 pl-80">
+        <div className="max-w-6xl mx-auto p-12">
+          
+          {activeTab === 'overview' && (
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <h2 className="text-[28px] font-bold tracking-tight">Dashboard Overview</h2>
+               
+               <div className="grid grid-cols-3 gap-6">
+                  {[
+                    { count: activeOrders.length, label: 'Pending Acceptance', color: 'text-red-500', id: 'orders' },
+                    { count: orders.filter(o => o.status === 'WAITING_FOR_RUNNER').length, label: 'Awaiting Runner', color: 'text-orange-500', id: 'orders' },
+                    { count: items.filter(i => i.stock_count === 0).length, label: 'Out of Stock', color: 'text-[#8E8E93]', id: 'inventory' },
+                  ].map((card, i) => (
+                    <button key={i} onClick={() => setActiveTab(card.id as any)} className="bg-white border border-[#F2F2F7] rounded-2xl p-8 text-left space-y-2 hover:border-[#00C4B4] transition-all">
+                       <p className={`text-[32px] font-bold ${card.color}`}>{card.count}</p>
+                       <p className="text-[13px] font-bold text-[#1C1C1E]">{card.label}</p>
+                    </button>
+                  ))}
+               </div>
+
+               <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-white border border-[#F2F2F7] rounded-3xl p-10 space-y-2">
+                     <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">Today's Revenue</p>
+                     <h4 className="text-[42px] font-bold text-[#1C1C1E] tracking-tighter">RM {revenue.toFixed(2)}</h4>
+                  </div>
+                  <div className="bg-white border border-[#F2F2F7] rounded-3xl p-10 space-y-2">
+                     <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">Items Sold</p>
+                     <h4 className="text-[42px] font-bold text-[#1C1C1E] tracking-tighter">{orders.length}</h4>
+                  </div>
+               </div>
+
+               <div className="bg-white border border-[#F2F2F7] rounded-[2.5rem] p-12 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[16px] font-bold text-[#1C1C1E]">7-Day Revenue Trend</h3>
+                    <button 
+                      onClick={() => setIsScannerOpen(true)}
+                      className="flex items-center gap-2 text-[13px] font-bold text-navy hover:text-[#00C4B4] transition-colors"
+                    >
+                      <Camera size={16} /> Registry Verify
+                    </button>
+                  </div>
+                  <div className="h-64 flex items-end justify-between gap-2">
+                    {[40, 70, 45, 90, 65, 80, 100, 50, 75, 95].map((h, i) => (
+                      <div key={i} className="flex-1 bg-[#F9F9FB] rounded-t-lg transition-all" style={{ height: `${h}%` }} />
+                    ))}
+                  </div>
+               </div>
             </div>
-          </div>
-        </header>
-
-        {/* Tab Nav */}
-        <nav className="mb-10 p-1.5 bg-slate-50 rounded-4xl flex items-center gap-1">
-          {(['hub', 'inventory', 'orders', 'settings'] as Tab[]).map((t) => (
-            <button 
-              key={t}
-              onClick={() => setActiveTab(t)}
-              className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                activeTab === t ? 'bg-white text-navy shadow-sm' : 'text-slate-400'
-              }`}
-            >
-              {t === 'settings' ? 'Me' : t}
-            </button>
-          ))}
-        </nav>
-
-        <AnimatePresence mode="wait">
-          {/* Hub View */}
-          {activeTab === "hub" && (
-            <motion.div key="hub" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2 bg-navy rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-navy/20">
-                  <div className="absolute top-0 left-0 right-0">
-                    <HeartbeatLine color="#3B82F6" speed={3} />
-                  </div>
-                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 relative z-10">Total Yield</p>
-                  <h4 className="text-[42px] font-black tabular-nums tracking-tighter relative z-10">RM {revenue.toFixed(0)}</h4>
-                  <div className="mt-8 flex items-center justify-between relative z-10">
-                    <span className="text-[11px] font-bold text-white/30">Sync status: Active</span>
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  </div>
-                </div>
-                <div className="bg-white border border-slate-100 rounded-[2.5rem] p-6 shadow-sm">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Active</p>
-                  <h4 className="text-[28px] font-black text-navy">{activeOrders.length}</h4>
-                </div>
-                <div className="bg-white border border-slate-100 rounded-[2.5rem] p-6 shadow-sm">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Assets</p>
-                  <h4 className="text-[28px] font-black text-navy">{items.length}</h4>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <motion.button 
-                  whileTap={{ scale: 0.97, y: 2 }} 
-                  onClick={() => router.push("/post")} 
-                  className="h-16 bg-navy text-white rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 shadow-xl shadow-navy/20"
-                >
-                  <Plus size={18} /> New Item
-                </motion.button>
-                <motion.button 
-                  whileTap={{ scale: 0.97, y: 2 }} 
-                  onClick={() => setIsScannerOpen(true)} 
-                  className="h-16 bg-white border border-slate-100 text-navy rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <Camera size={18} /> Verify QR
-                </motion.button>
-              </div>
-
-              <div className="pt-4 space-y-4">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Active Pulse</p>
-                {activeOrders.slice(0, 3).map(o => (
-                  <div key={o.id} className="bg-white border border-slate-100 rounded-3xl p-5 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-50 shrink-0 overflow-hidden">
-                      {o.image_url ? <img src={o.image_url} className="w-full h-full object-cover" /> : <Package size={20} />}
-                    </div>
-                    <div className="flex-1 truncate">
-                      <p className="text-[14px] font-bold text-navy truncate">{o.title}</p>
-                      <p className={`text-[10px] font-black uppercase mt-0.5 ${STATUS_MAP[o.status]?.color}`}>{STATUS_MAP[o.status]?.label}</p>
-                    </div>
-                    <p className="text-[14px] font-black text-navy">RM {Number(o.price || 0).toFixed(0)}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
           )}
 
-          {/* Inventory View */}
-          {activeTab === "inventory" && (
-            <motion.div key="inventory" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{items.length} Registered Assets</p>
-                <button onClick={() => router.push("/post")} className="text-[11px] font-bold text-accent">+ Add New</button>
-              </div>
-              {items.map(item => (
-                <div key={item.id} className="bg-white border border-slate-100 rounded-4xl p-5 flex items-center gap-5 shadow-sm">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-50 overflow-hidden shrink-0">
-                    {item.image_url ? <img src={item.image_url} className="w-full h-full object-cover" /> : <Package size={24} className="text-slate-300" />}
-                  </div>
-                  <div className="flex-1 truncate">
-                    <h4 className="text-[14px] font-bold text-navy truncate">{item.title}</h4>
-                    <p className="text-[18px] font-black text-navy mt-1">RM {Number(item.price).toFixed(0)}</p>
-                    <p className={`text-[9px] font-black uppercase mt-1 ${Number(item.stock_count) <= 3 ? 'text-red-500' : 'text-emerald-500'}`}>{item.stock_count || "Tracked"} in stock</p>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <button onClick={() => restock(item.id, item.stock_count ?? 0)} className="p-2.5 rounded-xl bg-slate-50 text-navy"><RefreshCw size={16} /></button>
-                    <button onClick={() => archive(item.id)} className="p-2.5 rounded-xl bg-red-50 text-red-400"><Trash2 size={16} /></button>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          )}
+          {/* ... other tabs ... */}
 
-          {/* Orders View */}
-          {activeTab === "orders" && (
-            <motion.div key="orders" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{orders.length} Handshakes</p>
-                <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400" /><span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Live Sync</span></div>
-              </div>
-              {orders.map(o => (
-                <div key={o.id} className={`bg-white border border-slate-100 rounded-4xl p-6 space-y-4 shadow-sm border-l-4 ${STATUS_MAP[o.status]?.border}`}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex gap-4 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-50">
-                        {o.image_url ? <img src={o.image_url} className="w-full h-full object-cover" /> : <Package size={18} className="text-slate-300" />}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[14px] font-bold text-navy truncate">{o.title}</p>
-                        <p className="text-[11px] font-medium text-slate-300 mt-0.5">#{o.id.slice(0, 8).toUpperCase()}</p>
-                      </div>
+
+          {activeTab === 'orders' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+               <div className="flex items-center justify-between">
+                  <h2 className="text-[28px] font-bold tracking-tight">Order Desk</h2>
+                  <button className="text-[14px] font-bold text-[#00C4B4] uppercase tracking-widest">Bulk Accept</button>
+               </div>
+               
+               <div className="flex gap-8 border-b border-[#F2F2F7]">
+                  {['Pending', 'Preparing', 'In Transit', 'Completed'].map((tab, i) => (
+                    <button key={i} className={`pb-4 text-[14px] font-bold ${i === 0 ? 'text-[#1C1C1E] border-b-2 border-[#00C4B4]' : 'text-[#8E8E93]'}`}>
+                      {tab}
+                    </button>
+                  ))}
+               </div>
+
+               <div className="space-y-4">
+                  {activeOrders.map(o => (
+                    <div key={o.id} className="bg-white border border-[#F2F2F7] rounded-2xl p-8 flex items-center justify-between">
+                       <div className="flex items-center gap-6">
+                          <div className="w-14 h-14 bg-[#F9F9FB] rounded-xl overflow-hidden flex items-center justify-center text-[#8E8E93]">
+                             {o.image_url ? <img src={o.image_url} className="w-full h-full object-cover" /> : <Package size={24} />}
+                          </div>
+                          <div>
+                             <h4 className="text-[16px] font-bold text-[#1C1C1E]">{o.title}</h4>
+                             <p className="text-[13px] text-[#8E8E93] mt-1">Order #{o.id.slice(0,8)}</p>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-12">
+                          <p className="text-[18px] font-bold text-[#1C1C1E]">RM {o.price}</p>
+                          <button onClick={() => handleAcceptOrder(o.id)} className="bg-[#1C1C1E] text-white px-8 py-3 rounded-xl font-bold text-[14px]">Accept</button>
+                       </div>
                     </div>
-                    <p className="text-[18px] font-black text-navy tabular-nums shrink-0">RM {Number(o.price || 0).toFixed(0)}</p>
-                  </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${STATUS_MAP[o.status]?.dot}`} />
-                      <span className={`text-[10px] font-black uppercase tracking-widest ${STATUS_MAP[o.status]?.color}`}>{STATUS_MAP[o.status]?.label}</span>
-                    </div>
-                    {o.status === "PENDING" && <button onClick={() => setShowQRFor(showQRFor === o.id ? null : o.id)} className="text-[11px] font-bold text-accent">{showQRFor === o.id ? 'Close' : 'Show QR'}</button>}
-                  </div>
-                  {showQRFor === o.id && <div className="pt-4 flex justify-center border-t border-slate-50"><HandshakeQR txId={o.id} /></div>}
-                </div>
-              ))}
-            </motion.div>
+                  ))}
+               </div>
+            </div>
           )}
 
-          {/* Settings / Me View */}
-          {activeTab === "settings" && (
-            <motion.div key="me" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-              <div className="p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm space-y-8">
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-24 h-24 rounded-[2.5rem] bg-slate-50 border border-slate-100 p-1 mb-6">
-                    <img src={merchant?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${merchant?.full_name}`} className="w-full h-full object-cover rounded-[2.2rem]" />
-                  </div>
-                  <h3 className="text-[22px] font-black tracking-tight">{merchant?.full_name}</h3>
-                  <p className="text-slate-400 text-[13px] font-medium mt-1">{merchant?.email}</p>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-4 py-8 border-t border-b border-slate-50">
-                  <div className="text-center"><p className="text-[18px] font-black text-navy">{items.length}</p><p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Assets</p></div>
-                  <div className="text-center"><p className="text-[18px] font-black text-navy">{orders.length}</p><p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Orders</p></div>
-                  <div className="text-center"><p className="text-[18px] font-black text-navy">4.9</p><p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Rating</p></div>
-                </div>
-
-                <div className="space-y-3">
-                  <button onClick={() => router.push("/home")} className="w-full p-6 bg-slate-50 rounded-3xl flex items-center justify-between font-bold text-navy active:scale-95 transition-all">
-                    <div className="flex items-center gap-4"><LayoutDashboard size={20} /> Student Dashboard</div>
-                    <ChevronRight size={18} className="text-slate-200" />
-                  </button>
-                  <button onClick={handleSignOut} className="w-full p-6 bg-red-500 text-white rounded-3xl flex items-center justify-between font-bold active:scale-95 transition-all shadow-lg shadow-red-200">
-                    <div className="flex items-center gap-4"><LogOut size={20} /> Sign Out Terminal</div>
-                    <ChevronRight size={18} className="text-white/50" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+          {activeTab === 'inventory' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+               <div className="flex items-center justify-between">
+                  <h2 className="text-[28px] font-bold tracking-tight">Inventory Registry</h2>
+                  <button onClick={() => router.push('/post')} className="bg-[#1C1C1E] text-white px-8 py-3 rounded-xl font-bold text-[14px]">Add Asset</button>
+               </div>
+               <div className="bg-white border border-[#F2F2F7] rounded-3xl overflow-hidden">
+                  <table className="w-full text-left">
+                     <thead className="bg-[#F9F9FB] border-b border-[#F2F2F7]">
+                        <tr>
+                           <th className="px-8 py-6 text-[12px] font-bold text-[#8E8E93] uppercase">Product</th>
+                           <th className="px-8 py-6 text-[12px] font-bold text-[#8E8E93] uppercase">Price</th>
+                           <th className="px-8 py-6 text-[12px] font-bold text-[#8E8E93] uppercase">Stock</th>
+                           <th className="px-8 py-6 text-[12px] font-bold text-[#8E8E93] uppercase">Status</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y divide-[#F2F2F7]">
+                        {items.map(item => (
+                          <tr key={item.id}>
+                             <td className="px-8 py-6 font-bold">{item.title}</td>
+                             <td className="px-8 py-6">RM {item.price}</td>
+                             <td className="px-8 py-6">{item.stock_count || 0}</td>
+                             <td className="px-8 py-6">
+                                <div className="w-10 h-5 bg-[#00C4B4] rounded-full relative p-0.5">
+                                   <div className="w-4 h-4 bg-white rounded-full absolute right-0.5" />
+                                </div>
+                             </td>
+                          </tr>
+                        ))}
+                     </tbody>
+                  </table>
+               </div>
+            </div>
           )}
-        </AnimatePresence>
 
-      </div>
+          {activeTab === 'ledger' && (
+            <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
+               <h2 className="text-[28px] font-bold tracking-tight">Financial Ledger</h2>
+               <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-white border border-[#F2F2F7] rounded-3xl p-12 space-y-6">
+                     <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-widest">Available Balance</p>
+                     <h4 className="text-[48px] font-bold text-[#1C1C1E]">RM 1,240.50</h4>
+                     <button className="w-full py-4 bg-[#00C4B4] text-white rounded-2xl font-bold uppercase tracking-widest text-[13px] shadow-lg shadow-[#00C4B4]/20">Withdraw Funds</button>
+                  </div>
+                  <div className="bg-white border border-[#F2F2F7] rounded-3xl p-12 space-y-6">
+                     <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-widest">Pending Clearing</p>
+                     <h4 className="text-[48px] font-bold text-[#1C1C1E]">RM 185.00</h4>
+                     <p className="text-[13px] text-[#8E8E93]">Est. clearance: 2 days</p>
+                  </div>
+               </div>
+            </div>
+          )}
 
-      {/* Floating Scanner */}
-      {activeTab !== 'settings' && (
-        <div className="fixed bottom-10 left-0 right-0 flex justify-center pointer-events-none z-100">
-          <motion.button 
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsScannerOpen(true)}
-            className="w-16 h-16 bg-navy text-white rounded-full shadow-2xl flex items-center justify-center pointer-events-auto border-4 border-white"
-          >
-            <Camera size={24} />
-          </motion.button>
         </div>
-      )}
-
-      {isScannerOpen && <QRScanner onScanSuccess={handleScan} onClose={() => setIsScannerOpen(false)} />}
+      </div>
     </main>
   );
 }

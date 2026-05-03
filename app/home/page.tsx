@@ -80,12 +80,18 @@ export default function PulseHome() {
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => {
       if (!user) return;
-      onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
+      onSnapshot(doc(db, 'users', user.uid), s => {
+        const data = s.data();
+        setProfile(data);
+        if (data?.is_official) {
+          router.replace('/merchant');
+        }
+      });
       const q = query(collection(db, 'transactions'), where('buyer_id', '==', user.uid), where('status', '==', 'PENDING'));
       onSnapshot(q, s => setNotificationCount(s.docs.length));
     });
     return () => unsub();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const qItems = query(collection(db, 'items'), where('status', '==', 'active'), limit(20));

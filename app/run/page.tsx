@@ -262,7 +262,24 @@ export default function RunModule() {
                             {isFAQOpen === idx && (
                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                                   <p className="pb-6 text-[13px] text-slate-400 leading-relaxed">{item.content}</p>
-                                  {idx === 0 && <button onClick={() => setIsEnrollmentOpen(true)} className="mb-8 px-6 h-12 bg-navy text-white text-[13px] font-bold rounded-xl active:scale-95 transition-all">Apply Now</button>}
+                                  {idx === 0 && (
+                                     profile?.is_verified_runner ? (
+                                        <button 
+                                          onClick={() => router.push('/run/terminal')} 
+                                          className="mb-8 px-8 h-14 bg-[#0A0F1E] text-white text-[14px] font-bold rounded-2xl active:scale-95 transition-all flex items-center gap-3 shadow-xl shadow-navy/10"
+                                        >
+                                           <Zap size={18} className="text-amber-400 fill-amber-400" />
+                                           Open Carrier Terminal
+                                        </button>
+                                     ) : (
+                                        <button 
+                                          onClick={() => setIsEnrollmentOpen(true)} 
+                                          className="mb-8 px-6 h-12 bg-navy text-white text-[13px] font-bold rounded-xl active:scale-95 transition-all"
+                                        >
+                                           Apply Now
+                                        </button>
+                                     )
+                                  )}
                                </motion.div>
                             )}
                          </AnimatePresence>

@@ -243,7 +243,7 @@ export default function ItemDetails() {
           transaction.update(itemRef, { stock_count: currentStock - 1 });
         }
 
-        const txRef = doc(collection(db, 'transactions'));
+        const txRef = doc(collection(db, 'orders'));
         transaction.set(txRef, {
           item_id: id,
           title: itemDoc.data().title,
@@ -253,7 +253,7 @@ export default function ItemDetails() {
           buyer_name: profile?.full_name || 'Student',
           seller_id: itemDoc.data().seller_id,
           seller_name: itemDoc.data().seller_name || 'Seller',
-          status: deliveryType === 'RUNNER' ? 'AWAITING_RUNNER' : 'PENDING',
+          status: 'PENDING_VENDOR',
           delivery_type: deliveryType,
           drop_off_location: dropOffLocation ?? null,
           created_at: new Date().toISOString(),

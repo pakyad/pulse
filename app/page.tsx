@@ -10,9 +10,19 @@ import { db, auth } from '@/lib/firebase';
 
 export default function Home() {
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
+    const unsub = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        window.location.href = '/home';
+        try {
+          const { getDoc, doc } = await import('firebase/firestore');
+          const snap = await getDoc(doc(db, "users", user.uid));
+          if (snap.exists() && snap.data().is_official) {
+            window.location.href = '/merchant';
+          } else {
+            window.location.href = '/home';
+          }
+        } catch (e) {
+          window.location.href = '/home';
+        }
       } else {
         window.location.href = '/auth';
       }

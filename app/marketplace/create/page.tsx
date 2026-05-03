@@ -28,6 +28,28 @@ export default function CreateListingPage() {
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [delivery, setDelivery] = useState('Pick up');
+  const [priceError, setPriceError] = useState<string | null>(null);
+  
+  // USP 1: Price Safeguard Registry
+  const CATEGORY_LIMITS: Record<string, number> = {
+    'Books': 100,
+    'Food': 30,
+    'Tech': 5000,
+    'Other': 1000
+  };
+
+  useEffect(() => {
+    if (category && price) {
+      const limit = CATEGORY_LIMITS[category];
+      if (limit && parseFloat(price) > limit) {
+        setPriceError(`Institutional Limit: RM ${limit}.00 max for ${category}.`);
+      } else {
+        setPriceError(null);
+      }
+    } else {
+      setPriceError(null);
+    }
+  }, [category, price]);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -176,9 +198,15 @@ export default function CreateListingPage() {
                       placeholder="0"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      className="w-full bg-transparent p-0 text-[28px] font-black border-none focus:ring-0"
+                      className={`w-full bg-transparent p-0 text-[28px] font-black border-none focus:ring-0 ${priceError ? 'text-red-500' : 'text-navy'}`}
                     />
                  </div>
+                 {priceError && (
+                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-red-500">
+                       <AlertCircle size={12} />
+                       <span className="text-[10px] font-black uppercase tracking-widest">{priceError}</span>
+                    </motion.div>
+                 )}
               </div>
               <div className="space-y-2 border-l border-slate-50 pl-6">
                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Stock</p>
@@ -223,7 +251,7 @@ export default function CreateListingPage() {
             <span className="text-[10px] font-black uppercase text-navy/40">Check Look</span>
           </button>
           <button 
-            disabled={!title || !price || !category || images.length === 0}
+            disabled={!title || !price || !category || images.length === 0 || !!priceError}
             className="flex-[2.5] h-18 bg-navy text-white rounded-[1.5rem] flex items-center justify-center gap-3 shadow-2xl shadow-navy/30 active:scale-[0.98] disabled:opacity-20 disabled:grayscale transition-all"
           >
             <div className="flex flex-col items-start">
