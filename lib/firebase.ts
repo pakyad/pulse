@@ -22,15 +22,15 @@ const storage = getStorage(app);
 const functions = getFunctions(app);
 
 // ── EMULATOR BRIDGE ──
-// Josh: connect to the local voxel engine if we're in dev mode.
-if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+// Josh: Only connect if explicitly requested via environment variable.
+// This prevents "functions/internal" crashes if the Java-based emulators aren't running.
+if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' && typeof window !== 'undefined') {
   const { connectFirestoreEmulator } = require('firebase/firestore');
   const { connectAuthEmulator } = require('firebase/auth');
   const { connectStorageEmulator } = require('firebase/storage');
   const { connectFunctionsEmulator } = require('firebase/functions');
 
   try {
-    // Only connect if not already connected (to avoid hot-reload crashes)
     if (!(db as any)._emulatorConnected) {
       connectFirestoreEmulator(db, 'localhost', 8080);
       connectAuthEmulator(auth, 'http://localhost:9099');
@@ -40,7 +40,11 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       console.log("🏛️ Institutional Emulators Connected");
     }
   } catch (e) {
-    console.warn("Emulator bridge active but connection skipped:", e);
+    console.warn("Emulator bridge connection failed:", e);
+  }
+} else {
+  if (typeof window !== 'undefined') {
+    console.log("🚀 Pulse Live: Connecting to Cloud Production Node");
   }
 }
 

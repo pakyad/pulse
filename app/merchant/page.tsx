@@ -1,48 +1,22 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { auth, db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, getDoc, updateDoc } from "firebase/firestore";
-import { 
-  BarChart2, Package, ShoppingBag, User, Plus, Camera, 
-  ChevronRight, Truck, CheckCircle2, Trash2, 
-  Home, LogOut, RefreshCw, X, Zap, LayoutDashboard, 
-  Settings, ArrowUpRight, Clock, ShieldCheck, HelpCircle, Wallet
-} from "lucide-react";
-import dynamic from "next/dynamic";
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { db, auth } from '@/lib/firebase';
+import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
 
-const HandshakeQR = dynamic(() => import("@/components/HandshakeQR"), { ssr: false });
-import QRScanner from "@/components/merchant/QRScanner";
-import HeartbeatLine from "@/components/shared/HeartbeatLine";
-import ReceiptViewer from "@/components/merchant/ReceiptViewer";
-
-type Tab = "hub" | "inventory" | "orders" | "analytics" | "settings";
-
-const STATUS_MAP: Record<string, { label: string; dot: string; border: string; color: string; action?: boolean }> = {
-  PENDING_VENDOR: { label: "New Order", dot: "bg-amber-400 animate-pulse", border: "border-l-amber-400", color: "text-amber-600", action: true },
-  WAITING_FOR_RUNNER: { label: "Awaiting Runner", dot: "bg-blue-400 animate-pulse", border: "border-l-blue-400", color: "text-blue-600" },
-  RUNNER_EN_ROUTE_TO_VENDOR: { label: "Runner Coming", dot: "bg-[#00C4B4] animate-pulse", border: "border-l-[#00C4B4]", color: "text-[#00C4B4]" },
-  IN_TRANSIT: { label: "In Transit", dot: "bg-violet-400 animate-pulse", border: "border-l-violet-400", color: "text-violet-600" },
-  DELIVERED: { label: "Delivered", dot: "bg-emerald-400", border: "border-l-emerald-400", color: "text-emerald-600" },
-};
-
-export default function MerchantTerminal() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'inventory' | 'ledger'>('overview');
-  const [merchant, setMerchant] = useState<any>(null);
-  const [items, setItems] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isStoreOpen, setIsStoreOpen] = useState(true);
-  const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [viewingReceipt, setViewingReceipt] = useState<any>(null);
+export default function MerchantDashboard() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
+  const [merchant, setMerchant] = useState<any>(null);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (user) => {
       if (!user) { router.push("/auth"); return; }
+      
       const snap = await getDoc(doc(db, "users", user.uid));
-      setMerchant(snap.exists() ? { ...snap.data(), uid: user.uid } : { full_name: user.displayName || "Merchant", email: user.email, uid: user.uid });
+      setMerchant(snap.exists() ? { ...snap.data(), uid: user.uid } : { full_name: user.displayName || "Pulse Vendor", uid: user.uid });
       
       const unsubItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid), where("status", "==", "active")), 
         (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
@@ -57,255 +31,262 @@ export default function MerchantTerminal() {
     return () => unsub();
   }, [router]);
 
-  const revenue = useMemo(() => orders.filter(o => ["DELIVERED"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
-  const activeOrders = useMemo(() => orders.filter(o => ["PENDING_VENDOR", "WAITING_FOR_RUNNER", "RUNNER_EN_ROUTE_TO_VENDOR", "IN_TRANSIT"].includes(o.status)), [orders]);
+  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
+  
+  const activeOrdersList = orders.filter(o => ["PENDING", "PREPARING", "PACKED", "AWAITING_RUNNER", "ON_THE_WAY", "PENDING_VENDOR"].includes(o.status));
+  const activeOrdersCount = activeOrdersList.length;
+  const attentionCount = activeOrdersList.filter(o => o.status === 'PENDING' || o.status === 'PENDING_VENDOR').length;
 
-  const handleAcceptOrder = async (orderId: string) => { await updateDoc(doc(db, "orders", orderId), { status: "WAITING_FOR_RUNNER" }); };
-  const handleDeclineOrder = async (orderId: string) => { 
-    if (confirm("Decline this order? Funds will need to be manually refunded if already paid.")) {
-      await updateDoc(doc(db, "orders", orderId), { status: "DECLINED" }); 
-    }
-  };
-  const handleSignOut = async () => { await auth.signOut(); router.push("/auth"); };
+  const recentOrders = orders.slice(0, 3);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#F9F9FB]"><div className="w-8 h-8 border-2 border-[#00C4B4] border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center">
+      <div className="w-8 h-8 border-[1.5px] border-[#E5E5EA] border-t-teal-500 rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <main className="min-h-screen bg-[#F9F9FB] flex font-sans text-[#1C1C1E] antialiased">
+    <div className="min-h-screen bg-[#F2F2F7] flex font-sans selection:bg-teal-100">
       
-      {/* ── PERSISTENT SIDEBAR ── */}
-      <nav className="w-80 bg-white border-r border-[#F2F2F7] flex flex-col fixed inset-y-0 z-50">
-        <div className="p-8 pb-12">
-           <h1 className="text-[20px] font-bold tracking-tight">Kelab Bola UniKL</h1>
-           <p className="text-[11px] font-medium text-[#8E8E93] uppercase tracking-widest mt-1">Institutional Vendor</p>
+      {/* ── Fixed Sidebar (Column 1) ── */}
+      <aside className="w-64 h-screen bg-[#FFFFFF] border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
+        
+        {/* Header */}
+        <div className="px-6 py-8 flex items-center gap-2">
+          <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
+          <span className="text-[10px] font-bold bg-[#F2F2F7] text-[#8E8E93] px-2 py-[2px] rounded-full uppercase tracking-widest">Merchant</span>
         </div>
 
-        <div className="flex-1 px-4 space-y-1">
-          {[
-            { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-            { id: 'orders', label: 'Order Desk', icon: ShoppingBag },
-            { id: 'inventory', label: 'Inventory', icon: Package },
-            { id: 'ledger', label: 'Ledger', icon: Wallet },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
-              className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl transition-all ${
-                activeTab === item.id 
-                  ? 'bg-[#F9F9FB] text-[#1C1C1E] font-bold border-l-4 border-[#00C4B4]' 
-                  : 'text-[#8E8E93] hover:text-[#1C1C1E]'
-              }`}
-            >
-              <item.icon size={20} />
-              <span className="text-[15px]">{item.label}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="p-8 border-t border-[#F2F2F7] space-y-6">
-           <div className="flex items-center justify-between">
-              <span className="text-[14px] font-semibold">Store Open</span>
-              <button 
-                onClick={() => setIsStoreOpen(!isStoreOpen)}
-                className={`w-12 h-6 rounded-full transition-all relative p-1 ${isStoreOpen ? 'bg-[#00C4B4]' : 'bg-slate-200'}`}
-              >
-                <div className={`w-4 h-4 bg-white rounded-full transition-all ${isStoreOpen ? 'translate-x-6' : 'translate-x-0'}`} />
-              </button>
-           </div>
-           <button onClick={handleSignOut} className="w-full py-4 text-left flex items-center gap-4 text-[#8E8E93] hover:text-red-500 transition-colors">
-              <LogOut size={20} />
-              <span className="text-[15px] font-medium">Sign Out</span>
-           </button>
-        </div>
-      </nav>
-
-      {/* ── WORKSPACE CANVAS ── */}
-      <div className="flex-1 pl-80">
-        <div className="max-w-6xl mx-auto p-12">
+        {/* Directory Links */}
+        <nav className="flex-1 px-4 py-2 space-y-1.5">
+          {/* Active Item */}
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 bg-[#F2F2F7] text-[#1C1C1E] rounded-xl transition-colors group">
+            <svg className="w-5 h-5 text-[#1C1C1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            <span className="text-[15px] font-bold tracking-[-0.24px]">Overview</span>
+          </button>
           
-          {activeTab === 'overview' && (
-            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <h2 className="text-[28px] font-bold tracking-tight">Dashboard Overview</h2>
-               
-               <div className="grid grid-cols-3 gap-6">
-                  {[
-                    { count: activeOrders.length, label: 'Pending Acceptance', color: 'text-red-500', id: 'orders' },
-                    { count: orders.filter(o => o.status === 'WAITING_FOR_RUNNER').length, label: 'Awaiting Runner', color: 'text-orange-500', id: 'orders' },
-                    { count: items.filter(i => i.stock_count === 0).length, label: 'Out of Stock', color: 'text-[#8E8E93]', id: 'inventory' },
-                  ].map((card, i) => (
-                    <button key={i} onClick={() => setActiveTab(card.id as any)} className="bg-white border border-[#F2F2F7] rounded-2xl p-8 text-left space-y-2 hover:border-[#00C4B4] transition-all">
-                       <p className={`text-[32px] font-bold ${card.color}`}>{card.count}</p>
-                       <p className="text-[13px] font-bold text-[#1C1C1E]">{card.label}</p>
-                    </button>
-                  ))}
-               </div>
+          {/* Inactive Items */}
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+            <span className="text-[15px] tracking-[-0.24px]">Live Orders</span>
+          </button>
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            <span className="text-[15px] tracking-[-0.24px]">Products</span>
+          </button>
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            <span className="text-[15px] tracking-[-0.24px]">Analytics</span>
+          </button>
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            <span className="text-[15px] tracking-[-0.24px]">Settings</span>
+          </button>
+        </nav>
 
-               <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-white border border-[#F2F2F7] rounded-3xl p-10 space-y-2">
-                     <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">Today's Revenue</p>
-                     <h4 className="text-[42px] font-bold text-[#1C1C1E] tracking-tighter">RM {revenue.toFixed(2)}</h4>
-                  </div>
-                  <div className="bg-white border border-[#F2F2F7] rounded-3xl p-10 space-y-2">
-                     <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider">Items Sold</p>
-                     <h4 className="text-[42px] font-bold text-[#1C1C1E] tracking-tighter">{orders.length}</h4>
-                  </div>
-               </div>
-
-               <div className="bg-white border border-[#F2F2F7] rounded-[2.5rem] p-12 space-y-8">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-[16px] font-bold text-[#1C1C1E]">7-Day Revenue Trend</h3>
-                    <button 
-                      onClick={() => setIsScannerOpen(true)}
-                      className="flex items-center gap-2 text-[13px] font-bold text-navy hover:text-[#00C4B4] transition-colors"
-                    >
-                      <Camera size={16} /> Registry Verify
-                    </button>
-                  </div>
-                  <div className="h-64 flex items-end justify-between gap-2">
-                    {[40, 70, 45, 90, 65, 80, 100, 50, 75, 95].map((h, i) => (
-                      <div key={i} className="flex-1 bg-[#F9F9FB] rounded-t-lg transition-all" style={{ height: `${h}%` }} />
-                    ))}
-                  </div>
-               </div>
-            </div>
-          )}
-
-          {/* ... other tabs ... */}
-
-
-          {activeTab === 'orders' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="flex items-center justify-between">
-                  <h2 className="text-[28px] font-bold tracking-tight">Order Desk</h2>
-                  <button className="text-[14px] font-bold text-[#00C4B4] uppercase tracking-widest">Bulk Accept</button>
-               </div>
-               
-               <div className="flex gap-8 border-b border-[#F2F2F7]">
-                  {['Pending', 'Preparing', 'In Transit', 'Completed'].map((tab, i) => (
-                    <button key={i} className={`pb-4 text-[14px] font-bold ${i === 0 ? 'text-[#1C1C1E] border-b-2 border-[#00C4B4]' : 'text-[#8E8E93]'}`}>
-                      {tab}
-                    </button>
-                  ))}
-               </div>
-
-               <div className="space-y-4">
-                   {activeOrders.map(o => (
-                    <div key={o.id} className="bg-white border border-[#F2F2F7] rounded-2xl p-8 flex items-center justify-between">
-                       <div className="flex items-center gap-6">
-                          <div className="w-14 h-14 bg-[#F9F9FB] rounded-xl overflow-hidden flex items-center justify-center text-[#8E8E93]">
-                             {o.image_url ? <img src={o.image_url} className="w-full h-full object-cover" /> : <Package size={24} />}
-                          </div>
-                          <div>
-                             <div className="flex items-center gap-2">
-                               <h4 className="text-[16px] font-bold text-[#1C1C1E]">{o.title}</h4>
-                               <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest ${
-                                 o.delivery_type === 'RUNNER' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
-                               }`}>
-                                 {o.delivery_type === 'RUNNER' ? 'Runner' : 'Collect'}
-                               </span>
-                             </div>
-                             <p className="text-[12px] font-medium text-[#8E8E93] mt-1">
-                               From {o.buyer_name} {o.drop_off_location ? `• ${o.drop_off_location}` : ''}
-                             </p>
-                          </div>
-                       </div>
-                       <div className="flex items-center gap-8">
-                          <div className="text-right">
-                             <p className="text-[18px] font-bold text-[#1C1C1E]">RM {Number(o.price).toFixed(2)}</p>
-                             {o.receipt_url && (
-                               <button 
-                                 onClick={() => setViewingReceipt(o)}
-                                 className="text-[11px] font-bold text-[#00C4B4] uppercase tracking-widest hover:underline"
-                                >
-                                 View Receipt
-                               </button>
-                             )}
-                          </div>
-                          <div className="flex flex-col gap-2">
-                             <button 
-                               onClick={() => handleAcceptOrder(o.id)} 
-                               className="bg-[#1C1C1E] text-white px-8 py-3 rounded-xl font-bold text-[14px] hover:bg-black transition-all"
-                             >
-                               Accept
-                             </button>
-                             <button 
-                               onClick={() => handleDeclineOrder(o.id)} 
-                               className="text-[11px] font-bold text-red-400 uppercase tracking-widest hover:text-red-600 transition-colors"
-                             >
-                               Decline
-                             </button>
-                          </div>
-                       </div>
-                    </div>
-                  ))}
-               </div>
-            </div>
-          )}
-
-          {activeTab === 'inventory' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="flex items-center justify-between">
-                  <h2 className="text-[28px] font-bold tracking-tight">Inventory Registry</h2>
-                  <button onClick={() => router.push('/post')} className="bg-[#1C1C1E] text-white px-8 py-3 rounded-xl font-bold text-[14px]">Add Asset</button>
-               </div>
-               <div className="bg-white border border-[#F2F2F7] rounded-3xl overflow-hidden">
-                  <table className="w-full text-left">
-                     <thead className="bg-[#F9F9FB] border-b border-[#F2F2F7]">
-                        <tr>
-                           <th className="px-8 py-6 text-[12px] font-bold text-[#8E8E93] uppercase">Product</th>
-                           <th className="px-8 py-6 text-[12px] font-bold text-[#8E8E93] uppercase">Price</th>
-                           <th className="px-8 py-6 text-[12px] font-bold text-[#8E8E93] uppercase">Stock</th>
-                           <th className="px-8 py-6 text-[12px] font-bold text-[#8E8E93] uppercase">Status</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y divide-[#F2F2F7]">
-                        {items.map(item => (
-                          <tr key={item.id}>
-                             <td className="px-8 py-6 font-bold">{item.title}</td>
-                             <td className="px-8 py-6">RM {item.price}</td>
-                             <td className="px-8 py-6">{item.stock_count || 0}</td>
-                             <td className="px-8 py-6">
-                                <div className="w-10 h-5 bg-[#00C4B4] rounded-full relative p-0.5">
-                                   <div className="w-4 h-4 bg-white rounded-full absolute right-0.5" />
-                                </div>
-                             </td>
-                          </tr>
-                        ))}
-                     </tbody>
-                  </table>
-               </div>
-            </div>
-          )}
-
-          {activeTab === 'ledger' && (
-            <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
-               <h2 className="text-[28px] font-bold tracking-tight">Financial Ledger</h2>
-               <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-white border border-[#F2F2F7] rounded-3xl p-12 space-y-6">
-                     <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-widest">Available Balance</p>
-                     <h4 className="text-[48px] font-bold text-[#1C1C1E]">RM 1,240.50</h4>
-                     <button className="w-full py-4 bg-[#00C4B4] text-white rounded-2xl font-bold uppercase tracking-widest text-[13px] shadow-lg shadow-[#00C4B4]/20">Withdraw Funds</button>
-                  </div>
-                  <div className="bg-white border border-[#F2F2F7] rounded-3xl p-12 space-y-6">
-                     <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-widest">Pending Clearing</p>
-                     <h4 className="text-[48px] font-bold text-[#1C1C1E]">RM 185.00</h4>
-                     <p className="text-[13px] text-[#8E8E93]">Est. clearance: 2 days</p>
-                  </div>
-               </div>
-            </div>
-          )}
-
+        {/* Footer */}
+        <div className="p-4 border-t-[0.5px] border-[#E5E5EA]">
+          <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors font-medium">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <span className="text-[15px] tracking-[-0.24px]">Logout</span>
+          </button>
         </div>
-      </div>
+      </aside>
 
-      <ReceiptViewer 
-        isOpen={!!viewingReceipt}
-        onClose={() => setViewingReceipt(null)}
-        imageUrl={viewingReceipt?.receipt_url}
-        orderId={viewingReceipt?.id || ""}
-        amount={Number(viewingReceipt?.price || 0)}
-        timestamp={viewingReceipt?.created_at}
-      />
-    </main>
+      {/* ── Main Content Area (Column 2) ── */}
+      <main className="flex-1 ml-64 flex flex-col min-h-screen">
+        
+        {/* Sticky Top Bar */}
+        <div className="bg-[#FFFFFF] sticky top-0 z-20 px-8 py-4 flex items-center justify-between border-b-[0.5px] border-[#E5E5EA] shadow-[0_2px_10px_rgba(0,0,0,0.015)]">
+          
+          {/* Left: Search Bar */}
+          <div className="flex-1 max-w-md">
+            <div className="relative flex items-center w-full h-10 rounded-xl bg-[#F2F2F7] overflow-hidden border-[0.5px] border-transparent focus-within:border-[#E5E5EA] focus-within:bg-[#FFFFFF] transition-all">
+              <div className="grid place-items-center h-full w-12 text-[#8E8E93]">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              </div>
+              <input className="peer h-full w-full outline-none text-[15px] text-[#1C1C1E] pr-2 bg-transparent placeholder-[#AEAEB2]" type="text" id="search" placeholder="Search orders, products..." /> 
+            </div>
+          </div>
+
+          {/* Right: Notifications & Profile */}
+          <div className="flex items-center gap-5 ml-4">
+             <button className="relative text-[#8E8E93] hover:text-[#1C1C1E] transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                {attentionCount > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-[#FFFFFF] rounded-full"></span>}
+             </button>
+             <div className="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center border-[0.5px] border-[#E5E5EA] overflow-hidden cursor-pointer shadow-sm">
+                <span className="text-[14px] font-bold text-teal-700">{merchant?.full_name?.charAt(0) || 'V'}</span>
+             </div>
+          </div>
+        </div>
+
+        {/* Dashboard Grid Container */}
+        <div className="p-8 space-y-6 max-w-[1200px] w-full">
+          
+          {/* Section 1: Quick Stats Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Card 1 */}
+            <div className="bg-[#FFFFFF] p-6 rounded-[16px] border-[0.5px] border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+              <p className="text-[13px] font-medium text-[#8E8E93] mb-1">Total Revenue</p>
+              <div className="flex items-baseline gap-3">
+                <h2 className="text-[32px] font-bold text-[#1C1C1E] tracking-tight leading-none">RM {revenue.toFixed(2)}</h2>
+                <span className="text-[11px] font-bold text-teal-600 bg-teal-50 px-2 py-[2px] rounded-md tracking-wide">+12% this week</span>
+              </div>
+            </div>
+            
+            {/* Card 2 */}
+            <div className="bg-[#FFFFFF] p-6 rounded-[16px] border-[0.5px] border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+              <p className="text-[13px] font-medium text-[#8E8E93] mb-1">Active Orders</p>
+              <div className="flex items-baseline gap-3">
+                 <h2 className="text-[32px] font-bold text-[#1C1C1E] tracking-tight leading-none mb-2">{activeOrdersCount}</h2>
+                 <span className="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-[2px] rounded-md tracking-wide">{attentionCount} need attention</span>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-[#FFFFFF] p-6 rounded-[16px] border-[0.5px] border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+              <p className="text-[13px] font-medium text-[#8E8E93] mb-1">Profile Views</p>
+              <div className="flex items-baseline gap-3">
+                 <h2 className="text-[32px] font-bold text-[#1C1C1E] tracking-tight leading-none mb-2">342</h2>
+                 <span className="text-[11px] font-bold text-teal-600 bg-teal-50 px-2 py-[2px] rounded-md tracking-wide">+5% this week</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Analytics Chart */}
+          <div className="bg-[#FFFFFF] p-6 rounded-[16px] border-[0.5px] border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+             <h3 className="text-[17px] font-semibold text-[#1C1C1E] tracking-[-0.41px] mb-8">Revenue Overview</h3>
+             <div className="h-48 flex items-end justify-between gap-4 border-b-[0.5px] border-[#E5E5EA] pb-3">
+                {/* Mon */}
+                <div className="flex-1 flex flex-col items-center gap-3 group">
+                   <div className="w-full h-[40%] bg-teal-100 group-hover:bg-teal-500 rounded-t-[6px] transition-all relative">
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM40</span>
+                   </div>
+                   <span className="text-[11px] font-medium text-[#8E8E93]">Mon</span>
+                </div>
+                {/* Tue */}
+                <div className="flex-1 flex flex-col items-center gap-3 group">
+                   <div className="w-full h-[70%] bg-teal-100 group-hover:bg-teal-500 rounded-t-[6px] transition-all relative">
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM70</span>
+                   </div>
+                   <span className="text-[11px] font-medium text-[#8E8E93]">Tue</span>
+                </div>
+                {/* Wed */}
+                <div className="flex-1 flex flex-col items-center gap-3 group">
+                   <div className="w-full h-[50%] bg-teal-100 group-hover:bg-teal-500 rounded-t-[6px] transition-all relative">
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM50</span>
+                   </div>
+                   <span className="text-[11px] font-medium text-[#8E8E93]">Wed</span>
+                </div>
+                {/* Thu */}
+                <div className="flex-1 flex flex-col items-center gap-3 group">
+                   <div className="w-full h-[85%] bg-teal-500 rounded-t-[6px] transition-all relative">
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM85</span>
+                   </div>
+                   <span className="text-[11px] font-bold text-[#1C1C1E]">Thu</span>
+                </div>
+                {/* Fri */}
+                <div className="flex-1 flex flex-col items-center gap-3 group">
+                   <div className="w-full h-[60%] bg-teal-100 group-hover:bg-teal-500 rounded-t-[6px] transition-all relative">
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM60</span>
+                   </div>
+                   <span className="text-[11px] font-medium text-[#8E8E93]">Fri</span>
+                </div>
+                {/* Sat */}
+                <div className="flex-1 flex flex-col items-center gap-3 group">
+                   <div className="w-full h-[100%] bg-teal-100 group-hover:bg-teal-500 rounded-t-[6px] transition-all relative">
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM100</span>
+                   </div>
+                   <span className="text-[11px] font-medium text-[#8E8E93]">Sat</span>
+                </div>
+                {/* Sun */}
+                <div className="flex-1 flex flex-col items-center gap-3 group">
+                   <div className="w-full h-[30%] bg-teal-100 group-hover:bg-teal-500 rounded-t-[6px] transition-all relative">
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM30</span>
+                   </div>
+                   <span className="text-[11px] font-medium text-[#8E8E93]">Sun</span>
+                </div>
+             </div>
+          </div>
+
+          {/* Section 3: Bottom Split (2 Columns) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             
+             {/* Left: Top Products */}
+             <div className="bg-[#FFFFFF] p-6 rounded-[16px] border-[0.5px] border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                <div className="flex items-center justify-between mb-6">
+                   <h3 className="text-[17px] font-semibold text-[#1C1C1E] tracking-[-0.41px]">Top Products</h3>
+                   <button className="text-[13px] font-semibold text-teal-600 hover:text-teal-700 transition-colors">See all</button>
+                </div>
+                <div className="space-y-5">
+                   {[
+                     { title: 'MIDI Canvas Tote Bag', sales: 24, revenue: 552 },
+                     { title: 'Nasi Lemak Ayam', sales: 18, revenue: 108 },
+                     { title: 'Data Comm Notes', sales: 12, revenue: 60 }
+                   ].map((item, i) => (
+                     <div key={i} className="flex items-center justify-between group cursor-pointer hover:bg-[#F2F2F7] -mx-3 px-3 py-2 rounded-xl transition-colors">
+                        <div className="flex items-center gap-4">
+                           <div className="w-[44px] h-[44px] bg-[#F2F2F7] rounded-[10px] border-[0.5px] border-[#E5E5EA] flex items-center justify-center shrink-0">
+                              <svg className="w-5 h-5 text-[#AEAEB2]" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                           </div>
+                           <div className="min-w-0 pr-4">
+                              <p className="text-[15px] font-semibold text-[#1C1C1E] tracking-[-0.24px] truncate">{item.title}</p>
+                              <p className="text-[13px] font-medium text-[#8E8E93] mt-[2px]">{item.sales} sold</p>
+                           </div>
+                        </div>
+                        <p className="text-[15px] font-bold text-[#1C1C1E]">RM {item.revenue.toFixed(2)}</p>
+                     </div>
+                   ))}
+                </div>
+             </div>
+
+             {/* Right: Recent Orders */}
+             <div className="bg-[#FFFFFF] p-6 rounded-[16px] border-[0.5px] border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                <div className="flex items-center justify-between mb-6">
+                   <h3 className="text-[17px] font-semibold text-[#1C1C1E] tracking-[-0.41px]">Live Order Queue</h3>
+                   <button className="text-[13px] font-semibold text-teal-600 hover:text-teal-700 transition-colors">View All</button>
+                </div>
+                <div className="space-y-3">
+                   {recentOrders.length === 0 ? (
+                     <p className="text-[13px] font-medium text-[#8E8E93] text-center py-6">No recent orders in queue.</p>
+                   ) : recentOrders.map((o) => (
+                     <div key={o.id} className="flex items-center justify-between bg-[#FFFFFF] border-[0.5px] border-[#E5E5EA] p-4 rounded-xl hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-shadow cursor-pointer">
+                        <div>
+                           <p className="text-[14px] font-bold text-[#1C1C1E] uppercase tracking-wide">#{o.id.substring(0,6)}</p>
+                           <p className="text-[13px] font-medium text-[#8E8E93] mt-[2px] truncate max-w-[140px]">{o.title}</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                           <span className={`px-2.5 py-[3px] rounded-md text-[11px] font-bold uppercase tracking-widest ${
+                             o.status === 'PENDING' ? 'bg-amber-50 text-amber-600' : 'bg-teal-50 text-teal-600'
+                           }`}>
+                             {o.status === 'PENDING' ? 'Preparing' : 'Ready'}
+                           </span>
+                           <button className="text-[13px] font-semibold text-[#8E8E93] hover:text-[#1C1C1E] transition-colors">View</button>
+                        </div>
+                     </div>
+                   ))}
+                   
+                   {/* Fill empty spots with mock data if needed for aesthetic testing */}
+                   {recentOrders.length < 3 && [1,2,3].slice(recentOrders.length).map((i) => (
+                     <div key={`mock-${i}`} className="flex items-center justify-between bg-[#FFFFFF] border-[0.5px] border-[#E5E5EA] p-4 rounded-xl">
+                        <div>
+                           <p className="text-[14px] font-bold text-[#1C1C1E] uppercase tracking-wide">#MOCK{i}X</p>
+                           <p className="text-[13px] font-medium text-[#8E8E93] mt-[2px] truncate max-w-[140px]">Campus Graphic Tee</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                           <span className="px-2.5 py-[3px] rounded-md text-[11px] font-bold uppercase tracking-widest bg-amber-50 text-amber-600">Preparing</span>
+                           <button className="text-[13px] font-semibold text-[#8E8E93] hover:text-[#1C1C1E] transition-colors">View</button>
+                        </div>
+                     </div>
+                   ))}
+                </div>
+             </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
   );
 }

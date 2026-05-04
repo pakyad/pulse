@@ -7,76 +7,75 @@ if (admin.apps.length === 0) {
     admin.initializeApp();
 }
 const db = admin.firestore();
+// 🏛️ EMULATOR DETECTION & SYNC
+if (process.env.FUNCTIONS_EMULATOR === 'true') {
+    db.settings({
+        host: 'localhost:8080',
+        ssl: false
+    });
+}
 /**
- * placeOrder (V2)
- * Atomic transaction to decrement stock and create an order.
- * Optimized for Firebase Functions v2.
+ * placeOrder (V2 Institutional)
+ * Zero-config regional architecture for high-stability commerce.
  */
-exports.placeOrder = (0, https_1.onCall)(async (request) => {
-    // 1. Authentication Check
+exports.placeOrder = (0, https_1.onCall)({
+    cors: true,
+    maxInstances: 10,
+    region: "us-central1"
+}, async (request) => {
+    var _a;
+    console.log("🏛️ TERMINAL_INVOKED:", {
+        uid: (_a = request.auth) === null || _a === void 0 ? void 0 : _a.uid,
+        data: request.data
+    });
     if (!request.auth) {
-        throw new https_1.HttpsError("unauthenticated", "Only signed-in students can place orders.");
+        throw new https_1.HttpsError("unauthenticated", "Pulse Authorization Required.");
     }
-    const data = request.data;
-    const { itemId, title, price, imageUrl, receiptUrl, sellerId, sellerName, deliveryType, dropOffLocation, buyerName, notes, } = data;
-    // 2. Data Validation
-    if (!itemId || price === undefined || !sellerId) {
-        throw new https_1.HttpsError("invalid-argument", "Missing required fields: itemId, price, or sellerId.");
+    const data = request.data || {};
+    const { itemId, sellerId, price } = data;
+    if (!itemId || !sellerId) {
+        throw new https_1.HttpsError("invalid-argument", "Institutional payload incomplete.");
     }
     const orderId = db.collection("orders").doc().id;
     const itemRef = db.collection("items").doc(itemId);
     const orderRef = db.collection("orders").doc(orderId);
     try {
-        return await db.runTransaction(async (transaction) => {
+        const result = await db.runTransaction(async (transaction) => {
             var _a, _b;
             const itemDoc = await transaction.get(itemRef);
-            if (!itemDoc.exists) {
-                throw new Error("ITEM_NOT_FOUND");
-            }
+            if (!itemDoc.exists)
+                throw new https_1.HttpsError("not-found", "Item node not found.");
             const itemData = itemDoc.data();
-            const currentStock = (_b = (_a = itemData === null || itemData === void 0 ? void 0 : itemData.stock_count) !== null && _a !== void 0 ? _a : itemData === null || itemData === void 0 ? void 0 : itemData.stock) !== null && _b !== void 0 ? _b : 0;
-            // 3. Stock Check
-            if (currentStock <= 0) {
-                throw new Error("OUT_OF_STOCK");
-            }
-            // 4. Update Stock
-            transaction.update(itemRef, {
-                stock_count: currentStock - 1,
-            });
-            // 5. Create Order document
+            const currentStock = Number((_b = (_a = itemData === null || itemData === void 0 ? void 0 : itemData.stock_count) !== null && _a !== void 0 ? _a : itemData === null || itemData === void 0 ? void 0 : itemData.stock) !== null && _b !== void 0 ? _b : 1);
+            if (currentStock <= 0)
+                throw new https_1.HttpsError("out-of-range", "This item just sold out!");
+            transaction.update(itemRef, { stock_count: currentStock - 1 });
             transaction.set(orderRef, {
                 order_id: orderId,
                 item_id: itemId,
-                title: title || (itemData === null || itemData === void 0 ? void 0 : itemData.title) || "Marketplace Item",
-                price: price,
-                image_url: imageUrl || (itemData === null || itemData === void 0 ? void 0 : itemData.image_url) || null,
-                receipt_url: receiptUrl || null,
+                title: data.title || (itemData === null || itemData === void 0 ? void 0 : itemData.title) || "Marketplace Item",
+                price: Number(price) || Number(itemData === null || itemData === void 0 ? void 0 : itemData.price) || 0,
+                image_url: data.imageUrl || (itemData === null || itemData === void 0 ? void 0 : itemData.image_url) || null,
+                receipt_url: data.receiptUrl || null,
                 buyer_id: request.auth.uid,
-                buyer_name: buyerName || "Verified Student",
+                buyer_name: data.buyerName || "Verified Student",
                 seller_id: sellerId,
-                seller_name: sellerName || "Verified Vendor",
+                seller_name: data.sellerName || "Verified Vendor",
                 status: "PENDING_VENDOR",
-                delivery_type: deliveryType || "SELF_COLLECT",
-                drop_off_location: dropOffLocation || null,
-                notes: notes || null,
+                delivery_type: data.deliveryType || "SELF_COLLECT",
+                drop_off_location: data.dropOffLocation || null,
                 created_at: admin.firestore.FieldValue.serverTimestamp(),
                 order_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
             });
-            return {
-                success: true,
-                orderId: orderId,
-                message: "Order placed successfully.",
-            };
+            return { success: true, orderId };
         });
+        return result;
     }
     catch (error) {
-        console.error("ORDER_TRANSACTION_FAILED:", error);
-        let message = "Something went wrong while placing your order.";
-        if (error.message === "OUT_OF_STOCK")
-            message = "This item just sold out!";
-        if (error.message === "ITEM_NOT_FOUND")
-            message = "This item is no longer available.";
-        throw new https_1.HttpsError("internal", message);
+        console.error("🏛️ TERMINAL_CRASH:", error);
+        if (error.code && error.message)
+            throw error;
+        throw new https_1.HttpsError("internal", `Transaction failed: ${error.message}`);
     }
 });
 //# sourceMappingURL=index.js.map

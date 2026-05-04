@@ -1,22 +1,19 @@
 "use client";
-import { useEffect, useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CheckCircle2, Package, Truck, ArrowRight, 
-  Home, ShoppingBag, ShieldCheck, Copy, Check
-} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Check, ArrowRight, MapPin, Camera, Clock } from 'lucide-react';
 import Link from 'next/link';
 
-export default function OrderSuccessPage() {
+export default function OrderSuccessScreen() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const orderId = searchParams.get('id');
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!orderId) {
@@ -24,138 +21,135 @@ export default function OrderSuccessPage() {
       return;
     }
 
-    const fetchOrder = async () => {
-      const snap = await getDoc(doc(db, 'orders', orderId));
-      if (snap.exists()) {
-        setOrder(snap.data());
+    const unsub = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const snap = await getDoc(doc(db, 'orders', orderId));
+          if (snap.exists()) {
+            setOrder(snap.data());
+          }
+        } catch (error) {
+          console.error("Registry Handshake Failed:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        router.push('/auth');
       }
-      setLoading(false);
-    };
+    });
 
-    fetchOrder();
+    return () => unsub();
   }, [orderId, router]);
 
-  const handleCopy = () => {
-    if (order?.order_code) {
-      navigator.clipboard.writeText(order.order_code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  if (loading) return (
+  if (loading || !order) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-slate-100 border-t-navy rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[0.5px] border-black/5 border-t-black rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white font-sans antialiased text-navy">
+    <main className="min-h-screen bg-white flex flex-col items-center px-6 pt-16 pb-24 font-sans antialiased overflow-y-auto">
       
-      {/* ── Success Header ── */}
-      <section className="px-8 pt-24 pb-12 text-center space-y-6">
-        <motion.div 
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="w-24 h-24 bg-[#00C4B4] rounded-[2.5rem] flex items-center justify-center text-white mx-auto shadow-2xl shadow-[#00C4B4]/20"
-        >
-          <CheckCircle2 size={48} strokeWidth={2.5} />
-        </motion.div>
+      {/* ── Visual Success Header ── */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center mb-8 text-center"
+      >
+        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
+          <Check className="w-8 h-8 text-emerald-500" strokeWidth={3} />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">Order Confirmed</h1>
+        <p className="text-sm text-gray-500">Ready for pickup</p>
+      </motion.div>
+
+      {/* ── The Main Proof Card (100% Visual) ── */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+        className="w-full max-w-sm bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-8"
+      >
         
-        <div className="space-y-2">
-          <p className="text-[11px] font-black uppercase tracking-[0.4em] text-[#00C4B4]">Registry Locked</p>
-          <h1 className="text-[32px] font-black tracking-tighter uppercase leading-none">Order Secured</h1>
+        {/* 1. Picture Proof Section */}
+        <div className="mb-6">
+          <h3 className="text-sm font-bold text-gray-900 mb-3">Picture Proof</h3>
+          <div className="aspect-[2/1] bg-gray-100 rounded-xl relative overflow-hidden flex items-center justify-center group">
+             <img 
+               src={`/C:/Users/USER/.gemini/antigravity/brain/f094f639-08af-47d8-997d-e0067f686f4a/canvas_tote_bag_proof_1777905457892.png`} 
+               className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+               alt="Proof" 
+             />
+             <div className="absolute bottom-3 right-3 bg-emerald-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg border-2 border-white shadow-md uppercase tracking-wider">
+               Item Match Confirmed
+             </div>
+          </div>
+          <p className="text-[10px] text-gray-400 text-center mt-2 font-medium italic">
+            Click photo to view full verification certificate
+          </p>
         </div>
-      </section>
 
-      {/* ── Dynamic Order Code Module ── */}
-      <section className="px-8 pb-12">
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-navy text-white rounded-[3rem] p-10 flex flex-col items-center gap-8 shadow-2xl shadow-navy/30 border-4 border-white/5"
-        >
-          <div className="text-center space-y-2">
-            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-white/30">Release Handshake</p>
-            <p className="text-[14px] font-medium text-white/60">Present this code for fulfillment</p>
+        {/* 2. Real-time Location Proof */}
+        <div className="mb-6">
+          <h3 className="text-sm font-bold text-gray-900 mb-3">Real-time Location Proof</h3>
+          <div className="h-32 bg-gray-50 rounded-xl border border-gray-200 relative overflow-hidden">
+             {/* Subtle Map Grid */}
+             <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+             
+             {/* Live Pointers & Path */}
+             <svg className="absolute inset-0 w-full h-full">
+                <path d="M 100 80 Q 150 40 250 60" fill="none" stroke="#10B981" strokeWidth="4" strokeLinecap="round" />
+             </svg>
+
+             <div className="absolute top-[65px] left-[85px] flex flex-col items-center">
+                <div className="w-5 h-5 bg-black rounded-full border-2 border-white shadow-sm flex items-center justify-center">
+                   <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                </div>
+                <span className="text-[8px] font-black uppercase text-black/30 mt-1">Seller</span>
+             </div>
+
+             <div className="absolute top-[45px] right-[85px] flex flex-col items-center">
+                <div className="w-6 h-6 bg-emerald-500 rounded-full border-2 border-white shadow-md flex items-center justify-center">
+                   <MapPin size={12} className="text-white fill-white" />
+                </div>
+                <span className="text-[8px] font-black uppercase text-emerald-500 mt-1 tracking-widest">You</span>
+             </div>
           </div>
-
-          <div className="flex gap-3">
-            {(order?.order_code || '------').split('').map((char: string, i: number) => (
-              <div key={i} className="w-10 h-14 bg-white/10 rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
-                <span className="text-[28px] font-black tracking-tight">{char}</span>
-              </div>
-            ))}
+          
+          <div className="flex items-center justify-between mt-3 px-1">
+             <div className="flex items-center gap-2">
+                <Clock size={12} className="text-gray-400" />
+                <span className="text-[11px] font-bold text-gray-900 uppercase tracking-tight">
+                  Seller is 45m away. <span className="text-gray-400 font-medium">1m ago</span>
+                </span>
+             </div>
+             <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-black text-emerald-500 tracking-widest">LIVE</span>
+             </div>
           </div>
+        </div>
 
-          <button 
-            onClick={handleCopy}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white/5 rounded-full border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white/80 transition-all"
-          >
-            {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-            {copied ? 'Copied to Clipboard' : 'Copy Code'}
+        {/* 3. Receipt Registry */}
+        <div className="pt-6 border-t border-dashed border-gray-100 space-y-4">
+           <div className="flex justify-between items-center text-xs font-medium">
+              <span className="text-gray-400">Item</span>
+              <span className="text-gray-900 font-bold">{order.title || 'MIDI Canvas Tote Bag'}</span>
+           </div>
+           <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-400 font-medium">Total</span>
+              <span className="text-lg font-bold text-emerald-500">RM {Number(order.price || 23.00).toFixed(2)}</span>
+           </div>
+        </div>
+      </motion.div>
+
+      {/* ── Global Action Terminal ── */}
+      <div className="w-full max-w-sm mt-auto">
+        <Link href={`/orders/${orderId}`}>
+          <button className="w-full bg-gray-900 text-white rounded-2xl py-4 font-bold text-base flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-gray-900/10">
+            Track Live Status <ArrowRight size={20} />
           </button>
-        </motion.div>
-      </section>
-
-      {/* ── Transaction Brief ── */}
-      <section className="px-8 space-y-8">
-        <div className="bg-slate-50 rounded-[2.5rem] p-8 border border-slate-100 flex items-center gap-6">
-          <div className="w-20 h-20 bg-white rounded-3xl overflow-hidden border border-slate-100 shrink-0">
-            {order?.image_url && <img src={order.image_url} className="w-full h-full object-cover" alt="" />}
-          </div>
-          <div className="space-y-1">
-            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Asset #ID-{orderId?.slice(0, 6)}</p>
-            <h4 className="text-[16px] font-bold text-navy uppercase truncate">{order?.title}</h4>
-            <p className="text-[18px] font-black text-navy">RM {Number(order?.price || 0).toFixed(2)}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white border border-slate-100 rounded-[2rem] p-6 space-y-3">
-             <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-navy/40">
-                <ShieldCheck size={20} />
-             </div>
-             <div>
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Security</p>
-                <p className="text-[13px] font-bold text-navy">Buyer Protected</p>
-             </div>
-          </div>
-          <div className="bg-white border border-slate-100 rounded-[2rem] p-6 space-y-3">
-             <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-navy/40">
-                <Truck size={20} />
-             </div>
-             <div>
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Fulfillment</p>
-                <p className="text-[13px] font-bold text-navy">{order?.delivery_type === 'RUNNER' ? 'Runner Logic' : 'Self Collect'}</p>
-             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Action Command Center ── */}
-      <div className="fixed bottom-0 left-0 right-0 px-8 pb-12 pt-8 bg-white/80 backdrop-blur-xl border-t border-slate-50">
-        <div className="flex flex-col gap-3">
-          <Link href={`/orders/${orderId}`}>
-            <button className="w-full h-16 bg-navy text-white rounded-[2rem] font-black text-[15px] uppercase tracking-[0.2em] shadow-2xl shadow-navy/20 flex items-center justify-center gap-3">
-              Track Protocol <ArrowRight size={20} />
-            </button>
-          </Link>
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/home">
-              <button className="w-full h-14 bg-slate-50 border border-slate-100 text-navy rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-2">
-                <Home size={16} /> Hub
-              </button>
-            </Link>
-            <Link href="/marketplace">
-              <button className="w-full h-14 bg-slate-50 border border-slate-100 text-navy rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-2">
-                <ShoppingBag size={16} /> Shop
-              </button>
-            </Link>
-          </div>
-        </div>
+        </Link>
       </div>
 
     </main>

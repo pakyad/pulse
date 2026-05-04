@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { Check, X, User, Store, Bike, Search, Filter } from 'lucide-react';
+import { Check, X, User, Store, Bike, Search, Filter, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ApprovalItem {
@@ -79,46 +79,44 @@ export default function ApprovalList({ type }: ApprovalListProps) {
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-24 w-full bg-slate-50 animate-pulse rounded-3xl" />
+          <div key={i} className="h-28 w-full bg-slate-50 border-[0.5px] border-[#F2F2F7] rounded-[22px] animate-pulse" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* List Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center">
-            {type === 'merchants' ? <Store className="text-[#007AFF]" size={20} /> : 
-             type === 'runners' ? <Bike className="text-[#007AFF]" size={20} /> : 
-             <User className="text-[#007AFF]" size={20} />}
+    <div className="space-y-8">
+      {/* List Header (Institutional) */}
+      <div className="flex justify-between items-end mb-12">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 rounded-[16px] bg-black/5 flex items-center justify-center text-black/40">
+            {type === 'merchants' ? <Store size={24} /> : 
+             type === 'runners' ? <Bike size={24} /> : 
+             <User size={24} />}
           </div>
           <div>
-            <h3 className="text-[#0A0F1E] font-bold text-lg leading-none mb-1">
-              {type === 'merchants' ? 'Merchant Queue' : 
-               type === 'runners' ? 'Runner Queue' : 
-               type === 'students' ? 'Student Verification' : 'Official Clubs'}
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-1">Authorization Hub</p>
+            <h3 className="text-[20px] font-black text-black uppercase tracking-tighter leading-none">
+              {type === 'merchants' ? 'Merchant Registry' : 
+               type === 'runners' ? 'Runner Registry' : 
+               type === 'students' ? 'Student Registry' : 'Official Clubs'}
             </h3>
-            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">
-              {items.length} Pending Review
-            </p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
-           <Search size={14} className="text-slate-300" />
-           <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-[12px] font-medium text-slate-500 w-40" />
+        <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-[16px] border-[0.5px] border-[#F2F2F7]">
+           <Search size={16} className="text-black/10" />
+           <input type="text" placeholder="Filter node..." className="bg-transparent border-none outline-none text-[11px] font-black uppercase tracking-widest text-black/40 w-48 placeholder:text-black/10" />
         </div>
       </div>
 
       {items.length === 0 ? (
-        <div className="h-64 w-full border-2 border-dashed border-slate-100 rounded-[3rem] flex flex-col items-center justify-center text-center p-12">
-           <p className="text-slate-300 font-bold text-sm mb-1 uppercase tracking-widest">All Clear</p>
-           <p className="text-slate-200 text-xs font-medium uppercase tracking-widest">No pending {type} at the moment.</p>
+        <div className="h-64 w-full border-[0.5px] border-dashed border-black/10 rounded-[22px] flex flex-col items-center justify-center text-center p-12">
+           <p className="text-black/20 font-black text-[12px] uppercase tracking-[0.3em] mb-2">Registry Silent</p>
+           <p className="text-black/10 text-[10px] font-black uppercase tracking-widest italic">No pending {type} authorizations at this timestamp.</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -127,42 +125,44 @@ export default function ApprovalList({ type }: ApprovalListProps) {
               <motion.div
                 key={item.id}
                 layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white border border-slate-100 rounded-4xl p-8 flex items-center justify-between group hover:border-blue-100 transition-colors shadow-sm"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                className="bg-white border-[0.5px] border-[#F2F2F7] rounded-[22px] p-8 flex items-center justify-between group hover:border-black/10 transition-all shadow-sm"
               >
-                <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden">
+                <div className="flex items-center gap-8">
+                  <div className="w-16 h-16 rounded-[16px] bg-slate-50 border-[0.5px] border-[#F2F2F7] flex items-center justify-center overflow-hidden grayscale group-hover:grayscale-0 transition-all">
                     <img 
                       src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.full_name || item.id}`} 
                       alt="Avatar" 
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div>
-                    <h4 className="text-[#0A0F1E] font-bold text-[16px] leading-tight mb-1">{item.full_name || 'Anonymous User'}</h4>
+                  <div className="space-y-2">
+                    <h4 className="text-black font-black text-[16px] uppercase tracking-tight leading-none">{item.full_name || 'Anonymous Node'}</h4>
                     <div className="flex items-center gap-4">
-                      <p className="text-slate-400 text-[12px] font-medium">{item.email}</p>
+                      <p className="text-black/30 text-[11px] font-black uppercase tracking-widest italic">{item.email}</p>
                       {item.matric_no && (
-                        <div className="w-1 h-1 rounded-full bg-slate-200" />
+                        <>
+                          <div className="w-1 h-1 rounded-full bg-black/10" />
+                          <p className="text-black font-black text-[11px] tracking-widest uppercase opacity-40">{item.matric_no}</p>
+                        </>
                       )}
-                      <p className="text-slate-400 text-[12px] font-medium font-mono uppercase">{item.matric_no}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                   <button 
                     onClick={() => handleAction(item.id, 'approve')}
-                    className="h-11 px-6 rounded-2xl bg-[#007AFF] text-white font-bold text-[12px] hover:bg-blue-600 transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-blue-500/10"
+                    className="h-12 px-8 rounded-[16px] bg-[#00927C] text-white font-black text-[11px] hover:bg-[#007A68] transition-all active:scale-95 flex items-center gap-3 uppercase tracking-widest"
                   >
-                    <Check size={16} />
-                    Approve
+                    <Check size={16} strokeWidth={3} />
+                    Authorize
                   </button>
                   <button 
                     onClick={() => handleAction(item.id, 'reject')}
-                    className="h-11 w-11 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
+                    className="h-12 w-12 rounded-[16px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-center text-black/20 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
                   >
                     <X size={18} />
                   </button>

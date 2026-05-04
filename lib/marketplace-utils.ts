@@ -75,6 +75,21 @@ export const markItemAsSold = async (itemId: string) => {
 };
 
 /**
+ * updateOrderStatus (Logistics Handshake)
+ * Manages the state machine for marketplace orders.
+ */
+export const updateOrderStatus = async (orderId: string, status: string, userId: string) => {
+  const { doc, updateDoc, serverTimestamp } = await import("firebase/firestore");
+  const orderRef = doc(db, "orders", orderId);
+  
+  return await updateDoc(orderRef, {
+    status: status,
+    updated_at: serverTimestamp(),
+    [`status_history.${status}`]: serverTimestamp()
+  });
+};
+
+/**
  * Remove a listing from the registry.
  */
 export const deleteItemListing = async (itemId: string) => {

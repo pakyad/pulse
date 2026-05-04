@@ -6,7 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import TreasuryView from '@/components/admin/TreasuryView';
 import ApprovalList from '@/components/admin/ApprovalList';
 import RegistryList from '@/components/admin/RegistryList';
-import { Monitor, ChevronRight, Activity, Zap, ShieldCheck } from 'lucide-react';
+import { Monitor, ChevronRight, Activity, Zap, ShieldCheck, Bell } from 'lucide-react';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
@@ -70,61 +70,73 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="h-screen w-full bg-[#0f172a] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-white/10 border-t-[#007AFF] rounded-full animate-spin" />
+      <div className="h-screen w-full bg-white flex items-center justify-center">
+        <div className="w-10 h-10 border-[0.5px] border-black/5 border-t-[#00927C] rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!isDesktop) {
     return (
-      <div className="h-screen w-full bg-[#0f172a] flex flex-col items-center justify-center p-12 text-center">
-        <Monitor size={32} className="text-[#007AFF] mb-6" />
-        <h2 className="text-white font-bold text-xl mb-2">Use Desktop</h2>
-        <p className="text-slate-400 text-sm max-w-[320px]">
-          The Admin Portal works best on a computer.
+      <div className="h-screen w-full bg-white flex flex-col items-center justify-center p-12 text-center">
+        <Monitor size={48} className="text-[#00927C] mb-8" />
+        <h2 className="text-black font-black text-2xl uppercase tracking-tighter mb-4">Desktop Authorization Required</h2>
+        <p className="text-black/40 text-[11px] font-black uppercase tracking-[0.2em] max-w-[320px]">
+          The Admin Interface requires a high-resolution viewport for secure operations.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-[#0A0F1E] flex overflow-hidden font-sans">
+    <div className="min-h-screen bg-white text-black flex overflow-hidden font-sans antialiased">
       <AdminSidebar activeModule={activeModule} setActiveModule={setActiveModule} />
       
       <main className="flex-1 ml-[260px] h-screen overflow-y-auto bg-white">
         
-        <header className="px-12 pt-12 pb-8 border-b border-slate-50">
+        {/* Institutional Header */}
+        <header className="px-12 pt-16 pb-10 border-b-[0.5px] border-[#F2F2F7] sticky top-0 bg-white/90 backdrop-blur-xl z-[40]">
           <div className="max-w-6xl mx-auto flex justify-between items-end">
             <div>
-              <nav className="flex items-center gap-2 mb-3">
-                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{activeMeta.parent}</span>
-                <ChevronRight size={10} className="text-slate-200" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{activeMeta.label}</span>
+              <nav className="flex items-center gap-3 mb-4">
+                <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em]">{activeMeta.parent}</span>
+                <ChevronRight size={12} className="text-black/10" />
+                <span className="text-[10px] font-black text-[#00927C] uppercase tracking-[0.3em]">{activeMeta.label}</span>
               </nav>
-              <h1 className="text-3xl font-bold tracking-widest text-[#0A0F1E]">{activeMeta.label}</h1>
+              <h1 className="text-[32px] font-black tracking-tighter text-black uppercase leading-none">{activeMeta.label}</h1>
             </div>
             
-            <div className="flex items-center gap-6">
-              <div className="text-right">
-                <p className="text-[13px] font-bold text-[#0A0F1E]">Admin User</p>
-                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Level 3</p>
+            <div className="flex items-center gap-10">
+              <div className="flex items-center gap-6">
+                <button className="relative p-2 text-black/20 hover:text-black transition-colors">
+                  <Bell size={20} />
+                  <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#00927C] rounded-full" />
+                </button>
+                <div className="h-8 w-[0.5px] bg-[#F2F2F7]" />
               </div>
-              <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 overflow-hidden shadow-sm">
-                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Admin" className="w-full h-full object-cover" />
+              
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-[13px] font-black uppercase tracking-tight text-black leading-none mb-1">System Admin</p>
+                  <p className="text-[9px] font-black text-black/20 uppercase tracking-[0.3em]">Institutional L3</p>
+                </div>
+                <div className="w-12 h-12 rounded-[16px] bg-slate-50 border-[0.5px] border-[#F2F2F7] overflow-hidden">
+                   <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Admin" className="w-full h-full object-cover grayscale" />
+                </div>
               </div>
             </div>
           </div>
         </header>
 
-        <section className="px-12 py-12 max-w-6xl mx-auto">
+        {/* Content Canvas */}
+        <section className="px-12 py-16 max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeModule}
-              initial={{ opacity: 0, y: 5 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             >
               {activeModule === 'treasury' ? (
                 <TreasuryView />
@@ -133,22 +145,23 @@ export default function AdminDashboard() {
               ) : activeModule.startsWith('registry_') ? (
                 <RegistryList type={activeModule as any} />
               ) : (
-                <div className="h-[40vh] w-full flex flex-col items-center justify-center bg-slate-50/50 border border-slate-100 rounded-[2.5rem]">
-                  <Activity size={24} className="text-slate-200 mb-4" />
-                  <h3 className="text-slate-400 font-bold text-[11px] tracking-widest uppercase">Coming Soon</h3>
-                  <p className="text-slate-300 text-[10px] mt-1 uppercase tracking-widest">Preparing {activeMeta.label}...</p>
+                <div className="h-[50vh] w-full flex flex-col items-center justify-center bg-white border-[0.5px] border-[#F2F2F7] rounded-[22px]">
+                  <Activity size={32} className="text-black/5 mb-6" />
+                  <h3 className="text-black/20 font-black text-[12px] tracking-[0.3em] uppercase">Module Hibernating</h3>
+                  <p className="text-black/10 text-[10px] mt-2 uppercase tracking-[0.2em]">Deployment of {activeMeta.label} in progress...</p>
                 </div>
               )}
             </motion.div>
           </AnimatePresence>
         </section>
 
-        <footer className="mt-20 px-12 pb-12 opacity-30 flex justify-between items-center max-w-6xl mx-auto">
-           <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-              <div className="w-1 h-1 rounded-full bg-[#007AFF]" />
-              Pulse Core Active
+        {/* Footer Audit */}
+        <footer className="mt-20 px-12 pb-16 opacity-30 flex justify-between items-center max-w-6xl mx-auto border-t-[0.5px] border-[#F2F2F7] pt-12">
+           <div className="flex items-center gap-3 text-[10px] font-black text-black/40 uppercase tracking-[0.3em]">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#00927C] animate-pulse" />
+              Pulse Core v2.4.0 • Authorized Session
            </div>
-           <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">2026</p>
+           <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.4em]">MMXXVI</p>
         </footer>
       </main>
     </div>

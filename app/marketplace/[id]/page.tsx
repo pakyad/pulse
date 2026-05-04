@@ -345,6 +345,14 @@ export default function ItemDetails() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [showDeliverySheet, setShowDeliverySheet] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [errorToast, setErrorToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+
+  useEffect(() => {
+    if (errorToast) {
+      const timer = setTimeout(() => setErrorToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorToast]);
 
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((user) => {
@@ -397,23 +405,42 @@ export default function ItemDetails() {
         buyerName: String(profile?.full_name || 'Verified Student'),
       };
 
-      // 3. Call Cloud Transaction Function with Turbopack Serialization
-      const placeOrderFn = httpsCallable(functions, 'placeOrder');
-      const result: any = await placeOrderFn(JSON.parse(JSON.stringify(orderData)));
+      // 3. Call Cloud Transaction Function
+      const placeOrder = httpsCallable(functions, 'placeOrder');
+      
+      // Force stripping of Next.js state objects and include ALL required fields
+      const safeData = JSON.parse(JSON.stringify({
+        itemId: orderData.itemId,
+        price: orderData.price,
+        sellerId: orderData.sellerId,
+      }));
+
+      console.log("Sending clean payload:", safeData);
+      const result: any = await placeOrder(safeData);
       
       console.log("✅ Transaction Atomic Success:", result.data);
       const orderId = result.data.orderId;
       setShowDeliverySheet(false);
       router.push(`/orders/success?id=${orderId}`);
     } catch (e: any) {
-      console.group("🏛️ INSTITUTIONAL TERMINAL ERROR");
+      console.group("🏛️ TRANSACTION LOG");
       console.error("CODE:", e.code);
       console.error("MESSAGE:", e.message);
-      console.error("DETAILS:", e.details || "No details provided by region handshake.");
       console.groupEnd();
-      
-      const msg = e.message || 'The secure terminal encountered a protocol error. Please check your connection.';
-      alert(msg);
+
+      // Catch the specific inventory error and show it to the user
+      if (e.message?.includes("sold out")) {
+          setErrorToast({ 
+            message: "Sold Out! Another student just bought this asset.", 
+            type: 'error' 
+          });
+          return; 
+      }
+
+      setErrorToast({ 
+        message: "Transaction Failed. Please check your registry and try again.", 
+        type: 'error' 
+      });
     } finally {
       setLoading(false);
     }
@@ -595,6 +622,27 @@ export default function ItemDetails() {
             onClose={() => setShowDeliverySheet(false)}
             loading={loading}
           />
+        )}
+      </AnimatePresence>
+      {/* ── Institutional Error Toast ── */}
+      <AnimatePresence>
+        {errorToast && (
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-32 left-8 right-8 z-[500] bg-black text-white rounded-2xl p-6 shadow-2xl flex items-center gap-4 border border-white/10"
+          >
+            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
+               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            </div>
+            <p className="text-[13px] font-bold uppercase tracking-tight flex-1">
+              {errorToast.message}
+            </p>
+            <button onClick={() => setErrorToast(null)} className="text-white/20 hover:text-white transition-all">
+              <X size={18} />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

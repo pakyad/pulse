@@ -67,266 +67,291 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
   const isFormValid = images.length > 0 && form.title && form.price && form.category && form.condition;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex flex-col bg-[#F9F9F9] overflow-hidden font-sans antialiased text-[#222222]">
+    <div className="fixed inset-0 z-[1000] flex flex-col bg-white overflow-hidden font-sans antialiased text-black">
       
-      {/* ── TOP NAV ── */}
-      <div className="flex justify-between items-center px-6 pt-12 pb-4 bg-white">
-        <button onClick={onClose} className="p-2 -ml-2 text-[#222222]">
-          <X size={24} />
+      {/* ── TOP NAV (Institutional) ── */}
+      <div className="flex justify-between items-center px-6 pt-16 pb-6 bg-white border-b-[0.5px] border-[#F2F2F7]">
+        <button onClick={onClose} className="p-2 -ml-2 text-black/40 hover:text-black transition-colors">
+          <X size={20} />
         </button>
-        <button className="text-[15px] font-bold text-[#222222]">Post all <span className="ml-1 text-slate-300">›</span></button>
+        <h1 className="text-[14px] font-black uppercase tracking-[0.2em] text-black">Create Listing</h1>
+        <button 
+          disabled={!isFormValid || loading}
+          onClick={handleUpload}
+          className={`text-[13px] font-black uppercase tracking-widest transition-all ${isFormValid ? 'text-[#00927C]' : 'text-black/10'}`}
+        >
+          {loading ? '...' : 'Post'}
+        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar bg-white pb-20">
+      <div className="flex-1 overflow-y-auto no-scrollbar bg-white pb-32">
         
-        {/* ── LISTING HEADER ── */}
-        <div className="px-6 py-6 flex justify-between items-end">
-          <h2 className="text-[22px] font-bold text-[#222222]">Listing 1</h2>
-        </div>
-
-        {/* ── PHOTO SECTION ── */}
-        <section className="px-6 space-y-4 mb-10">
-          <p className="text-[14px] font-bold text-[#222222]">Photo</p>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar">
+        {/* ── SECTION: PHOTO (Optical Layout) ── */}
+        <section className="px-6 py-10 space-y-6">
+          <div className="flex justify-between items-end">
+            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Asset Documentation</p>
+            <p className="text-[10px] font-bold text-[#00927C] uppercase tracking-widest">{images.length} / 4</p>
+          </div>
+          
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
             {images.map((img, i) => (
-              <div key={i} className="shrink-0 w-28 h-28 rounded-lg bg-slate-50 border border-slate-100 overflow-hidden relative group">
+              <div key={i} className="shrink-0 w-32 h-32 rounded-[22px] bg-white border-[0.5px] border-[#F2F2F7] overflow-hidden relative group">
                 <img src={img.preview} className="w-full h-full object-cover" />
                 <button 
                   onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
-                  className="absolute top-1 right-1 p-1 bg-black/40 rounded-full flex items-center justify-center active:scale-90 transition-all"
+                  className="absolute top-2 right-2 p-1.5 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center active:scale-90 transition-all"
                 >
                   <X size={12} className="text-white" />
                 </button>
               </div>
             ))}
-            {[...Array(4 - images.length)].map((_, i) => (
-              <label key={i} className="shrink-0 w-28 h-28 rounded-lg border border-slate-200 flex flex-col items-center justify-center gap-2 cursor-pointer active:bg-slate-50 transition-all">
-                <Plus size={24} className="text-slate-400" />
+            {images.length < 4 && (
+              <label className="shrink-0 w-32 h-32 rounded-[22px] border-[0.5px] border-dashed border-[#F2F2F7] flex flex-col items-center justify-center gap-2 cursor-pointer active:bg-slate-50 transition-all">
+                <Plus size={20} className="text-black/20" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-black/20">Add Photo</span>
                 <input type="file" className="hidden" onChange={handleFileChange} />
               </label>
-            ))}
+            )}
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">Tap to edit photos. Drag and drop to reorder.</p>
         </section>
 
-        {/* ── CATEGORY ── */}
-        <section className="px-6 space-y-4 mb-10">
-          <p className="text-[14px] font-bold text-[#222222]">Category</p>
-          <button 
-            onClick={() => setSheet('category')}
-            className="w-full h-14 px-5 rounded-xl bg-slate-50 border border-transparent flex items-center justify-between group active:scale-[0.99] transition-all"
-          >
-            <span className={`text-[15px] font-medium ${form.category ? 'text-[#222222]' : 'text-slate-400'}`}>
-              {form.category ? `${form.category} >> ${form.subCategory}` : 'All Categories'}
-            </span>
-            <ChevronRight size={20} className="text-slate-300 group-hover:translate-x-1 transition-all" />
-          </button>
-        </section>
-
-        {/* ── TITLE & CONDITION ── */}
-        <section className="px-6 space-y-10 mb-10">
-          <div className="space-y-3">
-            <p className="text-[14px] font-bold text-[#222222]">Listing title</p>
-            <input 
-              placeholder="Name your listing"
+        {/* ── SECTION: PRIMARY DETAILS ── */}
+        <section className="px-6 space-y-12">
+          
+          {/* Title Input */}
+          <div className="space-y-4">
+             <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Listing Title</label>
+             <input 
+              placeholder="What are you listing?"
               value={form.title}
-              className="w-full py-3 text-[16px] font-medium text-[#222222] border-b border-slate-100 focus:border-[#00927C] focus:outline-none transition-colors"
+              className="w-full py-4 text-[18px] font-bold text-black border-b-[0.5px] border-[#F2F2F7] focus:border-[#00927C] focus:outline-none transition-colors placeholder:text-black/10"
               onChange={(e) => setForm({...form, title: e.target.value})}
             />
           </div>
 
-          <div onClick={() => setSheet('condition')} className="space-y-3 cursor-pointer group">
-            <p className="text-[14px] font-bold text-[#222222]">Condition</p>
-            <div className="flex items-center justify-between py-2 border-b border-slate-100">
-               <span className={`text-[16px] font-medium ${form.condition ? 'text-[#222222]' : 'text-slate-300'}`}>
-                {form.condition || 'Select condition'}
-               </span>
-               <ChevronRight size={20} className="text-slate-200 group-hover:translate-x-1 transition-all" />
-            </div>
+          {/* Category Selection */}
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Classification</label>
+            <button 
+              onClick={() => setSheet('category')}
+              className="w-full h-16 px-6 rounded-[22px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-between group active:scale-[0.98] transition-all"
+            >
+              <span className={`text-[14px] font-bold ${form.category ? 'text-black' : 'text-black/20'}`}>
+                {form.category ? `${form.category} • ${form.subCategory || 'Select'}` : 'Select Category'}
+              </span>
+              <ChevronRight size={18} className="text-black/10 group-hover:translate-x-1 transition-all" />
+            </button>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-[14px] font-bold text-[#222222]">Price</p>
-            <div className="flex items-center gap-2 py-2 border-b border-slate-100 focus-within:border-[#00927C] transition-colors">
-              <span className="text-[16px] font-bold">RM</span>
+          {/* Condition Selection */}
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Asset Integrity</label>
+            <button 
+              onClick={() => setSheet('condition')}
+              className="w-full h-16 px-6 rounded-[22px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-between group active:scale-[0.98] transition-all"
+            >
+              <span className={`text-[14px] font-bold ${form.condition ? 'text-black' : 'text-black/20'}`}>
+                {form.condition || 'Select Condition'}
+              </span>
+              <ChevronRight size={18} className="text-black/10 group-hover:translate-x-1 transition-all" />
+            </button>
+          </div>
+
+          {/* Price Input */}
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Valuation</label>
+            <div className="flex items-center gap-3 py-4 border-b-[0.5px] border-[#F2F2F7] focus-within:border-[#00927C] transition-colors">
+              <span className="text-[18px] font-black">RM</span>
               <input 
                 type="number"
-                placeholder="0"
-                className="flex-1 bg-transparent text-[16px] font-bold focus:outline-none placeholder:text-slate-200"
+                placeholder="0.00"
+                value={form.price}
+                className="flex-1 bg-transparent text-[24px] font-black focus:outline-none placeholder:text-black/5"
                 onChange={(e) => setForm({...form, price: e.target.value})}
               />
             </div>
           </div>
-        </section>
 
-        {/* ── CAMPUS BASE ── */}
-        <section className="px-6 space-y-4 mb-10">
-          <p className="text-[14px] font-bold text-[#222222]">Campus Base</p>
-          <div className="flex gap-2">
-            {['MIIT', 'UBIS', 'BMI'].map((campus) => (
-              <button
-                key={campus}
-                onClick={() => setForm({...form, campus_id: campus, meetup_location: `UniKL ${campus} Lobby`})}
-                className={`flex-1 py-3 rounded-xl border font-bold text-[13px] transition-all ${form.campus_id === campus ? 'bg-[#00927C] text-white border-transparent' : 'bg-white text-slate-400 border-slate-100'}`}
-              >
-                UniKL {campus}
-              </button>
-            ))}
+          {/* Campus Base */}
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Institutional Hub</label>
+            <div className="flex gap-2">
+              {['MIIT', 'UBIS', 'BMI'].map((campus) => (
+                <button
+                  key={campus}
+                  onClick={() => setForm({...form, campus_id: campus, meetup_location: `UniKL ${campus} Lobby`})}
+                  className={`flex-1 h-12 rounded-[12px] border-[0.5px] font-black text-[11px] uppercase tracking-widest transition-all ${
+                    form.campus_id === campus 
+                      ? 'bg-black text-white border-black' 
+                      : 'bg-white text-black/20 border-[#F2F2F7]'
+                  }`}
+                >
+                  {campus}
+                </button>
+              ))}
+            </div>
           </div>
-        </section>
 
-        {/* ── FULFILLMENT (Logistics Sync) ── */}
-        <section className="px-6">
-           <p className="text-[14px] font-bold text-[#222222] mb-4">Fulfillment</p>
-           <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
-              {/* Meet-up Row */}
-              <div className="p-4 border-b border-slate-200/50">
-                 <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                       <Handshake size={18} className="text-slate-400" />
-                       <span className="text-[15px] font-bold text-[#222222]">Meet-up</span>
-                    </div>
-                    <button 
-                      onClick={() => setForm({...form, meetup_enabled: !form.meetup_enabled})}
-                      className={`w-11 h-6 rounded-full transition-all relative ${form.meetup_enabled ? 'bg-[#00927C]' : 'bg-slate-200'}`}
-                    >
-                      <motion.div animate={{ x: form.meetup_enabled ? 22 : 4 }} className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
-                    </button>
-                 </div>
-                 {form.meetup_enabled && (
-                    <div className="ml-7 flex items-center justify-between">
-                       <p className="text-[13px] text-slate-500 font-medium truncate pr-4">{form.meetup_location}</p>
-                       <button className="text-[12px] font-bold text-[#00927C] shrink-0">Edit</button>
-                    </div>
-                 )}
-              </div>
+          {/* Fulfillment Matrix */}
+          <div className="space-y-4">
+             <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Logistics Protocol</label>
+             <div className="bg-white rounded-[22px] border-[0.5px] border-[#F2F2F7] overflow-hidden">
+                {/* Meet-up Row */}
+                <div className="p-6 border-b-[0.5px] border-[#F2F2F7]">
+                   <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-4">
+                         <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-black/40">
+                            <Handshake size={18} />
+                         </div>
+                         <span className="text-[14px] font-bold text-black uppercase tracking-tight">Hand-to-Hand</span>
+                      </div>
+                      <button 
+                        onClick={() => setForm({...form, meetup_enabled: !form.meetup_enabled})}
+                        className={`w-11 h-6 rounded-full transition-all relative ${form.meetup_enabled ? 'bg-[#00927C]' : 'bg-black/5'}`}
+                      >
+                        <motion.div animate={{ x: form.meetup_enabled ? 22 : 4 }} className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
+                      </button>
+                   </div>
+                   {form.meetup_enabled && (
+                      <div className="ml-14 flex items-center justify-between">
+                         <p className="text-[12px] text-black/40 font-medium truncate pr-4">{form.meetup_location}</p>
+                         <button className="text-[10px] font-black uppercase tracking-widest text-[#00927C] shrink-0">Edit</button>
+                      </div>
+                   )}
+                </div>
 
-              {/* Delivery Row */}
-              <div className="p-4">
-                 <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                       <Truck size={18} className="text-slate-400" />
-                       <span className="text-[15px] font-bold text-[#222222]">Delivery</span>
-                    </div>
-                    <button 
-                      onClick={() => setForm({...form, delivery_enabled: !form.delivery_enabled})}
-                      className={`w-11 h-6 rounded-full transition-all relative ${form.delivery_enabled ? 'bg-[#00927C]' : 'bg-slate-200'}`}
-                    >
-                      <motion.div animate={{ x: form.delivery_enabled ? 22 : 4 }} className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
-                    </button>
-                 </div>
-                 {form.delivery_enabled && (
-                    <div className="ml-7 flex items-center justify-between">
-                       <p className="text-[13px] text-slate-500 font-medium">Standard (2-4 days)</p>
-                       <button className="text-[12px] font-bold text-[#00927C] shrink-0">Config</button>
-                    </div>
-                 )}
-              </div>
-           </div>
+                {/* Delivery Row */}
+                <div className="p-6">
+                   <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-4">
+                         <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-black/40">
+                            <Truck size={18} />
+                         </div>
+                         <span className="text-[14px] font-bold text-black uppercase tracking-tight">Institutional Run</span>
+                      </div>
+                      <button 
+                        onClick={() => setForm({...form, delivery_enabled: !form.delivery_enabled})}
+                        className={`w-11 h-6 rounded-full transition-all relative ${form.delivery_enabled ? 'bg-[#00927C]' : 'bg-black/5'}`}
+                      >
+                        <motion.div animate={{ x: form.delivery_enabled ? 22 : 4 }} className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
+                      </button>
+                   </div>
+                   {form.delivery_enabled && (
+                      <div className="ml-14 flex items-center justify-between">
+                         <p className="text-[12px] text-black/40 font-medium italic">Integrated Pulse Logistics</p>
+                         <button className="text-[10px] font-black uppercase tracking-widest text-[#00927C] shrink-0">Config</button>
+                      </div>
+                   )}
+                </div>
+             </div>
+          </div>
+
         </section>
       </div>
 
-      {/* ── STICKY FOOTER ACTION ── */}
-      <div className="relative z-50 p-6 bg-white border-t border-slate-100">
+      {/* ── ACTION FOOTER ── */}
+      <div className="p-8 bg-white border-t-[0.5px] border-[#F2F2F7] pb-12">
         <motion.button 
-          whileTap={isFormValid ? { scale: 0.96 } : {}}
+          whileTap={isFormValid ? { scale: 0.98 } : {}}
           onClick={handleUpload}
           disabled={loading || !isFormValid}
-          className={`w-full h-14 rounded-xl font-bold text-[16px] transition-all duration-300 ${
-            isFormValid ? 'bg-black text-white' : 'bg-slate-100 text-slate-300'
+          className={`w-full h-16 rounded-[22px] font-black text-[14px] uppercase tracking-[0.2em] transition-all duration-500 ${
+            isFormValid ? 'bg-black text-white shadow-2xl shadow-black/20' : 'bg-black/5 text-black/10'
           }`}
         >
-          {loading ? 'Posting...' : 'List it!'}
+          {loading ? 'Processing...' : 'Authorize Listing'}
         </motion.button>
       </div>
 
-      {/* ── BOTTOM SHEETS ── */}
+      {/* ── BOTTOM SHEETS (Institutional) ── */}
       <AnimatePresence>
         {sheet && (
           <>
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSheet(null)}
-              className="fixed inset-0 bg-black/40 z-[400]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[400]"
             />
             <motion.div 
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] z-[500] flex flex-col max-h-[85vh] shadow-2xl"
+              transition={{ type: 'spring', damping: 32, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] z-[500] flex flex-col max-h-[85vh] shadow-3xl border-t-[0.5px] border-[#F2F2F7]"
             >
-              {/* Institutional Sheet Header */}
-              <div className="px-8 pt-6 pb-6 border-b-[0.5px] border-slate-50">
-                <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto mb-6" />
+              <div className="px-8 pt-8 pb-4">
+                <div className="w-12 h-1 bg-black/5 rounded-full mx-auto mb-8" />
                 <div className="flex items-center justify-between">
-                  <h3 className="text-[18px] font-bold text-navy tracking-tight capitalize">{sheet}</h3>
-                  <button onClick={() => setSheet(null)}>
-                    <X size={18} className="text-slate-300" />
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-1">Marketplace Protocol</p>
+                    <h3 className="text-[20px] font-black text-black uppercase tracking-tighter">{sheet} Selection</h3>
+                  </div>
+                  <button onClick={() => setSheet(null)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-black/20">
+                    <X size={18} />
                   </button>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto no-scrollbar px-8 pb-32">
+              <div className="flex-1 overflow-y-auto no-scrollbar px-8 pb-32 pt-6">
                 {sheet === 'category' && (
-                  <div className="space-y-3 pt-6">
-                    <div className="bg-slate-50 rounded-xl px-4 py-3 mb-6 flex items-center gap-3 border-[0.5px] border-slate-100">
-                      <Search size={16} className="text-slate-300" />
-                      <input placeholder="Search Marketplace" className="bg-transparent text-[14px] font-medium focus:outline-none w-full" />
+                  <div className="space-y-3">
+                    <div className="bg-slate-50 rounded-[12px] px-5 py-4 mb-8 flex items-center gap-4 border-[0.5px] border-[#F2F2F7]">
+                      <Search size={16} className="text-black/20" />
+                      <input placeholder="Search classifications..." className="bg-transparent text-[14px] font-bold focus:outline-none w-full placeholder:text-black/10" />
                     </div>
                     {CATEGORIES.map(cat => (
                       <button 
                         key={cat.id} 
                         onClick={() => { setForm({...form, category: cat.label}); setSheet('subcategory'); }}
-                        className="w-full min-h-[72px] px-5 py-4 text-left flex items-center justify-between border-[0.5px] border-slate-50 rounded-2xl bg-white hover:bg-slate-50 transition-all"
+                        className="w-full h-20 px-6 text-left flex items-center justify-between border-[0.5px] border-[#F2F2F7] rounded-[22px] bg-white hover:bg-slate-50 transition-all group"
                       >
-                        <div className="flex items-center gap-4">
-                          <span className="text-[20px]">{cat.icon}</span>
+                        <div className="flex items-center gap-5">
+                          <span className="text-[24px] grayscale group-hover:grayscale-0 transition-all">{cat.icon}</span>
                           <div className="flex flex-col">
-                            <span className="text-[14px] font-bold text-navy leading-none">{cat.label}</span>
-                            <span className="text-[12px] font-normal text-slate-400 mt-1">Browse active listings</span>
+                            <span className="text-[14px] font-black text-black uppercase tracking-tight">{cat.label}</span>
+                            <span className="text-[10px] font-bold text-black/20 uppercase tracking-widest">Active Directory</span>
                           </div>
                         </div>
-                        <ChevronRight size={16} className="text-slate-200" />
+                        <ChevronRight size={16} className="text-black/10 group-hover:translate-x-1 transition-all" />
                       </button>
                     ))}
                   </div>
                 )}
 
                 {sheet === 'subcategory' && (
-                  <div className="space-y-2 pt-6">
-                     <h4 className="text-[12px] font-black text-slate-300 uppercase tracking-widest mb-4">{form.category}</h4>
+                  <div className="space-y-3">
+                     <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.2em] mb-6">{form.category} Spectrum</p>
                      {CATEGORIES.find(c => c.label === form.category)?.subs.map(sub => (
                        <button 
                          key={sub}
                          onClick={() => { setForm({...form, subCategory: sub}); setSheet(null); }}
-                         className="w-full min-h-[72px] px-5 py-4 text-left flex items-center justify-between border-[0.5px] border-slate-50 rounded-2xl bg-white hover:bg-slate-50 transition-all"
+                         className="w-full h-16 px-6 text-left flex items-center justify-between border-[0.5px] border-[#F2F2F7] rounded-[22px] bg-white hover:bg-slate-50 transition-all group"
                        >
-                         <span className="text-[14px] font-bold text-navy">{sub}</span>
-                         <ChevronRight size={16} className="text-slate-200" />
+                         <span className="text-[14px] font-black text-black uppercase tracking-tight">{sub}</span>
+                         <ChevronRight size={16} className="text-black/10 group-hover:translate-x-1 transition-all" />
                        </button>
                      ))}
                   </div>
                 )}
 
                 {sheet === 'condition' && (
-                  <div className="space-y-3 pt-6">
+                  <div className="space-y-3">
                     {CONDITIONS.map(cond => (
                       <button 
                         key={cond.label} 
                         onClick={() => { setForm({...form, condition: cond.label}); setSheet(null); }}
-                        className={`w-full min-h-[72px] px-5 py-4 text-left flex items-center justify-between border-[0.5px] rounded-2xl transition-all ${
+                        className={`w-full min-h-[80px] px-6 py-4 text-left flex items-center justify-between border-[0.5px] rounded-[22px] transition-all ${
                           form.condition === cond.label 
-                            ? 'bg-navy border-navy text-white' 
-                            : 'bg-white border-slate-50 text-navy'
+                            ? 'bg-black border-black text-white' 
+                            : 'bg-white border-[#F2F2F7] text-black'
                         }`}
                       >
                         <div className="flex-1">
-                          <p className="text-[14px] font-bold leading-none">{cond.label}</p>
-                          <p className={`text-[12px] font-normal mt-1 opacity-60 leading-tight`}>{cond.desc}</p>
+                          <p className="text-[14px] font-black uppercase tracking-tight">{cond.label}</p>
+                          <p className={`text-[11px] font-medium mt-1 opacity-40 leading-tight uppercase tracking-wide`}>{cond.desc}</p>
                         </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                          form.condition === cond.label ? 'border-white bg-white/20' : 'border-slate-100'
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                          form.condition === cond.label ? 'border-white bg-white/20' : 'border-black/5'
                         }`}>
-                           {form.condition === cond.label && <Check size={12} className="text-white" />}
+                           {form.condition === cond.label && <Check size={14} className="text-white" />}
                         </div>
                       </button>
                     ))}
