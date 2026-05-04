@@ -38,8 +38,9 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
     subCategory: '',
     condition: '',
     meetup_enabled: true,
-    delivery_enabled: false,
-    meetup_location: MIIT_HOTSPOTS[0],
+    delivery_enabled: true,
+    campus_id: 'MIIT',
+    meetup_location: 'Setapak, MIIT Level 2',
   });
 
   const [sheet, setSheet] = useState<'category' | 'subcategory' | 'condition' | 'location' | null>(null);
@@ -155,6 +156,22 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                 onChange={(e) => setForm({...form, price: e.target.value})}
               />
             </div>
+          </div>
+        </section>
+
+        {/* ── CAMPUS BASE ── */}
+        <section className="px-6 space-y-4 mb-10">
+          <p className="text-[14px] font-bold text-[#222222]">Campus Base</p>
+          <div className="flex gap-2">
+            {['MIIT', 'UBIS', 'BMI'].map((campus) => (
+              <button
+                key={campus}
+                onClick={() => setForm({...form, campus_id: campus, meetup_location: `UniKL ${campus} Lobby`})}
+                className={`flex-1 py-3 rounded-xl border font-bold text-[13px] transition-all ${form.campus_id === campus ? 'bg-[#00927C] text-white border-transparent' : 'bg-white text-slate-400 border-slate-100'}`}
+              >
+                UniKL {campus}
+              </button>
+            ))}
           </div>
         </section>
 

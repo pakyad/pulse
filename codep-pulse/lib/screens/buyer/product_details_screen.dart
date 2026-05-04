@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'customization_sheet.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Map<String, dynamic> item;
@@ -137,21 +138,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                         Text(
                           item['title'] ?? 'Item Name',
                           style: const TextStyle(
-                            fontSize: 38,
+                            fontSize: 30,
                             fontWeight: FontWeight.w900,
                             color: Color(0xFF1C1C1E),
-                            letterSpacing: -1.2,
-                            height: 1.0,
+                            letterSpacing: -1.0,
+                            height: 1.1,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         Text(
                           'RM ${price.toStringAsFixed(2)}',
                           style: const TextStyle(
-                            fontSize: 26,
+                            fontSize: 20,
                             fontWeight: FontWeight.w900,
                             color: Color(0xFF00C4B4),
-                            letterSpacing: -0.5,
                           ),
                         ),
                       ],
@@ -186,9 +186,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                       controller: _tabController,
                       labelColor: const Color(0xFF1C1C1E),
                       unselectedLabelColor: const Color(0xFFD1D1D6),
-                      labelStyle: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900),
+                      labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                       indicator: const UnderlineTabIndicator(
-                        borderSide: BorderSide(width: 4, color: Color(0xFF00C4B4)),
+                        borderSide: BorderSide(width: 3, color: Color(0xFF00C4B4)),
                         insets: EdgeInsets.only(right: 64, bottom: 4),
                       ),
                       tabs: const [
@@ -196,15 +196,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                         Tab(text: 'Details'),
                       ],
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
 
                     // Editorial Body
                     Text(
                       item['description'] ?? 'No description provided by the vendor. This listing is verified under institutional standards.',
                       style: const TextStyle(
-                        fontSize: 17,
+                        fontSize: 15,
                         color: Color(0xFF48484A),
-                        height: 1.8,
+                        height: 1.7,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -328,28 +328,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
       child: Icon(icon, size: 26, color: const Color(0xFF1C1C1E)),
     );
   }
-
   Widget _buildTealAction(double price) {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: const Color(0xFF00C4B4),
-        borderRadius: BorderRadius.circular(100),
-        boxShadow: [
-          BoxShadow(color: const Color(0xFF00C4B4).withOpacity(0.3), blurRadius: 30, offset: const Offset(0, 12))
-        ],
-      ),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(LucideIcons.shieldCheck, size: 20, color: Colors.white),
-            const SizedBox(width: 12),
-            Text(
-              'Buy Now — RM ${price.toStringAsFixed(2)}',
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900),
-            ),
+    final item = widget.item;
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => CustomizationSheet(
+            itemId: item['id']?.toString() ?? '',
+            title: item['title'] ?? 'Item',
+            basePrice: price,
+            imageUrl: item['image_url'],
+            sellerId: item['seller_id']?.toString() ?? '',
+            sellerName: item['seller_name'] ?? 'Vendor',
+            campusId: item['campus_id'] ?? 'MIIT',
+            meetupLocation: item['meetup_location'] ?? 'Main Lobby',
+          ),
+        );
+      },
+      child: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          color: const Color(0xFF00C4B4),
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(color: const Color(0xFF00C4B4).withOpacity(0.3), blurRadius: 30, offset: const Offset(0, 12))
           ],
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(LucideIcons.shieldCheck, size: 20, color: Colors.white),
+              const SizedBox(width: 12),
+              Text(
+                'Buy Now — RM ${price.toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900),
+              ),
+            ],
+          ),
         ),
       ),
     );

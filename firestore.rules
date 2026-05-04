@@ -55,7 +55,10 @@ service cloud.firestore {
       allow create: if isSignedIn(); 
     }
 
-    // Legacy Support (Optional)
-    match /delivery_jobs/{id} { allow read, write: if isSignedIn() && hasRole('ADMIN'); }
+    // ── LEGACY & EXTENSIONS ──
+    match /delivery_jobs/{id} { 
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (resource.data.runner_id == request.auth.uid || hasRole('ADMIN'));
+    }
   }
 }

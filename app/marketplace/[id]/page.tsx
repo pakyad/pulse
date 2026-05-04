@@ -7,21 +7,29 @@ import { httpsCallable } from 'firebase/functions';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   ChevronLeft, Heart, ShieldCheck, ShoppingBag, Star,
-  MessageSquare, Bell, MapPin, Truck, X, Package, Clock, Share2
+  MessageSquare, Bell, MapPin, Truck, X, Package, Clock, Share2, QrCode
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 // ── Marzia Drop-Off Locations ──
-const DROP_OFF_SPOTS = [
-  { id: 'k', label: 'Block K', sub: 'Main Lobby' },
-  { id: 'n', label: 'Block N', sub: 'Ground Floor' },
-  { id: 'lib', label: 'Library', sub: 'Level 1 entrance' },
-  { id: 'cafe', label: 'Cafe', sub: 'Student cafe' },
-  { id: 'sport', label: 'Sports Complex', sub: 'Main gate' },
-  { id: 'bus', label: 'Bus Stop A', sub: 'Near main road' },
-];
+const CAMPUS_HUBS: Record<string, any[]> = {
+  'MIIT': [
+    { id: 'k', label: 'Block K', sub: 'Main Lobby', zone: 'campus' },
+    { id: 'n', label: 'Block N', sub: 'Ground Floor', zone: 'campus' },
+    { id: 'lib', label: 'Library', sub: 'Level 1 entrance', zone: 'campus' },
+    { id: 'hostel_a', label: 'Kolej MARA', sub: 'Outside campus', zone: 'off_campus' },
+  ],
+  'UBIS': [
+    { id: 'ubis_l', label: 'UBIS Lobby', sub: 'Main Entrance', zone: 'campus' },
+    { id: 'ubis_c', label: 'UBIS Cafe', sub: 'Level 1', zone: 'campus' },
+  ],
+  'BMI': [
+    { id: 'bmi_m', label: 'BMI Main', sub: 'Security Post', zone: 'campus' },
+    { id: 'bmi_h', label: 'BMI Hostel', sub: 'Block B', zone: 'off_campus' },
+  ],
+};
 
 // ── Josh Voxel Stock Badge ──
 // Josh: blocky, pixelated, digital. Tells you "how many left" with authority.
@@ -56,12 +64,18 @@ function MarziaDeliverySheet({
   onClose: () => void;
   loading: boolean;
 }) {
+  const campus = item.campus_id || 'MIIT';
+  const hubs = CAMPUS_HUBS[campus] || CAMPUS_HUBS['MIIT'];
+  
   const [step, setStep] = useState<'FULFILLMENT' | 'PAYMENT'>('FULFILLMENT');
   const [choice, setChoice] = useState<'SELF_COLLECT' | 'RUNNER' | null>(null);
-  const [location, setLocation] = useState(DROP_OFF_SPOTS[0].id);
+  const [paymentMethod, setPaymentMethod] = useState<'QR' | 'TRANSFER'>('QR');
+  const [location, setLocation] = useState(hubs[0].id);
   const [receipt, setReceipt] = useState<File | null>(null);
 
-  const selectedSpot = DROP_OFF_SPOTS.find(s => s.id === location)!;
+  const selectedSpot = hubs.find(s => s.id === location) || hubs[0];
+  const runnerFee = selectedSpot.zone === 'campus' ? 3.50 : 5.00;
+  const total = Number(item.price) + (choice === 'RUNNER' ? runnerFee : 0);
 
   return (
     <motion.div
@@ -77,17 +91,23 @@ function MarziaDeliverySheet({
         exit={{ y: '100%' }}
         transition={{ type: 'spring', stiffness: 420, damping: 38 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full bg-[#FDFDFD] rounded-t-4xl overflow-hidden"
+        className="w-full bg-[#FDFDFD] rounded-t-4xl overflow-y-auto max-h-[92vh] pb-8"
       >
         {/* Sheet Header — Institutional Sync */}
         <div className="px-8 pt-6 pb-6 border-b-[0.5px] border-slate-50">
           <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto mb-6" />
           <div className="flex items-center justify-between">
             <h2 className="text-[18px] font-bold text-navy tracking-tight">
-              {step === 'FULFILLMENT' ? 'Fulfillment Selection' : 'Payment Verification'}
+              {step === 'FULFILLMENT' ? 'How to receive your item' : 'Payment Verification'}
             </h2>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
-              <X size={14} />
+            <button 
+              onClick={() => {
+                if (step === 'PAYMENT') setStep('FULFILLMENT');
+                else onClose();
+              }} 
+              className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all"
+            >
+              {step === 'PAYMENT' ? <ChevronLeft size={16} /> : <X size={14} />}
             </button>
           </div>
         </div>
@@ -115,12 +135,14 @@ function MarziaDeliverySheet({
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                   choice === 'SELF_COLLECT' ? 'bg-white/10' : 'bg-slate-50'
                 }`}>
-                  <ShoppingBag size={18} />
+                  <ShoppingBag size={18} className={choice === 'SELF_COLLECT' ? 'text-white' : 'text-slate-400'} />
                 </div>
                 <div>
                   <p className="text-[14px] font-bold leading-none">Self-Collection</p>
-                  <p className={`text-[12px] font-normal mt-1 opacity-60`}>
-                    Direct handover at campus hotspots
+                  <p className={`text-[12px] font-medium mt-1 ${choice === 'SELF_COLLECT' ? 'opacity-60' : 'text-slate-400'}`}>
+                    Handover at <span className={`font-black underline underline-offset-2 ${choice === 'SELF_COLLECT' ? 'text-white decoration-white/30' : 'text-navy decoration-navy/10'}`}>
+                      {item.meetup_location || 'UniKL MIIT Main Lobby'}
+                    </span>
                   </p>
                 </div>
               </motion.button>
@@ -159,7 +181,7 @@ function MarziaDeliverySheet({
               >
                 <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Select Hub</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {DROP_OFF_SPOTS.map((spot) => (
+                  {hubs.map((spot) => (
                     <button
                       key={spot.id}
                       onClick={() => setLocation(spot.id)}
@@ -170,7 +192,9 @@ function MarziaDeliverySheet({
                       }`}
                     >
                       <p className="text-[13px] font-bold leading-tight">{spot.label}</p>
-                      <p className={`text-[11px] font-normal opacity-50`}>{spot.sub}</p>
+                      <p className={`text-[11px] font-normal opacity-50`}>
+                        {spot.sub} (RM {spot.zone === 'campus' ? '3.50' : '5.00'})
+                      </p>
                     </button>
                   ))}
                 </div>
@@ -186,31 +210,95 @@ function MarziaDeliverySheet({
                 exit={{ opacity: 0, x: 20 }}
                 className="space-y-6"
               >
-              <div className="bg-slate-50 rounded-2xl p-6 border-[0.5px] border-slate-100">
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Direct Pay via DuitNow</p>
-                <p className="text-[13px] font-medium text-navy leading-relaxed">
-                  Transfer exact amount to vendor, then upload the receipt below to finalize.
-                </p>
+              {/* ── RESTORED EDITORIAL LEDGER ── */}
+              <div className="bg-slate-50/50 rounded-2xl p-6 border-[0.5px] border-slate-100 space-y-3">
+                <div className="flex justify-between items-center text-[13px] font-medium text-slate-500">
+                  <span>Item Subtotal</span>
+                  <span className="text-navy">RM {Number(item.price).toFixed(2)}</span>
+                </div>
+                {choice === 'RUNNER' && (
+                  <div className="flex justify-between items-center text-[13px] font-medium text-slate-500">
+                    <span>Runner Fee ({selectedSpot.label})</span>
+                    <span className="text-navy">RM {runnerFee.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="pt-3 border-t-[0.5px] border-slate-100 flex justify-between items-center">
+                  <span className="text-[14px] font-bold text-navy">Total to Transfer</span>
+                  <span className="text-[18px] font-black text-[#00C4B4]">RM {total.toFixed(2)}</span>
+                </div>
               </div>
 
-              {/* Receipt Upload Mock */}
-              <label className="block w-full h-[120px] rounded-2xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-all">
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  onChange={(e) => setReceipt(e.target.files?.[0] || null)}
-                />
-                {receipt ? (
-                  <div className="flex items-center gap-2 text-emerald-500 font-bold text-[13px]">
-                    <Package size={16} /> Receipt Attached
+              {/* ── PAYMENT METHOD SWITCHER ── */}
+              <div className="flex gap-2 p-1 bg-slate-50 rounded-xl">
+                {['QR', 'TRANSFER'].map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setPaymentMethod(m as 'QR' | 'TRANSFER')}
+                    className={`flex-1 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${
+                      paymentMethod === m ? 'bg-white text-navy shadow-sm' : 'text-slate-400'
+                    }`}
+                  >
+                    {m === 'QR' ? 'Scan QR' : 'Bank Transfer'}
+                  </button>
+                ))}
+              </div>
+
+              {/* ── DYNAMIC PAYMENT TERMINAL ── */}
+              {paymentMethod === 'QR' ? (
+                <div className="flex flex-col items-center py-4 space-y-4">
+                  <div className="w-[160px] h-[160px] bg-white p-3 rounded-3xl border-[0.5px] border-slate-100 shadow-xl shadow-[#E91E63]/10 flex items-center justify-center relative group">
+                    <div className="w-full h-full bg-[#E91E63]/5 rounded-2xl flex items-center justify-center overflow-hidden transition-all">
+                      <div className="text-center p-4">
+                        <QrCode size={48} className="mx-auto text-[#E91E63] mb-2" />
+                        <p className="text-[8px] font-black text-[#E91E63] uppercase tracking-widest">DuitNow QR • ShopeePay</p>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <>
-                    <ShoppingBag className="text-slate-200" size={24} />
-                    <p className="text-[12px] font-bold text-slate-300 uppercase tracking-widest">Upload Receipt</p>
-                  </>
-                )}
-              </label>
+                  <div className="text-center">
+                    <p className="text-[14px] font-bold text-navy">Scan to pay RM {total.toFixed(2)}</p>
+                    <p className="text-[11px] font-medium text-slate-400">ID: 64685896263645</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="px-2 flex justify-between items-center py-4">
+                  <div>
+                    <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">DuitNow Transfer</p>
+                    <p className="text-[20px] font-black text-navy leading-none tracking-tighter">6468 5896 2636 45</p>
+                    <p className="text-[12px] font-medium text-slate-400 mt-2">
+                      ShopeePay Account — {item.seller_name || 'Verified Vendor'}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center text-[10px] font-black text-[#E91E63]">DUITNOW</div>
+                </div>
+              )}
+
+              {/* ── MINIMALIST RECEIPT AREA ── */}
+              <div className="space-y-3">
+                <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest px-2">Verification Proof</p>
+                <label className="block w-full h-[100px] rounded-3xl border-[1px] border-dashed border-slate-200 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-slate-50 transition-all group">
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    onChange={(e) => setReceipt(e.target.files?.[0] || null)}
+                  />
+                  {receipt ? (
+                    <div className="flex items-center gap-2 text-emerald-500 font-bold text-[14px]">
+                      <Package size={18} /> Receipt Attached
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest group-hover:text-[#00C4B4] transition-all">Upload Receipt</div>
+                      <p className="text-[9px] text-slate-400">JPG, PNG or PDF</p>
+                    </>
+                  )}
+                </label>
+              </div>
+
+              {/* ── SECURITY BADGE ── */}
+              <div className="flex items-center justify-center gap-2 pt-2 pb-4">
+                <ShieldCheck size={14} className="text-[#00C4B4]" />
+                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Pulse Secure • End-to-End Encrypted</span>
+              </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -233,9 +321,9 @@ function MarziaDeliverySheet({
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" />
             ) : step === 'FULFILLMENT' ? (
-              <>Confirm Fulfillment</>
+              <>Continue</>
             ) : (
-              <>Buy Now — RM {Number(item.price).toFixed(2)}</>
+              <>Buy Now — RM {total.toFixed(2)}</>
             )}
           </motion.button>
 
@@ -279,35 +367,53 @@ export default function ItemDetails() {
 
   const handleConfirmOrder = async (deliveryType: 'SELF_COLLECT' | 'RUNNER', dropOffLocation: string | undefined, receipt: File) => {
     if (!auth.currentUser) return router.push('/auth');
+    
+    // 🏛️ FINAL INTEGRITY CHECK
+    if (!item?.seller_id || !id) {
+      alert("Institutional data mismatch. Please refresh this listing.");
+      return;
+    }
+
     setLoading(true);
     try {
-      // 1. Upload Receipt
+      console.log("🚀 Initiating Secure Handshake with Node 20...");
+      
+      // 1. Upload Receipt to Verified Terminal
       const receiptRef = ref(storage, `receipts/${Date.now()}_${receipt.name}`);
       const uploadResult = await uploadBytes(receiptRef, receipt);
       const receiptUrl = await getDownloadURL(uploadResult.ref);
 
-      // 2. Call Cloud Function
-      const placeOrderFn = httpsCallable(functions, 'placeOrder');
-      
-      const result: any = await placeOrderFn({
-        itemId: id,
-        title: item.title,
-        price: item.price,
-        imageUrl: item.image_url,
-        receiptUrl,
-        sellerId: item.seller_id,
-        sellerName: item.seller_name,
-        deliveryType,
-        dropOffLocation: dropOffLocation || null,
-        buyerName: profile?.full_name || 'Verified Student',
-      });
+      // 2. Prepare Order Data Payload
+      const orderData = {
+        itemId: String(id),
+        title: String(item.title || "Marketplace Item"),
+        price: Number(item.price),
+        imageUrl: String(item.image_url || ""),
+        receiptUrl: String(receiptUrl),
+        sellerId: String(item.seller_id),
+        sellerName: String(item.seller_name || "Verified Vendor"),
+        deliveryType: String(deliveryType),
+        dropOffLocation: dropOffLocation ? String(dropOffLocation) : null,
+        buyerName: String(profile?.full_name || 'Verified Student'),
+      };
 
+      // 3. Call Cloud Transaction Function with Turbopack Serialization
+      const placeOrderFn = httpsCallable(functions, 'placeOrder');
+      const result: any = await placeOrderFn(JSON.parse(JSON.stringify(orderData)));
+      
+      console.log("✅ Transaction Atomic Success:", result.data);
       const orderId = result.data.orderId;
       setShowDeliverySheet(false);
       router.push(`/orders/success?id=${orderId}`);
     } catch (e: any) {
-      console.error("WEB_ORDER_FAILED:", e);
-      alert(e.message || 'Something went wrong. Please try again.');
+      console.group("🏛️ INSTITUTIONAL TERMINAL ERROR");
+      console.error("CODE:", e.code);
+      console.error("MESSAGE:", e.message);
+      console.error("DETAILS:", e.details || "No details provided by region handshake.");
+      console.groupEnd();
+      
+      const msg = e.message || 'The secure terminal encountered a protocol error. Please check your connection.';
+      alert(msg);
     } finally {
       setLoading(false);
     }
@@ -381,9 +487,9 @@ export default function ItemDetails() {
       <div className="px-6 pt-16 pb-48 space-y-16 max-w-2xl mx-auto">
         
         {/* 1. IDENTITY & PRIMARY METRICS */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           <div className="space-y-2">
-             <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.15em]">
+             <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.12em]">
                {item.category || "General Marketplace"}
              </p>
              <div className="flex items-center gap-2">
@@ -394,11 +500,11 @@ export default function ItemDetails() {
              </div>
           </div>
 
-          <div className="space-y-4">
-            <h1 className="text-[40px] font-black text-navy tracking-tight leading-[1.0] max-w-[90%]">
+          <div className="space-y-2">
+            <h1 className="text-[32px] font-black text-navy tracking-tight leading-[1.1] max-w-[90%]">
               {item.title}
             </h1>
-            <p className="text-[24px] font-black text-[#00C4B4] tracking-tight">
+            <p className="text-[20px] font-black text-[#00C4B4] tracking-tight">
               RM {Number(item.price).toFixed(2)}
             </p>
           </div>
@@ -423,14 +529,14 @@ export default function ItemDetails() {
         </div>
 
         {/* 3. TABS: DESCRIPTION & DETAILS */}
-        <div className="space-y-10">
+        <div className="space-y-8">
            <div className="flex gap-10 border-b border-slate-50">
-              <button className="pb-4 text-[18px] font-black text-navy border-b-[3px] border-[#00C4B4]">Description</button>
-              <button className="pb-4 text-[18px] font-bold text-slate-300">Details</button>
+              <button className="pb-4 text-[16px] font-black text-navy border-b-[3px] border-[#00C4B4]">Description</button>
+              <button className="pb-4 text-[16px] font-bold text-slate-300">Details</button>
            </div>
            
            <div className="space-y-6">
-              <p className="text-[16px] text-slate-500 leading-[1.8] font-medium">
+              <p className="text-[15px] text-slate-500 leading-[1.7] font-medium">
                 {item.description || "No description provided by the vendor. This listing is verified under institutional standards."}
               </p>
               

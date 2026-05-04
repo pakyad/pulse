@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'checkout_screen.dart';
+import 'fulfillment_selection_sheet.dart';
 
 class CustomizationSheet extends StatefulWidget {
   final String itemId;
@@ -8,6 +8,8 @@ class CustomizationSheet extends StatefulWidget {
   final String? imageUrl;
   final String sellerId;
   final String sellerName;
+  final String campusId;
+  final String meetupLocation;
 
   const CustomizationSheet({
     super.key,
@@ -17,6 +19,8 @@ class CustomizationSheet extends StatefulWidget {
     this.imageUrl,
     required this.sellerId,
     required this.sellerName,
+    required this.campusId,
+    required this.meetupLocation,
   });
 
   @override
@@ -127,21 +131,23 @@ class _CustomizationSheetState extends State<CustomizationSheet> {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CheckoutScreen(
-                      orderData: {
-                        'itemId': widget.itemId,
-                        'title': widget.title,
-                        'quantity': _quantity,
-                        'basePrice': widget.basePrice,
-                        'notes': _notesController.text,
-                        'imageUrl': widget.imageUrl,
-                        'sellerId': widget.sellerId,
-                        'sellerName': widget.sellerName,
-                      },
-                    ),
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => FulfillmentSelectionSheet(
+                    orderData: {
+                      'itemId': widget.itemId,
+                      'title': widget.title,
+                      'quantity': _quantity,
+                      'basePrice': widget.basePrice,
+                      'notes': _notesController.text,
+                      'imageUrl': widget.imageUrl,
+                      'sellerId': widget.sellerId,
+                      'sellerName': widget.sellerName,
+                      'campusId': widget.campusId,
+                      'meetupLocation': widget.meetupLocation,
+                    },
                   ),
                 );
               },
@@ -151,7 +157,7 @@ class _CustomizationSheetState extends State<CustomizationSheet> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               child: const Text(
-                'Continue to Checkout',
+                'Continue to Fulfillment',
                 style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),

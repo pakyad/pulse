@@ -8,20 +8,23 @@ if (admin.apps.length === 0) {
 const db = admin.firestore();
 
 /**
- * placeOrder (V2)
- * Atomic transaction to decrement stock and create an order.
- * Optimized for Firebase Functions v2.
+ * placeOrder (V2 Institutional)
+ * Zero-config regional architecture for high-stability commerce.
  */
-export const placeOrder = onCall(async (request) => {
-  // 1. Authentication Check
+export const placeOrder = onCall({ 
+  cors: true,
+  maxInstances: 10 
+}, async (request) => {
+  console.log("🏛️ TERMINAL_INVOKED:", { 
+    uid: request.auth?.uid,
+    data: request.data 
+  });
+
   if (!request.auth) {
-    throw new HttpsError(
-      "unauthenticated",
-      "Only signed-in students can place orders."
-    );
+    throw new HttpsError("unauthenticated", "Login required.");
   }
 
-  const data = request.data;
+  const data = request.data || {};
   const {
     itemId,
     title,
@@ -33,15 +36,10 @@ export const placeOrder = onCall(async (request) => {
     deliveryType,
     dropOffLocation,
     buyerName,
-    notes,
   } = data;
 
-  // 2. Data Validation
   if (!itemId || price === undefined || !sellerId) {
-    throw new HttpsError(
-      "invalid-argument",
-      "Missing required fields: itemId, price, or sellerId."
-    );
+    throw new HttpsError("invalid-argument", "Missing required fields.");
   }
 
   const orderId = db.collection("orders").doc().id;
@@ -49,32 +47,22 @@ export const placeOrder = onCall(async (request) => {
   const orderRef = db.collection("orders").doc(orderId);
 
   try {
-    return await db.runTransaction(async (transaction) => {
+    const result = await db.runTransaction(async (transaction) => {
       const itemDoc = await transaction.get(itemRef);
-
-      if (!itemDoc.exists) {
-        throw new Error("ITEM_NOT_FOUND");
-      }
+      if (!itemDoc.exists) throw new HttpsError("not-found", "Item not found.");
 
       const itemData = itemDoc.data();
-      const currentStock = itemData?.stock_count ?? itemData?.stock ?? 0;
+      const currentStock = itemData?.stock_count ?? itemData?.stock ?? 1;
 
-      // 3. Stock Check
-      if (currentStock <= 0) {
-        throw new Error("OUT_OF_STOCK");
-      }
+      if (currentStock <= 0) throw new HttpsError("out-of-range", "Sold out.");
 
-      // 4. Update Stock
-      transaction.update(itemRef, {
-        stock_count: currentStock - 1,
-      });
+      transaction.update(itemRef, { stock_count: currentStock - 1 });
 
-      // 5. Create Order document
       transaction.set(orderRef, {
         order_id: orderId,
         item_id: itemId,
         title: title || itemData?.title || "Marketplace Item",
-        price: price,
+        price: Number(price) || 0,
         image_url: imageUrl || itemData?.image_url || null,
         receipt_url: receiptUrl || null,
         buyer_id: request.auth!.uid,
@@ -84,25 +72,18 @@ export const placeOrder = onCall(async (request) => {
         status: "PENDING_VENDOR",
         delivery_type: deliveryType || "SELF_COLLECT",
         drop_off_location: dropOffLocation || null,
-        notes: notes || null,
         created_at: admin.firestore.FieldValue.serverTimestamp(),
         order_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
       });
 
-      return {
-        success: true,
-        orderId: orderId,
-        message: "Order placed successfully.",
-      };
+      return { success: true, orderId };
     });
-  } catch (error: any) {
-    console.error("ORDER_TRANSACTION_FAILED:", error);
-    
-    let message = "Something went wrong while placing your order.";
-    if (error.message === "OUT_OF_STOCK") message = "This item just sold out!";
-    if (error.message === "ITEM_NOT_FOUND") message = "This item is no longer available.";
 
-    throw new HttpsError("internal", message);
+    return result;
+  } catch (error: any) {
+    console.error("🏛️ TERMINAL_CRASH:", error);
+    if (error instanceof HttpsError) throw error;
+    throw new HttpsError("internal", error.message || "Institutional transaction failed.");
   }
 });
 
@@ -110,24 +91,9 @@ export const placeOrder = onCall(async (request) => {
  * createRunDirective (V2)
  * Creates a logistics directive in the unified 'orders' collection.
  */
-export const createRunDirective = onCall(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Auth required.");
-  }
-
-  const data = request.data;
-  const {
-    serviceId,
-    label,
-    source,
-    dest,
-    fee,
-    items,
-    instructions,
-    type,
-    zone,
-  } = data;
-
+export const createRunDirective = onCall({ cors: true }, async (request) => {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Auth required.");
+  
   const orderId = db.collection("orders").doc().id;
   const orderRef = db.collection("orders").doc(orderId);
 
@@ -135,22 +101,12 @@ export const createRunDirective = onCall(async (request) => {
     order_id: orderId,
     buyer_id: request.auth.uid,
     buyer_name: request.auth.token.name || "Student",
-    source: source || "Campus Node",
-    dest: dest || "MIIT Hub",
-    fee: fee || 5.0,
     status: "WAITING_FOR_RUNNER",
-    type: type || "LOGISTICS",
-    zone: zone || "ALL ZONES",
-    instructions: instructions || items || "No special directives.",
-    service_id: serviceId,
-    label: label,
+    delivery_type: "RUNNER",
     created_at: admin.firestore.FieldValue.serverTimestamp(),
     order_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
-    delivery_type: "RUNNER",
+    ...request.data
   });
 
-  return {
-    success: true,
-    orderId: orderId,
-  };
+  return { success: true, orderId };
 });

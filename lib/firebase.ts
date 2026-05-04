@@ -21,6 +21,29 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 const functions = getFunctions(app);
 
+// ── EMULATOR BRIDGE ──
+// Josh: connect to the local voxel engine if we're in dev mode.
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+  const { connectFirestoreEmulator } = require('firebase/firestore');
+  const { connectAuthEmulator } = require('firebase/auth');
+  const { connectStorageEmulator } = require('firebase/storage');
+  const { connectFunctionsEmulator } = require('firebase/functions');
+
+  try {
+    // Only connect if not already connected (to avoid hot-reload crashes)
+    if (!(db as any)._emulatorConnected) {
+      connectFirestoreEmulator(db, 'localhost', 8080);
+      connectAuthEmulator(auth, 'http://localhost:9099');
+      connectStorageEmulator(storage, 'localhost', 9199);
+      connectFunctionsEmulator(functions, 'localhost', 5001);
+      (db as any)._emulatorConnected = true;
+      console.log("🏛️ Institutional Emulators Connected");
+    }
+  } catch (e) {
+    console.warn("Emulator bridge active but connection skipped:", e);
+  }
+}
+
 // ZERO-DISK PERSISTENCE PROTOCOL
 // Forces the identity session to reside in RAM only, bypassing the full C: drive.
 if (typeof window !== 'undefined') {
