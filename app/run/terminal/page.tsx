@@ -3,11 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import dynamic from 'next/dynamic';
+
+const LiveMap = dynamic(() => import('@/components/runner/LiveMap'), { ssr: false });
+import SwipeToAccept from '@/components/runner/SwipeToAccept';
 
 export default function CarrierTerminal() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
-  const [isOnline, setIsOnline] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   const [jobs, setJobs] = useState<any[]>([]);
   const [activeMission, setActiveMission] = useState<any>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -108,138 +112,131 @@ export default function CarrierTerminal() {
   );
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] flex flex-col font-sans selection:bg-[#F2F2F7]">
+    <div className="h-screen max-h-screen w-full bg-white flex flex-col relative overflow-hidden m-0 p-0">
       
-      {/* 1. Top App Bar & Status (Fixed to override global layout) */}
-      <div className="bg-[#FFFFFF] fixed top-0 left-0 right-0 z-[100] h-20 px-5 pt-8 pb-4 flex items-center justify-between border-b-[0.5px] border-[#E5E5EA]">
-        <h1 className="text-[20px] font-bold text-[#1C1C1E] tracking-tight">Pulse Runner</h1>
-        <div className="flex items-center gap-3">
-           <span className={`text-[13px] font-bold tracking-tight transition-colors ${isOnline ? 'text-[#34C759]' : 'text-[#8E8E93]'}`}>
-              {isOnline ? 'Online' : 'Offline'}
-           </span>
-           <button 
-             onClick={() => setIsOnline(!isOnline)}
-             className={`w-[51px] h-[31px] rounded-full p-[2px] transition-colors duration-200 ease-in-out shrink-0 ${isOnline ? 'bg-[#34C759]' : 'bg-[#E5E5EA]'}`}
-           >
-             <div className={`w-[27px] h-[27px] bg-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] transform transition-transform duration-200 ease-in-out ${isOnline ? 'translate-x-[20px]' : 'translate-x-0'}`} />
-           </button>
-        </div>
-      </div>
-
-      <div className="flex-1 pt-24 pb-24">
+      {/* 1. Header (Mode Switch) - Static, no margins */}
+      <div className="shrink-0 bg-white border-b border-gray-100 px-4 py-3 relative z-[100] flex items-center justify-between m-0 shadow-sm">
+         <button onClick={() => router.push('/home')} className="flex items-center text-gray-900 active:scale-95 transition-transform">
+            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+            <span className="text-sm font-bold">Back to Campus</span>
+         </button>
          
-         {activeMission ? (
-           /* 2. Section 1: Active Job (The Map & Action Card) */
-           <div className="border-b-[0.5px] border-[#E5E5EA] pb-6">
-              {/* Map Placeholder */}
-              <div className="w-full h-48 bg-[#F2F2F7] relative overflow-hidden border-b-[0.5px] border-[#E5E5EA]">
-                 <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(#E5E5EA 1px, transparent 1px), linear-gradient(90deg, #E5E5EA 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.5 }}></div>
-                 
-                 <div className="absolute top-[40%] left-[30%]">
-                    <div className="w-4 h-4 bg-[#007AFF] rounded-full border-2 border-white shadow-sm relative z-10"></div>
-                    <div className="w-4 h-4 bg-[#007AFF] rounded-full absolute inset-0 animate-ping opacity-75"></div>
-                 </div>
-                 
-                 <svg className="absolute top-[25%] left-[32%] w-[40%] h-[20%] text-[#1C1C1E] opacity-20" fill="none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <path stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" d="M 0 100 Q 50 0 100 0" />
-                 </svg>
-
-                 <div className="absolute top-[20%] right-[30%] flex flex-col items-center">
-                    <div className="w-6 h-6 bg-[#34C759] rounded-full border-2 border-white shadow-sm flex items-center justify-center relative z-10">
-                       <div className="w-2 h-2 bg-white rounded-full"></div>
-                    </div>
-                 </div>
-              </div>
-
-              {/* Job Details */}
-              <div className="px-5 pt-6">
-                 <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-[13px] font-bold text-[#8E8E93] tracking-widest uppercase">Current Task</h2>
-                    <span className="text-[11px] font-bold text-[#00927C] bg-[#E8F8EE] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                       {activeMission.status === 'RUNNER_EN_ROUTE_TO_VENDOR' ? 'Heading to Vendor' : 'In Transit'}
-                    </span>
-                 </div>
-                 <div className="flex flex-col gap-1">
-                    <p className="text-[20px] font-bold text-[#1C1C1E] tracking-tight">Pickup at {activeMission.source || 'Vendor'}</p>
-                    <p className="text-[15px] font-medium text-[#8E8E93]">Deliver to {activeMission.dest || 'Customer'}</p>
-                 </div>
-              </div>
-
-              {/* Action Button */}
-              <div className="px-4 mt-6">
-                 <button 
-                   onClick={handleActionClick}
-                   disabled={isUploading}
-                   className="w-full bg-[#1C1C1E] text-white text-[17px] font-bold py-4 rounded-[14px] active:scale-[0.98] transition-transform shadow-[0_4px_14px_rgba(0,0,0,0.1)] flex items-center justify-center disabled:opacity-50"
-                 >
-                    {isUploading ? (
-                       <span className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-[#FFFFFF] border-t-transparent rounded-full animate-spin"></div>
-                          Processing...
-                       </span>
-                    ) : (
-                       activeMission.status === 'RUNNER_EN_ROUTE_TO_VENDOR' ? 'Slide to Confirm Pickup' : 'Slide to Complete Delivery'
-                    )}
-                 </button>
-              </div>
-           </div>
-         ) : (
-           /* 3. Section 2: Available Jobs Radar */
-           <div className="px-5 py-8">
-              <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight mb-5">Nearby Deliveries</h2>
-              
-              <div className="flex flex-col space-y-4">
-                 {!isOnline ? (
-                    <div className="h-32 flex flex-col items-center justify-center bg-[#F9F9FB] rounded-[16px] border border-[#E5E5EA] border-dashed">
-                       <p className="text-[14px] font-semibold text-[#8E8E93]">Go online to receive jobs.</p>
-                    </div>
-                 ) : jobs.length === 0 ? (
-                    <div className="h-32 flex flex-col items-center justify-center bg-[#F9F9FB] rounded-[16px] border border-[#E5E5EA] border-dashed">
-                       <p className="text-[14px] font-semibold text-[#8E8E93]">No deliveries nearby. Stay tuned.</p>
-                    </div>
-                 ) : (
-                    jobs.map((job, idx) => (
-                      <div key={job.id} className={`flex items-center justify-between pb-4 ${idx !== jobs.length - 1 ? 'border-b-[0.5px] border-[#E5E5EA]' : ''}`}>
-                         <div>
-                            <p className="text-[17px] font-bold text-[#1C1C1E] tracking-tight">RM {job.fee ? job.fee.toFixed(2) : '3.00'}</p>
-                            <p className="text-[13px] font-medium text-[#8E8E93] mt-0.5">{job.source} → {job.dest}</p>
-                         </div>
-                         <button 
-                           onClick={() => handleAcceptJob(job.id)}
-                           className="text-[14px] font-bold text-[#34C759] bg-[#E8F8EE] px-5 py-2.5 rounded-[10px] active:opacity-70 transition-opacity tracking-tight"
-                         >
-                            Accept Job
-                         </button>
-                      </div>
-                    ))
-                 )}
-              </div>
-           </div>
-         )}
-      </div>
-
-      {/* 4. Bottom Navigation Bar (Sticky) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#FFFFFF] border-t-[0.5px] border-[#E5E5EA] pb-8 pt-3 px-6 z-[100]">
-         <div className="flex items-center justify-between max-w-sm mx-auto">
-            <button className="flex flex-col items-center gap-1 min-w-[64px]">
-               <svg className="w-[24px] h-[24px] text-[#1C1C1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-               <span className="text-[10px] font-bold text-[#1C1C1E]">Radar</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 min-w-[64px]">
-               <svg className="w-[24px] h-[24px] text-[#8E8E93]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-               <span className="text-[10px] font-bold text-[#8E8E93]">Tasks</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 min-w-[64px]">
-               <svg className="w-[24px] h-[24px] text-[#8E8E93]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-               <span className="text-[10px] font-bold text-[#8E8E93]">Earnings</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 min-w-[64px]">
-               <svg className="w-[24px] h-[24px] text-[#8E8E93]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-               <span className="text-[10px] font-bold text-[#8E8E93]">Profile</span>
+         <div className="flex items-center gap-2">
+            <span className={`text-xs font-bold tracking-tight uppercase ${isOnline ? 'text-emerald-600' : 'text-gray-400'}`}>
+               {isOnline ? 'Online' : 'Offline'}
+            </span>
+            <button 
+               onClick={() => setIsOnline(!isOnline)}
+               className={`w-[44px] h-[26px] rounded-full p-[2px] transition-colors duration-200 ease-in-out shrink-0 ${isOnline ? 'bg-emerald-500' : 'bg-gray-200'}`}
+            >
+               <div className={`w-[22px] h-[22px] bg-white rounded-full shadow-sm transform transition-transform duration-200 ease-in-out ${isOnline ? 'translate-x-[18px]' : 'translate-x-0'}`} />
             </button>
          </div>
       </div>
 
+      {/* 2. Top Half (Logistics Map) - Completely Flush */}
+      <div className="w-full h-[40vh] bg-gray-100 z-0 relative shrink-0 m-0 p-0 block overflow-hidden">
+         <LiveMap hasActiveJob={!!activeMission} />
+      </div>
+
+      {/* 3. Bottom Half: Scrollable Dashboard Content */}
+      <div className="flex-1 bg-gray-50 p-4 pb-12 overflow-y-auto relative z-10">
+         
+         {/* Section A: Active / Next Delivery */}
+         <div>
+            <h2 className="text-xs font-bold text-neutral-400 tracking-widest uppercase mb-3">
+               {activeMission ? 'Active Delivery' : 'Next Request'}
+            </h2>
+            
+            {activeMission ? (
+               <div className="bg-white rounded-2xl p-4 shadow-sm border border-neutral-200/60 mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                     <span className="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
+                        EN ROUTE
+                     </span>
+                     <p className="text-xl font-extrabold text-black">Order #{activeMission.id.substring(0,8).toUpperCase()}</p>
+                  </div>
+                  
+                  <div className="relative pl-5 mb-4">
+                     <div className="absolute left-[7px] top-[8px] bottom-[8px] w-[1px] bg-gray-200"></div>
+                     <div className="mb-4 relative">
+                        <div className="absolute left-[-20px] top-[6px] w-2 h-2 rounded-full bg-gray-900"></div>
+                        <p className="text-sm font-bold text-gray-900 leading-none mb-1">Take From</p>
+                        <p className="text-[13px] text-gray-500">{activeMission.source || 'Library Kiosk'}</p>
+                     </div>
+                     <div className="relative">
+                        <div className="absolute left-[-20px] top-[6px] w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <p className="text-sm font-bold text-gray-900 leading-none mb-1">Deliver To</p>
+                        <p className="text-[13px] text-gray-500">{activeMission.dest || 'Admin Office'}</p>
+                     </div>
+                  </div>
+
+                  <SwipeToAccept 
+                     key={activeMission.status} 
+                     onSuccess={handleActionClick} 
+                     loading={isUploading}
+                     defaultText={activeMission.status === 'RUNNER_EN_ROUTE_TO_VENDOR' ? 'SLIDE TO ARRIVE' : 'SLIDE TO COMPLETE'}
+                     successText="CONFIRMED ✓"
+                  />
+               </div>
+            ) : (
+               jobs.length > 0 ? (
+                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-neutral-200/60 mb-6">
+                     <div className="flex justify-between items-center mb-4">
+                        <span className="bg-gray-50 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
+                           📍 450m away
+                        </span>
+                        <p className="text-xl font-extrabold text-black">RM {jobs[0].fee ? jobs[0].fee.toFixed(2) : '3.00'}</p>
+                     </div>
+                     <div className="relative pl-5 mb-2">
+                        <div className="absolute left-[7px] top-[8px] bottom-[8px] w-[1px] bg-gray-200"></div>
+                        <div className="mb-3 relative">
+                           <div className="absolute left-[-20px] top-[6px] w-2 h-2 rounded-full bg-gray-900"></div>
+                           <p className="text-sm font-semibold text-gray-900 leading-none">{jobs[0].source}</p>
+                        </div>
+                        <div className="relative">
+                           <div className="absolute left-[-20px] top-[6px] w-2 h-2 rounded-full bg-emerald-500"></div>
+                           <p className="text-sm font-semibold text-gray-900 leading-none">{jobs[0].dest}</p>
+                        </div>
+                     </div>
+                     <p className="text-xs text-gray-500 font-medium mt-2">2 Items • Est. 10 mins</p>
+                     <SwipeToAccept 
+                       key={jobs[0].id} 
+                       onSuccess={() => handleAcceptJob(jobs[0].id)} 
+                       defaultText="SWIPE TO ACCEPT" 
+                       successText="ACCEPTED ✓"
+                     />
+                  </div>
+               ) : (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center mb-6">
+                     <p className="text-sm font-semibold text-gray-500">
+                       {isOnline ? "Scanning campus for requests..." : "Go online to receive delivery requests."}
+                     </p>
+                  </div>
+               )
+            )}
+         </div>
+
+         {/* Section B: Today's Summary */}
+         <h2 className="text-xs font-bold text-neutral-400 tracking-widest uppercase mt-8 mb-3">Today's Summary</h2>
+         <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Net Earnings</p>
+               <p className="text-2xl font-bold text-gray-900">RM {(profile?.balance || 0).toFixed(2)}</p>
+            </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Completed</p>
+               <p className="text-2xl font-bold text-gray-900">7 Trips</p>
+            </div>
+         </div>
+
+         {/* Section C: Preferences Shortcut */}
+         <button className="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-xl mt-6 active:scale-95 transition-transform flex items-center justify-center gap-2">
+            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Runner Preferences
+         </button>
+
+      </div>
     </div>
   );
 }

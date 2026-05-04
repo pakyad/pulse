@@ -54,6 +54,21 @@ function JoshStockBadge({ stock }: { stock: number }) {
   );
 }
 
+// ── Geofence Utility ──
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+const TARGET_COORDS = { lat: 3.1587, lng: 101.7005 }; // UniKL MIIT
+const MAX_DELIVERY_RADIUS_KM = 2.0;
+
 // ── Marzia Delivery Choice Sheet ──
 // Warm, conversational, clear. No forms, no friction.
 function MarziaDeliverySheet({
@@ -72,6 +87,14 @@ function MarziaDeliverySheet({
   const [paymentMethod, setPaymentMethod] = useState<'QR' | 'TRANSFER'>('QR');
   const [location, setLocation] = useState(hubs[0].id);
   const [receipt, setReceipt] = useState<File | null>(null);
+
+  // Geofence Mock State
+  const [mockUserLocation, setMockUserLocation] = useState({ lat: 3.1590, lng: 101.7010 });
+  const distanceKm = calculateDistance(
+    mockUserLocation.lat, mockUserLocation.lng,
+    TARGET_COORDS.lat, TARGET_COORDS.lng
+  );
+  const isWithinRadius = distanceKm <= MAX_DELIVERY_RADIUS_KM;
 
   const selectedSpot = hubs.find(s => s.id === location) || hubs[0];
   const runnerFee = selectedSpot.zone === 'campus' ? 3.50 : 5.00;
@@ -149,25 +172,36 @@ function MarziaDeliverySheet({
 
           {/* Choice B — Runner */}
           <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setChoice('RUNNER')}
-            className={`w-full min-h-[72px] p-4 rounded-2xl border-[0.5px] text-left transition-all flex items-center gap-4 ${
-              choice === 'RUNNER'
+            whileTap={isWithinRadius ? { scale: 0.98 } : {}}
+            onClick={() => isWithinRadius && setChoice('RUNNER')}
+            disabled={!isWithinRadius}
+            className={`w-full min-h-[72px] p-4 rounded-2xl border-[0.5px] text-left transition-all flex items-center justify-between ${
+              !isWithinRadius
+                ? 'bg-gray-50 border-gray-100 text-gray-400 opacity-60 cursor-not-allowed'
+                : choice === 'RUNNER'
                 ? 'border-[#00C4B4] bg-[#00C4B4] text-white'
                 : 'border-slate-100 bg-white text-navy'
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              choice === 'RUNNER' ? 'bg-white/10' : 'bg-slate-50'
-            }`}>
-              <Truck size={18} />
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                !isWithinRadius ? 'bg-gray-100 text-gray-400' : choice === 'RUNNER' ? 'bg-white/10 text-white' : 'bg-slate-50 text-navy'
+              }`}>
+                <Truck size={18} />
+              </div>
+              <div>
+                <p className="text-[14px] font-bold leading-none">Institutional Runner</p>
+                <p className={`text-[12px] font-normal mt-1 opacity-60`}>
+                  Delivery via verified peer network
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-[14px] font-bold leading-none">Institutional Runner</p>
-              <p className={`text-[12px] font-normal mt-1 opacity-60`}>
-                Delivery via verified peer network
-              </p>
-            </div>
+
+            {!isWithinRadius && (
+              <span className="bg-red-50 text-red-600 uppercase text-[10px] font-bold px-2 py-1 rounded-md shrink-0">
+                Out of Range (2km Max)
+              </span>
+            )}
           </motion.button>
 
           {/* Location Grid — Black Selection */}
@@ -201,7 +235,23 @@ function MarziaDeliverySheet({
               </motion.div>
             )}
           </AnimatePresence>
-              </motion.div>
+
+          {/* Secret Demo Toggle */}
+          <button
+            onClick={() => {
+              setMockUserLocation(prev => 
+                prev.lat === 3.1590 ? { lat: 3.0000, lng: 101.7000 } : { lat: 3.1590, lng: 101.7010 }
+              );
+              // Auto-deselect Runner if they go out of bounds
+              if (choice === 'RUNNER' && isWithinRadius) {
+                 setChoice(null);
+              }
+            }}
+            className="text-[10px] text-gray-300 hover:text-gray-400 mt-4 w-full text-center tracking-widest uppercase transition-colors"
+          >
+            demo: toggle geofence ({isWithinRadius ? 'Inside 2km' : 'Outside 2km'})
+          </button>
+        </motion.div>
             ) : (
               <motion.div
                 key="payment"

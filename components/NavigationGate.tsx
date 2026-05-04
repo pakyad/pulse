@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
 import { VETTED_ACCOUNTS } from '@/lib/utils/admin-seeding';
 import { seedSEClubItems } from '@/lib/utils/seed-se-club';
@@ -92,8 +93,12 @@ export default function NavigationGate() {
   return (
     <>
       {!hideHeader && !pathname?.startsWith('/admin') && !isDeepView && <Header />}
-      {/* Hide Student BottomNav for Industrial Terminals (Merchant, Admin), Active Missions, and Deep Views */}
-      {!isMerchantTerminal && !pathname?.startsWith('/admin') && !isAuthPage && !isDeepView && !isActiveMission && <BottomNav />}
+      
+      {/* Global Runner Dynamic Island */}
+      <FloatingActiveTask />
+
+      {/* Hide Student BottomNav for Industrial Terminals (Merchant, Admin), Run Module, and Deep Views */}
+      {!isMerchantTerminal && !pathname?.startsWith('/admin') && !isAuthPage && !isDeepView && !isRunTerminal && <BottomNav />}
     </>
   );
 }

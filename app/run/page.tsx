@@ -33,6 +33,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
+import CarrierTerminal from './terminal/page';
 
 // ── VOXEL ICON SYNCHRONIZATION ──
 const VoxelFood = ({ className, size = 24 }: { className?: string, size?: number }) => (
@@ -258,8 +259,12 @@ export default function RunModule() {
 
     if (status === 'loading') return <div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-navy" /></div>;
 
+    if (profile?.is_verified_runner) {
+       return <CarrierTerminal />;
+    }
+
     return (
-       <main className="min-h-screen bg-white font-sans antialiased text-navy overflow-x-hidden">
+       <main className="min-h-screen bg-white antialiased text-navy overflow-x-hidden">
           
           <nav className="fixed top-0 left-0 right-0 z-[60] px-8 pt-4 pb-6 flex items-center justify-between bg-white/80 backdrop-blur-xl">
              <div className="flex items-center gap-4">

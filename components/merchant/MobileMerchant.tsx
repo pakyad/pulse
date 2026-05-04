@@ -13,7 +13,7 @@ export default function MobileMerchant({
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] flex flex-col font-sans selection:bg-[#F2F2F7] md:hidden">
+    <div className="min-h-screen bg-[#FFFFFF] flex flex-col selection:bg-gray-100 md:hidden">
       
       {/* Top App Bar (Sticky) */}
       <div className="bg-[#FFFFFF] sticky top-0 z-20 px-5 py-4 flex items-center justify-between border-b-[0.5px] border-[#E5E5EA]">
@@ -88,7 +88,7 @@ export default function MobileMerchant({
                {topItems.map((item: any) => (
                  <div key={item.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                       <div className="w-[48px] h-[48px] bg-[#F2F2F7] rounded-[12px] flex items-center justify-center shrink-0 border-[0.5px] border-[#E5E5EA] overflow-hidden">
+                       <div className="w-[48px] h-[48px] bg-[#F2F2F7] rounded-2xl flex items-center justify-center shrink-0 border-[0.5px] border-[#E5E5EA] overflow-hidden">
                           {item.image_url ? (
                              <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
                           ) : (
@@ -113,7 +113,7 @@ export default function MobileMerchant({
                {topItems.length === 0 && (
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                       <div className="w-[48px] h-[48px] bg-[#F2F2F7] rounded-[12px] flex items-center justify-center shrink-0 border-[0.5px] border-[#E5E5EA]">
+                       <div className="w-[48px] h-[48px] bg-[#F2F2F7] rounded-2xl flex items-center justify-center shrink-0 border-[0.5px] border-[#E5E5EA]">
                           <svg className="w-6 h-6 text-[#C7C7CC]" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                        </div>
                        <div>
