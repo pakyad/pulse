@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
+
 import { createItemListing } from '@/lib/marketplace-utils';
-import { X, MapPin, ChevronRight, Plus, Truck, Handshake, Package, Search, Trash2, Camera, Info, Check } from 'lucide-react';
+import { submitProductListing } from '@/app/actions/productActions';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { X, MapPin, ChevronRight, Plus, Truck, Handshake, Package, Search, Trash2, Camera, Info, Check, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CreateListingProps {
@@ -28,15 +32,15 @@ const CONDITIONS = [
 ];
 
 export default function CreateListing({ userId, role, onClose }: CreateListingProps) {
-  const [loading, setLoading] = useState(false);
-  const [images, setImages] = useState<{file: File | null, preview: string}[]>([]);
-  const [activeDraft, setActiveDraft] = useState(0);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'flagged' | 'error'>('idle');
+  const [message, setMessage] = useState('');
   const [form, setForm] = useState({ 
     title: '', 
     price: '', 
     category: '',
     subCategory: '',
     condition: '',
+    justification: '',
     meetup_enabled: true,
     delivery_enabled: true,
     campus_id: 'MIIT',
@@ -44,6 +48,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
   });
 
   const [sheet, setSheet] = useState<'category' | 'subcategory' | 'condition' | 'location' | null>(null);
+  const [images, setImages] = useState<{file: File, preview: string}[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -53,14 +58,43 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
   };
 
   const handleUpload = async () => {
-    setLoading(true);
+    if (!images[0]?.file) return;
+    setStatus('loading');
+    
     try {
-      await createItemListing(userId, role, form, images[0]?.file);
-      onClose(); 
+      // 1. Asset Preparation (Client-side Storage)
+      const file = images[0].file;
+      const storageRef = ref(storage, `items/${userId}/${Date.now()}_${file.name}`);
+      const uploadResult = await uploadBytes(storageRef, file);
+      const imageUrl = await getDownloadURL(uploadResult.ref);
+
+      // 2. Registry Handshake (Server Action)
+      const formData = new FormData();
+      formData.append("title", form.title);
+      formData.append("price", form.price);
+      formData.append("category", form.category);
+      formData.append("justification", form.justification);
+      formData.append("vendorId", userId);
+      formData.append("image_url", imageUrl);
+
+      const res = await submitProductListing(formData);
+
+      if (res.success) {
+        setMessage(res.message);
+        if (res.isFlagged) {
+          setStatus('flagged');
+        } else {
+          setStatus('success');
+          setTimeout(() => onClose(), 2000);
+        }
+      } else {
+        setStatus('error');
+        setMessage(res.message || "An error occurred.");
+      }
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
+      setStatus('error');
+      setMessage("Failed to connect to the Pulse Registry.");
     }
   };
 
@@ -76,11 +110,11 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
         </button>
         <h1 className="text-[14px] font-black uppercase tracking-[0.2em] text-black">Create Listing</h1>
         <button 
-          disabled={!isFormValid || loading}
+          disabled={!isFormValid || status === 'loading'}
           onClick={handleUpload}
           className={`text-[13px] font-black uppercase tracking-widest transition-all ${isFormValid ? 'text-[#00927C]' : 'text-black/10'}`}
         >
-          {loading ? '...' : 'Post'}
+          {status === 'loading' ? '...' : 'Post'}
         </button>
       </div>
 
@@ -114,6 +148,60 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
             )}
           </div>
         </section>
+
+        {/* ── FEEDBACK LAYER (Dynamic State) ── */}
+        <AnimatePresence>
+          {(status === 'success' || status === 'flagged' || status === 'error') && (
+            <motion.section 
+              initial={{ opacity: 0, height: 0 }} 
+              animate={{ opacity: 1, height: 'auto' }}
+              className="px-6 mb-6"
+            >
+              {status === 'success' && (
+                <div className="p-5 rounded-[22px] bg-[#E8F5E9] border-[0.5px] border-[#81C784] flex gap-4 items-start">
+                  <div className="w-8 h-8 rounded-full bg-[#4CAF50] flex items-center justify-center shrink-0">
+                    <Check size={16} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-black text-[#1B5E20] uppercase tracking-wider mb-1">Authorization Success</p>
+                    <p className="text-[13px] text-[#2E7D32] font-medium leading-tight">{message}</p>
+                  </div>
+                </div>
+              )}
+
+              {status === 'flagged' && (
+                <div className="p-5 rounded-[22px] bg-[#FFF8E1] border-[0.5px] border-[#FFD54F] flex gap-4 items-start shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-[#FFB300] flex items-center justify-center shrink-0">
+                    <AlertCircle size={16} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-black text-[#7F4D00] uppercase tracking-wider mb-1">Manual Vetting Required</p>
+                    <p className="text-[13px] text-[#A67C00] font-medium leading-tight">{message}</p>
+                    <button 
+                      onClick={onClose}
+                      className="mt-3 text-[10px] font-black uppercase tracking-widest text-[#7F4D00] underline underline-offset-4"
+                    >
+                      Return to Terminal
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {status === 'error' && (
+                <div className="p-5 rounded-[22px] bg-[#FFEBEE] border-[0.5px] border-[#E57373] flex gap-4 items-start">
+                  <div className="w-8 h-8 rounded-full bg-[#F44336] flex items-center justify-center shrink-0">
+                    <X size={16} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-black text-[#B71C1C] uppercase tracking-wider mb-1">Registry Rejection</p>
+                    <p className="text-[13px] text-[#C62828] font-medium leading-tight">{message}</p>
+                  </div>
+                </div>
+              )}
+            </motion.section>
+          )}
+        </AnimatePresence>
+
 
         {/* ── SECTION: PRIMARY DETAILS ── */}
         <section className="px-6 space-y-12">
@@ -171,6 +259,21 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
               />
             </div>
           </div>
+
+          {/* Justification Field (Price Monitoring Edge Case) */}
+          <div className="space-y-4">
+             <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Registry Justification</label>
+             <textarea 
+               placeholder="Selling a premium item? Explain why (e.g., brand, extras)..."
+               value={form.justification}
+               className="w-full p-6 text-[14px] font-medium text-black bg-white border-[0.5px] border-[#F2F2F7] rounded-[22px] focus:border-black focus:outline-none transition-all placeholder:text-black/10 min-h-[120px] resize-none"
+               onChange={(e) => setForm({...form, justification: e.target.value})}
+             />
+             <p className="text-[9px] font-bold text-black/20 uppercase tracking-widest leading-relaxed">
+               Providing context helps Admins authorize high-value listings faster.
+             </p>
+          </div>
+
 
           {/* Campus Base */}
           <div className="space-y-4">
@@ -252,14 +355,14 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
       {/* ── ACTION FOOTER ── */}
       <div className="p-8 bg-white border-t-[0.5px] border-[#F2F2F7] pb-12">
         <motion.button 
-          whileTap={isFormValid ? { scale: 0.98 } : {}}
+          whileTap={isFormValid && status !== 'loading' ? { scale: 0.98 } : {}}
           onClick={handleUpload}
-          disabled={loading || !isFormValid}
+          disabled={status === 'loading' || !isFormValid}
           className={`w-full h-16 rounded-[22px] font-black text-[14px] uppercase tracking-[0.2em] transition-all duration-500 ${
-            isFormValid ? 'bg-black text-white shadow-2xl shadow-black/20' : 'bg-black/5 text-black/10'
+            isFormValid && status !== 'loading' ? 'bg-black text-white shadow-2xl shadow-black/20' : 'bg-black/5 text-black/10'
           }`}
         >
-          {loading ? 'Processing...' : 'Authorize Listing'}
+          {status === 'loading' ? 'Processing Handshake...' : 'Authorize Listing'}
         </motion.button>
       </div>
 

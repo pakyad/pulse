@@ -3,6 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
+import { Camera, X, Loader2, CheckCircle2, Settings } from 'lucide-react';
+import { completeDelivery } from '@/app/actions/deliveryActions';
 import dynamic from 'next/dynamic';
 
 const LiveMap = dynamic(() => import('@/components/runner/LiveMap'), { ssr: false });
@@ -14,6 +18,8 @@ export default function CarrierTerminal() {
   const [isOnline, setIsOnline] = useState(true);
   const [jobs, setJobs] = useState<any[]>([]);
   const [activeMission, setActiveMission] = useState<any>(null);
+  const [podPhoto, setPodPhoto] = useState<File | null>(null);
+  const [podPreview, setPodPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -93,13 +99,38 @@ export default function CarrierTerminal() {
           pickup_time: serverTimestamp() 
         });
       } else if (activeMission.status === 'IN_TRANSIT') {
-        await updateDoc(doc(db, "orders", activeMission.id), { 
-          status: 'DELIVERED', 
-          completed_at: serverTimestamp(),
-        });
+        if (!podPhoto) {
+          alert("Evidence Capture Required: Please take a photo of the delivery.");
+          setIsUploading(false);
+          return;
+        }
+
+        // 1. Upload PoD to Storage
+        const storageRef = ref(storage, `delivery_proofs/${activeMission.id}_${Date.now()}.jpg`);
+        const uploadResult = await uploadBytes(storageRef, podPhoto);
+        const proofUrl = await getDownloadURL(uploadResult.ref);
+
+        // 2. Finalize via Server Action
+        const res = await completeDelivery(activeMission.id, proofUrl);
+
+        if (res.success) {
+           // 3. Update Runner Balance (Atomic Transaction)
+           const userRef = doc(db, "users", auth.currentUser?.uid || "");
+           const userSnap = await getDoc(userRef);
+           const payout = activeMission.fee || 4.50;
+           
+           await updateDoc(userRef, {
+             balance: (userSnap.data()?.balance || 0) + payout
+           });
+
+           setPodPhoto(null);
+           setPodPreview(null);
+        } else {
+           throw res.message;
+        }
       }
-    } catch (e) {
-      alert("Error updating status");
+    } catch (e: any) {
+      alert(`Terminal Error: ${e}`);
     } finally {
       setIsUploading(false);
     }
@@ -114,103 +145,151 @@ export default function CarrierTerminal() {
   return (
     <div className="h-screen max-h-screen w-full bg-white flex flex-col relative overflow-hidden m-0 p-0">
       
-      {/* 1. Header (Mode Switch) - Static, no margins */}
-      <div className="shrink-0 bg-white border-b border-gray-100 px-4 py-3 relative z-[100] flex items-center justify-between m-0 shadow-sm">
-         <button onClick={() => router.push('/home')} className="flex items-center text-gray-900 active:scale-95 transition-transform">
-            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
-            <span className="text-sm font-bold">Back to Campus</span>
+      {/* 1. Header (Mode Switch) - Pure Institutional */}
+      <div className="shrink-0 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100 px-6 py-5 relative z-[100] flex items-center justify-between m-0">
+         <button onClick={() => router.push('/home')} className="flex items-center text-slate-400 hover:text-navy active:scale-95 transition-all">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>
+            <span className="text-[13px] font-bold tracking-tight">Back to Campus</span>
          </button>
          
-         <div className="flex items-center gap-2">
-            <span className={`text-xs font-bold tracking-tight uppercase ${isOnline ? 'text-emerald-600' : 'text-gray-400'}`}>
-               {isOnline ? 'Online' : 'Offline'}
+         <div className="flex items-center gap-3">
+            <span className={`text-[10px] font-black tracking-widest uppercase ${isOnline ? 'text-emerald-500' : 'text-slate-300'}`}>
+               {isOnline ? 'Terminal Online' : 'Offline'}
             </span>
             <button 
                onClick={() => setIsOnline(!isOnline)}
-               className={`w-[44px] h-[26px] rounded-full p-[2px] transition-colors duration-200 ease-in-out shrink-0 ${isOnline ? 'bg-emerald-500' : 'bg-gray-200'}`}
+               className={`w-[48px] h-[26px] rounded-full p-[2px] transition-all duration-500 ease-in-out shrink-0 ${isOnline ? 'bg-navy' : 'bg-slate-100'}`}
             >
-               <div className={`w-[22px] h-[22px] bg-white rounded-full shadow-sm transform transition-transform duration-200 ease-in-out ${isOnline ? 'translate-x-[18px]' : 'translate-x-0'}`} />
+               <div className={`w-[22px] h-[22px] bg-white rounded-full shadow-lg transform transition-transform duration-500 ease-in-out ${isOnline ? 'translate-x-[22px]' : 'translate-x-0'}`} />
             </button>
          </div>
       </div>
 
-      {/* 2. Top Half (Logistics Map) - Completely Flush */}
-      <div className="w-full h-[40vh] bg-gray-100 z-0 relative shrink-0 m-0 p-0 block overflow-hidden">
+      {/* 2. Top Half (Logistics Map) - Flush with soft gradient fade */}
+      <div className="w-full h-[35vh] bg-slate-50 z-0 relative shrink-0 m-0 p-0 block overflow-hidden border-b-[0.5px] border-slate-100">
          <LiveMap hasActiveJob={!!activeMission} />
+         <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-white/20 to-transparent" />
       </div>
 
       {/* 3. Bottom Half: Scrollable Dashboard Content */}
-      <div className="flex-1 bg-gray-50 p-4 pb-12 overflow-y-auto relative z-10">
+      <div className="flex-1 bg-white p-6 pb-20 overflow-y-auto relative z-10">
          
          {/* Section A: Active / Next Delivery */}
          <div>
-            <h2 className="text-xs font-bold text-neutral-400 tracking-widest uppercase mb-3">
-               {activeMission ? 'Active Delivery' : 'Next Request'}
-            </h2>
+            <p className="text-[10px] font-black text-slate-400 tracking-[0.2em] uppercase mb-4">
+               {activeMission ? 'Current Protocol' : 'Waiting Room'}
+            </p>
             
             {activeMission ? (
-               <div className="bg-white rounded-2xl p-4 shadow-sm border border-neutral-200/60 mb-6">
-                  <div className="flex justify-between items-center mb-4">
-                     <span className="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
-                        EN ROUTE
-                     </span>
-                     <p className="text-xl font-extrabold text-black">Order #{activeMission.id.substring(0,8).toUpperCase()}</p>
+               <div className="bg-white rounded-[24px] p-7 border-[0.5px] border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] mb-8">
+                  <div className="flex justify-between items-start mb-8">
+                     <div className="space-y-1">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-600 rounded-md border border-emerald-100/50">
+                           <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                           <span className="text-[9px] font-black uppercase tracking-widest">Active Pulse</span>
+                        </span>
+                        <h2 className="text-[20px] font-bold text-navy tracking-tight mt-2">#{activeMission.id.substring(0,8).toUpperCase()}</h2>
+                     </div>
+                     <div className="text-right">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Est. Earnings</p>
+                        <p className="text-[18px] font-black text-navy">RM {(activeMission.fee || 4.50).toFixed(2)}</p>
+                     </div>
                   </div>
                   
-                  <div className="relative pl-5 mb-4">
-                     <div className="absolute left-[7px] top-[8px] bottom-[8px] w-[1px] bg-gray-200"></div>
-                     <div className="mb-4 relative">
-                        <div className="absolute left-[-20px] top-[6px] w-2 h-2 rounded-full bg-gray-900"></div>
-                        <p className="text-sm font-bold text-gray-900 leading-none mb-1">Take From</p>
-                        <p className="text-[13px] text-gray-500">{activeMission.source || 'Library Kiosk'}</p>
+                  <div className="relative pl-7 mb-8 space-y-8">
+                     <div className="absolute left-[3px] top-[10px] bottom-[10px] w-[0.5px] bg-slate-100"></div>
+                     <div className="relative">
+                        <div className="absolute left-[-28px] top-[4px] w-2 h-2 rounded-full border-2 border-white bg-navy shadow-sm"></div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1">Pickup Point</p>
+                        <p className="text-[15px] font-bold text-navy leading-none">{activeMission.source || 'Library Kiosk'}</p>
                      </div>
                      <div className="relative">
-                        <div className="absolute left-[-20px] top-[6px] w-2 h-2 rounded-full bg-emerald-500"></div>
-                        <p className="text-sm font-bold text-gray-900 leading-none mb-1">Deliver To</p>
-                        <p className="text-[13px] text-gray-500">{activeMission.dest || 'Admin Office'}</p>
+                        <div className="absolute left-[-28px] top-[4px] w-2 h-2 rounded-full border-2 border-white bg-emerald-500 shadow-sm"></div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1">Drop-off Hub</p>
+                        <p className="text-[15px] font-bold text-navy leading-none">{activeMission.dest || 'Admin Office'}</p>
                      </div>
                   </div>
+
+                  {/* ── MATURE POD CAPTURE LAYER ── */}
+                  {activeMission.status === 'IN_TRANSIT' && (
+                     <div className="mb-8 p-1 bg-slate-50/50 rounded-[20px] border-[0.5px] border-slate-100">
+                        {!podPreview ? (
+                           <label className="flex flex-col items-center justify-center w-full h-36 rounded-[18px] bg-white cursor-pointer hover:bg-slate-50 transition-all group">
+                              <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                 <Camera className="w-5 h-5 text-slate-400" strokeWidth={1.5} />
+                              </div>
+                              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Capture Evidence</p>
+                              <input 
+                                 type="file" 
+                                 className="hidden" 
+                                 accept="image/*" 
+                                 capture="environment" 
+                                 onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                       setPodPhoto(file);
+                                       setPodPreview(URL.createObjectURL(file));
+                                    }
+                                 }} 
+                              />
+                           </label>
+                        ) : (
+                           <div className="relative w-full h-48 rounded-[18px] overflow-hidden border border-slate-100">
+                              <img src={podPreview} className="w-full h-full object-cover" />
+                              <button 
+                                 onClick={() => { setPodPhoto(null); setPodPreview(null); }}
+                                 className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-xl active:scale-90 transition-all"
+                              >
+                                 <X size={16} className="text-navy" />
+                              </button>
+                           </div>
+                        )}
+                     </div>
+                  )}
 
                   <SwipeToAccept 
                      key={activeMission.status} 
                      onSuccess={handleActionClick} 
                      loading={isUploading}
-                     defaultText={activeMission.status === 'RUNNER_EN_ROUTE_TO_VENDOR' ? 'SLIDE TO ARRIVE' : 'SLIDE TO COMPLETE'}
-                     successText="CONFIRMED ✓"
+                     defaultText={activeMission.status === 'RUNNER_EN_ROUTE_TO_VENDOR' ? 'SLIDE TO ARRIVE' : podPhoto ? 'SLIDE TO COMPLETE' : 'CAPTURE PROOF TO FINISH'}
+                     successText="VERIFIED ✓"
                   />
                </div>
             ) : (
                jobs.length > 0 ? (
-                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-neutral-200/60 mb-6">
-                     <div className="flex justify-between items-center mb-4">
-                        <span className="bg-gray-50 text-gray-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
-                           📍 450m away
+                  <div className="bg-white rounded-[24px] p-7 border-[0.5px] border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] mb-8">
+                     <div className="flex justify-between items-center mb-6">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded">
+                           450m from you
                         </span>
-                        <p className="text-xl font-extrabold text-black">RM {jobs[0].fee ? jobs[0].fee.toFixed(2) : '3.00'}</p>
+                        <p className="text-[20px] font-black text-navy tracking-tight">RM {jobs[0].fee ? jobs[0].fee.toFixed(2) : '4.50'}</p>
                      </div>
-                     <div className="relative pl-5 mb-2">
-                        <div className="absolute left-[7px] top-[8px] bottom-[8px] w-[1px] bg-gray-200"></div>
-                        <div className="mb-3 relative">
-                           <div className="absolute left-[-20px] top-[6px] w-2 h-2 rounded-full bg-gray-900"></div>
-                           <p className="text-sm font-semibold text-gray-900 leading-none">{jobs[0].source}</p>
+                     <div className="relative pl-7 mb-6 space-y-6">
+                        <div className="absolute left-[3px] top-[10px] bottom-[10px] w-[0.5px] bg-slate-100"></div>
+                        <div className="relative">
+                           <div className="absolute left-[-28px] top-[4px] w-2 h-2 rounded-full border-2 border-white bg-navy opacity-20"></div>
+                           <p className="text-[14px] font-bold text-navy leading-none">{jobs[0].source}</p>
                         </div>
                         <div className="relative">
-                           <div className="absolute left-[-20px] top-[6px] w-2 h-2 rounded-full bg-emerald-500"></div>
-                           <p className="text-sm font-semibold text-gray-900 leading-none">{jobs[0].dest}</p>
+                           <div className="absolute left-[-28px] top-[4px] w-2 h-2 rounded-full border-2 border-white bg-emerald-500 opacity-20"></div>
+                           <p className="text-[14px] font-bold text-navy leading-none">{jobs[0].dest}</p>
                         </div>
                      </div>
-                     <p className="text-xs text-gray-500 font-medium mt-2">2 Items • Est. 10 mins</p>
+                     <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest mb-6">Standard Bundle • 10m Est.</p>
                      <SwipeToAccept 
                        key={jobs[0].id} 
                        onSuccess={() => handleAcceptJob(jobs[0].id)} 
                        defaultText="SWIPE TO ACCEPT" 
-                       successText="ACCEPTED ✓"
+                       successText="CLAIMED ✓"
                      />
                   </div>
                ) : (
-                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center mb-6">
-                     <p className="text-sm font-semibold text-gray-500">
-                       {isOnline ? "Scanning campus for requests..." : "Go online to receive delivery requests."}
+                  <div className="bg-[#FDFDFD] rounded-[24px] p-12 border-[0.5px] border-slate-100 border-dashed text-center mb-8">
+                     <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-2 h-2 bg-slate-200 rounded-full animate-ping" />
+                     </div>
+                     <p className="text-[13px] font-bold text-slate-400 uppercase tracking-widest">
+                       {isOnline ? "Scanning Registry..." : "Terminal Disconnected"}
                      </p>
                   </div>
                )
@@ -218,22 +297,22 @@ export default function CarrierTerminal() {
          </div>
 
          {/* Section B: Today's Summary */}
-         <h2 className="text-xs font-bold text-neutral-400 tracking-widest uppercase mt-8 mb-3">Today's Summary</h2>
-         <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Net Earnings</p>
-               <p className="text-2xl font-bold text-gray-900">RM {(profile?.balance || 0).toFixed(2)}</p>
+         <p className="text-[10px] font-black text-slate-400 tracking-[0.2em] uppercase mt-4 mb-4">Carrier Performance</p>
+         <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="bg-white rounded-[20px] p-6 border-[0.5px] border-slate-100">
+               <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Session Revenue</p>
+               <p className="text-[20px] font-black text-navy tracking-tight">RM {(profile?.balance || 0).toFixed(2)}</p>
             </div>
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Completed</p>
-               <p className="text-2xl font-bold text-gray-900">7 Trips</p>
+            <div className="bg-white rounded-[20px] p-6 border-[0.5px] border-slate-100">
+               <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Audit Score</p>
+               <p className="text-[20px] font-black text-navy tracking-tight">4.98/5</p>
             </div>
          </div>
 
          {/* Section C: Preferences Shortcut */}
-         <button className="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-xl mt-6 active:scale-95 transition-transform flex items-center justify-center gap-2">
-            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-            Runner Preferences
+         <button className="w-full h-16 bg-slate-50/50 border-[0.5px] border-slate-100 text-navy font-bold text-[13px] rounded-[18px] active:scale-95 transition-all flex items-center justify-center gap-2">
+            <Settings size={16} className="text-slate-400" />
+            Carrier Preferences
          </button>
 
       </div>

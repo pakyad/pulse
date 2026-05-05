@@ -2,11 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
+import AdminProductApprovals from '@/components/admin/AdminProductApprovals';
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [flaggedItems, setFlaggedItems] = useState<any[]>([]);
+  const [guidelines, setGuidelines] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const checkAccess = auth.onAuthStateChanged(async (user) => {
@@ -16,7 +19,24 @@ export default function AdminDashboard() {
       if (profile?.role !== 'ADMIN' && user.email !== 'admin@pulse.com') {
         router.push('/home'); return;
       }
+
+      // Fetch Guidelines
+      const guidelinesUnsub = onSnapshot(collection(db, "PriceGuidelines"), (snap) => {
+        const g: Record<string, number> = {};
+        snap.docs.forEach(d => g[d.id] = d.data().maxBasePrice);
+        setGuidelines(g);
+      });
+
+      // Fetch Flagged Items
+      const itemsUnsub = onSnapshot(
+        query(collection(db, "items"), where("adminStatus", "==", "pending_review")),
+        (snap) => {
+          setFlaggedItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        }
+      );
+
       setLoading(false);
+      return () => { guidelinesUnsub(); itemsUnsub(); };
     });
     return () => checkAccess();
   }, [router]);
@@ -109,71 +129,12 @@ export default function AdminDashboard() {
           {/* Section 1: Price Monitoring Alerts */}
           <div className="bg-[#FFFFFF] rounded-[16px] border border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
              <div className="p-6 border-b border-[#E5E5EA]">
-                 <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight">Price Monitoring Alerts</h2>
+                 <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight text-black">Price Monitoring Terminal</h2>
                  <p className="text-[14px] text-[#8E8E93] mt-1">System-flagged items exceeding campus price ceilings.</p>
              </div>
              
-             <div className="divide-y divide-[#E5E5EA]">
-                {/* Alert Item 1 */}
-                <div className="p-6 flex items-center justify-between hover:bg-[#F9F9FB] transition-colors">
-                   <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#F2F2F7] rounded-lg flex items-center justify-center shrink-0">
-                         <svg className="w-6 h-6 text-[#AEAEB2]" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      </div>
-                      <div>
-                         <h3 className="text-[15px] font-bold text-[#1C1C1E]">Basic Lab Coat</h3>
-                         <p className="text-[13px] text-[#8E8E93] mt-0.5">MedSci Supplies</p>
-                      </div>
-                   </div>
-                   
-                   <div className="flex items-center gap-12">
-                      <div>
-                         <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider mb-1">Campus Guideline</p>
-                         <p className="text-[15px] font-semibold text-[#1C1C1E]">RM 45.00</p>
-                      </div>
-                      <div>
-                         <p className="text-[11px] font-bold text-red-600/80 uppercase tracking-wider mb-1">Listed Price</p>
-                         <p className="text-[15px] font-bold text-red-600 flex items-center gap-1.5">
-                            RM 120.00
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                         </p>
-                      </div>
-                      <div className="flex items-center gap-3 w-[300px] justify-end">
-                         <button className="px-5 py-2.5 text-[13px] font-bold text-[#1C1C1E] border border-[#E5E5EA] rounded-[10px] hover:bg-[#F9F9FB] transition-colors">Approve Price</button>
-                         <button className="px-5 py-2.5 text-[13px] font-bold text-white bg-[#1C1C1E] rounded-[10px] hover:bg-black transition-colors shadow-sm">Request Adjustment</button>
-                      </div>
-                   </div>
-                </div>
-
-                {/* Alert Item 2 */}
-                <div className="p-6 flex items-center justify-between hover:bg-[#F9F9FB] transition-colors">
-                   <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#F2F2F7] rounded-lg flex items-center justify-center shrink-0">
-                         <svg className="w-6 h-6 text-[#AEAEB2]" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      </div>
-                      <div>
-                         <h3 className="text-[15px] font-bold text-[#1C1C1E]">Engineering Calculus Kit</h3>
-                         <p className="text-[13px] text-[#8E8E93] mt-0.5">MIIT Bookshop</p>
-                      </div>
-                   </div>
-                   
-                   <div className="flex items-center gap-12">
-                      <div>
-                         <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider mb-1">Campus Guideline</p>
-                         <p className="text-[15px] font-semibold text-[#1C1C1E]">RM 80.00</p>
-                      </div>
-                      <div>
-                         <p className="text-[11px] font-bold text-amber-600/80 uppercase tracking-wider mb-1">Listed Price</p>
-                         <p className="text-[15px] font-bold text-amber-600 flex items-center gap-1.5">
-                            RM 95.00
-                         </p>
-                      </div>
-                      <div className="flex items-center gap-3 w-[300px] justify-end">
-                         <button className="px-5 py-2.5 text-[13px] font-bold text-[#1C1C1E] border border-[#E5E5EA] rounded-[10px] hover:bg-[#F9F9FB] transition-colors">Approve Price</button>
-                         <button className="px-5 py-2.5 text-[13px] font-bold text-white bg-[#1C1C1E] rounded-[10px] hover:bg-black transition-colors shadow-sm">Request Adjustment</button>
-                      </div>
-                   </div>
-                </div>
+             <div className="p-6">
+                <AdminProductApprovals items={flaggedItems} guidelines={guidelines} />
              </div>
           </div>
 

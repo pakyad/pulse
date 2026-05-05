@@ -1,6 +1,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
+import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search } from 'lucide-react';
+import CreateListing from '@/components/CreateListing';
 
 export default function DesktopMerchant({ 
   merchant, 
@@ -10,6 +12,7 @@ export default function DesktopMerchant({
   recentOrders 
 }: any) {
   const router = useRouter();
+  const [isCreateOpen, setIsCreateOpen] = React.useState(false);
 
   return (
     <div className="min-h-screen bg-[#F2F2F7] flex selection:bg-gray-100 hidden md:flex">
@@ -19,31 +22,33 @@ export default function DesktopMerchant({
         
         {/* Header */}
         <div className="px-6 py-8 flex items-center gap-2">
+          <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+             <span className="text-white font-black text-[14px]">P</span>
+          </div>
           <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
-          <span className="text-[10px] font-bold bg-[#F2F2F7] text-[#8E8E93] px-2 py-[2px] rounded-full uppercase tracking-widest">Merchant</span>
         </div>
 
         {/* Directory Links */}
         <nav className="flex-1 px-4 py-2 space-y-1.5">
           <button className="w-full flex items-center gap-3 px-3 py-2.5 bg-[#F2F2F7] text-[#1C1C1E] rounded-xl transition-colors group">
-            <svg className="w-5 h-5 text-[#1C1C1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            <LayoutGrid size={20} />
             <span className="text-[15px] font-bold tracking-[-0.24px]">Overview</span>
           </button>
           
           <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+            <Bell size={20} />
             <span className="text-[15px] tracking-[-0.24px]">Live Orders</span>
           </button>
           <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            <Package size={20} />
             <span className="text-[15px] tracking-[-0.24px]">Products</span>
           </button>
           <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            <BarChart3 size={20} />
             <span className="text-[15px] tracking-[-0.24px]">Analytics</span>
           </button>
           <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            <Settings size={20} />
             <span className="text-[15px] tracking-[-0.24px]">Settings</span>
           </button>
         </nav>
@@ -51,7 +56,7 @@ export default function DesktopMerchant({
         {/* Footer */}
         <div className="p-4 border-t-[0.5px] border-[#E5E5EA]">
           <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <LogOut size={20} />
             <span className="text-[15px] tracking-[-0.24px]">Logout</span>
           </button>
         </div>
@@ -66,7 +71,7 @@ export default function DesktopMerchant({
           <div className="flex-1 max-w-md">
             <div className="relative flex items-center w-full h-10 rounded-xl bg-[#F2F2F7] overflow-hidden border-[0.5px] border-transparent focus-within:border-[#E5E5EA] focus-within:bg-[#FFFFFF] transition-all">
               <div className="grid place-items-center h-full w-12 text-[#8E8E93]">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <Search size={18} />
               </div>
               <input className="peer h-full w-full outline-none text-[15px] text-[#1C1C1E] pr-2 bg-transparent placeholder-[#AEAEB2]" type="text" id="search" placeholder="Search orders, products..." /> 
             </div>
@@ -74,8 +79,15 @@ export default function DesktopMerchant({
 
            {/* Right Actions */}
           <div className="flex items-center gap-5 ml-4">
+             <button 
+               onClick={() => setIsCreateOpen(true)}
+               className="h-10 px-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-zinc-800 transition-all shadow-sm flex items-center gap-2"
+             >
+                <Plus size={16} strokeWidth={3} /> Post Listing
+             </button>
+
              <button className="relative text-[#8E8E93] hover:text-[#1C1C1E] transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                <Bell size={20} />
                 {attentionCount > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-[#FFFFFF] rounded-full"></span>}
              </button>
              <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center border-[0.5px] border-[#E5E5EA] overflow-hidden cursor-pointer shadow-sm">
@@ -114,55 +126,6 @@ export default function DesktopMerchant({
             </div>
           </div>
 
-          {/* Analytics Chart */}
-          <div className="bg-[#FFFFFF] p-6 rounded-[22px] border-[0.5px] border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-             <h3 className="text-[17px] font-semibold text-[#1C1C1E] tracking-[-0.41px] mb-8">Revenue Overview</h3>
-             <div className="h-48 flex items-end justify-between gap-4 border-b-[0.5px] border-[#E5E5EA] pb-3">
-                <div className="flex-1 flex flex-col items-center gap-3 group">
-                   <div className="w-full h-[40%] bg-gray-100 group-hover:bg-gray-900 rounded-t-[6px] transition-all relative">
-                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM40</span>
-                   </div>
-                   <span className="text-[11px] font-medium text-[#8E8E93]">Mon</span>
-                </div>
-                <div className="flex-1 flex flex-col items-center gap-3 group">
-                   <div className="w-full h-[70%] bg-gray-100 group-hover:bg-gray-900 rounded-t-[6px] transition-all relative">
-                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM70</span>
-                   </div>
-                   <span className="text-[11px] font-medium text-[#8E8E93]">Tue</span>
-                </div>
-                <div className="flex-1 flex flex-col items-center gap-3 group">
-                   <div className="w-full h-[50%] bg-gray-100 group-hover:bg-gray-900 rounded-t-[6px] transition-all relative">
-                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM50</span>
-                   </div>
-                   <span className="text-[11px] font-medium text-[#8E8E93]">Wed</span>
-                </div>
-                <div className="flex-1 flex flex-col items-center gap-3 group">
-                   <div className="w-full h-[85%] bg-gray-900 rounded-t-[6px] transition-all relative">
-                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM85</span>
-                   </div>
-                   <span className="text-[11px] font-bold text-[#1C1C1E]">Thu</span>
-                </div>
-                <div className="flex-1 flex flex-col items-center gap-3 group">
-                   <div className="w-full h-[60%] bg-gray-100 group-hover:bg-gray-900 rounded-t-[6px] transition-all relative">
-                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM60</span>
-                   </div>
-                   <span className="text-[11px] font-medium text-[#8E8E93]">Fri</span>
-                </div>
-                <div className="flex-1 flex flex-col items-center gap-3 group">
-                   <div className="w-full h-[100%] bg-gray-100 group-hover:bg-gray-900 rounded-t-[6px] transition-all relative">
-                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM100</span>
-                   </div>
-                   <span className="text-[11px] font-medium text-[#8E8E93]">Sat</span>
-                </div>
-                <div className="flex-1 flex flex-col items-center gap-3 group">
-                   <div className="w-full h-[30%] bg-gray-100 group-hover:bg-gray-900 rounded-t-[6px] transition-all relative">
-                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-bold text-[#1C1C1E] opacity-0 group-hover:opacity-100 transition-opacity">RM30</span>
-                   </div>
-                   <span className="text-[11px] font-medium text-[#8E8E93]">Sun</span>
-                </div>
-             </div>
-          </div>
-
           {/* Bottom Split (2 Columns) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div className="bg-[#FFFFFF] p-6 rounded-[22px] border-[0.5px] border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
@@ -179,7 +142,7 @@ export default function DesktopMerchant({
                      <div key={i} className="flex items-center justify-between group cursor-pointer hover:bg-[#F2F2F7] -mx-3 px-3 py-2 rounded-2xl transition-colors">
                         <div className="flex items-center gap-4">
                            <div className="w-[44px] h-[44px] bg-[#F2F2F7] rounded-[14px] border-[0.5px] border-[#E5E5EA] flex items-center justify-center shrink-0">
-                              <svg className="w-5 h-5 text-[#AEAEB2]" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                              <Package size={20} className="text-[#AEAEB2]" />
                            </div>
                            <div className="min-w-0 pr-4">
                               <p className="text-[15px] font-semibold text-[#1C1C1E] tracking-[-0.24px] truncate">{item.title}</p>
@@ -216,26 +179,21 @@ export default function DesktopMerchant({
                         </div>
                      </div>
                    ))}
-                   
-                   {recentOrders.length < 3 && [1,2,3].slice(recentOrders.length).map((i) => (
-                     <div key={`mock-${i}`} className="flex items-center justify-between bg-[#FFFFFF] border-[0.5px] border-[#E5E5EA] p-4 rounded-2xl">
-                        <div>
-                           <p className="text-[14px] font-bold text-[#1C1C1E] uppercase tracking-wide">#MOCK{i}X</p>
-                           <p className="text-[13px] font-medium text-[#8E8E93] mt-[2px] truncate max-w-[140px]">Campus Graphic Tee</p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                           <span className="px-2.5 py-[3px] rounded-md text-[11px] font-bold uppercase tracking-widest bg-amber-50 text-amber-600">Preparing</span>
-                           <button className="text-[13px] font-semibold text-[#8E8E93] hover:text-[#1C1C1E] transition-colors">View</button>
-                        </div>
-                     </div>
-                   ))}
                 </div>
              </div>
-
           </div>
         </div>
 
       </main>
+
+      {/* ── MODAL LAYER ── */}
+      {isCreateOpen && (
+        <CreateListing 
+          userId={merchant?.uid} 
+          role="merchant" 
+          onClose={() => setIsCreateOpen(false)} 
+        />
+      )}
     </div>
   );
 }

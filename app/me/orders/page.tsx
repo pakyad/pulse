@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 
 export default function EdgeToEdgeOrderStatus() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function EdgeToEdgeOrderStatus() {
       const q = query(
         collection(db, 'transactions'),
         where('buyer_id', '==', user.uid),
-        where('status', 'in', ['PENDING', 'PREPARING', 'PACKED', 'AWAITING_RUNNER', 'ON_THE_WAY', 'READY_FOR_PICKUP']),
+        where('status', 'in', ['PENDING', 'PREPARING', 'PACKED', 'AWAITING_RUNNER', 'ON_THE_WAY', 'READY_FOR_PICKUP', 'PICKED_UP', 'DELIVERED', 'COMPLETED']),
       );
 
       const unsub = onSnapshot(q, (snap) => {
@@ -81,6 +82,7 @@ export default function EdgeToEdgeOrderStatus() {
         return { phase: 5, title: 'Order Picked Up', subtext: 'Runner is heading to your delivery location.' };
       case 'COMPLETED': 
       case 'ARRIVED':
+      case 'DELIVERED':
         return { phase: 6, title: 'Delivered', subtext: 'Your order has been successfully delivered.' };
       default: 
         return { phase: 1, title: 'Processing...', subtext: 'Please wait.' };
@@ -216,6 +218,32 @@ export default function EdgeToEdgeOrderStatus() {
         </div>
       </div>
 
+      {/* Proof of Delivery Image Section */}
+      {order.proofOfDeliveryUrl && (
+        <div className="px-5 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+           <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
+                 <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <p className="text-[12px] font-black text-[#1C1C1E] uppercase tracking-widest">Verified Proof of Delivery</p>
+           </div>
+           <div className="relative aspect-[4/3] w-full rounded-[28px] overflow-hidden border-[0.5px] border-[#E5E5EA] shadow-2xl shadow-black/5 group cursor-zoom-in">
+              <img 
+                src={order.proofOfDeliveryUrl} 
+                alt="Delivery Proof" 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2">
+                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                 <span className="text-[10px] font-bold text-[#1C1C1E] uppercase tracking-wider">Secure Drop-off Record</span>
+              </div>
+           </div>
+           <p className="text-[13px] text-[#8E8E93] mt-4 italic font-medium leading-relaxed">Your items were left at the drop-off point recorded by our logistics runner. Photo captured upon completion.</p>
+        </div>
+      )}
+
+
       {/* Section 3: Item & Seller Details */}
       <div className="px-5 py-5 border-b-[0.5px] border-[#E5E5EA] flex items-center justify-between group active:bg-[#F2F2F7] transition-colors cursor-pointer">
         <div className="flex items-center gap-[14px]">
@@ -233,6 +261,13 @@ export default function EdgeToEdgeOrderStatus() {
         </div>
         <svg className="w-[20px] h-[20px] text-[#C7C7CC] ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
       </div>
+
+      {/* Section 6: Quality Assurance (Delivered State) */}
+      {(phase === 6 && !order.isReviewed) && (
+        <div className="px-5 py-10 bg-[#F9F9FB] border-t-[0.5px] border-[#E5E5EA]">
+           <PostDeliveryReview order={order} userId={auth.currentUser?.uid || ''} />
+        </div>
+      )}
 
       {/* Section 4: Delivery Details */}
       <div className="px-5 py-6 border-b-[0.5px] border-[#E5E5EA] flex items-start gap-4">
