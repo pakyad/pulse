@@ -61,12 +61,7 @@ export default function NavigationGate() {
               router.replace('/home');
             }
 
-            // Runner Gating
-            const isInRunModule = pathname?.startsWith('/run');
-            const isOnboarding = pathname === '/run/onboarding';
-            if (isInRunModule && !isOnboarding && userData.runner_status === 'none' && !userData.is_verified_runner) {
-              router.replace('/run/onboarding');
-            }
+            // Runner Gating - Removed to allow students to access logistics directives on /run
           }
         } catch (error) {
           console.error("Pulse Registry Shield Error:", error);
@@ -81,7 +76,7 @@ export default function NavigationGate() {
   // Only hide the global header on auth pages, root ('/'), me ('/me'), merchant/admin terminals, and active mission terminal.
   const hideHeader = isAuthPage || pathname === '/' || pathname === '/me' || pathname === '/merchant' || pathname?.startsWith('/hub') || pathname?.startsWith('/run/active') || pathname?.startsWith('/me/orders') || pathname?.startsWith('/marketplace/');
   const isMerchantTerminal = pathname?.startsWith('/merchant');
-  const isRunTerminal = pathname?.startsWith('/run');
+  const isRunTerminal = pathname?.startsWith('/run') && profile?.is_verified_runner;
   const isActiveMission = pathname?.startsWith('/run/active');
 
   // Block flash of student UI for Merchants

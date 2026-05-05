@@ -37,6 +37,14 @@ export const VETTED_ACCOUNTS: AccountVetting[] = [
         campus: 'City Campus'
     },
     {
+        email: 'muhaimin@s.unikl.edu.my',
+        role: 'STUDENT',
+        full_name: 'Muhaimin',
+        is_verified_runner: false,
+        runner_status: 'none',
+        campus: 'City Campus'
+    },
+    {
         email: 'se-club@s.unikl.edu.my',
         role: 'CLUB',
         full_name: 'Software Engineering Club',
