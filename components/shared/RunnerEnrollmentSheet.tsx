@@ -87,7 +87,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          className="fixed inset-0 z-[500] bg-white flex flex-col"
+          className="fixed inset-0 z-500 bg-white flex flex-col"
         >
           {/* ── HEADER ── */}
           <nav className="px-8 pt-10 pb-6 flex items-center justify-between border-b border-[#F2F2F7]">
@@ -344,7 +344,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
 
           {/* ── FOOTER BUTTON ── */}
           {step < 5 && (
-            <div className="fixed bottom-0 left-0 right-0 p-8 bg-white/80 backdrop-blur-xl border-t border-[#F2F2F7] supports-[backdrop-filter]:bg-white/60" style={{ WebkitBackdropFilter: 'blur(20px)' }}>
+            <div className="fixed bottom-0 left-0 right-0 p-8 bg-white/80 backdrop-blur-xl border-t border-[#F2F2F7] supports-backdrop-filter:bg-white/60" style={{ WebkitBackdropFilter: 'blur(20px)' }}>
                <button 
                  onClick={step === 4 ? handleSubmit : next}
                  disabled={isSubmitting || (step === 4 && !form.agreedToTerms)}

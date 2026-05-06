@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F8F9FA;
-  --foreground: #1A1D21;
-  --accent: #007AFF;
-  --muted: #8E8E93;
-  --navy: #0A0F1E;
-  --border: rgba(0, 0, 0, 0.06);
+  --background: #FFFFFF;
+  --foreground: #020617; /* Slate 950 */
+  --accent: #1B3C35;     /* Institutional Forest Green */
+  --muted: #64748b;     /* Slate 500 */
+  --navy: #0F172A;      /* Slate 900 */
+  --border: #F1F5F9;    /* Slate 100 */
   --card: #FFFFFF;
+  --radius-institutional: 24px;
+  --radius-institutional-lg: 32px;
 }
 
 @theme inline {
@@ -17,6 +19,9 @@
   --color-muted: var(--muted);
   --color-navy: var(--navy);
   --color-border-custom: var(--border);
+  
+  --radius-3xl: var(--radius-institutional);
+  --radius-4xl: var(--radius-institutional-lg);
   
   --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

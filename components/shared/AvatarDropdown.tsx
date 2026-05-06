@@ -45,19 +45,19 @@ export default function AvatarDropdown({ photoUrl, userName }: AvatarDropdownPro
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 group active:scale-95 transition-all"
+        className="flex items-center gap-2 group active:scale-95 transition-all"
       >
         <div className="relative shrink-0">
-          <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm group-hover:border-navy/20 transition-colors">
+          <div className="h-10 w-10 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm group-hover:border-slate-300 transition-colors">
             <img 
               src={photoUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`} 
               className="w-full h-full object-cover" 
               alt="Avatar"
             />
           </div>
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />
+          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />
         </div>
-        <ChevronDown size={14} className={`text-slate-300 group-hover:text-navy transition-all ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown size={14} className={`text-slate-300 group-hover:text-slate-900 transition-all ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -66,15 +66,15 @@ export default function AvatarDropdown({ photoUrl, userName }: AvatarDropdownPro
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute right-0 mt-3 w-56 bg-white rounded-3xl shadow-2xl shadow-navy/10 border border-slate-100 overflow-hidden z-200"
+            className="absolute right-0 mt-3 w-60 bg-white rounded-3xl shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden z-[200]"
           >
-            <div className="p-2">
+            <div className="p-3">
               {menuItems.map((section, idx) => (
-                <div key={section.group} className={idx > 0 ? 'mt-2 pt-2 border-t border-slate-50' : ''}>
-                  <p className="px-3 py-1.5 text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                <div key={section.group} className={idx > 0 ? 'mt-4 pt-3 border-t border-slate-50' : ''}>
+                  <p className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     {section.group}
                   </p>
-                  <div className="space-y-0.5">
+                  <div className="space-y-1">
                     {section.items.map((item) => (
                       <button
                         key={item.label}
@@ -82,26 +82,26 @@ export default function AvatarDropdown({ photoUrl, userName }: AvatarDropdownPro
                           router.push(item.path);
                           setIsOpen(false);
                         }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors group text-left"
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-slate-50 transition-colors group text-left"
                       >
-                        <item.icon size={16} className="text-slate-400 group-hover:text-navy transition-colors" />
-                        <span className="text-[13px] font-bold text-navy/80 group-hover:text-navy">{item.label}</span>
+                        <item.icon size={18} className="text-slate-300 group-hover:text-slate-900 transition-colors" />
+                        <span className="text-[14px] font-bold text-slate-900/80 group-hover:text-slate-900 tracking-tight">{item.label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
               ))}
               
-              <div className="mt-2 pt-2 border-t border-slate-50">
+              <div className="mt-4 pt-3 border-t border-slate-50">
                 <button
                   onClick={() => {
                     auth.signOut().then(() => router.push('/auth'));
                     setIsOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-rose-50 transition-colors group text-left"
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-rose-50 transition-colors group text-left"
                 >
-                  <LogOut size={16} className="text-slate-400 group-hover:text-rose-500 transition-colors" />
-                  <span className="text-[13px] font-bold text-navy/80 group-hover:text-rose-600">Sign Out</span>
+                  <LogOut size={18} className="text-slate-300 group-hover:text-rose-500 transition-colors" />
+                  <span className="text-[14px] font-bold text-slate-900/80 group-hover:text-rose-600 tracking-tight">Sign Out</span>
                 </button>
               </div>
             </div>

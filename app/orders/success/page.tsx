@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { motion } from 'framer-motion';
-import { Check, ArrowRight, MapPin, Camera, Clock } from 'lucide-react';
+import { Check, ArrowRight, MapPin, Camera, Clock, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function OrderSuccessScreen() {
@@ -43,102 +43,111 @@ export default function OrderSuccessScreen() {
 
   if (loading || !order) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-[0.5px] border-black/5 border-t-black rounded-full animate-spin" />
+      <div className="w-10 h-10 border-[1.5px] border-slate-100 border-t-slate-900 rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white flex flex-col items-center px-6 pt-16 pb-24 font-sans antialiased overflow-y-auto">
+    <main className="min-h-screen bg-white flex flex-col items-center px-6 pt-20 pb-24 font-sans antialiased overflow-y-auto">
       
-      {/* ── Visual Success Header ── */}
+      {/* ── Institutional Success Header ── */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center mb-8 text-center"
+        className="flex flex-col items-center mb-10 text-center"
       >
-        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
-          <Check className="w-8 h-8 text-emerald-500" strokeWidth={3} />
+        <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-6 border border-emerald-100 shadow-sm">
+          <Check className="w-10 h-10 text-emerald-600" strokeWidth={3} />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">Order Confirmed</h1>
-        <p className="text-sm text-gray-500">Ready for pickup</p>
+        <h1 className="text-[28px] font-bold text-slate-900 tracking-tight mb-2">Order Confirmed</h1>
+        <p className="text-[14px] font-semibold text-slate-400 uppercase tracking-widest">Entry Registered in Pulse Ledger</p>
       </motion.div>
 
-      {/* ── The Main Proof Card (100% Visual) ── */}
+      {/* ── The Main Proof Card (Institutional DNA) ── */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1 }}
-        className="w-full max-w-sm bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-8"
+        className="w-full max-w-sm bg-white rounded-4xl border border-slate-100 shadow-2xl shadow-slate-200/50 p-8 mb-10"
       >
         
         {/* 1. Picture Proof Section */}
-        <div className="mb-6">
-          <h3 className="text-sm font-bold text-gray-900 mb-3">Picture Proof</h3>
-          <div className="aspect-[2/1] bg-gray-100 rounded-xl relative overflow-hidden flex items-center justify-center group">
+        <div className="mb-8">
+          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Picture Proof</h3>
+          <div className="aspect-[2/1] bg-slate-50 rounded-3xl relative overflow-hidden flex items-center justify-center group border border-slate-100">
              <img 
-               src={`/C:/Users/USER/.gemini/antigravity/brain/f094f639-08af-47d8-997d-e0067f686f4a/canvas_tote_bag_proof_1777905457892.png`} 
-               className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+               src={order.imageUrl || `https://picsum.photos/seed/${order.itemId}/800/400`} 
+               className="w-full h-full object-cover transition-transform group-hover:scale-105 opacity-90" 
                alt="Proof" 
              />
-             <div className="absolute bottom-3 right-3 bg-emerald-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg border-2 border-white shadow-md uppercase tracking-wider">
-               Item Match Confirmed
+             <div className="absolute bottom-4 right-4 bg-emerald-600 text-white font-bold text-[9px] px-3 py-2 rounded-xl border border-white/20 shadow-xl uppercase tracking-widest">
+               Item Verified
              </div>
           </div>
-          <p className="text-[10px] text-gray-400 text-center mt-2 font-medium italic">
-            Click photo to view full verification certificate
+          <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-widest opacity-60">
+            Institutional Verification Hash: {orderId?.slice(0, 8).toUpperCase()}
           </p>
         </div>
 
-        {/* 2. Real-time Location Proof */}
-        <div className="mb-6">
-          <h3 className="text-sm font-bold text-gray-900 mb-3">Real-time Location Proof</h3>
-          <div className="h-32 bg-gray-50 rounded-xl border border-gray-200 relative overflow-hidden">
-             {/* Subtle Map Grid */}
-             <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+        {/* 2. Live Handshake Proof */}
+        <div className="mb-8">
+          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Live Handshake Node</h3>
+          <div className="h-36 bg-slate-50 rounded-3xl border border-slate-100 relative overflow-hidden shadow-inner">
+             {/* Subtle Institutional Grid */}
+             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
              
-             {/* Live Pointers & Path */}
+             {/* Node Connections */}
              <svg className="absolute inset-0 w-full h-full">
-                <path d="M 100 80 Q 150 40 250 60" fill="none" stroke="#10B981" strokeWidth="4" strokeLinecap="round" />
+                <motion.path 
+                  d="M 80 100 Q 150 40 260 70" 
+                  fill="none" 
+                  stroke="#1B3C35" 
+                  strokeWidth="3" 
+                  strokeLinecap="round" 
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 1.5, ease: "easeInOut" }}
+                />
              </svg>
 
-             <div className="absolute top-[65px] left-[85px] flex flex-col items-center">
-                <div className="w-5 h-5 bg-black rounded-full border-2 border-white shadow-sm flex items-center justify-center">
-                   <div className="w-1.5 h-1.5 bg-white rounded-full" />
+             <div className="absolute top-[85px] left-[70px] flex flex-col items-center">
+                <div className="w-6 h-6 bg-slate-900 rounded-2xl border-2 border-white shadow-xl flex items-center justify-center">
+                   <div className="w-2 h-2 bg-white rounded-full" />
                 </div>
-                <span className="text-[8px] font-black uppercase text-black/30 mt-1">Seller</span>
+                <span className="text-[8px] font-bold uppercase text-slate-400 mt-2 tracking-widest">Vendor</span>
              </div>
 
-             <div className="absolute top-[45px] right-[85px] flex flex-col items-center">
-                <div className="w-6 h-6 bg-emerald-500 rounded-full border-2 border-white shadow-md flex items-center justify-center">
-                   <MapPin size={12} className="text-white fill-white" />
+             <div className="absolute top-[55px] right-[70px] flex flex-col items-center">
+                <div className="w-8 h-8 bg-accent rounded-2xl border-2 border-white shadow-xl flex items-center justify-center">
+                   <MapPin size={16} className="text-white fill-white" />
                 </div>
-                <span className="text-[8px] font-black uppercase text-emerald-500 mt-1 tracking-widest">You</span>
+                <span className="text-[8px] font-bold uppercase text-accent mt-2 tracking-[0.2em]">Collector</span>
              </div>
           </div>
           
-          <div className="flex items-center justify-between mt-3 px-1">
-             <div className="flex items-center gap-2">
-                <Clock size={12} className="text-gray-400" />
-                <span className="text-[11px] font-bold text-gray-900 uppercase tracking-tight">
-                  Seller is 45m away. <span className="text-gray-400 font-medium">1m ago</span>
+          <div className="flex items-center justify-between mt-4 px-1">
+             <div className="flex items-center gap-2.5">
+                <Clock size={14} className="text-slate-300" />
+                <span className="text-[11px] font-bold text-slate-900 uppercase tracking-tight">
+                  Handshake Node Active. <span className="text-slate-400">1m ago</span>
                 </span>
              </div>
-             <div className="flex items-center gap-1.5">
+             <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-[10px] font-black text-emerald-500 tracking-widest">LIVE</span>
+                <span className="text-[10px] font-bold text-emerald-500 tracking-[0.2em] uppercase">Live</span>
              </div>
           </div>
         </div>
 
-        {/* 3. Receipt Registry */}
-        <div className="pt-6 border-t border-dashed border-gray-100 space-y-4">
-           <div className="flex justify-between items-center text-xs font-medium">
-              <span className="text-gray-400">Item</span>
-              <span className="text-gray-900 font-bold">{order.title || 'MIDI Canvas Tote Bag'}</span>
+        {/* 3. Ledger Entry */}
+        <div className="pt-8 border-t border-slate-100 space-y-5">
+           <div className="flex justify-between items-center">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Asset</span>
+              <span className="text-[14px] font-bold text-slate-900 tracking-tight">{order.title || 'Institutional Asset'}</span>
            </div>
            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-400 font-medium">Total</span>
-              <span className="text-lg font-bold text-emerald-500">RM {Number(order.price || 23.00).toFixed(2)}</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Registry Value</span>
+              <span className="text-[22px] font-bold text-slate-900">RM {Number(order.price || 0).toFixed(2)}</span>
            </div>
         </div>
       </motion.div>
@@ -146,8 +155,8 @@ export default function OrderSuccessScreen() {
       {/* ── Global Action Terminal ── */}
       <div className="w-full max-w-sm mt-auto">
         <Link href={`/orders/${orderId}`}>
-          <button className="w-full bg-gray-900 text-white rounded-2xl py-4 font-bold text-base flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-gray-900/10">
-            Track Live Status <ArrowRight size={20} />
+          <button className="w-full h-16 bg-accent text-white rounded-3xl font-bold text-[15px] flex items-center justify-center gap-4 active:scale-[0.98] transition-all shadow-2xl shadow-accent/20 uppercase tracking-widest">
+            Open Logistics Node <ArrowRight size={20} strokeWidth={3} />
           </button>
         </Link>
       </div>

@@ -165,7 +165,7 @@ function ProtocolSuccessOverlay({ onInitiate }: { onInitiate: () => void }) {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-[1000] bg-navy flex flex-col items-center justify-center p-12 text-center"
+      className="fixed inset-0 z-1000 bg-navy flex flex-col items-center justify-center p-12 text-center"
     >
        {/* Pixel Art Pulse (Simplified CSS) */}
        <div className="relative mb-12">

@@ -53,7 +53,7 @@ export default function ChatOverlay({ tx_id, status, recipientName, isOpen, onCl
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed bottom-0 left-0 w-full z-[60] h-[80vh] md:h-[60vh] max-w-2xl mx-auto right-0"
+          className="fixed bottom-0 left-0 w-full z-60 h-[80vh] md:h-[60vh] max-w-2xl mx-auto right-0"
         >
           <div className="h-full soft-lens rounded-t-[40px] border-t border-x border-navy/10 flex flex-col overflow-hidden shadow-2xl">
             {/* Header */}

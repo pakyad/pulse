@@ -129,7 +129,7 @@ export default function EdgeToEdgeOrderStatus() {
       <div className="px-5 py-8 border-b-[0.5px] border-[#E5E5EA]">
         <div className="relative">
           {/* Vertical Track Line */}
-          <div className="absolute left-[11.5px] top-3 bottom-8 w-[1px] bg-[#E5E5EA]"></div>
+          <div className="absolute left-[11.5px] top-3 bottom-8 w-px bg-[#E5E5EA]"></div>
 
           {/* Step 1: Order Placed */}
           <div className="relative flex items-start gap-4 mb-8">
@@ -155,7 +155,7 @@ export default function EdgeToEdgeOrderStatus() {
 
           {/* Step 3: Waiting for Runner */}
           <div className="relative flex items-start gap-4 mb-8">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[1px] bg-[#FFFFFF] py-[2px]">
+            <div className="relative z-10 w-[24px] flex justify-center mt-px bg-[#FFFFFF] py-[2px]">
               {phase === 3 ? (
                 <div className="w-[14px] h-[14px] rounded-full bg-[#FFFFFF] border-[3.5px] border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.3)]"></div>
               ) : phase > 3 ? (
@@ -171,7 +171,7 @@ export default function EdgeToEdgeOrderStatus() {
 
           {/* Step 4: Runner Heading to Seller */}
           <div className="relative flex items-start gap-4 mb-8">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[1px] bg-[#FFFFFF] py-[2px]">
+            <div className="relative z-10 w-[24px] flex justify-center mt-px bg-[#FFFFFF] py-[2px]">
               {phase === 4 ? (
                 <div className="w-[14px] h-[14px] rounded-full bg-[#FFFFFF] border-[3.5px] border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.3)]"></div>
               ) : phase > 4 ? (
@@ -187,7 +187,7 @@ export default function EdgeToEdgeOrderStatus() {
 
           {/* Step 5: Order Picked Up */}
           <div className="relative flex items-start gap-4 mb-8">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[1px] bg-[#FFFFFF] py-[2px]">
+            <div className="relative z-10 w-[24px] flex justify-center mt-px bg-[#FFFFFF] py-[2px]">
               {phase === 5 ? (
                 <div className="w-[14px] h-[14px] rounded-full bg-[#FFFFFF] border-[3.5px] border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.3)]"></div>
               ) : phase > 5 ? (
@@ -203,7 +203,7 @@ export default function EdgeToEdgeOrderStatus() {
 
           {/* Step 6: Delivered */}
           <div className="relative flex items-start gap-4">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[1px] bg-[#FFFFFF] py-[2px]">
+            <div className="relative z-10 w-[24px] flex justify-center mt-px bg-[#FFFFFF] py-[2px]">
               {phase === 6 ? (
                 <div className="w-[14px] h-[14px] rounded-full bg-[#FFFFFF] border-[3.5px] border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.3)]"></div>
               ) : (
@@ -227,13 +227,13 @@ export default function EdgeToEdgeOrderStatus() {
               </div>
               <p className="text-[12px] font-black text-[#1C1C1E] uppercase tracking-widest">Verified Proof of Delivery</p>
            </div>
-           <div className="relative aspect-[4/3] w-full rounded-[28px] overflow-hidden border-[0.5px] border-[#E5E5EA] shadow-2xl shadow-black/5 group cursor-zoom-in">
+           <div className="relative aspect-4/3 w-full rounded-[28px] overflow-hidden border-[0.5px] border-[#E5E5EA] shadow-2xl shadow-black/5 group cursor-zoom-in">
               <img 
                 src={order.proofOfDeliveryUrl} 
                 alt="Delivery Proof" 
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2">
                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
                  <span className="text-[10px] font-bold text-[#1C1C1E] uppercase tracking-wider">Secure Drop-off Record</span>

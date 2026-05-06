@@ -13,7 +13,6 @@ export interface BannerSlide {
   ctaText?: string;
   ctaPath: string;
   bgColor?: string;
-  onClick?: () => void;
 }
 
 interface FeaturedBannerProps {
@@ -22,7 +21,7 @@ interface FeaturedBannerProps {
   height?: string;
 }
 
-export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 'h-[144px]' }: FeaturedBannerProps) {
+export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 'h-[220px]' }: FeaturedBannerProps) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const router = useRouter();
@@ -46,7 +45,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
 
   return (
     <div className="relative">
-      <div className={`relative ${height} rounded-3xl overflow-hidden shadow-sm`}>
+      <div className={`relative ${height} rounded-[2.5rem] overflow-hidden shadow-xl shadow-black/5`}>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={index}
@@ -55,26 +54,42 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="absolute inset-0 flex flex-col justify-end p-6"
+            className="absolute inset-0 flex flex-col justify-end p-8"
             style={{ backgroundColor: slide.bgColor || '#4A5D23' }}
           >
-            {/* Minimalist Organic Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/5 to-transparent opacity-40 pointer-events-none" />
-
+            {/* Abstract Graphic Background (Overlapping Squares) */}
+            <div className="absolute right-[-20px] top-[10%] pointer-events-none opacity-80 mix-blend-overlay">
+               <motion.div 
+                 animate={{ rotate: 15 }}
+                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                 className="absolute right-12 top-4 w-40 h-40 rounded-[2.5rem] bg-white/20 border border-white/30 backdrop-blur-sm"
+               />
+               <motion.div 
+                 animate={{ rotate: -10 }}
+                 transition={{ duration: 15, repeat: Infinity, ease: "linear", repeatType: "reverse" }}
+                 className="absolute right-4 top-8 w-40 h-40 rounded-[2.5rem] bg-white/20 border border-white/30 backdrop-blur-md"
+               />
+               <motion.div 
+                 animate={{ rotate: 5 }}
+                 className="relative right-0 top-12 w-40 h-40 rounded-[2.5rem] bg-white/30 border border-white/40 backdrop-blur-lg flex items-center justify-center shadow-2xl"
+               >
+                  <div className="w-16 h-16 rounded-2xl border-2 border-white/40" />
+               </motion.div>
+            </div>
 
             {/* Content Area */}
             <div className="relative z-10 flex items-end justify-between w-full">
                <div className="flex-1 pr-6">
-                 <h2 className="text-white text-[20px] font-bold leading-tight tracking-tight mb-1">{slide.headline}</h2>
-                 {slide.subline && <p className="text-white/80 text-[13px] font-medium leading-snug">{slide.subline}</p>}
+                 <h2 className="text-white text-[24px] font-bold leading-tight tracking-tight mb-2">{slide.headline}</h2>
+                 {slide.subline && <p className="text-white/70 text-[14px] font-medium leading-snug">{slide.subline}</p>}
                </div>
                
                {/* Square CTA Button */}
                <button
-                 onClick={() => slide.onClick ? slide.onClick() : router.push(slide.ctaPath)}
-                 className="shrink-0 w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50"
+                 onClick={() => router.push(slide.ctaPath)}
+                 className="shrink-0 w-16 h-16 bg-white rounded-2xl shadow-xl shadow-black/10 flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50"
                >
-                 <ArrowUpRight size={20} className="text-black" strokeWidth={2} />
+                 <ArrowUpRight size={28} className="text-black" strokeWidth={2.5} />
                </button>
             </div>
           </motion.div>

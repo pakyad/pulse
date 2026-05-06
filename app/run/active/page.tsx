@@ -184,7 +184,7 @@ function ActiveRunContent() {
          
          <AnimatePresence>
             {step === 6 && (
-               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center px-8 text-center">
+               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-100 bg-white flex flex-col items-center justify-center px-8 text-center">
                   <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-inner">
                      <CheckCircle2 size={48} />
                   </div>

@@ -92,7 +92,7 @@ export default function CreateListingPage() {
            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-shrink-0 w-32 h-32 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-2 active:scale-95 transition-all group"
+                className="shrink-0 w-32 h-32 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-2 active:scale-95 transition-all group"
               >
                 <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:bg-navy group-hover:text-white transition-all">
                    <Plus size={20} />
@@ -107,7 +107,7 @@ export default function CreateListingPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   key={i} 
-                  className="flex-shrink-0 w-32 h-32 relative rounded-3xl overflow-hidden border border-slate-100 shadow-sm"
+                  className="shrink-0 w-32 h-32 relative rounded-3xl overflow-hidden border border-slate-100 shadow-sm"
                 >
                   <img src={img} className="w-full h-full object-cover" />
                   <button onClick={() => removeImage(i)} className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-md rounded-full shadow-lg">

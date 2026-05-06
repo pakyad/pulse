@@ -357,7 +357,7 @@ export default function RunnerActivePage() {
       {/* ── Cancel Modal ── */}
       <AnimatePresence>
          {showCancelModal && (
-            <div className="fixed inset-0 z-[500] bg-black/60 backdrop-blur-md flex items-center justify-center p-8">
+            <div className="fixed inset-0 z-500 bg-black/60 backdrop-blur-md flex items-center justify-center p-8">
                <motion.div 
                  initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
                  className="bg-white border border-slate-100 rounded-[3rem] p-10 w-full max-w-sm space-y-8"

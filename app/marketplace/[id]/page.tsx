@@ -117,20 +117,20 @@ function MarziaDeliverySheet({
         className="w-full bg-[#FDFDFD] rounded-t-4xl overflow-y-auto max-h-[92vh] pb-8"
       >
         {/* Sheet Header — Institutional Sync */}
-        <div className="px-8 pt-6 pb-6 border-b-[0.5px] border-slate-50">
-          <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto mb-6" />
+        <div className="px-8 pt-8 pb-6 border-b-[0.5px] border-slate-100">
+          <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-8" />
           <div className="flex items-center justify-between">
-            <h2 className="text-[18px] font-bold text-navy tracking-tight">
-              {step === 'FULFILLMENT' ? 'How to receive your item' : 'Payment Verification'}
+            <h2 className="text-[20px] font-bold text-slate-900 tracking-tight">
+              {step === 'FULFILLMENT' ? 'Delivery Configuration' : 'Payment Verification'}
             </h2>
             <button 
               onClick={() => {
                 if (step === 'PAYMENT') setStep('FULFILLMENT');
                 else onClose();
               }} 
-              className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all"
+              className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all border border-slate-100 shadow-sm"
             >
-              {step === 'PAYMENT' ? <ChevronLeft size={16} /> : <X size={14} />}
+              {step === 'PAYMENT' ? <ChevronLeft size={18} /> : <X size={16} />}
             </button>
           </div>
         </div>
@@ -149,21 +149,21 @@ function MarziaDeliverySheet({
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setChoice('SELF_COLLECT')}
-                className={`w-full min-h-[72px] p-4 rounded-2xl border-[0.5px] text-left transition-all flex items-center gap-4 ${
+                className={`w-full min-h-[80px] p-5 rounded-3xl border-[0.5px] text-left transition-all flex items-center gap-5 ${
                   choice === 'SELF_COLLECT'
-                    ? 'border-[#00C4B4] bg-[#00C4B4] text-white'
-                    : 'border-slate-100 bg-white text-navy'
+                    ? 'border-accent bg-accent text-white shadow-xl shadow-accent/10'
+                    : 'border-slate-100 bg-white text-slate-900 shadow-sm'
                 }`}
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${
                   choice === 'SELF_COLLECT' ? 'bg-white/10' : 'bg-slate-50'
                 }`}>
-                  <ShoppingBag size={18} className={choice === 'SELF_COLLECT' ? 'text-white' : 'text-slate-400'} />
+                  <ShoppingBag size={20} className={choice === 'SELF_COLLECT' ? 'text-white' : 'text-slate-400'} />
                 </div>
                 <div>
-                  <p className="text-[14px] font-bold leading-none">Self-Collection</p>
-                  <p className={`text-[12px] font-medium mt-1 ${choice === 'SELF_COLLECT' ? 'opacity-60' : 'text-slate-400'}`}>
-                    Handover at <span className={`font-black underline underline-offset-2 ${choice === 'SELF_COLLECT' ? 'text-white decoration-white/30' : 'text-navy decoration-navy/10'}`}>
+                  <p className="text-[15px] font-bold leading-none tracking-tight">Self-Collection</p>
+                  <p className={`text-[12px] font-medium mt-1.5 ${choice === 'SELF_COLLECT' ? 'opacity-70' : 'text-slate-400'}`}>
+                    Handover at <span className={`font-bold underline underline-offset-4 ${choice === 'SELF_COLLECT' ? 'text-white decoration-white/30' : 'text-slate-900 decoration-slate-900/10'}`}>
                       {item.meetup_location || 'UniKL MIIT Main Lobby'}
                     </span>
                   </p>
@@ -175,31 +175,31 @@ function MarziaDeliverySheet({
             whileTap={isWithinRadius ? { scale: 0.98 } : {}}
             onClick={() => isWithinRadius && setChoice('RUNNER')}
             disabled={!isWithinRadius}
-            className={`w-full min-h-[72px] p-4 rounded-2xl border-[0.5px] text-left transition-all flex items-center justify-between ${
+            className={`w-full min-h-[80px] p-5 rounded-3xl border-[0.5px] text-left transition-all flex items-center justify-between ${
               !isWithinRadius
-                ? 'bg-gray-50 border-gray-100 text-gray-400 opacity-60 cursor-not-allowed'
+                ? 'bg-slate-50 border-slate-100 text-slate-300 opacity-60 cursor-not-allowed'
                 : choice === 'RUNNER'
-                ? 'border-[#00C4B4] bg-[#00C4B4] text-white'
-                : 'border-slate-100 bg-white text-navy'
+                ? 'border-accent bg-accent text-white shadow-xl shadow-accent/10'
+                : 'border-slate-100 bg-white text-slate-900 shadow-sm'
             }`}
           >
-            <div className="flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                !isWithinRadius ? 'bg-gray-100 text-gray-400' : choice === 'RUNNER' ? 'bg-white/10 text-white' : 'bg-slate-50 text-navy'
+            <div className="flex items-center gap-5">
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${
+                !isWithinRadius ? 'bg-slate-100 text-slate-300' : choice === 'RUNNER' ? 'bg-white/10 text-white' : 'bg-slate-50 text-slate-900'
               }`}>
-                <Truck size={18} />
+                <Truck size={20} />
               </div>
               <div>
-                <p className="text-[14px] font-bold leading-none">Institutional Runner</p>
-                <p className={`text-[12px] font-normal mt-1 opacity-60`}>
+                <p className="text-[15px] font-bold leading-none tracking-tight">Institutional Runner</p>
+                <p className={`text-[12px] font-medium mt-1.5 ${choice === 'RUNNER' ? 'opacity-70' : 'text-slate-400'}`}>
                   Delivery via verified peer network
                 </p>
               </div>
             </div>
 
             {!isWithinRadius && (
-              <span className="bg-red-50 text-red-600 uppercase text-[10px] font-bold px-2 py-1 rounded-md shrink-0">
-                Out of Range (2km Max)
+              <span className="bg-red-50 text-red-600 uppercase text-[9px] font-bold px-2.5 py-1 rounded-lg shrink-0 border border-red-100">
+                Out of Range
               </span>
             )}
           </motion.button>
@@ -214,20 +214,20 @@ function MarziaDeliverySheet({
                 className="pt-4 space-y-3"
               >
                 <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Select Hub</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {hubs.map((spot) => (
                     <button
                       key={spot.id}
                       onClick={() => setLocation(spot.id)}
-                      className={`h-[56px] px-4 rounded-xl border-[0.5px] text-left transition-all ${
+                      className={`h-[64px] px-5 rounded-2xl border-[0.5px] text-left transition-all ${
                         location === spot.id
-                          ? 'bg-[#00C4B4] border-[#00C4B4] text-white'
-                          : 'bg-white border-slate-100 text-navy'
+                          ? 'bg-accent border-accent text-white shadow-lg shadow-accent/10'
+                          : 'bg-white border-slate-100 text-slate-900 shadow-sm'
                       }`}
                     >
                       <p className="text-[13px] font-bold leading-tight">{spot.label}</p>
-                      <p className={`text-[11px] font-normal opacity-50`}>
-                        {spot.sub} (RM {spot.zone === 'campus' ? '3.50' : '5.00'})
+                      <p className={`text-[11px] font-semibold mt-0.5 opacity-60 uppercase tracking-widest`}>
+                        RM {spot.zone === 'campus' ? '3.50' : '5.00'}
                       </p>
                     </button>
                   ))}
@@ -261,20 +261,20 @@ function MarziaDeliverySheet({
                 className="space-y-6"
               >
               {/* ── RESTORED EDITORIAL LEDGER ── */}
-              <div className="bg-slate-50/50 rounded-2xl p-6 border-[0.5px] border-slate-100 space-y-3">
-                <div className="flex justify-between items-center text-[13px] font-medium text-slate-500">
-                  <span>Item Subtotal</span>
-                  <span className="text-navy">RM {Number(item.price).toFixed(2)}</span>
+              <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 space-y-4 shadow-sm shadow-slate-200/50">
+                <div className="flex justify-between items-center text-[13px] font-semibold text-slate-400 uppercase tracking-widest">
+                  <span>Subtotal</span>
+                  <span className="text-slate-900">RM {Number(item.price).toFixed(2)}</span>
                 </div>
                 {choice === 'RUNNER' && (
-                  <div className="flex justify-between items-center text-[13px] font-medium text-slate-500">
-                    <span>Runner Fee ({selectedSpot.label})</span>
-                    <span className="text-navy">RM {runnerFee.toFixed(2)}</span>
+                  <div className="flex justify-between items-center text-[13px] font-semibold text-slate-400 uppercase tracking-widest">
+                    <span>Logistics</span>
+                    <span className="text-slate-900">RM {runnerFee.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="pt-3 border-t-[0.5px] border-slate-100 flex justify-between items-center">
-                  <span className="text-[14px] font-bold text-navy">Total to Transfer</span>
-                  <span className="text-[18px] font-black text-[#00C4B4]">RM {total.toFixed(2)}</span>
+                <div className="pt-4 border-t border-slate-200 flex justify-between items-center">
+                  <span className="text-[15px] font-bold text-slate-900 uppercase tracking-widest">Final Ledger</span>
+                  <span className="text-[24px] font-bold text-slate-900 tracking-tight">RM {total.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -295,30 +295,30 @@ function MarziaDeliverySheet({
 
               {/* ── DYNAMIC PAYMENT TERMINAL ── */}
               {paymentMethod === 'QR' ? (
-                <div className="flex flex-col items-center py-4 space-y-4">
-                  <div className="w-[160px] h-[160px] bg-white p-3 rounded-3xl border-[0.5px] border-slate-100 shadow-xl shadow-[#E91E63]/10 flex items-center justify-center relative group">
-                    <div className="w-full h-full bg-[#E91E63]/5 rounded-2xl flex items-center justify-center overflow-hidden transition-all">
+                <div className="flex flex-col items-center py-6 space-y-6">
+                  <div className="w-[180px] h-[180px] bg-white p-4 rounded-4xl border border-slate-100 shadow-2xl shadow-slate-200 flex items-center justify-center relative group">
+                    <div className="w-full h-full bg-slate-50 rounded-3xl flex items-center justify-center overflow-hidden transition-all">
                       <div className="text-center p-4">
-                        <QrCode size={48} className="mx-auto text-[#E91E63] mb-2" />
-                        <p className="text-[8px] font-black text-[#E91E63] uppercase tracking-widest">DuitNow QR • ShopeePay</p>
+                        <QrCode size={56} className="mx-auto text-slate-900 mb-3" />
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">DuitNow QR • Standard</p>
                       </div>
                     </div>
                   </div>
                   <div className="text-center">
-                    <p className="text-[14px] font-bold text-navy">Scan to pay RM {total.toFixed(2)}</p>
-                    <p className="text-[11px] font-medium text-slate-400">ID: 64685896263645</p>
+                    <p className="text-[16px] font-bold text-slate-900 tracking-tight">Scan to fulfill RM {total.toFixed(2)}</p>
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Registry ID: 64685896263645</p>
                   </div>
                 </div>
               ) : (
-                <div className="px-2 flex justify-between items-center py-4">
-                  <div>
-                    <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">DuitNow Transfer</p>
-                    <p className="text-[20px] font-black text-navy leading-none tracking-tighter">6468 5896 2636 45</p>
-                    <p className="text-[12px] font-medium text-slate-400 mt-2">
-                      ShopeePay Account — {item.seller_name || 'Verified Vendor'}
+                <div className="px-3 flex justify-between items-center py-6">
+                  <div className="space-y-1">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">DuitNow Terminal</p>
+                    <p className="text-[22px] font-bold text-slate-900 leading-none tracking-tight">6468 5896 2636 45</p>
+                    <p className="text-[12px] font-semibold text-slate-500 mt-2">
+                      Verified Account — {item.seller_name || 'Pulse Resident'}
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center text-[10px] font-black text-[#E91E63]">DUITNOW</div>
+                  <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-900 uppercase tracking-widest">Bank</div>
                 </div>
               )}
 
@@ -332,22 +332,22 @@ function MarziaDeliverySheet({
                     onChange={(e) => setReceipt(e.target.files?.[0] || null)}
                   />
                   {receipt ? (
-                    <div className="flex items-center gap-2 text-emerald-500 font-bold text-[14px]">
-                      <Package size={18} /> Receipt Attached
+                    <div className="flex items-center gap-2 text-emerald-500 font-bold text-[14px] uppercase tracking-widest">
+                      <Package size={20} /> Registry Updated
                     </div>
                   ) : (
                     <>
-                      <div className="text-[11px] font-black text-slate-300 uppercase tracking-widest group-hover:text-[#00C4B4] transition-all">Upload Receipt</div>
-                      <p className="text-[9px] text-slate-400">JPG, PNG or PDF</p>
+                      <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-accent transition-all">Upload Receipt</div>
+                      <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest mt-1">Institutional Audit Trail</p>
                     </>
                   )}
                 </label>
               </div>
 
               {/* ── SECURITY BADGE ── */}
-              <div className="flex items-center justify-center gap-2 pt-2 pb-4">
-                <ShieldCheck size={14} className="text-[#00C4B4]" />
-                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Pulse Secure • End-to-End Encrypted</span>
+              <div className="flex items-center justify-center gap-2.5 pt-4 pb-6">
+                <ShieldCheck size={16} className="text-emerald-500" />
+                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.1em]">Pulse Secure • Institutional Verification</span>
               </div>
               </motion.div>
             )}
@@ -366,12 +366,12 @@ function MarziaDeliverySheet({
                 onConfirm(choice!, loc, receipt);
               }
             }}
-            className="w-full h-[60px] bg-[#00C4B4] text-white rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 disabled:opacity-40 transition-all shadow-lg shadow-[#00C4B4]/20 mt-2"
+            className="w-full h-[64px] bg-accent text-white rounded-3xl font-bold text-[15px] flex items-center justify-center gap-3 disabled:opacity-40 transition-all shadow-xl shadow-accent/10 mt-6 uppercase tracking-widest"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" />
+              <div className="w-6 h-6 border-[1.5px] border-white/20 border-t-white animate-spin rounded-full" />
             ) : step === 'FULFILLMENT' ? (
-              <>Continue</>
+              <>Continue to Payment</>
             ) : (
               <>Buy Now — RM {total.toFixed(2)}</>
             )}
@@ -532,7 +532,7 @@ export default function ItemDetails() {
         <div className="absolute bottom-0 w-[85%] h-[320px] bg-white rounded-t-[200px]" />
 
         {/* The Product Asset (Full Editorial Stage) */}
-        <div className="relative z-10 w-full max-w-[320px] aspect-square rounded-2xl overflow-hidden shadow-2xl shadow-black/10 border-[0.5px] border-slate-100 bg-white">
+        <div className="relative z-10 w-full max-w-[340px] aspect-square rounded-4xl overflow-hidden shadow-2xl shadow-slate-200/50 border border-slate-100 bg-white">
           {item.image_url ? (
             <img
               src={item.image_url}
@@ -541,20 +541,20 @@ export default function ItemDetails() {
             />
           ) : (
             <div className="w-full h-full bg-slate-50 flex items-center justify-center">
-               <Package size={48} className="text-slate-200" />
+               <Package size={56} className="text-slate-200" />
             </div>
           )}
         </div>
 
-        <div className="absolute -bottom-7 left-0 right-0 z-50 px-6 flex justify-between items-center max-w-2xl mx-auto w-full">
-           <button className="w-14 h-14 rounded-full bg-white border border-slate-100 shadow-lg flex items-center justify-center text-navy hover:scale-105 transition-all">
-              <Share2 size={20} />
+        <div className="absolute -bottom-8 left-0 right-0 z-50 px-8 flex justify-between items-center max-w-2xl mx-auto w-full">
+           <button className="w-16 h-16 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-200 flex items-center justify-center text-slate-900 hover:scale-105 transition-all">
+              <Share2 size={24} />
            </button>
            <button 
              onClick={() => setShowDeliverySheet(true)}
-             className="h-14 px-8 bg-[#00C4B4] rounded-full text-white font-bold text-[15px] flex items-center gap-3 shadow-lg shadow-[#00C4B4]/20 hover:scale-[1.02] active:scale-95 transition-all"
+             className="h-16 px-10 bg-accent rounded-3xl text-white font-bold text-[15px] flex items-center gap-4 shadow-xl shadow-accent/20 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest"
            >
-              <ShieldCheck size={18} />
+              <ShieldCheck size={20} strokeWidth={2.5} />
               Buy Now — RM {Number(item.price).toFixed(2)}
            </button>
         </div>
@@ -577,39 +577,39 @@ export default function ItemDetails() {
              </div>
           </div>
 
-          <div className="space-y-2">
-            <h1 className="text-[32px] font-black text-navy tracking-tight leading-[1.1] max-w-[90%]">
+          <div className="space-y-3">
+            <h1 className="text-[36px] font-bold text-slate-900 tracking-tight leading-[1.1] max-w-[95%]">
               {item.title}
             </h1>
-            <p className="text-[20px] font-black text-[#00C4B4] tracking-tight">
+            <p className="text-[24px] font-bold text-slate-900 tracking-tight">
               RM {Number(item.price).toFixed(2)}
             </p>
           </div>
         </div>
 
         {/* 2. SHIPPING & FULFILLMENT (Boutique Module) */}
-        <div className="p-8 bg-slate-50/50 rounded-[24px] border-[0.5px] border-slate-100 space-y-6">
+        <div className="p-8 bg-slate-50 rounded-4xl border border-slate-100 space-y-8 shadow-sm">
            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                 <Truck size={20} className="text-slate-600" />
-                 <span className="text-[15px] font-bold text-navy">Shipping to</span>
+              <div className="flex items-center gap-5">
+                 <Truck size={22} className="text-slate-400" />
+                 <span className="text-[16px] font-bold text-slate-900">Institutional Delivery</span>
               </div>
-              <span className="text-[15px] font-medium text-slate-500">UniKL MIIT (Level 2)</span>
+              <span className="text-[14px] font-semibold text-slate-500 uppercase tracking-widest">Available</span>
            </div>
            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                 <Clock size={20} className="text-slate-600" />
-                 <span className="text-[15px] font-bold text-navy">Fulfillment</span>
+              <div className="flex items-center gap-5">
+                 <Clock size={22} className="text-slate-400" />
+                 <span className="text-[16px] font-bold text-slate-900">Standard Transit</span>
               </div>
-              <span className="text-[15px] font-medium text-slate-500">Within 24 Hours</span>
+              <span className="text-[14px] font-semibold text-slate-500 uppercase tracking-widest">24H Handshake</span>
            </div>
         </div>
 
         {/* 3. TABS: DESCRIPTION & DETAILS */}
-        <div className="space-y-8">
-           <div className="flex gap-10 border-b border-slate-50">
-              <button className="pb-4 text-[16px] font-black text-navy border-b-[3px] border-[#00C4B4]">Description</button>
-              <button className="pb-4 text-[16px] font-bold text-slate-300">Details</button>
+        <div className="space-y-10">
+           <div className="flex gap-12 border-b border-slate-100">
+              <button className="pb-5 text-[16px] font-bold text-slate-900 border-b-[2px] border-accent uppercase tracking-widest">Description</button>
+              <button className="pb-5 text-[16px] font-bold text-slate-300 uppercase tracking-widest">Specifications</button>
            </div>
            
            <div className="space-y-6">
@@ -635,28 +635,28 @@ export default function ItemDetails() {
         </div>
 
         {/* 4. STORE PROFILE (Shopee Style) */}
-        <div className="pt-12 border-t-[0.5px] border-slate-100 flex items-center justify-between">
-           <div className="flex items-center gap-5">
+        <div className="pt-16 border-t border-slate-100 flex items-center justify-between">
+           <div className="flex items-center gap-6">
               <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center">
+                <div className="w-20 h-20 rounded-3xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center shadow-sm">
                   {item.seller_photo ? (
                     <img src={item.seller_photo} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-[20px] font-black text-slate-200">{item.seller_name?.[0]}</span>
+                    <span className="text-[24px] font-bold text-slate-300">{item.seller_name?.[0] || 'V'}</span>
                   )}
                 </div>
-                <div className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" />
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full shadow-sm" />
               </div>
-              <div className="space-y-1">
-                <h3 className="text-[18px] font-black text-navy">{item.seller_name || 'Verified Vendor'}</h3>
-                <div className="flex items-center gap-3">
-                   <span className="text-[12px] font-bold text-slate-400">Active 5m ago</span>
-                   <div className="w-1 h-1 rounded-full bg-slate-200" />
-                   <span className="text-[12px] font-bold text-[#00C4B4]">View Shop</span>
+              <div className="space-y-1.5">
+                <h3 className="text-[20px] font-bold text-slate-900 tracking-tight">{item.seller_name || 'Verified Vendor'}</h3>
+                <div className="flex items-center gap-4">
+                   <span className="text-[12px] font-semibold text-slate-400 uppercase tracking-widest">Verified Resident</span>
+                   <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
+                   <span className="text-[12px] font-bold text-accent uppercase tracking-widest">View Store</span>
                 </div>
               </div>
            </div>
-           <button className="px-6 py-3 rounded-xl border-[0.5px] border-slate-200 text-[14px] font-bold text-navy hover:bg-slate-50 transition-all">
+           <button className="h-12 px-8 rounded-2xl border border-slate-200 text-[13px] font-bold text-slate-900 hover:bg-slate-50 transition-all uppercase tracking-widest shadow-sm">
               Chat
            </button>
         </div>

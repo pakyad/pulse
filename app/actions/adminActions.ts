@@ -42,3 +42,22 @@ export async function rejectListing(productId: string, reason: string) {
     return { success: false, message: "Failed to reject listing." };
   }
 }
+
+/**
+ * RESOLVE DISPUTE
+ * Marks a dispute ticket as resolved in the central registry.
+ */
+export async function resolveDispute(disputeId: string) {
+  try {
+    await adminDb.collection("disputes").doc(disputeId).update({
+        status: 'RESOLVED',
+        resolved_at: new Date().toISOString()
+    });
+    
+    revalidatePath("/admin/dashboard");
+    return { success: true, message: "Dispute Resolved." };
+  } catch (error) {
+    console.error("Dispute Resolution Failure:", error);
+    return { success: false, message: "Failed to resolve dispute." };
+  }
+}

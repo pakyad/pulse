@@ -49,12 +49,12 @@ export default function CampusVitals() {
           <Train size={10} className="text-[#007AFF]" />
           <span className="text-[9px] font-medium text-[#1D1D1F]">LRT: {lrtTime}m away</span>
         </div>
-        <div className="w-[1px] h-3 bg-[#F2F2F7]" />
+        <div className="w-px h-3 bg-[#F2F2F7]" />
         <div className="flex items-center gap-2">
           <Coffee size={10} className="text-[#FF9500]" />
           <span className="text-[9px] font-medium text-[#1D1D1F]">Cafe: {cafeStatus}</span>
         </div>
-        <div className="w-[1px] h-3 bg-[#F2F2F7]" />
+        <div className="w-px h-3 bg-[#F2F2F7]" />
         <div className="flex items-center gap-2">
           <Activity size={10} className="text-[#5AC8FA]" />
           <span className="text-[9px] font-medium text-[#1D1D1F]">Active Runs: 12</span>

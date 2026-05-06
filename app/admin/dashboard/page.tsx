@@ -4,12 +4,20 @@ import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import AdminProductApprovals from '@/components/admin/AdminProductApprovals';
+import { resolveDispute } from '@/app/actions/adminActions';
+import { 
+  Loader2, CheckCircle, AlertTriangle, ChevronRight, Inbox, 
+  LayoutGrid, BarChart3, Users, Settings, LogOut, ShieldAlert
+} from 'lucide-react';
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [flaggedItems, setFlaggedItems] = useState<any[]>([]);
+  const [disputes, setDisputes] = useState<any[]>([]);
   const [guidelines, setGuidelines] = useState<Record<string, number>>({});
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('command');
 
   useEffect(() => {
     const checkAccess = auth.onAuthStateChanged(async (user) => {
@@ -20,14 +28,14 @@ export default function AdminDashboard() {
         router.push('/home'); return;
       }
 
-      // Fetch Guidelines
+      // 1. Fetch Price Guidelines
       const guidelinesUnsub = onSnapshot(collection(db, "PriceGuidelines"), (snap) => {
         const g: Record<string, number> = {};
         snap.docs.forEach(d => g[d.id] = d.data().maxBasePrice);
         setGuidelines(g);
       });
 
-      // Fetch Flagged Items
+      // 2. Fetch Flagged Items (onSnapshot)
       const itemsUnsub = onSnapshot(
         query(collection(db, "items"), where("adminStatus", "==", "pending_review")),
         (snap) => {
@@ -35,11 +43,27 @@ export default function AdminDashboard() {
         }
       );
 
+      // 3. Fetch Active Disputes (onSnapshot)
+      const disputesUnsub = onSnapshot(
+        query(collection(db, "disputes"), where("status", "==", "AWAITING_ADMIN")),
+        (snap) => {
+          setDisputes(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => b.created_at?.toMillis?.() - a.created_at?.toMillis?.()));
+        }
+      );
+
       setLoading(false);
-      return () => { guidelinesUnsub(); itemsUnsub(); };
+      return () => { guidelinesUnsub(); itemsUnsub(); disputesUnsub(); };
     });
     return () => checkAccess();
   }, [router]);
+
+  const handleResolve = async (id: string) => {
+    setIsProcessing(id);
+    try {
+      const res = await resolveDispute(id);
+      if (!res.success) alert(res.message);
+    } catch (e) { console.error(e); } finally { setIsProcessing(null); }
+  };
 
   if (loading) return (
     <div className="min-h-screen bg-[#F9F9FB] flex items-center justify-center">
@@ -47,183 +71,163 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const navItems = [
+    { id: 'overview', label: 'Overview', icon: LayoutGrid },
+    { id: 'command', label: 'Command Center', icon: Inbox },
+    { id: 'monitor', label: 'Price Monitor', icon: BarChart3 },
+    { id: 'disputes', label: 'Active Disputes', icon: ShieldAlert, badge: disputes.length },
+    { id: 'users', label: 'User Registry', icon: Users, path: '/admin/users' },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F9F9FB] flex font-sans selection:bg-teal-100">
       
-      {/* ── Fixed Sidebar (Column 1) ── */}
-      <aside className="w-64 h-screen bg-[#FFFFFF] border-r border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
+      {/* ── Institutional Side Navigator ── */}
+      <aside className="w-72 h-screen bg-[#FFFFFF] border-r border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         
-        {/* Header */}
-        <div className="px-6 py-8 flex items-center gap-2">
-          <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
-          <span className="text-[10px] font-bold bg-[#1C1C1E] text-white px-2 py-[2px] rounded-md uppercase tracking-wider">Admin</span>
+        {/* Brand Header */}
+        <div className="px-8 py-10 flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#1C1C1E] rounded-xl flex items-center justify-center shadow-lg shadow-black/10">
+             <span className="text-white font-black text-[20px]">P</span>
+          </div>
+          <div>
+            <h1 className="text-[20px] font-black text-[#1C1C1E] tracking-tighter leading-none">Pulse</h1>
+            <p className="text-[9px] font-black bg-emerald-500 text-white px-2 py-[2px] rounded-md uppercase tracking-[0.2em] mt-1 inline-block">Institutional</p>
+          </div>
         </div>
 
-        {/* Directory Links */}
-        <nav className="flex-1 px-4 py-2 space-y-1.5">
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-            <span className="text-[15px] tracking-[-0.24px]">Overview</span>
-          </button>
-          
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 bg-[#F2F2F7] text-[#1C1C1E] rounded-xl transition-colors font-bold group">
-            <svg className="w-5 h-5 text-[#1C1C1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span className="text-[15px] tracking-[-0.24px]">Price Monitor</span>
-          </button>
-
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-            <span className="text-[15px] tracking-[-0.24px]">Active Disputes</span>
-          </button>
-
-          <button 
-            onClick={() => router.push('/admin/users')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-            <span className="text-[15px] tracking-[-0.24px]">User Management</span>
-          </button>
-
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-            <span className="text-[15px] tracking-[-0.24px]">Settings</span>
-          </button>
+        {/* Dynamic Navigation Spectrum */}
+        <nav className="flex-1 px-4 py-2 space-y-1">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                if (item.path) { router.push(item.path); }
+                else { setActiveTab(item.id); }
+              }}
+              className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
+                activeTab === item.id 
+                  ? 'bg-[#F2F2F7] text-[#1C1C1E] shadow-sm' 
+                  : 'text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <item.icon size={20} strokeWidth={activeTab === item.id ? 2.5 : 2} className="transition-all" />
+                <span className={`text-[14px] tracking-tight ${activeTab === item.id ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+              </div>
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-red-500/20">{item.badge}</span>
+              )}
+            </button>
+          ))}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-[#E5E5EA]">
-          <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            <span className="text-[15px] tracking-[-0.24px]">Logout</span>
+        {/* Infrastructure Footer */}
+        <div className="p-6 border-t border-[#E5E5EA]">
+          <button 
+            onClick={() => { auth.signOut(); router.push('/auth'); }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#8E8E93] hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all font-bold group"
+          >
+            <LogOut size={20} className="group-hover:translate-x-1 transition-all" />
+            <span className="text-[14px]">Terminate Session</span>
           </button>
         </div>
       </aside>
 
-      {/* ── Main Content Area (Column 2) ── */}
-      <main className="flex-1 ml-64 flex flex-col min-h-screen">
+      {/* ── Command Interface ── */}
+      <main className="flex-1 ml-72 flex flex-col min-h-screen">
         
-        {/* Sticky Top Bar */}
-        <div className="bg-[#FFFFFF] sticky top-0 z-20 px-8 py-4 flex items-center justify-between border-b border-[#E5E5EA] shadow-[0_2px_10px_rgba(0,0,0,0.015)]">
-          {/* Search Bar */}
+        {/* Global Header Registry */}
+        <div className="bg-white/80 backdrop-blur-xl sticky top-0 z-20 px-10 py-5 flex items-center justify-between border-b border-[#E5E5EA]">
           <div className="flex-1 max-w-md">
-            <div className="relative flex items-center w-full h-10 rounded-xl bg-[#F9F9FB] overflow-hidden border border-transparent focus-within:border-[#E5E5EA] focus-within:bg-[#FFFFFF] transition-all">
-              <div className="grid place-items-center h-full w-12 text-[#8E8E93]">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <div className="relative flex items-center w-full h-11 rounded-2xl bg-[#F9F9FB] overflow-hidden border border-transparent focus-within:border-[#E5E5EA] transition-all">
+              <div className="grid place-items-center h-full w-12 text-[#AEAEB2]">
+                <ChevronRight className="rotate-90 h-5 w-5" />
               </div>
-              <input className="peer h-full w-full outline-none text-[15px] text-[#1C1C1E] pr-2 bg-transparent placeholder-[#AEAEB2]" type="text" id="search" placeholder="Search logs, tickets, users..." /> 
+              <input className="peer h-full w-full outline-none text-[14px] text-[#1C1C1E] pr-2 bg-transparent placeholder-[#AEAEB2] font-medium" placeholder="Search institutional directives..." /> 
             </div>
           </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-5 ml-4">
-             <button className="relative text-[#8E8E93] hover:text-[#1C1C1E] transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-600 border-2 border-[#FFFFFF] rounded-full"></span>
-             </button>
-             <div className="w-9 h-9 bg-[#1C1C1E] rounded-full flex items-center justify-center border border-[#E5E5EA] overflow-hidden cursor-pointer shadow-sm">
-                <span className="text-[14px] font-bold text-white">A</span>
+          <div className="flex items-center gap-4">
+             <div className="flex flex-col items-end">
+                <p className="text-[10px] font-black text-[#AEAEB2] uppercase tracking-widest">Admin Registry</p>
+                <p className="text-[13px] font-bold text-[#1C1C1E]">Iyad Mohmad</p>
              </div>
+             <div className="w-10 h-10 bg-slate-900 rounded-2xl border border-slate-100 shadow-sm" />
           </div>
         </div>
 
-        {/* Dashboard Content Container */}
-        <div className="p-8 space-y-8 max-w-[1200px] w-full mx-auto">
+        <div className="p-10 space-y-10 max-w-[1400px] w-full mx-auto">
           
-          {/* Section 1: Price Monitoring Alerts */}
-          <div className="bg-[#FFFFFF] rounded-[16px] border border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
-             <div className="p-6 border-b border-[#E5E5EA]">
-                 <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight">Price Monitoring Terminal</h2>
-                 <p className="text-[14px] text-[#8E8E93] mt-1">System-flagged items exceeding campus price ceilings.</p>
+          {/* PRICE MONITORING COMPONENT */}
+          <section className="bg-white rounded-[32px] border border-[#E5E5EA] shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
+             <div className="p-8 border-b border-[#E5E5EA] flex justify-between items-end">
+                <div>
+                   <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1">Active Monitoring</p>
+                   <h2 className="text-[22px] font-black text-[#1C1C1E] tracking-tight">Price Monitoring Terminal</h2>
+                </div>
+                <div className="text-right">
+                   <p className="text-[10px] font-black text-[#AEAEB2] uppercase tracking-widest">Guideline Status</p>
+                   <p className="text-[13px] font-bold text-emerald-500 uppercase">Synchronized</p>
+                </div>
              </div>
-             
-             <div className="p-6">
+             <div className="p-8">
                 <AdminProductApprovals items={flaggedItems} guidelines={guidelines} />
              </div>
-          </div>
+          </section>
 
-          {/* Section 2: Active Dispute Tickets */}
-          <div className="bg-[#FFFFFF] rounded-[16px] border border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
-             <div className="p-6 border-b border-[#E5E5EA]">
-                 <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight">Active Disputes requiring mediation</h2>
+          {/* ACTIVE DISPUTES COMPONENT (LIVE) */}
+          <section className="bg-white rounded-[32px] border border-[#E5E5EA] shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
+             <div className="p-8 border-b border-[#E5E5EA] flex justify-between items-center">
+                 <div>
+                    <p className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] mb-1">Operational Conflict</p>
+                    <h2 className="text-[22px] font-black text-[#1C1C1E] tracking-tight">Active Disputes</h2>
+                 </div>
+                 <div className="bg-red-50 px-4 py-2 rounded-2xl border border-red-100">
+                    <span className="text-[11px] font-black uppercase tracking-[0.1em] text-red-600">{disputes.length} UNRESOLVED</span>
+                 </div>
              </div>
              
              <div className="divide-y divide-[#E5E5EA]">
-                {/* Ticket 1 */}
-                <div className="p-6 flex items-center justify-between hover:bg-[#F9F9FB] transition-colors cursor-pointer group">
-                   <div className="flex items-center gap-8">
-                      <div>
-                         <p className="text-[13px] font-bold text-[#1C1C1E] uppercase tracking-widest">#DSP_089</p>
-                         <p className="text-[13px] text-[#8E8E93] mt-1">2 hrs ago</p>
+                {disputes.length > 0 ? disputes.map((dispute) => (
+                   <div key={dispute.id} className="p-8 flex items-center justify-between hover:bg-[#F9F9FB] transition-colors group">
+                      <div className="flex items-center gap-10">
+                         <div className="w-14 h-14 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400">
+                            <AlertTriangle size={24} />
+                         </div>
+                         <div>
+                            <div className="flex items-center gap-3 mb-1">
+                               <p className="text-[11px] font-black text-[#1C1C1E] uppercase tracking-widest">#{dispute.id.substring(0,8).toUpperCase()}</p>
+                               <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                               <p className="text-[11px] text-red-500 font-bold uppercase tracking-widest">Handshake Failure</p>
+                            </div>
+                            <h3 className="text-[17px] font-black text-[#1C1C1E] tracking-tight">{dispute.reason || 'General Logistics Dispute'}</h3>
+                            <p className="text-[13px] text-[#8E8E93] font-medium mt-1">Reporter: <span className="text-slate-900 font-bold">{dispute.reporter_name || 'Anonymous Node'}</span></p>
+                         </div>
                       </div>
-                      <div>
-                         <h3 className="text-[15px] font-bold text-[#1C1C1E]">Order never arrived</h3>
-                         <p className="text-[14px] text-[#8E8E93] mt-0.5">Reported by: Iyad I.</p>
-                      </div>
-                   </div>
-                   
-                   <div className="flex items-center gap-8">
-                      <span className="bg-amber-50 text-amber-600 px-3 py-[4px] rounded-md text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-                         <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
-                         Awaiting Admin
-                      </span>
-                      <button className="flex items-center gap-1.5 text-[14px] font-bold text-[#1C1C1E] group-hover:text-teal-600 transition-colors">
-                         Review Case
-                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
-                      </button>
-                   </div>
-                </div>
-
-                {/* Ticket 2 */}
-                <div className="p-6 flex items-center justify-between hover:bg-[#F9F9FB] transition-colors cursor-pointer group">
-                   <div className="flex items-center gap-8">
-                      <div>
-                         <p className="text-[13px] font-bold text-[#1C1C1E] uppercase tracking-widest">#DSP_090</p>
-                         <p className="text-[13px] text-[#8E8E93] mt-1">5 hrs ago</p>
-                      </div>
-                      <div>
-                         <h3 className="text-[15px] font-bold text-[#1C1C1E]">Wrong item delivered</h3>
-                         <p className="text-[14px] text-[#8E8E93] mt-0.5">Reported by: Naim F.</p>
+                      
+                      <div className="flex items-center gap-6">
+                         <button 
+                            onClick={() => handleResolve(dispute.id)}
+                            disabled={isProcessing === dispute.id}
+                            className="flex items-center gap-3 h-[56px] px-8 bg-slate-900 text-white rounded-[20px] text-[13px] font-black uppercase tracking-[0.15em] hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50 shadow-xl shadow-black/10"
+                         >
+                            {isProcessing === dispute.id ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
+                            RESOLVE DIRECTIVE
+                         </button>
                       </div>
                    </div>
-                   
-                   <div className="flex items-center gap-8">
-                      <span className="bg-amber-50 text-amber-600 px-3 py-[4px] rounded-md text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-                         <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
-                         Awaiting Admin
-                      </span>
-                      <button className="flex items-center gap-1.5 text-[14px] font-bold text-[#1C1C1E] group-hover:text-teal-600 transition-colors">
-                         Review Case
-                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
-                      </button>
-                   </div>
-                </div>
-
-                {/* Ticket 3 - Resolved Example */}
-                <div className="p-6 flex items-center justify-between hover:bg-[#F9F9FB] transition-colors cursor-pointer group opacity-60">
-                   <div className="flex items-center gap-8">
-                      <div>
-                         <p className="text-[13px] font-bold text-[#1C1C1E] uppercase tracking-widest">#DSP_085</p>
-                         <p className="text-[13px] text-[#8E8E93] mt-1">1 day ago</p>
+                )) : (
+                   <div className="py-24 flex flex-col items-center justify-center text-center">
+                      <div className="w-20 h-20 bg-slate-50 rounded-[28px] border border-slate-100 flex items-center justify-center mb-6">
+                         <Inbox size={32} strokeWidth={1} className="text-slate-300" />
                       </div>
-                      <div>
-                         <h3 className="text-[15px] font-bold text-[#1C1C1E]">Vendor unresponsive</h3>
-                         <p className="text-[14px] text-[#8E8E93] mt-0.5">Reported by: Ali R.</p>
-                      </div>
+                      <p className="text-[14px] font-black uppercase tracking-[0.2em] text-slate-400">Registry Neutral</p>
+                      <p className="text-[12px] text-slate-300 font-medium mt-1">No operational conflicts detected in the logs.</p>
                    </div>
-                   
-                   <div className="flex items-center gap-8">
-                      <span className="bg-emerald-50 text-emerald-600 px-3 py-[4px] rounded-md text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-                         Resolved
-                      </span>
-                      <button className="flex items-center gap-1.5 text-[14px] font-bold text-[#8E8E93] group-hover:text-teal-600 transition-colors">
-                         View Log
-                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
-                      </button>
-                   </div>
-                </div>
-
+                )}
              </div>
-          </div>
+          </section>
 
         </div>
       </main>
