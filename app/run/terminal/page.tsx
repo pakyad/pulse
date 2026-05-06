@@ -80,7 +80,7 @@ export default function CarrierTerminal() {
     const qRadar = query(
       collection(db, "orders"), 
       where("deliveryType", "==", "RUNNER"),
-      where("status", "==", "AWAITING_RUNNER")
+      where("status", "in", ["AWAITING_RUNNER", "PENDING", "PREPARING", "PACKED"])
     );
 
     const unsubRadar = onSnapshot(qRadar, (snap) => {
@@ -328,18 +328,22 @@ export default function CarrierTerminal() {
          </AnimatePresence>
 
          {/* 🏛️ REQ_F901: CONDITIONAL BANNER RENDERING */}
-         {/* This banner ONLY mounts if activeMission !== null */}
-         {activeMission && (
+         {/* This banner ONLY mounts if activeMission !== null and terminal is online */}
+         {activeMission && (isOnline || activeMission.status === 'PICKED_UP') && (
             <motion.div 
                initial={{ y: 100 }}
                animate={{ y: 0 }}
                className="fixed bottom-24 left-6 right-6 bg-[#0A0F1E] text-white p-6 rounded-[22px] flex items-center justify-between shadow-2xl z-[200] border border-white/5"
             >
                <div className="flex items-center gap-4">
-                  <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse shadow-[0_0_8px_white]" />
+                  <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10B981]" />
                   <div>
-                     <p className="text-[13px] font-bold tracking-tight">Delivering Order</p>
-                     <p className="text-[10px] font-medium text-white/50">Active Delivery • 8 mins est.</p>
+                     <p className="text-[13px] font-bold tracking-tight">
+                        {activeMission.status === 'PICKED_UP' ? 'Delivery in Progress' : 'Assigned Order'}
+                     </p>
+                     <p className="text-[10px] font-medium text-white/50">
+                        ID: {activeMission.id.substring(0, 8)} • {activeMission.items?.[0]?.name || 'Institutional Item'}
+                     </p>
                   </div>
                </div>
                <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">

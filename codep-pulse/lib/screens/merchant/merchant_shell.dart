@@ -105,9 +105,11 @@ class _MerchantShellState extends State<MerchantShell> {
                 // Store Open Toggle at Bottom
                 Container(
                   padding: const EdgeInsets.all(24),
-                  border: const Border(top: BorderSide(color: Color(0xFFF2F2F7), width: 0.5)),
+                  decoration: const BoxDecoration(
+                    border: Border(top: BorderSide(color: Color(0xFFF2F2F7), width: 0.5)),
+                  ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.between,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Store Open',
@@ -115,7 +117,7 @@ class _MerchantShellState extends State<MerchantShell> {
                       ),
                       CupertinoSwitch(
                         value: _isStoreOpen,
-                        activeColor: const Color(0xFF00C4B4),
+                        activeTrackColor: const Color(0xFF00C4B4),
                         onChanged: (val) => setState(() => _isStoreOpen = val),
                       ),
                     ],
@@ -196,7 +198,7 @@ class _OrderDeskWorkspace extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.between,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Order Desk', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF1C1C1E))),
                 TextButton(
@@ -266,7 +268,7 @@ class _InventoryWorkspace extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: DataTable(
-                  headingRowColor: MaterialStateProperty.all(const Color(0xFFF9F9FB)),
+                  headingRowColor: WidgetStateProperty.all(const Color(0xFFF9F9FB)),
                   columns: const [
                     DataColumn(label: Text('Product Name', style: TextStyle(fontWeight: FontWeight.w700))),
                     DataColumn(label: Text('Category', style: TextStyle(fontWeight: FontWeight.w700))),
@@ -294,7 +296,7 @@ class _InventoryWorkspace extends StatelessWidget {
       DataCell(Text(cat)),
       DataCell(Text(price)),
       DataCell(Text(stock)),
-      DataCell(CupertinoSwitch(value: isActive, activeColor: const Color(0xFF00C4B4), onChanged: (v) {})),
+      DataCell(CupertinoSwitch(value: isActive, activeTrackColor: const Color(0xFF00C4B4), onChanged: (v) {})),
     ]);
   }
 }
@@ -404,7 +406,7 @@ class _OrderItem extends StatelessWidget {
         border: Border.all(color: const Color(0xFFF2F2F7), width: 0.5),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.between,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,12 +465,20 @@ class _RevenueTrendChart extends StatelessWidget {
                 borderData: FlBorderData(show: false),
                 lineBarsData: [
                   LineChartBarData(
-                    spots: const [FlSpot(0, 3), FlSpot(1, 1), FlSpot(2, 4), FlSpot(3, 2), FlSpot(4, 5), FlSpot(5, 3), FlSpot(6, 4)],
+                    spots: [
+                      const FlSpot(0, 3),
+                      const FlSpot(1, 1),
+                      const FlSpot(2, 4),
+                      const FlSpot(3, 2),
+                      const FlSpot(4, 5),
+                      const FlSpot(5, 3),
+                      const FlSpot(6, 4)
+                    ],
                     isCurved: true,
                     color: const Color(0xFF00C4B4),
                     barWidth: 3,
                     dotData: FlDotData(show: false),
-                    belowBarData: BarAreaData(show: true, color: const Color(0xFF00C4B4).withOpacity(0.05)),
+                    belowBarData: BarAreaData(show: true, color: const Color(0xFF00C4B4).withValues(alpha: 0.05)),
                   ),
                 ],
               ),

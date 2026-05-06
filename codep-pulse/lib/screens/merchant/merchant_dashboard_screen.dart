@@ -27,7 +27,7 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
           ),
           padding: const EdgeInsets.fromLTRB(24, 48, 24, 16),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.between,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Kelab Bola UniKL',
@@ -51,7 +51,7 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                   const SizedBox(width: 8),
                   CupertinoSwitch(
                     value: _isStoreOpen,
-                    activeColor: const Color(0xFF00C4B4), // PULSE Teal
+                    activeTrackColor: const Color(0xFF00C4B4), // PULSE Teal
                     onChanged: (val) => setState(() => _isStoreOpen = val),
                   ),
                 ],
@@ -176,7 +176,7 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                       dotData: FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: const Color(0xFF00C4B4).withOpacity(0.05),
+                        color: const Color(0xFF00C4B4).withValues(alpha: 0.05),
                       ),
                     ),
                   ],

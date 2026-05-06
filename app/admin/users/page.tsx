@@ -190,11 +190,11 @@ export default function AdminUserManagement() {
       <AnimatePresence>
         {selectedUser && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)} className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-md" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)} className="fixed inset-0 z-100 bg-black/20 backdrop-blur-md" />
             <motion.div 
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 w-[540px] bg-white z-[110] shadow-3xl flex flex-col"
+              className="fixed top-0 right-0 bottom-0 w-[540px] bg-white z-110 shadow-3xl flex flex-col"
             >
                <div className="p-10 flex items-center justify-between">
                   <div className="space-y-1">
@@ -209,7 +209,7 @@ export default function AdminUserManagement() {
                   <div className="flex flex-col items-center text-center space-y-4 py-8">
                      <div className="w-32 h-32 rounded-[48px] overflow-hidden border-[0.5px] border-[#F2F2F7] shadow-2xl relative">
                         <img src={selectedUser.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.full_name}`} className="w-full h-full object-cover" alt="" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                      </div>
                      <div>
                         <h3 className="text-[28px] font-black text-black tracking-tighter leading-none">{selectedUser.full_name}</h3>

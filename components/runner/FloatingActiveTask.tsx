@@ -16,7 +16,7 @@ export default function FloatingActiveTask() {
         const q = query(
           collection(db, "orders"),
           where("runner_id", "==", user.uid),
-          where("status", "in", ["RUNNER_EN_ROUTE_TO_VENDOR", "IN_TRANSIT"])
+          where("status", "in", ["ON_THE_WAY", "PICKED_UP", "ARRIVED"])
         );
         const unsubJobs = onSnapshot(q, (snapshot) => {
           if (!snapshot.empty) {
@@ -45,19 +45,19 @@ export default function FloatingActiveTask() {
       <Link href="/run/terminal" className="block w-full bg-gray-900 border border-gray-800 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] p-4 active:scale-[0.98] transition-transform">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            {/* Live Indicator (Muted White) */}
+            {/* Live Indicator (Institutional Emerald) */}
             <div className="relative flex items-center justify-center w-2.5 h-2.5">
-              <div className="absolute inset-0 bg-gray-400 rounded-full opacity-40 animate-ping"></div>
-              <div className="relative w-2.5 h-2.5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.4)]"></div>
+              <div className="absolute inset-0 bg-emerald-500 rounded-full opacity-40 animate-ping"></div>
+              <div className="relative w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
             </div>
             
             {/* Text Stack */}
             <div className="flex flex-col">
               <span className="text-[15px] font-bold text-white leading-none mb-1.5">
-                {activeTask.status === 'RUNNER_EN_ROUTE_TO_VENDOR' ? 'Heading to Vendor' : 'Delivering Order'}
+                {activeTask.status === 'PICKED_UP' ? 'Delivery in Progress' : 'Assigned Order'}
               </span>
               <span className="text-[11px] font-medium text-gray-400 tracking-wide">
-                Active Delivery • 8 mins est.
+                ID: {activeTask.id.substring(0, 8)} • {activeTask.items?.[0]?.name || 'Institutional Item'}
               </span>
             </div>
           </div>

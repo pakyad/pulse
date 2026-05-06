@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+
 import 'checkout_screen.dart';
 
 class FulfillmentSelectionSheet extends StatefulWidget {
@@ -78,7 +78,7 @@ class _FulfillmentSelectionSheetState extends State<FulfillmentSelectionSheet> {
           _FulfillmentCard(
             title: 'Self-Collection',
             sub: widget.orderData['meetupLocation'] ?? 'UniKL MIIT Main Lobby',
-            icon: LucideIcons.shoppingBag,
+            icon: Icons.shopping_bag_rounded,
             isActive: _choice == 'SELF_COLLECT',
             onTap: () => setState(() => _choice = 'SELF_COLLECT'),
           ),
@@ -86,7 +86,7 @@ class _FulfillmentSelectionSheetState extends State<FulfillmentSelectionSheet> {
           _FulfillmentCard(
             title: 'Institutional Runner',
             sub: 'Delivery via verified peer network',
-            icon: LucideIcons.truck,
+            icon: Icons.local_shipping_rounded,
             isActive: _choice == 'RUNNER',
             onTap: () => setState(() => _choice = 'RUNNER'),
           ),
@@ -127,7 +127,7 @@ class _FulfillmentSelectionSheetState extends State<FulfillmentSelectionSheet> {
                       children: [
                         Text(hub['label']!, style: TextStyle(color: isSelected ? Colors.white : const Color(0xFF1C1C1E), fontWeight: FontWeight.bold, fontSize: 13)),
                         Text('${hub['sub']!} (RM ${hub['zone'] == 'campus' ? '3.50' : '5.00'})', 
-                          style: TextStyle(color: isSelected ? Colors.white.withOpacity(0.6) : const Color(0xFF8E8E93), fontSize: 9)),
+                          style: TextStyle(color: isSelected ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF8E8E93), fontSize: 9)),
                       ],
                     ),
                   ),
@@ -141,10 +141,10 @@ class _FulfillmentSelectionSheetState extends State<FulfillmentSelectionSheet> {
           // ── SELECTION TAGS ──
           Row(
             children: [
-              _TagChip(icon: LucideIcons.history, label: 'Qty: $qty'),
+              _TagChip(icon: Icons.history_rounded, label: 'Qty: $qty'),
               if (widget.orderData['notes'].toString().isNotEmpty) ...[
                 const SizedBox(width: 8),
-                _TagChip(icon: LucideIcons.edit3, label: widget.orderData['notes']),
+                _TagChip(icon: Icons.edit_rounded, label: widget.orderData['notes']),
               ],
             ],
           ),
@@ -169,7 +169,7 @@ class _FulfillmentSelectionSheetState extends State<FulfillmentSelectionSheet> {
                 ],
                 const SizedBox(height: 12),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.between,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Est. Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     Text(
@@ -239,19 +239,6 @@ class _FulfillmentCard extends StatelessWidget {
     required this.onTap,
   });
 
-  void _showPaymentVerification(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _PaymentVerificationSheet(
-        orderData: widget.orderData,
-        total: (widget.orderData['subtotal'] as double) + 3.50, // Mock total with fee
-        accountNumber: '64685896263645',
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -268,7 +255,7 @@ class _FulfillmentCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isActive ? Colors.white.withOpacity(0.2) : const Color(0xFFF9F9FB),
+                color: isActive ? Colors.white.withValues(alpha: 0.2) : const Color(0xFFF9F9FB),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: isActive ? Colors.white : const Color(0xFF1C1C1E), size: 20),
@@ -279,21 +266,11 @@ class _FulfillmentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: TextStyle(color: isActive ? Colors.white : const Color(0xFF1C1C1E), fontWeight: FontWeight.w800, fontSize: 15)),
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(color: isActive ? Colors.white.withOpacity(0.7) : const Color(0xFF8E8E93), fontSize: 12),
-                      children: [
-                        const TextSpan(text: 'Handover at '),
-                        TextSpan(
-                          text: sub,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: isActive ? Colors.white : const Color(0xFF1C1C1E),
-                            decoration: TextDecoration.underline,
-                            decorationColor: isActive ? Colors.white.withOpacity(0.3) : const Color(0xFF1C1C1E).withOpacity(0.1),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    sub,
+                    style: TextStyle(
+                      color: isActive ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF8E8E93),
+                      fontSize: 12,
                     ),
                   ),
                 ],
@@ -314,7 +291,7 @@ class _PriceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.between,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 14, fontWeight: FontWeight.w500)),
         Text(value, style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 14, fontWeight: FontWeight.w600)),

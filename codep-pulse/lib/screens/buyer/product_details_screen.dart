@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+
 import 'customization_sheet.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -74,7 +74,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                                   border: Border.all(color: const Color(0xFFF2F2F7), width: 0.5),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.12),
+                                      color: Colors.black.withValues(alpha: 0.12),
                                       blurRadius: 40,
                                       offset: const Offset(0, 20),
                                       spreadRadius: -5,
@@ -85,7 +85,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                                   borderRadius: BorderRadius.circular(24),
                                   child: item['image_url'] != null
                                       ? Image.network(item['image_url'], fit: BoxFit.cover)
-                                      : const Icon(LucideIcons.package, size: 56, color: Color(0xFFE5E5EA)),
+                                      : const Icon(Icons.inventory_2_rounded, size: 56, color: Color(0xFFE5E5EA)),
                                 ),
                               ),
                             ),
@@ -100,7 +100,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                       right: 20,
                       child: Row(
                         children: [
-                          _buildCircleAction(LucideIcons.share2),
+                          _buildCircleAction(Icons.ios_share_rounded),
                           const SizedBox(width: 12),
                           Expanded(child: _buildTealAction(price)),
                         ],
@@ -131,7 +131,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            _buildLabelChip(LucideIcons.star, '4.9 Rating', Colors.amber),
+                            _buildLabelChip(Icons.star_rounded, '4.9 Rating', Colors.amber),
                           ],
                         ),
                         const SizedBox(height: 32),
@@ -169,12 +169,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                       ),
                       child: Column(
                         children: [
-                          _buildShippingRow(LucideIcons.truck, 'Shipping to', 'UniKL MIIT (Level 2)'),
+                          _buildShippingRow(Icons.local_shipping_rounded, 'Shipping to', 'UniKL MIIT (Level 2)'),
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 20),
                             child: Divider(color: Color(0xFFF2F2F7), height: 1),
                           ),
-                          _buildShippingRow(LucideIcons.clock, 'Fulfillment', 'Within 24 Hours'),
+                          _buildShippingRow(Icons.access_time_rounded, 'Fulfillment', 'Within 24 Hours'),
                         ],
                       ),
                     ),
@@ -244,7 +244,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                                 shape: BoxShape.circle,
                                 border: Border.all(color: const Color(0xFFF2F2F7), width: 1.5),
                               ),
-                              child: const Icon(LucideIcons.user, color: Color(0xFFD1D1D6), size: 28),
+                              child: const Icon(Icons.person_rounded, color: Color(0xFFD1D1D6), size: 28),
                             ),
                             Positioned(
                               bottom: 0,
@@ -253,7 +253,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                                 width: 18,
                                 height: 18,
                                 decoration: BoxDecoration(
-                                  color: Colors.emerald,
+                                  color: const Color(0xFF10B981),
                                   shape: BoxShape.circle,
                                   border: Border.all(color: Colors.white, width: 2.5),
                                 ),
@@ -264,6 +264,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
                         const SizedBox(width: 20),
                         Expanded(
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -322,7 +323,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
         shape: BoxShape.circle,
         border: Border.all(color: const Color(0xFFF2F2F7), width: 0.5),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 8))
+          BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, 8))
         ],
       ),
       child: Icon(icon, size: 26, color: const Color(0xFF1C1C1E)),
@@ -354,14 +355,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
           color: const Color(0xFF00C4B4),
           borderRadius: BorderRadius.circular(100),
           boxShadow: [
-            BoxShadow(color: const Color(0xFF00C4B4).withOpacity(0.3), blurRadius: 30, offset: const Offset(0, 12))
+            BoxShadow(color: const Color(0xFF00C4B4).withValues(alpha: 0.3), blurRadius: 30, offset: const Offset(0, 12))
           ],
         ),
         child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(LucideIcons.shieldCheck, size: 20, color: Colors.white),
+              const Icon(Icons.verified_user_rounded, size: 20, color: Colors.white),
               const SizedBox(width: 12),
               Text(
                 'Buy Now — RM ${price.toStringAsFixed(2)}',
@@ -378,9 +379,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: color.withOpacity(0.15), width: 0.5),
+        border: Border.all(color: color.withValues(alpha: 0.15), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -389,7 +390,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> with SingleTi
           const SizedBox(width: 8),
           Text(
             label.toUpperCase(),
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: color.withOpacity(0.9)),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: color.withValues(alpha: 0.9)),
           ),
         ],
       ),

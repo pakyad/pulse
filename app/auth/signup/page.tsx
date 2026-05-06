@@ -91,7 +91,7 @@ export default function PerfectSignUp() {
                     <label className="text-[13px] font-bold text-black ml-4 opacity-80">Campus</label>
                     <select 
                       defaultValue=""
-                      className="w-full h-[54px] px-6 bg-[#F2F8FF] border-none rounded-full text-[14px] font-medium text-black outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all appearance-none text-slate-400/50"
+                      className="w-full h-[54px] px-6 bg-[#F2F8FF] border-none rounded-full text-[14px] font-medium text-black outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all appearance-none"
                     >
                       <option value="" disabled>Select Campus</option>
                       <option className="text-black">MIIT</option>

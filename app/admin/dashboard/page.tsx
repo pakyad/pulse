@@ -132,7 +132,7 @@ export default function AdminDashboard() {
           {/* Section 1: Price Monitoring Alerts */}
           <div className="bg-[#FFFFFF] rounded-[16px] border border-[#E5E5EA] shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
              <div className="p-6 border-b border-[#E5E5EA]">
-                 <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight text-black">Price Monitoring Terminal</h2>
+                 <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight">Price Monitoring Terminal</h2>
                  <p className="text-[14px] text-[#8E8E93] mt-1">System-flagged items exceeding campus price ceilings.</p>
              </div>
              

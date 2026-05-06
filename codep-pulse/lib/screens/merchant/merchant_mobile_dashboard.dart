@@ -25,7 +25,7 @@ class _MerchantMobileDashboardState extends State<MerchantMobileDashboard> {
           ),
           padding: const EdgeInsets.fromLTRB(20, 48, 20, 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.between,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +43,7 @@ class _MerchantMobileDashboardState extends State<MerchantMobileDashboard> {
               ),
               CupertinoSwitch(
                 value: _isStoreOpen,
-                activeColor: const Color(0xFF00C4B4),
+                activeTrackColor: const Color(0xFF00C4B4),
                 onChanged: (val) => setState(() => _isStoreOpen = val),
               ),
             ],
@@ -215,7 +215,7 @@ class _QuickOrderCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.between,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Order #$id', style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 11, fontWeight: FontWeight.w600)),
               Text(time, style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 11)),
@@ -225,7 +225,7 @@ class _QuickOrderCard extends StatelessWidget {
           Text('1x $item', style: const TextStyle(color: Color(0xFF1C1C1E), fontSize: 14, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.between,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(price, style: const TextStyle(color: Color(0xFF1C1C1E), fontSize: 15, fontWeight: FontWeight.w700)),
               GestureDetector(

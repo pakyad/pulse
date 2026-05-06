@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final Map<String, dynamic> orderData;
@@ -88,8 +89,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false, // Prevent back button
+      builder: (context) => PopScope(
+        canPop: false, // Prevent back button
         child: Dialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -98,7 +99,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                CircularProgressIndicator(color: Color(0xFF1C1C1E)),
+                CircularProgressIndicator(color: Color(0xFF00C4B4)),
                 SizedBox(height: 24),
                 Text('Processing Order...', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 SizedBox(height: 8),
@@ -232,7 +233,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             if (_fulfillmentChoice == 'RUNNER') _BillRow(label: 'Runner Fee', value: 'RM ${runnerFee.toStringAsFixed(2)}'),
             const Divider(height: 32, color: Color(0xFFF2F2F7)),
             Row(
-              mainAxisAlignment: MainAxisAlignment.between,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Total Payment', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                 Text('RM ${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF00C4B4))),
@@ -309,7 +310,7 @@ class _FulfillmentChoice extends StatelessWidget {
         const SizedBox(width: 16),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title, style: TextStyle(color: isActive ? Colors.white : Colors.black, fontWeight: FontWeight.w700)),
-          Text(sub, style: TextStyle(color: isActive ? Colors.white.withOpacity(0.6) : const Color(0xFF8E8E93), fontSize: 12)),
+          Text(sub, style: TextStyle(color: isActive ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF8E8E93), fontSize: 12)),
         ]),
       ]),
     ),
@@ -321,7 +322,7 @@ class _BillRow extends StatelessWidget {
   final String value;
   const _BillRow({required this.label, required this.value});
   @override
-  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(mainAxisAlignment: MainAxisAlignment.between, children: [
+  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
     Text(label, style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 14)),
     Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
   ]));
@@ -345,7 +346,7 @@ class _HubChip extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(color: isActive ? Colors.white : const Color(0xFF1C1C1E), fontWeight: FontWeight.bold, fontSize: 13)),
-        Text(sub, style: TextStyle(color: isActive ? Colors.white.withOpacity(0.6) : const Color(0xFF8E8E93), fontSize: 11)),
+        Text(sub, style: TextStyle(color: isActive ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF8E8E93), fontSize: 11)),
       ],
     ),
   );

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomizationBottomSheet extends StatefulWidget {
@@ -46,7 +45,7 @@ class _CustomizationBottomSheetState extends State<CustomizationBottomSheet> {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.between,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Customize Order',
@@ -75,7 +74,7 @@ class _CustomizationBottomSheetState extends State<CustomizationBottomSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.between,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
                   'Quantity',
