@@ -211,15 +211,25 @@ export default function RunModule() {
     });
 
     useEffect(() => {
-        const unsub = auth.onAuthStateChanged(user => {
+        let unsubProfile: (() => void) | null = null;
+
+        const unsubAuth = auth.onAuthStateChanged(user => {
+            if (unsubProfile) unsubProfile();
+
             if (user) {
-                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                unsubProfile = onSnapshot(doc(db, "users", user.uid), (snap) => {
                   setProfile(snap.data());
                   setStatus('verified');
                 });
-            } else { setStatus('verified'); }
+            } else { 
+                setStatus('verified'); 
+            }
         });
-        return () => unsub();
+
+        return () => {
+            unsubAuth();
+            if (unsubProfile) unsubProfile();
+        };
     }, []);
 
     const next = () => setCurrentStep(s => s + 1);

@@ -6,6 +6,7 @@ import { collection, query, where, onSnapshot, doc, getDoc, updateDoc } from 'fi
 
 import DesktopMerchant from '@/components/merchant/DesktopMerchant';
 import MobileMerchant from '@/components/merchant/MobileMerchant';
+import ProofInspector from '@/components/merchant/ProofInspector';
 
 export default function MerchantDashboard() {
   const router = useRouter();
@@ -13,27 +14,34 @@ export default function MerchantDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
   const [merchant, setMerchant] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isProofOpen, setIsProofOpen] = useState(false);
   
   // Smart Window Hook
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    let unsubItems: (() => void) | null = null;
+    let unsubOrders: (() => void) | null = null;
+
     // Check Auth & Fetch Data
-    const unsub = auth.onAuthStateChanged(async (user) => {
+    const unsubAuth = auth.onAuthStateChanged(async (user) => {
+      // Cleanup previous
+      if (unsubItems) unsubItems();
+      if (unsubOrders) unsubOrders();
+
       if (!user) { router.push("/auth"); return; }
       
       const snap = await getDoc(doc(db, "users", user.uid));
       setMerchant(snap.exists() ? { ...snap.data(), uid: user.uid } : { full_name: user.displayName || "Pulse Vendor", uid: user.uid });
       
-      const unsubItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid)), 
+      unsubItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid)), 
         (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-      const unsubOrders = onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
+      unsubOrders = onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
         setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
         setLoading(false);
       });
-
-      return () => { unsubItems(); unsubOrders(); };
     });
 
     // Handle Resize
@@ -42,7 +50,9 @@ export default function MerchantDashboard() {
     window.addEventListener('resize', handleResize);
 
     return () => {
-      unsub();
+      unsubAuth();
+      if (unsubItems) unsubItems();
+      if (unsubOrders) unsubOrders();
       window.removeEventListener('resize', handleResize);
     };
   }, [router]);
@@ -66,6 +76,11 @@ export default function MerchantDashboard() {
     await updateDoc(doc(db, "items", itemId), { status: newStatus });
   };
 
+  const handleViewProof = (order: any) => {
+    setSelectedOrder(order);
+    setIsProofOpen(true);
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center">
       <div className="w-8 h-8 border-[1.5px] border-[#F2F2F7] border-t-[#1C1C1E] rounded-full animate-spin" />
@@ -81,8 +96,10 @@ export default function MerchantDashboard() {
           activeOrdersCount={activeOrdersCount}
           urgentOrders={urgentOrders}
           topItems={topItems}
+          recentOrders={recentOrders}
           handleAcceptOrder={handleAcceptOrder}
           toggleItemStatus={toggleItemStatus}
+          onViewProof={handleViewProof}
         />
       ) : (
         <DesktopMerchant 
@@ -91,8 +108,15 @@ export default function MerchantDashboard() {
           activeOrdersCount={activeOrdersCount}
           attentionCount={attentionCount}
           recentOrders={recentOrders}
+          onViewProof={handleViewProof}
         />
       )}
+
+      <ProofInspector 
+        isOpen={isProofOpen}
+        onClose={() => setIsProofOpen(false)}
+        order={selectedOrder}
+      />
     </>
   );
 }

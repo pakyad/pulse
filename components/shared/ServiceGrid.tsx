@@ -60,6 +60,15 @@ const VoxelSearch = () => (
   </svg>
 );
 
+const VoxelFacility = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="16" height="16" fill="white" rx="1" />
+    <rect x="6" y="8" width="4" height="8" fill="#cbd5e1" />
+    <rect x="14" y="8" width="4" height="8" fill="#cbd5e1" />
+    <rect x="10" y="12" width="4" height="8" fill="white" />
+  </svg>
+);
+
 const VoxelBooks = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="4" y="4" width="4" height="16" fill="white" />
@@ -92,7 +101,7 @@ const VoxelMore = () => (
 const services = [
   { id: 1, label: 'UniStore',  icon: VoxelStore,     path: '/hub/unistore', color: 'bg-[#3B82F6]', shadow: 'bg-[#1E40AF]' },
   { id: 2, label: 'Clinic',    icon: VoxelMed,       path: '/hub/med',      color: 'bg-[#EF4444]', shadow: 'bg-[#991B1B]' },
-  { id: 3, label: 'Events',    icon: VoxelEvents,    path: '/pulse',        color: 'bg-[#EC4899]', shadow: 'bg-[#9D174D]' },
+  { id: 3, label: 'Facility',  icon: VoxelFacility,  path: '/pulse',        color: 'bg-[#0F172A]', shadow: 'bg-[#020617]' },
   { id: 4, label: 'Found',     icon: VoxelSearch,    path: '/hub/found',    color: 'bg-[#F59E0B]', shadow: 'bg-[#92400E]' },
   { id: 5, label: 'Library',   icon: VoxelBooks,     path: '/hub/books',    color: 'bg-[#6366F1]', shadow: 'bg-[#3730A3]' },
   { id: 6, label: 'Logistics', icon: VoxelLogistics, path: '/hub/services', color: 'bg-[#64748B]', shadow: 'bg-[#334155]' },

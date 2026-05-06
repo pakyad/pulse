@@ -9,7 +9,8 @@ export default function DesktopMerchant({
   revenue, 
   activeOrdersCount, 
   attentionCount, 
-  recentOrders 
+  recentOrders,
+  onViewProof
 }: any) {
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
@@ -175,7 +176,12 @@ export default function DesktopMerchant({
                            }`}>
                              {o.status === 'PENDING' ? 'Preparing' : 'Ready'}
                            </span>
-                           <button className="text-[13px] font-semibold text-[#8E8E93] hover:text-[#1C1C1E] transition-colors">View</button>
+                           <button 
+                             onClick={() => onViewProof(o)}
+                             className="text-[13px] font-semibold text-[#8E8E93] hover:text-[#1C1C1E] transition-colors"
+                           >
+                             View
+                           </button>
                         </div>
                      </div>
                    ))}

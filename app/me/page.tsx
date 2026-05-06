@@ -11,7 +11,7 @@ import {
   MapPin, Edit3, Search, TrendingUp, Wallet,
   BarChart3, ArrowUpRight, Upload, HelpCircle, ChevronRight,
   Eye, Users, Trash2, CheckCircle2,
-  X, Info, Sparkles, MoreHorizontal, Footprints, User
+  X, Info, Sparkles, MoreHorizontal, Footprints, User, Star, Leaf
 } from 'lucide-react';
 import { markItemAsSold, deleteItemListing } from '@/lib/marketplace-utils';
 import HologramID from '@/components/shared/HologramID';
@@ -69,22 +69,32 @@ export default function MePage() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const u = auth.onAuthStateChanged((currentUser) => {
+    let unsubProfile: (() => void) | null = null;
+    let unsubTrans: (() => void) | null = null;
+    let unsubItems: (() => void) | null = null;
+
+    const unsubAuth = auth.onAuthStateChanged((currentUser) => {
+      // Cleanup previous listeners
+      if (unsubProfile) unsubProfile();
+      if (unsubTrans) unsubTrans();
+      if (unsubItems) unsubItems();
+
       setUser(currentUser);
       if (!currentUser) { setLoading(false); return; }
-      onSnapshot(doc(db, 'users', currentUser.uid), 
+
+      unsubProfile = onSnapshot(doc(db, 'users', currentUser.uid), 
         s => { if (s.exists()) setProfile(s.data()); setLoading(false); },
         err => { console.error("[Pulse Registry] Profile Sync Error:", err); setLoading(false); }
       );
 
       const nq = query(collection(db, 'transactions'), where('buyer_id', '==', currentUser.uid), where('status', '==', 'PENDING'));
-      onSnapshot(nq, 
+      unsubTrans = onSnapshot(nq, 
         s => setNotificationCount(s.docs.length),
         err => console.error("[Pulse Registry] Transaction Listener Error:", err)
       );
 
       const lq = query(collection(db, 'items'), where('seller_id', '==', currentUser.uid));
-      onSnapshot(lq, 
+      unsubItems = onSnapshot(lq, 
         s => {
           const live = s.docs.map(d => ({ id: d.id, ...d.data() }));
           const merged = [...live, ...DUMMY_LISTINGS];
@@ -93,13 +103,19 @@ export default function MePage() {
         },
         err => {
           console.error("[Pulse Registry] Items Listener Error:", err);
-          setMyListings(DUMMY_LISTINGS); // Fallback to dummy data
+          setMyListings(DUMMY_LISTINGS);
           setLoading(false);
         }
       );
     });
-    return () => u();
-  }, []);
+
+    return () => {
+      unsubAuth();
+      if (unsubProfile) unsubProfile();
+      if (unsubTrans) unsubTrans();
+      if (unsubItems) unsubItems();
+    };
+  }, [router]);
 
   const isSeller = profile?.is_seller === true || profile?.role === 'CLUB';
   const displayName = profile?.full_name || 'Pulse Member';
@@ -229,21 +245,29 @@ export default function MePage() {
         {/* ── FLOATING STATS (Zero-Container Architecture) ── */}
         <motion.div 
           animate={{ opacity: isCreateOpen ? 0 : 1 }}
-          className="flex items-center justify-between px-2 !mt-8"
+          className="grid grid-cols-4 items-center px-2 !mt-8 divide-x divide-[#E5E5EA]"
         >
-          <div className="flex-1 text-center">
-            <p className="text-[24px] font-bold text-black tracking-[-0.02em]">{tenure}</p>
-            <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Tenure</p>
+          <div className="text-center">
+            <p className="text-[20px] font-bold text-black tracking-[-0.02em]">{tenure}</p>
+            <p className="text-[8px] font-black text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Tenure</p>
           </div>
-          <div className="w-[0.5px] h-6 bg-[#E5E5EA]" />
-          <div className="flex-1 text-center">
-            <p className="text-[24px] font-bold text-black tracking-[-0.02em]">{myListings.length}</p>
-            <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Listings</p>
+          <div className="text-center px-2">
+            <p className="text-[20px] font-bold text-black tracking-[-0.02em]">{myListings.length}</p>
+            <p className="text-[8px] font-black text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Listings</p>
           </div>
-          <div className="w-[0.5px] h-6 bg-[#E5E5EA]" />
-          <div className="flex-1 text-center">
-            <p className="text-[24px] font-bold text-black tracking-[-0.02em]">RM {(profile?.balance || 0).toFixed(0)}</p>
-            <p className="text-[9px] font-bold text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Credit</p>
+          <div className="text-center px-2">
+            <p className="text-[20px] font-bold text-black tracking-[-0.02em] flex items-center justify-center gap-1">
+               <Star size={12} className="text-amber-400 fill-amber-400" />
+               {profile?.merit || 120}
+            </p>
+            <p className="text-[8px] font-black text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Merit</p>
+          </div>
+          <div className="text-center">
+            <p className="text-[20px] font-bold text-black tracking-[-0.02em] flex items-center justify-center gap-1">
+               <Leaf size={12} className="text-emerald-500 fill-emerald-500" />
+               {profile?.carbon || '0.4kg'}
+            </p>
+            <p className="text-[8px] font-black text-[#8E8E93] uppercase tracking-[0.15em] mt-1">Carbon</p>
           </div>
         </motion.div>
 
@@ -253,7 +277,7 @@ export default function MePage() {
           className="space-y-1"
         >
           <div className="space-y-[0.5px] bg-[#F2F2F7] rounded-[24px] overflow-hidden border-[0.5px] border-[#F2F2F7]">
-            {MENU_GROUPS.flatMap(g => g.items).map((item) => (
+            {MENU_GROUPS.flatMap(g => g.items).concat(profile?.role === 'ADMIN' ? [{ icon: ShieldCheck, color: 'text-orange-500', bg: 'bg-orange-50', label: 'Admin Portal', desc: 'Platform oversight', path: '/admin/dashboard' }] : []).map((item) => (
               <motion.button
                 key={item.label}
                 whileTap={{ backgroundColor: '#F9F9FB' }}

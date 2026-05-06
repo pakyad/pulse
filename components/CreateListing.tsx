@@ -45,6 +45,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
     delivery_enabled: true,
     campus_id: 'MIIT',
     meetup_location: 'Setapak, MIIT Level 2',
+    stock_count: '1'
   });
 
   const [sheet, setSheet] = useState<'category' | 'subcategory' | 'condition' | 'location' | null>(null);
@@ -76,6 +77,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
       formData.append("justification", form.justification);
       formData.append("vendorId", userId);
       formData.append("image_url", imageUrl);
+      formData.append("stock_count", form.stock_count);
 
       const res = await submitProductListing(formData);
 
@@ -256,6 +258,21 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                 value={form.price}
                 className="flex-1 bg-transparent text-[24px] font-black focus:outline-none placeholder:text-black/5"
                 onChange={(e) => setForm({...form, price: e.target.value})}
+              />
+            </div>
+          </div>
+          
+          {/* Stock Input (REQ_V102) */}
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Inventory Depth</label>
+            <div className="flex items-center gap-3 py-4 border-b-[0.5px] border-[#F2F2F7]">
+              <Package size={18} className="text-black/10" />
+              <input 
+                type="number"
+                placeholder="Units available"
+                value={form.stock_count}
+                className="flex-1 bg-transparent text-[18px] font-bold focus:outline-none placeholder:text-black/5"
+                onChange={(e) => setForm({...form, stock_count: e.target.value})}
               />
             </div>
           </div>

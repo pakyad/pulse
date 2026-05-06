@@ -57,6 +57,15 @@ export default function AuthPage() {
   const handleRegister = async () => {
     setLoading(true);
     setError(null);
+    
+    // 🏛️ REQ_F101: Institutional UI Gating
+    const { isValidUniKLEmail } = await import('@/lib/auth-utils');
+    if (!isValidUniKLEmail(regData.email)) {
+      setError('Unauthorized: You must use a valid UniKL email address to join CODEP.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { registerStudent } = await import('@/lib/auth-utils');
       const fullName = `${regData.firstName} ${regData.surname}`.trim();

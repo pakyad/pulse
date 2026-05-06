@@ -15,6 +15,7 @@ export async function submitProductListing(formData: FormData) {
   const justification = formData.get("justification") as string || "";
   const vendorId = formData.get("vendorId") as string;
   const imageUrl = formData.get("image_url") as string;
+  const stockCount = parseInt(formData.get("stock_count") as string) || 1;
 
   // Basic Validation Guard
   if (!title || isNaN(price) || !category || !vendorId || !imageUrl) {
@@ -34,27 +35,28 @@ export async function submitProductListing(formData: FormData) {
     
     // STEP B: Compare & Categorize
     let isFlagged = false;
-    let adminStatus: 'approved' | 'pending_review' = 'approved';
+    let adminStatus: 'approved' | 'pending' = 'approved';
     let message = "Listing published successfully.";
 
     if (price > maxBasePrice) {
         // STEP D: Flagged Execution
         isFlagged = true;
-        adminStatus = 'pending_review';
+        adminStatus = 'pending';
         message = "Price exceeds campus guidelines. Listing saved and sent to Admin for manual review.";
     }
 
     // STEP C/D: Central Registry Commit
     const productPayload = {
-        seller_id: vendorId, // Aligned with existing schema
+        seller_id: vendorId,
         title,
         price,
         category,
+        stock_count: parseInt(formData.get("stock_count") as string) || 1,
         image_url: imageUrl,
+        status: adminStatus === 'approved' ? 'active' : 'pending',
         isFlagged,
         adminStatus,
         justification,
-        status: adminStatus === 'approved' ? 'active' : 'pending',
         created_at: new Date().toISOString()
     };
 

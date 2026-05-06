@@ -7,10 +7,24 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 
 /**
+ * Institutional Guard: Validates that the email belongs to the UniKL domain.
+ * Supports both Student (@s.unikl.edu.my) and Staff (@unikl.edu.my) nodes.
+ */
+export const isValidUniKLEmail = (email: string) => {
+  const uniklRegex = /^[a-zA-Z0-9._%+-]+@(s\.)?unikl\.edu\.my$/;
+  return uniklRegex.test(email.toLowerCase());
+};
+
+/**
  * Register a new Student in the Pulse Ecosystem.
  * Creates an Auth record and initializes a Firestore Profile.
  */
 export const registerStudent = async (email: string, pass: string, fullName: string, matricNo: string) => {
+  // 🏛️ REQ_F101: Institutional Gating
+  if (!isValidUniKLEmail(email)) {
+    return { user: null, error: 'Unauthorized: You must use a valid UniKL email address to join CODEP.' };
+  }
+
   try {
     // 1. Create Auth Identity
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);

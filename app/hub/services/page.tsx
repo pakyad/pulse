@@ -111,40 +111,45 @@ export default function ServicesHub() {
            </div>
         </section>
 
-        {/* 4. HOSTEL HUB */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="space-y-4">
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">Hostel Status</h3>
-              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-6 h-[184px] flex flex-col justify-between group cursor-pointer hover:border-navy transition-all">
-                 <div className="flex justify-between items-start">
-                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-navy">
-                       <Waves size={18} />
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Room: B-4-12</span>
-                 </div>
-                 <div>
-                    <h4 className="text-[16px] font-bold text-navy">My Residence</h4>
-                    <p className="text-[12px] text-slate-400 mt-1">UniKL MIIT Residence A. Check your stay details and key sync status.</p>
-                 </div>
-              </div>
-           </div>
+         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+               <h3 className="text-[17px] font-bold text-navy tracking-tight">Hostel Status</h3>
+               <div 
+                 onClick={() => router.push('/hub/facility/hostel-a')}
+                 className="bg-white border border-slate-100 rounded-[2.5rem] p-6 h-[184px] flex flex-col justify-between group cursor-pointer hover:border-navy transition-all"
+               >
+                  <div className="flex justify-between items-start">
+                     <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-navy">
+                        <Waves size={18} />
+                     </div>
+                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Room: B-4-12</span>
+                  </div>
+                  <div>
+                     <h4 className="text-[16px] font-bold text-navy">My Residence</h4>
+                     <p className="text-[12px] text-slate-400 mt-1">UniKL MIIT Residence A. Check your stay details and key sync status.</p>
+                  </div>
+               </div>
+            </div>
 
-           <div className="space-y-4">
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">New Application</h3>
-              <div className="bg-navy rounded-[2.5rem] p-6 text-white h-[184px] flex flex-col justify-between group cursor-pointer hover:bg-navy/90 transition-all shadow-xl shadow-navy/20">
-                 <div className="flex justify-between items-start">
-                    <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-emerald-400">
-                       <CalendarCheck size={18} />
-                    </div>
-                    <ArrowUpRight size={18} className="text-white/20 group-hover:text-white" />
-                 </div>
-                 <div>
-                    <h4 className="text-[16px] font-bold">Apply for Hostel</h4>
-                    <p className="text-[12px] text-white/40 mt-1">Submit a new application or renew your stay for the next semester.</p>
-                 </div>
-              </div>
-           </div>
-        </section>
+            <div className="space-y-4">
+               <h3 className="text-[17px] font-bold text-navy tracking-tight">New Application</h3>
+               <div 
+                 onClick={() => router.push('/hub/facility/hostel-new')}
+                 className="bg-navy rounded-[2.5rem] p-6 text-white h-[184px] flex flex-col justify-between group cursor-pointer hover:bg-navy/90 transition-all shadow-xl shadow-navy/20"
+               >
+                  <div className="flex justify-between items-start">
+                     <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-emerald-400">
+                        <CalendarCheck size={18} />
+                     </div>
+                     <ArrowUpRight size={18} className="text-white/20 group-hover:text-white" />
+                  </div>
+                  <div>
+                     <h4 className="text-[16px] font-bold">Apply for Hostel</h4>
+                     <p className="text-[12px] text-white/40 mt-1">Submit a new application or renew your stay for the next semester.</p>
+                  </div>
+               </div>
+            </div>
+         </section>
 
         {/* 5. QUICK LINKS */}
         <section className="space-y-3">

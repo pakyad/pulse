@@ -135,11 +135,19 @@ export default function MarketplacePage() {
   }, []);
 
   useEffect(() => {
+    let unsubProfile: (() => void) | null = null;
+    let unsubCount: (() => void) | null = null;
+
     const unsubAuth = auth.onAuthStateChanged((user) => {
+      // Cleanup previous listeners
+      if (unsubProfile) unsubProfile();
+      if (unsubCount) unsubCount();
+
       if (!user) return;
-      onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
+
+      unsubProfile = onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
       const qCount = query(collection(db, 'items'), where('seller_id', '==', user.uid), where('is_active', '==', true));
-      onSnapshot(qCount, s => setActiveItemsCount(s.docs.length));
+      unsubCount = onSnapshot(qCount, s => setActiveItemsCount(s.docs.length));
     });
 
     const q = query(collection(db, 'items'), where('is_active', '==', true));
@@ -155,8 +163,13 @@ export default function MarketplacePage() {
       setLoading(false); 
     });
 
-    return () => { unsubAuth(); unsubItems(); };
-  }, []);
+    return () => {
+      unsubAuth();
+      if (unsubProfile) unsubProfile();
+      if (unsubCount) unsubCount();
+      unsubItems();
+    };
+  }, [router]);
 
   const discoveryItems = useMemo(() => {
     // Combine real Firestore items with demo fallbacks for a populated demo feel

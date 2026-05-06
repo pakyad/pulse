@@ -11,7 +11,7 @@ export async function completeDelivery(orderId: string, proofUrl: string) {
   try {
     // 1. Update the Order Registry
     await adminDb.collection("orders").doc(orderId).update({
-        status: 'delivered',
+        status: 'DELIVERED',
         proofOfDeliveryUrl: proofUrl,
         deliveredAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

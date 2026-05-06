@@ -78,19 +78,33 @@ export default function PulseHome() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
+    let unsubProfile: (() => void) | null = null;
+    let unsubTrans: (() => void) | null = null;
+
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      // Cleanup previous listeners
+      if (unsubProfile) unsubProfile();
+      if (unsubTrans) unsubTrans();
+
       if (!user) return;
-      onSnapshot(doc(db, 'users', user.uid), s => {
+
+      unsubProfile = onSnapshot(doc(db, 'users', user.uid), s => {
         const data = s.data();
         setProfile(data);
         if (data?.is_official) {
           router.replace('/merchant');
         }
       });
+
       const q = query(collection(db, 'transactions'), where('buyer_id', '==', user.uid), where('status', '==', 'PENDING'));
-      onSnapshot(q, s => setNotificationCount(s.docs.length));
+      unsubTrans = onSnapshot(q, s => setNotificationCount(s.docs.length));
     });
-    return () => unsub();
+
+    return () => {
+      unsubAuth();
+      if (unsubProfile) unsubProfile();
+      if (unsubTrans) unsubTrans();
+    };
   }, [router]);
 
   useEffect(() => {

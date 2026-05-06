@@ -9,8 +9,10 @@ export default function MobileMerchant({
   activeOrdersCount, 
   urgentOrders, 
   topItems, 
+  recentOrders,
   handleAcceptOrder, 
-  toggleItemStatus 
+  toggleItemStatus,
+  onViewProof
 }: any) {
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
@@ -75,11 +77,11 @@ export default function MobileMerchant({
          <div className="px-5 py-8">
             <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight mb-5">Top Items</h2>
             
-            <div className="flex flex-col space-y-6">
+          <div className="flex flex-col space-y-6">
                {topItems.map((item: any) => (
-                 <div key={item.id} className="flex items-center justify-between">
+                 <div key={item.id} className="flex items-center justify-between bg-slate-50/50 p-4 rounded-[22px] border border-[#F2F2F7]">
                     <div className="flex items-center gap-4">
-                       <div className="w-[48px] h-[48px] bg-[#F2F2F7] rounded-2xl flex items-center justify-center shrink-0 border-[0.5px] border-[#E5E5EA] overflow-hidden">
+                       <div className="w-[48px] h-[48px] bg-[#FFFFFF] rounded-2xl flex items-center justify-center shrink-0 border-[0.5px] border-[#E5E5EA] overflow-hidden shadow-sm">
                           {item.image_url ? (
                              <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
                           ) : (
@@ -87,17 +89,73 @@ export default function MobileMerchant({
                           )}
                        </div>
                        <div>
-                          <p className="text-[15px] font-bold text-[#1C1C1E] tracking-tight">{item.title}</p>
-                          <p className="text-[13px] font-medium text-[#8E8E93] mt-0.5">{item.stock_count || 0} left</p>
+                          <p className="text-[14px] font-bold text-[#1C1C1E] tracking-tight">{item.title}</p>
+                          <p className="text-[12px] font-black text-[#8E8E93] uppercase tracking-widest mt-1">RM {item.price}</p>
                        </div>
                     </div>
                     
-                    <button 
-                      onClick={() => toggleItemStatus(item.id, item.status)}
-                      className={`w-[51px] h-[31px] rounded-full p-[2px] transition-colors duration-200 ease-in-out shrink-0 ${item.status === 'active' ? 'bg-[#34C759]' : 'bg-[#E5E5EA]'}`}
-                    >
-                      <div className={`w-[27px] h-[27px] bg-white rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15)] transform transition-transform duration-200 ease-in-out ${item.status === 'active' ? 'translate-x-[20px]' : 'translate-x-0'}`} />
-                    </button>
+                    <div className="flex items-center gap-3">
+                       {/* 🏛️ Stock Editor Module */}
+                       <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-[#E5E5EA] shadow-sm">
+                          <button 
+                            onClick={async () => {
+                              const newStock = Math.max(0, (item.stock_count || 0) - 1);
+                              await updateDoc(doc(db, "items", item.id), { stock_count: newStock });
+                            }}
+                            className="w-8 h-8 flex items-center justify-center text-[#8E8E93] active:bg-slate-50 rounded-lg transition-colors"
+                          >
+                             -
+                          </button>
+                          <span className="w-8 text-center text-[13px] font-black text-[#1C1C1E]">{item.stock_count || 0}</span>
+                          <button 
+                            onClick={async () => {
+                              const newStock = (item.stock_count || 0) + 1;
+                              await updateDoc(doc(db, "items", item.id), { stock_count: newStock });
+                            }}
+                            className="w-8 h-8 flex items-center justify-center text-[#1C1C1E] active:bg-slate-50 rounded-lg transition-colors"
+                          >
+                             +
+                          </button>
+                       </div>
+
+                       <button 
+                         onClick={() => toggleItemStatus(item.id, item.status)}
+                         className={`w-[44px] h-[24px] rounded-full p-[2px] transition-colors duration-200 shrink-0 ${item.status === 'active' ? 'bg-[#34C759]' : 'bg-[#E5E5EA]'}`}
+                       >
+                         <div className={`w-[20px] h-[20px] bg-white rounded-full shadow-sm transform transition-transform duration-200 ${item.status === 'active' ? 'translate-x-[20px]' : 'translate-x-0'}`} />
+                       </button>
+                    </div>
+                 </div>
+               ))}
+            </div>
+         </div>
+
+         {/* Recent History */}
+         <div className="px-5 py-8 border-t-[0.5px] border-[#E5E5EA]">
+            <div className="flex items-center justify-between mb-5">
+               <h2 className="text-[18px] font-bold text-[#1C1C1E] tracking-tight">Recent History</h2>
+               <button className="text-[13px] font-bold text-[#8E8E93]">See All</button>
+            </div>
+            
+            <div className="flex flex-col space-y-4">
+               {recentOrders.length === 0 ? (
+                 <p className="text-[15px] text-[#8E8E93] font-medium">No order history yet.</p>
+               ) : recentOrders.map((o: any) => (
+                 <div key={o.id} className="flex items-center justify-between p-4 bg-[#F2F2F7] rounded-[22px] border-[0.5px] border-[#E5E5EA] active:scale-[0.98] transition-transform" onClick={() => onViewProof(o)}>
+                    <div className="flex items-center gap-4">
+                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${o.status === 'DELIVERED' || o.status === 'COMPLETED' ? 'bg-[#34C759]/10 text-[#34C759]' : 'bg-[#1C1C1E]/10 text-[#1C1C1E]'}`}>
+                          <ClipboardList size={18} />
+                       </div>
+                       <div>
+                          <p className="text-[14px] font-bold text-[#1C1C1E] uppercase tracking-wide">#{o.id.substring(0,6)}</p>
+                          <p className="text-[12px] font-medium text-[#8E8E93] mt-0.5">{o.status}</p>
+                       </div>
+                    </div>
+                    {o.proofOfDeliveryUrl && (
+                       <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                          <Camera size={14} className="text-[#1C1C1E]" />
+                       </div>
+                    )}
                  </div>
                ))}
             </div>

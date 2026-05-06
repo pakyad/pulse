@@ -82,6 +82,7 @@ export default function EdgeToEdgeOrderStatus() {
         return { phase: 5, title: 'Order Picked Up', subtext: 'Runner is heading to your delivery location.' };
       case 'COMPLETED': 
       case 'ARRIVED':
+      case 'DELIVERED':
         return { phase: 6, title: 'Delivered', subtext: 'Your order has been successfully delivered.' };
       default: 
         return { phase: 1, title: 'Processing...', subtext: 'Please wait.' };

@@ -16,12 +16,20 @@ export default function RunnerWalletPage() {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
+    let unsubProfile: (() => void) | null = null;
+
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (unsubProfile) unsubProfile();
+
       if (user) {
-        onSnapshot(doc(db, 'users', user.uid), (s) => setProfile(s.data()));
+        unsubProfile = onSnapshot(doc(db, 'users', user.uid), (s) => setProfile(s.data()));
       }
     });
-    return () => unsub();
+
+    return () => {
+      unsubAuth();
+      if (unsubProfile) unsubProfile();
+    };
   }, []);
 
   const MANAGEMENT_ITEMS = [

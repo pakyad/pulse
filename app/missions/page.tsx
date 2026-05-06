@@ -207,13 +207,15 @@ export default function MissionBoard() {
   const router = useRouter();
 
   useEffect(() => {
-    let unsubProfile: (() => void) | undefined;
-    let unsubOrders: (() => void) | undefined;
+    let unsubProfile: (() => void) | null = null;
+    let unsubOrders: (() => void) | null = null;
 
     const unsubAuth = auth.onAuthStateChanged((user) => {
+      // Cleanup previous listeners
+      if (unsubProfile) unsubProfile();
+      if (unsubOrders) unsubOrders();
+
       if (!user) {
-        if (unsubProfile) unsubProfile();
-        if (unsubOrders) unsubOrders();
         router.push('/auth');
         return;
       }

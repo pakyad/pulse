@@ -11,7 +11,7 @@ export async function approveListing(productId: string) {
   try {
     await adminDb.collection("items").doc(productId).update({
         adminStatus: 'approved',
-        status: 'active',
+        is_active: true, // Visible to marketplace
         isFlagged: false, 
         reviewed_at: new Date().toISOString()
     });
@@ -31,7 +31,7 @@ export async function rejectListing(productId: string, reason: string) {
   try {
     await adminDb.collection("items").doc(productId).update({
         adminStatus: 'rejected',
-        status: 'inactive',
+        is_active: false, // Hidden from marketplace
         rejection_reason: reason,
         reviewed_at: new Date().toISOString()
     });
