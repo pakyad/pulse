@@ -154,7 +154,7 @@ export default function MarketplacePage() {
         </div>
       </nav>
 
-      <div className="pt-20 space-y-12">
+      <div className="pt-20 space-y-10">
 
         {/* ── 1. CAMPUS UPDATES (Institutional Style) ── */}
         <section>
@@ -170,7 +170,7 @@ export default function MarketplacePage() {
               <motion.div
                 key={camp.id}
                 whileTap={{ scale: 0.98 }}
-                className={`shrink-0 w-[280px] p-6 rounded-[32px] ${camp.color} text-white flex flex-col justify-between min-h-[200px] group cursor-pointer transition-all overflow-hidden relative shadow-sm shadow-slate-200/20 border border-white/5`}
+                className={`shrink-0 w-[240px] p-5 rounded-[28px] ${camp.color} text-white flex flex-col justify-between min-h-[160px] group cursor-pointer transition-all overflow-hidden relative shadow-sm shadow-slate-200/20 border border-white/5`}
               >
                 <div className="absolute -top-8 -right-8 opacity-5 group-hover:opacity-10 transition-all duration-700">
                   <span className="text-[120px] font-bold leading-none tracking-tighter select-none">{camp.initials}</span>
@@ -207,12 +207,12 @@ export default function MarketplacePage() {
                 onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
                 className="flex flex-col items-center gap-2.5 shrink-0 group"
               >
-                <div className={`w-[52px] h-[52px] rounded-[20px] flex items-center justify-center transition-all duration-300 border-2 ${
+                <div className={`w-[48px] h-[48px] rounded-[18px] flex items-center justify-center transition-all duration-300 border-2 ${
                   activeCategory === cat.filter 
                     ? 'bg-slate-900 border-slate-900 shadow-lg shadow-slate-200/50' 
                     : `${cat.bg} border-transparent group-hover:border-slate-100 shadow-sm shadow-slate-200/10`
                 }`}>
-                  <cat.icon size={20} strokeWidth={2.2} className={activeCategory === cat.filter ? 'text-white' : cat.color} />
+                  <cat.icon size={18} strokeWidth={2.2} className={activeCategory === cat.filter ? 'text-white' : cat.color} />
                 </div>
                 <span className={`text-[11px] font-bold tracking-tight transition-colors ${
                   activeCategory === cat.filter ? 'text-slate-900' : 'text-slate-400'

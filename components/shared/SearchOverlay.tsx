@@ -61,7 +61,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
           <div className="px-6 pt-16 pb-6 flex flex-col gap-10">
             <div className="flex justify-between items-center">
               <div className="space-y-1">
-                <h2 className="text-[32px] font-bold text-slate-900 tracking-tight">Discovery</h2>
+                <h2 className="text-[26px] font-bold text-slate-900 tracking-tight">Discovery</h2>
                 <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Institutional Directory</p>
               </div>
               <button 
@@ -81,7 +81,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                 placeholder="Search items, nodes, or news..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full h-16 bg-slate-50 rounded-3xl pl-16 pr-6 font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 border border-slate-100 focus:border-slate-200 transition-all text-[16px] placeholder:text-slate-300"
+                className="w-full h-14 bg-slate-50 rounded-[24px] pl-16 pr-6 font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 border border-slate-100 focus:border-slate-200 transition-all text-[15px] placeholder:text-slate-300"
               />
             </div>
           </div>
