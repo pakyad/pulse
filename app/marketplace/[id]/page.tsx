@@ -518,9 +518,9 @@ export default function ItemDetails() {
         <span className="text-[17px] font-medium">Home</span>
       </button>
 
-      <div className="relative w-full h-[450px] bg-[#F2F5F7] flex flex-col items-center justify-center overflow-visible">
-        <div className="absolute bottom-0 w-[85%] h-[320px] bg-white rounded-t-[200px]" />
-        <div className="relative z-10 w-full max-w-[340px] aspect-square rounded-[48px] overflow-hidden shadow-2xl shadow-slate-200/50 border border-slate-100 bg-white">
+      <div className="relative w-full h-[380px] bg-[#F2F5F7] flex flex-col items-center justify-center overflow-visible">
+        <div className="absolute bottom-0 w-[80%] h-[260px] bg-white rounded-t-[200px]" />
+        <div className="relative z-10 w-full max-w-[280px] aspect-square rounded-[40px] overflow-hidden shadow-2xl shadow-slate-200/50 border border-slate-100 bg-white">
           {item.image_url ? (
             <img src={item.image_url} className="w-full h-full object-cover" alt={item.title} />
           ) : (
@@ -530,15 +530,15 @@ export default function ItemDetails() {
           )}
         </div>
 
-        <div className="absolute -bottom-10 left-0 right-0 z-50 px-8 flex justify-between items-center max-w-2xl mx-auto w-full">
-           <button className="w-16 h-16 rounded-[28px] bg-white border border-slate-50 shadow-2xl shadow-slate-200/50 flex items-center justify-center text-slate-900 hover:scale-105 transition-all">
-              <Share2 size={24} />
+        <div className="absolute -bottom-8 left-0 right-0 z-50 px-6 flex justify-between items-center max-w-2xl mx-auto w-full">
+           <button className="w-14 h-14 rounded-[24px] bg-white border border-slate-50 shadow-2xl shadow-slate-200/50 flex items-center justify-center text-slate-900 hover:scale-105 transition-all">
+              <Share2 size={20} />
            </button>
            <button 
              onClick={() => setShowDeliverySheet(true)}
-             className="h-16 px-10 bg-slate-900 rounded-[28px] text-white font-black text-[15px] flex items-center gap-4 shadow-2xl shadow-slate-900/20 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest"
+             className="h-14 px-8 bg-slate-900 rounded-[24px] text-white font-black text-[14px] flex items-center gap-3 shadow-2xl shadow-slate-900/20 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest"
            >
-              <ShieldCheck size={20} strokeWidth={2.5} />
+              <ShieldCheck size={18} strokeWidth={2.5} />
               Buy Now — RM{Number(item.price).toFixed(0)}
            </button>
         </div>
@@ -558,37 +558,37 @@ export default function ItemDetails() {
              </div>
           </div>
 
-          <div className="space-y-4">
-            <h1 className="text-[40px] font-black text-slate-900 tracking-tighter leading-none max-w-[95%]">
+          <div className="space-y-3">
+            <h1 className="text-[32px] font-black text-slate-900 tracking-tighter leading-none max-w-[95%]">
               {item.title}
             </h1>
-            <p className="text-[28px] font-black text-slate-900 tracking-tighter">
+            <p className="text-[24px] font-black text-slate-900 tracking-tighter">
               RM{Number(item.price).toFixed(0)}
             </p>
           </div>
         </div>
 
-        <div className="p-10 bg-slate-50/50 rounded-[48px] border border-slate-50 space-y-8 shadow-sm">
+        <div className="p-8 bg-slate-50/50 rounded-[40px] border border-slate-50 space-y-6 shadow-sm">
            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                 <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                    <Truck size={24} className="text-slate-400" />
+              <div className="flex items-center gap-5">
+                 <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                    <Truck size={20} className="text-slate-400" />
                  </div>
                  <div>
-                    <p className="text-[17px] font-black text-slate-900 tracking-tight">Institutional Delivery</p>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Verified Runner Node</p>
+                    <p className="text-[15px] font-black text-slate-900 tracking-tight">Institutional Delivery</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verified Runner Node</p>
                  </div>
               </div>
-              <Check size={20} className="text-emerald-500" strokeWidth={4} />
+              <Check size={18} className="text-emerald-500" strokeWidth={4} />
            </div>
            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                 <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                    <Clock size={24} className="text-slate-400" />
+              <div className="flex items-center gap-5">
+                 <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                    <Clock size={20} className="text-slate-400" />
                  </div>
                  <div>
-                    <p className="text-[17px] font-black text-slate-900 tracking-tight">Rapid Handoff</p>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">~24H Registry Lock</p>
+                    <p className="text-[15px] font-black text-slate-900 tracking-tight">Rapid Handoff</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">~24H Registry Lock</p>
                  </div>
               </div>
            </div>
@@ -621,8 +621,8 @@ export default function ItemDetails() {
            </div>
         </div>
 
-        <div className="pt-20 border-t border-slate-50 flex items-center justify-between">
-           <div className="flex items-center gap-8">
+        <div className="pt-16 border-t border-slate-50 flex items-center justify-between">
+           <div className="flex items-center gap-6">
               <div className="relative">
                 <div className="w-24 h-24 rounded-[36px] bg-slate-50 border border-slate-50 overflow-hidden flex items-center justify-center shadow-2xl shadow-slate-200/50">
                   {item.seller_photo ? (

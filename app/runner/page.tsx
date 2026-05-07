@@ -233,16 +233,16 @@ export default function MobileRunnerDashboard() {
          {activeTab === 'ANALYTICS' && (
             <div className="p-8 space-y-12">
                <div className="space-y-1">
-                  <h2 className="text-[32px] font-black tracking-tight uppercase">Performance</h2>
-                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">Institutional Logistics Ledger</p>
+                  <h2 className="text-[26px] font-black tracking-tight uppercase">Performance</h2>
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Institutional Logistics Ledger</p>
                </div>
 
                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-8 bg-black rounded-[36px] text-white space-y-6">
-                     <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Net Earnings</p>
-                     <div className="space-y-1">
-                        <p className="text-[13px] font-bold opacity-60">RM</p>
-                        <p className="text-[32px] font-black leading-none">{analytics.earnings.toFixed(2)}</p>
+                  <div className="p-6 bg-black rounded-[32px] text-white space-y-4">
+                     <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Net Earnings</p>
+                     <div className="space-y-0.5">
+                        <p className="text-[11px] font-bold opacity-60">RM</p>
+                        <p className="text-[26px] font-black leading-none">{analytics.earnings.toFixed(2)}</p>
                      </div>
                   </div>
                   <div className="p-8 bg-slate-50 rounded-[36px] border border-slate-100 space-y-6">

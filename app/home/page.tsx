@@ -143,27 +143,25 @@ export default function PulseHome() {
 
 
 
-      <div className="pt-28 px-6 space-y-12 pb-12">
+      <div className="pt-24 px-5 space-y-10 pb-10">
 
 
         {/* ── HERO BANNER ── */}
         <FeaturedBanner slides={HERO_SLIDES} />
 
-        {/* ── CAMPUS HUB ── */}
         <div className="space-y-1">
-          <h3 className="text-[26px] font-black text-navy tracking-tight">Campus Hub</h3>
-          <p className="text-[14px] font-medium text-slate-400 leading-relaxed mb-6">Centralized directory for all institutional services and protocols.</p>
+          <h3 className="text-[22px] font-black text-navy tracking-tight">Campus Hub</h3>
+          <p className="text-[12px] font-medium text-slate-400 leading-relaxed mb-4">Centralized directory for all institutional services and protocols.</p>
           <ServiceGrid />
         </div>
 
-        {/* ── WHAT'S HAPPENING ── */}
         <div className="space-y-1">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-3">
             <div>
-              <h3 className="text-[26px] font-black text-navy tracking-tight">What's happening</h3>
-              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Broadcast updates and live announcements from campus nodes.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">What's happening</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Broadcast updates and live announcements from campus nodes.</p>
             </div>
-            <button onClick={() => router.push('/pulse')} className="text-[12px] font-bold text-accent flex items-center gap-1">
+            <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-accent flex items-center gap-1">
               Explore <ChevronRight size={14} />
             </button>
           </div>
@@ -175,7 +173,7 @@ export default function PulseHome() {
                 onClick={() => router.push('/pulse')}
                 className="shrink-0 w-[240px] cursor-pointer group"
               >
-                <div className="w-full h-[140px] bg-slate-50 rounded-4xl overflow-hidden mb-3 border border-slate-100 shadow-sm relative">
+                <div className="w-full h-[120px] bg-slate-50 rounded-3xl overflow-hidden mb-2.5 border border-slate-100 shadow-sm relative">
                   <img src={item.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.title} />
                   <div className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm">
                     <span className={`text-[8px] font-black uppercase tracking-widest ${TAG_COLORS[item.tag] || 'text-slate-500'}`}>{item.tag}</span>
@@ -188,14 +186,13 @@ export default function PulseHome() {
           </div>
         </div>
 
-        {/* ── LIVE PULSE FEED (Institutional Design) ── */}
         <div className="space-y-1">
-          <div className="flex justify-between items-baseline mb-6">
+          <div className="flex justify-between items-baseline mb-5">
             <div>
-              <h3 className="text-[26px] font-black text-navy tracking-tight">Live Pulse Feed</h3>
-              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Real-time synchronization of student activity across the grid.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">Live Pulse Feed</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Real-time synchronization of student activity across the grid.</p>
             </div>
-            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live Now
             </span>
@@ -224,14 +221,13 @@ export default function PulseHome() {
           </div>
         </div>
 
-        {/* ── IN THE MARKET ── */}
         <div className="space-y-1">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-3">
             <div>
-              <h3 className="text-[26px] font-black text-navy tracking-tight">In The Market</h3>
-              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Monitor recent asset acquisitions and marketplace liquidity.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">In The Market</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Monitor recent asset acquisitions and marketplace liquidity.</p>
             </div>
-            <button onClick={() => router.push('/marketplace')} className="text-[12px] font-bold text-accent flex items-center gap-1">
+            <button onClick={() => router.push('/marketplace')} className="text-[11px] font-bold text-accent flex items-center gap-1">
               See All <ArrowUpRight size={14} />
             </button>
           </div>
@@ -262,12 +258,11 @@ export default function PulseHome() {
           </div>
         </div>
 
-        {/* ── CAMPUS CLUBS (JOSH DESIGN PROTOCOL) ── */}
         <div className="space-y-1">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-5">
             <div>
-              <h3 className="text-[26px] font-black text-navy tracking-tight">Campus Clubs</h3>
-              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Authorized student organizations and creative faculty nodes.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">Campus Clubs</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Authorized student organizations and creative faculty nodes.</p>
             </div>
             <button onClick={() => router.push('/pulse')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Directory</button>
           </div>
@@ -322,7 +317,7 @@ export default function PulseHome() {
                 className="shrink-0 flex flex-col items-center gap-4 cursor-pointer group"
               >
                 {/* Josh Voxel Pod */}
-                <div className="w-[64px] h-[64px] relative">
+                <div className="w-[56px] h-[56px] relative">
                    {/* 3D Base */}
                   <div className="absolute inset-0 translate-y-1.5 translate-x-1 rounded-2xl bg-slate-200 group-hover:bg-opacity-20 transition-all duration-300" style={{ backgroundColor: `${club.color}33` }} />
                   {/* Main Block */}
@@ -348,7 +343,7 @@ export default function PulseHome() {
               onClick={() => router.push('/pulse')}
               className="shrink-0 flex flex-col items-center gap-4 cursor-pointer group"
             >
-              <div className="w-[64px] h-[64px] rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 group-hover:bg-navy group-hover:text-white group-hover:border-navy transition-all duration-300">
+              <div className="w-[56px] h-[56px] rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 group-hover:bg-navy group-hover:text-white group-hover:border-navy transition-all duration-300">
                 <ChevronRight size={24} />
               </div>
               <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">More</p>
@@ -356,12 +351,11 @@ export default function PulseHome() {
           </div>
         </div>
 
-        {/* ── THE ESSENTIALS (BOB DESIGN PROTOCOL) ── */}
         <div className="space-y-1">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-5">
             <div>
-              <h3 className="text-[26px] font-black text-navy tracking-tight">The Essentials</h3>
-              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Academic resources and mandatory institutional equipment.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">The Essentials</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Academic resources and mandatory institutional equipment.</p>
             </div>
             <button onClick={() => router.push('/marketplace')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">See All</button>
           </div>

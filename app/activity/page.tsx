@@ -110,8 +110,8 @@ function MerchantInsights({ profile, orders, items }: any) {
     <div className="flex flex-col space-y-10 animate-in fade-in duration-500 pb-32">
       <section className="space-y-1">
          <p className="text-[11px] font-bold text-blue-600 uppercase tracking-widest">Operational Intelligence</p>
-         <h2 className="text-[26px] font-black text-slate-900 tracking-tight leading-none">Merchant Insights</h2>
-         <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Live telemetry for your institutional merchant node and fulfillment status.</p>
+         <h2 className="text-[22px] font-black text-slate-900 tracking-tight leading-none">Merchant Insights</h2>
+         <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Live telemetry for your institutional merchant node and fulfillment status.</p>
       </section>
 
       {/* ── HIGH-LEVEL REGISTRY NODES ── */}
@@ -121,22 +121,22 @@ function MerchantInsights({ profile, orders, items }: any) {
             <p className="text-[10px] font-medium text-slate-400">Registry nodes show aggregate liquidity and fulfillment integrity for the current cycle.</p>
          </div>
          <div className="grid grid-cols-2 gap-4">
-            <div className="p-6 border border-slate-100 rounded-3xl bg-white shadow-sm">
-               <div className="flex items-center gap-2 mb-3">
+            <div className="p-5 border border-slate-100 rounded-3xl bg-white shadow-sm">
+               <div className="flex items-center gap-2 mb-2">
                   <TrendingUp size={16} className="text-blue-600" />
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Revenue Flow</p>
                </div>
-               <p className="text-[24px] font-bold text-slate-900 tracking-tight">RM {totalRevenue.toFixed(2)}</p>
+               <p className="text-[20px] font-bold text-slate-900 tracking-tight">RM {totalRevenue.toFixed(2)}</p>
                <p className="text-[11px] text-emerald-500 font-bold mt-2 flex items-center gap-1">
                   <ArrowUpRight size={12} /> +12% Cycle
                </p>
             </div>
-            <div className="p-6 border border-slate-100 rounded-3xl bg-white shadow-sm">
-               <div className="flex items-center gap-2 mb-3">
+            <div className="p-5 border border-slate-100 rounded-3xl bg-white shadow-sm">
+               <div className="flex items-center gap-2 mb-2">
                   <CheckCircle2 size={16} className="text-emerald-600" />
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fulfillment</p>
                </div>
-               <p className="text-[24px] font-bold text-slate-900 tracking-tight">{completionRate}%</p>
+               <p className="text-[20px] font-bold text-slate-900 tracking-tight">{completionRate}%</p>
                <p className="text-[11px] text-slate-400 font-bold mt-2 uppercase">Institutional Avg: 84%</p>
             </div>
          </div>
@@ -301,7 +301,7 @@ export default function ActivityPage() {
                   <button onClick={() => router.push('/home')} className="p-1 -ml-2 text-slate-300 hover:text-navy transition-colors">
                      <ArrowLeft size={22} />
                   </button>
-                  <h1 className="text-[26px] font-black tracking-tight text-navy">Inbox</h1>
+                  <h1 className="text-[22px] font-black tracking-tight text-navy">Inbox</h1>
                </div>
                <div className="flex-1 max-w-[120px]">
                   <div className="h-9 bg-[#F6F7F9] rounded-full flex items-center px-4 gap-2">

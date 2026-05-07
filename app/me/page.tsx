@@ -329,10 +329,10 @@ export default function MePage() {
                <div className="flex-1 flex flex-col justify-center">
                  <div className="flex items-center justify-between">
                     <div className="space-y-1">
-                      <h1 className="text-[26px] font-black text-slate-900 tracking-tight leading-none">
+                      <h1 className="text-[22px] font-black text-slate-900 tracking-tight leading-none">
                         {displayName}
                       </h1>
-                      <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Pulse Registry Member since {joinYear}</p>
+                      <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Pulse Registry Member since {joinYear}</p>
                     </div>
                    
                    {/* Refined Settings Action */}
@@ -370,9 +370,9 @@ export default function MePage() {
            {/* ── PERFORMANCE METRICS (3-Node Institutional Strip) ── */}
            <motion.div 
              animate={{ opacity: isCreateOpen ? 0 : 1 }}
-             className="bg-white border border-slate-100 rounded-3xl p-1.5 shadow-sm shadow-slate-200/20"
+             className="bg-white border border-slate-100 rounded-2xl p-1 shadow-sm shadow-slate-200/20"
            >
-             <div className="grid grid-cols-3 items-center bg-slate-50/50 rounded-[22px] h-[58px] px-2">
+             <div className="grid grid-cols-3 items-center bg-slate-50/50 rounded-[18px] h-[52px] px-2">
                {/* Tenure */}
                <div className="flex items-center justify-center gap-2.5">
                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">

@@ -79,7 +79,7 @@ export default function OrderSuccessScreen() {
         <div className="w-24 h-24 bg-emerald-50 rounded-[48px] flex items-center justify-center mb-8 border border-emerald-100 shadow-sm">
           <Check className="w-12 h-12 text-emerald-600" strokeWidth={4} />
         </div>
-        <h1 className="text-[32px] font-black text-slate-900 tracking-tighter leading-none mb-3">Order Confirmed</h1>
+        <h1 className="text-[26px] font-black text-slate-900 tracking-tighter leading-none mb-3">Order Confirmed</h1>
         <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Registry Entry Finalized</p>
       </motion.div>
 
