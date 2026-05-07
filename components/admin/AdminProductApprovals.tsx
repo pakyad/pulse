@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { approveListing, rejectListing } from '@/app/actions/adminActions';
-import { Check, X, AlertCircle, Clock, Tag, User, DollarSign } from 'lucide-react';
+import { Check, X, AlertCircle, Clock, Tag, User, DollarSign, Loader2, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AdminProductApprovalsProps {

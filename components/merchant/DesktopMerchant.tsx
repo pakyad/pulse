@@ -17,7 +17,7 @@ export default function DesktopMerchant({
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] flex selection:bg-gray-100 hidden md:flex">
+    <div className="min-h-screen bg-[#F2F2F7] selection:bg-gray-100 hidden md:flex">
       
       {/* ── Fixed Sidebar (Column 1) ── */}
       <aside className="w-64 h-screen bg-[#FFFFFF] border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
@@ -90,11 +90,11 @@ export default function DesktopMerchant({
           </div>
 
           <div className="flex items-center gap-6">
-             <div className="relative flex items-center w-64 h-10 rounded-md border border-slate-200 bg-slate-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+             <div className="relative flex items-center w-80 h-10 rounded-xl border border-slate-200 bg-slate-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
                <div className="px-3 text-slate-400">
                  <Search size={16} />
                </div>
-               <input className="h-full w-full outline-none text-[13px] pr-2 bg-transparent placeholder-slate-400" type="text" placeholder="Search entries..." /> 
+               <input className="h-full w-full outline-none text-[12px] pr-2 bg-transparent placeholder-slate-400 font-medium" type="text" placeholder="Search Registry (Order ID, Student Name)..." /> 
              </div>
 
              <button 

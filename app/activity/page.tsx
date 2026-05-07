@@ -291,9 +291,10 @@ export default function ActivityPage() {
                <button onClick={() => router.push('/merchant')} className="p-1 -ml-2 text-slate-300 hover:text-navy transition-colors">
                   <ArrowLeft size={22} />
                </button>
-               <div className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center font-bold text-slate-400">
-                  {profile?.full_name?.charAt(0)}
-               </div>
+               <AvatarDropdown 
+                  photoUrl={profile?.photo_url} 
+                  userName={profile?.full_name || 'Merchant'} 
+               />
             </div>
          ) : (
             <div className="flex items-center justify-between gap-3">

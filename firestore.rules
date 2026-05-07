@@ -8,7 +8,8 @@ service cloud.firestore {
     function isSuperAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'admin@pulse.com' || 
-        request.auth.token.email == 'official@pulse.com'
+        request.auth.token.email == 'official@pulse.com' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN'
       );
     }
 

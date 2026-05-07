@@ -265,13 +265,17 @@ export default function MePage() {
           <ChevronLeft size={24} strokeWidth={2.5} />
         </button>
         <div className="flex-1">
-          <button 
-            onClick={() => setIsSearchOpen(true)} 
-            className="w-full h-10 bg-slate-50 rounded-2xl flex items-center px-4 gap-3 transition-all active:scale-[0.98] border border-slate-100/50 shadow-sm shadow-slate-200/5"
-          >
-            <Search size={16} className="text-slate-400" />
-            <span className="text-[13px] font-medium text-slate-400">Search Pulse</span>
-          </button>
+          {profile?.role === 'CLUB' ? (
+             <h2 className="text-[16px] font-bold text-slate-900 tracking-tight px-2">Identity Registry</h2>
+          ) : (
+            <button 
+              onClick={() => setIsSearchOpen(true)} 
+              className="w-full h-10 bg-slate-50 rounded-2xl flex items-center px-4 gap-3 transition-all active:scale-[0.98] border border-slate-100/50 shadow-sm shadow-slate-200/5"
+            >
+              <Search size={16} className="text-slate-400" />
+              <span className="text-[13px] font-medium text-slate-400">Search Pulse</span>
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-4 shrink-0">
           <button onClick={() => router.push('/activity')} className="relative p-1 text-slate-300 hover:text-slate-900 transition-all active:scale-90">
@@ -580,7 +584,7 @@ export default function MePage() {
 
     {/* RENDER MERCHANT BOTTOM NAV IF ROLE IS CLUB */}
     {profile?.role === 'CLUB' && (
-       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 pb-8 pt-3 px-10 z-[300] flex justify-between items-center shadow-sm max-w-md mx-auto border-x border-slate-50">
+       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-x border-slate-100 pb-8 pt-3 px-10 z-300 flex justify-between items-center shadow-sm max-w-md mx-auto">
           <button onClick={() => router.push('/merchant')} className="flex flex-col items-center gap-1 group">
              <LayoutGrid size={20} className="text-slate-400 group-active:text-blue-600 transition-colors" />
              <span className="text-[10px] font-bold text-slate-400">Dashboard</span>

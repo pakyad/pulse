@@ -131,6 +131,7 @@ export default function NavigationGate() {
     isAuthPage || 
     isRoot || 
     pathname === '/me' || 
+    pathname === '/activity' || 
     pathname?.startsWith('/merchant') || 
     pathname?.startsWith('/admin') || 
     pathname?.startsWith('/run') || 
