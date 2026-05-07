@@ -5,10 +5,10 @@ async function seedPriceGuidelines() {
   console.log("🏛️ Pulse Administrative Seeding: Price Guidelines...");
   
   const guidelines = [
-    { id: 'Tech Assets', maxBasePrice: 5.00 },
-    { id: 'Student Apparel', maxBasePrice: 10.00 },
-    { id: 'Food', maxBasePrice: 15.00 },
-    { id: 'Stationery', maxBasePrice: 3.00 }
+    { id: 'tech', maxBasePrice: 50.00 },
+    { id: 'books', maxBasePrice: 30.00 },
+    { id: 'apparel', maxBasePrice: 40.00 },
+    { id: 'services', maxBasePrice: 20.00 }
   ];
 
   for (const g of guidelines) {
