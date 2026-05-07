@@ -26,14 +26,18 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
   const router = useRouter();
 
   const filteredResults = useMemo(() => {
-    if (!query.trim()) return [];
-    const q = query.toLowerCase();
-    return items.filter(item => 
-      item.title?.toLowerCase().includes(q) || 
-      item.description?.toLowerCase().includes(q) ||
-      item.seller_name?.toLowerCase().includes(q) ||
-      item.category?.toLowerCase().includes(q)
-    ).slice(0, 8);
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    
+    // 🏛️ Pulse Institutional Search Protocol
+    return items.filter(item => {
+      const title = (item.title || "").toLowerCase();
+      const desc = (item.description || "").toLowerCase();
+      const seller = (item.seller_name || "").toLowerCase();
+      const cat = (item.category || "").toLowerCase();
+      
+      return title.includes(q) || desc.includes(q) || seller.includes(q) || cat.includes(q);
+    }).slice(0, 10);
   }, [query, items]);
 
   const itemCategories = [

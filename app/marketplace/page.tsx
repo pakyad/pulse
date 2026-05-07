@@ -54,6 +54,9 @@ const DISCOVERY_FALLBACK = [
   { id: 'd14', title: 'Vintage Polo Tee', price: 30, image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400', seller_name: 'Syazwan', time_ago: '2d ago', is_official: false, category: 'Merch' },
   { id: 'd15', title: 'Data Structures & Algorithms', price: 50, image_url: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=400', seller_name: 'Nurul Izzah', time_ago: '3d ago', is_official: false, category: 'Books' },
   { id: 'd21', title: 'Discrete Mathematics Textbook', price: 40, image_url: 'https://images.unsplash.com/photo-1543004629-142a2ec95393?q=80&w=400', seller_name: 'Ali Imran', time_ago: '2d ago', is_official: false, category: 'Books' },
+  { id: 'd_pro_kit', title: 'Official UniKL Football Match-Day Kit (PRO)', price: 120, image_url: 'https://images.unsplash.com/photo-1551854838-212c50b4c184?q=80&w=600', seller_name: 'Kelab Bola UniKL', time_ago: 'Just now', is_official: true, category: 'Official' },
+  { id: 'd_scarf_fix', title: 'UniKL Football Club Scarf', price: 25, image_url: 'https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=600', seller_name: 'Kelab Bola UniKL', time_ago: 'Live', is_official: true, category: 'Official' },
+  { id: 'd_jersey_2026', title: 'Official UniKL Football Jersey 2026', price: 95, image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600', seller_name: 'Kelab Bola UniKL', time_ago: 'Verified', is_official: true, category: 'Official' },
 ];
 
 export default function MarketplacePage() {
@@ -81,7 +84,7 @@ export default function MarketplacePage() {
       unsubProfile = onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
     });
 
-    const q = query(collection(db, 'items'), where('is_active', '==', true));
+    const q = query(collection(db, 'items'), where('status', '==', 'active'));
     const unsubItems = onSnapshot(q, s => { 
       const docs = s.docs.map(d => ({ id: d.id, ...d.data() }));
       docs.sort((a: any, b: any) => {
@@ -118,6 +121,16 @@ export default function MarketplacePage() {
       return catMatch;
     });
   }, [items, activeCategory]);
+
+  const unfilteredItems = useMemo(() => {
+    const combinedList = [...items];
+    DISCOVERY_FALLBACK.forEach(fb => {
+      if (!items.find(i => i.id === fb.id)) {
+        combinedList.push(fb);
+      }
+    });
+    return combinedList;
+  }, [items]);
 
   return (
     <main className="min-h-screen bg-white pb-32 font-sans antialiased text-slate-900">
@@ -245,7 +258,7 @@ export default function MarketplacePage() {
       <SearchOverlay 
         isOpen={isSearchOpen} 
         onClose={() => setIsSearchOpen(false)} 
-        items={discoveryItems}
+        items={unfilteredItems}
       />
 
       <style jsx global>{`

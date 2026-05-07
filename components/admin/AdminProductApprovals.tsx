@@ -13,33 +13,30 @@ interface AdminProductApprovalsProps {
 export default function AdminProductApprovals({ items, guidelines }: AdminProductApprovalsProps) {
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  if (items.length === 0) {
+  const monitorItems = items.filter(item => {
+    const limit = guidelines[item.category] || 9999;
+    return item.price > limit;
+  });
+
+  if (monitorItems.length === 0) {
     return (
       <div className="py-20 flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4">
-          <Check size={24} className="text-gray-200" />
+        <div className="w-16 h-16 rounded-[24px] bg-emerald-50 flex items-center justify-center mb-6">
+          <Check size={24} className="text-emerald-500" />
         </div>
-        <h3 className="text-[18px] font-black text-gray-900 uppercase tracking-tighter text-black">Inbox Zero</h3>
-        <p className="text-[14px] text-gray-400 mt-1">All campus listings are within policy limits.</p>
+        <h3 className="text-[17px] font-black text-slate-900 uppercase tracking-widest">Registry Stable</h3>
+        <p className="text-[13px] text-slate-400 mt-2 font-medium">All campus listings are within institutional limits.</p>
       </div>
     );
   }
 
-  const handleApprove = async (id: string) => {
+  const handleSuspend = async (id: string) => {
+    if (!window.confirm("Operational Directive: Suspend this asset immediately?")) return;
     setProcessingId(id);
     try {
-      await approveListing(id);
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    const reason = window.prompt("Reason for rejection:");
-    if (!reason) return;
-    setProcessingId(id);
-    try {
-      await rejectListing(id, reason);
+      const { db } = await import('@/lib/firebase');
+      const { doc, updateDoc } = await import('firebase/firestore');
+      await updateDoc(doc(db, "items", id), { status: "SUSPENDED" });
     } finally {
       setProcessingId(null);
     }
@@ -48,7 +45,7 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
   return (
     <div className="space-y-6">
       <AnimatePresence>
-        {items.map((item) => {
+        {monitorItems.map((item) => {
           const suggestedLimit = guidelines[item.category] || 0;
           
           return (
@@ -57,85 +54,69 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-white rounded-[22px] border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white rounded-[32px] border-[0.5px] border-slate-100 p-8 shadow-sm hover:shadow-xl shadow-slate-200/50 transition-all group"
             >
               {/* Header */}
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-[18px] font-black text-gray-900 uppercase tracking-tight leading-none mb-2 text-black">
+              <div className="flex justify-between items-start mb-8">
+                <div className="space-y-2">
+                  <h3 className="text-[20px] font-black text-slate-900 tracking-tight leading-none pr-12">
                     {item.title}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md uppercase tracking-wider border border-amber-100 flex items-center gap-1">
-                      <AlertCircle size={10} /> Pending Review
+                    <span className="text-[10px] font-black bg-red-50 text-red-600 px-3 py-1 rounded-lg uppercase tracking-widest border border-red-100 flex items-center gap-2 shadow-sm shadow-red-500/10">
+                      <AlertCircle size={12} strokeWidth={3} /> Price Violation
                     </span>
                   </div>
                 </div>
                 
                 <div className="text-right">
-                  <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Flagged Price</p>
-                  <p className="text-[24px] font-black text-gray-900 text-black">RM {Number(item.price).toFixed(2)}</p>
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1">Market Price</p>
+                  <p className="text-[26px] font-black text-slate-900 tracking-tighter">RM {Number(item.price).toFixed(2)}</p>
                 </div>
               </div>
 
               {/* Metadata Grid */}
-              <div className="grid grid-cols-2 gap-8 mb-6 border-y border-gray-50 py-6">
-                <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-10 mb-8 border-y border-slate-50 py-8">
+                <div className="space-y-6">
                   <div>
-                    <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] block mb-1">Vendor Registry</label>
-                    <div className="flex items-center gap-2 text-[13px] font-medium text-gray-600">
-                      <User size={14} className="text-gray-300" /> {item.seller_id}
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] block mb-2">Vendor Node</label>
+                    <div className="flex items-center gap-3 text-[14px] font-bold text-slate-700">
+                      <User size={16} className="text-slate-300" /> {item.seller_name || 'Verified Vendor'}
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] block mb-1">Classification</label>
-                    <div className="flex items-center gap-2 text-[13px] font-medium text-gray-600">
-                      <Tag size={14} className="text-gray-300" /> {item.category}
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] block mb-2">Classification</label>
+                    <div className="flex items-center gap-3 text-[14px] font-bold text-slate-700">
+                      <Tag size={16} className="text-slate-300" /> {item.category}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] block mb-1">Suggested Limit</label>
-                    <div className="flex items-center gap-2 text-[13px] font-bold text-[#00927C]">
-                      <DollarSign size={14} /> RM {suggestedLimit.toFixed(2)}
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] block mb-2">Institutional Limit</label>
+                    <div className="flex items-center gap-3 text-[14px] font-black text-emerald-500">
+                      <DollarSign size={16} strokeWidth={2.5} /> RM {suggestedLimit.toFixed(2)}
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] block mb-1">Listing Date</label>
-                    <div className="flex items-center gap-2 text-[13px] font-medium text-gray-600">
-                      <Clock size={14} className="text-gray-300" /> {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
+                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] block mb-2">Audit Timestamp</label>
+                    <div className="flex items-center gap-3 text-[14px] font-bold text-slate-700">
+                      <Clock size={16} className="text-slate-300" /> {item.created_at ? new Date(item.created_at.toMillis()).toLocaleDateString() : 'N/A'}
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Justification Block */}
-              <div className="bg-gray-50 rounded-[18px] p-5 mb-8">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] block mb-2">Vendor Justification</label>
-                <p className="text-[13px] font-medium text-gray-700 italic leading-relaxed">
-                  {item.justification || "No justification provided."}
-                </p>
               </div>
 
               {/* Action Terminal */}
-              <div className="flex gap-3">
-                <button 
-                  disabled={processingId === item.id}
-                  onClick={() => handleReject(item.id)}
-                  className="flex-1 h-14 rounded-[16px] bg-red-50 text-red-700 border border-red-100 font-black text-[11px] uppercase tracking-widest hover:bg-red-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <X size={16} /> Reject & Adjust
-                </button>
-                <button 
-                  disabled={processingId === item.id}
-                  onClick={() => handleApprove(item.id)}
-                  className="flex-1 h-14 rounded-[16px] bg-gray-900 text-white font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-black/10"
-                >
-                  <Check size={16} /> Approve Override
-                </button>
-              </div>
+              <button 
+                disabled={processingId === item.id}
+                onClick={() => handleSuspend(item.id)}
+                className="w-full h-[64px] bg-slate-900 text-white rounded-[24px] font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-xl shadow-black/10 active:scale-95"
+              >
+                {processingId === item.id ? <Loader2 className="animate-spin" size={20} /> : <ShieldAlert size={20} />}
+                SUSPEND ASSET IMMEDIATELY
+              </button>
             </motion.div>
           );
         })}

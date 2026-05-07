@@ -78,12 +78,19 @@ export default function PulseHome() {
   const [profile, setProfile] = useState<any>(null);
   const [liveItems, setLiveItems] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [pulsePosts, setPulsePosts] = useState<any[]>([]);
   const router = useRouter();
   const pathname = usePathname();
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const [greeting, setGreeting] = useState('Welcome');
+  const [mounted, setMounted] = useState(false);
   const firstName = profile?.full_name?.split(' ')[0] || 'Student';
+
+  useEffect(() => {
+    setMounted(true);
+    const hour = new Date().getHours();
+    setGreeting(hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening');
+  }, []);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => {
@@ -112,7 +119,11 @@ export default function PulseHome() {
     });
     const qAnn = query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(3));
     const unsubAnn = onSnapshot(qAnn, s => setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-    return () => { unsubItems(); unsubAnn(); };
+
+    const qPulse = query(collection(db, 'pulse_posts'), orderBy('created_at', 'desc'), limit(5));
+    const unsubPulse = onSnapshot(qPulse, s => setPulsePosts(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+
+    return () => { unsubItems(); unsubAnn(); unsubPulse(); };
   }, []);
 
   const displayItems = (liveItems.length > 0 ? liveItems : MARKET_FALLBACK)
@@ -124,6 +135,8 @@ export default function PulseHome() {
   const displayAnnouncements = announcements.length > 0
     ? announcements.map(a => ({ ...a, tag: a.category || 'NEWS', path: '/pulse' }))
     : ANNOUNCEMENTS_FALLBACK;
+
+  if (!mounted) return <div className="min-h-screen bg-[#FDFDFD]" />;
 
   return (
     <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
@@ -171,6 +184,39 @@ export default function PulseHome() {
                 <p className="text-[11px] font-medium text-slate-400 mt-0.5 px-1">{item.sub}</p>
               </motion.div>
             ))}
+          </div>
+        </div>
+
+        {/* ── LIVE PULSE FEED (Institutional Design) ── */}
+        <div>
+          <div className="flex justify-between items-baseline mb-6">
+            <h3 className="text-[17px] font-bold text-navy tracking-tight">Live Pulse Feed</h3>
+            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Now
+            </span>
+          </div>
+          <div className="space-y-4">
+            {pulsePosts.length > 0 ? pulsePosts.map((post) => (
+              <motion.div 
+                key={post.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm shadow-slate-200/40"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[11px] font-bold text-navy">{post.author_name || 'Anonymous Student'}</span>
+                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{post.time_ago || 'Just now'}</span>
+                </div>
+                <p className="text-[14px] text-slate-600 leading-relaxed font-medium">
+                  {post.content}
+                </p>
+              </motion.div>
+            )) : (
+              <div className="py-12 bg-slate-50 rounded-[32px] border border-dashed border-slate-200 flex items-center justify-center">
+                <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">No active pulse detected</p>
+              </div>
+            )}
           </div>
         </div>
 

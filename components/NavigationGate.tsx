@@ -11,6 +11,7 @@ import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
 import { VETTED_ACCOUNTS } from '@/lib/utils/admin-seeding';
 import { seedSEClubItems } from '@/lib/utils/seed-se-club';
+import { seedKelabBolaItems } from '@/lib/utils/seed-kelab-bola';
 
 /**
  * 🏛️ Pulse Navigation Gate | Institutional Governance
@@ -49,7 +50,15 @@ export default function NavigationGate() {
           await setDoc(userRef, userData);
         } else if (userSnap.exists()) {
           userData = userSnap.data();
-          if (vetting && (userData.role !== vetting.role || userData.is_verified_runner !== vetting.is_verified_runner)) {
+          // 🏛️ SYNC REQ_S101: Sync all vetting flags if they differ from Firestore
+          const needsSync = vetting && (
+            userData.role !== vetting.role || 
+            userData.is_verified_runner !== vetting.is_verified_runner ||
+            userData.is_verified_merchant !== vetting.is_verified_merchant ||
+            userData.is_official !== vetting.is_official
+          );
+          
+          if (needsSync) {
             userData = { ...userData, ...vetting };
             await updateDoc(userRef, vetting);
           }
@@ -64,7 +73,7 @@ export default function NavigationGate() {
           
           const isMerchantPath = pathname?.startsWith('/merchant');
           const isAdminPath = pathname?.startsWith('/admin');
-          const isRunPath = pathname?.startsWith('/run');
+          const isRunPath = pathname?.startsWith('/run') || pathname?.startsWith('/runner');
           const isDevPage = pathname === '/dev';
 
           if (isDevPage) {
@@ -78,13 +87,24 @@ export default function NavigationGate() {
           } else if (userData.role === 'CLUB') {
              if (!isMerchantPath && !isAuthPage) router.replace('/merchant');
           } else if (userData.role === 'STUDENT') {
-             if (isAdminPath) router.replace('/home');
-             if (isMerchantPath) router.replace('/home');
+             // 🏛️ REQ_G001: STRICT ROLE LOCKDOWN
+             if (isAdminPath || isMerchantPath) {
+               router.replace('/home');
+             }
+             
+             // 🏛️ REQ_G102: UNVERIFIED LOCKDOWN
+             // Bar unverified students from sensitive logistics terminals
+             if (pathname?.startsWith('/run/terminal') && !userData.is_verified_runner) {
+               router.replace('/run');
+             }
           }
 
           // Trigger automated merchant seeding
           if (user.email === 'se-club@s.unikl.edu.my') {
             seedSEClubItems(user.uid);
+          }
+          if (user.email === 'kelab-bola@s.unikl.edu.my' || user.email === 'kelabbola@s.unikl.edu.my') {
+            seedKelabBolaItems(user.uid);
           }
         }
       } catch (error) {
@@ -108,14 +128,12 @@ export default function NavigationGate() {
     pathname?.startsWith('/run') || 
     pathname?.startsWith('/marketplace/');
 
-  // BottomNav Visibility (Dynamic Lockdown)
+  // BottomNav Visibility (Dynamic Suppression)
   const showBottomNav = 
     !isAuthPage && 
     !isRoot && 
     !pathname?.startsWith('/admin') && 
-    !pathname?.startsWith('/merchant') && 
-    !pathname?.startsWith('/run') &&
-    !pathname?.startsWith('/marketplace/');
+    !pathname?.startsWith('/merchant');
 
   if (checking && !isAuthPage && !isRoot) return (
     <div className="h-screen w-full bg-slate-50 flex items-center justify-center">

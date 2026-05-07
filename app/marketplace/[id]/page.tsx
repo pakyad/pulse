@@ -414,9 +414,25 @@ export default function ItemDetails() {
     });
 
     const fetchItem = async () => {
+      // 🏛️ Pulse Discovery Fallback Protocol
+      const FALLBACK_LIST = [
+        { id: 'd_pro_kit', title: 'Official UniKL Football Match-Day Kit (PRO)', price: 120, description: 'Institutional performance jersey for active match-day participation. Limited edition forest green / slate accents.', image_url: 'https://images.unsplash.com/photo-1551854838-212c50b4c184?q=80&w=600', seller_name: 'Kelab Bola UniKL', seller_id: 'kelabbola', is_official: true, category: 'Official', stock_count: 15 },
+        { id: 'd_scarf_fix', title: 'UniKL Football Club Scarf', price: 25, description: 'Knitted wool scarf for match days and chilly labs. Classic forest green/slate.', image_url: 'https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=600', seller_name: 'Kelab Bola UniKL', seller_id: 'kelabbola', is_official: true, category: 'Official', stock_count: 50 },
+        { id: 'd_jersey_2026', title: 'Official UniKL Football Jersey 2026', price: 95, description: 'The official 2026 home kit for UniKL Football Club. Breathable fabric with embroidered crest.', image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600', seller_name: 'Kelab Bola UniKL', seller_id: 'kelabbola', is_official: true, category: 'Official', stock_count: 22 }
+      ];
+
       const docRef = doc(db, 'items', id as string);
       const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) setItem({ id: docSnap.id, ...docSnap.data() });
+      
+      if (docSnap.exists()) {
+        setItem({ id: docSnap.id, ...docSnap.data() });
+      } else {
+        const fallback = FALLBACK_LIST.find(f => f.id === id);
+        if (fallback) {
+          console.log("🏛️ Rendering Fallback Asset:", id);
+          setItem(fallback);
+        }
+      }
       setPageLoading(false);
     };
     fetchItem();
@@ -441,36 +457,36 @@ export default function ItemDetails() {
       const uploadResult = await uploadBytes(receiptRef, receipt);
       const receiptUrl = await getDownloadURL(uploadResult.ref);
 
-      // 2. Prepare Order Data Payload
+      // 2. Prepare Order Data Payload (Institutional Handshake)
       const orderData = {
-        itemId: String(id),
+        item_id: String(id),
         title: String(item.title || "Marketplace Item"),
         price: Number(item.price),
-        imageUrl: String(item.image_url || ""),
-        receiptUrl: String(receiptUrl),
-        sellerId: String(item.seller_id),
-        sellerName: String(item.seller_name || "Verified Vendor"),
-        deliveryType: String(deliveryType),
-        dropOffLocation: dropOffLocation ? String(dropOffLocation) : null,
-        buyerName: String(profile?.full_name || 'Verified Student'),
+        image_url: String(item.image_url || ""),
+        receipt_url: String(receiptUrl),
+        seller_id: String(item.seller_id),
+        seller_name: String(item.seller_name || "Verified Vendor"),
+        delivery_type: String(deliveryType),
+        drop_off_location: dropOffLocation ? String(dropOffLocation) : null,
+        buyer_name: String(profile?.full_name || 'Verified Student'),
       };
 
       // 3. Call Cloud Transaction Function
       const placeOrder = httpsCallable(functions, 'placeOrder');
       
       // 🏛️ REQ_F105: Institutional Payload Handshake
-      // Ensure all logistics and verification data is preserved through the state strip
       const safeData = JSON.parse(JSON.stringify({
-        itemId: orderData.itemId,
+        itemId: orderData.item_id, // CF expects itemId in its destructuring, but we align internal fields
         price: orderData.price,
-        sellerId: orderData.sellerId,
+        seller_id: orderData.seller_id,
+        sellerId: orderData.seller_id, // Compatibility for legacy CF destructuring
         title: orderData.title,
-        imageUrl: orderData.imageUrl,
-        receiptUrl: orderData.receiptUrl,
-        buyerName: orderData.buyerName,
-        sellerName: orderData.sellerName,
-        deliveryType: orderData.deliveryType,
-        dropOffLocation: orderData.dropOffLocation,
+        imageUrl: orderData.image_url,
+        receiptUrl: orderData.receipt_url,
+        buyerName: orderData.buyer_name,
+        sellerName: orderData.seller_name,
+        deliveryType: orderData.delivery_type,
+        dropOffLocation: orderData.drop_off_location,
       }));
 
       console.log("Sending clean payload:", safeData);

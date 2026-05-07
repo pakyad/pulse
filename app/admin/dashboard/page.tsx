@@ -38,9 +38,9 @@ export default function AdminDashboard() {
         (err) => console.error("[Pulse Audit] PriceGuidelines Listener Failed:", err)
       );
 
-      // 2. Fetch Flagged Items (onSnapshot)
+      // 2. Fetch All Active Items for Monitoring (onSnapshot)
       const itemsUnsub = onSnapshot(
-        query(collection(db, "items"), where("adminStatus", "==", "pending_review")),
+        query(collection(db, "items"), where("status", "==", "active")),
         (snap) => {
           setFlaggedItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
         },

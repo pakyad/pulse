@@ -12,6 +12,7 @@ const SE_CLUB_ITEMS = [
         category: 'Apparel',
         image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600',
         is_official: true,
+        is_active: true,
         status: 'active'
     },
     {
@@ -22,6 +23,7 @@ const SE_CLUB_ITEMS = [
         category: 'Tech',
         image_url: 'https://images.unsplash.com/photo-1553406830-ef2513450d76?q=80&w=600',
         is_official: true,
+        is_active: true,
         status: 'active'
     },
     {
@@ -32,6 +34,7 @@ const SE_CLUB_ITEMS = [
         category: 'Stationery',
         image_url: 'https://images.unsplash.com/photo-1622219809260-ce065fc5277f?q=80&w=600',
         is_official: true,
+        is_active: true,
         status: 'active'
     },
     {
@@ -42,6 +45,7 @@ const SE_CLUB_ITEMS = [
         category: 'Tech',
         image_url: 'https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=600',
         is_official: true,
+        is_active: true,
         status: 'active'
     },
     {
@@ -52,6 +56,7 @@ const SE_CLUB_ITEMS = [
         category: 'Books',
         image_url: 'https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=600',
         is_official: true,
+        is_active: true,
         status: 'active'
     }
 ];

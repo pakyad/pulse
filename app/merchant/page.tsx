@@ -33,7 +33,21 @@ export default function MerchantDashboard() {
       if (!user) { router.push("/auth"); return; }
       
       const snap = await getDoc(doc(db, "users", user.uid));
-      setMerchant(snap.exists() ? { ...snap.data(), uid: user.uid } : { full_name: user.displayName || "Pulse Vendor", uid: user.uid });
+      const userData = snap.data();
+      setMerchant(snap.exists() ? { ...userData, uid: user.uid } : { full_name: user.displayName || "Pulse Vendor", uid: user.uid });
+      
+      // 🏛️ Pulse Institutional Repair: Force-align orphan assets
+      if (userData?.role === 'CLUB' || userData?.is_verified_merchant) {
+        console.log("🏛️ Registry Repair Initiated for Merchant:", user.uid);
+        const { seedKelabBolaItems } = await import('@/lib/utils/seed-kelab-bola');
+        const { seedSEClubItems } = await import('@/lib/utils/seed-se-club');
+        
+        if (user.email?.includes('kelabbola') || user.email?.includes('kelab-bola')) {
+          await seedKelabBolaItems(user.uid);
+        } else if (user.email?.includes('se-club')) {
+          await seedSEClubItems(user.uid);
+        }
+      }
       
       unsubItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid)), 
         (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
@@ -72,6 +86,7 @@ export default function MerchantDashboard() {
       status: "AWAITING_RUNNER",
       ready_at: serverTimestamp() 
     });
+    alert("Institutional Logistics: Order is now visible to the Runner Radar.");
   };
 
   const toggleItemStatus = async (itemId: string, currentStatus: string) => {
@@ -81,9 +96,9 @@ export default function MerchantDashboard() {
 
   // ── SHARED ANALYTICS LOGIC ──
   const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
-  const activeOrdersList = orders.filter(o => ["PENDING", "PREPARING", "AWAITING_RUNNER", "ON_THE_WAY", "PENDING_VENDOR"].includes(o.status));
+  const activeOrdersList = orders.filter(o => ["PENDING_VENDOR", "PREPARING", "AWAITING_RUNNER", "IN_TRANSIT", "ON_THE_WAY"].includes(o.status));
   
-  const urgentOrders = activeOrdersList.filter(o => o.status === 'PENDING' || o.status === 'PENDING_VENDOR');
+  const urgentOrders = activeOrdersList.filter(o => o.status === 'PENDING_VENDOR');
   const preparingOrders = activeOrdersList.filter(o => o.status === 'PREPARING');
 
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" /></div>;

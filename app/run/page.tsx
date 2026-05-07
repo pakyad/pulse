@@ -269,9 +269,8 @@ export default function RunModule() {
 
     if (status === 'loading') return <div className="min-h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-navy" /></div>;
 
-    if (profile?.is_verified_runner) {
-       return <CarrierTerminal />;
-    }
+    // 🏛️ SYNC: Verified runners now see the unified hub
+    // The separate terminal is accessible via the "Runner Hub" section below.
 
     return (
        <main className="min-h-screen bg-white antialiased text-navy overflow-x-hidden">
@@ -297,11 +296,49 @@ export default function RunModule() {
              </div>
 
              <footer className="pt-10">
-                <div className="space-y-1">
-                   {[
-                      { title: "Interested in helping the campus?", content: "Active UniKL MIIT students are eligible to join the Pulse Runner network." },
-                      { title: "What are the requirements?", content: "You must be a current student, maintain a 4.5+ star rating." }
-                   ].map((item, idx) => (
+                {profile?.is_verified_runner ? (
+                   <div className="space-y-8">
+                      <div className="flex justify-between items-baseline">
+                         <h3 className="text-[17px] font-bold text-navy tracking-tight">Runner Hub</h3>
+                         <button onClick={() => router.push('/run/terminal')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Open Terminal ↗</button>
+                      </div>
+                      
+                      {/* Institutional Bento Summary */}
+                      <div className="grid grid-cols-2 gap-4">
+                         <motion.div 
+                           whileTap={{ scale: 0.97 }}
+                           onClick={() => router.push('/run/terminal')}
+                           className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-[0_8px_0_0_#F1F5F9] active:shadow-none transition-all"
+                         >
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Payout</p>
+                            <p className="text-[20px] font-black text-emerald-600 tracking-tight leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
+                         </motion.div>
+                         <motion.div 
+                           whileTap={{ scale: 0.97 }}
+                           onClick={() => router.push('/run/terminal')}
+                           className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-[0_8px_0_0_#F1F5F9] active:shadow-none transition-all"
+                         >
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Status</p>
+                            <p className={`text-[16px] font-black tracking-tight leading-none ${profile?.is_online ? 'text-emerald-500' : 'text-slate-300'}`}>
+                               {profile?.is_online ? '• ONLINE' : 'OFFLINE'}
+                            </p>
+                         </motion.div>
+                      </div>
+
+                      <button 
+                         onClick={() => router.push('/run/terminal')}
+                         className="w-full h-[64px] bg-navy text-white rounded-[24px] font-bold text-[15px] flex items-center justify-center gap-3 shadow-xl shadow-navy/10 active:scale-95 transition-all"
+                      >
+                         <Zap size={20} className="text-amber-400 fill-amber-400" />
+                         Enter Carrier Terminal
+                      </button>
+                   </div>
+                ) : (
+                   <div className="space-y-1">
+                      {[
+                         { title: "Interested in helping the campus?", content: "Active UniKL MIIT students are eligible to join the Pulse Runner network." },
+                         { title: "What are the requirements?", content: "You must be a current student, maintain a 4.5+ star rating." }
+                      ].map((item, idx) => (
                       <div key={idx} className="border-b border-[#F2F2F7] last:border-0">
                          <button onClick={() => setIsFAQOpen(isFAQOpen === idx ? null : idx)} className="w-full py-4 flex items-center justify-between group">
                             <h3 className="text-[14px] font-semibold text-slate-500 tracking-tight text-left">{item.title}</h3>
@@ -332,7 +369,8 @@ export default function RunModule() {
                       </div>
                    ))}
                 </div>
-             </footer>
+             )}
+          </footer>
           </div>
 
           <AnimatePresence>
