@@ -11,7 +11,9 @@ export default function DesktopMerchant({
   activeOrdersCount, 
   attentionCount, 
   recentOrders,
-  onViewProof
+  onViewProof,
+  handleAcceptOrder,
+  handleCallRunner
 }: any) {
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
@@ -176,7 +178,10 @@ export default function DesktopMerchant({
                               <p className="text-[14px] font-bold text-slate-900">RM {Number(o.price).toFixed(2)}</p>
                               <p className="text-[12px] text-slate-400">{o.deliveryType || 'N/A'}</p>
                            </div>
-                           <button className="h-9 px-5 bg-blue-600 text-white rounded-md text-[12px] font-bold hover:bg-blue-700">
+                           <button 
+                             onClick={() => handleAcceptOrder(o.id)}
+                             className="h-9 px-5 bg-blue-600 text-white rounded-md text-[12px] font-bold hover:bg-blue-700"
+                           >
                               Accept
                            </button>
                         </div>
@@ -206,6 +211,19 @@ export default function DesktopMerchant({
                            </div>
                         </div>
                         <div className="flex items-center gap-4">
+                           {o.status === 'PREPARING' && (
+                             <button 
+                               onClick={() => handleCallRunner(o.id)}
+                               className="h-8 px-4 bg-slate-900 text-white rounded text-[11px] font-bold hover:bg-black transition-all shadow-sm"
+                             >
+                               Call Runner
+                             </button>
+                           )}
+                           {o.status === 'AWAITING_RUNNER' && (
+                             <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold border border-blue-100">
+                               Runner Paged
+                             </span>
+                           )}
                            <button 
                              onClick={() => onViewProof(o)}
                              className="h-8 px-4 border border-slate-200 rounded text-[11px] font-bold text-slate-600 hover:bg-slate-50"

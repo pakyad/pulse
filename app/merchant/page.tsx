@@ -126,6 +126,7 @@ export default function MerchantDashboard() {
           revenue={revenue}
           activeOrdersCount={activeOrdersList.length}
           recentOrders={orders}
+          handleAcceptOrder={handleAcceptOrder}
           handleCallRunner={handleCallRunner}
           onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
         />
