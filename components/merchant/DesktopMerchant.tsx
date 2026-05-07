@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search } from 'lucide-react';
+import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
 
 export default function DesktopMerchant({ 

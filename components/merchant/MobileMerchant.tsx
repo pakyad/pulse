@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck } from 'lucide-react';
+import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
 
 /**
