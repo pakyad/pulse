@@ -328,11 +328,12 @@ export default function MePage() {
                
                <div className="flex-1 flex flex-col justify-center">
                  <div className="flex items-center justify-between">
-                   <div>
-                     <h1 className="text-[22px] font-black text-slate-900 tracking-tight">
-                       {displayName}
-                     </h1>
-                   </div>
+                    <div className="space-y-1">
+                      <h1 className="text-[26px] font-black text-slate-900 tracking-tight leading-none">
+                        {displayName}
+                      </h1>
+                      <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Pulse Registry Member since {joinYear}</p>
+                    </div>
                    
                    {/* Refined Settings Action */}
                    <motion.button 

@@ -150,17 +150,18 @@ export default function PulseHome() {
         <FeaturedBanner slides={HERO_SLIDES} />
 
         {/* ── CAMPUS HUB ── */}
-        <div>
-          <h3 className="text-[17px] font-bold text-navy tracking-widest mb-5">Campus Hub</h3>
+        <div className="space-y-1">
+          <h3 className="text-[26px] font-black text-navy tracking-tight">Campus Hub</h3>
+          <p className="text-[14px] font-medium text-slate-400 leading-relaxed mb-6">Centralized directory for all institutional services and protocols.</p>
           <ServiceGrid />
         </div>
 
         {/* ── WHAT'S HAPPENING ── */}
-        <div>
+        <div className="space-y-1">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">What's happening</h3>
-              <p className="text-[11px] text-slate-400 font-medium mt-0.5">Campus news & highlights</p>
+              <h3 className="text-[26px] font-black text-navy tracking-tight">What's happening</h3>
+              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Broadcast updates and live announcements from campus nodes.</p>
             </div>
             <button onClick={() => router.push('/pulse')} className="text-[12px] font-bold text-accent flex items-center gap-1">
               Explore <ChevronRight size={14} />
@@ -188,9 +189,12 @@ export default function PulseHome() {
         </div>
 
         {/* ── LIVE PULSE FEED (Institutional Design) ── */}
-        <div>
+        <div className="space-y-1">
           <div className="flex justify-between items-baseline mb-6">
-            <h3 className="text-[17px] font-bold text-navy tracking-tight">Live Pulse Feed</h3>
+            <div>
+              <h3 className="text-[26px] font-black text-navy tracking-tight">Live Pulse Feed</h3>
+              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Real-time synchronization of student activity across the grid.</p>
+            </div>
             <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live Now
@@ -221,11 +225,11 @@ export default function PulseHome() {
         </div>
 
         {/* ── IN THE MARKET ── */}
-        <div>
+        <div className="space-y-1">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">In The Market</h3>
-              <p className="text-[11px] text-slate-400 font-medium mt-0.5">What students are buying</p>
+              <h3 className="text-[26px] font-black text-navy tracking-tight">In The Market</h3>
+              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Monitor recent asset acquisitions and marketplace liquidity.</p>
             </div>
             <button onClick={() => router.push('/marketplace')} className="text-[12px] font-bold text-accent flex items-center gap-1">
               See All <ArrowUpRight size={14} />
@@ -259,9 +263,12 @@ export default function PulseHome() {
         </div>
 
         {/* ── CAMPUS CLUBS (JOSH DESIGN PROTOCOL) ── */}
-        <div>
+        <div className="space-y-1">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-[17px] font-bold text-navy tracking-tight">Campus Clubs</h3>
+            <div>
+              <h3 className="text-[26px] font-black text-navy tracking-tight">Campus Clubs</h3>
+              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Authorized student organizations and creative faculty nodes.</p>
+            </div>
             <button onClick={() => router.push('/pulse')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Directory</button>
           </div>
           <div className="flex gap-7 -mx-6 px-6 overflow-x-auto no-scrollbar pb-6">
@@ -350,11 +357,11 @@ export default function PulseHome() {
         </div>
 
         {/* ── THE ESSENTIALS (BOB DESIGN PROTOCOL) ── */}
-        <div>
+        <div className="space-y-1">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">The Essentials</h3>
-              <p className="text-[11px] text-slate-400 font-medium mt-0.5">Academic & campus must-haves</p>
+              <h3 className="text-[26px] font-black text-navy tracking-tight">The Essentials</h3>
+              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Academic resources and mandatory institutional equipment.</p>
             </div>
             <button onClick={() => router.push('/marketplace')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">See All</button>
           </div>

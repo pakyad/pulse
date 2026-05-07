@@ -31,9 +31,9 @@ export default function MobileMerchant({
       {/* ── HEADER ── */}
       <header className="px-8 py-8 border-b-[0.5px] border-slate-100 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
         <div className="flex items-center justify-between">
-           <div>
-              <h1 className="text-[22px] font-black text-slate-900 tracking-tighter leading-none">{merchant?.full_name || 'Terminal'}</h1>
-              <p className="text-[11px] font-bold text-slate-400 mt-1.5 uppercase tracking-widest">Active Node Session</p>
+           <div className="space-y-1">
+              <h1 className="text-[26px] font-black text-slate-900 tracking-tighter leading-none">{merchant?.full_name || 'Terminal'}</h1>
+              <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Active node session for institutional fulfillment.</p>
            </div>
            <div className="flex items-center gap-4">
               <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 relative border border-slate-50">
@@ -71,13 +71,14 @@ export default function MobileMerchant({
          </section>
 
          {/* ── PENDING ACTIONS ── */}
-         <section className="space-y-6">
+         <section className="space-y-1">
             <div className="flex justify-between items-baseline">
-               <h2 className="text-[17px] font-black text-slate-900 tracking-tight flex items-center gap-3">
+               <h2 className="text-[26px] font-black text-slate-900 tracking-tight flex items-center gap-3">
                   Pending Handoff
                   <span className="text-[10px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg font-black uppercase tracking-widest">{urgentOrders?.length || 0}</span>
                </h2>
             </div>
+            <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Verify and prep pending orders for institutional distribution.</p>
             
             {urgentOrders?.length === 0 ? (
                <div className="py-16 bg-slate-50/30 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-200">
@@ -112,9 +113,10 @@ export default function MobileMerchant({
          </section>
 
          {/* ── ACTIVE PIPELINE ── */}
-         <section className="space-y-6">
-            <h2 className="text-[17px] font-black text-slate-900 tracking-tight">Active Pipeline</h2>
-            <div className="space-y-3">
+         <section className="space-y-1">
+            <h2 className="text-[26px] font-black text-slate-900 tracking-tight">Active Pipeline</h2>
+            <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Live telemetry of assets currently in the fulfillment loop.</p>
+            <div className="space-y-3 mt-6">
                {preparingOrders?.length === 0 ? (
                   <p className="text-[13px] text-slate-300 font-medium italic">Pipeline is clear.</p>
                ) : (
@@ -142,9 +144,10 @@ export default function MobileMerchant({
          </section>
 
          {/* ── SYSTEM DIRECTIVES ── */}
-         <section className="space-y-6">
-            <h2 className="text-[17px] font-black text-slate-900 tracking-tight">Node Directives</h2>
-            <div className="bg-slate-50/50 rounded-[40px] border border-slate-50 overflow-hidden">
+         <section className="space-y-1">
+            <h2 className="text-[26px] font-black text-slate-900 tracking-tight">Node Directives</h2>
+            <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Execute operational protocols to optimize node performance.</p>
+            <div className="bg-slate-50/50 rounded-[40px] border border-slate-50 overflow-hidden mt-6">
                {[
                   { id: 'verify', icon: ShieldCheck, title: 'Identity Registry', text: 'Submit student ID to unlock high-velocity transaction nodes.' },
                   { id: 'assets', icon: Zap, title: 'Liquidity Mastery', text: 'Optimize 1:1 image ratios for superior marketplace visibility.' },
@@ -186,9 +189,10 @@ export default function MobileMerchant({
          </section>
 
          {/* ── ASSET MANAGEMENT ── */}
-         <section className="space-y-6 pb-12">
-            <h2 className="text-[17px] font-black text-slate-900 tracking-tight">Asset Registry</h2>
-            <div className="space-y-4">
+         <section className="space-y-1 pb-12">
+            <h2 className="text-[26px] font-black text-slate-900 tracking-tight">Asset Registry</h2>
+            <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Manage institutional liquidity and inventory status nodes.</p>
+            <div className="space-y-4 mt-6">
                {topItems?.length === 0 ? (
                   <p className="text-[13px] text-slate-300 italic">No assets registered.</p>
                ) : (

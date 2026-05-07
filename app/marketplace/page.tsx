@@ -158,9 +158,12 @@ export default function MarketplacePage() {
 
         {/* ── 1. CAMPUS UPDATES (Institutional Style) ── */}
         <section>
-          <div className="px-6 mb-5 flex items-baseline justify-between">
-             <h3 className="text-[18px] font-semibold text-slate-900 tracking-tight">Institutional Sync</h3>
-             <button className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors">Archive</button>
+          <div className="px-6 mb-8 space-y-1">
+             <div className="flex items-baseline justify-between">
+                <h3 className="text-[26px] font-black text-slate-900 tracking-tight">Institutional Sync</h3>
+                <button className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors">Archive</button>
+             </div>
+             <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Synchronize with verified merchant nodes and institutional distributions.</p>
           </div>
           <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar pb-4">
             {OFFICIAL_CAMPAIGNS.map((camp) => (
@@ -189,9 +192,12 @@ export default function MarketplacePage() {
 
         {/* ── 2. CATEGORY PICKER (Institutional Squircles) ── */}
         <section>
-          <div className="px-6 mb-5 flex items-baseline justify-between">
-             <h3 className="text-[18px] font-semibold text-slate-900 tracking-tight">Browse Registry</h3>
-             <button className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors">Filter</button>
+          <div className="px-6 mb-8 space-y-1">
+             <div className="flex items-baseline justify-between">
+                <h3 className="text-[26px] font-black text-slate-900 tracking-tight">Browse Registry</h3>
+                <button className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors">Filter</button>
+             </div>
+             <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Navigate the decentralized student asset network and node clusters.</p>
           </div>
           <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-6">
             {CATEGORIES.map((cat) => (

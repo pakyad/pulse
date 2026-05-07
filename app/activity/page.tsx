@@ -108,11 +108,10 @@ function MerchantInsights({ profile, orders, items }: any) {
 
   return (
     <div className="flex flex-col space-y-10 animate-in fade-in duration-500 pb-32">
-      {/* ── INTELLIGENCE HEADER ── */}
       <section className="space-y-1">
-         <p className="text-[11px] font-bold text-blue-600 uppercase tracking-widest">UniKL Operational Intelligence</p>
-         <h2 className="text-[26px] font-bold text-slate-900 tracking-tight leading-tight">Merchant Insights Dashboard</h2>
-         <p className="text-[13px] text-slate-500 font-medium tracking-tight">Live telemetry for node: {profile?.full_name}</p>
+         <p className="text-[11px] font-bold text-blue-600 uppercase tracking-widest">Operational Intelligence</p>
+         <h2 className="text-[26px] font-black text-slate-900 tracking-tight leading-none">Merchant Insights</h2>
+         <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Live telemetry for your institutional merchant node and fulfillment status.</p>
       </section>
 
       {/* ── HIGH-LEVEL REGISTRY NODES ── */}
@@ -302,7 +301,7 @@ export default function ActivityPage() {
                   <button onClick={() => router.push('/home')} className="p-1 -ml-2 text-slate-300 hover:text-navy transition-colors">
                      <ArrowLeft size={22} />
                   </button>
-                  <h1 className="text-[26px] font-bold tracking-tight text-navy">Inbox</h1>
+                  <h1 className="text-[26px] font-black tracking-tight text-navy">Inbox</h1>
                </div>
                <div className="flex-1 max-w-[120px]">
                   <div className="h-9 bg-[#F6F7F9] rounded-full flex items-center px-4 gap-2">
