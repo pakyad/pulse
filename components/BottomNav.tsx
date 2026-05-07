@@ -97,7 +97,7 @@ export default function BottomNav() {
               </div>
 
               {/* iOS-Style Label Scaling */}
-              <span className={`text-[10px] font-bold tracking-tight transition-all duration-300 ${isActive ? 'text-slate-900 scale-105' : 'text-slate-400 opacity-60'}`}>
+              <span className={`text-[10px] font-bold tracking-widest transition-all duration-300 ${isActive ? 'text-slate-900 scale-105' : 'text-slate-400 opacity-60'}`}>
                 {item.name}
               </span>
 

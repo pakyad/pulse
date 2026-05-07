@@ -91,7 +91,7 @@ export default function SimplifiedPurchaseHub() {
           <button onClick={() => router.push(profile?.role === 'CLUB' ? '/merchant' : '/me')} className="text-slate-400 hover:text-slate-900 transition-all">
              <ChevronLeft size={24} />
           </button>
-          <h1 className="text-[17px] font-bold tracking-tight">
+          <h1 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">
              {profile?.role === 'CLUB' ? 'Sales Registry' : 'My Purchases'}
           </h1>
           <div className="w-6" /> 
@@ -201,7 +201,7 @@ function PurchaseCard({ order, router }: { order: any, router: any }) {
       >
          <div className="flex items-center justify-between pb-3 border-b border-slate-50">
             <div className="flex items-center gap-2">
-               <span className="text-[12px] font-bold text-slate-900">{order.seller_name || 'Pulse Entity'}</span>
+               <span className="text-[12px] font-bold text-slate-900 tracking-tight">{order.seller_name || 'Pulse Entity'}</span>
             </div>
             <span className={`text-[10px] font-bold uppercase tracking-widest ${order.status === 'CANCELLED' ? 'text-red-500' : isHistory ? 'text-green-600' : 'text-blue-600'}`}>
                {order.status.replace(/_/g, ' ')}

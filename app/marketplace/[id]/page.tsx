@@ -71,7 +71,7 @@ function MarziaDeliverySheet({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-sm flex items-end justify-center"
+      className="fixed inset-0 z-200 bg-slate-900/40 backdrop-blur-sm flex items-end justify-center"
       onClick={onClose}
     >
       <motion.div
@@ -256,7 +256,7 @@ export default function ItemDetails() {
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-slate-100">
       {/* ── TOP NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-6 py-6 flex items-center justify-between pointer-events-none">
+      <nav className="fixed top-0 left-0 right-0 z-100 px-6 py-6 flex items-center justify-between pointer-events-none">
         <button onClick={() => router.back()} className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-900 shadow-sm pointer-events-auto active:scale-90 transition-all">
           <ChevronLeft size={20} />
         </button>
@@ -341,7 +341,7 @@ export default function ItemDetails() {
         </main>
       </div>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-[100] bg-white/80 backdrop-blur-xl border-t border-slate-50 px-6 py-6 pb-10">
+      <footer className="fixed bottom-0 left-0 right-0 z-100 bg-white/80 backdrop-blur-xl border-t border-slate-50 px-6 py-6 pb-10">
          <div className="max-w-xl mx-auto">
             <button onClick={() => setShowDeliverySheet(true)} className="w-full h-16 bg-slate-900 text-white rounded-3xl font-black text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 active:scale-95 transition-all">
               Initiate Handshake <ArrowUpRight size={18} strokeWidth={3} />

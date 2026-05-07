@@ -97,3 +97,42 @@ export const deleteItemListing = async (itemId: string) => {
   const itemRef = doc(db, "items", itemId);
   return await deleteDoc(itemRef);
 };
+
+/**
+ * reportOrderIssue
+ * Synchronizes student conflicts with the Admin Dispute Mediation Terminal.
+ */
+export const reportOrderIssue = async (orderId: string, data: any, evidence?: File) => {
+  const { collection, addDoc, doc, updateDoc, serverTimestamp } = await import("firebase/firestore");
+  const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+  
+  let evidenceUrl = '';
+  if (evidence) {
+    const fileName = `${Date.now()}_dispute_${orderId}.jpg`;
+    const storageRef = ref(storage, `disputes/${orderId}/${fileName}`);
+    const uploadResult = await uploadBytes(storageRef, evidence);
+    evidenceUrl = await getDownloadURL(uploadResult.ref);
+  }
+
+  // 1. Create Dispute Record
+  await addDoc(collection(db, "disputes"), {
+    order_id: orderId,
+    buyer_id: data.buyer_id || 'UNKNOWN_BUYER',
+    seller_id: data.seller_id || 'UNKNOWN_SELLER',
+    reporter_name: data.reporter_name,
+    order_code: data.order_code,
+    reason: data.reason,
+    narrative: data.narrative,
+    evidence_url: evidenceUrl,
+    status: 'AWAITING_ADMIN',
+    created_at: serverTimestamp(),
+  });
+
+  // 2. Flag Order as DISPUTED
+  const orderRef = doc(db, "orders", orderId);
+  return await updateDoc(orderRef, {
+    is_disputed: true,
+    dispute_status: 'AWAITING_ADMIN',
+    updated_at: serverTimestamp()
+  });
+};

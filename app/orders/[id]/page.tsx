@@ -20,8 +20,11 @@ import {
   ArrowRight,
   Navigation,
   FileText,
-  Copy
+  Copy,
+  AlertTriangle,
+  Info
 } from 'lucide-react';
+import ReportIssueModal from '@/components/shared/ReportIssueModal';
 
 export default function EdgeToEdgeOrderStatus() {
   const router = useRouter();
@@ -29,6 +32,8 @@ export default function EdgeToEdgeOrderStatus() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -295,7 +300,35 @@ export default function EdgeToEdgeOrderStatus() {
                <p className="text-[11px] font-bold text-slate-400">Handshake ID: {order.id}</p>
                <p className="text-[11px] font-medium text-slate-300">Synchronized via Pulse Node 20 • Cluster Alpha</p>
             </div>
+
+            <div className="pt-4 flex flex-col items-center gap-4">
+               {order.is_disputed ? (
+                  <div className="flex items-center gap-2 text-red-500 bg-red-50 px-4 py-2 rounded-full border border-red-100">
+                     <AlertTriangle size={14} />
+                     <span className="text-[10px] font-black uppercase tracking-widest">Dispute Open: Awaiting Admin</span>
+                  </div>
+               ) : (
+                  <button 
+                    onClick={() => setIsReportModalOpen(true)}
+                    className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors flex items-center gap-2"
+                  >
+                     <AlertTriangle size={12} /> Report Issue
+                  </button>
+               )}
+               
+               <div className="flex items-center gap-2 opacity-50">
+                  <Info size={10} className="text-slate-400" />
+                  <p className="text-[9px] font-medium text-slate-400 italic">Directive: Handshake is legally binding unless a dispute node is initiated.</p>
+               </div>
+            </div>
          </footer>
+         
+         <ReportIssueModal 
+           isOpen={isReportModalOpen} 
+           onClose={() => setIsReportModalOpen(false)} 
+           order={order}
+           onSuccess={() => setReportSuccess(true)}
+         />
 
       </div>
 
