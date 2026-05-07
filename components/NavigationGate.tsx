@@ -12,6 +12,10 @@ import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 import { VETTED_ACCOUNTS } from '@/lib/utils/admin-seeding';
 import { seedSEClubItems } from '@/lib/utils/seed-se-club';
 
+/**
+ * 🏛️ Pulse Navigation Gate | Institutional Governance
+ * Enforces strict role isolation and layout barriers.
+ */
 export default function NavigationGate() {
   const pathname = usePathname();
   const router = useRouter();
@@ -20,52 +24,71 @@ export default function NavigationGate() {
   const [profile, setProfile] = useState<any>(null);
 
   const isAuthPage = pathname?.startsWith('/auth');
+  const isRoot = pathname === '/';
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const vetting = VETTED_ACCOUNTS.find(a => a.email.toLowerCase() === user.email?.toLowerCase());
+      if (!user) {
+        setRole(null);
+        setProfile(null);
+        setChecking(false);
+        // Redirect to auth if trying to access protected paths
+        if (!isAuthPage && !isRoot) router.replace('/auth');
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
         
-        try {
-          const userRef = doc(db, "users", user.uid);
-          const userSnap = await getDoc(userRef);
-          
-          let userData: any = null;
+        let userData: any = null;
+        const vetting = VETTED_ACCOUNTS.find(a => a.email.toLowerCase() === user.email?.toLowerCase());
 
-          if (!userSnap.exists() && vetting) {
-            // Initialize vetted account if missing from Firestore
-            userData = { ...vetting, created_at: new Date().toISOString() };
-            await setDoc(userRef, userData);
-          } else if (userSnap.exists()) {
-            userData = userSnap.data();
-            // Sync vetted roles if they drift
-            if (vetting && (userData.role !== vetting.role || userData.is_verified_runner !== vetting.is_verified_runner)) {
-              userData = { ...userData, ...vetting };
-              await updateDoc(userRef, vetting);
-            }
+        if (!userSnap.exists() && vetting) {
+          userData = { ...vetting, created_at: new Date().toISOString() };
+          await setDoc(userRef, userData);
+        } else if (userSnap.exists()) {
+          userData = userSnap.data();
+          if (vetting && (userData.role !== vetting.role || userData.is_verified_runner !== vetting.is_verified_runner)) {
+            userData = { ...userData, ...vetting };
+            await updateDoc(userRef, vetting);
           }
-
-          if (userData) {
-            setRole(userData.role);
-            setProfile(userData);
-
-            // Special Seeding for SE Club
-            if (user.email === 'se-club@s.unikl.edu.my') {
-              seedSEClubItems(user.uid);
-            }
-
-            // Routing Logic
-            if (userData.role === 'CLUB' && !pathname?.startsWith('/merchant')) {
-              router.replace('/merchant');
-            } else if (userData.role === 'STUDENT' && pathname?.startsWith('/merchant')) {
-              router.replace('/home');
-            }
-
-            // Runner Gating - Removed to allow students to access logistics directives on /run
-          }
-        } catch (error) {
-          console.error("Pulse Registry Shield Error:", error);
         }
+
+        if (userData) {
+          setRole(userData.role);
+          setProfile(userData);
+
+          // 🏛️ REQ_G001: ROLE ISOLATION LOGIC
+          // Prevent horizontal privilege escalation
+          
+          const isMerchantPath = pathname?.startsWith('/merchant');
+          const isAdminPath = pathname?.startsWith('/admin');
+          const isRunPath = pathname?.startsWith('/run');
+          const isDevPage = pathname === '/dev';
+
+          if (isDevPage) {
+            // Institutional bypass for development terminal
+            setChecking(false);
+            return;
+          }
+
+          if (userData.role === 'ADMIN') {
+             if (!isAdminPath && !isAuthPage) router.replace('/admin/dashboard');
+          } else if (userData.role === 'CLUB') {
+             if (!isMerchantPath && !isAuthPage) router.replace('/merchant');
+          } else if (userData.role === 'STUDENT') {
+             if (isAdminPath) router.replace('/home');
+             if (isMerchantPath) router.replace('/home');
+          }
+
+          // Trigger automated merchant seeding
+          if (user.email === 'se-club@s.unikl.edu.my') {
+            seedSEClubItems(user.uid);
+          }
+        }
+      } catch (error) {
+        console.error("Institutional Shield Failure:", error);
       }
       setChecking(false);
     });
@@ -73,27 +96,42 @@ export default function NavigationGate() {
     return () => unsubscribe();
   }, [pathname, router]);
 
-  // Only hide the global header on auth pages, root ('/'), me ('/me'), merchant/admin terminals, and active mission terminal.
-  const hideHeader = isAuthPage || pathname === '/' || pathname === '/me' || pathname === '/merchant' || pathname?.startsWith('/hub') || pathname?.startsWith('/run') || pathname?.startsWith('/run/active') || pathname?.startsWith('/me/orders') || pathname?.startsWith('/marketplace/');
-  const isMerchantTerminal = pathname?.startsWith('/merchant');
-  const isRunTerminal = pathname?.startsWith('/run') && profile?.is_verified_runner;
-  const isActiveMission = pathname?.startsWith('/run/active');
+  // ── LAYOUT VISIBILITY PROTOCOL ──
+  
+  // Header Visibility (Institutional Silence)
+  const hideHeader = 
+    isAuthPage || 
+    isRoot || 
+    pathname === '/me' || 
+    pathname?.startsWith('/merchant') || 
+    pathname?.startsWith('/admin') || 
+    pathname?.startsWith('/run') || 
+    pathname?.startsWith('/marketplace/');
 
-  // Block flash of student UI for Merchants
-  if (!isAuthPage && checking) return null;
-  if (role === 'CLUB' && !isMerchantTerminal) return null;
+  // BottomNav Visibility (Dynamic Lockdown)
+  const showBottomNav = 
+    !isAuthPage && 
+    !isRoot && 
+    !pathname?.startsWith('/admin') && 
+    !pathname?.startsWith('/merchant') && 
+    !pathname?.startsWith('/run') &&
+    !pathname?.startsWith('/marketplace/');
 
-  const isDeepView = pathname === '/activity' || pathname?.startsWith('/messages');
+  if (checking && !isAuthPage && !isRoot) return (
+    <div className="h-screen w-full bg-slate-50 flex items-center justify-center">
+       <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+    </div>
+  );
 
   return (
     <>
-      {!hideHeader && !pathname?.startsWith('/admin') && !isDeepView && <Header />}
+      {!hideHeader && <Header />}
       
-      {/* Global Runner Dynamic Island */}
+      {/* Global Runner Dynamic Island (Only for active logistics) */}
       <FloatingActiveTask />
 
-      {/* Hide Student BottomNav for Industrial Terminals (Merchant, Admin), Run Module, and Deep Views */}
-      {!isMerchantTerminal && !pathname?.startsWith('/admin') && !isAuthPage && !isDeepView && !isRunTerminal && <BottomNav />}
+      {/* Dynamic Navigation lockdown */}
+      {showBottomNav && <BottomNav />}
     </>
   );
 }

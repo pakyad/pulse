@@ -1,30 +1,46 @@
 'use client'
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { Home, Newspaper, Bike, Bell, User, ShoppingBag } from 'lucide-react';
+import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { Home, Newspaper, Bike, User, ShoppingBag, LayoutGrid } from 'lucide-react';
+import { motion } from 'framer-motion';
 
+/**
+ * 🏛️ Pulse Institutional Command Bar
+ * Role-aware navigation with strict layout isolation.
+ */
 export default function BottomNav() {
   const pathname = usePathname();
+  const [profile, setProfile] = useState<any>(null);
   const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     let unsubSnap: (() => void) | null = null;
+    let unsubProfile: (() => void) | null = null;
 
-    const unsubAuth = auth.onAuthStateChanged((user) => {
-      // Cleanup previous listener
+    const unsubAuth = auth.onAuthStateChanged(async (user) => {
       if (unsubSnap) unsubSnap();
+      if (unsubProfile) unsubProfile();
 
       if (user) {
-        // Listen for active PENDING handshakes to show the notification badge
+        // 1. Fetch Role Profile
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) setProfile(snap.data());
+
+        unsubProfile = onSnapshot(userRef, (s) => {
+          if (s.exists()) setProfile(s.data());
+        });
+
+        // 2. Handshake Notification Logic
         const q = query(
           collection(db, "transactions"),
           where("buyer_id", "==", user.uid),
           where("status", "==", "PENDING")
         );
-
         unsubSnap = onSnapshot(q, (snap) => {
           setNotificationCount(snap.docs.length);
         });
@@ -34,62 +50,71 @@ export default function BottomNav() {
     return () => {
       unsubAuth();
       if (unsubSnap) unsubSnap();
+      if (unsubProfile) unsubProfile();
     };
   }, []);
 
-  const navItems = [
-    { name: 'Home', path: '/home', icon: Home },
-    { name: 'Market', path: '/marketplace', icon: ShoppingBag },
-    { name: 'Pulse', path: '/pulse', icon: Newspaper, isCenter: true },
-    { name: 'Run', path: '/run', icon: Bike },
-    { name: 'Me', path: '/me', icon: User },
+  // ── ROLE-BASED NAVIGATION SCHEMA ──
+  const allItems = [
+    { name: 'Home', path: '/home', icon: Home, roles: ['STUDENT', 'ADMIN'] },
+    { name: 'Market', path: '/marketplace', icon: ShoppingBag, roles: ['STUDENT'] },
+    { name: 'Pulse', path: '/pulse', icon: Newspaper, roles: ['STUDENT'], isCenter: true },
+    { name: 'Run', path: '/run/terminal', icon: Bike, roles: ['STUDENT'] },
+    { name: 'Admin', path: '/admin/dashboard', icon: LayoutGrid, roles: ['ADMIN'] },
+    { name: 'Me', path: '/me', icon: User, roles: ['STUDENT', 'ADMIN'] },
   ];
 
+  // Filter items based on institutional role
+  const navItems = allItems.filter(item => {
+    if (!profile) return item.roles.includes('STUDENT');
+    return item.roles.includes(profile.role);
+  });
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-100 bg-white border-t border-[#E5E5E5] pb-2 shadow-[0_-1px_10px_rgba(0,0,0,0.02)]">
-      <div className="flex justify-around items-end h-[60px] max-w-lg mx-auto px-4">
+    <nav className="fixed bottom-0 left-0 right-0 z-100 bg-white/80 backdrop-blur-xl border-t-[0.5px] border-slate-200 pb-8 shadow-sm">
+      <div className="flex justify-around items-center h-[64px] max-w-lg mx-auto px-6">
         {navItems.map((item) => {
-          const isActive = pathname === item.path;
+          const isActive = pathname === item.path || (item.path !== '/home' && pathname?.startsWith(item.path));
           const Icon = item.icon;
 
           return (
             <Link 
-                key={item.name} 
-                href={item.path} 
-                className="flex-1 flex flex-col items-center justify-center relative py-1 transition-all active:scale-95 duration-200"
+              key={item.name} 
+              href={item.path} 
+              className="flex-1 flex flex-col items-center justify-center relative group"
             >
-              
-              {/* Notification Badge */}
-              {item.badge !== undefined && item.badge > 0 && (
-                <div className="absolute top-0 right-1/4 bg-[#FF3B30] text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10">
-                  {item.badge}
-                </div>
-              )}
-
-              {/* Icon Container with Center Highlight logic */}
-              <div className={`p-2 rounded-full mb-0.5 transition-all duration-300 ${item.isCenter ? (isActive ? 'bg-blue-500/10' : 'bg-blue-50/50') : ''}`}>
+              <div className="relative p-2 rounded-3xl transition-all duration-300">
                 <Icon 
-                  size={24} 
+                  size={22} 
                   strokeWidth={isActive ? 2.5 : 2}
-                  className={isActive ? 'text-[#007AFF]' : 'text-[#8E8E93]'} 
+                  className={`transition-colors duration-300 ${isActive ? 'text-slate-900' : 'text-slate-400'}`} 
                 />
+                
+                {/* Notification Badge */}
+                {item.name === 'Me' && notificationCount > 0 && (
+                  <div className="absolute top-1 right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white shadow-sm" />
+                )}
               </div>
 
-              {/* Label */}
-              <span className={`text-[10px] font-black  transition-colors ${isActive ? 'text-[#007AFF]' : 'text-[#8E8E93]'}`}>
+              {/* iOS-Style Label Scaling */}
+              <span className={`text-[10px] font-bold tracking-tight transition-all duration-300 ${isActive ? 'text-slate-900 scale-105' : 'text-slate-400 opacity-60'}`}>
                 {item.name}
               </span>
 
-              {/* iOS Active Indicator Dot */}
-              {isActive && !item.isCenter && (
-                <div className="w-1 h-1 bg-[#007AFF] rounded-full mt-0.5" />
+              {/* Institutional Active Marker */}
+              {isActive && (
+                <motion.div 
+                  layoutId="active-pill"
+                  className="absolute -bottom-1 w-1 h-1 bg-slate-900 rounded-full"
+                />
               )}
             </Link>
           );
         })}
       </div>
-      {/* Home Indicator line (iOS Style) */}
-      <div className="h-1 w-32 bg-[#E5E5E5] rounded-full mx-auto mt-3" />
+      
+      {/* Visual DNA: Home Indicator Space */}
+      <div className="h-1.5 w-32 bg-slate-100 rounded-full mx-auto mt-2 opacity-50" />
     </nav>
   );
 }

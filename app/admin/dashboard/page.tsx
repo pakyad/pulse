@@ -29,18 +29,22 @@ export default function AdminDashboard() {
       }
 
       // 1. Fetch Price Guidelines
-      const guidelinesUnsub = onSnapshot(collection(db, "PriceGuidelines"), (snap) => {
-        const g: Record<string, number> = {};
-        snap.docs.forEach(d => g[d.id] = d.data().maxBasePrice);
-        setGuidelines(g);
-      });
+      const guidelinesUnsub = onSnapshot(collection(db, "PriceGuidelines"), 
+        (snap) => {
+          const g: Record<string, number> = {};
+          snap.docs.forEach(d => g[d.id] = d.data().maxBasePrice);
+          setGuidelines(g);
+        },
+        (err) => console.error("[Pulse Audit] PriceGuidelines Listener Failed:", err)
+      );
 
       // 2. Fetch Flagged Items (onSnapshot)
       const itemsUnsub = onSnapshot(
         query(collection(db, "items"), where("adminStatus", "==", "pending_review")),
         (snap) => {
           setFlaggedItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-        }
+        },
+        (err) => console.error("[Pulse Audit] Items Listener Failed:", err)
       );
 
       // 3. Fetch Active Disputes (onSnapshot)
@@ -48,7 +52,8 @@ export default function AdminDashboard() {
         query(collection(db, "disputes"), where("status", "==", "AWAITING_ADMIN")),
         (snap) => {
           setDisputes(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => b.created_at?.toMillis?.() - a.created_at?.toMillis?.()));
-        }
+        },
+        (err) => console.error("[Pulse Audit] Disputes Listener Failed:", err)
       );
 
       setLoading(false);
@@ -184,7 +189,7 @@ export default function AdminDashboard() {
                     <h2 className="text-[22px] font-black text-[#1C1C1E] tracking-tight">Active Disputes</h2>
                  </div>
                  <div className="bg-red-50 px-4 py-2 rounded-2xl border border-red-100">
-                    <span className="text-[11px] font-black uppercase tracking-[0.1em] text-red-600">{disputes.length} UNRESOLVED</span>
+                    <span className="text-[11px] font-black uppercase tracking-widest text-red-600">{disputes.length} UNRESOLVED</span>
                  </div>
              </div>
              

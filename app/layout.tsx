@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen bg-white relative antialiased selection:bg-slate-100`}>
         <NavigationGate />
 

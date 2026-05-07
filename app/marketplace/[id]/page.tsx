@@ -325,7 +325,7 @@ function MarziaDeliverySheet({
               {/* ── MINIMALIST RECEIPT AREA ── */}
               <div className="space-y-3">
                 <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest px-2">Verification Proof</p>
-                <label className="block w-full h-[100px] rounded-3xl border-[1px] border-dashed border-slate-200 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-slate-50 transition-all group">
+                <label className="w-full h-[100px] rounded-3xl border border-dashed border-slate-200 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-slate-50 transition-all group">
                   <input 
                     type="file" 
                     className="hidden" 
@@ -347,7 +347,7 @@ function MarziaDeliverySheet({
               {/* ── SECURITY BADGE ── */}
               <div className="flex items-center justify-center gap-2.5 pt-4 pb-6">
                 <ShieldCheck size={16} className="text-emerald-500" />
-                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.1em]">Pulse Secure • Institutional Verification</span>
+                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Pulse Secure • Institutional Verification</span>
               </div>
               </motion.div>
             )}
@@ -458,11 +458,19 @@ export default function ItemDetails() {
       // 3. Call Cloud Transaction Function
       const placeOrder = httpsCallable(functions, 'placeOrder');
       
-      // Force stripping of Next.js state objects and include ALL required fields
+      // 🏛️ REQ_F105: Institutional Payload Handshake
+      // Ensure all logistics and verification data is preserved through the state strip
       const safeData = JSON.parse(JSON.stringify({
         itemId: orderData.itemId,
         price: orderData.price,
         sellerId: orderData.sellerId,
+        title: orderData.title,
+        imageUrl: orderData.imageUrl,
+        receiptUrl: orderData.receiptUrl,
+        buyerName: orderData.buyerName,
+        sellerName: orderData.sellerName,
+        deliveryType: orderData.deliveryType,
+        dropOffLocation: orderData.dropOffLocation,
       }));
 
       console.log("Sending clean payload:", safeData);
@@ -519,7 +527,7 @@ export default function ItemDetails() {
       {/* ── MINIMAL BACK NAV ── */}
       <button 
         onClick={() => router.back()}
-        className="fixed top-8 left-6 z-[110] flex items-center gap-1 text-slate-400 hover:text-navy transition-colors"
+        className="fixed top-8 left-6 z-110 flex items-center gap-1 text-slate-400 hover:text-navy transition-colors"
       >
         <ChevronLeft size={24} />
         <span className="text-[17px] font-medium">Home</span>
@@ -608,7 +616,7 @@ export default function ItemDetails() {
         {/* 3. TABS: DESCRIPTION & DETAILS */}
         <div className="space-y-10">
            <div className="flex gap-12 border-b border-slate-100">
-              <button className="pb-5 text-[16px] font-bold text-slate-900 border-b-[2px] border-accent uppercase tracking-widest">Description</button>
+              <button className="pb-5 text-[16px] font-bold text-slate-900 border-b-2 border-accent uppercase tracking-widest">Description</button>
               <button className="pb-5 text-[16px] font-bold text-slate-300 uppercase tracking-widest">Specifications</button>
            </div>
            
@@ -681,7 +689,7 @@ export default function ItemDetails() {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-32 left-8 right-8 z-[500] bg-black text-white rounded-2xl p-6 shadow-2xl flex items-center gap-4 border border-white/10"
+            className="fixed bottom-32 left-8 right-8 z-500 bg-black text-white rounded-2xl p-6 shadow-2xl flex items-center gap-4 border border-white/10"
           >
             <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />

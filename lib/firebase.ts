@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, setPersistence, inMemoryPersistence } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import { getFunctions } from "firebase/functions";
 
@@ -48,10 +48,10 @@ if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' && typeof window !== 'undef
   }
 }
 
-// ZERO-DISK PERSISTENCE PROTOCOL
-// Forces the identity session to reside in RAM only, bypassing the full C: drive.
+// 🏛️ INSTITUTIONAL PERSISTENCE PROTOCOL
+// Upgraded to browserLocalPersistence to ensure session continuity across navigations.
 if (typeof window !== 'undefined') {
-  setPersistence(auth, inMemoryPersistence)
+  setPersistence(auth, browserLocalPersistence)
     .catch((err) => console.error("Persistence Handshake Failed:", err));
 }
 

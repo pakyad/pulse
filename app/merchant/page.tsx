@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 import DesktopMerchant from '@/components/merchant/DesktopMerchant';
 import MobileMerchant from '@/components/merchant/MobileMerchant';
@@ -57,18 +57,21 @@ export default function MerchantDashboard() {
     };
   }, [router]);
 
-  // Shared Logic
-  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
-  const activeOrdersList = orders.filter(o => ["PENDING", "PREPARING", "PACKED", "AWAITING_RUNNER", "ON_THE_WAY", "PENDING_VENDOR"].includes(o.status));
-  const activeOrdersCount = activeOrdersList.length;
-  const attentionCount = activeOrdersList.filter(o => o.status === 'PENDING' || o.status === 'PENDING_VENDOR').length;
-  
-  const urgentOrders = activeOrdersList.filter(o => o.status === 'PENDING' || o.status === 'PENDING_VENDOR').slice(0, 2);
-  const recentOrders = orders.slice(0, 3);
-  const topItems = items.slice(0, 2);
-
+  // 🏛️ REQ_L101: THE LOGISTICS BRIDGE
+  // Transitions order from Merchant Prep to Runner Radar
   const handleAcceptOrder = async (orderId: string) => {
-    await updateDoc(doc(db, "orders", orderId), { status: "PREPARING" });
+    await updateDoc(doc(db, "orders", orderId), { 
+      status: "PREPARING",
+      accepted_at: serverTimestamp() 
+    });
+  };
+
+  const handleCallRunner = async (orderId: string) => {
+    // Exact status match for @/app/run/terminal/page.tsx radar query
+    await updateDoc(doc(db, "orders", orderId), { 
+      status: "AWAITING_RUNNER",
+      ready_at: serverTimestamp() 
+    });
   };
 
   const toggleItemStatus = async (itemId: string, currentStatus: string) => {
@@ -76,16 +79,14 @@ export default function MerchantDashboard() {
     await updateDoc(doc(db, "items", itemId), { status: newStatus });
   };
 
-  const handleViewProof = (order: any) => {
-    setSelectedOrder(order);
-    setIsProofOpen(true);
-  };
+  // ── SHARED ANALYTICS LOGIC ──
+  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
+  const activeOrdersList = orders.filter(o => ["PENDING", "PREPARING", "AWAITING_RUNNER", "ON_THE_WAY", "PENDING_VENDOR"].includes(o.status));
+  
+  const urgentOrders = activeOrdersList.filter(o => o.status === 'PENDING' || o.status === 'PENDING_VENDOR');
+  const preparingOrders = activeOrdersList.filter(o => o.status === 'PREPARING');
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center">
-      <div className="w-8 h-8 border-[1.5px] border-[#F2F2F7] border-t-[#1C1C1E] rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" /></div>;
 
   return (
     <>
@@ -93,22 +94,24 @@ export default function MerchantDashboard() {
         <MobileMerchant 
           merchant={merchant}
           revenue={revenue}
-          activeOrdersCount={activeOrdersCount}
+          activeOrdersCount={activeOrdersList.length}
           urgentOrders={urgentOrders}
-          topItems={topItems}
-          recentOrders={recentOrders}
+          preparingOrders={preparingOrders}
+          topItems={items.slice(0, 5)}
+          recentOrders={orders.slice(0, 10)}
           handleAcceptOrder={handleAcceptOrder}
+          handleCallRunner={handleCallRunner}
           toggleItemStatus={toggleItemStatus}
-          onViewProof={handleViewProof}
+          onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
         />
       ) : (
         <DesktopMerchant 
           merchant={merchant}
           revenue={revenue}
-          activeOrdersCount={activeOrdersCount}
-          attentionCount={attentionCount}
-          recentOrders={recentOrders}
-          onViewProof={handleViewProof}
+          activeOrdersCount={activeOrdersList.length}
+          recentOrders={orders}
+          handleCallRunner={handleCallRunner}
+          onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
         />
       )}
 

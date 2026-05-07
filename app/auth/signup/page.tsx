@@ -93,7 +93,7 @@ export default function PerfectSignUp() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-8 left-6 right-6 z-[2000] p-4 bg-red-600 text-white rounded-2xl shadow-2xl flex items-start gap-4"
+            className="fixed top-8 left-6 right-6 z-2000 p-4 bg-red-600 text-white rounded-2xl shadow-2xl flex items-start gap-4"
           >
             <AlertCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">

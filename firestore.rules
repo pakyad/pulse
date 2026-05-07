@@ -5,12 +5,16 @@ service cloud.firestore {
     // ── INSTITUTIONAL HELPERS (Optimized for evaluation limits) ──
     function isSignedIn() { return request.auth != null; }
     
-    // Static check for SuperAdmin to prevent evaluation loop in lists
     function isSuperAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'admin@pulse.com' || 
         request.auth.token.email == 'official@pulse.com'
       );
+    }
+
+    // 🛡️ GLOBAL ADMIN OVERRIDE
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
     }
 
     // ── USER PROFILES ──
@@ -61,6 +65,12 @@ service cloud.firestore {
     match /delivery_jobs/{id} { 
       allow read, list: if isSignedIn();
       allow write: if isSignedIn();
+    }
+
+    match /disputes/{id} {
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSuperAdmin();
     }
   }
 }

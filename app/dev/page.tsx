@@ -26,6 +26,13 @@ const TEST_ACCOUNTS = [
         fullName: 'Kelab Bola UniKL',
         role: 'SELLER',
         data: { is_official: true, is_verified_runner: false, seller_name: 'Kelab Bola UniKL', photo_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ball' }
+    },
+    {
+        email: 'se-club@s.unikl.edu.my',
+        password: 'password123',
+        fullName: 'Software Engineering Club',
+        role: 'CLUB',
+        data: { is_official: true, is_verified_merchant: true, seller_name: 'SE Club', photo_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Tech' }
     }
 ];
 
@@ -86,6 +93,7 @@ export default function DevSeedPage() {
                     <ul className="space-y-1 text-sm text-slate-600">
                         <li>iyad.mohmad@s.unikl.edu.my (Runner)</li>
                         <li>muhaimin@s.unikl.edu.my (Buyer)</li>
+                        <li>se-club@s.unikl.edu.my (Merchant)</li>
                         <li>kelabbola@s.unikl.edu.my (Seller)</li>
                     </ul>
                 </div>

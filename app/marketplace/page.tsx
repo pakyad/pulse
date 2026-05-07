@@ -242,7 +242,11 @@ export default function MarketplacePage() {
         )}
       </AnimatePresence>
 
-      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <SearchOverlay 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+        items={discoveryItems}
+      />
 
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
