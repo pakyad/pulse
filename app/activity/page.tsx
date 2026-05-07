@@ -108,74 +108,77 @@ function MerchantInsights({ profile, orders, items }: any) {
 
   return (
     <div className="flex flex-col space-y-10 animate-in fade-in duration-500 pb-32">
-      <section className="space-y-1">
-         <p className="text-[11px] font-bold text-blue-600 uppercase tracking-widest">Operational Intelligence</p>
-         <h2 className="text-[22px] font-black text-slate-900 tracking-tight leading-none">Merchant Insights</h2>
-         <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Live telemetry for your institutional merchant node and fulfillment status.</p>
+      <section className="space-y-4">
+         {/* Smart Alert Node */}
+         <div className="p-4 bg-blue-600 rounded-[28px] text-white flex items-start gap-4 shadow-lg shadow-blue-600/20">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+               <TrendingUp size={20} />
+            </div>
+            <div className="space-y-1">
+               <p className="text-[13px] font-bold">Event Alert: Sports Week</p>
+               <p className="text-[11px] text-blue-100 leading-tight">High demand expected from the Sports Complex zone. Increase stock for drinks and jerseys.</p>
+            </div>
+         </div>
+
+         <div className="space-y-1">
+            <h2 className="text-[24px] font-bold text-slate-900 tracking-tight">Insights</h2>
+            <p className="text-[14px] text-slate-400">Deep-dive into your shop's campus performance.</p>
+         </div>
       </section>
 
       {/* ── HIGH-LEVEL REGISTRY NODES ── */}
-      <div className="space-y-4">
-         <div className="flex items-center gap-2 px-1">
-            <Info size={12} className="text-slate-400" />
-            <p className="text-[10px] font-medium text-slate-400">Registry nodes show aggregate liquidity and fulfillment integrity for the current cycle.</p>
+      <div className="grid grid-cols-2 gap-4">
+         <div className="p-6 border border-slate-100 rounded-[32px] bg-white shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Total Earnings</p>
+            <p className="text-[22px] font-bold text-slate-900">RM {totalRevenue.toFixed(2)}</p>
+            <p className="text-[10px] text-emerald-500 font-bold mt-1">+14% vs last week</p>
          </div>
-         <div className="grid grid-cols-2 gap-4">
-            <div className="p-5 border border-slate-100 rounded-3xl bg-white shadow-sm">
-               <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp size={16} className="text-blue-600" />
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Revenue Flow</p>
-               </div>
-               <p className="text-[20px] font-bold text-slate-900 tracking-tight">RM {totalRevenue.toFixed(2)}</p>
-               <p className="text-[11px] text-emerald-500 font-bold mt-2 flex items-center gap-1">
-                  <ArrowUpRight size={12} /> +12% Cycle
-               </p>
-            </div>
-            <div className="p-5 border border-slate-100 rounded-3xl bg-white shadow-sm">
-               <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle2 size={16} className="text-emerald-600" />
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fulfillment</p>
-               </div>
-               <p className="text-[20px] font-bold text-slate-900 tracking-tight">{completionRate}%</p>
-               <p className="text-[11px] text-slate-400 font-bold mt-2 uppercase">Institutional Avg: 84%</p>
-            </div>
+         <div className="p-6 border border-slate-100 rounded-[32px] bg-white shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Prep Speed</p>
+            <p className="text-[22px] font-bold text-slate-900">8.4 min</p>
+            <p className="text-[10px] text-blue-500 font-bold mt-1">Faster than avg.</p>
          </div>
       </div>
 
       {/* ── CAMPUS HOTSPOT INTELLIGENCE ── */}
+      <section className="space-y-6">
+         <div className="space-y-1">
+            <h3 className="text-[16px] font-bold text-slate-900">The Campus Pulse</h3>
+            <p className="text-[12px] text-slate-400">Hourly order traffic across UniKL.</p>
+         </div>
+         <div className="h-[120px] flex items-end justify-between gap-1 px-2">
+            {[30, 45, 60, 90, 100, 70, 40, 20, 15, 10].map((h, i) => (
+               <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                  <div className={`w-full rounded-t-lg transition-all duration-700 ${i === 4 ? 'bg-blue-600' : 'bg-slate-100'}`} style={{ height: `${h}%` }} />
+                  <span className="text-[8px] font-bold text-slate-300">{8 + i}h</span>
+               </div>
+            ))}
+         </div>
+         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <p className="text-[11px] font-medium text-slate-500 text-center">Peak rush detected between <span className="font-bold text-slate-900">12:00 PM - 2:00 PM</span>.</p>
+         </div>
+      </section>
+
       <section className="space-y-4">
-         <div className="flex items-center justify-between">
-            <h3 className="text-[14px] font-bold text-slate-900 flex items-center gap-2 tracking-tight">
-               <MapPin size={16} className="text-slate-400" />
-               Campus Demand Zones
-            </h3>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">UniKL Registry</span>
-         </div>
-         <div className="flex items-center gap-2 px-1">
-            <Info size={12} className="text-slate-400" />
-            <p className="text-[10px] font-medium text-slate-400 italic">Directive: Target zones with 'up' trends to maximize asset visibility during peak traffic.</p>
-         </div>
-         <div className="grid grid-cols-2 gap-3">
-            {buildingStats.map((stat) => (
-               <div key={stat.name} className="p-4 border border-slate-100 rounded-2xl bg-slate-50/30 flex flex-col justify-between h-[90px]">
-                  <p className="text-[11px] font-bold text-slate-500 leading-tight">{stat.name}</p>
-                  <div className="flex items-end justify-between">
-                     <p className="text-[20px] font-bold text-slate-900">{stat.value}</p>
-                     <div className={`w-1.5 h-1.5 rounded-full ${stat.trend === 'up' ? 'bg-emerald-500' : stat.trend === 'down' ? 'bg-rose-500' : 'bg-slate-300'}`} />
-                  </div>
+         <h3 className="text-[16px] font-bold text-slate-900">Faculty Reach</h3>
+         <div className="space-y-3">
+            {[
+               { name: 'MIIT (Tech)', color: 'bg-blue-500', pct: '62%' },
+               { name: 'Business School', color: 'bg-emerald-500', pct: '24%' },
+               { name: 'Engineering', color: 'bg-rose-500', pct: '14%' }
+            ].map(f => (
+               <div key={f.name} className="flex items-center gap-4 p-4 border border-slate-50 rounded-[24px]">
+                  <div className={`w-2 h-2 rounded-full ${f.color}`} />
+                  <p className="text-[13px] font-bold text-slate-700 flex-1">{f.name}</p>
+                  <p className="text-[13px] font-black text-slate-900">{f.pct}</p>
                </div>
             ))}
          </div>
       </section>
 
       {/* ── ASSET CATEGORY DISTRIBUTION ── */}
-      <section className="p-6 border border-slate-100 rounded-[32px] bg-white">
-         <div className="flex items-center justify-between mb-6">
-            <h3 className="text-[14px] font-bold text-slate-900 tracking-tight">Revenue per Asset Class</h3>
-            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
-               <Info size={10} /> Data monitors liquidity per faculity node.
-            </div>
-         </div>
+      <section className="p-8 border border-slate-100 rounded-[36px] bg-white">
+         <h3 className="text-[16px] font-bold text-slate-900 mb-6">Sales by Category</h3>
          <div className="space-y-5">
             {categoryStats.map((cat) => (
                <div key={cat.label} className="space-y-2">
@@ -193,46 +196,28 @@ function MerchantInsights({ profile, orders, items }: any) {
 
       {/* ── LOGISTICS HANDSHAKE EFFICIENCY ── */}
       <section className="space-y-4">
-         <h3 className="text-[14px] font-bold text-slate-900 flex items-center gap-2 tracking-tight">
-            <Clock size={16} className="text-slate-400" />
-            Operational Handshake Metrics
-         </h3>
-         <div className="flex items-center gap-2 px-1">
-            <Info size={12} className="text-slate-400" />
-            <p className="text-[10px] font-medium text-slate-400 italic">Instruction: Optimize prep cycles to reduce the Handshake latency below 10m.</p>
-         </div>
-         <div className="p-6 border border-slate-100 rounded-[32px] bg-slate-900 text-white relative overflow-hidden shadow-xl shadow-slate-900/10">
-            <div className="relative z-10 grid grid-cols-2 gap-8">
-               <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Avg Prep Time</p>
-                  <p className="text-[22px] font-bold">12.4m</p>
-                  <div className="mt-2 h-1 w-12 bg-blue-500 rounded-full" />
-               </div>
-               <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pickup Delay</p>
-                  <p className="text-[22px] font-bold">4.2m</p>
-                  <div className="mt-2 h-1 w-12 bg-emerald-500 rounded-full" />
-               </div>
+         <h3 className="text-[16px] font-bold text-slate-900">Average Times</h3>
+         <div className="p-8 bg-slate-900 text-white rounded-[40px] grid grid-cols-2 gap-8 shadow-xl shadow-slate-900/10">
+            <div>
+               <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Preparation</p>
+               <p className="text-[24px] font-bold">12.4m</p>
             </div>
-            <div className="absolute -right-8 -bottom-8 opacity-10">
-               <TrendingUp size={120} strokeWidth={1} />
+            <div>
+               <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Pickup</p>
+               <p className="text-[24px] font-bold">4.2m</p>
             </div>
          </div>
       </section>
 
       {/* ── TRUST & STANDING NODES ── */}
       <section className="grid grid-cols-2 gap-4">
-         <div className="p-5 border border-slate-100 rounded-3xl bg-slate-50/50">
-            <Users size={18} className="text-slate-400 mb-3" />
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Buyer Loyalty</p>
-            <p className="text-[18px] font-bold text-slate-900 mt-1">64.2%</p>
-            <p className="text-[10px] text-slate-400 mt-1">Return purchase rate</p>
+         <div className="p-6 border border-slate-50 rounded-[32px] bg-slate-50/30">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Returning Buyers</p>
+            <p className="text-[20px] font-bold text-slate-900">64.2%</p>
          </div>
-         <div className="p-5 border border-slate-100 rounded-3xl bg-slate-50/50">
-            <Star size={18} className="text-amber-400 mb-3" />
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pulse Status</p>
-            <p className="text-[18px] font-bold text-slate-900 mt-1">Silver Tier</p>
-            <p className="text-[10px] text-slate-400 mt-1">Top 15% in UniKL</p>
+         <div className="p-6 border border-slate-50 rounded-[32px] bg-slate-50/30">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Shop Tier</p>
+            <p className="text-[20px] font-bold text-slate-900">Silver</p>
          </div>
       </section>
 
@@ -352,22 +337,22 @@ export default function ActivityPage() {
 
       {/* RENDER MERCHANT BOTTOM NAV IF ROLE IS CLUB */}
       {profile?.role === 'CLUB' && (
-         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-x border-slate-50 pb-8 pt-3 px-10 z-30 flex justify-between items-center shadow-sm max-w-md mx-auto">
-            <button onClick={() => router.push('/merchant')} className="flex flex-col items-center gap-1 group">
-               <LayoutGrid size={20} className="text-slate-400 group-active:text-blue-600 transition-colors" />
-               <span className="text-[10px] font-bold text-slate-400">Dashboard</span>
+         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-[0.5px] border-slate-100 pb-8 pt-4 px-10 z-50 flex justify-between items-center shadow-[0_-10px_40px_rgba(0,0,0,0.02)] max-w-md mx-auto">
+            <button onClick={() => router.push('/merchant')} className="flex flex-col items-center gap-1.5 transition-all active:scale-90">
+               <LayoutGrid size={22} className="text-slate-300" strokeWidth={2} />
+               <span className="text-[12px] font-bold text-slate-400">Dashboard</span>
             </button>
-            <button onClick={() => router.push('/me/orders')} className="flex flex-col items-center gap-1 group">
-               <ClipboardList size={20} className="text-slate-400 group-active:text-blue-600 transition-colors" />
-               <span className="text-[10px] font-bold text-slate-400">History</span>
+            <button onClick={() => router.push('/me/orders')} className="flex flex-col items-center gap-1.5 transition-all active:scale-90">
+               <ClipboardList size={22} className="text-slate-300" strokeWidth={2} />
+               <span className="text-[12px] font-bold text-slate-400">History</span>
             </button>
-            <button onClick={() => router.push('/activity')} className="flex flex-col items-center gap-1 group">
-               <BarChart3 size={20} className="text-blue-600" />
-               <span className="text-[10px] font-bold text-blue-600">Insights</span>
+            <button onClick={() => router.push('/activity')} className="flex flex-col items-center gap-1.5 transition-all active:scale-90">
+               <BarChart3 size={22} className="text-blue-600" strokeWidth={2.5} />
+               <span className="text-[12px] font-bold text-blue-600">Insights</span>
             </button>
-            <button onClick={() => router.push('/me')} className="flex flex-col items-center gap-1 group">
-               <User size={20} className="text-slate-400 group-active:text-blue-600 transition-colors" />
-               <span className="text-[10px] font-bold text-slate-400">Account</span>
+            <button onClick={() => router.push('/me')} className="flex flex-col items-center gap-1.5 transition-all active:scale-90">
+               <User size={22} className="text-slate-300" strokeWidth={2} />
+               <span className="text-[12px] font-bold text-slate-400">Account</span>
             </button>
          </nav>
       )}

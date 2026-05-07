@@ -7,24 +7,15 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ChevronLeft, 
-  Package, 
-  MapPin, 
-  ChevronRight, 
-  Clock, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Truck,
-  Zap,
-  Activity,
-  ArrowRight,
-  Navigation,
-  FileText,
-  Copy,
-  AlertTriangle,
-  Info
+  CheckCircle2, Package, Bike, ArrowLeft, 
+  Clock, ShieldCheck, MapPin, Receipt, 
+  ExternalLink, Info, AlertTriangle, MessageSquare,
+  ShieldAlert, ChevronLeft, ChevronRight, Truck, Zap, Activity,
+  Navigation
 } from 'lucide-react';
+import VoxelStatus, { VoxelPulse, VoxelRadar } from '@/components/shared/VoxelStatus';
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
+import { reportOrderIssue } from '@/lib/marketplace-utils';
 
 export default function EdgeToEdgeOrderStatus() {
   const router = useRouter();
@@ -61,76 +52,50 @@ export default function EdgeToEdgeOrderStatus() {
   }, [id, router]);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin" />
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center space-y-4">
+       <VoxelRadar size={40} className="text-blue-500" />
+       <p className="text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing Registry...</p>
+    </div>
+  );
+  
+  if (!order) return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-10 text-center space-y-6">
+       <ShieldAlert size={48} className="text-slate-200" />
+       <div className="space-y-2">
+         <h1 className="text-[20px] font-black text-slate-900 tracking-tight">Node Not Found</h1>
+         <p className="text-[14px] text-slate-400 font-medium">This transaction does not exist in the Pulse registry.</p>
+       </div>
+       <button onClick={() => router.push('/me')} className="h-14 px-8 bg-slate-900 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest">Return to Base</button>
     </div>
   );
 
-  if (!order) {
-    return (
-      <div className="min-h-screen bg-[#FDFDFD] flex flex-col font-sans p-8 items-center justify-center space-y-6">
-        <div className="w-20 h-20 bg-slate-50 rounded-[28px] flex items-center justify-center text-slate-200 border border-slate-100">
-           <Package size={32} />
-        </div>
-        <div className="text-center space-y-2">
-           <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Mission Node Lost</h2>
-           <p className="text-[14px] text-slate-400 font-medium max-w-[240px]">This order registry could not be synchronized. Return to the main hub.</p>
-        </div>
-        <button onClick={() => router.push('/me')} className="h-[60px] px-8 bg-slate-900 text-white rounded-[24px] font-black text-[13px] uppercase tracking-widest shadow-xl shadow-black/10">Return Home</button>
-      </div>
-    );
-  }
-
-  const getStatusInfo = (status: string) => {
-    switch (status) {
-      case 'PENDING': 
-      case 'PENDING_VENDOR':
-        return { phase: 1, title: 'Registry Validating', subtext: 'Order awaiting vendor handshake.' };
-      case 'PREPARING': 
-      case 'PACKED':
-      case 'CONFIRMED':
-        return { phase: 2, title: 'Node Preparation', subtext: 'Seller is packing your assets.' };
-      case 'AWAITING_RUNNER': 
-        return { phase: 3, title: 'Logistics Call', subtext: 'Awaiting a local peer runner.' };
-      case 'ON_THE_WAY': 
-      case 'IN_TRANSIT':
-        return { phase: 4, title: 'Logistics Intercept', subtext: 'Runner heading to the vendor node.' };
-      case 'PICKED_UP':
-        return { phase: 5, title: 'Active Transit', subtext: 'Assets in transit to your hub.' };
-      case 'COMPLETED': 
-      case 'ARRIVED':
-      case 'DELIVERED':
-        return { phase: 6, title: 'Mission Complete', subtext: 'Assets secured at drop-off.' };
-      default: 
-        return { phase: 1, title: 'Syncing...', subtext: 'Initializing registry...' };
-    }
-  };
-
-  const { phase, title, subtext } = getStatusInfo(order.status);
-
-  const formatTime = (dateObj: any) => {
-    if (!dateObj) return '';
-    try {
-      const d = dateObj.toDate ? dateObj.toDate() : new Date(dateObj);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch(e) { return ''; }
-  };
-
-  const orderTime = formatTime(order.created_at) || "10:00 AM";
-
+  const status = (order.status || 'PENDING').toUpperCase();
   const phases = [
-    { id: 1, label: 'Placed' },
-    { id: 2, label: 'Preparing' },
-    { id: 3, label: 'Runner' },
-    { id: 4, label: 'Intercept' },
-    { id: 5, label: 'Transit' },
-    { id: 6, label: 'Arrived' }
+    { id: 1, label: 'Order Placement', key: 'PENDING_VENDOR' },
+    { id: 2, label: 'Merchant Prep', key: 'PREPARING' },
+    { id: 3, label: 'Logistics Handoff', key: 'AWAITING_RUNNER' },
+    { id: 4, label: 'Runner Pickup', key: 'PICKED_UP' },
+    { id: 5, label: 'Asset in Transit', key: 'IN_TRANSIT' },
+    { id: 6, label: 'Final Handshake', key: 'DELIVERED' }
   ];
 
+  const getPhase = () => {
+    if (status === 'DELIVERED' || status === 'COMPLETED') return 6;
+    if (status === 'IN_TRANSIT' || status === 'ON_THE_WAY' || status === 'ARRIVED_AT_DESTINATION') return 5;
+    if (status === 'PICKED_UP') return 4;
+    if (status === 'AWAITING_RUNNER') return 3;
+    if (status === 'PREPARING') return 2;
+    return 1;
+  };
+
+  const phase = getPhase();
+  const orderTime = order.created_at?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const title = status === 'DELIVERED' ? 'Asset Secured' : status === 'CANCELLED' ? 'Directive Terminated' : 'Handshake Active';
+  const subtext = status === 'DELIVERED' ? 'Final handshake completed. Asset registered to your inventory.' : 'Live telemetry tracking your marketplace asset.';
+
   return (
-    <main className="min-h-screen bg-[#FDFDFD] font-sans text-slate-900 antialiased overflow-x-hidden">
-      
-      {/* ── 1. PREMIUM HEADER ── */}
+    <main className="min-h-screen bg-[#FDFDFD] text-slate-900 selection:bg-blue-100 font-sans antialiased overflow-x-hidden">
+      {/* ── 1. NAVIGATION LAYER ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100 px-6 h-20 flex items-center justify-between">
          <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900 active:scale-90 transition-all">
             <ChevronLeft size={20} />
@@ -159,7 +124,7 @@ export default function EdgeToEdgeOrderStatus() {
                <div className="relative z-10 space-y-8">
                   <div className="flex items-center gap-3">
                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
-                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,1)]" />
+                        <VoxelPulse size={12} className="text-emerald-400" />
                         <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Active Directive</span>
                      </div>
                   </div>
@@ -190,6 +155,12 @@ export default function EdgeToEdgeOrderStatus() {
                               className="h-full rounded-full transition-all"
                            />
                         ))}
+                     </div>
+                     <div className="flex items-center gap-3">
+                        <VoxelStatus status={order.status} size={14} />
+                        <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest leading-none">
+                           {order.status.replace(/_/g, ' ')}
+                        </span>
                      </div>
                      <div className="flex justify-between px-1">
                         <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{phases[0].label}</p>
@@ -267,75 +238,54 @@ export default function EdgeToEdgeOrderStatus() {
                      RM {Number(order.price).toFixed(2)} • {order.seller_name || 'Pulse Node'}
                   </div>
                </div>
-               <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition-all">
-                  <ArrowRight size={20} />
-               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-xl shadow-slate-900/5 flex items-start gap-6">
-               <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-900 shrink-0 border border-slate-100 shadow-sm">
-                  <MapPin size={22} strokeWidth={1.5} />
-               </div>
-               <div className="space-y-1 flex-1">
+            {/* Merchant Details Node */}
+            <div className="grid grid-cols-2 gap-4">
+               <div className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-xl shadow-slate-900/5 space-y-3">
                   <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Drop-Off Hub</p>
-                  <p className="text-[16px] font-bold text-slate-900 tracking-tight leading-snug">{order.drop_off_location || 'Campus Main Entrance'}</p>
-                  <div className="flex items-center gap-2 pt-2 text-emerald-500 text-[10px] font-black uppercase tracking-widest">
-                     <Zap size={10} className="fill-emerald-500" /> Geofence Verified
+                  <div className="flex items-center gap-3">
+                     <MapPin size={16} className="text-blue-500" />
+                     <h4 className="text-[15px] font-bold text-slate-900 tracking-tight">Main Lobby</h4>
                   </div>
                </div>
-               <button className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-900 border border-slate-100 active:scale-90 transition-all shadow-sm">
-                  <Navigation size={18} />
-               </button>
+               <div className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-xl shadow-slate-900/5 space-y-3">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Asset Fee</p>
+                  <div className="flex items-center gap-3">
+                     <Receipt size={16} className="text-emerald-500" />
+                     <h4 className="text-[15px] font-bold text-slate-900 tracking-tight">RM {Number(order.price).toFixed(2)}</h4>
+                  </div>
+               </div>
             </div>
          </section>
 
-         {/* ── 5. REGISTRY LEDGER ── */}
-         <footer className="text-center space-y-6 py-10 opacity-40 hover:opacity-100 transition-opacity">
-            <div className="flex items-center justify-center gap-3">
-               <div className="h-px w-12 bg-slate-200" />
-               <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Institutional Audit Trail</p>
-               <div className="h-px w-12 bg-slate-200" />
+         {/* ── 5. GOVERNANCE & HELP ── */}
+         <section className="pt-10 flex flex-col gap-4">
+            <button 
+              onClick={() => setIsReportModalOpen(true)}
+              className="w-full h-18 border-[0.5px] border-slate-200 rounded-[28px] flex items-center justify-center gap-3 text-[13px] font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all"
+            >
+               <ShieldAlert size={18} />
+               Report Institutional Conflict
+            </button>
+            <div className="p-6 bg-slate-50/50 rounded-[28px] border border-slate-100 flex items-start gap-4">
+               <Info size={16} className="text-blue-400 shrink-0 mt-1" />
+               <p className="text-[12px] text-slate-400 font-medium leading-relaxed italic">
+                  Registry Directive: All handshakes are logged and audited. Institutional conflicts are resolved within 24 hours of report.
+               </p>
             </div>
-            <div className="space-y-1">
-               <p className="text-[11px] font-bold text-slate-400">Handshake ID: {order.id}</p>
-               <p className="text-[11px] font-medium text-slate-300">Synchronized via Pulse Node 20 • Cluster Alpha</p>
-            </div>
-
-            <div className="pt-4 flex flex-col items-center gap-4">
-               {order.is_disputed ? (
-                  <div className="flex items-center gap-2 text-red-500 bg-red-50 px-4 py-2 rounded-full border border-red-100">
-                     <AlertTriangle size={14} />
-                     <span className="text-[10px] font-black uppercase tracking-widest">Dispute Open: Awaiting Admin</span>
-                  </div>
-               ) : (
-                  <button 
-                    onClick={() => setIsReportModalOpen(true)}
-                    className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors flex items-center gap-2"
-                  >
-                     <AlertTriangle size={12} /> Report Issue
-                  </button>
-               )}
-               
-               <div className="flex items-center gap-2 opacity-50">
-                  <Info size={10} className="text-slate-400" />
-                  <p className="text-[9px] font-medium text-slate-400 italic">Directive: Handshake is legally binding unless a dispute node is initiated.</p>
-               </div>
-            </div>
-         </footer>
-         
-         <ReportIssueModal 
-           isOpen={isReportModalOpen} 
-           onClose={() => setIsReportModalOpen(false)} 
-           order={order}
-           onSuccess={() => setReportSuccess(true)}
-         />
-
+         </section>
       </div>
 
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+      <ReportIssueModal 
+        isOpen={isReportModalOpen} 
+        onClose={() => setIsReportModalOpen(false)} 
+        order={order}
+        onSuccess={() => {
+          setReportSuccess(true);
+          // Refresh order data if needed
+        }}
+      />
     </main>
   );
 }

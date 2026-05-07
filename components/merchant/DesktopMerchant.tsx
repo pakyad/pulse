@@ -4,6 +4,7 @@ import { auth } from '@/lib/firebase';
 import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import VoxelStatus from '@/components/shared/VoxelStatus';
 
 export default function DesktopMerchant({ 
   merchant, 
@@ -87,8 +88,8 @@ export default function DesktopMerchant({
         {/* Top Header */}
         <header className="bg-white border-b border-slate-200 px-10 py-6 flex items-center justify-between sticky top-0 z-30">
           <div>
-             <h1 className="text-[20px] font-bold text-slate-900">Merchant Dashboard</h1>
-             <p className="text-[13px] text-slate-500 mt-1">Operational Oversight: {merchant?.full_name}</p>
+             <h1 className="text-[20px] font-bold text-slate-900">Shop Manager</h1>
+             <p className="text-[13px] text-slate-500 mt-1">Logged in as {merchant?.full_name}</p>
           </div>
 
           <div className="flex items-center gap-6">
@@ -96,7 +97,7 @@ export default function DesktopMerchant({
                <div className="px-3 text-slate-400">
                  <Search size={16} />
                </div>
-               <input className="h-full w-full outline-none text-[12px] pr-2 bg-transparent placeholder-slate-400 font-medium" type="text" placeholder="Search Registry (Order ID, Student Name)..." /> 
+               <input className="h-full w-full outline-none text-[12px] pr-2 bg-transparent placeholder-slate-400 font-medium" type="text" placeholder="Search orders, student names..." /> 
              </div>
 
              <button 
@@ -131,15 +132,15 @@ export default function DesktopMerchant({
           <section className="space-y-4">
             <div className="flex items-center gap-2 px-1">
                <Info size={14} className="text-slate-400" />
-               <p className="text-[11px] font-medium text-slate-400 italic">Institutional Metrics: Node tracking live liquidity and fulfillment status for {merchant?.full_name}.</p>
+               <p className="text-[11px] font-medium text-slate-400 italic">Daily summary of shop activity for {merchant?.full_name}.</p>
             </div>
             <div className="grid grid-cols-3 gap-6">
               <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Total Revenue</p>
+                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Total Earnings</p>
                  <h2 className="text-[28px] font-bold text-slate-900 mt-2">RM {revenue.toFixed(2)}</h2>
               </div>
               <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Active Directives</p>
+                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Orders to Do</p>
                  <h2 className="text-[28px] font-bold text-slate-900 mt-2">{activeOrdersCount}</h2>
               </div>
               <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
@@ -156,9 +157,9 @@ export default function DesktopMerchant({
              <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
                 <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
                    <div className="flex items-center gap-3">
-                      <h3 className="text-[14px] font-bold text-slate-900">Pending Actions</h3>
+                      <h3 className="text-[14px] font-bold text-slate-900">Current Orders</h3>
                       <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                         <Info size={12} /> Fulfill records to maintain merit score.
+                         <Info size={12} /> Track your active orders here.
                       </div>
                    </div>
                    <span className="text-[12px] text-blue-600 font-bold">{recentOrders.filter((o: any) => o.status === 'PENDING_VENDOR').length} Required</span>
@@ -205,10 +206,15 @@ export default function DesktopMerchant({
                            <div className="w-10 h-10 bg-slate-100 rounded border border-slate-200 flex items-center justify-center text-slate-400">
                               <Package size={18} />
                            </div>
-                           <div>
-                              <p className="text-[14px] font-bold text-slate-900">{o.title}</p>
-                              <p className="text-[12px] text-blue-600 font-medium">Status: {o.status.replace('_', ' ')}</p>
-                           </div>
+                            <div>
+                               <p className="text-[14px] font-bold text-slate-900">{o.title}</p>
+                               <div className="flex items-center gap-2 mt-0.5">
+                                 <VoxelStatus status={o.status} size={10} />
+                                 <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest leading-none">
+                                   {o.status.replace(/_/g, ' ')}
+                                 </p>
+                               </div>
+                            </div>
                         </div>
                         <div className="flex items-center gap-4">
                            {o.status === 'PREPARING' && (
@@ -221,7 +227,7 @@ export default function DesktopMerchant({
                            )}
                            {o.status === 'AWAITING_RUNNER' && (
                              <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold border border-blue-100">
-                               Runner Paged
+                               Runner Called
                              </span>
                            )}
                            <button 

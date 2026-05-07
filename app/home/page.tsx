@@ -10,6 +10,7 @@ import FeaturedBanner, { BannerSlide } from '@/components/shared/FeaturedBanner'
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, orderBy, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import VoxelStatus, { VoxelRadar } from '@/components/shared/VoxelStatus';
 
 // ── Fallback data (used when Firestore has no campaigns/announcements) ──
 const HERO_SLIDES: BannerSlide[] = [
@@ -151,15 +152,15 @@ export default function PulseHome() {
 
         <div className="space-y-1">
           <h3 className="text-[22px] font-black text-navy tracking-tight">Campus Hub</h3>
-          <p className="text-[12px] font-medium text-slate-400 leading-relaxed mb-4">Centralized directory for all institutional services and protocols.</p>
+          <p className="text-[12px] font-medium text-slate-400 leading-relaxed mb-4">Quick access to campus services and links.</p>
           <ServiceGrid />
         </div>
 
         <div className="space-y-1">
           <div className="flex justify-between items-center mb-3">
             <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">What's happening</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Broadcast updates and live announcements from campus nodes.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">Latest News</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Stay updated with the latest news on campus.</p>
             </div>
             <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-accent flex items-center gap-1">
               Explore <ChevronRight size={14} />
@@ -189,11 +190,11 @@ export default function PulseHome() {
         <div className="space-y-1">
           <div className="flex justify-between items-baseline mb-5">
             <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">Live Pulse Feed</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Real-time synchronization of student activity across the grid.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">Student Activity</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">See what students are posting right now.</p>
             </div>
             <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <VoxelRadar size={12} className="text-emerald-500" />
               Live Now
             </span>
           </div>
@@ -224,8 +225,8 @@ export default function PulseHome() {
         <div className="space-y-1">
           <div className="flex justify-between items-center mb-3">
             <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">In The Market</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Monitor recent asset acquisitions and marketplace liquidity.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">Marketplace</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Browse items for sale from other students.</p>
             </div>
             <button onClick={() => router.push('/marketplace')} className="text-[11px] font-bold text-accent flex items-center gap-1">
               See All <ArrowUpRight size={14} />
@@ -261,8 +262,8 @@ export default function PulseHome() {
         <div className="space-y-1">
           <div className="flex justify-between items-center mb-5">
             <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">Campus Clubs</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Authorized student organizations and creative faculty nodes.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">Student Clubs</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Discover and join student organizations on campus.</p>
             </div>
             <button onClick={() => router.push('/pulse')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Directory</button>
           </div>
@@ -354,8 +355,8 @@ export default function PulseHome() {
         <div className="space-y-1">
           <div className="flex justify-between items-center mb-5">
             <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">The Essentials</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Academic resources and mandatory institutional equipment.</p>
+              <h3 className="text-[22px] font-black text-navy tracking-tight">Campus Essentials</h3>
+              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Academic resources and official school equipment.</p>
             </div>
             <button onClick={() => router.push('/marketplace')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">See All</button>
           </div>
