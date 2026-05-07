@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
+import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 export default function DesktopMerchant({ 
   merchant, 
@@ -108,9 +109,16 @@ export default function DesktopMerchant({
              <button className="text-slate-400 hover:text-slate-900">
                 <Bell size={20} />
              </button>
-             <div className="w-9 h-9 bg-slate-100 border border-slate-200 rounded-md flex items-center justify-center font-bold text-slate-600">
-                {merchant?.full_name?.charAt(0)}
-             </div>
+             <button 
+               onClick={() => { auth.signOut(); router.push('/auth'); }}
+               className="text-slate-400 hover:text-rose-600 transition-colors"
+             >
+                <LogOut size={20} />
+             </button>
+              <AvatarDropdown 
+                 photoUrl={merchant?.photo_url} 
+                 userName={merchant?.full_name || 'Merchant'} 
+              />
           </div>
         </header>
 

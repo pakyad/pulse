@@ -2,6 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
+import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 /**
  * 🏛️ Pulse Mobile Merchant Terminal
@@ -38,9 +39,10 @@ export default function MobileMerchant({
                  <Bell size={20} />
                  {urgentOrders?.length > 0 && <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full"></span>}
               </button>
-              <div className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center font-bold text-slate-600">
-                 {merchant?.full_name?.charAt(0)}
-              </div>
+               <AvatarDropdown 
+                  photoUrl={merchant?.photo_url} 
+                  userName={merchant?.full_name || 'Merchant'} 
+               />
            </div>
         </div>
       </header>
