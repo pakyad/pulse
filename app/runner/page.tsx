@@ -12,6 +12,8 @@ export default function MobileRunnerDashboard() {
   const [nearbyJobs, setNearbyJobs] = useState<any[]>([]);
   const [activeJob, setActiveJob] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'RADAR' | 'ANALYTICS'>('RADAR');
+  const [analytics, setAnalytics] = useState({ deliveries: 0, earnings: 0 });
 
   useEffect(() => {
     let unsubJobs: (() => void) | null = null;
@@ -35,7 +37,7 @@ export default function MobileRunnerDashboard() {
       const qJobs = query(
         collection(db, "orders"), 
         where("status", "==", "AWAITING_RUNNER"),
-        where("deliveryType", "==", "RUNNER")
+        where("delivery_type", "==", "RUNNER")
       );
       
       unsubJobs = onSnapshot(qJobs, (snap) => {
@@ -56,6 +58,22 @@ export default function MobileRunnerDashboard() {
         } else {
           setActiveJob(null);
         }
+      });
+
+      // 4. Pull Historical Performance (Analytics)
+      const qHistory = query(
+        collection(db, "orders"),
+        where("runner_id", "==", user.uid),
+        where("status", "==", "COMPLETED")
+      );
+      
+      onSnapshot(qHistory, (snap) => {
+        const docs = snap.docs.map(d => d.data());
+        const totalEarned = docs.reduce((acc, curr) => acc + (curr.delivery_fee || 3.50), 0);
+        setAnalytics({
+          deliveries: docs.length,
+          earnings: totalEarned
+        });
       });
     });
 
@@ -158,51 +176,121 @@ export default function MobileRunnerDashboard() {
          )}
 
          {/* ── Available Jobs (Radar) ── */}
-         <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-               <h2 className="text-[18px] font-black tracking-tight">Nearby Deliveries</h2>
-               <div className="flex items-center gap-2">
-                  <Activity size={14} className="text-teal-500" />
-                  <span className="text-[11px] font-bold text-teal-500 uppercase tracking-widest">Live Radar</span>
+         {activeTab === 'RADAR' && (
+           <div className="px-6 py-8 space-y-8">
+              <div className="space-y-1">
+                 <h2 className="text-[26px] font-black tracking-tight">Logistics Directives</h2>
+                 <p className="text-[14px] font-medium text-slate-400 leading-relaxed">Initiate a 4-layer verification funnel for specialized task fulfillment.</p>
+              </div>
+              
+              <div className="space-y-4">
+                 {nearbyJobs.length === 0 ? (
+                   <div className="py-20 flex flex-col items-center gap-4 text-center">
+                      <div className="w-20 h-20 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-200"><Zap size={40} /></div>
+                      <p className="text-[14px] font-bold text-slate-300 uppercase tracking-widest px-12">Radar is currently clear.</p>
+                   </div>
+                 ) : (
+                   nearbyJobs.map((job) => {
+                     const isFood = (job.category || '').toLowerCase().includes('food') || (job.items_summary || '').toLowerCase().includes('food');
+                     const isTech = (job.category || '').toLowerCase().includes('tech') || (job.category || '').toLowerCase().includes('asset');
+                     
+                     return (
+                       <motion.div 
+                         key={job.id} 
+                         initial={{ opacity: 0, y: 10 }}
+                         animate={{ opacity: 1, y: 0 }}
+                         className={`p-6 rounded-[36px] border border-slate-50 flex items-center justify-between group transition-all shadow-sm shadow-slate-100 ${
+                           isFood ? 'bg-amber-50/50' : isTech ? 'bg-blue-50/50' : 'bg-slate-50/50'
+                         }`}
+                       >
+                          <div className="flex items-center gap-5">
+                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm ${
+                               isFood ? 'bg-white text-amber-500' : isTech ? 'bg-white text-blue-500' : 'bg-white text-slate-400'
+                             }`}>
+                                {isFood ? <Truck size={24} /> : isTech ? <Package size={24} /> : <Zap size={24} />}
+                             </div>
+                             <div>
+                                <p className="text-[17px] font-black tracking-tight text-slate-900">{job.title || 'Institutional Task'}</p>
+                                <p className="text-[12px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{job.dropOffLocation?.split('—')[0] || 'Campus Hub'}</p>
+                             </div>
+                          </div>
+                          <button 
+                            onClick={() => handleAcceptJob(job.id)}
+                            disabled={!isOnline}
+                            className={`h-12 px-6 bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] transition-all ${isOnline ? 'hover:scale-105 active:scale-95 shadow-xl shadow-black/10' : 'opacity-20 cursor-not-allowed'}`}
+                          >
+                             Initiate
+                          </button>
+                       </motion.div>
+                     );
+                   })
+                 )}
+              </div>
+           </div>
+         )}
+
+         {/* ── Analytics Terminal ── */}
+         {activeTab === 'ANALYTICS' && (
+            <div className="p-8 space-y-12">
+               <div className="space-y-1">
+                  <h2 className="text-[32px] font-black tracking-tight uppercase">Performance</h2>
+                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">Institutional Logistics Ledger</p>
+               </div>
+
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="p-8 bg-black rounded-[36px] text-white space-y-6">
+                     <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Net Earnings</p>
+                     <div className="space-y-1">
+                        <p className="text-[13px] font-bold opacity-60">RM</p>
+                        <p className="text-[32px] font-black leading-none">{analytics.earnings.toFixed(2)}</p>
+                     </div>
+                  </div>
+                  <div className="p-8 bg-slate-50 rounded-[36px] border border-slate-100 space-y-6">
+                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Fulfillments</p>
+                     <div className="space-y-1">
+                        <p className="text-[13px] font-bold text-slate-400">Total</p>
+                        <p className="text-[32px] font-black text-slate-900 leading-none">{analytics.deliveries}</p>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="p-8 bg-white rounded-[36px] border-[0.5px] border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-5">
+                     <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center"><Activity size={24} /></div>
+                     <div>
+                        <p className="text-[15px] font-bold">Node Health</p>
+                        <p className="text-[12px] font-medium text-slate-400 uppercase tracking-widest">Optimized</p>
+                     </div>
+                  </div>
+                  <div className="text-right">
+                     <p className="text-[14px] font-black text-slate-900">100%</p>
+                  </div>
                </div>
             </div>
-            
-            <div className="space-y-4">
-               {nearbyJobs.length === 0 ? (
-                 <div className="py-20 flex flex-col items-center gap-4 text-center">
-                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200"><Zap size={32} /></div>
-                    <p className="text-[14px] font-medium text-slate-400 px-12">Radar is clear. New deliveries will appear here as students place orders.</p>
-                 </div>
-               ) : (
-                 nearbyJobs.map((job) => (
-                   <div key={job.id} className="p-6 bg-white rounded-[24px] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
-                      <div className="flex items-center gap-5">
-                         <div className="w-12 h-12 bg-[#F2F2F7] rounded-2xl flex items-center justify-center text-black font-black text-[14px]">RM</div>
-                         <div>
-                            <p className="text-[17px] font-black tracking-tight leading-none">RM {(3.50).toFixed(2)}</p>
-                            <p className="text-[12px] font-medium text-slate-400 mt-1">{job.dropOffLocation?.split('—')[0] || 'Campus Hub'}</p>
-                         </div>
-                      </div>
-                      <button 
-                        onClick={() => handleAcceptJob(job.id)}
-                        disabled={!isOnline}
-                        className={`px-6 py-3 bg-black text-white rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${isOnline ? 'hover:scale-105 active:scale-95' : 'opacity-20 cursor-not-allowed'}`}
-                      >
-                         Accept Job
-                      </button>
-                   </div>
-                 ))
-               )}
-            </div>
-         </div>
+         )}
       </main>
 
       {/* ── Fixed Bottom Nav ── */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t-[0.5px] border-[#F2F2F7] pb-10 pt-4 px-10 z-30">
          <div className="flex items-center justify-between max-w-sm mx-auto">
-            <button className="flex flex-col items-center gap-1.5 transition-all active:scale-90"><Zap size={22} className="text-black" /><span className="text-[9px] font-black uppercase tracking-widest">Radar</span></button>
-            <button className="flex flex-col items-center gap-1.5 opacity-20 transition-all active:scale-90"><Activity size={22} /><span className="text-[9px] font-black uppercase tracking-widest">Analytics</span></button>
-            <button className="flex flex-col items-center gap-1.5 transition-all active:scale-90" onClick={() => router.push('/home')}><ChevronRight size={22} /><span className="text-[9px] font-black uppercase tracking-widest">Exit</span></button>
+            <button 
+              onClick={() => setActiveTab('RADAR')}
+              className={`flex flex-col items-center gap-1.5 transition-all active:scale-90 ${activeTab === 'RADAR' ? 'text-black' : 'text-slate-300'}`}
+            >
+              <Zap size={22} strokeWidth={activeTab === 'RADAR' ? 2.5 : 2} />
+              <span className="text-[9px] font-black uppercase tracking-widest">Radar</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('ANALYTICS')}
+              className={`flex flex-col items-center gap-1.5 transition-all active:scale-90 ${activeTab === 'ANALYTICS' ? 'text-black' : 'text-slate-300'}`}
+            >
+              <Activity size={22} strokeWidth={activeTab === 'ANALYTICS' ? 2.5 : 2} />
+              <span className="text-[9px] font-black uppercase tracking-widest">Analytics</span>
+            </button>
+            <button className="flex flex-col items-center gap-1.5 transition-all active:scale-90 text-slate-300" onClick={() => router.push('/home')}>
+              <ChevronRight size={22} />
+              <span className="text-[9px] font-black uppercase tracking-widest">Exit</span>
+            </button>
          </div>
       </div>
 

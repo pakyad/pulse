@@ -38,6 +38,11 @@ service cloud.firestore {
       allow update: if isSignedIn(); 
     }
 
+    match /parent_orders/{orderId} {
+      allow read, list: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
     // ── INSTITUTIONAL REGISTRIES (Public Read, Admin Write) ──
     match /PriceGuidelines/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
     match /announcements/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }

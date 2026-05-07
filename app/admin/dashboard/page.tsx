@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import AdminProductApprovals from '@/components/admin/AdminProductApprovals';
-import { resolveDispute } from '@/app/actions/adminActions';
+import { resolveDispute, updatePriceGuideline } from '@/app/actions/adminActions';
 import { 
   Loader2, CheckCircle, AlertTriangle, ChevronRight, Inbox, 
   LayoutGrid, BarChart3, Users, Settings, LogOut, ShieldAlert,
@@ -58,9 +58,9 @@ export default function AdminDashboard() {
         (err) => console.error("[Pulse Audit] PriceGuidelines Listener Failed:", err)
       );
 
-      // 2. Fetch All Active Items for Monitoring (onSnapshot)
+      // 2. Fetch All Items for Monitoring (onSnapshot)
       itemsUnsub = onSnapshot(
-        query(collection(db, "items"), where("status", "==", "active")),
+        collection(db, "items"),
         (snap) => {
           setFlaggedItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
         },
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
   const handleResolve = async (id: string, action: 'RELEASE' | 'REFUND') => {
     setIsProcessing(id);
     try {
-      const res = await resolveDispute(id); // Backend action
+      const res = await resolveDispute(id, action); // Backend action with directive
       if (res.success) {
         setIsDisputeDrawerOpen(false);
         alert(`Directive Executed: Funds have been ${action === 'RELEASE' ? 'released to merchant' : 'refunded to buyer'}.`);
@@ -109,11 +109,12 @@ export default function AdminDashboard() {
 
   const saveGuideline = async (cat: string, price: number) => {
     try {
-      await setDoc(doc(db, "PriceGuidelines", cat), {
-        maxBasePrice: price,
-        updated_at: new Date().toISOString()
-      });
-      alert("Institutional Limit Established.");
+      const res = await updatePriceGuideline(cat, price);
+      if (res.success) {
+        alert("Institutional Limit Established.");
+      } else {
+        alert(res.message);
+      }
     } catch (e) { console.error(e); }
   };
 
@@ -236,20 +237,26 @@ export default function AdminDashboard() {
           {activeTab === 'overview' && (
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Sales</p>
-                  <p className="text-[24px] font-bold text-slate-900">RM 1,240.50</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Marketplace Volume</p>
+                  <p className="text-[24px] font-bold text-slate-900">
+                    RM {flaggedItems.reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </p>
                </div>
                <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Orders</p>
-                  <p className="text-[24px] font-bold text-slate-900">12</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Directives</p>
+                  <p className="text-[24px] font-bold text-slate-900">{disputes.length + flaggedItems.length}</p>
                </div>
                <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Verified Sellers</p>
-                  <p className="text-[24px] font-bold text-slate-900">8</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Verified Nodes</p>
+                  <p className="text-[24px] font-bold text-slate-900">
+                    {users.filter(u => u.role === 'MERCHANT' || u.role === 'RUNNER').length}
+                  </p>
                </div>
                <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">System Health</p>
-                  <p className="text-[24px] font-bold text-emerald-500">Normal</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Infrastructure Health</p>
+                  <p className={`text-[24px] font-bold ${disputes.length > 5 ? 'text-orange-500' : 'text-emerald-500'}`}>
+                    {disputes.length > 5 ? 'High Load' : 'Stable'}
+                  </p>
                </div>
             </section>
           )}
@@ -404,106 +411,51 @@ export default function AdminDashboard() {
             </section>
           )}
 
-          {/* 4. SETTINGS */}
+          {/* 4. SETTINGS (Guideline Management) */}
           {activeTab === 'settings' && (
-            <section className="bg-white rounded-[32px] border border-slate-100 p-10">
-               <h2 className="text-[22px] font-bold text-slate-900 mb-8">System Settings</h2>
-               <div className="space-y-8 max-w-md">
-                  <div className="flex items-center justify-between">
-                     <div>
-                        <p className="text-[14px] font-bold text-slate-900">Maintenance Mode</p>
-                        <p className="text-[12px] text-slate-400">Put marketplace in read-only mode</p>
-                     </div>
-                     <div className="w-12 h-6 bg-slate-100 rounded-full relative">
-                        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
-                     </div>
+            <section className="bg-white rounded-[32px] border border-slate-100 p-10 space-y-12">
+               <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Infrastructure Control</p>
+                    <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Economic Guidelines</h2>
                   </div>
-                  <div className="flex items-center justify-between">
-                     <div>
-                        <p className="text-[14px] font-bold text-slate-900">Service Fee (%)</p>
-                        <p className="text-[12px] text-slate-400">Commission on each sale</p>
-                     </div>
-                     <input type="number" defaultValue="5" className="w-16 h-10 border border-slate-200 rounded-xl px-3 text-[14px] font-bold text-right outline-none focus:border-slate-400" />
-                  </div>
+                  <button 
+                    onClick={() => setIsPriceModalOpen(true)}
+                    className="h-11 px-6 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-black/10 hover:scale-105 transition-all"
+                  >
+                    Establish New Limit
+                  </button>
+               </div>
 
-                  <div className="pt-10 border-t border-slate-50">
-                     <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mb-4">Development Tools</p>
-                     <div className="bg-slate-50 rounded-2xl p-6 mb-4 border border-slate-100">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Registry Debug Console</p>
-                        <div className="grid grid-cols-3 gap-4">
-                           <div>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase">Items</p>
-                              <p className="text-[18px] font-bold text-slate-900">{flaggedItems.length}</p>
-                           </div>
-                           <div>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase">Disputes</p>
-                              <p className="text-[18px] font-bold text-slate-900">{disputes.length}</p>
-                           </div>
-                           <div>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase">Limits</p>
-                              <p className="text-[18px] font-bold text-slate-900">{Object.keys(guidelines).length}</p>
-                           </div>
-                        </div>
-                     </div>
-                     <button 
-                        onClick={() => {
-                           if (!window.confirm("Seed Universal Registry: Generate 5 records for each data node?")) return;
-                           import('@/lib/firebase').then(({ db }) => {
-                              import('firebase/firestore').then(({ doc, setDoc, collection, addDoc }) => {
-                                 const tasks: Promise<any>[] = [];
-
-                                 // 1. Seed 5 Guidelines
-                                 const categories = ["Food", "Tech Assets", "Stationery", "Clothing", "Beverages"];
-                                 categories.forEach(cat => {
-                                    tasks.push(setDoc(doc(db, "PriceGuidelines", cat), { maxBasePrice: Math.floor(Math.random() * 50) + 10 }));
-                                 });
-
-                                 // 2. Seed 5 Flagged Items
-                                 for(let i=1; i<=5; i++) {
-                                    tasks.push(addDoc(collection(db, "items"), {
-                                       title: `Price Violation ${i}: ${categories[i-1] || 'Asset'}`,
-                                       price: 500.00 + (i * 10),
-                                       category: categories[i-1] || "Tech Assets",
-                                       seller_name: `Vendor ${String.fromCharCode(64 + i)}`,
-                                       status: "active",
-                                       created_at: new Date()
-                                    }));
-                                 }
-
-                                 // 3. Seed 5 Disputes
-                                 const reasons = ["Item never delivered", "Wrong item received", "Quality discrepancy", "Payment failure", "Handoff refusal"];
-                                 for(let i=1; i<=5; i++) {
-                                    tasks.push(addDoc(collection(db, "disputes"), {
-                                       reason: reasons[i-1],
-                                       reporter_name: `Student ${i}`,
-                                       status: "AWAITING_ADMIN",
-                                       created_at: new Date()
-                                    }));
-                                 }
-
-                                 // 4. Seed 5 Users
-                                 for(let i=1; i<=5; i++) {
-                                    tasks.push(setDoc(doc(db, "users", `test_user_${Date.now()}_${i}`), {
-                                       full_name: `Registry Identity ${i}`,
-                                       email: `test${i}@pulse.com`,
-                                       role: i % 2 === 0 ? "MERCHANT" : "STUDENT",
-                                       runner_application: i === 3 ? "PENDING" : null,
-                                       created_at: new Date()
-                                    }));
-                                 }
-
-                                 Promise.all(tasks).then(() => {
-                                    alert("Universal Registry Updated: 20 records injected across all nodes.");
-                                    window.location.reload();
-                                 });
-                              });
-                           });
-                        }}
-                        className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl shadow-slate-900/20 active:scale-95"
-                     >
-                        Seed Universal Registry
-                     </button>
-                  </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Object.entries(guidelines).map(([cat, price]) => (
+                    <div key={cat} className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-6">
+                       <div className="flex justify-between items-start">
+                          <div>
+                             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Asset Category</p>
+                             <p className="text-[17px] font-black text-slate-900 tracking-tight">{cat}</p>
+                          </div>
+                          <div className="w-10 h-10 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400">
+                             <Filter size={18} />
+                          </div>
+                       </div>
+                       <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
+                          <div>
+                             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Price Ceiling</p>
+                             <p className="text-[22px] font-black text-slate-900">RM {price.toFixed(2)}</p>
+                          </div>
+                          <button 
+                            onClick={() => {
+                              const newPrice = prompt(`Update ceiling for ${cat}:`, String(price));
+                              if (newPrice) saveGuideline(cat, Number(newPrice));
+                            }}
+                            className="text-[11px] font-black text-accent uppercase tracking-widest underline underline-offset-4"
+                          >
+                             Adjust
+                          </button>
+                       </div>
+                    </div>
+                  ))}
                </div>
             </section>
           )}

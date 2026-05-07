@@ -7,110 +7,100 @@ if (admin.apps.length === 0) {
 
 const db = admin.firestore();
 
-// 🏛️ EMULATOR DETECTION & SYNC
-if (process.env.FUNCTIONS_EMULATOR === 'true') {
-  db.settings({
-    host: 'localhost:8080',
-    ssl: false
-  });
-}
-
 /**
- * placeOrder (V2 Institutional)
- * Zero-config regional architecture for high-stability commerce.
+ * placeOrder (V3 Multi-Vendor Splitting)
+ * Handles atomic cart decomposition into merchant-specific sub-orders.
  */
 export const placeOrder = onCall({ 
   cors: true,
   maxInstances: 10,
   region: "us-central1"
 }, async (request) => {
-  console.log("🏛️ TERMINAL_INVOKED:", { 
-    uid: request.auth?.uid,
-    data: request.data 
-  });
+  const data = request.data || {};
+  const { userId, cartItems, deliveryType } = data;
+  const buyerId = request.auth?.uid;
 
-  if (!request.auth) {
+  if (!buyerId && !userId) {
     throw new HttpsError("unauthenticated", "Pulse Authorization Required.");
   }
 
-  const data = request.data || {};
-  const itemId = data.item_id || data.itemId;
-  const price = data.price;
-
-  if (!itemId) {
-    throw new HttpsError("invalid-argument", "Institutional payload incomplete: Missing Item ID.");
-  }
-
-  const orderId = db.collection("orders").doc().id;
-  const itemRef = db.collection("items").doc(itemId);
-  const orderRef = db.collection("orders").doc(orderId);
+  const finalUserId = userId || buyerId;
 
   try {
     return await db.runTransaction(async (transaction) => {
-      let itemDoc = await transaction.get(itemRef);
-      let itemData: any = null;
+      // 1. THE CHECK (Stock Validation)
+      const itemRefs = cartItems.map((item: any) => db.collection('items').doc(item.productId));
+      const itemDocs = await Promise.all(itemRefs.map((ref: any) => transaction.get(ref)));
 
-      if (!itemDoc.exists) {
-        // 🏛️ Pulse Institutional Fallback: Self-Healing Registry
-        if (itemId.startsWith('d_')) {
-          console.log("🏛️ Initializing Virtual Asset Handshake:", itemId);
-          const FALLBACK_MAP: Record<string, any> = {
-            'd_pro_kit': { title: 'Official UniKL Football Match-Day Kit (PRO)', price: 120, seller_id: '2GSboliteBeTsO3eeVCIoBseLB62', seller_name: 'Kelab Bola UniKL' },
-            'd_scarf_fix': { title: 'UniKL Football Club Scarf', price: 25, seller_id: '2GSboliteBeTsO3eeVCIoBseLB62', seller_name: 'Kelab Bola UniKL' },
-            'd_jersey_2026': { title: 'Official UniKL Football Jersey 2026', price: 95, seller_id: '2GSboliteBeTsO3eeVCIoBseLB62', seller_name: 'Kelab Bola UniKL' }
-          };
-          itemData = FALLBACK_MAP[itemId];
-          if (!itemData) throw new HttpsError("not-found", "Target asset unknown to registry.");
-        } else {
-          throw new HttpsError("not-found", "Target asset not found in registry.");
+      for (let i = 0; i < itemDocs.length; i++) {
+        const itemData = itemDocs[i].data();
+        if (!itemDocs[i].exists || (itemData?.stock_count ?? 0) < cartItems[i].qty) {
+          throw new HttpsError("resource-exhausted", `SOLD_OUT: ${itemData?.title || 'Item'} is unavailable!`);
         }
-      } else {
-        itemData = itemDoc.data();
       }
 
-      const verifiedSellerId = itemData?.seller_id || itemData?.sellerId || data.seller_id || data.sellerId;
-      
-      if (!verifiedSellerId) {
-        throw new HttpsError("failed-precondition", "Target asset has no verified owner node.");
-      }
+      // 2. THE SPLIT (Grouping by Vendor)
+      const ordersByVendor: { [key: string]: any[] } = {};
+      cartItems.forEach((item: any) => {
+        if (!ordersByVendor[item.vendorId]) {
+          ordersByVendor[item.vendorId] = [];
+        }
+        ordersByVendor[item.vendorId].push(item);
+      });
 
-      const stock = itemData?.stock_count ?? itemData?.stock ?? 100;
-      if (stock <= 0) {
-        throw new HttpsError("out-of-resource", "Asset sold out during handshake.");
-      }
+      const parentOrderId = `PULSE-${Date.now()}`;
+      let totalAmount = 0;
+      cartItems.forEach((item: any) => totalAmount += (item.price * item.qty));
 
-      // Update Inventory (Only for real documents)
-      if (itemDoc.exists) {
-        transaction.update(itemRef, { 
-          stock_count: stock - 1,
-          stock: stock - 1 
+      // 3. ATOMIC DECREMENT & SUB-ORDER CREATION
+      for (const vendorId in ordersByVendor) {
+        const subOrderRef = db.collection('orders').doc();
+        const itemsForThisVendor = ordersByVendor[vendorId];
+        let subtotal = 0;
+        itemsForThisVendor.forEach((i: any) => subtotal += (i.price * i.qty));
+
+        itemsForThisVendor.forEach((item: any) => {
+          const ref = db.collection('items').doc(item.productId);
+          transaction.update(ref, {
+            stock_count: admin.firestore.FieldValue.increment(-item.qty),
+            stock: admin.firestore.FieldValue.increment(-item.qty)
+          });
+        });
+
+        transaction.set(subOrderRef, {
+          order_id: subOrderRef.id,
+          parent_id: parentOrderId,
+          buyer_id: finalUserId,
+          seller_id: vendorId, // Institutional Sync: Must be 'seller_id'
+          items: itemsForThisVendor,
+          price: subtotal, // Root field for Merchant Analytics
+          title: itemsForThisVendor.length > 1 
+            ? `${itemsForThisVendor.length} Items Bundle` 
+            : itemsForThisVendor[0].title,
+          delivery_type: deliveryType || 'RUNNER',
+          status: 'PENDING_VENDOR',
+          created_at: admin.firestore.FieldValue.serverTimestamp()
         });
       }
 
-      // Register Entry
-      transaction.set(orderRef, {
-        order_id: orderId,
-        item_id: itemId,
-        title: data.title || itemData?.title || "Marketplace Item",
-        price: Number(price) || Number(itemData?.price) || 0,
-        image_url: data.image_url || data.imageUrl || itemData?.image_url || null,
-        receipt_url: data.receipt_url || data.receiptUrl || null,
-        buyer_id: request.auth!.uid,
-        buyer_name: data.buyer_name || data.buyerName || "Verified Student",
-        seller_id: verifiedSellerId,
-        seller_name: data.seller_name || data.sellerName || itemData?.seller_name || "Verified Vendor",
-        status: "PENDING_VENDOR",
-        delivery_type: data.delivery_type || data.deliveryType || "RUNNER",
-        drop_off_location: data.drop_off_location || data.dropOffLocation || null,
-        runner_id: null,
-        created_at: admin.firestore.FieldValue.serverTimestamp(),
-        order_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      // 4. CREATE PARENT REGISTRY
+      const parentRef = db.collection('parent_orders').doc(parentOrderId);
+      transaction.set(parentRef, {
+        id: parentOrderId,
+        buyer_id: finalUserId,
+        total_price: totalAmount,
+        item_count: cartItems.length,
+        status: 'PAID',
+        items_summary: cartItems.map((i: any) => i.title).join(", "),
+        created_at: admin.firestore.FieldValue.serverTimestamp()
       });
 
-      return { success: true, orderId: orderId };
+      return { success: true, parentId: parentOrderId };
     });
-  } catch (e: any) {
-    console.error("[Pulse Transaction Failure]:", e);
-    throw new HttpsError("internal", e.message || "Transaction Handshake Failed");
+
+  } catch (error: any) {
+    console.error("Order Transaction Failed: ", error.message);
+    if (error instanceof HttpsError) throw error;
+    throw new HttpsError("internal", error.message || "Institutional Transaction Failed");
   }
 });
