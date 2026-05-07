@@ -60,7 +60,7 @@ export default function NavigationGate() {
           
           if (needsSync) {
             userData = { ...userData, ...vetting };
-            await updateDoc(userRef, vetting);
+            await updateDoc(userRef, { ...vetting });
           }
         }
 
@@ -85,7 +85,15 @@ export default function NavigationGate() {
           if (userData.role === 'ADMIN') {
              if (!isAdminPath && !isAuthPage) router.replace('/admin/dashboard');
           } else if (userData.role === 'CLUB') {
-             if (!isMerchantPath && !isAuthPage) router.replace('/merchant');
+             const isAllowedSharedPath = 
+               pathname === '/me' || 
+               pathname === '/activity' || 
+               pathname?.startsWith('/me/orders') || 
+               pathname?.startsWith('/orders/');
+               
+             if (!isMerchantPath && !isAllowedSharedPath && !isAuthPage) {
+                router.replace('/merchant');
+             }
           } else if (userData.role === 'STUDENT') {
              // 🏛️ REQ_G001: STRICT ROLE LOCKDOWN
              if (isAdminPath || isMerchantPath) {
@@ -133,7 +141,8 @@ export default function NavigationGate() {
     !isAuthPage && 
     !isRoot && 
     !pathname?.startsWith('/admin') && 
-    !pathname?.startsWith('/merchant');
+    !pathname?.startsWith('/merchant') &&
+    !(role === 'CLUB' && (pathname === '/me' || pathname === '/activity' || pathname?.startsWith('/me/orders')));
 
   if (checking && !isAuthPage && !isRoot) return (
     <div className="h-screen w-full bg-slate-50 flex items-center justify-center">

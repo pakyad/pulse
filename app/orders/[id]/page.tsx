@@ -5,12 +5,30 @@ import { useRouter, useParams } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ChevronLeft, 
+  Package, 
+  MapPin, 
+  ChevronRight, 
+  Clock, 
+  ShieldCheck, 
+  CheckCircle2, 
+  Truck,
+  Zap,
+  Activity,
+  ArrowRight,
+  Navigation,
+  FileText,
+  Copy
+} from 'lucide-react';
 
 export default function EdgeToEdgeOrderStatus() {
   const router = useRouter();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -38,27 +56,22 @@ export default function EdgeToEdgeOrderStatus() {
   }, [id, router]);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center">
-      <div className="w-8 h-8 border-[1.5px] border-[#F2F2F7] border-t-teal-500 rounded-full animate-spin" />
+    <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin" />
     </div>
   );
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-[#FFFFFF] flex flex-col font-sans">
-        <div className="bg-[#FFFFFF] sticky top-0 z-20 px-5 py-4 flex items-center justify-between border-b-[0.5px] border-[#E5E5EA]">
-          <button onClick={() => router.back()} className="p-2 -ml-2 text-[#1C1C1E] hover:bg-[#F2F2F7] rounded-full transition-colors active:scale-95">
-            <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
-          </button>
-          <h1 className="text-[17px] font-semibold text-[#1C1C1E] tracking-[-0.41px]">Order Status</h1>
-          <button className="text-[15px] font-semibold text-teal-600 px-2 py-1 rounded-md active:opacity-70 transition-opacity">
-            Help
-          </button>
+      <div className="min-h-screen bg-[#FDFDFD] flex flex-col font-sans p-8 items-center justify-center space-y-6">
+        <div className="w-20 h-20 bg-slate-50 rounded-[28px] flex items-center justify-center text-slate-200 border border-slate-100">
+           <Package size={32} />
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <h2 className="text-[20px] font-bold text-[#1C1C1E] mb-2 tracking-tight">Order Not Found</h2>
-          <p className="text-[15px] text-[#8E8E93] font-medium">We couldn't find this specific order.</p>
+        <div className="text-center space-y-2">
+           <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Mission Node Lost</h2>
+           <p className="text-[14px] text-slate-400 font-medium max-w-[240px]">This order registry could not be synchronized. Return to the main hub.</p>
         </div>
+        <button onClick={() => router.push('/me')} className="h-[60px] px-8 bg-slate-900 text-white rounded-[24px] font-black text-[13px] uppercase tracking-widest shadow-xl shadow-black/10">Return Home</button>
       </div>
     );
   }
@@ -67,25 +80,24 @@ export default function EdgeToEdgeOrderStatus() {
     switch (status) {
       case 'PENDING': 
       case 'PENDING_VENDOR':
-        return { phase: 1, title: 'Waiting for seller to accept', subtext: 'We have notified the seller about your order.' };
+        return { phase: 1, title: 'Registry Validating', subtext: 'Order awaiting vendor handshake.' };
       case 'PREPARING': 
       case 'PACKED':
       case 'CONFIRMED':
-        return { phase: 2, title: 'Seller is preparing your order', subtext: 'Your item is being packed and prepared.' };
+        return { phase: 2, title: 'Node Preparation', subtext: 'Seller is packing your assets.' };
       case 'AWAITING_RUNNER': 
-        return { phase: 3, title: 'Waiting for runner to accept', subtext: 'Seller is preparing your order.' };
+        return { phase: 3, title: 'Logistics Call', subtext: 'Awaiting a local peer runner.' };
       case 'ON_THE_WAY': 
-      case 'DELIVERING':
-        return { phase: 4, title: 'Runner heading to seller', subtext: 'Runner is on the way to pick up the item.' };
-      case 'READY_FOR_PICKUP': 
+      case 'IN_TRANSIT':
+        return { phase: 4, title: 'Logistics Intercept', subtext: 'Runner heading to the vendor node.' };
       case 'PICKED_UP':
-        return { phase: 5, title: 'Order Picked Up', subtext: 'Runner is heading to your delivery location.' };
+        return { phase: 5, title: 'Active Transit', subtext: 'Assets in transit to your hub.' };
       case 'COMPLETED': 
       case 'ARRIVED':
       case 'DELIVERED':
-        return { phase: 6, title: 'Delivered', subtext: 'Your order has been successfully delivered.' };
+        return { phase: 6, title: 'Mission Complete', subtext: 'Assets secured at drop-off.' };
       default: 
-        return { phase: 1, title: 'Processing...', subtext: 'Please wait.' };
+        return { phase: 1, title: 'Syncing...', subtext: 'Initializing registry...' };
     }
   };
 
@@ -100,166 +112,197 @@ export default function EdgeToEdgeOrderStatus() {
   };
 
   const orderTime = formatTime(order.created_at) || "10:00 AM";
-  const acceptedTime = phase >= 2 ? (formatTime(order.updated_at) || "10:05 AM") : "";
+
+  const phases = [
+    { id: 1, label: 'Placed' },
+    { id: 2, label: 'Preparing' },
+    { id: 3, label: 'Runner' },
+    { id: 4, label: 'Intercept' },
+    { id: 5, label: 'Transit' },
+    { id: 6, label: 'Arrived' }
+  ];
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] flex flex-col font-sans pb-24 selection:bg-teal-100">
-      {/* Top App Bar */}
-      <div className="bg-[#FFFFFF] sticky top-0 z-20 px-5 py-4 flex items-center justify-between border-b-[0.5px] border-[#E5E5EA]">
-        <button onClick={() => router.back()} className="p-2 -ml-2 text-[#1C1C1E] hover:bg-[#F2F2F7] rounded-full transition-colors active:scale-95">
-          <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <h1 className="text-[17px] font-semibold text-[#1C1C1E] tracking-[-0.41px]">Order Status</h1>
-        <button className="text-[15px] font-semibold text-teal-600 px-2 py-1 rounded-md active:opacity-70 transition-opacity">
-          Help
-        </button>
-      </div>
-
-      {/* Section 1: Live Status Hero */}
-      <div className="px-5 py-8 border-b-[0.5px] border-[#E5E5EA]">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2.5 h-2.5 bg-teal-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.5)]"></div>
-          <span className="text-[13px] font-bold text-teal-600 tracking-[0.08em] uppercase">Live Tracking</span>
-        </div>
-        <h2 className="text-[28px] font-bold text-[#1C1C1E] tracking-tight leading-[1.1]">{title}</h2>
-        <p className="text-[#8E8E93] mt-[6px] text-[15px] font-medium leading-relaxed">{subtext}</p>
-      </div>
-
-      {/* Section 2: Vertical Tracking Timeline */}
-      <div className="px-5 py-8 border-b-[0.5px] border-[#E5E5EA]">
-        <div className="relative">
-          {/* Vertical Track Line */}
-          <div className="absolute left-[11.5px] top-3 bottom-8 w-[1px] bg-[#E5E5EA]"></div>
-
-          {/* Step 1: Order Placed */}
-          <div className="relative flex items-start gap-4 mb-8">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[3px] bg-[#FFFFFF] py-1">
-              <div className="w-[8px] h-[8px] rounded-full bg-[#C7C7CC]"></div>
-            </div>
-            <div className="flex-1 flex justify-between items-start">
-              <p className={`text-[15px] ${phase === 1 ? 'font-bold text-[#1C1C1E]' : 'font-medium text-[#8E8E93]'}`}>Order Placed</p>
-              <p className="text-[13px] text-[#AEAEB2] font-medium mt-[2px]">{orderTime}</p>
-            </div>
-          </div>
-
-          {/* Step 2: Seller Accepted */}
-          <div className="relative flex items-start gap-4 mb-8">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[3px] bg-[#FFFFFF] py-1">
-              <div className={`w-[8px] h-[8px] rounded-full ${phase >= 2 ? 'bg-[#C7C7CC]' : 'border-[1.5px] border-[#E5E5EA] bg-[#FFFFFF]'}`}></div>
-            </div>
-            <div className="flex-1 flex justify-between items-start">
-              <p className={`text-[15px] ${phase === 2 ? 'font-bold text-[#1C1C1E]' : 'font-medium text-[#8E8E93]'}`}>Seller Accepted</p>
-              {phase >= 2 && <p className="text-[13px] text-[#AEAEB2] font-medium mt-[2px]">{acceptedTime}</p>}
-            </div>
-          </div>
-
-          {/* Step 3: Waiting for Runner */}
-          <div className="relative flex items-start gap-4 mb-8">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[1px] bg-[#FFFFFF] py-[2px]">
-              {phase === 3 ? (
-                <div className="w-[14px] h-[14px] rounded-full bg-[#FFFFFF] border-[3.5px] border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.3)]"></div>
-              ) : phase > 3 ? (
-                <div className="w-[8px] h-[8px] rounded-full bg-[#C7C7CC] mt-[2px]"></div>
-              ) : (
-                <div className="w-[8px] h-[8px] rounded-full border-[1.5px] border-[#E5E5EA] bg-[#FFFFFF] mt-[2px]"></div>
-              )}
-            </div>
-            <div className="flex-1 flex justify-between items-start">
-              <p className={phase === 3 ? 'text-[17px] font-bold text-[#1C1C1E] tracking-tight leading-none' : 'text-[15px] font-medium text-[#8E8E93] leading-none'}>Waiting for Runner</p>
-            </div>
-          </div>
-
-          {/* Step 4: Runner Heading to Seller */}
-          <div className="relative flex items-start gap-4 mb-8">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[1px] bg-[#FFFFFF] py-[2px]">
-              {phase === 4 ? (
-                <div className="w-[14px] h-[14px] rounded-full bg-[#FFFFFF] border-[3.5px] border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.3)]"></div>
-              ) : phase > 4 ? (
-                <div className="w-[8px] h-[8px] rounded-full bg-[#C7C7CC] mt-[2px]"></div>
-              ) : (
-                <div className="w-[8px] h-[8px] rounded-full border-[1.5px] border-[#E5E5EA] bg-[#FFFFFF] mt-[2px]"></div>
-              )}
-            </div>
-            <div className="flex-1 flex justify-between items-start">
-              <p className={phase === 4 ? 'text-[17px] font-bold text-[#1C1C1E] tracking-tight leading-none' : 'text-[15px] font-medium text-[#8E8E93] leading-none'}>Runner Heading to Seller</p>
-            </div>
-          </div>
-
-          {/* Step 5: Order Picked Up */}
-          <div className="relative flex items-start gap-4 mb-8">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[1px] bg-[#FFFFFF] py-[2px]">
-              {phase === 5 ? (
-                <div className="w-[14px] h-[14px] rounded-full bg-[#FFFFFF] border-[3.5px] border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.3)]"></div>
-              ) : phase > 5 ? (
-                <div className="w-[8px] h-[8px] rounded-full bg-[#C7C7CC] mt-[2px]"></div>
-              ) : (
-                <div className="w-[8px] h-[8px] rounded-full border-[1.5px] border-[#E5E5EA] bg-[#FFFFFF] mt-[2px]"></div>
-              )}
-            </div>
-            <div className="flex-1 flex justify-between items-start">
-              <p className={phase === 5 ? 'text-[17px] font-bold text-[#1C1C1E] tracking-tight leading-none' : 'text-[15px] font-medium text-[#8E8E93] leading-none'}>Order Picked Up</p>
-            </div>
-          </div>
-
-          {/* Step 6: Delivered */}
-          <div className="relative flex items-start gap-4">
-            <div className="relative z-10 w-[24px] flex justify-center mt-[1px] bg-[#FFFFFF] py-[2px]">
-              {phase === 6 ? (
-                <div className="w-[14px] h-[14px] rounded-full bg-[#FFFFFF] border-[3.5px] border-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.3)]"></div>
-              ) : (
-                <div className="w-[8px] h-[8px] rounded-full border-[1.5px] border-[#E5E5EA] bg-[#FFFFFF] mt-[2px]"></div>
-              )}
-            </div>
-            <div className="flex-1 flex justify-between items-start">
-              <p className={phase === 6 ? 'text-[17px] font-bold text-[#1C1C1E] tracking-tight leading-none' : 'text-[15px] font-medium text-[#8E8E93] leading-none'}>Delivered</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* Section 3: Item & Seller Details */}
-      <div className="px-5 py-5 border-b-[0.5px] border-[#E5E5EA] flex items-center justify-between group active:bg-[#F2F2F7] transition-colors cursor-pointer">
-        <div className="flex items-center gap-[14px]">
-          <div className="w-[52px] h-[52px] bg-[#F2F2F7] rounded-[14px] border-[0.5px] border-[#E5E5EA] flex items-center justify-center overflow-hidden shrink-0">
-             {order.image_url ? (
-               <img src={order.image_url} alt={order.title} className="w-full h-full object-cover" />
-             ) : (
-               <svg className="w-6 h-6 text-[#C7C7CC]" fill="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-             )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-[#1C1C1E] text-[17px] tracking-[-0.41px] truncate">{order.title || 'MIDI Canvas Tote Bag'}</h3>
-            <p className="text-[14px] font-medium text-[#8E8E93] mt-[2px] truncate">{order.seller_name || 'Pulse Official'}</p>
-          </div>
-        </div>
-        <svg className="w-[20px] h-[20px] text-[#C7C7CC] ml-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
-      </div>
-
-      {/* Section 4: Delivery Details */}
-      <div className="px-5 py-6 border-b-[0.5px] border-[#E5E5EA] flex items-start gap-4">
-         <div className="shrink-0 mt-[2px]">
-            <div className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center">
-                <svg className="w-[18px] h-[18px] text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-            </div>
+    <main className="min-h-screen bg-[#FDFDFD] font-sans text-slate-900 antialiased overflow-x-hidden">
+      
+      {/* ── 1. PREMIUM HEADER ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100 px-6 h-20 flex items-center justify-between">
+         <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900 active:scale-90 transition-all">
+            <ChevronLeft size={20} />
+         </button>
+         <div className="flex flex-col items-center">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Registry</p>
+            <p className="text-[14px] font-bold tracking-tight">#{order.order_code || order.id.substring(0, 6).toUpperCase()}</p>
          </div>
-         <div className="flex-1">
-             <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-[0.08em] mb-[4px]">Delivery to</p>
-             <p className="text-[15px] font-semibold text-[#1C1C1E] leading-snug pr-4">{order.drop_off_location || 'Bus Stop A — Near main road'}</p>
-         </div>
+         <button className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900">
+            <ShieldCheck size={18} />
+         </button>
+      </nav>
+
+      <div className="pt-24 pb-32 px-6 max-w-2xl mx-auto space-y-10">
+         
+         {/* ── 2. LOGISTICS PULSE HERO ── */}
+         <section className="space-y-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-slate-900 rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl shadow-slate-900/10"
+            >
+               {/* Background Animated Pulse */}
+               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[100px] animate-pulse rounded-full -mr-20 -mt-20" />
+               
+               <div className="relative z-10 space-y-8">
+                  <div className="flex items-center gap-3">
+                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
+                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,1)]" />
+                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Active Directive</span>
+                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                     <motion.h1 
+                        key={title}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="text-[32px] font-black tracking-tighter leading-none"
+                     >
+                        {title}
+                     </motion.h1>
+                     <p className="text-slate-400 text-[15px] font-medium leading-relaxed max-w-[260px]">{subtext}</p>
+                  </div>
+
+                  {/* Voxel Progress Bar */}
+                  <div className="space-y-3 pt-4">
+                     <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden flex gap-1 p-0.5">
+                        {phases.map((p) => (
+                           <motion.div 
+                              key={p.id}
+                              initial={false}
+                              animate={{ 
+                                 backgroundColor: phase >= p.id ? '#10B981' : 'rgba(255,255,255,0.05)',
+                                 flex: phase === p.id ? 2 : 1
+                              }}
+                              className="h-full rounded-full transition-all"
+                           />
+                        ))}
+                     </div>
+                     <div className="flex justify-between px-1">
+                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{phases[0].label}</p>
+                        <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">{phases[phase-1]?.label || 'Pending'}</p>
+                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{phases[5].label}</p>
+                     </div>
+                  </div>
+               </div>
+            </motion.div>
+         </section>
+
+         {/* ── 3. TRACKING TIMELINE ── */}
+         <section className="bg-white rounded-[40px] border-[0.5px] border-slate-100 p-10 shadow-xl shadow-slate-900/5 space-y-10">
+            <div className="relative">
+               {/* Tubular Progress Line */}
+               <div className="absolute left-4 top-4 bottom-4 w-1 bg-slate-50 rounded-full" />
+               <motion.div 
+                  initial={{ height: 0 }}
+                  animate={{ height: `${Math.min(100, ((phase - 1) / 5) * 100)}%` }}
+                  className="absolute left-4 top-4 w-1 bg-emerald-500 rounded-full z-10 transition-all duration-1000"
+               />
+
+               <div className="space-y-10 relative z-20">
+                  {phases.map((p) => {
+                     const isCurrent = phase === p.id;
+                     const isPast = phase > p.id;
+                     
+                     return (
+                        <div key={p.id} className="flex items-start gap-8 group">
+                           <div className={`w-9 h-9 rounded-[14px] flex items-center justify-center transition-all duration-500 border-2 ${
+                              isCurrent ? 'bg-slate-900 border-slate-900 text-white scale-110 shadow-xl shadow-slate-900/20' : 
+                              isPast ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/10' : 
+                              'bg-white border-slate-50 text-slate-200'
+                           }`}>
+                              {isPast ? <CheckCircle2 size={16} /> : isCurrent ? <Activity size={16} className="animate-pulse" /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
+                           </div>
+                           <div className="flex-1 pt-1 space-y-1">
+                              <div className="flex justify-between items-baseline">
+                                 <h4 className={`text-[15px] font-bold tracking-tight transition-colors ${isCurrent ? 'text-slate-900' : isPast ? 'text-slate-400' : 'text-slate-200'}`}>
+                                    {p.label} Node
+                                 </h4>
+                                 {isPast && <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">{p.id === 1 ? orderTime : ''}</span>}
+                              </div>
+                              {isCurrent && (
+                                 <motion.p 
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="text-[13px] text-slate-400 font-medium leading-relaxed"
+                                 >
+                                    Registry confirmed at this node. Awaiting handshake.
+                                 </motion.p>
+                              )}
+                           </div>
+                        </div>
+                     );
+                  })}
+               </div>
+            </div>
+         </section>
+
+         {/* ── 4. ASSET BENTO NODE ── */}
+         <section className="grid grid-cols-1 gap-6">
+            <div className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-xl shadow-slate-900/5 flex items-center gap-6 group cursor-pointer hover:bg-slate-50 transition-all">
+               <div className="w-20 h-20 bg-slate-50 rounded-[28px] overflow-hidden border border-slate-100 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-500">
+                  {order.image_url ? (
+                    <img src={order.image_url} className="w-full h-full object-cover" />
+                  ) : (
+                    <Package size={28} className="text-slate-200" />
+                  )}
+               </div>
+               <div className="flex-1 space-y-1">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Asset Manifest</p>
+                  <h3 className="text-[18px] font-black text-slate-900 tracking-tighter leading-tight">{order.title}</h3>
+                  <div className="flex items-center gap-2 text-slate-400 font-bold text-[12px] uppercase tracking-widest">
+                     RM {Number(order.price).toFixed(2)} • {order.seller_name || 'Pulse Node'}
+                  </div>
+               </div>
+               <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition-all">
+                  <ArrowRight size={20} />
+               </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-xl shadow-slate-900/5 flex items-start gap-6">
+               <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-900 shrink-0 border border-slate-100 shadow-sm">
+                  <MapPin size={22} strokeWidth={1.5} />
+               </div>
+               <div className="space-y-1 flex-1">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Drop-Off Hub</p>
+                  <p className="text-[16px] font-bold text-slate-900 tracking-tight leading-snug">{order.drop_off_location || 'Campus Main Entrance'}</p>
+                  <div className="flex items-center gap-2 pt-2 text-emerald-500 text-[10px] font-black uppercase tracking-widest">
+                     <Zap size={10} className="fill-emerald-500" /> Geofence Verified
+                  </div>
+               </div>
+               <button className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-900 border border-slate-100 active:scale-90 transition-all shadow-sm">
+                  <Navigation size={18} />
+               </button>
+            </div>
+         </section>
+
+         {/* ── 5. REGISTRY LEDGER ── */}
+         <footer className="text-center space-y-6 py-10 opacity-40 hover:opacity-100 transition-opacity">
+            <div className="flex items-center justify-center gap-3">
+               <div className="h-px w-12 bg-slate-200" />
+               <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Institutional Audit Trail</p>
+               <div className="h-px w-12 bg-slate-200" />
+            </div>
+            <div className="space-y-1">
+               <p className="text-[11px] font-bold text-slate-400">Handshake ID: {order.id}</p>
+               <p className="text-[11px] font-medium text-slate-300">Synchronized via Pulse Node 20 • Cluster Alpha</p>
+            </div>
+         </footer>
+
       </div>
 
-      {/* Section 5: Order Summary */}
-      <div className="px-5 py-6 flex justify-between items-center bg-[#FDFDFD]">
-          <span className="text-[15px] font-medium text-[#8E8E93]">Order ID</span>
-          <div className="flex items-center gap-2">
-              <span className="font-semibold text-[#1C1C1E] text-[15px] uppercase tracking-wide">#{order.order_code || order.id.substring(0, 6)}</span>
-              <button className="text-[#8E8E93] hover:text-[#1C1C1E] transition-colors p-[6px] -mr-2 rounded-full active:bg-[#F2F2F7]" onClick={() => navigator.clipboard.writeText(order.order_code || order.id)}>
-                  <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-              </button>
-          </div>
-      </div>
-
-    </div>
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+    </main>
   );
 }

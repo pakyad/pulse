@@ -10,7 +10,11 @@ export default function FloatingActiveTask() {
   const [activeTask, setActiveTask] = useState<any>(null);
 
   useEffect(() => {
+    let unsubJobs: (() => void) | null = null;
+
     const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (unsubJobs) unsubJobs();
+      
       if (user) {
         // Query active orders where user is the runner
         const q = query(
@@ -18,7 +22,7 @@ export default function FloatingActiveTask() {
           where("runner_id", "==", user.uid),
           where("status", "in", ["ON_THE_WAY", "PICKED_UP", "ARRIVED"])
         );
-        const unsubJobs = onSnapshot(q, (snapshot) => {
+        unsubJobs = onSnapshot(q, (snapshot) => {
           if (!snapshot.empty) {
             const doc = snapshot.docs[0];
             setActiveTask({ id: doc.id, ...doc.data() });
@@ -28,12 +32,15 @@ export default function FloatingActiveTask() {
         }, (err) => {
            console.error("FloatingActiveTask Error:", err);
         });
-        return () => unsubJobs();
       } else {
         setActiveTask(null);
       }
     });
-    return () => unsubAuth();
+
+    return () => {
+      unsubAuth();
+      if (unsubJobs) unsubJobs();
+    };
   }, []);
 
   // Hide on auth pages, the terminal itself (where the full manifest is), and admin/merchant routes

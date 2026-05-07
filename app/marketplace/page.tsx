@@ -141,9 +141,9 @@ export default function MarketplacePage() {
           <ChevronLeft size={28} strokeWidth={2.5} />
         </button>
         <div className="flex-1">
-          <button onClick={() => setIsSearchOpen(true)} className="w-full h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center px-4 gap-3 shadow-sm shadow-slate-200/50">
-            <Search size={18} className="text-slate-400" />
-            <span className="text-[14px] font-bold text-slate-300">Search marketplace...</span>
+          <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center px-4 gap-3 transition-all hover:bg-slate-50 active:scale-[0.98]">
+            <Search size={16} className="text-slate-400" />
+            <span className="text-[13px] font-medium text-slate-400/60">Search marketplace...</span>
           </button>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -158,29 +158,29 @@ export default function MarketplacePage() {
 
         {/* ── 1. CAMPUS UPDATES (Institutional Style) ── */}
         <section>
-          <div className="px-6 mb-6 flex items-baseline justify-between">
-             <h3 className="text-[20px] font-bold text-slate-900 tracking-tight">Institutional Sync</h3>
-             <button className="text-[13px] font-bold text-slate-400 uppercase tracking-widest">Archive</button>
+          <div className="px-6 mb-5 flex items-baseline justify-between">
+             <h3 className="text-[18px] font-semibold text-slate-900 tracking-tight">Institutional Sync</h3>
+             <button className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors">Archive</button>
           </div>
           <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar pb-4">
             {OFFICIAL_CAMPAIGNS.map((camp) => (
               <motion.div
                 key={camp.id}
                 whileTap={{ scale: 0.98 }}
-                className={`shrink-0 w-[300px] p-8 rounded-2xl ${camp.color} text-white flex flex-col justify-between min-h-[220px] group cursor-pointer transition-all overflow-hidden relative shadow-xl shadow-slate-200/50`}
+                className={`shrink-0 w-[280px] p-6 rounded-[32px] ${camp.color} text-white flex flex-col justify-between min-h-[200px] group cursor-pointer transition-all overflow-hidden relative shadow-sm shadow-slate-200/20 border border-white/5`}
               >
-                <div className="absolute -top-10 -right-10 opacity-5 group-hover:opacity-10 transition-all duration-500">
-                  <span className="text-[140px] font-bold leading-none tracking-tighter select-none">{camp.initials}</span>
+                <div className="absolute -top-8 -right-8 opacity-5 group-hover:opacity-10 transition-all duration-700">
+                  <span className="text-[120px] font-bold leading-none tracking-tighter select-none">{camp.initials}</span>
                 </div>
                 
-                <div className="relative z-10 flex flex-col gap-1">
-                   <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">{camp.club_name}</span>
-                   <h4 className="text-[20px] font-bold leading-tight tracking-tight pr-6">{camp.title}</h4>
+                <div className="relative z-10 flex flex-col gap-0.5">
+                   <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/50">{camp.club_name}</span>
+                   <h4 className="text-[18px] font-semibold leading-tight tracking-tight pr-4">{camp.title}</h4>
                 </div>
 
-                <div className="relative z-10 flex items-center justify-between mt-auto pt-6 border-t border-white/10">
-                   <span className="text-[10px] font-bold uppercase tracking-[0.3em] bg-white/10 px-2.5 py-1 rounded-lg">{camp.tag}</span>
-                   <ArrowUpRight size={20} strokeWidth={2.5} />
+                <div className="relative z-10 flex items-center justify-between mt-auto pt-5 border-t border-white/5">
+                   <span className="text-[9px] font-bold uppercase tracking-[0.15em] bg-white/10 px-2.5 py-1 rounded-lg">{camp.tag}</span>
+                   <ArrowUpRight size={18} strokeWidth={2.5} />
                 </div>
               </motion.div>
             ))}
@@ -189,9 +189,9 @@ export default function MarketplacePage() {
 
         {/* ── 2. CATEGORY PICKER (Institutional Squircles) ── */}
         <section>
-          <div className="px-6 mb-6 flex items-baseline justify-between">
-             <h3 className="text-[20px] font-bold text-slate-900 tracking-tight">Browse Registry</h3>
-             <button className="text-[13px] font-bold text-slate-400 uppercase tracking-widest">Filter</button>
+          <div className="px-6 mb-5 flex items-baseline justify-between">
+             <h3 className="text-[18px] font-semibold text-slate-900 tracking-tight">Browse Registry</h3>
+             <button className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors">Filter</button>
           </div>
           <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-6">
             {CATEGORIES.map((cat) => (
@@ -199,17 +199,17 @@ export default function MarketplacePage() {
                 key={cat.id}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                className="flex flex-col items-center gap-3 shrink-0 group"
+                className="flex flex-col items-center gap-2.5 shrink-0 group"
               >
-                <div className={`w-[60px] h-[60px] rounded-2xl flex items-center justify-center transition-all duration-300 border-2 ${
+                <div className={`w-[52px] h-[52px] rounded-[20px] flex items-center justify-center transition-all duration-300 border-2 ${
                   activeCategory === cat.filter 
-                    ? 'bg-slate-900 border-slate-900 shadow-xl shadow-slate-200' 
-                    : `${cat.bg} border-transparent group-hover:border-slate-100 shadow-sm`
+                    ? 'bg-slate-900 border-slate-900 shadow-lg shadow-slate-200/50' 
+                    : `${cat.bg} border-transparent group-hover:border-slate-100 shadow-sm shadow-slate-200/10`
                 }`}>
-                  <cat.icon size={24} strokeWidth={2.2} className={activeCategory === cat.filter ? 'text-white' : cat.color} />
+                  <cat.icon size={20} strokeWidth={2.2} className={activeCategory === cat.filter ? 'text-white' : cat.color} />
                 </div>
-                <span className={`text-[12px] font-bold tracking-tight transition-colors ${
-                  activeCategory === cat.filter ? 'text-slate-900' : 'text-slate-500'
+                <span className={`text-[11px] font-bold tracking-tight transition-colors ${
+                  activeCategory === cat.filter ? 'text-slate-900' : 'text-slate-400'
                 }`}>
                   {cat.label}
                 </span>

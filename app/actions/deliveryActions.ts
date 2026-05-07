@@ -12,13 +12,15 @@ export async function completeDelivery(orderId: string, proofUrl: string) {
     // 1. Update the Order Registry
     await adminDb.collection("orders").doc(orderId).update({
         status: 'DELIVERED',
-        proofOfDeliveryUrl: proofUrl,
-        deliveredAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        delivered_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        delivery_proof_url: proofUrl,
+        finalized_at: new Date().toISOString()
     });
     
-    revalidatePath("/run/active");
+    revalidatePath("/run/terminal");
     revalidatePath("/me/orders");
+    revalidatePath(`/orders/${orderId}`);
     
     return { success: true, message: "Delivery Handshake Complete." };
   } catch (error) {

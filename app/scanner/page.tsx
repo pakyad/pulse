@@ -61,20 +61,33 @@ export default function ScannerPage() {
           setIsSyncing(true);
 
           try {
-            const txRef = doc(db, "transactions", decodedText);
+            const txRef = doc(db, "orders", decodedText);
             const txSnap = await getDoc(txRef);
             
-            if (txSnap.exists() && txSnap.data().status === 'PENDING') {
+            if (txSnap.exists()) {
               const data = txSnap.data();
+              const status = data.status;
+              
+              // Only allow scan if it's in a valid transitional state
+              const VALID_SCAN_STATES = ['PENDING', 'AWAITING_RUNNER', 'ON_THE_WAY', 'IN_TRANSIT', 'ARRIVED_AT_BUYER'];
+              if (!VALID_SCAN_STATES.includes(status)) {
+                setIsSyncing(false);
+                return;
+              }
               const sellerId = data.seller_id;
               const sellerRef = doc(db, "users", sellerId);
 
               // ⚡ ATOMIC HANDSHAKE
               const batch = writeBatch(db);
               
+              const newStatus = status === 'ON_THE_WAY' || status === 'IN_TRANSIT' || status === 'ARRIVED_AT_BUYER' 
+                ? 'DELIVERED' 
+                : 'COLLECTED';
+
               batch.update(txRef, { 
-                status: 'COLLECTED', 
-                completed_at: new Date().toISOString() 
+                status: newStatus, 
+                completed_at: new Date().toISOString(),
+                delivered_at: newStatus === 'DELIVERED' ? new Date().toISOString() : null
               });
 
               batch.update(sellerRef, { 

@@ -275,7 +275,7 @@ export default function RunModule() {
     return (
        <main className="min-h-screen bg-white antialiased text-navy overflow-x-hidden">
           
-          <nav className="fixed top-0 left-0 right-0 z-[60] px-8 pt-4 pb-6 flex items-center justify-between bg-white/80 backdrop-blur-xl">
+          <nav className="fixed top-0 left-0 right-0 z-60 px-8 pt-4 pb-6 flex items-center justify-between bg-white/80 backdrop-blur-xl">
              <div className="flex items-center gap-4">
                 <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all"><ChevronLeft size={24} /></button>
                 <h1 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">Run Terminal</h1>
@@ -378,7 +378,7 @@ export default function RunModule() {
                 <motion.div 
                   initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
                   transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                  className="fixed inset-0 z-[200] bg-white flex flex-col"
+                  className="fixed inset-0 z-200 bg-white flex flex-col"
                 >
                    {/* IKEA PROGRESS BAR */}
                    <div className="absolute top-0 left-0 right-0 h-[12px] bg-slate-50">
@@ -398,7 +398,7 @@ export default function RunModule() {
                    <div className="flex-1 overflow-y-auto no-scrollbar p-8">
                       <div className="space-y-10">
                          <div className="space-y-2">
-                            <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-[0.1em]">Layer {currentStep + 1} of 4</p>
+                             <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest">Layer {currentStep + 1} of 4</p>
                             <h3 className="text-[28px] font-bold tracking-tight text-navy leading-[1.1]">{activeService.steps[currentStep].title}</h3>
                             <p className="text-[14px] text-slate-400 font-medium leading-relaxed">{activeService.steps[currentStep].desc}</p>
                          </div>

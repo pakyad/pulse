@@ -231,7 +231,7 @@ export default function MissionBoard() {
       });
 
       const qOrders = query(
-        collection(db, 'transactions'),
+        collection(db, 'orders'),
         where('delivery_type', '==', 'RUNNER'),
         where('status', '==', 'AWAITING_RUNNER')
       );
@@ -263,7 +263,7 @@ export default function MissionBoard() {
     setAcceptingId(orderId);
     try {
       const runnerRef = doc(db, 'users', auth.currentUser.uid);
-      const orderRef = doc(db, 'transactions', orderId);
+      const orderRef = doc(db, 'orders', orderId);
 
       await updateDoc(orderRef, {
         runner_id: auth.currentUser.uid,

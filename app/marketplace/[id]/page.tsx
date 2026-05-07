@@ -408,8 +408,8 @@ export default function ItemDetails() {
     const unsubAuth = auth.onAuthStateChanged((user) => {
       if (user) {
         onSnapshot(doc(db, 'users', user.uid), (snap) => setProfile(snap.data()));
-        const q = query(collection(db, 'transactions'), where('buyer_id', '==', user.uid), where('status', '==', 'PENDING'));
-        onSnapshot(q, (snap) => setNotificationCount(snap.docs.length));
+        const nq = query(collection(db, 'orders'), where('buyer_id', '==', user.uid), where('status', 'in', ['PENDING', 'AWAITING_RUNNER', 'IN_TRANSIT']));
+        onSnapshot(nq, (snap) => setNotificationCount(snap.docs.length));
       }
     });
 

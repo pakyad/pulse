@@ -92,8 +92,8 @@ export default function PulseBulletinPage() {
       if (!user) return;
 
       unsubProfile = onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
-      const q = query(collection(db, 'transactions'), where('buyer_id', '==', user.uid), where('status', '==', 'PENDING'));
-      unsubTrans = onSnapshot(q, s => setNotificationCount(s.docs.length));
+      const q = query(collection(db, 'orders'), where('buyer_id', '==', user.uid), where('status', 'in', ['PENDING', 'AWAITING_RUNNER', 'IN_TRANSIT']));
+      unsubTrans = onSnapshot(q, (snap) => setNotificationCount(snap.docs.length));
     });
 
     const facUnsub = onSnapshot(collection(db, 'facilities'), (s) => {
@@ -122,7 +122,7 @@ export default function PulseBulletinPage() {
     <main className="min-h-screen bg-[#FDFDFD] pb-40 font-sans antialiased text-slate-800">
 
       {/* ── SOFT NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b border-slate-50">
+      <nav className="fixed top-0 left-0 right-0 z-100 px-6 py-4 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b border-slate-50">
         <button onClick={() => router.back()} className="p-2 -ml-2 text-slate-400 hover:text-slate-800 transition-all">
           <ChevronLeft size={22} />
         </button>
@@ -147,7 +147,6 @@ export default function PulseBulletinPage() {
           <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
         </div>
       </nav>
-
       {/* ── Pulse Bulletin ── */}
       <div className="pt-24 px-6 space-y-10">
         
@@ -211,7 +210,7 @@ export default function PulseBulletinPage() {
                   className="relative shrink-0 w-[220px] h-[280px] rounded-3xl overflow-hidden group cursor-pointer border border-slate-50"
                 >
                   <img src={item.img} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={item.title} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[9px] font-bold text-white uppercase tracking-wider">{item.status}</span>
                   </div>
@@ -267,7 +266,7 @@ export default function PulseBulletinPage() {
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsPulseCreateOpen(true)}
-          className="fixed bottom-10 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-100 flex items-center justify-center z-[150]"
+          className="fixed bottom-10 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-100 flex items-center justify-center z-150"
         >
           <Plus size={24} />
         </motion.button>

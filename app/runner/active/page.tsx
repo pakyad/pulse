@@ -34,7 +34,7 @@ export default function RunnerActivePage() {
         return;
       }
 
-      unsub = onSnapshot(doc(db, 'transactions', orderId), (snap) => {
+      unsub = onSnapshot(doc(db, 'orders', orderId), (snap) => {
         if (snap.exists()) setOrder({ id: snap.id, ...snap.data() });
         setLoading(false);
       }, (error) => {
@@ -51,7 +51,7 @@ export default function RunnerActivePage() {
   const handlePickup = async () => {
     if (!orderId) return;
     try {
-      await updateDoc(doc(db, 'transactions', orderId), {
+      await updateDoc(doc(db, 'orders', orderId), {
         status: 'ON_THE_WAY',
         picked_up_at: new Date().toISOString()
       });
@@ -66,7 +66,7 @@ export default function RunnerActivePage() {
     
     if (verificationCode === order.handshake_code) {
       try {
-        const orderRef = doc(db, 'transactions', orderId);
+        const orderRef = doc(db, 'orders', orderId);
         const runnerRef = doc(db, 'users', auth.currentUser!.uid);
 
         await updateDoc(orderRef, {
@@ -91,7 +91,7 @@ export default function RunnerActivePage() {
   const handleCancelMission = async () => {
     if (!orderId) return;
     try {
-      const orderRef = doc(db, 'transactions', orderId);
+      const orderRef = doc(db, 'orders', orderId);
       const runnerRef = doc(db, 'users', auth.currentUser!.uid);
 
       await updateDoc(orderRef, {
@@ -279,7 +279,7 @@ export default function RunnerActivePage() {
               <ActionButton 
                 key="arrived_merchant"
                 label="Arrived at Merchant"
-                onClick={() => updateDoc(doc(db, 'transactions', orderId!), { status: 'ARRIVED_AT_MERCHANT' })}
+                onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_MERCHANT' })}
                 color="navy"
               />
             )}
@@ -298,7 +298,7 @@ export default function RunnerActivePage() {
                <ActionButton 
                  key="arrived_buyer"
                  label="Arrived at Drop-off"
-                 onClick={() => updateDoc(doc(db, 'transactions', orderId!), { status: 'ARRIVED_AT_BUYER' })}
+                 onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
                  color="navy"
                />
             )}

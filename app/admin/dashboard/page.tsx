@@ -20,7 +20,15 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('command');
 
   useEffect(() => {
+    let guidelinesUnsub: (() => void) | null = null;
+    let itemsUnsub: (() => void) | null = null;
+    let disputesUnsub: (() => void) | null = null;
+
     const checkAccess = auth.onAuthStateChanged(async (user) => {
+      if (guidelinesUnsub) guidelinesUnsub();
+      if (itemsUnsub) itemsUnsub();
+      if (disputesUnsub) disputesUnsub();
+
       if (!user) { router.push('/auth'); return; }
       const userDoc = await getDoc(doc(db, "users", user.uid));
       const profile = userDoc.data();
@@ -29,7 +37,7 @@ export default function AdminDashboard() {
       }
 
       // 1. Fetch Price Guidelines
-      const guidelinesUnsub = onSnapshot(collection(db, "PriceGuidelines"), 
+      guidelinesUnsub = onSnapshot(collection(db, "PriceGuidelines"), 
         (snap) => {
           const g: Record<string, number> = {};
           snap.docs.forEach(d => g[d.id] = d.data().maxBasePrice);
@@ -39,7 +47,7 @@ export default function AdminDashboard() {
       );
 
       // 2. Fetch All Active Items for Monitoring (onSnapshot)
-      const itemsUnsub = onSnapshot(
+      itemsUnsub = onSnapshot(
         query(collection(db, "items"), where("status", "==", "active")),
         (snap) => {
           setFlaggedItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -48,7 +56,7 @@ export default function AdminDashboard() {
       );
 
       // 3. Fetch Active Disputes (onSnapshot)
-      const disputesUnsub = onSnapshot(
+      disputesUnsub = onSnapshot(
         query(collection(db, "disputes"), where("status", "==", "AWAITING_ADMIN")),
         (snap) => {
           setDisputes(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => b.created_at?.toMillis?.() - a.created_at?.toMillis?.()));
@@ -57,9 +65,14 @@ export default function AdminDashboard() {
       );
 
       setLoading(false);
-      return () => { guidelinesUnsub(); itemsUnsub(); disputesUnsub(); };
     });
-    return () => checkAccess();
+
+    return () => {
+      checkAccess();
+      if (guidelinesUnsub) guidelinesUnsub();
+      if (itemsUnsub) itemsUnsub();
+      if (disputesUnsub) disputesUnsub();
+    };
   }, [router]);
 
   const handleResolve = async (id: string) => {

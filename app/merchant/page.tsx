@@ -84,6 +84,7 @@ export default function MerchantDashboard() {
     // Exact status match for @/app/run/terminal/page.tsx radar query
     await updateDoc(doc(db, "orders", orderId), { 
       status: "AWAITING_RUNNER",
+      delivery_type: "RUNNER", // Force-align with logistics schema
       ready_at: serverTimestamp() 
     });
     alert("Institutional Logistics: Order is now visible to the Runner Radar.");
@@ -99,7 +100,7 @@ export default function MerchantDashboard() {
   const activeOrdersList = orders.filter(o => ["PENDING_VENDOR", "PREPARING", "AWAITING_RUNNER", "IN_TRANSIT", "ON_THE_WAY"].includes(o.status));
   
   const urgentOrders = activeOrdersList.filter(o => o.status === 'PENDING_VENDOR');
-  const preparingOrders = activeOrdersList.filter(o => o.status === 'PREPARING');
+  const preparingOrders = activeOrdersList.filter(o => o.status === 'PREPARING' || o.status === 'AWAITING_RUNNER');
 
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" /></div>;
 

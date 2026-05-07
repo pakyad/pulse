@@ -96,8 +96,8 @@ export default function PulseHome() {
     const unsub = auth.onAuthStateChanged((user) => {
       if (!user) return;
       onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
-      const q = query(collection(db, 'transactions'), where('buyer_id', '==', user.uid), where('status', '==', 'PENDING'));
-      onSnapshot(q, s => setNotificationCount(s.docs.length));
+      const q = query(collection(db, 'orders'), where('buyer_id', '==', user.uid), where('status', 'in', ['PENDING', 'AWAITING_RUNNER', 'IN_TRANSIT']));
+      onSnapshot(q, (snap) => setNotificationCount(snap.docs.length));
     });
     return () => unsub();
   }, []);

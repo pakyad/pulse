@@ -55,7 +55,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-          className="fixed inset-0 z-[200] bg-white/95 backdrop-blur-3xl overflow-y-auto no-scrollbar pb-32"
+          className="fixed inset-0 z-200 bg-white/95 backdrop-blur-3xl overflow-y-auto no-scrollbar pb-32"
         >
           {/* ── HEADER ── */}
           <div className="px-6 pt-16 pb-6 flex flex-col gap-10">

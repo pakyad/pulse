@@ -54,11 +54,12 @@ export default function HandshakeScanner() {
     
     try {
         await runTransaction(db, async (transaction) => {
-            const txRef = doc(db, "transactions", txId);
+            const txRef = doc(db, "orders", txId);
             const txDoc = await transaction.get(txRef);
 
             if (!txDoc.exists()) throw "Invalid Pulse Handshake ID.";
-            if (txDoc.data().status === 'COLLECTED') throw "Handshake already finalized.";
+            const data = txDoc.data();
+            if (data.status === 'COLLECTED') throw "Handshake already finalized.";
 
             // 1. Finalize Transaction
             transaction.update(txRef, { 
@@ -68,8 +69,9 @@ export default function HandshakeScanner() {
 
             // 2. Reward the Runner/Collector
             if (auth.currentUser) {
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                transaction.update(userRef, {
+                const sellerId = data.seller_id;
+                const sellerRef = doc(db, "users", sellerId);
+                transaction.update(sellerRef, {
                     hustle_score: increment(10)
                 });
             }
