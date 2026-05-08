@@ -113,10 +113,10 @@ const SERVICES = [
     id: 'errands', 
     label: 'Custom Errands', 
     icon: VoxelErrands, 
-    desc: 'Flexible directives & tasks',
+    desc: 'Flexible tasks & requests',
     accent: 'text-purple-600',
     steps: [
-      { title: "Task Description", desc: "Detailed operational prompt" },
+      { title: "Task Description", desc: "Detailed request summary" },
       { title: "Estimated Effort", desc: "Time & energy projection" },
       { title: "Material Cost", desc: "Financial upfront protocol" },
       { title: "Risk Disclaimer", desc: "UniKL code compliance" }
@@ -235,7 +235,7 @@ export default function RunModule() {
     const next = () => setCurrentStep(s => s + 1);
     const back = () => { if(currentStep > 0) setCurrentStep(s => s - 1); else setActiveService(null); };
 
-    const handleFinalizeDirective = async () => {
+    const handleFinalizeRequest = async () => {
         if (!auth.currentUser) { router.push('/auth'); return; }
         setSubmitting(true);
         try {
@@ -260,7 +260,7 @@ export default function RunModule() {
             setActiveService(null);
             router.push(`/orders/success?id=${orderId}`);
         } catch (e: any) {
-            console.error("RUN_DIRECTIVE_FAILED:", e);
+            console.error("RUN_REQUEST_FAILED:", e);
             alert(e.message || "Registry update failed.");
         } finally {
             setSubmitting(false);
@@ -278,14 +278,14 @@ export default function RunModule() {
           <nav className="fixed top-0 left-0 right-0 z-60 px-8 pt-4 pb-6 flex items-center justify-between bg-white/80 backdrop-blur-xl">
              <div className="flex items-center gap-4">
                 <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all"><ChevronLeft size={24} /></button>
-                <h1 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">Run Terminal</h1>
+                <h1 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">Runner Hub</h1>
              </div>
              <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
           </nav>
 
           <div className="pt-24 px-8 pb-32 space-y-12">
              <div className="space-y-2">
-                <h2 className="text-[18px] font-bold tracking-tight text-navy">Logistics Directives</h2>
+                <h2 className="text-[18px] font-bold tracking-tight text-navy">Delivery Requests</h2>
                 <p className="text-[13px] text-slate-400 font-medium leading-relaxed">Initiate a 4-layer verification funnel for specialized task fulfillment.</p>
              </div>
 
@@ -300,7 +300,7 @@ export default function RunModule() {
                    <div className="space-y-8">
                       <div className="flex justify-between items-baseline">
                          <h3 className="text-[17px] font-bold text-navy tracking-tight">Runner Hub</h3>
-                         <button onClick={() => router.push('/run/terminal')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Open Terminal ↗</button>
+                         <button onClick={() => router.push('/run/terminal')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Open Dashboard ↗</button>
                       </div>
                       
                       {/* Institutional Bento Summary */}
@@ -330,7 +330,7 @@ export default function RunModule() {
                          className="w-full h-[64px] bg-navy text-white rounded-[24px] font-bold text-[15px] flex items-center justify-center gap-3 shadow-xl shadow-navy/10 active:scale-95 transition-all"
                       >
                          <Zap size={20} className="text-amber-400 fill-amber-400" />
-                         Enter Carrier Terminal
+                         Open Runner Dashboard
                       </button>
                    </div>
                 ) : (
@@ -356,7 +356,7 @@ export default function RunModule() {
                                         {profile?.is_verified_runner ? (
                                            <>
                                               <Zap size={18} className="text-amber-400 fill-amber-400" />
-                                              Open Carrier Terminal
+                                              Open Runner Dashboard
                                            </>
                                         ) : (
                                            'Apply Now'
@@ -398,7 +398,7 @@ export default function RunModule() {
                    <div className="flex-1 overflow-y-auto no-scrollbar p-8">
                       <div className="space-y-10">
                          <div className="space-y-2">
-                             <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest">Layer {currentStep + 1} of 4</p>
+                             <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest">Step {currentStep + 1} of 4</p>
                             <h3 className="text-[28px] font-bold tracking-tight text-navy leading-[1.1]">{activeService.steps[currentStep].title}</h3>
                             <p className="text-[14px] text-slate-400 font-medium leading-relaxed">{activeService.steps[currentStep].desc}</p>
                          </div>
@@ -562,7 +562,7 @@ export default function RunModule() {
                                            </p>
                                         </div>
                                         <button onClick={() => setForm({ ...form, confirmed: true })} className="w-full h-16 bg-navy text-white rounded-[22px] font-bold text-[15px] flex items-center justify-center gap-3">
-                                           <CheckCircle2 size={20} /> Accept & Lock Directive
+                                           <CheckCircle2 size={20} /> Accept & Lock Request
                                         </button>
                                      </div>
                                   )}
@@ -587,14 +587,14 @@ export default function RunModule() {
                       {(currentStep === 1 || (currentStep === 3 && activeService.id !== 'errands')) && (
                          <button 
                            disabled={submitting}
-                           onClick={() => { if(currentStep < 3) next(); else handleFinalizeDirective(); }}
+                           onClick={() => { if(currentStep < 3) next(); else handleFinalizeRequest(); }}
                            className="w-full h-[64px] bg-navy text-white rounded-[22px] font-bold text-[15px] tracking-tight active:scale-[0.98] transition-all shadow-xl shadow-navy/10 flex items-center justify-center gap-3 disabled:opacity-50"
                          >
                             {submitting ? (
                                 <Loader2 className="animate-spin" size={20} />
                             ) : (
                                 <>
-                                    {currentStep === 3 ? 'Finalize Directive' : 'Confirm & Proceed'}
+                                    {currentStep === 3 ? 'Finalize Request' : 'Confirm & Proceed'}
                                     <ArrowRight size={18} />
                                 </>
                             )}

@@ -25,7 +25,7 @@ export default function RunnerDashboard({ profile, onBack }: { profile: any, onB
                 <button onClick={onBack} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all">
                    <ChevronLeft size={24} />
                 </button>
-                <h1 className="text-[17px] font-bold tracking-tight text-[#222222]">Carrier Hub</h1>
+                <h1 className="text-[17px] font-bold tracking-tight text-[#222222]">Runner Hub</h1>
              </div>
              <div className="flex items-center gap-4">
                 <button className="text-slate-300 active:scale-90 transition-all"><LayoutGrid size={20} /></button>
@@ -60,9 +60,9 @@ export default function RunnerDashboard({ profile, onBack }: { profile: any, onB
                     <Power size={24} className="text-slate-200" />
                 </div>
                 <div className="space-y-2">
-                    <h3 className="text-[20px] font-bold text-[#222222]">Terminal Offline</h3>
+                    <h3 className="text-[20px] font-bold text-[#222222]">Runner Offline</h3>
                     <p className="text-[14px] text-slate-400 font-medium max-w-[240px] mx-auto leading-relaxed">
-                        Activate your working status to receive institutional delivery directives.
+                        Activate your working status to receive delivery requests.
                     </p>
                 </div>
              </div>
