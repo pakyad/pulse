@@ -123,8 +123,8 @@ export default function PulseBulletinPage() {
 
       {/* ── SOFT NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-100 px-6 py-4 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b border-slate-50">
-        <button onClick={() => router.back()} className="p-2 -ml-2 text-slate-400 hover:text-slate-800 transition-all">
-          <ChevronLeft size={22} />
+        <button onClick={() => router.back()} className="p-2 -ml-2 text-slate-400 hover:text-slate-900 transition-all active:scale-90">
+          <ChevronLeft size={24} strokeWidth={1.5} />
         </button>
         <div className="flex-1">
           <button 

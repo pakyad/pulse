@@ -24,6 +24,8 @@
   --radius-4xl: var(--radius-institutional-lg);
   
   --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 .image-rendering-pixelated {
@@ -120,8 +122,5 @@
   background: var(--accent);
 }
 
-.font-mono-data {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-variant-numeric: tabular-nums;
-}
+
 

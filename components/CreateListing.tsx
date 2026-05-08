@@ -103,18 +103,18 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
   const isFormValid = images.length > 0 && form.title && form.price && form.category && form.condition;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex flex-col bg-white overflow-hidden font-sans antialiased text-black">
+    <div className="fixed inset-0 z-1000 flex flex-col bg-white overflow-hidden font-sans antialiased text-black">
       
       {/* ── TOP NAV (Institutional) ── */}
       <div className="flex justify-between items-center px-6 pt-16 pb-6 bg-white border-b-[0.5px] border-[#F2F2F7]">
         <button onClick={onClose} className="p-2 -ml-2 text-black/40 hover:text-black transition-colors">
           <X size={20} />
         </button>
-        <h1 className="text-[14px] font-black uppercase tracking-[0.2em] text-black">Create Listing</h1>
+        <h1 className="text-[14px] font-bold uppercase tracking-[0.15em] text-black">New Listing</h1>
         <button 
           disabled={!isFormValid || status === 'loading'}
           onClick={handleUpload}
-          className={`text-[13px] font-black uppercase tracking-widest transition-all ${isFormValid ? 'text-[#00927C]' : 'text-black/10'}`}
+          className={`text-[13px] font-bold uppercase tracking-widest transition-all ${isFormValid ? 'text-[#00927C]' : 'text-black/10'}`}
         >
           {status === 'loading' ? '...' : 'Post'}
         </button>
@@ -125,7 +125,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
         {/* ── SECTION: PHOTO (Optical Layout) ── */}
         <section className="px-6 py-10 space-y-6">
           <div className="flex justify-between items-end">
-            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Asset Documentation</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-black/30">Photos</p>
             <p className="text-[10px] font-bold text-[#00927C] uppercase tracking-widest">{images.length} / 4</p>
           </div>
           
@@ -165,7 +165,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                     <Check size={16} className="text-white" />
                   </div>
                   <div>
-                    <p className="text-[12px] font-black text-[#1B5E20] uppercase tracking-wider mb-1">Authorization Success</p>
+                    <p className="text-[12px] font-black text-[#1B5E20] uppercase tracking-wider mb-1">Success</p>
                     <p className="text-[13px] text-[#2E7D32] font-medium leading-tight">{message}</p>
                   </div>
                 </div>
@@ -177,13 +177,13 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                     <AlertCircle size={16} className="text-white" />
                   </div>
                   <div>
-                    <p className="text-[12px] font-black text-[#7F4D00] uppercase tracking-wider mb-1">Manual Vetting Required</p>
+                    <p className="text-[12px] font-black text-[#7F4D00] uppercase tracking-wider mb-1">Review Pending</p>
                     <p className="text-[13px] text-[#A67C00] font-medium leading-tight">{message}</p>
                     <button 
                       onClick={onClose}
                       className="mt-3 text-[10px] font-black uppercase tracking-widest text-[#7F4D00] underline underline-offset-4"
                     >
-                      Return to Terminal
+                      Return to Dashboard
                     </button>
                   </div>
                 </div>
@@ -195,7 +195,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                     <X size={16} className="text-white" />
                   </div>
                   <div>
-                    <p className="text-[12px] font-black text-[#B71C1C] uppercase tracking-wider mb-1">Registry Rejection</p>
+                    <p className="text-[12px] font-black text-[#B71C1C] uppercase tracking-wider mb-1">Failed to Post</p>
                     <p className="text-[13px] text-[#C62828] font-medium leading-tight">{message}</p>
                   </div>
                 </div>
@@ -210,7 +210,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
           
           {/* Title Input */}
           <div className="space-y-4">
-             <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Listing Title</label>
+             <label className="text-[10px] font-bold uppercase tracking-widest text-black/30">Item Title</label>
              <input 
               placeholder="What are you listing?"
               value={form.title}
@@ -221,7 +221,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
 
           {/* Category Selection */}
           <div className="space-y-4">
-            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Classification</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-black/30">Category</label>
             <button 
               onClick={() => setSheet('category')}
               className="w-full h-16 px-6 rounded-[22px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-between group active:scale-[0.98] transition-all"
@@ -235,7 +235,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
 
           {/* Condition Selection */}
           <div className="space-y-4">
-            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Asset Integrity</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-black/30">Condition</label>
             <button 
               onClick={() => setSheet('condition')}
               className="w-full h-16 px-6 rounded-[22px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-between group active:scale-[0.98] transition-all"
@@ -249,7 +249,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
 
           {/* Price Input */}
           <div className="space-y-4">
-            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Valuation</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-black/30">Price</label>
             <div className="flex items-center gap-3 py-4 border-b-[0.5px] border-[#F2F2F7] focus-within:border-[#00927C] transition-colors">
               <span className="text-[18px] font-black">RM</span>
               <input 
@@ -264,7 +264,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
           
           {/* Stock Input (REQ_V102) */}
           <div className="space-y-4">
-            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Inventory Depth</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-black/30">Quantity</label>
             <div className="flex items-center gap-3 py-4 border-b-[0.5px] border-[#F2F2F7]">
               <Package size={18} className="text-black/10" />
               <input 
@@ -279,7 +279,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
 
           {/* Justification Field (Price Monitoring Edge Case) */}
           <div className="space-y-4">
-             <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Registry Justification</label>
+             <label className="text-[10px] font-bold uppercase tracking-widest text-black/30">About the Item</label>
              <textarea 
                placeholder="Selling a premium item? Explain why (e.g., brand, extras)..."
                value={form.justification}
@@ -287,14 +287,14 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                onChange={(e) => setForm({...form, justification: e.target.value})}
              />
              <p className="text-[9px] font-bold text-black/20 uppercase tracking-widest leading-relaxed">
-               Providing context helps Admins authorize high-value listings faster.
+                Details help buyers and staff understand what you are selling.
              </p>
           </div>
 
 
           {/* Campus Base */}
           <div className="space-y-4">
-            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Institutional Hub</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-black/30">Campus</label>
             <div className="flex gap-2">
               {['MIIT', 'UBIS', 'BMI'].map((campus) => (
                 <button
@@ -314,7 +314,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
 
           {/* Fulfillment Matrix */}
           <div className="space-y-4">
-             <label className="text-[10px] font-black uppercase tracking-[0.15em] text-black/30">Logistics Protocol</label>
+             <label className="text-[10px] font-bold uppercase tracking-widest text-black/30">Delivery & Collection</label>
              <div className="bg-white rounded-[22px] border-[0.5px] border-[#F2F2F7] overflow-hidden">
                 {/* Meet-up Row */}
                 <div className="p-6 border-b-[0.5px] border-[#F2F2F7]">
@@ -323,7 +323,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-black/40">
                             <Handshake size={18} />
                          </div>
-                         <span className="text-[14px] font-bold text-black uppercase tracking-tight">Hand-to-Hand</span>
+                         <span className="text-[14px] font-bold text-black uppercase tracking-tight">Meet up</span>
                       </div>
                       <button 
                         onClick={() => setForm({...form, meetup_enabled: !form.meetup_enabled})}
@@ -347,7 +347,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-black/40">
                             <Truck size={18} />
                          </div>
-                         <span className="text-[14px] font-bold text-black uppercase tracking-tight">Institutional Run</span>
+                         <span className="text-[14px] font-bold text-black uppercase tracking-tight">Pulse Runner</span>
                       </div>
                       <button 
                         onClick={() => setForm({...form, delivery_enabled: !form.delivery_enabled})}
@@ -376,10 +376,10 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
           onClick={handleUpload}
           disabled={status === 'loading' || !isFormValid}
           className={`w-full h-16 rounded-[22px] font-black text-[14px] uppercase tracking-[0.2em] transition-all duration-500 ${
-            isFormValid && status !== 'loading' ? 'bg-black text-white shadow-2xl shadow-black/20' : 'bg-black/5 text-black/10'
+          isFormValid && status !== 'loading' ? 'bg-black text-white shadow-2xl shadow-black/20' : 'bg-black/5 text-black/10'
           }`}
         >
-          {status === 'loading' ? 'Processing Handshake...' : 'Authorize Listing'}
+          {status === 'loading' ? 'Posting...' : 'Post Listing'}
         </motion.button>
       </div>
 
@@ -390,18 +390,18 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setSheet(null)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[400]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-400"
             />
             <motion.div 
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] z-[500] flex flex-col max-h-[85vh] shadow-3xl border-t-[0.5px] border-[#F2F2F7]"
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[28px] z-500 flex flex-col max-h-[85vh] shadow-3xl border-t-[0.5px] border-[#F2F2F7]"
             >
               <div className="px-8 pt-8 pb-4">
                 <div className="w-12 h-1 bg-black/5 rounded-full mx-auto mb-8" />
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-1">Marketplace Protocol</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-1">Marketplace</p>
                     <h3 className="text-[20px] font-black text-black uppercase tracking-tighter">{sheet} Selection</h3>
                   </div>
                   <button onClick={() => setSheet(null)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-black/20">
@@ -415,7 +415,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                   <div className="space-y-3">
                     <div className="bg-slate-50 rounded-[12px] px-5 py-4 mb-8 flex items-center gap-4 border-[0.5px] border-[#F2F2F7]">
                       <Search size={16} className="text-black/20" />
-                      <input placeholder="Search classifications..." className="bg-transparent text-[14px] font-bold focus:outline-none w-full placeholder:text-black/10" />
+                      <input placeholder="Search..." className="bg-transparent text-[14px] font-bold focus:outline-none w-full placeholder:text-black/10" />
                     </div>
                     {CATEGORIES.map(cat => (
                       <button 
@@ -426,8 +426,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
                         <div className="flex items-center gap-5">
                           <span className="text-[24px] grayscale group-hover:grayscale-0 transition-all">{cat.icon}</span>
                           <div className="flex flex-col">
-                            <span className="text-[14px] font-black text-black uppercase tracking-tight">{cat.label}</span>
-                            <span className="text-[10px] font-bold text-black/20 uppercase tracking-widest">Active Directory</span>
+                             <span className="text-[14px] font-black text-black uppercase tracking-tight">{cat.label}</span>
                           </div>
                         </div>
                         <ChevronRight size={16} className="text-black/10 group-hover:translate-x-1 transition-all" />
@@ -438,7 +437,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
 
                 {sheet === 'subcategory' && (
                   <div className="space-y-3">
-                     <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.2em] mb-6">{form.category} Spectrum</p>
+                     <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.2em] mb-6">{form.category}</p>
                      {CATEGORIES.find(c => c.label === form.category)?.subs.map(sub => (
                        <button 
                          key={sub}

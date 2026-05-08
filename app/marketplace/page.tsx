@@ -137,8 +137,8 @@ export default function MarketplacePage() {
       
       {/* ── INSTITUTIONAL NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-100 px-5 pt-5 pb-5 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b border-slate-100">
-        <button onClick={() => router.back()} className="p-1 -ml-1 text-slate-400 hover:text-slate-900 transition-all active:scale-90">
-          <ChevronLeft size={28} strokeWidth={2.5} />
+        <button onClick={() => router.back()} className="p-2 -ml-2 text-slate-400 hover:text-slate-900 transition-all active:scale-90">
+          <ChevronLeft size={24} strokeWidth={1.5} />
         </button>
         <div className="flex-1">
           <button onClick={() => setIsSearchOpen(true)} className="w-full h-11 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center px-4 gap-3 transition-all hover:bg-slate-50 active:scale-[0.98]">
@@ -160,17 +160,17 @@ export default function MarketplacePage() {
         <section>
           <div className="px-6 mb-6 space-y-1">
              <div className="flex items-baseline justify-between">
-                <h3 className="text-[22px] font-black text-slate-900 tracking-tight">Institutional Sync</h3>
-                <button className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors">Archive</button>
+                <h3 className="text-[26px] font-bold text-slate-900 tracking-[-0.03em]">Official Store</h3>
+                <button className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">Archive</button>
              </div>
-             <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Synchronize with verified merchant nodes and institutional distributions.</p>
+             <p className="text-[12px] font-medium text-slate-400 leading-relaxed tracking-tight">Get university gear and verified club items.</p>
           </div>
           <div className="flex gap-4 overflow-x-auto px-6 no-scrollbar pb-4">
             {OFFICIAL_CAMPAIGNS.map((camp) => (
               <motion.div
                 key={camp.id}
                 whileTap={{ scale: 0.98 }}
-                className={`shrink-0 w-[240px] p-5 rounded-[28px] ${camp.color} text-white flex flex-col justify-between min-h-[160px] group cursor-pointer transition-all overflow-hidden relative shadow-sm shadow-slate-200/20 border border-white/5`}
+                className={`shrink-0 w-[240px] p-5 rounded-[12px] ${camp.color} text-white flex flex-col justify-between min-h-[160px] group cursor-pointer transition-all overflow-hidden relative shadow-sm shadow-slate-200/20 border border-white/5`}
               >
                 <div className="absolute -top-8 -right-8 opacity-5 group-hover:opacity-10 transition-all duration-700">
                   <span className="text-[120px] font-bold leading-none tracking-tighter select-none">{camp.initials}</span>
@@ -192,31 +192,27 @@ export default function MarketplacePage() {
 
         {/* ── 2. CATEGORY PICKER (Institutional Squircles) ── */}
         <section>
-          <div className="px-6 mb-6 space-y-1">
+          <div className="px-6 mb-4 space-y-0.5">
              <div className="flex items-baseline justify-between">
-                <h3 className="text-[22px] font-black text-slate-900 tracking-tight">Browse Registry</h3>
-                <button className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:text-slate-900 transition-colors">Filter</button>
+                <h3 className="text-[26px] font-bold text-slate-900 tracking-[-0.03em]">Marketplace</h3>
+                <button className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">Filter</button>
              </div>
-             <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Navigate the decentralized student asset network and node clusters.</p>
+             <p className="text-[11px] font-medium text-slate-400 leading-relaxed tracking-tight">Explore items listed by students across campus.</p>
           </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-6">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar px-6 pb-2">
             {CATEGORIES.map((cat) => (
               <motion.button
                 key={cat.id}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                className="flex flex-col items-center gap-2.5 shrink-0 group"
-              >
-                <div className={`w-[48px] h-[48px] rounded-[18px] flex items-center justify-center transition-all duration-300 border-2 ${
+                className={`flex items-center gap-2 px-4 h-[38px] rounded-full border transition-all shrink-0 ${
                   activeCategory === cat.filter 
-                    ? 'bg-slate-900 border-slate-900 shadow-lg shadow-slate-200/50' 
-                    : `${cat.bg} border-transparent group-hover:border-slate-100 shadow-sm shadow-slate-200/10`
-                }`}>
-                  <cat.icon size={18} strokeWidth={2.2} className={activeCategory === cat.filter ? 'text-white' : cat.color} />
-                </div>
-                <span className={`text-[11px] font-bold tracking-tight transition-colors ${
-                  activeCategory === cat.filter ? 'text-slate-900' : 'text-slate-400'
-                }`}>
+                    ? 'bg-slate-900 border-slate-900 text-white shadow-sm' 
+                    : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                }`}
+              >
+                <cat.icon size={14} strokeWidth={2.2} />
+                <span className="text-[12px] font-bold tracking-tight">
                   {cat.label}
                 </span>
               </motion.button>
@@ -232,8 +228,8 @@ export default function MarketplacePage() {
                 <ShoppingBag size={28} className="text-slate-200" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-[18px] font-bold text-slate-900">Registry Empty</h4>
-                <p className="text-[14px] font-medium text-slate-400">No active listings in this node.</p>
+                <h4 className="text-[18px] font-bold text-slate-900 tracking-tight">No Items Found</h4>
+                <p className="text-[14px] font-medium text-slate-400">Check back later or try a different category.</p>
               </div>
             </div>
           ) : (

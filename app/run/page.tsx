@@ -170,7 +170,7 @@ const ServiceStrip = ({ label, icon: Icon, desc, onClick, accent, id }: any) => 
              <Icon className={accent} size={28} />
           </div>
           <div className="text-left">
-             <h4 className="text-[17px] font-bold text-navy tracking-tight">{label}</h4>
+             <h4 className="text-[17px] font-bold text-slate-900 tracking-[-0.02em]">{label}</h4>
              <p className="text-[12px] text-slate-400 font-medium tracking-tight mt-0.5">{desc}</p>
           </div>
        </div>
@@ -277,16 +277,18 @@ export default function RunModule() {
           
           <nav className="fixed top-0 left-0 right-0 z-60 px-8 pt-4 pb-6 flex items-center justify-between bg-white/80 backdrop-blur-xl">
              <div className="flex items-center gap-4">
-                <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all"><ChevronLeft size={24} /></button>
-                <h1 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">Runner Hub</h1>
+                <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-400 hover:text-slate-900 transition-all active:scale-90">
+                  <ChevronLeft size={24} strokeWidth={1.5} />
+                </button>
+                <h1 className="text-[14px] font-bold tracking-[-0.01em] uppercase text-slate-400">Runner</h1>
              </div>
              <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
           </nav>
 
           <div className="pt-24 px-8 pb-32 space-y-12">
-             <div className="space-y-2">
-                <h2 className="text-[18px] font-bold tracking-tight text-navy">Delivery Requests</h2>
-                <p className="text-[13px] text-slate-400 font-medium leading-relaxed">Initiate a 4-layer verification funnel for specialized task fulfillment.</p>
+             <div className="space-y-0.5">
+                <h2 className="text-[26px] font-bold tracking-[-0.03em] text-slate-900">Services</h2>
+                <p className="text-[12px] text-slate-400 font-medium leading-relaxed tracking-tight">Select a service to request a delivery or task.</p>
              </div>
 
              <div className="space-y-3">
@@ -298,10 +300,10 @@ export default function RunModule() {
              <footer className="pt-10">
                 {profile?.is_verified_runner ? (
                    <div className="space-y-8">
-                      <div className="flex justify-between items-baseline">
-                         <h3 className="text-[17px] font-bold text-navy tracking-tight">Runner Hub</h3>
-                         <button onClick={() => router.push('/run/terminal')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Open Dashboard ↗</button>
-                      </div>
+                       <div className="flex justify-between items-baseline">
+                          <h3 className="text-[26px] font-bold text-slate-900 tracking-[-0.03em]">Runner Hub</h3>
+                          <button onClick={() => router.push('/run/terminal')} className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors">Dashboard</button>
+                       </div>
                       
                       {/* Institutional Bento Summary */}
                       <div className="grid grid-cols-2 gap-4">
@@ -310,17 +312,17 @@ export default function RunModule() {
                            onClick={() => router.push('/run/terminal')}
                            className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-[0_8px_0_0_#F1F5F9] active:shadow-none transition-all"
                          >
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Payout</p>
-                            <p className="text-[20px] font-black text-emerald-600 tracking-tight leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
+                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Payout</p>
+                             <p className="text-[22px] font-bold text-emerald-600 tracking-[-0.03em] leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
                          </motion.div>
                          <motion.div 
                            whileTap={{ scale: 0.97 }}
                            onClick={() => router.push('/run/terminal')}
                            className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-[0_8px_0_0_#F1F5F9] active:shadow-none transition-all"
                          >
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Status</p>
-                            <p className={`text-[16px] font-black tracking-tight leading-none ${profile?.is_online ? 'text-emerald-500' : 'text-slate-300'}`}>
-                               {profile?.is_online ? '• ONLINE' : 'OFFLINE'}
+                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                             <p className={`text-[16px] font-bold tracking-[-0.02em] leading-none ${profile?.is_online ? 'text-emerald-500' : 'text-slate-300'}`}>
+                                {profile?.is_online ? '• ONLINE' : 'OFFLINE'}
                             </p>
                          </motion.div>
                       </div>
@@ -387,10 +389,10 @@ export default function RunModule() {
 
                    {/* FUNNEL HEADER */}
                    <nav className="px-8 pt-10 pb-6 flex items-center justify-between border-b border-[#F2F2F7]">
-                      <div className="flex items-center gap-4">
-                         <button onClick={back} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all"><ChevronLeft size={24} /></button>
-                         <h2 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">{activeService.label}</h2>
-                      </div>
+                       <div className="flex items-center gap-4">
+                          <button onClick={back} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all"><ChevronLeft size={24} /></button>
+                          <h2 className="text-[14px] font-bold tracking-[-0.01em] uppercase text-slate-400">{activeService.label}</h2>
+                       </div>
                       <button onClick={() => { setActiveService(null); setCurrentStep(0); }} className="p-2 text-slate-300"><X size={24} /></button>
                    </nav>
 
@@ -398,8 +400,8 @@ export default function RunModule() {
                    <div className="flex-1 overflow-y-auto no-scrollbar p-8">
                       <div className="space-y-10">
                          <div className="space-y-2">
-                             <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest">Step {currentStep + 1} of 4</p>
-                            <h3 className="text-[28px] font-bold tracking-tight text-navy leading-[1.1]">{activeService.steps[currentStep].title}</h3>
+                              <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Step {currentStep + 1} of 4</p>
+                             <h3 className="text-[28px] font-bold tracking-[-0.03em] text-slate-900 leading-[1.1]">{activeService.steps[currentStep].title}</h3>
                             <p className="text-[14px] text-slate-400 font-medium leading-relaxed">{activeService.steps[currentStep].desc}</p>
                          </div>
 

@@ -29,7 +29,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       className="flex flex-col cursor-pointer group"
     >
       {/* ── IMAGE BOX ── */}
-      <div className="relative aspect-4/5 bg-slate-50 rounded-[24px] overflow-hidden mb-3 border border-slate-50 shadow-sm shadow-slate-200/20 group-hover:shadow-md transition-shadow">
+      <div className="relative aspect-square bg-slate-50 rounded-[10px] overflow-hidden mb-3 border border-slate-50 shadow-sm shadow-slate-200/20 group-hover:shadow-md transition-shadow">
         <motion.img 
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -39,28 +39,46 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
         />
         
         {item.is_official && (
-          <div className="absolute top-4 left-4 px-2.5 py-1.5 bg-white/90 backdrop-blur-xl rounded-xl flex items-center gap-2 border border-white/50 shadow-sm">
-             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-             <span className="text-[8px] font-black text-slate-900 uppercase tracking-widest">Official</span>
+          <div className="absolute top-4 left-4 flex gap-1">
+             <div className="w-2 h-2 bg-[#00D09C] rounded-full shadow-sm" />
+             <div className="w-2 h-2 bg-[#00D09C]/40 rounded-full shadow-sm" />
           </div>
         )}
       </div>
 
       {/* ── INFORMATION BLOCK ── */}
-      <div className="px-1.5 space-y-1.5">
-        <h4 className="text-[15px] font-black text-slate-900 tracking-tight leading-[1.2] line-clamp-1">
-          {item.title}
-        </h4>
+      <div className="px-1.5 space-y-2">
+        {/* Row 1: Title & Time */}
+        <div className="flex items-start justify-between gap-4">
+          <h4 className="text-[13px] font-bold text-slate-900 tracking-[-0.02em] leading-tight flex-1">
+            {item.title}
+          </h4>
+          <span className="text-[11px] font-medium text-slate-300 tracking-tight shrink-0">
+            {item.time_ago || '2d'}
+          </span>
+        </div>
 
-        <div className="flex items-center justify-between">
-           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.seller_name || 'Pulse Resident'}</span>
+        {/* Row 2: Price & Seller */}
+        <div className="flex items-center justify-between gap-3">
            {isSold ? (
-              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest line-through">SOLD</span>
+              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest line-through">SOLD</span>
            ) : (
-              <p className="text-[16px] font-black text-slate-900 tracking-tighter">
+              <p className="text-[16px] font-bold text-slate-900 tracking-[-0.03em]">
                 RM{Number(item.price || 0).toFixed(0)}
               </p>
            )}
+
+           <div className="flex items-center gap-2 max-w-[60%]">
+              <span className="text-[10px] font-bold text-slate-400 tracking-tight line-clamp-1 text-right">
+                {item.seller_name || 'Pulse Resident'}
+              </span>
+              <div className="w-5 h-5 rounded-full bg-slate-100 border border-white overflow-hidden shrink-0 shadow-sm">
+                <img 
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.seller_name || 'Pulse'}`} 
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+           </div>
         </div>
       </div>
     </motion.div>
