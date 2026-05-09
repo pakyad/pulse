@@ -51,7 +51,7 @@ export default function LeaderboardPage() {
   );
 
   return (
-    <main className="px-6 pt-16 pb-32 max-w-lg mx-auto bg-pearl min-h-screen">
+    <main className="px-6 pt-32 pb-40 max-w-lg mx-auto bg-pearl min-h-screen">
       <header className="mb-12">
         <div className="flex items-center gap-3 mb-2">
             <div className="h-[2px] w-8 bg-orange" />

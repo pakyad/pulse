@@ -140,11 +140,11 @@ export default function PulseHome() {
   if (!mounted) return <div className="min-h-screen bg-[#FDFDFD]" />;
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
+    <main className="min-h-screen bg-[#FDFDFD] pb-40 font-sans antialiased text-navy">
 
 
 
-      <div className="pt-24 px-5 space-y-10 pb-10">
+      <div className="pt-32 px-5 space-y-10 pb-10">
 
 
         {/* ── HERO BANNER ── */}

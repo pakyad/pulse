@@ -133,7 +133,7 @@ export default function MarketplacePage() {
   }, [items]);
 
   return (
-    <main className="min-h-screen bg-white pb-32 font-sans antialiased text-slate-900">
+    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900">
       
       {/* ── INSTITUTIONAL NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-100 px-5 pt-5 pb-5 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b border-slate-100">
@@ -154,7 +154,7 @@ export default function MarketplacePage() {
         </div>
       </nav>
 
-      <div className="pt-20 space-y-10">
+      <div className="pt-32 space-y-10">
 
         {/* ── 1. CAMPUS UPDATES (Institutional Style) ── */}
         <section>

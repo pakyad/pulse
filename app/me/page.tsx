@@ -204,7 +204,7 @@ export default function MePage() {
 
   return (
     <>
-      <main className="min-h-screen bg-white pb-24 font-sans antialiased text-navy">
+      <main className="min-h-screen bg-white pb-40 font-sans antialiased text-navy">
         <nav className="fixed top-0 left-0 right-0 z-100 px-6 pt-8 pb-4 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b border-slate-100">
           <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-400 hover:text-slate-900 transition-all active:scale-90">
             <ChevronLeft size={24} strokeWidth={1.5} />
@@ -235,7 +235,7 @@ export default function MePage() {
           </div>
         </nav>
 
-        <div className="pt-28 px-6 space-y-12">
+        <div className="pt-32 px-6 space-y-12">
           {profile?.role === 'CLUB' ? (
             <MerchantAccountView />
           ) : (

@@ -54,7 +54,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'receiptUrl': receiptUrl,
         'sellerId': widget.orderData['sellerId'],
         'sellerName': widget.orderData['sellerName'],
-        'deliveryType': _fulfillmentChoice,
+        'delivery_type': _fulfillmentChoice,
         'dropOffLocation': _fulfillmentChoice == 'RUNNER' ? 'Block K - Main Lobby' : null,
         'buyerName': 'Verified Student', // Should come from Auth profile
         'notes': widget.orderData['notes'],

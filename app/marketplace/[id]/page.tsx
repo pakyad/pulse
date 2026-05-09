@@ -240,7 +240,7 @@ export default function ItemDetails() {
       const result: any = await placeOrder({
         userId: auth.currentUser.uid,
         cartItems: [{ productId: id, title: item.title, price: item.price, qty, vendorId: item.seller_id, sellerName: item.seller_name }],
-        deliveryType, dropOffLocation, receiptUrl
+        delivery_type: deliveryType, dropOffLocation, receiptUrl
       });
       router.push(`/orders/success?id=${result.data.parentId}`);
     } catch (e: any) {

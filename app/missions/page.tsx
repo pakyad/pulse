@@ -232,12 +232,14 @@ export default function MissionBoard() {
 
       const qOrders = query(
         collection(db, 'orders'),
-        where('delivery_type', '==', 'RUNNER'),
-        where('status', '==', 'AWAITING_RUNNER')
+        where('status', 'in', ['AWAITING_RUNNER', 'PREPARING', 'READY_FOR_PICKUP'])
       );
       
       unsubOrders = onSnapshot(qOrders, (snap) => {
-        const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const docs = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER' || o.delivery_type === 'runner' || o.deliveryType === 'runner');
+        
         setOrders(docs.sort((a: any, b: any) => (b.created_at || '').localeCompare(a.created_at || '')));
         setLoading(false);
         setPermissionError(false);
@@ -287,14 +289,14 @@ export default function MissionBoard() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
+    <main className="min-h-screen bg-[#FDFDFD] pt-32 pb-40 font-sans antialiased text-navy">
       <AnimatePresence>
          {showSuccess && (
             <ProtocolSuccessOverlay onInitiate={() => router.push(`/runner/active?order=${securedOrderId}`)} />
          )}
       </AnimatePresence>
 
-      <nav className="px-8 pt-12 flex justify-between items-center">
+      <nav className="px-8 flex justify-between items-center">
          <button onClick={() => router.push('/home')} className="w-12 h-12 rounded-[1.5rem] bg-white border border-slate-100 flex items-center justify-center text-navy shadow-sm transition-all active:scale-90">
             <ChevronLeft size={24} />
          </button>
