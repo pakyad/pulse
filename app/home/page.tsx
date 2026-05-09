@@ -1,409 +1,198 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { useRouter, usePathname } from 'next/navigation';
-import { Bell, Settings, Search, ChevronLeft, ChevronRight, ArrowUpRight, GraduationCap, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { 
+  Bell, Settings, Search, ChevronLeft, ChevronRight, 
+  ArrowUpRight, GraduationCap, Zap, Package, 
+  Activity, LayoutGrid, Sparkles, Navigation, MapPin, Box
+} from 'lucide-react';
 import ServiceGrid from '@/components/shared/ServiceGrid';
-import SearchOverlay from '@/components/shared/SearchOverlay';
 import FeaturedBanner, { BannerSlide } from '@/components/shared/FeaturedBanner';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, orderBy, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
-import VoxelStatus, { VoxelRadar } from '@/components/shared/VoxelStatus';
 
-// ── Fallback data (used when Firestore has no campaigns/announcements) ──
-const HERO_SLIDES: BannerSlide[] = [
-  {
-    id: 'h1', ctaPath: '/pulse',
-    headline: "Synchronize Your Stipend",
-    subline: 'Check your MARA allowance status & payment schedule',
-    bgColor: '#4A5D23' // Olive Green
-  },
-  {
-    id: 'h2', ctaPath: '/pulse',
-    headline: "Clear Outstanding Fees",
-    subline: 'Your Semester 4 tuition clearance is pending authorization.',
-    bgColor: '#1E293B' // Navy Slate
-  },
-  {
-    id: 'h3', ctaPath: '/pulse',
-    headline: "Final Results Published",
-    subline: 'Your academic transcript for Sem 3 is now officially available.',
-    bgColor: '#8B5CF6' // Purple
-  },
-];
+// ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
+const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <h2 className={`text-[24px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+    {children}
+  </h2>
+);
 
-const ANNOUNCEMENTS_FALLBACK = [
-  { id: 'a1', tag: 'ADMIN', title: 'Hostel Applications Now Open', time: '2h ago', path: '/pulse' },
-  { id: 'a2', tag: 'EVENT', title: 'Motivational Talk Tomorrow at 9AM', time: '4h ago', path: '/pulse' },
-  { id: 'a3', tag: 'CLUB', title: "Badminton Club Merch Launch", time: '6h ago', path: '/marketplace' },
-];
-
-const MARKET_FALLBACK = [
-  { id: 'f1', title: 'Calculus III Ref Pack', price: 45, img: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400', seller: 'MIIT Academic' },
-  { id: 'f2', title: 'Keychron K2 Pro', price: 280, img: 'https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=400', seller: 'Elite Tech' },
-  { id: 'f3', title: 'BAC Official Jersey', price: 95, img: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400', seller: 'BAC Club' },
-];
-
-const SPOTLIGHT_FALLBACK = [
-  { id: 's1', tag: 'ADMIN', title: 'Hostel Registration Open', sub: 'Deadline: 30 April', img: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=400' },
-  { id: 's2', tag: 'EVENT', title: 'Robotics Grand Prix', sub: 'Main Hall · 2PM', img: 'https://images.unsplash.com/photo-1561144257-e32e8efc6c4f?q=80&w=400' },
-  { id: 's3', tag: 'CLUB',  title: 'Photography Contest', sub: 'Win RM 500 Credits', img: 'https://images.unsplash.com/photo-1452784444945-3f422708fe5e?q=80&w=400' },
-];
-
-const CLUBS_FALLBACK = [
-  { id: 'c1', name: 'MIIT Tech Store', category: 'Official Club', img: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=400', color: 'text-blue-500' },
-  { id: 'c2', name: 'UBIS Business Society', category: 'Academic', img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=400', color: 'text-emerald-500' },
-  { id: 'c3', name: 'MIDI Design Club', category: 'Creative', img: 'https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=400', color: 'text-purple-500' },
-  { id: 'c4', name: 'SRC Student Council', category: 'Leadership', img: 'https://images.unsplash.com/photo-1521791136064-7986c2923216?q=80&w=400', color: 'text-rose-500' },
-];
-
-const ESSENTIALS_FALLBACK = [
-  { id: 'e1', title: 'Stationery Master Pack', price: 25, img: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=400', tag: 'ACADEMIC' },
-  { id: 'e2', title: 'Official MIIT Lab Coat', price: 65, img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400', tag: 'REQUIRED' },
-  { id: 'e3', title: 'Pulse Gym Stringer', price: 40, img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=400', tag: 'FITNESS' },
-  { id: 'e4', title: 'Calculus Cheat Sheet', price: 12, img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=400', tag: 'EXAMS' },
-];
-
-const TAG_COLORS: Record<string, string> = {
-  ADMIN: 'bg-blue-50 text-blue-600',
-  EVENT: 'bg-emerald-50 text-emerald-600',
-  CLUB:  'bg-purple-50 text-purple-600',
-  NEWS:  'bg-slate-50 text-slate-500',
-};
+const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <p className={`text-[14px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+    {children}
+  </p>
+);
 
 export default function PulseHome() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(0);
   const [profile, setProfile] = useState<any>(null);
   const [liveItems, setLiveItems] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [pulsePosts, setPulsePosts] = useState<any[]>([]);
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const [greeting, setGreeting] = useState('Welcome');
   const [mounted, setMounted] = useState(false);
-  const firstName = profile?.full_name?.split(' ')[0] || 'Student';
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
-    const hour = new Date().getHours();
-    setGreeting(hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening');
-  }, []);
-
-  useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
-      if (!user) return;
-      onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
-      const q = query(collection(db, 'orders'), where('buyer_id', '==', user.uid), where('status', 'in', ['PENDING', 'AWAITING_RUNNER', 'IN_TRANSIT']));
-      onSnapshot(q, (snap) => setNotificationCount(snap.docs.length));
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (user) onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
     });
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    const qItems = query(
-      collection(db, 'items'), 
-      where('status', '==', 'active'), 
-      limit(20)
-    );
-    const unsubItems = onSnapshot(qItems, s => {
-      const docs = s.docs.map(d => ({ id: d.id, ...d.data() }));
-      docs.sort((a: any, b: any) => {
-        const tA = a.created_at?.toMillis ? a.created_at.toMillis() : 0;
-        const tB = b.created_at?.toMillis ? b.created_at.toMillis() : 0;
-        return tB - tA;
-      });
-      setLiveItems(docs);
-    });
+    
+    // 🛍️ Real Items Only
+    const qItems = query(collection(db, 'items'), where('status', '==', 'active'), limit(6));
+    const unsubItems = onSnapshot(qItems, s => setLiveItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    
+    // 📰 Real Announcements Only
     const qAnn = query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(3));
     const unsubAnn = onSnapshot(qAnn, s => setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-
-    const qPulse = query(collection(db, 'pulse_posts'), orderBy('created_at', 'desc'), limit(5));
+    
+    // 💬 Real Posts Only
+    const qPulse = query(collection(db, 'pulse_posts'), orderBy('created_at', 'desc'), limit(3));
     const unsubPulse = onSnapshot(qPulse, s => setPulsePosts(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    return () => { unsubItems(); unsubAnn(); unsubPulse(); };
+    return () => { unsubAuth(); unsubItems(); unsubAnn(); unsubPulse(); };
   }, []);
 
-  const displayItems = (liveItems.length > 0 ? liveItems : MARKET_FALLBACK)
-    .filter(item => {
-      const title = item.title?.toLowerCase() || '';
-      const passesOfficial = liveItems.length > 0 ? item.is_official === true : true;
-      return passesOfficial && !title.includes('roti') && !title.includes('murtabak') && !title.includes('canai');
-    });
-  const displayAnnouncements = announcements.length > 0
-    ? announcements.map(a => ({ ...a, tag: a.category || 'NEWS', path: '/pulse' }))
-    : ANNOUNCEMENTS_FALLBACK;
-
-  if (!mounted) return <div className="min-h-screen bg-[#FDFDFD]" />;
+  if (!mounted) return null;
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pb-40 font-sans antialiased text-navy">
-
-
-
-      <div className="pt-32 px-5 space-y-10 pb-10">
-
-
-        {/* ── HERO BANNER ── */}
-        <FeaturedBanner slides={HERO_SLIDES} />
-
-        <div className="space-y-1">
-          <h3 className="text-[22px] font-black text-navy tracking-tight">Campus Hub</h3>
-          <p className="text-[12px] font-medium text-slate-400 leading-relaxed mb-4">Quick access to campus services and links.</p>
-          <ServiceGrid />
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex justify-between items-center mb-3">
-            <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">Latest News</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Stay updated with the latest news on campus.</p>
+    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
+      
+      {/* ── GLOBAL NAVIGATION ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+         <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#1e293b] flex items-center justify-center text-white shadow-lg shadow-slate-900/10">
+               <Sparkles size={20} />
             </div>
-            <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-accent flex items-center gap-1">
-              Explore <ChevronRight size={14} />
+            <div>
+               <p className="text-[15px] font-bold tracking-tight leading-none">Pulse Hub</p>
+               <p className="text-[11px] font-medium text-[#94a3b8] mt-1 uppercase tracking-wider">Campus Center</p>
+            </div>
+         </div>
+         <div className="flex items-center gap-4">
+            <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+               <Search size={20} />
             </button>
-          </div>
-          <div className="flex gap-4 -mx-6 px-6 overflow-x-auto no-scrollbar pb-1">
-            {SPOTLIGHT_FALLBACK.map((item) => (
-              <motion.div
-                key={item.id}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => router.push('/pulse')}
-                className="shrink-0 w-[240px] cursor-pointer group"
-              >
-                <div className="w-full h-[120px] bg-slate-50 rounded-3xl overflow-hidden mb-2.5 border border-slate-100 shadow-sm relative">
-                  <img src={item.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.title} />
-                  <div className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm">
-                    <span className={`text-[8px] font-black uppercase tracking-widest ${TAG_COLORS[item.tag] || 'text-slate-500'}`}>{item.tag}</span>
-                  </div>
-                </div>
-                <h4 className="text-[14px] font-bold text-navy leading-tight truncate px-1">{item.title}</h4>
-                <p className="text-[11px] font-medium text-slate-400 mt-0.5 px-1">{item.sub}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+            <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
+         </div>
+      </nav>
 
-        <div className="space-y-1">
-          <div className="flex justify-between items-baseline mb-5">
-            <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">Student Activity</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">See what students are posting right now.</p>
-            </div>
-            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
-              <VoxelRadar size={12} className="text-emerald-500" />
-              Live Now
-            </span>
-          </div>
-          <div className="space-y-4">
-            {pulsePosts.length > 0 ? pulsePosts.map((post) => (
-              <motion.div 
-                key={post.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm shadow-slate-200/40"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-bold text-navy">{post.author_name || 'Anonymous Student'}</span>
-                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{post.time_ago || 'Just now'}</span>
-                </div>
-                <p className="text-[14px] text-slate-600 leading-relaxed font-medium">
-                  {post.content}
-                </p>
-              </motion.div>
-            )) : (
-              <div className="py-12 bg-slate-50 rounded-[32px] border border-dashed border-slate-200 flex items-center justify-center">
-                <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">No active pulse detected</p>
-              </div>
+      <div className="pt-32 px-8 space-y-16">
+         
+         {/* ── FEATURED BANNER (HIDDEN IF EMPTY) ── */}
+         <AnimatePresence>
+            {announcements.length > 0 && (
+               <motion.section initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                  <FeaturedBanner slides={announcements.map(a => ({ 
+                    id: a.id, 
+                    headline: a.headline, 
+                    subline: a.body || a.subline, 
+                    bgColor: a.color || '#1e293b', 
+                    ctaPath: '/pulse' 
+                  }))} />
+               </motion.section>
             )}
-          </div>
-        </div>
+         </AnimatePresence>
 
-        <div className="space-y-1">
-          <div className="flex justify-between items-center mb-3">
-            <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">Marketplace</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Browse items for sale from other students.</p>
+         {/* ── CAMPUS DIRECTORY ── */}
+         <section className="space-y-8">
+            <div className="px-1">
+               <Heading>Campus Directory</Heading>
+               <Subtext>Quick access to student services and links</Subtext>
             </div>
-            <button onClick={() => router.push('/marketplace')} className="text-[11px] font-bold text-accent flex items-center gap-1">
-              See All <ArrowUpRight size={14} />
-            </button>
-          </div>
-          <div className="flex gap-4 -mx-6 px-6 overflow-x-auto no-scrollbar pb-1">
-            {displayItems.slice(0, 4).map((item) => (
-              <motion.div
-                key={item.id}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => router.push(`/marketplace/${item.id}`)}
-                className="shrink-0 w-[160px] cursor-pointer group"
-              >
-                <div className="w-full aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-2.5 border border-slate-100 shadow-sm relative">
-                  <img src={item.image_url || item.img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 image-rendering-pixelated" alt={item.title} />
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.05] pointer-events-none" />
-                </div>
-                <h4 className="text-[13px] font-bold text-navy leading-tight truncate">{item.title}</h4>
-                <p className="text-[13px] font-black text-accent mt-0.5">RM {Number(item.price).toFixed(0)}</p>
-              </motion.div>
-            ))}
-            <motion.div
-              whileTap={{ scale: 0.97 }}
-              onClick={() => router.push('/marketplace')}
-              className="shrink-0 w-[120px] aspect-square bg-slate-50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all self-start"
-            >
-              <ArrowUpRight size={20} className="text-slate-300" />
-              <span className="text-[10px] font-bold text-slate-300 text-center leading-tight">View All</span>
-            </motion.div>
-          </div>
-        </div>
+            <ServiceGrid />
+         </section>
 
-        <div className="space-y-1">
-          <div className="flex justify-between items-center mb-5">
-            <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">Student Clubs</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Discover and join student organizations on campus.</p>
+         {/* ── CAMPUS ACTIVITY ── */}
+         <section className="space-y-8">
+            <div className="flex justify-between items-end px-1">
+               <div>
+                  <Heading>Campus Activity</Heading>
+                  <Subtext>See what students are sharing right now</Subtext>
+               </div>
+               <button onClick={() => router.push('/pulse')} className="text-[12px] font-bold text-[#1e293b] flex items-center gap-1.5 active:scale-95 transition-all">
+                  See More <ArrowUpRight size={16} />
+               </button>
             </div>
-            <button onClick={() => router.push('/pulse')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">Directory</button>
-          </div>
-          <div className="flex gap-7 -mx-6 px-6 overflow-x-auto no-scrollbar pb-6">
-            {[
-              { id: 'c1', name: 'MIIT', color: '#3B82F6', icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="4" width="16" height="16" fill="currentColor" />
-                  <rect x="8" y="8" width="8" height="8" fill="white" opacity="0.5" />
-                  <rect x="11" y="2" width="2" height="4" fill="currentColor" />
-                  <rect x="11" y="18" width="2" height="4" fill="currentColor" />
-                  <rect x="2" y="11" width="4" height="2" fill="currentColor" />
-                  <rect x="18" y="11" width="4" height="2" fill="currentColor" />
-                </svg>
-              )},
-              { id: 'c2', name: 'UBIS', color: '#10B981', icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="14" width="4" height="6" fill="currentColor" />
-                  <rect x="10" y="8" width="4" height="12" fill="currentColor" />
-                  <rect x="16" y="4" width="4" height="16" fill="currentColor" />
-                </svg>
-              )},
-              { id: 'c3', name: 'MIDI', color: '#8B5CF6', icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="4" width="16" height="10" fill="currentColor" />
-                  <rect x="6" y="6" width="4" height="4" fill="white" opacity="0.4" />
-                  <rect x="12" y="6" width="4" height="4" fill="white" opacity="0.6" />
-                  <rect x="8" y="16" width="8" height="4" fill="currentColor" />
-                </svg>
-              )},
-              { id: 'c4', name: 'SRC', color: '#F43F5E', icon: (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="4" y="8" width="12" height="8" fill="currentColor" />
-                  <rect x="16" y="6" width="4" height="12" fill="currentColor" />
-                  <rect x="6" y="10" width="4" height="4" fill="white" opacity="0.5" />
-                </svg>
-              )},
-            ].map((club, index) => (
-              <motion.div
-                key={club.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ 
-                  type: 'spring', 
-                  stiffness: 500, 
-                  damping: 15,
-                  delay: index * 0.05 
-                }}
-                whileHover={{ y: -8, scale: 1.05 }}
-                whileTap={{ scale: 0.9, y: 0 }}
-                onClick={() => router.push('/pulse')}
-                className="shrink-0 flex flex-col items-center gap-4 cursor-pointer group"
-              >
-                {/* Josh Voxel Pod */}
-                <div className="w-[56px] h-[56px] relative">
-                   {/* 3D Base */}
-                  <div className="absolute inset-0 translate-y-1.5 translate-x-1 rounded-2xl bg-slate-200 group-hover:bg-opacity-20 transition-all duration-300" style={{ backgroundColor: `${club.color}33` }} />
-                  {/* Main Block */}
-                  <div className="absolute inset-0 rounded-2xl bg-white border-2 border-slate-100 flex items-center justify-center p-3 shadow-sm group-hover:border-opacity-30 transition-all duration-300 overflow-hidden" style={{ borderColor: `${club.color}33` }}>
-                     {/* Pixel Grid Overlay */}
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
-                    <div className="relative z-10 scale-125 image-rendering-pixelated group-hover:scale-150 transition-all duration-500" style={{ color: club.color }}>
-                      {club.icon}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <p className="text-[11px] font-black text-navy tracking-widest transition-colors uppercase group-hover:text-accent">{club.name}</p>
-                  <div className="h-0.5 w-0 transition-all duration-300 mx-auto mt-0.5 rounded-full group-hover:w-full" style={{ backgroundColor: club.color }} />
-                </div>
-              </motion.div>
-            ))}
-            
-            {/* View More Josh Style */}
-            <motion.div
-              whileHover={{ y: -8, scale: 1.05 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => router.push('/pulse')}
-              className="shrink-0 flex flex-col items-center gap-4 cursor-pointer group"
-            >
-              <div className="w-[56px] h-[56px] rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 group-hover:bg-navy group-hover:text-white group-hover:border-navy transition-all duration-300">
-                <ChevronRight size={24} />
-              </div>
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">More</p>
-            </motion.div>
-          </div>
-        </div>
 
-        <div className="space-y-1">
-          <div className="flex justify-between items-center mb-5">
-            <div>
-              <h3 className="text-[22px] font-black text-navy tracking-tight">Campus Essentials</h3>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Academic resources and official school equipment.</p>
+            <div className="space-y-4">
+               {pulsePosts.length > 0 ? pulsePosts.map((post) => (
+                  <motion.div 
+                    key={post.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-slate-50/50 p-7 rounded-[32px] border-[0.5px] border-slate-100 group hover:bg-white hover:border-slate-300 transition-all"
+                  >
+                     <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                           <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
+                              <Activity size={14} />
+                           </div>
+                           <p className="text-[13px] font-bold text-[#1e293b]">{post.author_name || 'Verified Student'}</p>
+                        </div>
+                        <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">{post.time_ago || 'Recent'}</p>
+                     </div>
+                     <p className="text-[15px] text-slate-600 leading-relaxed font-medium">
+                        {post.content}
+                     </p>
+                  </motion.div>
+               )) : (
+                  <div className="py-16 bg-slate-50/50 rounded-[40px] border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
+                     <Activity size={32} strokeWidth={1} className="opacity-30" />
+                     <p className="text-[12px] font-bold uppercase tracking-widest">No recent activity</p>
+                  </div>
+               )}
             </div>
-            <button onClick={() => router.push('/marketplace')} className="text-[11px] font-black text-slate-300 uppercase tracking-widest hover:text-navy transition-colors">See All</button>
-          </div>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-12 items-start pt-4">
-            {ESSENTIALS_FALLBACK.map((item, index) => (
-              <motion.div
-                key={item.id}
-                animate={{ y: [0, -6, 0] }}
-                transition={{ 
-                  duration: 4, 
-                  repeat: Infinity, 
-                  ease: "easeInOut",
-                  delay: index * 0.4 
-                }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push('/marketplace')}
-                className={`group cursor-pointer relative ${index % 2 === 1 ? 'mt-10' : ''}`}
-              >
-                {/* Bobbing Glass Vessel */}
-                <div className="relative aspect-4/5 rounded-[2.5rem] overflow-hidden mb-4 glass-card border-white/40 shadow-xl shadow-navy/5 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-navy/10">
-                  <div className="absolute inset-0 bg-linear-to-br from-accent/5 via-transparent to-transparent opacity-50" />
-                  
-                  <img src={item.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 image-rendering-pixelated" alt={item.title} />
-                  
-                  {/* Personality Badge */}
-                  <div className="absolute top-4 left-4">
-                    <div className="px-2 py-1 bg-navy/90 backdrop-blur-md rounded-lg border border-white/10 shadow-lg">
-                      <span className="text-[7px] font-black text-white uppercase tracking-[0.2em]">{item.tag}</span>
-                    </div>
-                  </div>
-                </div>
+         </section>
 
-                <div className="px-2 space-y-1">
-                  <h4 className="text-[13px] font-bold text-navy leading-tight line-clamp-1">{item.title}</h4>
-                  <div className="flex items-center justify-between">
-                    <p className="text-[15px] font-black text-accent">RM {item.price}</p>
-                    <ArrowUpRight size={14} className="text-slate-200 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+         {/* ── MARKETPLACE PREVIEW ── */}
+         <section className="space-y-8">
+            <div className="flex justify-between items-end px-1">
+               <div>
+                  <Heading>Marketplace</Heading>
+                  <Subtext>Browse items for sale from other students</Subtext>
+               </div>
+               <button onClick={() => router.push('/marketplace')} className="text-[12px] font-bold text-[#1e293b] flex items-center gap-1.5 active:scale-95 transition-all">
+                  Browse All <LayoutGrid size={16} />
+               </button>
+            </div>
+
+            {liveItems.length > 0 ? (
+               <div className="grid grid-cols-2 gap-4">
+                  {liveItems.slice(0, 4).map((item) => (
+                     <motion.div
+                       key={item.id}
+                       whileTap={{ scale: 0.98 }}
+                       onClick={() => router.push(`/marketplace/${item.id}`)}
+                       className="bg-white rounded-[20px] border-[0.5px] border-slate-100 overflow-hidden group shadow-sm"
+                     >
+                        <div className="aspect-square bg-slate-50 relative overflow-hidden">
+                           <img src={item.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={item.title} />
+                        </div>
+                        <div className="p-5 space-y-1">
+                           <h4 className="text-[14px] font-bold text-[#1e293b] truncate">{item.title}</h4>
+                           <div className="flex justify-between items-center">
+                              <p className="text-[15px] font-bold text-emerald-600">RM {Number(item.price).toFixed(0)}</p>
+                              <ChevronRight size={14} className="text-slate-300" />
+                           </div>
+                        </div>
+                     </motion.div>
+                  ))}
+               </div>
+            ) : (
+               <div className="py-16 bg-slate-50/50 rounded-[40px] border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
+                  <Box size={32} strokeWidth={1} className="opacity-30" />
+                  <p className="text-[12px] font-bold uppercase tracking-widest">No listings found</p>
+               </div>
+            )}
+         </section>
 
       </div>
 
-
+      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
     </main>
   );
 }

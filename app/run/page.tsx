@@ -5,23 +5,9 @@ import { auth, db, functions } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { 
-  ChevronLeft, 
-  X,
-  Loader2,
-  Navigation,
-  MapPin,
-  Camera,
-  Package,
-  ChevronDown,
-  ArrowRight,
-  Zap,
-  ChevronRight,
-  Clock,
-  FileText,
-  ShieldCheck,
-  CreditCard,
-  CheckCircle2,
-  LayoutGrid
+  ChevronLeft, X, Loader2, Navigation, MapPin, Camera, Package, 
+  ChevronDown, ArrowRight, Zap, ChevronRight, Clock, FileText, 
+  ShieldCheck, CreditCard, CheckCircle2, LayoutGrid
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -55,10 +41,10 @@ const VoxelErrands = ({ className, size = 24 }: any) => (
 );
 
 const SERVICES = [
-  { id: 'food', label: 'Food & Cravings', icon: VoxelFood, desc: 'Cafe Block A, Starbucks, West Wing', accent: 'text-amber-600', steps: [{ title: "Store Selection", desc: "Choose your source" }, { title: "Item Input", desc: "List items" }, { title: "Window", desc: "Set time" }, { title: "Hand-off", desc: "Location" }] },
-  { id: 'parcels', label: 'Parcel & Mail', icon: VoxelLogistics, desc: 'Shopee, Lazada, Mail', accent: 'text-slate-600', steps: [{ title: "Type", desc: "Categorize size" }, { title: "Security", desc: "Verify QR" }, { title: "Weight", desc: "Capacity check" }, { title: "Node", desc: "Select hub" }] },
-  { id: 'academic', label: 'Academic Print', icon: VoxelBooks, desc: 'UniStore, Library Node', accent: 'text-indigo-600', steps: [{ title: "Source", desc: "Paste link" }, { title: "Specs", desc: "Color, Binding" }, { title: "Shop", desc: "Select node" }, { title: "Dest", desc: "Lab/Class" }] },
-  { id: 'errands', label: 'Custom Errands', icon: VoxelErrands, desc: 'Flexible tasks & requests', accent: 'text-purple-600', steps: [{ title: "Brief", desc: "Task summary" }, { title: "Effort", desc: "Time projection" }, { title: "Cost", desc: "Petty cash" }, { title: "Registry", desc: "Handshake" }] },
+  { id: 'food', label: 'Food & Cravings', icon: VoxelFood, desc: 'Cafe Block A, Starbucks, West Wing', accent: 'text-amber-600', steps: [{ title: "Selection", desc: "Choose your source" }, { title: "Order List", desc: "List your items" }, { title: "Schedule", desc: "Set your time window" }, { title: "Delivery", desc: "Set drop-off location" }] },
+  { id: 'parcels', label: 'Parcel & Mail', icon: VoxelLogistics, desc: 'Shopee, Lazada, Mail', accent: 'text-slate-600', steps: [{ title: "Item Type", desc: "Categorize size" }, { title: "Verification", desc: "Security check" }, { title: "Weight", desc: "Capacity check" }, { title: "Drop-off", desc: "Select location" }] },
+  { id: 'academic', label: 'Academic Print', icon: VoxelBooks, desc: 'UniStore, Library Hub', accent: 'text-indigo-600', steps: [{ title: "Files", desc: "Provide details" }, { title: "Specs", desc: "Color, Binding" }, { title: "Service", desc: "Select hub" }, { title: "Destination", desc: "Lab or Classroom" }] },
+  { id: 'errands', label: 'Custom Tasks', icon: VoxelErrands, desc: 'Flexible errands & requests', accent: 'text-purple-600', steps: [{ title: "Brief", desc: "Task summary" }, { title: "Duration", desc: "Time projection" }, { title: "Funds", desc: "Petty cash" }, { title: "Review", desc: "Final check" }] },
 ];
 
 const OptionCard = ({ label, sublabel, icon: Icon, active, onClick }: any) => (
@@ -98,7 +84,6 @@ export default function RunModule() {
     const [activeService, setActiveService] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
-    const [isFAQOpen, setIsFAQOpen] = useState<number | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [form, setForm] = useState<any>({ source: '', items: '', budget: '', window: 'ASAP', handoff: '', parcelType: '', weight: '', pickupNode: '', docUrl: '', printSpecs: [], destination: '', errandBrief: '', errandEffort: '', errandCost: '' });
 
@@ -114,25 +99,25 @@ export default function RunModule() {
         setSubmitting(true);
         try {
             const createRunFn = httpsCallable(functions, 'createRunDirective');
-            const res: any = await createRunFn({ serviceId: activeService.id, label: activeService.label, source: form.source || activeService.desc.split(',')[0], dest: form.destination || form.handoff || form.pickupNode || 'Hub', fee: 4.50, items: form.items || form.errandBrief || 'Logistics Item', type: activeService.id.toUpperCase(), zone: 'ALL' });
+            const res: any = await createRunFn({ serviceId: activeService.id, label: activeService.label, source: form.source || activeService.desc.split(',')[0], dest: form.destination || form.handoff || form.pickupNode || 'Campus', fee: 4.50, items: form.items || form.errandBrief || 'Delivery Request', type: activeService.id.toUpperCase(), zone: 'ALL' });
             router.push(`/orders/success?id=${res.data.orderId}`);
-        } catch (e) { alert("Registry update failed."); } finally { setSubmitting(false); }
+        } catch (e) { alert("Failed to submit request."); } finally { setSubmitting(false); }
     };
 
     return (
        <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-32">
           <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
              <div className="flex items-center gap-4">
-                <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-400"><ChevronLeft size={24} /></button>
-                <p className="text-[14px] font-bold uppercase text-slate-300 tracking-wider">Logistics</p>
+                <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-400 transition-all active:scale-90"><ChevronLeft size={24} /></button>
+                <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">Deliveries</p>
              </div>
              <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
           </nav>
 
           <div className="pt-32 px-8 space-y-12">
              <div className="px-1">
-                <Heading>Services</Heading>
-                <Subtext>Request on-campus delivery or tasks</Subtext>
+                <Heading>Request Delivery</Heading>
+                <Subtext>Get help with food, parcels, or custom tasks on campus</Subtext>
              </div>
 
              <div className="grid grid-cols-1 gap-4">
@@ -142,29 +127,29 @@ export default function RunModule() {
              {profile?.is_verified_runner && (
                 <div className="pt-10 space-y-8">
                    <div className="px-1">
-                      <Heading>Runner Hub</Heading>
-                      <Subtext>Manage your logistics node status</Subtext>
+                      <Heading>Runner Dashboard</Heading>
+                      <Subtext>Manage your active missions and earnings</Subtext>
                    </div>
                    
                    <div className="grid grid-cols-2 gap-4">
                       <button onClick={() => router.push('/run/terminal')} className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-100 text-left">
-                         <Subtext className="text-[11px] mb-1">Total Payout</Subtext>
+                         <Subtext className="text-[11px] uppercase tracking-wider mb-1">Total Payout</Subtext>
                          <p className="text-[20px] font-bold text-emerald-600 tracking-tight">RM {(profile?.balance || 0).toFixed(2)}</p>
                       </button>
                       <button onClick={() => router.push('/run/terminal')} className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-100 text-left">
-                         <Subtext className="text-[11px] mb-1">Status</Subtext>
+                         <Subtext className="text-[11px] uppercase tracking-wider mb-1">Current Status</Subtext>
                          <p className={`text-[15px] font-bold tracking-tight ${profile?.is_online ? 'text-emerald-500' : 'text-slate-300'}`}>
-                            {profile?.is_online ? 'Active Node' : 'Offline'}
+                            {profile?.is_online ? 'Online' : 'Offline'}
                          </p>
                       </button>
                    </div>
 
                    <div className="flex gap-4">
-                      <button onClick={() => router.push('/run/terminal?pool=true')} className="flex-1 h-16 bg-[#1e293b] text-white rounded-3xl font-bold text-[13px] flex items-center justify-center gap-2 shadow-xl shadow-slate-900/10">
-                         <Zap size={18} className="text-amber-400 fill-amber-400" /> MISSION POOL
+                      <button onClick={() => router.push('/run/terminal?pool=true')} className="flex-1 h-16 bg-[#1e293b] text-white rounded-[24px] font-bold text-[13px] flex items-center justify-center gap-2 shadow-xl shadow-slate-900/10 active:scale-95 transition-all">
+                         <Zap size={18} className="text-amber-400 fill-amber-400" /> FIND MISSIONS
                       </button>
-                      <button onClick={() => router.push('/run/terminal')} className="flex-1 h-16 bg-slate-100 text-[#1e293b] rounded-3xl font-bold text-[13px] flex items-center justify-center gap-2">
-                         <LayoutGrid size={18} className="text-slate-400" /> DASHBOARD
+                      <button onClick={() => router.push('/run/terminal')} className="flex-1 h-16 bg-slate-100 text-[#1e293b] rounded-[24px] font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all">
+                         <LayoutGrid size={18} className="text-slate-400" /> TERMINAL
                       </button>
                    </div>
                 </div>
@@ -174,30 +159,29 @@ export default function RunModule() {
           <AnimatePresence>
              {activeService && (
                 <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed inset-0 z-200 bg-white flex flex-col">
-                   <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-50"><motion.div initial={{ width: 0 }} animate={{ width: `${((currentStep+1)/4)*100}%` }} className="h-full bg-[#1e293b]" /></div>
+                   <div className="absolute top-0 left-0 right-0 h-1 bg-slate-50"><motion.div initial={{ width: 0 }} animate={{ width: `${((currentStep+1)/4)*100}%` }} className="h-full bg-[#1e293b]" /></div>
                    <nav className="px-8 pt-12 pb-6 flex items-center justify-between border-b border-slate-50">
-                      <button onClick={() => currentStep > 0 ? setCurrentStep(s => s-1) : setActiveService(null)} className="p-2 -ml-2 text-slate-300"><ChevronLeft size={24} /></button>
-                      <p className="text-[14px] font-bold text-slate-300 uppercase tracking-wider">{activeService.label}</p>
-                      <button onClick={() => setActiveService(null)} className="p-2 text-slate-300"><X size={24} /></button>
+                      <button onClick={() => currentStep > 0 ? setCurrentStep(s => s-1) : setActiveService(null)} className="p-2 -ml-2 text-slate-300 transition-all active:scale-90"><ChevronLeft size={24} /></button>
+                      <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">{activeService.label}</p>
+                      <button onClick={() => setActiveService(null)} className="p-2 text-slate-300 transition-all active:scale-90"><X size={24} /></button>
                    </nav>
-                   <div className="flex-1 p-8 space-y-10">
+                   <div className="flex-1 p-8 space-y-10 overflow-y-auto">
                       <div className="space-y-2">
                          <Subtext className="text-[11px] font-bold uppercase tracking-widest">Step {currentStep+1} of 4</Subtext>
-                         <Heading className="text-[28px]">{activeService.steps[currentStep].title}</Heading>
+                         <Heading className="text-[28px] leading-tight">{activeService.steps[currentStep].title}</Heading>
                          <Subtext>{activeService.steps[currentStep].desc}</Subtext>
                       </div>
                       <div className="space-y-4">
                          {activeService.id === 'food' && currentStep === 0 && UNIKL_CAFES.map(cafe => <OptionCard key={cafe.name} label={cafe.name} active={form.source === cafe.name} onClick={() => { setForm({...form, source: cafe.name}); setCurrentStep(1); }} />)}
-                         {/* ... other steps simplified for brevity ... */}
                       </div>
                    </div>
                    <div className="p-8 pb-12 bg-white border-t border-slate-50 flex flex-col gap-6">
                       <div className="flex items-center justify-between px-2">
-                         <Subtext>Estimated Payout</Subtext>
+                         <Subtext>Estimated Delivery Fee</Subtext>
                          <p className="text-[20px] font-bold">RM 4.50</p>
                       </div>
-                      <button onClick={() => currentStep < 3 ? setCurrentStep(currentStep + 1) : handleFinalizeRequest()} className="w-full h-16 bg-[#1e293b] text-white rounded-3xl font-bold flex items-center justify-center gap-3">
-                         {submitting ? <Loader2 className="animate-spin" /> : (currentStep === 3 ? 'Confirm Request' : 'Next Step')}
+                      <button onClick={() => currentStep < 3 ? setCurrentStep(currentStep + 1) : handleFinalizeRequest()} className="w-full h-16 bg-[#1e293b] text-white rounded-[24px] font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-slate-900/10">
+                         {submitting ? <Loader2 className="animate-spin" /> : (currentStep === 3 ? 'Confirm Order' : 'Continue')}
                       </button>
                    </div>
                 </motion.div>

@@ -13,6 +13,19 @@ import {
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
+// ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
+const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <h2 className={`text-[24px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+    {children}
+  </h2>
+);
+
+const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <p className={`text-[14px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+    {children}
+  </p>
+);
+
 // ── Mission Card Component ──
 function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id: string) => void; disabled: boolean }) {
   const [holdProgress, setHoldProgress] = useState(0);
@@ -48,33 +61,20 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-md transition-all group overflow-hidden relative"
+      className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm hover:border-slate-300 transition-all group overflow-hidden relative"
     >
-      {/* Pixelated Scanning Overlay */}
+      {/* Scanning Overlay */}
       {isHolding && (
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 bg-navy/5 pointer-events-none z-10"
+          className="absolute inset-0 bg-[#1e293b]/5 pointer-events-none z-10"
         >
            <motion.div 
              animate={{ y: [-10, 300] }}
              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-             className="w-full h-2 bg-navy/10 blur-sm"
+             className="w-full h-2 bg-[#1e293b]/10 blur-sm"
            />
-           <div className="absolute inset-0 overflow-hidden opacity-10">
-              <div className="grid grid-cols-10 h-full w-full">
-                 {Array.from({ length: 50 }).map((_, i) => (
-                   <motion.div 
-                     key={i} 
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: [0, 1, 0] }}
-                     transition={{ duration: 0.5, delay: i * 0.02, repeat: Infinity }}
-                     className="bg-navy h-4 w-full" 
-                   />
-                 ))}
-              </div>
-           </div>
         </motion.div>
       )}
 
@@ -82,26 +82,26 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
       <motion.div 
         initial={{ width: 0 }}
         animate={{ width: `${holdProgress}%` }}
-        className="absolute bottom-0 left-0 h-1.5 bg-navy pointer-events-none z-20 transition-all duration-75"
+        className="absolute bottom-0 left-0 h-1.5 bg-[#1e293b] pointer-events-none z-20 transition-all duration-75"
       />
 
       <div className="flex items-start justify-between mb-8">
         <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-[1.5rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-navy shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#1e293b] shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
              {order.image_url ? (
-               <img src={order.image_url} className="w-full h-full object-cover" alt="" />
+                <img src={order.image_url} className="w-full h-full object-cover" alt="" />
              ) : (
-               <Package size={28} />
+                <Package size={28} />
              )}
           </div>
           <div>
-            <h3 className="font-black text-navy text-[18px] tracking-tightest leading-none mb-2 uppercase">{order.title}</h3>
+            <h3 className="text-[18px] font-bold text-[#1e293b] tracking-tight mb-1">{order.title || 'Delivery Request'}</h3>
             <div className="flex items-center gap-3">
-               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Yield: RM {runnerCut.toFixed(2)}</span>
+               <span className="text-[11px] font-bold text-emerald-600">RM {runnerCut.toFixed(2)} payout</span>
                <div className="w-1 h-1 rounded-full bg-slate-200" />
                <div className="flex items-center gap-1">
                   <Zap size={10} className="text-amber-500 fill-amber-500" />
-                  <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">High Demand</span>
+                  <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Urgent</span>
                </div>
             </div>
           </div>
@@ -109,24 +109,24 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
       </div>
 
       {/* Logistics Detail */}
-      <div className="space-y-4 mb-8 bg-slate-50/50 p-6 rounded-[1.5rem] border border-slate-100/50">
+      <div className="space-y-4 mb-8 bg-slate-50/50 p-6 rounded-[24px] border border-slate-100/50">
         <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
-             <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+          <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-300">
+             <MapPin size={18} />
           </div>
           <div className="flex-1">
-             <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Node Alpha</p>
-             <p className="text-[13px] font-bold text-slate-500 truncate">{order.seller_name || 'Merchant Point'}</p>
+             <p className="text-[9px] font-bold text-[#94a3b8] uppercase tracking-widest">Pickup Point</p>
+             <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.seller_name || 'Merchant point'}</p>
           </div>
         </div>
-        <div className="ml-4 h-4 border-l border-dashed border-slate-200" />
+        <div className="ml-5 h-4 border-l border-dashed border-slate-200" />
         <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-xl bg-navy text-white flex items-center justify-center">
-             <MapPin size={14} fill="currentColor" />
+          <div className="w-10 h-10 rounded-xl bg-[#1e293b] text-white flex items-center justify-center">
+             <MapPin size={18} />
           </div>
           <div className="flex-1">
-             <p className="text-[9px] font-black text-navy/30 uppercase tracking-widest">Destination Node</p>
-             <p className="text-[13px] font-bold text-navy truncate">{order.drop_off_location}</p>
+             <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Drop-off Point</p>
+             <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.drop_off_location}</p>
           </div>
         </div>
       </div>
@@ -139,56 +139,38 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
         onTouchStart={() => !disabled && setIsHolding(true)}
         onTouchEnd={() => setIsHolding(false)}
         disabled={disabled}
-        className={`w-full h-16 rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest transition-all select-none relative z-20 ${
+        className={`w-full h-16 rounded-[24px] font-bold text-[14px] transition-all select-none relative z-20 ${
           disabled 
-          ? 'bg-slate-50 text-slate-300' 
+          ? 'bg-slate-50 text-slate-300 cursor-not-allowed' 
           : isHolding 
-            ? 'bg-navy text-white scale-[0.98] shadow-2xl shadow-navy/30' 
-            : 'bg-navy/5 text-navy border border-navy/10 hover:bg-navy/10'
+            ? 'bg-[#1e293b] text-white scale-[0.98] shadow-2xl shadow-slate-900/10' 
+            : 'bg-slate-50 text-[#1e293b] border border-slate-100 hover:bg-slate-100'
         }`}
       >
-        {disabled ? 'Capacity Reached' : isHolding ? `Securing Node... ${holdProgress}%` : 'Hold to Secure Mission'}
+        {disabled ? 'Capacity Reached' : isHolding ? `Accepting Job... ${holdProgress}%` : 'Hold to Accept Job'}
       </button>
     </motion.div>
   );
 }
 
-function ProtocolSuccessOverlay({ onInitiate }: { onInitiate: () => void }) {
+function SuccessOverlay({ onInitiate }: { onInitiate: () => void }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onInitiate();
-    }, 2500); // Wait 2.5 seconds for animation then redirect
+    }, 2000);
     return () => clearTimeout(timer);
   }, [onInitiate]);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 z-1000 bg-navy flex flex-col items-center justify-center p-12 text-center"
-    >
-       {/* Pixel Art Pulse (Simplified CSS) */}
-       <div className="relative mb-12">
-          <motion.div 
-            animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.3, 0.1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-0 bg-white rounded-full blur-3xl"
-          />
-          <div className="w-32 h-32 bg-white/5 border border-white/10 rounded-[2.5rem] flex items-center justify-center relative">
-             <Truck size={48} className="text-white" />
-          </div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-1000 bg-[#1e293b] flex flex-col items-center justify-center p-12 text-center">
+       <div className="w-24 h-24 bg-white/10 rounded-[40px] flex items-center justify-center mb-10 border border-white/5 shadow-2xl">
+          <Truck size={40} className="text-white" />
        </div>
-
-       <h2 className="text-[42px] font-black text-white tracking-tightest leading-none mb-4 uppercase">
-          Mission <br/> Secured
-       </h2>
-       <p className="text-[14px] font-bold text-white/40 uppercase tracking-widest mb-16">
-          Commencing Logistics Protocol <br/> Phase 01: Merchant Rendezvous
-       </p>
-
-       <div className="flex flex-col items-center gap-4">
+       <h2 className="text-[32px] font-bold text-white tracking-tight leading-tight mb-4">Job Accepted</h2>
+       <p className="text-[14px] font-medium text-white/50 max-w-[200px]">Head to the pickup point to start the delivery.</p>
+       <div className="mt-16 flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-4 border-white/10 border-t-white rounded-full animate-spin" />
-          <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Starting Work...</p>
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">Preparing terminal...</p>
        </div>
     </motion.div>
   );
@@ -201,33 +183,20 @@ export default function MissionBoard() {
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeMissionsCount, setActiveMissionsCount] = useState(0);
-  const [permissionError, setPermissionError] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [securedOrderId, setSecuredOrderId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    let unsubProfile: (() => void) | null = null;
-    let unsubOrders: (() => void) | null = null;
-
     const unsubAuth = auth.onAuthStateChanged((user) => {
-      // Cleanup previous listeners
-      if (unsubProfile) unsubProfile();
-      if (unsubOrders) unsubOrders();
+      if (!user) { router.push('/auth'); return; }
 
-      if (!user) {
-        router.push('/auth');
-        return;
-      }
-
-      unsubProfile = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+      onSnapshot(doc(db, 'users', user.uid), (snap) => {
         if (snap.exists()) {
           const data = snap.data();
           setProfile(data);
           setActiveMissionsCount(data?.current_missions?.length || 0);
         }
-      }, (error) => {
-        console.error("Profile sync error:", error);
       });
 
       const qOrders = query(
@@ -235,32 +204,15 @@ export default function MissionBoard() {
         where('status', 'in', ['AWAITING_RUNNER', 'PREPARING', 'READY_FOR_PICKUP'])
       );
       
-      unsubOrders = onSnapshot(qOrders, (snap) => {
+      onSnapshot(qOrders, (snap) => {
         const docs = snap.docs
           .map(d => ({ id: d.id, ...d.data() }))
-          .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER' || o.delivery_type === 'runner' || o.deliveryType === 'runner');
+          .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER');
         
-        setOrders(docs.sort((a: any, b: any) => {
-          const timeA = a.created_at?.seconds || new Date(a.created_at || 0).getTime();
-          const timeB = b.created_at?.seconds || new Date(b.created_at || 0).getTime();
-          return timeB - timeA;
-        }));
+        setOrders(docs.sort((a: any, b: any) => (b.created_at?.seconds || 0) - (a.created_at?.seconds || 0)));
         setLoading(false);
-        setPermissionError(false);
-      }, (error) => {
-        console.error("Order pool error:", error);
-        setLoading(false);
-        if (error.code === 'permission-denied') {
-          setPermissionError(true);
-        }
       });
     });
-
-    return () => {
-      unsubAuth();
-      if (unsubProfile) unsubProfile();
-      if (unsubOrders) unsubOrders();
-    };
   }, [router]);
 
   const handleAccept = async (orderId: string) => {
@@ -286,75 +238,48 @@ export default function MissionBoard() {
       setShowSuccess(true);
     } catch (err) {
       console.error('Accept failed:', err);
-      alert('Mission failed to lock. Re-syncing...');
+      alert('Failed to accept job. Please try again.');
     } finally {
       setAcceptingId(null);
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pt-32 pb-40 font-sans antialiased text-navy">
+    <main className="min-h-screen bg-white pt-32 pb-40 font-sans antialiased text-[#1e293b]">
       <AnimatePresence>
          {showSuccess && (
-            <ProtocolSuccessOverlay onInitiate={() => router.push(`/runner/active?order=${securedOrderId}`)} />
+            <SuccessOverlay onInitiate={() => router.push(`/run/terminal?active=${securedOrderId}`)} />
          )}
       </AnimatePresence>
 
-      <nav className="px-8 flex justify-between items-center">
-         <button onClick={() => router.push('/home')} className="w-12 h-12 rounded-[1.5rem] bg-white border border-slate-100 flex items-center justify-center text-navy shadow-sm transition-all active:scale-90">
-            <ChevronLeft size={24} />
-         </button>
-         <div className="flex items-center gap-6">
-            <AnimatePresence>
-               {activeMissionsCount > 0 && (
-                 <motion.button 
-                   initial={{ opacity: 0, scale: 0.8 }}
-                   animate={{ opacity: 1, scale: 1 }}
-                   onClick={() => router.push('/run')} 
-                   className="w-12 h-12 rounded-[1.5rem] bg-navy text-white flex items-center justify-center shadow-lg shadow-navy/20 relative"
-                 >
-                    <Zap size={20} fill="currentColor" />
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" />
-                 </motion.button>
-               )}
-            </AnimatePresence>
-            <div className="flex flex-col items-end">
-               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Status</span>
-               <div className="flex items-center gap-1.5 mt-0.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                  <span className="text-[12px] font-black text-navy uppercase tracking-tight">Searching Nodes</span>
-               </div>
-            </div>
-            <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} userId={auth.currentUser?.uid} />
+      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+         <div className="flex items-center gap-4">
+            <button onClick={() => router.push('/run')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-90 transition-all">
+               <ChevronLeft size={20} />
+            </button>
+            <p className="text-[15px] font-bold tracking-tight">Find Jobs</p>
          </div>
+         <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
       </nav>
 
-      <header className="px-8 pt-12 pb-8">
-         <h1 className="text-[36px] font-black tracking-tightest leading-none mb-4 uppercase">Mission <br/> Pool</h1>
-         <div className="flex items-center gap-3">
-            <div className="px-3 py-1 bg-navy text-white rounded-lg">
-               <span className="text-[10px] font-black uppercase tracking-widest">{orders.length} Available</span>
+      <header className="px-8 mb-12">
+         <Heading className="text-[32px] leading-tight">Job Board</Heading>
+         <div className="flex items-center gap-3 mt-4">
+            <div className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-xl">
+               <span className="text-[10px] font-bold text-[#1e293b] uppercase tracking-widest">{orders.length} Available</span>
             </div>
-            <div className={`px-3 py-1 rounded-lg border flex items-center gap-2 ${activeMissionsCount >= 2 ? 'bg-red-50 border-red-100 text-red-500' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
-               <span className="text-[10px] font-black uppercase tracking-widest">Active: {activeMissionsCount}/2</span>
-               {activeMissionsCount >= 2 && <AlertCircle size={10} />}
+            <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 ${activeMissionsCount >= 2 ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-slate-50 border-slate-100 text-[#94a3b8]'}`}>
+               <span className="text-[10px] font-bold uppercase tracking-widest">Limit: {activeMissionsCount}/2</span>
+               {activeMissionsCount >= 2 && <AlertCircle size={12} />}
             </div>
          </div>
       </header>
 
       <section className="px-8 space-y-6">
-        {permissionError && (
-          <div className="p-8 bg-red-50 border border-red-100 rounded-[2.5rem] text-center space-y-3">
-             <AlertCircle className="mx-auto text-red-500" size={32} />
-             <p className="text-[14px] font-black text-red-600 uppercase tracking-widest">Protocol Blocked</p>
-             <p className="text-[12px] text-red-400 font-medium leading-relaxed">Your account lacks clearance to access the mission ledger. Please contact an administrator.</p>
-          </div>
-        )}
-
         {loading ? (
-          <div className="py-20 flex flex-col items-center gap-4 text-slate-200">
-             <div className="w-10 h-10 border-4 border-slate-100 border-t-navy rounded-full animate-spin" />
-             <p className="text-[11px] font-black uppercase tracking-widest">Scanning Network...</p>
+          <div className="py-20 flex flex-col items-center gap-4 text-[#94a3b8]">
+             <div className="w-10 h-10 border-4 border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
+             <p className="text-[11px] font-bold uppercase tracking-widest">Searching for jobs...</p>
           </div>
         ) : orders.length > 0 ? (
           orders.map((order) => (
@@ -366,12 +291,10 @@ export default function MissionBoard() {
             />
           ))
         ) : (
-          !permissionError && (
-            <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-[3rem] flex flex-col items-center">
-               <Radio className="text-slate-100 mb-4" size={48} />
-               <p className="text-[14px] font-black text-slate-300 uppercase tracking-widest">No active mission signals</p>
-            </div>
-          )
+          <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-[40px] flex flex-col items-center">
+             <Radio className="text-slate-100 mb-4" size={48} />
+             <p className="text-[14px] font-bold text-[#94a3b8] uppercase tracking-widest">No active jobs found</p>
+          </div>
         )}
       </section>
 

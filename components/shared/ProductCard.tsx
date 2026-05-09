@@ -10,11 +10,9 @@ interface ProductCardProps {
     price?: number;
     image_url: string;
     seller_name?: string;
-    subtitle?: string;
     time_ago?: string;
     is_official?: boolean;
     status?: string;
-    badge?: string;
   };
   onClick?: () => void;
 }
@@ -29,53 +27,54 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       className="flex flex-col cursor-pointer group"
     >
       {/* ── IMAGE BOX ── */}
-      <div className="relative aspect-square bg-slate-50 rounded-[10px] overflow-hidden mb-3 border border-slate-50 shadow-sm shadow-slate-200/20 group-hover:shadow-md transition-shadow">
+      <div className="relative aspect-square bg-slate-50 rounded-[20px] overflow-hidden mb-4 border border-slate-100 shadow-sm transition-all group-hover:border-slate-300">
         <motion.img 
           whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          src={item.image_url || `https://picsum.photos/seed/${item.id || item.title}/400/500`} 
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          src={item.image_url || `https://picsum.photos/seed/${item.id || item.title}/400/400`} 
           className={`w-full h-full object-cover transition-all ${isSold ? 'blur-[1px] grayscale opacity-60' : ''}`}
           loading="lazy"
         />
         
         {item.is_official && (
-          <div className="absolute top-4 left-4 flex gap-1">
-             <div className="w-2 h-2 bg-[#00D09C] rounded-full shadow-sm" />
-             <div className="w-2 h-2 bg-[#00D09C]/40 rounded-full shadow-sm" />
+          <div className="absolute top-4 left-4">
+             <div className="px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm border border-slate-100">
+                <p className="text-[8px] font-bold text-[#1e293b] uppercase tracking-widest">Official</p>
+             </div>
+          </div>
+        )}
+
+        {isSold && (
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+             <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em] bg-black/40 px-4 py-1.5 rounded-full backdrop-blur-md border border-white/20">Sold</p>
           </div>
         )}
       </div>
 
       {/* ── INFORMATION BLOCK ── */}
-      <div className="px-1.5 space-y-2">
-        {/* Row 1: Title & Time */}
-        <div className="flex items-start justify-between gap-4">
-          <h4 className="text-[13px] font-bold text-slate-900 tracking-[-0.02em] leading-tight flex-1">
+      <div className="px-2 space-y-1">
+        <div className="flex items-start justify-between gap-3">
+          <h4 className="text-[14px] font-bold text-[#1e293b] tracking-tight leading-tight flex-1 truncate">
             {item.title}
           </h4>
-          <span className="text-[11px] font-medium text-slate-300 tracking-tight shrink-0">
+          <span className="text-[11px] font-medium text-[#94a3b8] tracking-tight shrink-0">
             {item.time_ago || '2d'}
           </span>
         </div>
 
-        {/* Row 2: Price & Seller */}
-        <div className="flex items-center justify-between gap-3">
-           {isSold ? (
-              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest line-through">SOLD</span>
-           ) : (
-              <p className="text-[16px] font-bold text-slate-900 tracking-[-0.03em]">
-                RM{Number(item.price || 0).toFixed(0)}
-              </p>
-           )}
-
-           <div className="flex items-center gap-2 max-w-[60%]">
-              <span className="text-[10px] font-bold text-slate-400 tracking-tight line-clamp-1 text-right">
-                {item.seller_name || 'Pulse Resident'}
+        <div className="flex items-center justify-between">
+           <p className="text-[16px] font-bold text-[#1e293b] tracking-tight">
+             RM {Number(item.price || 0).toFixed(0)}
+           </p>
+           <div className="flex items-center gap-2 max-w-[50%]">
+              <span className="text-[10px] font-bold text-[#94a3b8] truncate">
+                {item.seller_name || 'Verified'}
               </span>
-              <div className="w-5 h-5 rounded-full bg-slate-100 border border-white overflow-hidden shrink-0 shadow-sm">
+              <div className="w-5 h-5 rounded-full bg-slate-100 overflow-hidden shrink-0 border border-slate-50">
                 <img 
                   src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.seller_name || 'Pulse'}`} 
                   className="w-full h-full object-cover" 
+                  alt="S"
                 />
               </div>
            </div>
