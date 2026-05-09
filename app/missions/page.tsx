@@ -240,7 +240,11 @@ export default function MissionBoard() {
           .map(d => ({ id: d.id, ...d.data() }))
           .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER' || o.delivery_type === 'runner' || o.deliveryType === 'runner');
         
-        setOrders(docs.sort((a: any, b: any) => (b.created_at || '').localeCompare(a.created_at || '')));
+        setOrders(docs.sort((a: any, b: any) => {
+          const timeA = a.created_at?.seconds || new Date(a.created_at || 0).getTime();
+          const timeB = b.created_at?.seconds || new Date(b.created_at || 0).getTime();
+          return timeB - timeA;
+        }));
         setLoading(false);
         setPermissionError(false);
       }, (error) => {

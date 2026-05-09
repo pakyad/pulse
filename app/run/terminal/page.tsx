@@ -96,7 +96,11 @@ export default function RunnerTerminal() {
         );
         unsubHistory = onSnapshot(qHistory, (snap) => {
           const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          setHistory(docs.sort((a: any, b: any) => (b.completed_at || '').localeCompare(a.completed_at || '')).slice(0, 5));
+          setHistory(docs.sort((a: any, b: any) => {
+            const timeA = a.completed_at?.seconds || new Date(a.completed_at || 0).getTime();
+            const timeB = b.completed_at?.seconds || new Date(b.completed_at || 0).getTime();
+            return timeB - timeA;
+          }).slice(0, 5));
         });
 
         const qRadar = query(
@@ -312,7 +316,7 @@ export default function RunnerTerminal() {
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsPoolExpanded(false)}
-              className="fixed inset-0 z-[150] bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 z-150 bg-black/40 backdrop-blur-sm"
             />
             
             {/* The "Sheet" */}
@@ -327,7 +331,7 @@ export default function RunnerTerminal() {
               onDragEnd={(e, info) => {
                 if (info.offset.y > 150) setIsPoolExpanded(false);
               }}
-              className="fixed inset-x-0 bottom-0 z-[200] h-[100vh] bg-white rounded-t-[48px] shadow-[0_-20px_80px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden border-t-[0.5px] border-slate-100"
+              className="fixed inset-x-0 bottom-0 z-200 h-screen bg-white rounded-t-[48px] shadow-[0_-20px_80px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden border-t-[0.5px] border-slate-100"
             >
               {/* Drag Handle */}
               <div className="w-full pt-4 pb-2 flex justify-center cursor-grab active:cursor-grabbing">
