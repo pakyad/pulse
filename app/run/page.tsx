@@ -7,11 +7,12 @@ import { httpsCallable } from 'firebase/functions';
 import { 
   ChevronLeft, X, Loader2, Navigation, MapPin, Camera, Package, 
   ChevronDown, ArrowRight, Zap, ChevronRight, Clock, FileText, 
-  ShieldCheck, CreditCard, CheckCircle2, LayoutGrid
+  ShieldCheck, CreditCard, CheckCircle2, LayoutGrid, ArrowLeft
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
+import { updateDoc, serverTimestamp } from 'firebase/firestore';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -94,6 +95,17 @@ export default function RunModule() {
         return () => unsubAuth();
     }, []);
 
+    const toggleStatus = async () => {
+        if (!auth.currentUser) return;
+        setSubmitting(true);
+        try {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+                is_online: !profile?.is_online, 
+                last_active: serverTimestamp() 
+            });
+        } catch (e) { console.error(e); } finally { setSubmitting(false); }
+    };
+
     const handleFinalizeRequest = async () => {
         if (!auth.currentUser) return router.push('/auth');
         setSubmitting(true);
@@ -109,52 +121,79 @@ export default function RunModule() {
           <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
              <div className="flex items-center gap-4">
                 <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-400 transition-all active:scale-90"><ChevronLeft size={24} /></button>
-                <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">Deliveries</p>
+                 <p className="text-[24px] font-bold text-[#1e293b] tracking-tight">Deliveries</p>
              </div>
              <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
           </nav>
 
           <div className="pt-32 px-8 space-y-12">
-             <div className="px-1">
-                <Heading>Request Delivery</Heading>
-                <Subtext>Get help with food, parcels, or custom tasks on campus</Subtext>
-             </div>
-
-             <div className="grid grid-cols-1 gap-4">
-                {SERVICES.map(s => <ServiceStrip key={s.id} {...s} onClick={() => { setActiveService(s); setCurrentStep(0); }} />)}
-             </div>
-
              {profile?.is_verified_runner && (
-                <div className="pt-10 space-y-8">
+                <div className="space-y-8">
                    <div className="px-1">
                       <Heading>Runner Dashboard</Heading>
                       <Subtext>Manage your active missions and earnings</Subtext>
                    </div>
                    
-                   <div className="grid grid-cols-2 gap-4">
-                      <button onClick={() => router.push('/run/terminal')} className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-100 text-left">
-                         <Subtext className="text-[11px] uppercase tracking-wider mb-1">Total Payout</Subtext>
-                         <p className="text-[20px] font-bold text-emerald-600 tracking-tight">RM {(profile?.balance || 0).toFixed(2)}</p>
-                      </button>
-                      <button onClick={() => router.push('/run/terminal')} className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-100 text-left">
-                         <Subtext className="text-[11px] uppercase tracking-wider mb-1">Current Status</Subtext>
-                         <p className={`text-[15px] font-bold tracking-tight ${profile?.is_online ? 'text-emerald-500' : 'text-slate-300'}`}>
-                            {profile?.is_online ? 'Online' : 'Offline'}
-                         </p>
-                      </button>
-                   </div>
+                    <div className="space-y-6">
+                       {/* ── EARNINGS HERO CARD ── */}
+                       <div className="bg-slate-50/50 p-6 rounded-[32px] border border-slate-100/80 flex items-center justify-between shadow-sm">
+                          <div className="flex items-center gap-6">
+                             <div className={`w-1.5 h-12 rounded-full transition-all duration-500 ${profile?.is_online ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-200'}`} />
+                             <div className="text-left">
+                                <p className="text-[28px] font-bold text-slate-900 tracking-tighter leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
+                                <p className="text-[13px] text-slate-400 font-bold mt-2 lowercase tracking-tight">today's earnings</p>
+                             </div>
+                          </div>
+                          <button 
+                            onClick={toggleStatus}
+                            className={`h-11 px-6 rounded-2xl text-[12px] font-bold transition-all flex items-center gap-2.5 border ${profile?.is_online ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/25' : 'bg-white border-slate-200 text-slate-400'}`}
+                          >
+                             {profile?.is_online && <div className="w-2 h-2 rounded-full bg-white animate-pulse" />}
+                             <span className="lowercase">{profile?.is_online ? 'online' : 'offline'}</span>
+                          </button>
+                       </div>
 
-                   <div className="flex gap-4">
-                      <button onClick={() => router.push('/run/terminal?pool=true')} className="flex-1 h-16 bg-[#1e293b] text-white rounded-[24px] font-bold text-[13px] flex items-center justify-center gap-2 shadow-xl shadow-slate-900/10 active:scale-95 transition-all">
-                         <Zap size={18} className="text-amber-400 fill-amber-400" /> FIND MISSIONS
-                      </button>
-                      <button onClick={() => router.push('/run/terminal')} className="flex-1 h-16 bg-slate-100 text-[#1e293b] rounded-[24px] font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all">
-                         <LayoutGrid size={18} className="text-slate-400" /> TERMINAL
-                      </button>
-                   </div>
-                </div>
-             )}
-          </div>
+                       {/* ── SECONDARY OPERATIONAL ACTIONS ── */}
+                       <div className="px-1 space-y-4 pt-6">
+                          <button 
+                            onClick={() => router.push('/run/missions')} 
+                            className="w-full flex items-center justify-between group py-3"
+                          >
+                             <div className="text-left">
+                                <p className="text-[17px] font-bold text-slate-700 tracking-tight">Available Jobs</p>
+                                <p className="text-[12px] text-slate-400 font-medium lowercase">browse active missions</p>
+                             </div>
+                             <ArrowRight size={18} className="text-slate-200 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                          </button>
+
+                          <div className="h-px bg-slate-50" />
+
+                          <button 
+                            onClick={() => router.push('/run/terminal')} 
+                            className="w-full flex items-center justify-between group py-3"
+                          >
+                             <div className="text-left">
+                                <p className="text-[17px] font-bold text-slate-700 tracking-tight">Delivery Hub</p>
+                                <p className="text-[12px] text-slate-400 font-medium lowercase">open terminal tools</p>
+                             </div>
+                             <ArrowRight size={18} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                          </button>
+                       </div>
+                    </div>
+                 </div>
+              )}
+
+              <div className="space-y-12">
+                 <div className="px-1">
+                    <Heading>Request Delivery</Heading>
+                    <Subtext>Get help with food, parcels, or custom tasks on campus</Subtext>
+                 </div>
+
+                 <div className="grid grid-cols-1 gap-4">
+                    {SERVICES.map(s => <ServiceStrip key={s.id} {...s} onClick={() => { setActiveService(s); setCurrentStep(0); }} />)}
+                 </div>
+              </div>
+           </div>
 
           <AnimatePresence>
              {activeService && (

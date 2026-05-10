@@ -80,7 +80,7 @@ function MarziaDeliverySheet({
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-xl bg-white rounded-t-[40px] overflow-y-auto max-h-[90vh] pb-10 shadow-2xl"
+        className="w-full max-w-xl bg-white rounded-t-2xl overflow-y-auto max-h-[90vh] pb-10 shadow-2xl"
       >
         <div className="px-8 pt-8 pb-4">
           <div className="w-12 h-1 bg-slate-100 rounded-full mx-auto mb-8" />
@@ -97,7 +97,7 @@ function MarziaDeliverySheet({
         <div className="px-8 py-6 space-y-8">
           {step === 'FULFILLMENT' ? (
             <div className="space-y-8">
-              <div className="flex items-center justify-between p-5 bg-slate-50 rounded-3xl border border-slate-100">
+              <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
                 <p className="text-[14px] font-bold text-slate-900">Quantity</p>
                 <div className="flex items-center gap-4 bg-white px-3 py-1.5 rounded-2xl border border-slate-100">
                   <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-1 text-slate-400 hover:text-slate-900"><X size={14} className="rotate-45" /></button>
@@ -151,7 +151,7 @@ function MarziaDeliverySheet({
             </div>
           ) : (
             <div className="space-y-8">
-               <div className="p-6 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4">
+               <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
                  <div className="flex justify-between items-center text-[13px] font-bold text-slate-500">
                     <span>Order Total</span>
                     <span>RM {(itemPrice * qty).toFixed(2)}</span>
@@ -169,7 +169,7 @@ function MarziaDeliverySheet({
                </div>
 
                <div className="flex flex-col items-center gap-6 py-4">
-                 <div className="w-48 h-48 bg-white p-4 rounded-[40px] border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-center">
+                 <div className="w-48 h-48 bg-white p-4 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-center">
                     <QrCode size={120} className="text-slate-900 opacity-80" />
                  </div>
                  <div className="text-center space-y-1">
@@ -199,7 +199,7 @@ function MarziaDeliverySheet({
               else onConfirm(choice!, choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : undefined, receipt!, qty);
             }}
             disabled={!choice || (step === 'PAYMENT' && !receipt) || loading}
-            className="w-full h-14 bg-slate-900 text-white rounded-[24px] font-black text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10 mt-4"
+            className="w-full h-14 bg-slate-900 text-white rounded-xl font-black text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10 mt-4"
           >
             {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" /> : step === 'FULFILLMENT' ? 'Continue' : 'Complete Handshake'}
           </button>
@@ -313,7 +313,7 @@ export default function ItemDetails() {
               </div>
             </div>
             <div className="space-y-3">
-              <h1 className="text-[24px] font-black text-slate-900 tracking-tighter leading-tight">{item.title}</h1>
+              <h1 className="text-[24px] font-medium text-slate-900 tracking-tighter leading-tight">{item.title}</h1>
               <div className="flex items-baseline gap-2">
                 <span className="text-[20px] font-black text-slate-900">RM {item.price}</span>
                 <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Registry Node</span>
@@ -326,7 +326,7 @@ export default function ItemDetails() {
                 { icon: Truck, title: 'Institutional Delivery', desc: 'Verified Runner Node' },
                 { icon: Clock, title: 'Rapid Handoff', desc: '~24H Registry Lock' }
              ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-4 p-5 bg-white border border-slate-50 rounded-[28px] shadow-sm">
+                <div key={i} className="flex items-center gap-4 p-5 bg-white border border-slate-50 rounded-xl shadow-sm">
                    <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400"><badge.icon size={20} /></div>
                    <div>
                       <p className="text-[14px] font-black text-slate-900 tracking-tight">{badge.title}</p>
@@ -370,7 +370,7 @@ export default function ItemDetails() {
 
       <footer className="fixed bottom-0 left-0 right-0 z-100 bg-white/80 backdrop-blur-xl border-t border-slate-50 px-6 py-6 pb-10">
          <div className="max-w-xl mx-auto">
-            <button onClick={() => setShowDeliverySheet(true)} className="w-full h-16 bg-slate-900 text-white rounded-3xl font-black text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 active:scale-95 transition-all">
+            <button onClick={() => setShowDeliverySheet(true)} className="w-full h-16 bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 active:scale-95 transition-all">
               Initiate Handshake <ArrowUpRight size={18} strokeWidth={3} />
             </button>
          </div>

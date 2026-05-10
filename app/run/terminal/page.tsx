@@ -189,25 +189,19 @@ export default function RunnerTerminal() {
         transition={{ type: 'spring', damping: 25, stiffness: 120 }}
         className="min-h-screen bg-white pb-40 overflow-x-hidden relative"
       >
-        {/* ── GLOBAL NAVIGATION ── */}
-        <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
-           <div className="flex items-center gap-4">
-              <button onClick={() => router.push('/run')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-900 border border-slate-100 active:scale-95 transition-all">
+        {/* ── MATURED NAVIGATION ── */}
+        <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+           <div className="flex items-center gap-3">
+              <button onClick={() => router.push('/run')} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 active:scale-95 transition-all">
                  <ChevronLeft size={20} />
               </button>
-              <div className="flex flex-col">
-                 <p className="text-[16px] font-bold tracking-tight">Runner Dashboard</p>
-                 <div className="flex items-center gap-1.5 mt-0.5">
-                    <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
-                    <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">{isOnline ? 'Online' : 'Offline'}</p>
-                 </div>
+              <div>
+                 <p className="text-[24px] font-bold tracking-tight text-slate-900 leading-none">Terminal Hub</p>
               </div>
            </div>
+           
            <div className="flex items-center gap-3">
-              <button onClick={toggleStatus} className={`h-10 px-5 rounded-2xl border flex items-center gap-2 transition-all active:scale-95 ${isOnline ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-slate-50 border-slate-100 text-[#94a3b8]'}`}>
-                 <span className="text-[11px] font-bold uppercase tracking-widest">{isOnline ? 'Go Offline' : 'Go Online'}</span>
-              </button>
-              <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
+              <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} className="scale-90" />
            </div>
         </nav>
 
@@ -220,8 +214,14 @@ export default function RunnerTerminal() {
         {/* ── STATS & ACTIONS ── */}
         <section className="px-8 -mt-10 relative z-10 space-y-12">
            <div className="grid grid-cols-2 gap-4">
-              <StatCard label="Earnings" value={`RM ${(profile?.balance || 0).toFixed(2)}`} icon={DollarSign} color="text-emerald-600" />
-              <StatCard label="Rating" value="5.0" icon={Award} color="text-amber-500" />
+              <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm space-y-4">
+                 <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em]">Earnings</p>
+                 <p className="text-[24px] font-bold text-emerald-600 tracking-tight leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
+              </div>
+              <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm space-y-4">
+                 <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em]">Rating</p>
+                 <p className="text-[24px] font-bold text-slate-900 tracking-tight leading-none">5.0</p>
+              </div>
            </div>
 
            {/* ── ACTIVE JOB SLOT ── */}
@@ -229,145 +229,60 @@ export default function RunnerTerminal() {
               {activeMission ? (
                  <motion.div key="active" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-2xl shadow-slate-900/5 space-y-8">
                     <div className="flex justify-between items-start">
-                       <div><Heading>Current Job</Heading><Subtext>Order #{activeMission.id.substring(0,8).toUpperCase()}</Subtext></div>
-                       <div className="px-4 py-1.5 bg-slate-50 text-[#1e293b] rounded-xl text-[10px] font-bold uppercase tracking-widest border border-slate-100">{activeMission.status.replace(/_/g, ' ')}</div>
+                       <div><Heading className="lowercase">current job</Heading><Subtext className="lowercase mt-1">order #{activeMission.id.substring(0,8)}</Subtext></div>
+                       <div className="px-4 py-1.5 bg-slate-50 text-[#1e293b] rounded-full text-[9px] font-bold uppercase tracking-widest border border-slate-100">{activeMission.status.replace(/_/g, ' ')}</div>
                     </div>
                     <div className="space-y-6">
                        <div className="flex items-start gap-4">
                           <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 mt-1"><Navigation size={18}/></div>
-                          <div><Heading className="text-[15px]">{activeMission.seller_name || 'Pickup Point'}</Heading><Subtext className="text-[13px] mt-0.5">MIIT Level 2 Cafe</Subtext></div>
+                          <div><Heading className="text-[15px] lowercase">{activeMission.seller_name || 'pickup point'}</Heading><Subtext className="text-[13px] mt-0.5 lowercase">miit level 2 cafe</Subtext></div>
                        </div>
                        <div className="ml-5 h-6 border-l-[0.5px] border-dashed border-slate-200" />
                        <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-[#1e293b] flex items-center justify-center text-white mt-1"><MapPin size={18}/></div>
-                          <div><Heading className="text-[15px]">{activeMission.drop_off_location || 'Drop-off'}</Heading><Subtext className="text-[13px] mt-0.5">{activeMission.buyer_name || 'Student'}</Subtext></div>
+                          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white mt-1"><MapPin size={18}/></div>
+                          <div><Heading className="text-[15px] lowercase">{activeMission.drop_off_location || 'drop-off'}</Heading><Subtext className="text-[13px] mt-0.5 lowercase">{activeMission.buyer_name || 'student'}</Subtext></div>
                        </div>
                     </div>
                     <div className="pt-2 flex gap-3">
-                       <button className="flex-1 h-14 bg-[#1e293b] text-white rounded-[24px] font-bold text-[13px] shadow-lg shadow-slate-900/10 active:scale-95 transition-all">Navigate</button>
-                       <button onClick={() => setProofMode(activeMission.status === 'IN_TRANSIT' ? 'PICKUP' : 'DELIVERY')} className="flex-1 h-14 bg-white text-[#1e293b] border border-slate-100 rounded-[24px] font-bold text-[13px] active:scale-95 transition-all">{activeMission.status === 'IN_TRANSIT' ? 'Confirm Pickup' : 'Complete Delivery'}</button>
+                       <button className="flex-1 h-14 bg-slate-900 text-white rounded-full font-bold text-[13px] shadow-lg shadow-slate-900/10 active:scale-95 transition-all lowercase">navigate</button>
+                       <button onClick={() => setProofMode(activeMission.status === 'IN_TRANSIT' ? 'PICKUP' : 'DELIVERY')} className="flex-1 h-14 bg-white text-slate-900 border border-slate-100 rounded-full font-bold text-[13px] active:scale-95 transition-all lowercase">{activeMission.status === 'IN_TRANSIT' ? 'confirm pickup' : 'complete delivery'}</button>
                     </div>
                  </motion.div>
               ) : (
-                 <motion.div key="radar" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                    <div className="flex justify-between items-end px-1">
-                       <div><Heading>Missions Nearby</Heading><Subtext>Live job opportunities found</Subtext></div>
-                       <button onClick={() => setIsPoolExpanded(true)} className="text-[12px] font-bold text-[#1e293b] flex items-center gap-1.5 mb-1 active:scale-90 transition-all">View All <Maximize2 size={14} /></button>
+                 <motion.div key="searching" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="py-24 flex flex-col items-center justify-center text-center space-y-8">
+                    <div className="relative w-20 h-20">
+                        <motion.div 
+                          animate={{ 
+                            scale: [1, 1.2, 1],
+                            rotate: [0, 90, 180, 270, 360],
+                            borderRadius: ["20%", "50%", "20%"]
+                          }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                          className="absolute inset-0 border-2 border-dashed border-slate-100" 
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                           <div className="grid grid-cols-2 gap-1 animate-pulse">
+                              {[1,2,3,4].map(i => <div key={i} className="w-2 h-2 bg-slate-200 rounded-xs" />)}
+                           </div>
+                        </div>
                     </div>
-                    {jobs.length > 0 ? (
-                       <div className="space-y-3">
-                          {jobs.slice(0, 3).map(job => (
-                             <div key={job.id} className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm flex items-center justify-between group hover:border-slate-300 transition-all">
-                                <div className="flex items-center gap-4">
-                                   <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#1e293b] group-hover:text-white transition-colors"><Package size={20} /></div>
-                                   <div><Heading className="text-[15px] mb-0.5">{job.seller_name || 'Merchant'}</Heading><Subtext className="text-[12px]">RM {(job.deliveryFee || 3.50).toFixed(2)} • {job.drop_off_location}</Subtext></div>
-                                </div>
-                                <button onClick={() => handleAccept(job.id)} className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center text-slate-300 hover:text-[#1e293b] hover:bg-slate-50 transition-colors"><ChevronRight size={18} /></button>
-                             </div>
-                          ))}
-                          {jobs.length > 3 && <button onClick={() => setIsPoolExpanded(true)} className="w-full py-4 text-center text-[11px] font-bold text-[#94a3b8] uppercase tracking-[0.2em] bg-slate-50/50 rounded-2xl transition-all hover:bg-slate-50">+ {jobs.length - 3} More Missions Available</button>}
-                       </div>
-                    ) : (
-                       <div className="py-14 bg-slate-50/50 rounded-[40px] border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8]"><Activity size={32} strokeWidth={1} className="mb-3 opacity-30" /><Subtext className="text-[12px]">Searching for jobs...</Subtext></div>
-                    )}
+                    <div className="space-y-2">
+                       <p className="text-[16px] font-bold text-slate-900 lowercase">no active mission...</p>
+                       <p className="text-[12px] text-slate-400 font-medium lowercase leading-relaxed">
+                          go to orders to claim a mission.
+                       </p>
+                    </div>
+                    <button 
+                      onClick={() => router.push('/run/missions')}
+                      className="px-8 h-11 bg-slate-900 text-white rounded-full text-[12px] font-bold shadow-lg shadow-slate-900/10 active:scale-95 transition-all lowercase"
+                    >
+                      browse orders
+                    </button>
                  </motion.div>
               )}
            </AnimatePresence>
-
-           {/* ── HISTORY LAYER ── */}
-           <section className="space-y-6">
-              <div className="px-1"><Heading>Recent Deliveries</Heading><Subtext>Your latest completed missions</Subtext></div>
-              <div className="space-y-3">
-                 {history.length > 0 ? history.map((h: any) => (
-                    <div key={h.id} className="flex items-center justify-between p-6 bg-white border border-slate-100 rounded-[32px] shadow-sm">
-                       <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500"><Check size={18} /></div>
-                          <div><Heading className="text-[15px] mb-0.5">Completed Job</Heading><Subtext className="text-[11px] uppercase tracking-wider">{h.id.substring(0,8)} • {new Date(h.completed_at).toLocaleDateString()}</Subtext></div>
-                       </div>
-                       <p className="text-[15px] font-bold text-emerald-600">+RM {(h.deliveryFee || 3.50).toFixed(2)}</p>
-                    </div>
-                 )) : (<div className="py-8 text-center bg-slate-50/50 rounded-[32px] border border-dashed border-slate-100"><Subtext className="italic">No delivery history found.</Subtext></div>)}
-              </div>
-           </section>
-
-           {/* ── ACCOUNT PREFERENCES ── */}
-           <section className="space-y-6">
-              <div className="px-1"><Heading>Account Settings</Heading><Subtext>Manage your runner preferences and profile</Subtext></div>
-              <div className="bg-slate-50/50 rounded-[40px] overflow-hidden border border-slate-100">
-                 {[{ icon: Settings, label: 'Runner Preferences', sub: 'Manage delivery zones and alerts' }, { icon: ShieldCheck, label: 'Runner Profile', sub: 'Verified runner account details' }].map((item, i) => (
-                    <button key={i} className="w-full p-7 flex items-center justify-between border-b-[0.5px] border-slate-100 last:border-0 hover:bg-white transition-all group">
-                       <div className="flex items-center gap-5 text-left">
-                          <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:border-slate-300 transition-colors"><item.icon size={20} strokeWidth={1.5} /></div>
-                          <div><Heading className="text-[16px] mb-0.5">{item.label}</Heading><Subtext className="text-[13px]">{item.sub}</Subtext></div>
-                       </div>
-                       <ChevronRight size={18} className="text-slate-300" />
-                    </button>
-                 ))}
-              </div>
-           </section>
         </section>
       </motion.div>
-
-      {/* ── MISSION POOL SHEET ── */}
-      <AnimatePresence>
-        {isPoolExpanded && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setIsPoolExpanded(false)}
-              className="fixed inset-0 z-150 bg-black/40 backdrop-blur-sm"
-            />
-            
-            <motion.div 
-              initial={{ y: '100%' }} animate={{ y: '8%' }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 150 }}
-              drag="y" dragConstraints={{ top: 0 }} dragElastic={0.2}
-              onDragEnd={(e, info) => { if (info.offset.y > 150) setIsPoolExpanded(false); }}
-              className="fixed inset-x-0 bottom-0 z-200 h-screen bg-white rounded-t-[48px] shadow-[0_-20px_80px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden border-t-[0.5px] border-slate-100"
-            >
-              <div className="w-full pt-4 pb-2 flex justify-center cursor-grab active:cursor-grabbing">
-                <div className="w-12 h-1.5 bg-slate-100 rounded-full" />
-              </div>
-
-              <nav className="px-8 pt-4 pb-6 flex items-center justify-between border-b border-slate-50">
-                 <div className="flex items-center gap-4">
-                    <button onClick={() => setIsPoolExpanded(false)} className="p-2 -ml-2 text-slate-400 active:scale-90 transition-all"><ChevronDown size={24}/></button>
-                    <div>
-                      <Heading>Job Board</Heading>
-                      <Subtext>{jobs.length} Missions Available</Subtext>
-                    </div>
-                 </div>
-                 <button onClick={() => setIsPoolExpanded(false)} className="p-3 bg-slate-50 rounded-2xl text-slate-400 active:scale-90 transition-all"><Minimize2 size={20}/></button>
-              </nav>
-
-              <div className="px-8 py-4 bg-slate-50/50 border-b border-slate-100 flex gap-2 overflow-x-auto no-scrollbar">
-                 {['ALL', 'NEARBY', 'HIGH YIELD', 'URGENT'].map(tag => (
-                    <button key={tag} onClick={() => setFilter(tag)} className={`px-5 h-10 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap active:scale-95 ${filter === tag ? 'bg-[#1e293b] text-white shadow-lg' : 'bg-white text-[#94a3b8] border border-slate-100'}`}>{tag}</button>
-                 ))}
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-8 pb-32 space-y-4 no-scrollbar">
-                 {jobs.length > 0 ? jobs.map(job => (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} key={job.id} className="bg-white p-7 rounded-[40px] border-[0.5px] border-slate-100 shadow-sm space-y-6">
-                       <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-4">
-                             <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400"><Package size={22}/></div>
-                             <div><Heading className="text-[16px]">{job.seller_name || 'Merchant'}</Heading><Subtext className="text-[12px]">Order #{job.id.substring(0,8).toUpperCase()}</Subtext></div>
-                          </div>
-                          <div className="text-right"><p className="text-[18px] font-bold text-emerald-600">RM {(job.deliveryFee || 3.50).toFixed(2)}</p><Subtext className="text-[11px] uppercase tracking-wider">Earnings</Subtext></div>
-                       </div>
-                       <div className="space-y-4 bg-slate-50/50 p-5 rounded-[28px] border border-slate-50">
-                          <div className="flex items-center gap-3"><Navigation size={14} className="text-slate-300" /><Subtext className="text-[13px] text-[#1e293b] font-bold">MIIT Level 2 Cafe</Subtext></div>
-                          <div className="flex items-center gap-3"><MapPin size={14} className="text-slate-300" /><Subtext className="text-[13px] text-[#1e293b] font-bold">{job.drop_off_location || 'Campus Hub'}</Subtext></div>
-                       </div>
-                       <button onClick={() => handleAccept(job.id)} className="w-full h-16 bg-[#1e293b] text-white rounded-[24px] font-bold text-[14px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-slate-900/10">Accept Job <ArrowUpRight size={18} /></button>
-                    </motion.div>
-                 )) : (<div className="h-full flex flex-col items-center justify-center text-[#94a3b8] py-20"><Activity size={48} strokeWidth={1} className="mb-4 opacity-20" /><Heading className="text-[#94a3b8]">All Clear</Heading><Subtext>No active jobs available right now.</Subtext></div>)}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* ── PROOF MODAL ── */}
       <AnimatePresence>{proofMode && (

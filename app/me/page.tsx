@@ -115,25 +115,26 @@ export default function MePage() {
 
          {/* ── MENU GROUPS ── */}
          {MENU_GROUPS.map((group, idx) => (
-            <section key={idx} className="space-y-6">
+            <section key={idx} className="space-y-8">
                <div className="px-1">
                   <Heading className="text-[18px]">{group.label}</Heading>
-                  <Subtext className="text-[13px]">Manage your account and preferences</Subtext>
+                  <Subtext className="text-[13px] lowercase">Manage your account and preferences</Subtext>
                </div>
-               <div className="bg-white border border-slate-100 rounded-[40px] overflow-hidden shadow-sm">
+               <div className="space-y-4">
                   {group.items.map((item, i) => (
-                     <button 
-                        key={i} onClick={() => router.push(item.path)}
-                        className="w-full h-[76px] px-8 flex items-center justify-between border-b-[0.5px] border-slate-100 last:border-0 hover:bg-slate-50/50 transition-all group"
-                     >
-                        <div className="flex items-center gap-5">
-                           <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-50 group-hover:bg-white transition-colors">
-                              <item.icon size={18} />
+                     <div key={i} className="space-y-4">
+                        <button 
+                           onClick={() => router.push(item.path)}
+                           className="w-full flex items-center justify-between group py-3"
+                        >
+                           <div className="text-left">
+                              <p className="text-[17px] font-bold text-slate-700 tracking-tight">{item.label}</p>
+                              <p className="text-[12px] text-slate-400 font-medium lowercase">View your {item.label.toLowerCase()}</p>
                            </div>
-                           <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">{item.label}</p>
-                        </div>
-                        <ChevronRight size={16} className="text-slate-200" />
-                     </button>
+                           <ChevronRight size={18} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                        </button>
+                        {i < group.items.length - 1 && <div className="h-px bg-slate-50" />}
+                     </div>
                   ))}
                </div>
             </section>

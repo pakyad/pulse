@@ -100,7 +100,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                       </div>
                       <div>
                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Issue Reporting</p>
-                         <h2 className="text-[18px] font-black text-slate-900 tracking-tight">Report Conflict</h2>
+                         <h2 className="text-[18px] font-black text-slate-900 tracking-tight">Report a Problem</h2>
                       </div>
                    </div>
                    <button 
@@ -116,13 +116,13 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
                       <Info size={14} className="text-blue-500 mt-0.5 shrink-0" />
                       <p className="text-[11px] font-medium text-slate-500 leading-relaxed italic">
-                        Directive: False reporting may affect your institutional hustle score. Ensure all evidence provided is accurate.
+                        Rule: False reporting may affect your score. Ensure all evidence provided is accurate.
                       </p>
                    </div>
 
                    {/* Reason Selection */}
                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Select Conflict Type</label>
+                      <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Select Problem Type</label>
                       <div className="relative group">
                         <select 
                           value={reason}
@@ -157,7 +157,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
 
                    {/* Narrative */}
                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Conflict Narrative</label>
+                      <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Tell us what happened</label>
                       <textarea 
                         value={narrative}
                         onChange={(e) => setNarrative(e.target.value)}

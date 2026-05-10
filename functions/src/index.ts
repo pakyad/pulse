@@ -17,7 +17,7 @@ export const placeOrder = onCall({
   region: "us-central1"
 }, async (request) => {
   const data = request.data || {};
-  const { userId, cartItems, deliveryType } = data;
+  const { userId, cartItems, deliveryType, dropOffLocation, receiptUrl } = data;
   const buyerId = request.auth?.uid;
 
   if (!buyerId && !userId) {
@@ -33,9 +33,16 @@ export const placeOrder = onCall({
       const itemDocs = await Promise.all(itemRefs.map((ref: any) => transaction.get(ref)));
 
       for (let i = 0; i < itemDocs.length; i++) {
-        const itemData = itemDocs[i].data();
-        if (!itemDocs[i].exists || (itemData?.stock_count ?? 0) < cartItems[i].qty) {
-          throw new HttpsError("resource-exhausted", `SOLD_OUT: ${itemData?.title || 'Item'} is unavailable!`);
+        const itemDoc = itemDocs[i];
+        const itemData = itemDoc.data();
+        
+        if (!itemDoc.exists) {
+          throw new HttpsError("not-found", `Item ${cartItems[i].title} no longer exists in registry.`);
+        }
+
+        const currentStock = itemData?.stock_count ?? 0;
+        if (currentStock < cartItems[i].qty) {
+          throw new HttpsError("resource-exhausted", `SOLD_OUT: Only ${currentStock} units of ${itemData?.title} remain.`);
         }
       }
 
@@ -63,6 +70,7 @@ export const placeOrder = onCall({
           const ref = db.collection('items').doc(item.productId);
           transaction.update(ref, {
             stock_count: admin.firestore.FieldValue.increment(-item.qty),
+            // Maintain legacy field for compatibility
             stock: admin.firestore.FieldValue.increment(-item.qty)
           });
         });
@@ -71,13 +79,15 @@ export const placeOrder = onCall({
           order_id: subOrderRef.id,
           parent_id: parentOrderId,
           buyer_id: finalUserId,
-          seller_id: vendorId, // Institutional Sync: Must be 'seller_id'
+          seller_id: vendorId,
           items: itemsForThisVendor,
-          price: subtotal, // Root field for Merchant Analytics
+          price: subtotal,
           title: itemsForThisVendor.length > 1 
             ? `${itemsForThisVendor.length} Items Bundle` 
             : itemsForThisVendor[0].title,
           delivery_type: deliveryType || 'RUNNER',
+          drop_off_location: dropOffLocation || null,
+          receipt_url: receiptUrl || null,
           status: 'PENDING_VENDOR',
           handshake: {
             seller_confirmed: false,

@@ -90,8 +90,8 @@ export default function EdgeToEdgeOrderStatus() {
 
   const phase = getPhase();
   const orderTime = order.created_at?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const title = status === 'DELIVERED' ? 'Asset Secured' : status === 'CANCELLED' ? 'Directive Terminated' : 'Handshake Active';
-  const subtext = status === 'DELIVERED' ? 'Final handshake completed. Asset registered to your inventory.' : 'Live telemetry tracking your marketplace asset.';
+  const title = status === 'DELIVERED' ? 'Asset Secured' : status === 'CANCELLED' ? 'Order Cancelled' : 'Order Active';
+  const subtext = status === 'DELIVERED' ? 'Delivery completed. Asset registered to your inventory.' : 'Live tracking your marketplace asset.';
 
   const handleConfirmReceipt = async () => {
     if (!navigator.geolocation) {
@@ -106,7 +106,7 @@ export default function EdgeToEdgeOrderStatus() {
         const { httpsCallable } = await import('firebase/functions');
         const completeHandshake = httpsCallable(functions, 'completeHandshake');
         await completeHandshake({ orderId: id, role: 'buyer', coords });
-        alert("Institutional Confirmation Sent. Asset registry updated upon merchant confirmation.");
+        alert("Verification Sent. Your order will update once the merchant confirms.");
       } catch (e) {
         console.error(e);
         alert("Handshake Transmission Failed.");
@@ -148,7 +148,7 @@ export default function EdgeToEdgeOrderStatus() {
                   <div className="flex items-center gap-3">
                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
                         <VoxelPulse size={12} className="text-emerald-400" />
-                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Active Directive</span>
+                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Active Process</span>
                      </div>
                   </div>
 
@@ -233,7 +233,7 @@ export default function EdgeToEdgeOrderStatus() {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="text-[13px] text-slate-400 font-medium leading-relaxed"
                                  >
-                                    Registry confirmed at this node. Awaiting handshake.
+                                    Registry confirmed at this node. Awaiting verification.
                                  </motion.p>
                               )}
                            </div>
@@ -293,20 +293,34 @@ export default function EdgeToEdgeOrderStatus() {
                  Confirm Receipt
               </button>
             )}
-            <button 
-              onClick={() => setIsReportModalOpen(true)}
-              className="w-full h-18 border-[0.5px] border-slate-200 rounded-[28px] flex items-center justify-center gap-3 text-[13px] font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all"
-            >
-               <ShieldAlert size={18} />
-               Report Institutional Conflict
-            </button>
+
+            {/* 🏛️ Dispute Gating Logic */}
+            <div className="space-y-3">
+              <button 
+                onClick={() => setIsReportModalOpen(true)}
+                disabled={!order.handshake?.seller_confirmed}
+                className="w-full h-18 border-[0.5px] border-slate-200 rounded-[28px] flex items-center justify-center gap-3 text-[13px] font-bold transition-all disabled:opacity-20 disabled:grayscale group"
+              >
+                 <ShieldAlert size={18} className="text-slate-400 group-hover:text-red-500 transition-colors" />
+                 <span className={order.handshake?.seller_confirmed ? 'text-slate-900' : 'text-slate-400'}>
+                   Report a Problem
+                 </span>
+              </button>
+              
+              {!order.handshake?.seller_confirmed && (
+                <p className="text-[11px] text-slate-400 font-medium text-center px-6 italic">
+                  Mediation is locked until the merchant initiates the delivery handshake.
+                </p>
+              )}
+            </div>
+
             <div className="p-8 bg-slate-50/50 rounded-[32px] border border-slate-100 space-y-6">
                <div className="flex items-start gap-4">
                   <Info size={20} className="text-blue-500 shrink-0 mt-1" />
                   <div>
-                     <p className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-2">End Process & Mediation</p>
+                     <p className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-2">Refund & Support Process</p>
                      <p className="text-[12px] text-slate-400 font-medium leading-relaxed italic">
-                        "If a conflict arises, the Pulse Admin will conduct a <strong>GPS Proximity Audit</strong>. If coordinates match, the dispute is dismissed. If they diverge, a refund or credit will be issued within 24 hours."
+                        "If there is a problem, the Admin will check the <strong>GPS Location Data</strong>. If the locations match, the order is confirmed. If not, a refund will be issued within 24 hours."
                      </p>
                   </div>
                </div>
@@ -318,7 +332,7 @@ export default function EdgeToEdgeOrderStatus() {
                   </div>
                   <div className="space-y-1">
                      <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Adjudication</p>
-                     <p className="text-[12px] font-bold text-slate-900">GPS Verified</p>
+                     <p className="text-[12px] font-bold text-slate-900">Location Check</p>
                   </div>
                </div>
             </div>

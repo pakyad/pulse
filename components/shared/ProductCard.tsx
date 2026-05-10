@@ -27,7 +27,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       className="flex flex-col cursor-pointer group"
     >
       {/* ── IMAGE BOX ── */}
-      <div className="relative aspect-square bg-slate-50 rounded-[20px] overflow-hidden mb-4 border border-slate-100 shadow-sm transition-all group-hover:border-slate-300">
+      <div className="relative aspect-4/5 bg-slate-50 rounded-xl overflow-hidden mb-4 border border-slate-100 shadow-sm transition-all group-hover:border-slate-300">
         <motion.img 
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -52,31 +52,24 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       </div>
 
       {/* ── INFORMATION BLOCK ── */}
-      <div className="px-2 space-y-1">
-        <div className="flex items-start justify-between gap-3">
-          <h4 className="text-[14px] font-bold text-[#1e293b] tracking-tight leading-tight flex-1 truncate">
-            {item.title}
-          </h4>
-          <span className="text-[11px] font-medium text-[#94a3b8] tracking-tight shrink-0">
-            {item.time_ago || '2d'}
-          </span>
+      <div className="px-1 space-y-3">
+        <h4 className="text-[14px] font-medium text-slate-900 tracking-tight leading-snug">
+          {item.title}
+        </h4>
+
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <div key={s} className="w-2.5 h-2.5 bg-emerald-500 rounded-[2px]" />
+          ))}
+          <span className="text-[10px] font-bold text-slate-300 ml-1">(121)</span>
         </div>
 
-        <div className="flex items-center justify-between">
-           <p className="text-[16px] font-bold text-[#1e293b] tracking-tight">
+        <div className="flex items-center justify-between pt-1">
+           <p className="text-[16px] font-black text-slate-900 tracking-tighter">
              RM {Number(item.price || 0).toFixed(0)}
            </p>
-           <div className="flex items-center gap-2 max-w-[50%]">
-              <span className="text-[10px] font-bold text-[#94a3b8] truncate">
-                {item.seller_name || 'Verified'}
-              </span>
-              <div className="w-5 h-5 rounded-full bg-slate-100 overflow-hidden shrink-0 border border-slate-50">
-                <img 
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.seller_name || 'Pulse'}`} 
-                  className="w-full h-full object-cover" 
-                  alt="S"
-                />
-              </div>
+           <div className="h-8 px-4 border border-slate-200 rounded-full flex items-center justify-center">
+              <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">View</span>
            </div>
         </div>
       </div>

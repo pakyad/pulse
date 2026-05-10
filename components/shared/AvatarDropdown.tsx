@@ -12,9 +12,10 @@ import { auth } from '@/lib/firebase';
 interface AvatarDropdownProps {
   photoUrl: string;
   userName: string;
+  className?: string;
 }
 
-export default function AvatarDropdown({ photoUrl, userName }: AvatarDropdownProps) {
+export default function AvatarDropdown({ photoUrl, userName, className = "" }: AvatarDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function AvatarDropdown({ photoUrl, userName }: AvatarDropdownPro
   ];
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative ${className}`} ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 group active:scale-95 transition-all"
@@ -66,7 +67,7 @@ export default function AvatarDropdown({ photoUrl, userName }: AvatarDropdownPro
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute right-0 mt-3 w-60 bg-white rounded-3xl shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden z-[200]"
+            className="absolute right-0 mt-3 w-60 bg-white rounded-3xl shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden z-200"
           >
             <div className="p-3">
               {menuItems.map((section, idx) => (

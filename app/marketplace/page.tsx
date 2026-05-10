@@ -98,13 +98,13 @@ export default function MarketplacePage() {
       {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
+            <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
                <ChevronLeft size={20} />
             </button>
             <p className="text-[15px] font-bold tracking-tight">Marketplace</p>
          </div>
          <div className="flex items-center gap-4">
-            <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
+            <button className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
                <Search size={20} />
             </button>
             <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
@@ -130,7 +130,7 @@ export default function MarketplacePage() {
                         <motion.div
                           key={camp.id}
                           whileTap={{ scale: 0.98 }}
-                          className={`shrink-0 w-[240px] h-[130px] p-6 rounded-[20px] ${camp.color || 'bg-[#1e293b]'} text-white flex flex-col justify-between shadow-lg shadow-slate-900/5 cursor-pointer group relative overflow-hidden`}
+                          className={`shrink-0 w-[240px] h-[130px] p-6 rounded-xl ${camp.color || 'bg-[#1e293b]'} text-white flex flex-col justify-between shadow-lg shadow-slate-900/5 cursor-pointer group relative overflow-hidden`}
                         >
                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 blur-2xl" />
                            <div className="space-y-0.5 relative z-10">
@@ -192,7 +192,7 @@ export default function MarketplacePage() {
                   ))}
                </div>
             ) : (
-               <div className="py-24 flex flex-col items-center justify-center text-[#94a3b8] gap-4 border-2 border-dashed border-slate-100 rounded-[40px]">
+               <div className="py-24 flex flex-col items-center justify-center text-[#94a3b8] gap-4 border-2 border-dashed border-slate-100 rounded-[16px]">
                   <Box size={48} strokeWidth={1} className="opacity-20" />
                   <p className="text-[13px] font-bold uppercase tracking-widest">No listings found in this sector</p>
                </div>
