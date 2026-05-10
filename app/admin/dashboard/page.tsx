@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import AdminProductApprovals from '@/components/admin/AdminProductApprovals';
@@ -8,7 +9,8 @@ import { resolveDispute, updatePriceGuideline } from '@/app/actions/adminActions
 import { 
   Loader2, CheckCircle, AlertTriangle, ChevronRight, Inbox, 
   LayoutGrid, BarChart3, Users, Settings, LogOut, ShieldAlert,
-  Search, ShieldCheck, UserCheck, Clock, ExternalLink, Filter
+  Search, ShieldCheck, UserCheck, Clock, ExternalLink, Filter, ChevronDown,
+  X, Briefcase, GraduationCap, Mail, Smartphone, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import PriceAudit from '@/components/admin/PriceAudit';
 import SimplePolicyModal from '@/components/admin/SimplePolicyModal';
@@ -27,6 +29,9 @@ export default function AdminDashboard() {
   const [selectedDispute, setSelectedDispute] = useState<any>(null);
   const [isDisputeDrawerOpen, setIsDisputeDrawerOpen] = useState(false);
   const [selectedReviewItem, setSelectedReviewItem] = useState<any>(null);
+  const [isUsersExpanded, setIsUsersExpanded] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState('ALL');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
@@ -118,6 +123,17 @@ export default function AdminDashboard() {
     } catch (e) { console.error(e); }
   };
 
+  const toggleVerification = async (userId: string, currentStatus: boolean, roleField: string) => {
+    try {
+      await updateDoc(doc(db, "users", userId), {
+        [roleField]: !currentStatus
+      });
+      // Update local state if needed, but onSnapshot should handle it
+    } catch (e) {
+      alert("Registry update failed.");
+    }
+  };
+
   const handleVerifyRunner = async (userId: string) => {
     try {
       await setDoc(doc(db, "users", userId), { role: "RUNNER", runner_application: "VERIFIED" }, { merge: true });
@@ -150,7 +166,17 @@ export default function AdminDashboard() {
     { id: 'command', label: 'Command Center', icon: Inbox },
     { id: 'monitor', label: 'Price Monitor', icon: BarChart3 },
     { id: 'disputes', label: 'Active Disputes', icon: ShieldAlert, badge: disputes.length },
-    { id: 'users', label: 'User Registry', icon: Users },
+    { 
+      id: 'users', 
+      label: 'User Registry', 
+      icon: Users,
+      subItems: [
+        { id: 'ALL', label: 'All Identities' },
+        { id: 'STUDENT', label: 'Student Registry' },
+        { id: 'MERCHANT', label: 'Merchant Registry' },
+        { id: 'RUNNER', label: 'Runner Registry' },
+      ]
+    },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -174,26 +200,60 @@ export default function AdminDashboard() {
         {/* Dynamic Navigation Spectrum */}
         <nav className="flex-1 px-4 py-2 space-y-1">
           {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                if (item.path) { router.push(item.path); }
-                else { setActiveTab(item.id); }
-              }}
-              className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
-                activeTab === item.id 
-                  ? 'bg-[#F2F2F7] text-[#1C1C1E] shadow-sm' 
-                  : 'text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E]'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon size={20} strokeWidth={activeTab === item.id ? 2.5 : 2} className="transition-all" />
-                <span className={`text-[14px] tracking-tight ${activeTab === item.id ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
-              </div>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-red-500/20">{item.badge}</span>
+            <div key={item.id} className="space-y-1">
+              <button
+                onClick={() => {
+                  if (item.subItems) {
+                    setIsUsersExpanded(!isUsersExpanded);
+                    setActiveTab(item.id);
+                  } else { 
+                    setActiveTab(item.id); 
+                  }
+                }}
+                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
+                  activeTab === item.id 
+                    ? 'bg-[#F2F2F7] text-[#1C1C1E] shadow-sm' 
+                    : 'text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E]'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon size={20} strokeWidth={activeTab === item.id ? 2.5 : 2} className="transition-all" />
+                  <span className={`text-[14px] tracking-tight ${activeTab === item.id ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+                </div>
+                {item.subItems ? (
+                  <ChevronDown 
+                    size={16} 
+                    className={`transition-transform duration-300 ${isUsersExpanded ? 'rotate-180' : ''} text-[#AEAEB2]`} 
+                  />
+                ) : (
+                  item.badge !== undefined && item.badge > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-red-500/20">{item.badge}</span>
+                  )
+                )}
+              </button>
+
+              {/* Sidebar Sub-options */}
+              {item.subItems && isUsersExpanded && (
+                <div className="pl-12 pr-2 py-2 space-y-1">
+                  {item.subItems.map((sub) => (
+                    <button
+                      key={sub.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setActiveSubTab(sub.id);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                        activeTab === item.id && activeSubTab === sub.id
+                          ? 'text-emerald-600 bg-emerald-50'
+                          : 'text-[#AEAEB2] hover:text-[#1C1C1E] hover:bg-[#F9F9FB]'
+                      }`}
+                    >
+                      {sub.label}
+                    </button>
+                  ))}
+                </div>
               )}
-            </button>
+            </div>
           ))}
         </nav>
 
@@ -353,7 +413,9 @@ export default function AdminDashboard() {
                <div className="flex justify-between items-center px-2">
                   <div>
                      <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Identity Management</p>
-                     <h2 className="text-[22px] font-black text-slate-900 tracking-tight">User Registry</h2>
+                     <h2 className="text-[22px] font-black text-slate-900 tracking-tight">
+                        {activeSubTab === 'ALL' ? 'User Registry' : `${activeSubTab.charAt(0) + activeSubTab.slice(1).toLowerCase()} Registry`}
+                     </h2>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="relative">
@@ -363,51 +425,58 @@ export default function AdminDashboard() {
                   </div>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {users.map((user) => (
-                    <div key={user.id} className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm hover:shadow-xl transition-all">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-black text-[18px]">
-                          {user.full_name?.[0] || 'U'}
-                        </div>
-                        <div>
-                          <h3 className="text-[16px] font-black text-slate-900 tracking-tight">{user.full_name}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            {user.role === 'RUNNER' ? (
-                              <span className="text-[9px] font-black bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md uppercase tracking-widest border border-emerald-100 flex items-center gap-1">
-                                <ShieldCheck size={10} /> Institutional Runner
-                              </span>
-                            ) : (
-                              <span className="text-[9px] font-black bg-slate-50 text-slate-400 px-2 py-0.5 rounded-md uppercase tracking-widest border border-slate-100">
-                                Unverified
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4 mb-8">
-                        <div>
-                          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Electronic Mail</p>
-                          <p className="text-[13px] font-bold text-slate-900 truncate">{user.email}</p>
-                        </div>
-                        <div>
-                          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Registry ID</p>
-                          <p className="text-[13px] font-bold text-slate-900 truncate uppercase tracking-tighter">#{user.id.substring(0,12)}</p>
-                        </div>
-                      </div>
-
-                      {user.runner_application === 'PENDING' && (
-                        <button 
-                          onClick={() => handleVerifyRunner(user.id)}
-                          className="w-full h-11 bg-blue-50 text-blue-600 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2"
-                        >
-                          <UserCheck size={16} /> Verify Identity
-                        </button>
-                      )}
-                    </div>
-                  ))}
-               </div>
+                <div className="bg-white rounded-[32px] border-[0.5px] border-[#F2F2F7] overflow-hidden shadow-sm">
+                   <table className="w-full text-left border-collapse">
+                      <thead>
+                         <tr className="bg-[#FDFDFD] border-b-[0.5px] border-[#F2F2F7]">
+                            <th className="px-8 py-6 text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">Institutional Identity</th>
+                            <th className="px-8 py-6 text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">Verification State</th>
+                            <th className="px-8 py-6 text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">Tenure</th>
+                            <th className="px-8 py-6 text-[10px] font-black text-black/30 uppercase tracking-[0.2em] text-right">Audit</th>
+                         </tr>
+                      </thead>
+                      <tbody className="divide-y-[0.5px] divide-[#F2F2F7]">
+                         {users
+                           .filter(u => {
+                             if (activeSubTab === 'ALL') return true;
+                             if (activeSubTab === 'RUNNER') return u.is_verified_runner;
+                             if (activeSubTab === 'MERCHANT') return u.is_seller;
+                             if (activeSubTab === 'STUDENT') return !u.is_verified_runner && !u.is_seller;
+                             return true;
+                           })
+                           .map((u) => (
+                            <tr key={u.id} className="hover:bg-[#FDFDFD] transition-colors group cursor-pointer" onClick={() => setSelectedUser(u)}>
+                               <td className="px-8 py-6">
+                                  <div className="flex items-center gap-5">
+                                     <div className="w-12 h-12 rounded-2xl bg-slate-50 overflow-hidden border-[0.5px] border-[#F2F2F7] shadow-sm">
+                                        <img src={u.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${u.full_name}`} alt="" className="w-full h-full object-cover" />
+                                     </div>
+                                     <div>
+                                        <p className="text-[16px] font-bold text-black tracking-tight">{u.full_name}</p>
+                                        <p className="text-[12px] font-medium text-black/30">{u.matric_no || 'UniKL ID: Pending'}</p>
+                                     </div>
+                                  </div>
+                               </td>
+                               <td className="px-8 py-6">
+                                  <div className="flex gap-2">
+                                     {u.is_verified_runner && <span className="px-3 py-1.5 bg-[#1C1C1E] text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><ShieldCheck size={12} /> Runner</span>}
+                                     {u.is_seller && <span className="px-3 py-1.5 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Briefcase size={12} /> Merchant</span>}
+                                     {!u.is_verified_runner && !u.is_seller && <span className="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest">Student</span>}
+                                  </div>
+                               </td>
+                               <td className="px-8 py-6">
+                                  <span className="text-[14px] font-bold text-black/40">Class of 2026</span>
+                               </td>
+                               <td className="px-8 py-6 text-right">
+                                  <button className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-black/20 group-hover:bg-black group-hover:text-white transition-all">
+                                     <ChevronRight size={18} />
+                                  </button>
+                               </td>
+                            </tr>
+                         ))}
+                      </tbody>
+                   </table>
+                </div>
             </section>
           )}
 
@@ -484,6 +553,111 @@ export default function AdminDashboard() {
         dispute={selectedDispute}
         onResolve={handleResolve}
       />
+
+      {/* ── IDENTITY AUDIT DRAWER (Option 1) ── */}
+      <AnimatePresence>
+        {selectedUser && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)} className="fixed inset-0 z-100 bg-black/20 backdrop-blur-md" />
+            <motion.div 
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 bottom-0 w-[540px] bg-white z-110 shadow-2xl flex flex-col"
+            >
+               <div className="p-10 flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.4em]">Audit Terminal</p>
+                    <h2 className="text-[24px] font-black text-black uppercase tracking-tighter">Identity Review</h2>
+                  </div>
+                  <button onClick={() => setSelectedUser(null)} className="w-12 h-12 rounded-full bg-[#F5F5F5] flex items-center justify-center text-black/20 hover:text-black transition-colors"><X size={24} /></button>
+               </div>
+
+               <div className="flex-1 overflow-y-auto p-10 space-y-12">
+                  <div className="flex flex-col items-center text-center space-y-4 py-8">
+                     <div className="w-32 h-32 rounded-[48px] overflow-hidden border-[0.5px] border-[#F2F2F7] shadow-2xl relative">
+                        <img src={selectedUser.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${selectedUser.full_name}`} className="w-full h-full object-cover" alt="" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+                     </div>
+                     <div>
+                        <h3 className="text-[28px] font-black text-black tracking-tighter leading-none">{selectedUser.full_name}</h3>
+                        <p className="text-[14px] font-bold text-black/30 mt-2">{selectedUser.email}</p>
+                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                     <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] mb-6">Registry Authorization</p>
+                     
+                     <div className="p-8 rounded-[32px] bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
+                        <div className="flex items-center gap-6">
+                           <div className="w-14 h-14 bg-black text-white rounded-[20px] flex items-center justify-center shadow-lg"><ShieldCheck size={28} /></div>
+                           <div>
+                              <p className="text-[17px] font-black text-black tracking-tight">Logistics Verification</p>
+                              <p className="text-[13px] font-medium text-black/30">Verified Pulse Runner Node</p>
+                           </div>
+                        </div>
+                        <button 
+                          onClick={() => toggleVerification(selectedUser.id, selectedUser.is_verified_runner, 'is_verified_runner')}
+                          className={`w-16 h-9 rounded-full relative transition-all duration-500 ${selectedUser.is_verified_runner ? 'bg-[#00927C]' : 'bg-black/10'}`}
+                        >
+                           <motion.div 
+                             animate={{ x: selectedUser.is_verified_runner ? 30 : 6 }}
+                             className="absolute top-1.5 w-6 h-6 bg-white rounded-full shadow-lg"
+                           />
+                        </button>
+                     </div>
+
+                     <div className="p-8 rounded-[32px] bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
+                        <div className="flex items-center gap-6">
+                           <div className="w-14 h-14 bg-blue-600 text-white rounded-[20px] flex items-center justify-center shadow-lg"><Briefcase size={28} /></div>
+                           <div>
+                              <p className="text-[17px] font-black text-black tracking-tight">Merchant Authority</p>
+                              <p className="text-[13px] font-medium text-black/30">Verified Pulse Vendor Node</p>
+                           </div>
+                        </div>
+                        <button 
+                          onClick={() => toggleVerification(selectedUser.id, selectedUser.is_seller, 'is_seller')}
+                          className={`w-16 h-9 rounded-full relative transition-all duration-500 ${selectedUser.is_seller ? 'bg-[#007AFF]' : 'bg-black/10'}`}
+                        >
+                           <motion.div 
+                             animate={{ x: selectedUser.is_seller ? 30 : 6 }}
+                             className="absolute top-1.5 w-6 h-6 bg-white rounded-full shadow-lg"
+                           />
+                        </button>
+                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                     {[
+                        { label: 'Campus ID', value: selectedUser.matric_no || 'UniKL-PR', icon: GraduationCap },
+                        { label: 'Mobile Auth', value: selectedUser.phone || 'N/A', icon: Smartphone },
+                        { label: 'Registry Date', value: '24 May 2024', icon: Clock },
+                        { label: 'Trust Score', value: '98.2%', icon: CheckCircle2 },
+                     ].map(item => (
+                        <div key={item.label} className="p-6 bg-white border-[0.5px] border-[#F2F2F7] rounded-[24px]">
+                           <p className="text-[9px] font-black text-black/20 uppercase tracking-[0.2em] mb-4">{item.label}</p>
+                           <div className="flex items-center gap-3">
+                              <item.icon size={16} className="text-black/20" />
+                              <span className="text-[15px] font-bold text-black truncate">{item.value}</span>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+
+                  <div className="p-8 bg-red-50/50 rounded-[32px] border-[0.5px] border-red-100/50 space-y-6">
+                     <div className="flex items-center gap-4 text-red-600">
+                        <AlertCircle size={24} />
+                        <p className="text-[17px] font-black tracking-tight">Security Protocol</p>
+                     </div>
+                     <p className="text-[13px] text-red-800/40 font-medium leading-relaxed italic pr-4">"Suspending this node will immediately revoke all campus-wide logistics tokens and marketplace clearance."</p>
+                     <button className="w-full h-16 bg-red-600 text-white rounded-[22px] font-black text-[13px] uppercase tracking-widest shadow-xl shadow-red-200 active:scale-95 transition-all">
+                        Suspend Resident Node
+                     </button>
+                  </div>
+               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

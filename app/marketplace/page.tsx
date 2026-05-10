@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'next/navigation';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ProductCard from '@/components/shared/ProductCard';
+import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/MarketplaceFilterOverlay';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -40,6 +41,12 @@ export default function MarketplacePage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    sortBy: 'newest',
+    priceRange: [0, 1000],
+    officialOnly: false
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -57,9 +64,33 @@ export default function MarketplacePage() {
   }, []);
 
   const filteredItems = useMemo(() => {
-    if (!activeCategory) return items;
-    return items.filter(i => i.category?.toLowerCase() === activeCategory.toLowerCase());
-  }, [items, activeCategory]);
+    let result = [...items];
+
+    // ── CATEGORY FILTER ──
+    if (activeCategory) {
+      result = result.filter(i => i.category?.toLowerCase() === activeCategory.toLowerCase());
+    }
+
+    // ── PRICE FILTER ──
+    result = result.filter(i => Number(i.price) <= filters.priceRange[1]);
+
+    // ── OFFICIAL ONLY FILTER ──
+    if (filters.officialOnly) {
+      result = result.filter(i => i.is_official === true);
+    }
+
+    // ── SORT LOGIC ──
+    result.sort((a, b) => {
+      if (filters.sortBy === 'price_asc') return Number(a.price) - Number(b.price);
+      if (filters.sortBy === 'price_desc') return Number(b.price) - Number(a.price);
+      
+      const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : new Date(a.created_at).getTime();
+      const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : new Date(b.created_at).getTime();
+      return (timeB || 0) - (timeA || 0);
+    });
+
+    return result;
+  }, [items, activeCategory, filters]);
 
   return (
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
@@ -120,14 +151,17 @@ export default function MarketplacePage() {
          {/* ── DISCOVER ITEMS ── */}
          <section className="space-y-8">
             <div className="px-1 flex justify-between items-end">
-               <div className="space-y-1">
+                <div className="space-y-1">
                   <Heading>Discover Items</Heading>
                   <Subtext>{filteredItems.length} active listings verified across campus</Subtext>
                </div>
-               <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100">
-                  <Filter size={14} className="text-slate-400" />
-                  <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">Filter</span>
-               </div>
+               <button 
+                  onClick={() => setIsFilterOpen(true)}
+                  className="h-8 px-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 active:scale-95 transition-all hover:bg-slate-100/50"
+               >
+                  <Filter size={12} className="text-slate-400" />
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filter</span>
+               </button>
             </div>
 
             {/* ── MINIMALIST METADATA PILLS (FILTERS) ── */}
@@ -166,6 +200,13 @@ export default function MarketplacePage() {
          </section>
 
       </div>
+
+      <MarketplaceFilterOverlay 
+        isOpen={isFilterOpen} 
+        onClose={() => setIsFilterOpen(false)} 
+        filters={filters}
+        onApply={setFilters}
+      />
 
       <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
     </main>
