@@ -17,13 +17,13 @@ import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[24px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[21px] font-bold text-[#1e293b] tracking-tight ${className}`}>
     {children}
   </h2>
 );
 
 const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-[14px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+  <p className={`text-[13px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
     {children}
   </p>
 );
@@ -73,17 +73,17 @@ export default function MePage() {
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
       
       {/* ── GLOBAL NAVIGATION ── */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
-               <ChevronLeft size={20} />
+            <button onClick={() => router.push('/home')} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
+               <ChevronLeft size={18} />
             </button>
-            <p className="text-[15px] font-bold tracking-tight">Profile</p>
+            <p className="text-[14px] font-bold tracking-tight">Profile</p>
          </div>
          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
       </nav>
 
-      <div className="pt-32 px-8 space-y-12">
+      <div className="pt-28 px-6 space-y-12">
          
          {/* ── PROFILE HEADER ── */}
          <section className="flex items-center gap-6">
@@ -125,13 +125,13 @@ export default function MePage() {
                      <div key={i} className="space-y-4">
                         <button 
                            onClick={() => router.push(item.path)}
-                           className="w-full flex items-center justify-between group py-3"
+                           className="w-full flex items-center justify-between group py-2"
                         >
                            <div className="text-left">
-                              <p className="text-[17px] font-bold text-slate-700 tracking-tight">{item.label}</p>
+                              <p className="text-[15px] font-bold text-slate-600 group-hover:text-slate-900 tracking-tight transition-colors">{item.label}</p>
                               <p className="text-[12px] text-slate-400 font-medium lowercase">View your {item.label.toLowerCase()}</p>
                            </div>
-                           <ChevronRight size={18} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                           <ChevronRight size={16} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
                         </button>
                         {i < group.items.length - 1 && <div className="h-px bg-slate-50" />}
                      </div>

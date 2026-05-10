@@ -8,8 +8,8 @@
   --navy: #0F172A;      /* Slate 900 */
   --border: #F1F5F9;    /* Slate 100 */
   --card: #FFFFFF;
-  --radius-institutional: 24px;
-  --radius-institutional-lg: 32px;
+  --radius-institutional: 20px;
+  --radius-institutional-lg: 28px;
 }
 
 @theme inline {

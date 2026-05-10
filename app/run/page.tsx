@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db, functions } from '@/lib/firebase';
@@ -16,13 +16,13 @@ import { updateDoc, serverTimestamp } from 'firebase/firestore';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[24px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[21px] font-bold text-[#1e293b] tracking-tight ${className}`}>
     {children}
   </h2>
 );
 
 const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-[14px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+  <p className={`text-[13px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
     {children}
   </p>
 );
@@ -118,17 +118,20 @@ export default function RunModule() {
 
     return (
        <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-32">
-          <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
-             <div className="flex items-center gap-4">
-                <button onClick={() => router.push('/home')} className="p-2 -ml-2 text-slate-400 transition-all active:scale-90"><ChevronLeft size={24} /></button>
-                 <p className="text-[24px] font-bold text-[#1e293b] tracking-tight">Deliveries</p>
-             </div>
-             <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
-          </nav>
+      {/* ── GLOBAL NAVIGATION ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+         <div className="flex items-center gap-3">
+            <button onClick={() => router.push('/home')} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
+               <ChevronLeft size={18} />
+            </button>
+            <p className="text-[14px] font-bold tracking-tight">Deliveries</p>
+         </div>
+         <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
+      </nav>
 
-          <div className="pt-32 px-8 space-y-12">
-             {profile?.is_verified_runner && (
-                <div className="space-y-8">
+      <div className="pt-28 px-6 space-y-10">
+         {profile?.is_verified_runner && (
+            <div className="space-y-6">
                    <div className="px-1">
                       <Heading>Runner Dashboard</Heading>
                       <Subtext>Manage your active missions and earnings</Subtext>
@@ -157,26 +160,26 @@ export default function RunModule() {
                        <div className="px-1 space-y-4 pt-6">
                           <button 
                             onClick={() => router.push('/run/missions')} 
-                            className="w-full flex items-center justify-between group py-3"
+                            className="w-full flex items-center justify-between group py-2"
                           >
                              <div className="text-left">
-                                <p className="text-[17px] font-bold text-slate-700 tracking-tight">Available Jobs</p>
+                                <p className="text-[15px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors tracking-tight">Available Jobs</p>
                                 <p className="text-[12px] text-slate-400 font-medium lowercase">browse active missions</p>
                              </div>
-                             <ArrowRight size={18} className="text-slate-200 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                             <ArrowRight size={16} className="text-slate-200 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
                           </button>
 
                           <div className="h-px bg-slate-50" />
 
                           <button 
                             onClick={() => router.push('/run/terminal')} 
-                            className="w-full flex items-center justify-between group py-3"
+                            className="w-full flex items-center justify-between group py-2"
                           >
                              <div className="text-left">
-                                <p className="text-[17px] font-bold text-slate-700 tracking-tight">Delivery Hub</p>
+                                <p className="text-[15px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors tracking-tight">Delivery Hub</p>
                                 <p className="text-[12px] text-slate-400 font-medium lowercase">open terminal tools</p>
                              </div>
-                             <ArrowRight size={18} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                             <ArrowRight size={16} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
                           </button>
                        </div>
                     </div>
@@ -232,3 +235,5 @@ export default function RunModule() {
 }
 
 const UNIKL_CAFES = [{ name: "Cafe Block A" }, { name: "Starbucks MIIT" }, { name: "West Wing Cafeteria" }];
+
+

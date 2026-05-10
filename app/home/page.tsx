@@ -16,13 +16,13 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[24px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[21px] font-bold text-[#1e293b] tracking-tight ${className}`}>
     {children}
   </h2>
 );
 
 const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-[14px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+  <p className={`text-[13px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
     {children}
   </p>
 );
@@ -62,25 +62,25 @@ export default function PulseHome() {
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
       
       {/* ── GLOBAL NAVIGATION ── */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#1e293b] flex items-center justify-center text-white shadow-lg shadow-slate-900/10">
-               <Sparkles size={20} />
+            <div className="w-9 h-9 rounded-xl bg-[#1e293b] flex items-center justify-center text-white shadow-lg shadow-slate-900/10">
+               <Sparkles size={18} />
             </div>
             <div>
-               <p className="text-[15px] font-bold tracking-tight leading-none">Pulse Hub</p>
-               <p className="text-[11px] font-medium text-[#94a3b8] mt-1 uppercase tracking-wider">Campus Center</p>
+               <p className="text-[14px] font-bold tracking-tight leading-none">Pulse Hub</p>
+               <p className="text-[10px] font-medium text-[#94a3b8] mt-1 uppercase tracking-wider">Campus Center</p>
             </div>
          </div>
          <div className="flex items-center gap-4">
-            <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-               <Search size={20} />
+            <button className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+               <Search size={18} />
             </button>
             <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
          </div>
       </nav>
 
-      <div className="pt-32 px-8 space-y-16">
+      <div className="pt-28 px-6 space-y-12">
          
          {/* ── FEATURED BANNER (HIDDEN IF EMPTY) ── */}
          <AnimatePresence>

@@ -22,13 +22,13 @@ const LiveMap = dynamic(() => import('@/components/runner/LiveMap'), { ssr: fals
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h3 className={`text-[18px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h3 className={`text-[17px] font-bold text-[#1e293b] tracking-tight ${className}`}>
     {children}
   </h3>
 );
 
 const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-[14px] font-medium text-[#94a3b8] leading-snug ${className}`}>
+  <p className={`text-[13px] font-medium text-[#94a3b8] leading-snug ${className}`}>
     {children}
   </p>
 );
@@ -192,11 +192,11 @@ export default function RunnerTerminal() {
         {/* ── MATURED NAVIGATION ── */}
         <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
            <div className="flex items-center gap-3">
-              <button onClick={() => router.push('/run')} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 active:scale-95 transition-all">
-                 <ChevronLeft size={20} />
+              <button onClick={() => router.push('/run')} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 active:scale-95 transition-all">
+                 <ChevronLeft size={18} />
               </button>
               <div>
-                 <p className="text-[24px] font-bold tracking-tight text-slate-900 leading-none">Terminal Hub</p>
+                 <p className="text-[21px] font-bold tracking-tight text-slate-900 leading-none">Terminal Hub</p>
               </div>
            </div>
            
