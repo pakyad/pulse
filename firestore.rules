@@ -26,7 +26,8 @@ service cloud.firestore {
 
     // ── MARKETPLACE ITEMS (Public Discovery) ──
     match /items/{itemId} {
-      allow read, list: if true; 
+      allow read: if isSignedIn() && (resource.data.status != 'FLAGGED_FOR_REVIEW' || isSuperAdmin());
+      allow list: if isSignedIn(); // Rely on 'active' filters in the UI; direct reads are still protected.
       allow create: if isSignedIn();
       allow update, delete: if isSignedIn(); 
     }

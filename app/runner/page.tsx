@@ -1,9 +1,13 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, getDoc } from 'firebase/firestore';
-import { ShieldCheck, Truck, MapPin, ChevronRight, Activity, Zap } from 'lucide-react';
+import { ShieldCheck, Truck, MapPin, ChevronRight, Activity, Zap, Camera, X, Loader2, Package, CheckCircle2 } from 'lucide-react';
+import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
+
+const storage = getStorage();
 
 export default function MobileRunnerDashboard() {
   const router = useRouter();
@@ -14,26 +18,26 @@ export default function MobileRunnerDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'RADAR' | 'ANALYTICS'>('RADAR');
   const [analytics, setAnalytics] = useState({ deliveries: 0, earnings: 0 });
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
     let unsubJobs: (() => void) | null = null;
     let unsubActive: (() => void) | null = null;
 
-    const unsubAuth = auth.onAuthStateChanged(async (user) => {
+    const unsubAuth = auth.onAuthStateChanged(async (user: any) => {
       if (!user) { router.push('/auth'); return; }
 
-      // 1. Verify Institutional Clearance
       const userDoc = await getDoc(doc(db, "users", user.uid));
       const userData = userDoc.data();
       setProfile(userData);
 
       if (!userData?.is_verified_runner) {
-        // Redirect if not a verified runner node
         router.push('/home'); return;
       }
 
-      // 2. Sync Available Radar Jobs (Institutional Gating)
-      // Query for orders that are explicitly waiting for a runner
       const qJobs = query(
         collection(db, "orders"), 
         where("status", "==", "AWAITING_RUNNER"),
@@ -45,7 +49,6 @@ export default function MobileRunnerDashboard() {
         setLoading(false);
       });
 
-      // 3. Sync Current Active Job (Assigned to this runner)
       const qActive = query(
         collection(db, "orders"),
         where("runner_id", "==", user.uid),
@@ -60,7 +63,6 @@ export default function MobileRunnerDashboard() {
         }
       });
 
-      // 4. Pull Historical Performance (Analytics)
       const qHistory = query(
         collection(db, "orders"),
         where("runner_id", "==", user.uid),
@@ -69,7 +71,7 @@ export default function MobileRunnerDashboard() {
       
       onSnapshot(qHistory, (snap) => {
         const docs = snap.docs.map(d => d.data());
-        const totalEarned = docs.reduce((acc, curr) => acc + (curr.delivery_fee || 3.50), 0);
+        const totalEarned = docs.reduce((acc: number, curr: any) => acc + (curr.delivery_fee || 3.50), 0);
         setAnalytics({
           deliveries: docs.length,
           earnings: totalEarned
@@ -88,7 +90,7 @@ export default function MobileRunnerDashboard() {
     if (!auth.currentUser || !isOnline) return;
     try {
       await updateDoc(doc(db, "orders", orderId), {
-        status: 'ON_THE_WAY',
+        status: 'PICKED_UP',
         runner_id: auth.currentUser.uid,
         runner_name: profile?.full_name || 'Verified Runner',
         accepted_at: new Date().toISOString(),
@@ -96,7 +98,71 @@ export default function MobileRunnerDashboard() {
       });
     } catch (e) {
       console.error("Job Acceptance Error:", e);
-      alert("Job synchronization failed. Another node may have accepted.");
+      alert("Job synchronization failed. Another agent may have accepted.");
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment', aspectRatio: 1 } 
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setIsCameraOpen(true);
+    } catch (err) {
+      alert("Camera Access Denied.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setIsCameraOpen(false);
+  };
+
+  const captureAndComplete = async () => {
+    if (!activeJob || !videoRef.current || isUploading) return;
+    setIsUploading(true);
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1000;
+      canvas.height = 1000;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.drawImage(videoRef.current, 0, 0, 1000, 1000);
+      
+      ctx.fillStyle = "white";
+      ctx.font = "bold 20px Inter";
+      ctx.fillText(`ORDER: #${activeJob.id.substring(0,8).toUpperCase()}`, 40, 920);
+      ctx.font = "16px Inter";
+      ctx.fillText(new Date().toLocaleString(), 40, 950);
+
+      const imageData = canvas.toDataURL('image/jpeg', 0.8);
+      
+      const storageRef = ref(storage, `pod/${activeJob.id}.jpg`);
+      await uploadString(storageRef, imageData, 'data_url');
+      const podUrl = await getDownloadURL(storageRef);
+
+      await updateDoc(doc(db, "orders", activeJob.id), {
+        status: 'COMPLETED',
+        pod_url: podUrl,
+        completed_at: new Date().toISOString()
+      });
+
+      stopCamera();
+      alert("Proof Uploaded. Mission Finalized.");
+    } catch (e) {
+      console.error(e);
+      alert("Handshake failed. Please retry.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -111,8 +177,6 @@ export default function MobileRunnerDashboard() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans selection:bg-teal-50 text-[#1C1C1E]">
-      
-      {/* ── Top Bar ── */}
       <div className="bg-white sticky top-0 z-20 px-6 py-6 flex items-center justify-between border-b-[0.5px] border-[#F2F2F7]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white"><Truck size={18} /></div>
@@ -132,7 +196,6 @@ export default function MobileRunnerDashboard() {
       </div>
 
       <main className="flex-1 pb-40">
-         {/* ── Active Job Spotlight ── */}
          {activeJob ? (
            <div className="p-6 border-b-[0.5px] border-[#F2F2F7] bg-slate-50/30">
               <div className="flex items-center gap-2 mb-6">
@@ -161,12 +224,20 @@ export default function MobileRunnerDashboard() {
                     </div>
                  </div>
 
-                 <button 
-                  onClick={() => router.push(`/orders/${activeJob.id}`)}
-                  className="w-full h-14 bg-black text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] shadow-lg active:scale-[0.98] transition-all"
-                 >
-                    View Logistics Map
-                 </button>
+                  <div className="flex gap-4">
+                    <button 
+                      onClick={() => router.push(`/orders/${activeJob.id}`)}
+                      className="flex-1 h-14 bg-slate-50 text-slate-400 rounded-2xl font-black text-[11px] uppercase tracking-widest border border-slate-100 active:scale-95 transition-all"
+                    >
+                        Logistics Map
+                    </button>
+                    <button 
+                      onClick={startCamera}
+                      className="flex-1 h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-black/10 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    >
+                        <Camera size={18} /> Complete Job
+                    </button>
+                  </div>
               </div>
            </div>
          ) : (
@@ -293,6 +364,64 @@ export default function MobileRunnerDashboard() {
             </button>
          </div>
       </div>
+
+      {/* ── Institutional PoD Camera Terminal ── */}
+      <AnimatePresence>
+        {isCameraOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-100 bg-black flex flex-col items-center justify-center"
+          >
+            {/* Header */}
+            <div className="absolute top-0 left-0 right-0 p-8 flex justify-between items-center z-10">
+               <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Proof of Delivery</p>
+               <button onClick={stopCamera} className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white"><X size={20} /></button>
+            </div>
+
+            {/* 1:1 Viewfinder */}
+            <div className="relative w-full aspect-square max-w-md border-[0.5px] border-white/20 overflow-hidden bg-zinc-900">
+               <video 
+                  ref={videoRef} 
+                  autoPlay 
+                  playsInline 
+                  className="w-full h-full object-cover grayscale brightness-110"
+               />
+               
+               {/* Center Brackets */}
+               <div className="absolute inset-20 border-[0.5px] border-white/30 rounded-2xl pointer-events-none">
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t-[0.5px] border-l-[0.5px] border-white/60" />
+                  <div className="absolute top-0 right-0 w-8 h-8 border-t-[0.5px] border-r-[0.5px] border-white/60" />
+                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[0.5px] border-l-[0.5px] border-white/60" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[0.5px] border-r-[0.5px] border-white/60" />
+               </div>
+
+               {/* Metadata Overlay */}
+               <div className="absolute bottom-8 left-8 text-white/60 font-medium">
+                  <p className="text-[10px] font-black uppercase tracking-widest mb-1">AUDIT #{activeJob?.id.substring(0,8).toUpperCase()}</p>
+                  <p className="text-[10px]">{new Date().toLocaleString()}</p>
+               </div>
+            </div>
+
+            {/* Footer / Shutter */}
+            <div className="mt-12 flex flex-col items-center gap-8">
+               <p className="text-[11px] font-medium text-white/30 text-center px-12">"Align package within brackets. Institutional proof is irreversible."</p>
+               
+               <motion.button 
+                  whileTap={{ scale: 0.9 }}
+                  onClick={captureAndComplete}
+                  disabled={isUploading}
+                  className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-3xl border border-white/20 flex items-center justify-center group"
+               >
+                  <div className={`w-16 h-16 rounded-full border-2 border-white transition-all ${isUploading ? 'bg-emerald-500 scale-75' : 'bg-white group-hover:scale-110'}`}>
+                     {isUploading && <Loader2 className="animate-spin text-white w-full h-full p-4" />}
+                  </div>
+               </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

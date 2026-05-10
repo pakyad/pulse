@@ -1,3 +1,6 @@
+import { db } from '@/lib/firebase';
+import { doc, getDoc, updateDoc, getDocs, collection } from 'firebase/firestore';
+
 /**
  * Pulse Protocol | Account Role Configuration
  * Centralizes the "forever" memory of specific user roles and statuses.
@@ -77,21 +80,17 @@ export const VETTED_ACCOUNTS: AccountVetting[] = [
         full_name: 'System Admin'
     }
 ];
-import { db } from '@/lib/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 /**
  * 🏛️ Registry Correction | Institutional Data Integrity
  * Force-aligns the UniKL Scarf (cicMuv) to the correct Merchant UID.
  */
 export async function fixMerchantRegistry() {
-    const TARGET_ID = "cicMuv"; // Prefix for UniKL Scarf
-    const TARGET_UID = "2GSboliteBeTsO3eeVCIoBseLB62"; // Kelab Bola UID
+    const TARGET_ID = "cicMuv";
+    const TARGET_UID = "2GSboliteBeTsO3eeVCIoBseLB62";
 
     try {
-        // Since we know the specific ID prefix, we attempt a direct doc update
-        // We'll use the ID provided by the user in the audit report
-        const docId = "cicMuvyP2GSboliteBeTs"; // Reconstructing the ID from the fragment
+        const docId = "cicMuvyP2GSboliteBeTs";
         const ref = doc(db, "items", docId);
         const snap = await getDoc(ref);
         
@@ -106,3 +105,4 @@ export async function fixMerchantRegistry() {
         console.error("Registry Repair Failed:", e);
     }
 }
+

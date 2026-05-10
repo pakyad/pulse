@@ -19,6 +19,7 @@ export default function MobileMerchant({
   recentOrders,
   handleAcceptOrder, 
   handleCallRunner,
+  handleConfirmDelivery,
   toggleItemStatus,
   onViewProof
 }: any) {
@@ -129,21 +130,36 @@ export default function MobileMerchant({
                   <p className="text-[13px] text-slate-300 font-medium italic">No active orders.</p>
                ) : (
                   preparingOrders.map((o: any) => (
-                     <div key={o.id} className="flex items-center justify-between p-6 bg-slate-50/50 border border-slate-50 rounded-[32px] shadow-sm">
-                        <div className="space-y-1">
-                           <p className="text-[15px] font-black text-slate-900 tracking-tight">{o.title}</p>
-                           <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">{o.status.replace('_', ' ')}</p>
+                     <div key={o.id} className="flex flex-col gap-4 p-6 bg-slate-50/50 border border-slate-50 rounded-[32px] shadow-sm">
+                        <div className="flex items-center justify-between w-full">
+                           <div className="space-y-1">
+                              <p className="text-[15px] font-black text-slate-900 tracking-tight">{o.title}</p>
+                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">{o.status.replace(/_/g, ' ')}</p>
+                           </div>
+                           <button 
+                              onClick={() => handleCallRunner(o.id)}
+                              disabled={o.status === 'AWAITING_RUNNER' || o.status === 'IN_TRANSIT'}
+                              className={`h-11 px-5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                                 (o.status === 'AWAITING_RUNNER' || o.status === 'IN_TRANSIT')
+                                 ? 'bg-white text-slate-300 border border-slate-100 shadow-sm' 
+                                 : 'bg-slate-900 text-white shadow-xl shadow-slate-900/10 active:scale-95'
+                              }`}
+                           >
+                              {o.status === 'AWAITING_RUNNER' ? 'Runner Called' : o.status === 'IN_TRANSIT' ? 'In Transit' : 'Call Runner'}
+                           </button>
                         </div>
+
+                        {/* 🏛️ The Handshake Layer */}
                         <button 
-                           onClick={() => handleCallRunner(o.id)}
-                           disabled={o.status === 'AWAITING_RUNNER'}
-                           className={`h-11 px-5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
-                              o.status === 'AWAITING_RUNNER' 
-                              ? 'bg-white text-slate-300 border border-slate-100 shadow-sm' 
-                              : 'bg-slate-900 text-white shadow-xl shadow-slate-900/10 active:scale-95'
+                           onClick={() => handleConfirmDelivery(o.id)}
+                           disabled={o.handshake?.seller_confirmed}
+                           className={`w-full h-12 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all ${
+                              o.handshake?.seller_confirmed 
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                              : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 active:scale-95'
                            }`}
                         >
-                           {o.status === 'AWAITING_RUNNER' ? 'Runner Called' : 'Call Runner'}
+                           {o.handshake?.seller_confirmed ? 'Sent - Awaiting Buyer' : 'Confirm Delivery'}
                         </button>
                      </div>
                   ))
@@ -210,26 +226,40 @@ export default function MobileMerchant({
                   <span className="font-medium">Manage your listed items and stock.</span>
                </div>
             </div>
-            <div className="space-y-4 mt-6">
+            <div className="grid grid-cols-1 gap-4 mt-6">
                {topItems?.length === 0 ? (
                   <p className="text-[13px] text-slate-300 italic">No assets registered.</p>
                ) : (
                   topItems.map((item: any) => (
-                     <div key={item.id} className="p-6 bg-white border border-slate-50 rounded-[36px] shadow-sm shadow-slate-200/50 flex items-center justify-between">
-                        <div className="space-y-1.5">
-                           <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-tight">{item.title}</p>
-                           <div className="flex items-center gap-3">
-                               <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">RM{item.price}</p>
-                              <span className="w-1.5 h-1.5 bg-slate-100 rounded-full" />
-                               <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{item.stock_count ?? 0} UNITS</p>
+                     <div key={item.id} className="p-5 bg-white border border-slate-50 rounded-[32px] shadow-sm shadow-slate-200/50 flex items-center gap-5">
+                        {/* 🖼️ Precise Asset Thumbnail */}
+                        <div className="w-16 h-16 bg-slate-50 rounded-[20px] overflow-hidden shrink-0 border-[0.5px] border-slate-100">
+                           {item.image_url ? (
+                              <img src={item.image_url} className="w-full h-full object-cover" alt="" />
+                           ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-200">
+                                 <LayoutGrid size={24} strokeWidth={1.5} />
+                              </div>
+                           )}
+                        </div>
+
+                        {/* 📄 Metadata Block */}
+                        <div className="flex-1 min-w-0">
+                           <p className="text-[14px] font-black text-slate-900 truncate tracking-tight mb-1">{item.title}</p>
+                           <div className="flex items-center gap-2">
+                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RM{item.price}</p>
+                               <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.stock_count ?? 0} STOCK</p>
                            </div>
                         </div>
+
+                        {/* 🛠️ Subtle Control Node */}
                         <button 
                            onClick={() => toggleItemStatus(item.id, item.status)}
-                           className={`h-10 px-4 rounded-[14px] text-[10px] font-black uppercase tracking-widest border transition-all ${
+                           className={`h-9 px-4 rounded-[14px] text-[10px] font-black uppercase tracking-widest transition-all ${
                               item.status === 'active' 
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100 shadow-sm shadow-emerald-500/10' 
-                              : 'bg-slate-50 text-slate-300 border-slate-100'
+                              ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100' 
+                              : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'
                            }`}
                         >
                            {item.status === 'active' ? 'Active' : 'Hidden'}

@@ -124,6 +124,7 @@ export const reportOrderIssue = async (orderId: string, data: any, evidence?: Fi
     reason: data.reason,
     narrative: data.narrative,
     evidence_url: evidenceUrl,
+    handshake: data.handshake || null,
     status: 'AWAITING_ADMIN',
     created_at: serverTimestamp(),
   });

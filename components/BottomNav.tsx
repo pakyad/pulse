@@ -18,8 +18,8 @@ export default function BottomNav() {
   const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
-    let unsubSnap: (() => void) | null = null;
-    let unsubProfile: (() => void) | null = null;
+    let unsubSnap: any = null;
+    let unsubProfile: any = null;
 
     const unsubAuth = auth.onAuthStateChanged(async (user) => {
       if (unsubSnap) unsubSnap();
@@ -35,7 +35,8 @@ export default function BottomNav() {
           if (s.exists()) setProfile(s.data());
         });
 
-        // 2. Handshake Notification Logic
+        // 2. Handshake Notification Logic (Temporarily suppressed for permission audit)
+        /*
         const q = query(
           collection(db, "transactions"),
           where("buyer_id", "==", user.uid),
@@ -44,6 +45,7 @@ export default function BottomNav() {
         unsubSnap = onSnapshot(q, (snap) => {
           setNotificationCount(snap.docs.length);
         });
+        */
       }
     });
 

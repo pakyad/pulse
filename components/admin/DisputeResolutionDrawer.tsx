@@ -68,6 +68,38 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
               </div>
             </div>
 
+            {/* Proximity Trust Protocol */}
+            {dispute.handshake?.verification_type && (
+              <section>
+                 <div className={`p-6 rounded-[24px] border-[0.5px] flex items-center gap-6 ${
+                   dispute.handshake.verification_type === 'IN_PERSON_SAFE' 
+                   ? 'bg-emerald-50 border-emerald-100' 
+                   : 'bg-amber-50 border-amber-100'
+                 }`}>
+                    <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center ${
+                      dispute.handshake.verification_type === 'IN_PERSON_SAFE' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                    }`}>
+                       <MapPin size={24} />
+                    </div>
+                    <div className="flex-1">
+                       <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${
+                         dispute.handshake.verification_type === 'IN_PERSON_SAFE' ? 'text-emerald-600' : 'text-amber-600'
+                       }`}>
+                          {dispute.handshake.verification_type === 'IN_PERSON_SAFE' ? 'Trust Level: Absolute' : 'Trust Level: Suspicious'}
+                       </p>
+                       <h4 className="text-[15px] font-black text-slate-900 tracking-tight">
+                          {dispute.handshake.verification_type === 'IN_PERSON_SAFE' ? 'Safe/In-Person Handshake' : 'Remote Handshake Detected'}
+                       </h4>
+                       <p className="text-[12px] font-medium text-slate-400 mt-1">
+                          {dispute.handshake.verification_type === 'IN_PERSON_SAFE' 
+                            ? 'GPS coordinates match within 50m. Claim of non-receipt is likely fraudulent.' 
+                            : 'Parties were far apart during confirmation. Investigation required.'}
+                       </p>
+                    </div>
+                 </div>
+              </section>
+            )}
+
             {/* Evidence Section */}
             <section>
               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">

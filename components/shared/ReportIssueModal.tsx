@@ -43,7 +43,8 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
         reason,
         narrative,
         reporter_name: order.buyer_name || 'Pulse Student',
-        order_code: order.order_code || order.id.substring(0,6).toUpperCase()
+        order_code: order.order_code || order.id.substring(0,6).toUpperCase(),
+        handshake: order.handshake || null
       }, image || undefined);
       
       setIsSuccess(true);
@@ -131,6 +132,26 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                           {ISSUE_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                         <ChevronDown size={16} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" />
+                      </div>
+                   </div>
+
+                   {/* 🏛️ Institutional Resolution Protocol */}
+                   <div className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-100 space-y-4">
+                      <div className="flex items-center gap-3 text-slate-900">
+                         <ShieldAlert size={18} className="text-blue-500" />
+                         <p className="text-[12px] font-black uppercase tracking-widest">Resolution Protocol</p>
+                      </div>
+                      <div className="space-y-3">
+                         {[
+                           { step: 1, text: "Audit: Pulse verifies GPS handshake metadata." },
+                           { step: 2, text: "Mediation: Admin reviews narrative and evidence." },
+                           { step: 3, text: "Directive: Outcome finalized within 24 hours." }
+                         ].map((item) => (
+                           <div key={item.step} className="flex gap-3">
+                              <span className="text-[11px] font-black text-slate-300">{item.step}.</span>
+                              <p className="text-[11px] font-medium text-slate-500 leading-tight">{item.text}</p>
+                           </div>
+                         ))}
                       </div>
                    </div>
 

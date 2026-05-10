@@ -7,6 +7,7 @@ import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, serverTim
 import DesktopMerchant from '@/components/merchant/DesktopMerchant';
 import MobileMerchant from '@/components/merchant/MobileMerchant';
 import ProofInspector from '@/components/merchant/ProofInspector';
+import PriceAppealModal from '@/components/merchant/PriceAppealModal';
 
 export default function MerchantDashboard() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function MerchantDashboard() {
   const [merchant, setMerchant] = useState<any>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isProofOpen, setIsProofOpen] = useState(false);
+  const [selectedFlaggedItem, setSelectedFlaggedItem] = useState<any>(null);
   
   // Smart Window Hook
   const [isMobile, setIsMobile] = useState(false);
@@ -90,6 +92,29 @@ export default function MerchantDashboard() {
     alert("Institutional Logistics: Order is now visible to the Runner Radar.");
   };
 
+  const handleConfirmDelivery = async (orderId: string) => {
+    if (!navigator.geolocation) {
+      alert("Institutional Location Services Required.");
+      return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const { functions } = await import('@/lib/firebase');
+        const { httpsCallable } = await import('firebase/functions');
+        const completeHandshake = httpsCallable(functions, 'completeHandshake');
+        await completeHandshake({ orderId, role: 'seller', coords });
+        alert("Institutional Confirmation Sent. Waiting for buyer receipt.");
+      } catch (e) {
+        console.error(e);
+        alert("Handshake Transmission Failed.");
+      }
+    }, (err) => {
+      alert("Location Access Denied. Handshake cannot be institutionalized.");
+    });
+  };
+
   const toggleItemStatus = async (itemId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     await updateDoc(doc(db, "items", itemId), { status: newStatus });
@@ -117,6 +142,7 @@ export default function MerchantDashboard() {
           recentOrders={orders.slice(0, 10)}
           handleAcceptOrder={handleAcceptOrder}
           handleCallRunner={handleCallRunner}
+          handleConfirmDelivery={handleConfirmDelivery}
           toggleItemStatus={toggleItemStatus}
           onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
         />
@@ -126,8 +152,11 @@ export default function MerchantDashboard() {
           revenue={revenue}
           activeOrdersCount={activeOrdersList.length}
           recentOrders={orders}
+          items={items}
           handleAcceptOrder={handleAcceptOrder}
           handleCallRunner={handleCallRunner}
+          handleConfirmDelivery={handleConfirmDelivery}
+          toggleItemStatus={toggleItemStatus}
           onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
         />
       )}
@@ -136,6 +165,12 @@ export default function MerchantDashboard() {
         isOpen={isProofOpen}
         onClose={() => setIsProofOpen(false)}
         order={selectedOrder}
+      />
+
+      <PriceAppealModal 
+        isOpen={!!selectedFlaggedItem}
+        onClose={() => setSelectedFlaggedItem(null)}
+        item={selectedFlaggedItem}
       />
     </>
   );

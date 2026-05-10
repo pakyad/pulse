@@ -3,20 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where, onSnapshot, setDoc, updateDoc, limit } from 'firebase/firestore';
 import AdminProductApprovals from '@/components/admin/AdminProductApprovals';
 import { resolveDispute, updatePriceGuideline } from '@/app/actions/adminActions';
 import { 
   Loader2, CheckCircle, AlertTriangle, ChevronRight, Inbox, 
   LayoutGrid, BarChart3, Users, Settings, LogOut, ShieldAlert,
   Search, ShieldCheck, UserCheck, Clock, ExternalLink, Filter, ChevronDown,
-  X, Briefcase, GraduationCap, Mail, Smartphone, CheckCircle2, AlertCircle
+  X, Briefcase, GraduationCap, Mail, Smartphone, CheckCircle2, AlertCircle,
+  Blocks, UserPlus
 } from 'lucide-react';
 import PriceAudit from '@/components/admin/PriceAudit';
 import SimplePolicyModal from '@/components/admin/SimplePolicyModal';
 import AuditReviewModal from '@/components/admin/AuditReviewModal';
 import DisputeResolutionDrawer from '@/components/admin/DisputeResolutionDrawer';
-import { setDoc, updateDoc } from 'firebase/firestore';
+import AddMerchantModal from '@/components/admin/AddMerchantModal';
+import { seedClubMerchants } from '@/lib/utils/club-merchant-seeder';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -25,6 +27,10 @@ export default function AdminDashboard() {
   const [disputes, setDisputes] = useState<any[]>([]);
   const [guidelines, setGuidelines] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState('command');
+  const [isAddMerchantOpen, setIsAddMerchantOpen] = useState(false);
+  const [appeals, setAppeals] = useState<any[]>([]);
+  const [governanceLogs, setGovernanceLogs] = useState<any[]>([]);
+  const [isSeeding, setIsSeeding] = useState(false);
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
   const [selectedDispute, setSelectedDispute] = useState<any>(null);
   const [isDisputeDrawerOpen, setIsDisputeDrawerOpen] = useState(false);
@@ -40,6 +46,8 @@ export default function AdminDashboard() {
     let itemsUnsub: (() => void) | null = null;
     let disputesUnsub: (() => void) | null = null;
     let usersUnsub: (() => void) | null = null;
+    let appealsUnsub: (() => void) | null = null;
+    let logsUnsub: (() => void) | null = null;
 
     const checkAccess = auth.onAuthStateChanged(async (user) => {
       if (guidelinesUnsub) guidelinesUnsub();
@@ -87,6 +95,22 @@ export default function AdminDashboard() {
         }
       );
 
+      // 5. Fetch Pending Appeals (onSnapshot)
+      appealsUnsub = onSnapshot(
+        query(collection(db, "appeals"), where("status", "==", "PENDING")),
+        (snap) => {
+          setAppeals(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        }
+      );
+
+      // 6. Fetch Governance Logs (onSnapshot)
+      logsUnsub = onSnapshot(
+        query(collection(db, "governance_logs"), limit(50)),
+        (snap) => {
+          setGovernanceLogs(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => b.timestamp?.toMillis?.() - a.timestamp?.toMillis?.()));
+        }
+      );
+
       setLoading(false);
     });
 
@@ -96,6 +120,8 @@ export default function AdminDashboard() {
       if (itemsUnsub) itemsUnsub();
       if (disputesUnsub) disputesUnsub();
       if (usersUnsub) usersUnsub();
+      if (appealsUnsub) appealsUnsub();
+      if (logsUnsub) logsUnsub();
     };
   }, [router]);
 
@@ -120,6 +146,52 @@ export default function AdminDashboard() {
       } else {
         alert(res.message);
       }
+    } catch (e) { console.error(e); }
+  };
+
+  // ── Institutional Directive Handlers ──
+  const handleAdjudicate = async (appeal: any, action: 'APPROVE' | 'REJECT') => {
+    try {
+      setIsProcessing(appeal.id);
+      const { functions } = await import('@/lib/firebase');
+      const { httpsCallable } = await import('firebase/functions');
+      const adjudicate = httpsCallable(functions, 'adjudicateAppeal');
+      await adjudicate({ itemId: appeal.itemId, appealId: appeal.id, action, adminId: 'ADMIN-CORE' });
+      alert(`Directive Sealed: ${action}`);
+    } catch (e) {
+      console.error(e);
+      alert("Adjudication Handshake Failed.");
+    } finally {
+      setIsProcessing(null);
+    }
+  };
+
+  const handleSeedClubs = async () => {
+    if (!confirm("Populate Institutional Registry with 5 Club Merchant accounts?")) return;
+    setIsSeeding(true);
+    try {
+      const res = await seedClubMerchants();
+      if (res.success) alert("Institutional Registry Populated.");
+      else alert("Seeding Registry Failed.");
+    } catch (e) { console.error(e); }
+    finally { setIsSeeding(false); }
+  };
+
+  const verifyUser = async (userId: string) => {
+    try {
+      await updateDoc(doc(db, "users", userId), {
+        is_verified: true,
+        verified_at: new Date()
+      });
+      alert("Institutional Credentials Granted.");
+    } catch (e) {
+      alert("Credentialing failed.");
+    }
+  };
+
+  const toggleSuspension = async (userId: string, currentStatus: boolean) => {
+    try {
+      await updateDoc(doc(db, "users", userId), { is_suspended: !currentStatus });
     } catch (e) { console.error(e); }
   };
 
@@ -165,7 +237,7 @@ export default function AdminDashboard() {
     { id: 'overview', label: 'Overview', icon: LayoutGrid },
     { id: 'command', label: 'Command Center', icon: Inbox },
     { id: 'monitor', label: 'Price Monitor', icon: BarChart3 },
-    { id: 'disputes', label: 'Active Disputes', icon: ShieldAlert, badge: disputes.length },
+    { id: 'disputes', label: 'Dispute Mediation', icon: ShieldAlert, badge: disputes.length },
     { 
       id: 'users', 
       label: 'User Registry', 
@@ -177,6 +249,8 @@ export default function AdminDashboard() {
         { id: 'RUNNER', label: 'Runner Registry' },
       ]
     },
+    { id: 'appeals', label: 'Price Appeals', icon: ShieldCheck, badge: appeals.length },
+    { id: 'logs', label: 'Governance Logs', icon: Clock },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -407,7 +481,93 @@ export default function AdminDashboard() {
             </section>
           )}
 
-          {/* 4. USER REGISTRY (BENTO GRID) */}
+          {/* 4. APPEALS COMMAND CENTER */}
+          {activeTab === 'appeals' && (
+            <section className="space-y-10">
+               <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                     <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1">Economic Adjudication</p>
+                     <h2 className="text-[28px] font-black tracking-tight uppercase">Price Appeals Registry</h2>
+                     <p className="text-[14px] font-medium text-slate-400">Review justification for category ceiling exemptions.</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                     <button 
+                       onClick={handleSeedClubs}
+                       disabled={isSeeding}
+                       className="h-10 px-6 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2"
+                     >
+                        {isSeeding ? <Loader2 className="animate-spin" size={14} /> : <Blocks size={14} />}
+                        Seed Institutional Data
+                     </button>
+                     <div className="px-5 py-2 bg-slate-50 border border-slate-100 rounded-2xl">
+                        <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">{appeals.length} Pending Directives</span>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-1 gap-4">
+                  {appeals.length === 0 ? (
+                    <div className="py-40 flex flex-col items-center gap-4 text-center">
+                       <div className="w-20 h-20 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-200"><Inbox size={40} /></div>
+                       <p className="text-[14px] font-bold text-slate-300 uppercase tracking-widest">No pending appeals in registry.</p>
+                    </div>
+                  ) : (
+                    appeals.map((appeal) => (
+                      <motion.div 
+                        key={appeal.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-8 bg-white rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between gap-10"
+                      >
+                         <div className="flex-1 space-y-6">
+                            <div className="flex items-center gap-4">
+                               <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400"><ShieldAlert size={24} /></div>
+                               <div>
+                                  <p className="text-[16px] font-black text-slate-900">{appeal.itemTitle}</p>
+                                  <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Merchant: {appeal.sellerName}</p>
+                               </div>
+                            </div>
+                            <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 italic text-[14px] text-slate-600 leading-relaxed">
+                               "{appeal.justification_text || 'No justification provided.'}"
+                            </div>
+                         </div>
+
+                         <div className="w-[300px] space-y-3">
+                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
+                               <div className="flex justify-between items-center mb-1">
+                                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Proposed Price</span>
+                                  <span className="text-[16px] font-black text-slate-900">RM {appeal.price}</span>
+                               </div>
+                               <div className="flex justify-between items-center">
+                                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Category</span>
+                                  <span className="text-[12px] font-bold text-slate-900">{appeal.category}</span>
+                               </div>
+                            </div>
+                            <div className="flex gap-3">
+                               <button 
+                                 onClick={() => handleAdjudicate(appeal, 'APPROVE')}
+                                 disabled={isProcessing === appeal.id}
+                                 className="flex-1 h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10 disabled:opacity-20"
+                               >
+                                  {isProcessing === appeal.id ? '...' : 'Approve'}
+                               </button>
+                               <button 
+                                 onClick={() => handleAdjudicate(appeal, 'REJECT')}
+                                 disabled={isProcessing === appeal.id}
+                                 className="flex-1 h-14 bg-white text-red-600 border border-red-100 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-red-50 active:scale-95 transition-all disabled:opacity-20"
+                               >
+                                  {isProcessing === appeal.id ? '...' : 'Reject'}
+                               </button>
+                            </div>
+                         </div>
+                      </motion.div>
+                    ))
+                  )}
+               </div>
+            </section>
+          )}
+
+          {/* 5. USER REGISTRY (BENTO GRID) */}
           {activeTab === 'users' && (
             <section className="space-y-8">
                <div className="flex justify-between items-center px-2">
@@ -418,6 +578,13 @@ export default function AdminDashboard() {
                      </h2>
                   </div>
                   <div className="flex items-center gap-4">
+                    <button 
+                      onClick={() => setIsAddMerchantOpen(true)}
+                      className="h-10 px-4 bg-slate-900 text-white rounded-xl text-[12px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-black transition-all active:scale-95 shadow-lg shadow-slate-900/10"
+                    >
+                      <UserPlus size={16} />
+                      Add Merchant
+                    </button>
                     <div className="relative">
                       <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input type="text" placeholder="Search Identity..." className="h-10 pl-11 pr-4 bg-white border border-slate-100 rounded-xl text-[12px] font-bold text-slate-900 outline-none focus:border-slate-300 w-64 transition-all" />
@@ -452,8 +619,15 @@ export default function AdminDashboard() {
                                         <img src={u.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${u.full_name}`} alt="" className="w-full h-full object-cover" />
                                      </div>
                                      <div>
-                                        <p className="text-[14px] font-black text-[#1C1C1E] tracking-tight leading-none mb-1">{u.full_name}</p>
-                                        <p className="text-[10px] font-bold text-black/20 uppercase tracking-widest">{u.matric_no || 'UniKL IDENTITY'}</p>
+                                         <div className="flex items-center gap-2 mb-1">
+                                            <p className="text-[14px] font-black text-[#1C1C1E] tracking-tight leading-none">{u.full_name}</p>
+                                            {u.role === 'STUDENT' && (
+                                               <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${u.is_verified ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                                  {u.is_verified ? 'VERIFIED' : 'PENDING'}
+                                               </span>
+                                            )}
+                                         </div>
+                                         <p className="text-[10px] font-bold text-black/20 uppercase tracking-widest">{u.matric_no || 'UniKL IDENTITY'}</p>
                                      </div>
                                   </div>
                                </td>
@@ -468,10 +642,20 @@ export default function AdminDashboard() {
                                   <span className="text-[12px] font-bold text-black/30 tracking-tight">Class of 2026</span>
                                </td>
                                <td className="px-10 py-4 text-right">
-                                  <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-black/10 group-hover:bg-[#1C1C1E] group-hover:text-white transition-all duration-300">
-                                     <ChevronRight size={14} strokeWidth={3} />
-                                  </button>
-                               </td>
+                                   <div className="flex items-center justify-end gap-3">
+                                      {u.role === 'STUDENT' && !u.is_verified && (
+                                         <button 
+                                           onClick={(e) => { e.stopPropagation(); verifyUser(u.id); }}
+                                           className="h-8 px-4 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/10"
+                                         >
+                                            Grant Credentials
+                                         </button>
+                                      )}
+                                      <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-black/10 group-hover:bg-[#1C1C1E] group-hover:text-white transition-all duration-300">
+                                         <ChevronRight size={14} strokeWidth={3} />
+                                      </button>
+                                   </div>
+                                </td>
                             </tr>
                          ))}
                       </tbody>
@@ -480,7 +664,58 @@ export default function AdminDashboard() {
             </section>
           )}
 
-          {/* 4. SETTINGS (Guideline Management) */}
+          {/* 5. GOVERNANCE AUDIT LOGS */}
+          {activeTab === 'logs' && (
+            <section className="space-y-10">
+               <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">System Audit Trail</p>
+                     <h2 className="text-[28px] font-black tracking-tight uppercase text-slate-900">Governance Ledger</h2>
+                  </div>
+               </div>
+
+               <div className="bg-white rounded-[40px] border border-slate-100 overflow-hidden shadow-sm">
+                  <table className="w-full text-left border-collapse">
+                     <thead>
+                        <tr className="bg-slate-50/50 border-b border-slate-100">
+                           <th className="px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Directive Type</th>
+                           <th className="px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Target ID</th>
+                           <th className="px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Event Data</th>
+                           <th className="px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Timestamp</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y divide-slate-50">
+                        {governanceLogs.map((log) => (
+                          <tr key={log.id} className="hover:bg-slate-50/30 transition-colors">
+                             <td className="px-10 py-5">
+                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${
+                                  log.type === 'PRICE_BLOCK' ? 'bg-red-50 text-red-500' :
+                                  log.type === 'ADJUDICATION' ? 'bg-emerald-50 text-emerald-500' :
+                                  'bg-slate-100 text-slate-400'
+                                }`}>
+                                   {log.type}
+                                </span>
+                             </td>
+                             <td className="px-10 py-5">
+                                <code className="text-[11px] font-bold text-slate-400">#{log.target_id?.substring(0,8).toUpperCase()}</code>
+                             </td>
+                             <td className="px-10 py-5">
+                                <p className="text-[13px] font-medium text-slate-600">{log.details}</p>
+                             </td>
+                             <td className="px-10 py-5 text-right">
+                                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">
+                                   {log.timestamp?.toMillis ? new Date(log.timestamp.toMillis()).toLocaleString() : 'Just Now'}
+                                </span>
+                             </td>
+                          </tr>
+                        ))}
+                     </tbody>
+                  </table>
+               </div>
+            </section>
+          )}
+
+          {/* 6. SETTINGS (Guideline Management) */}
           {activeTab === 'settings' && (
             <section className="bg-white rounded-[32px] border border-slate-100 p-10 space-y-12">
                <div className="flex justify-between items-center">
@@ -658,6 +893,11 @@ export default function AdminDashboard() {
           </>
         )}
       </AnimatePresence>
+
+      <AddMerchantModal 
+        isOpen={isAddMerchantOpen} 
+        onClose={() => setIsAddMerchantOpen(false)} 
+      />
     </div>
   );
 }

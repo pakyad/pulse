@@ -231,20 +231,32 @@ export default function ItemDetails() {
   const handleConfirmOrder = async (deliveryType: 'SELF_COLLECT' | 'RUNNER', dropOffLocation: string | undefined, receipt: File, qty: number) => {
     if (!auth.currentUser) return router.push('/auth');
     setLoading(true);
+    console.log("[Pulse Handshake] Initiating transaction...", { deliveryType, qty });
+    
     try {
+      // 1. Storage Handshake
       const receiptRef = ref(storage, `receipts/${Date.now()}_${receipt.name}`);
       const uploadResult = await uploadBytes(receiptRef, receipt);
       const receiptUrl = await getDownloadURL(uploadResult.ref);
-
+      console.log("[Pulse Handshake] Receipt logged to Storage:", receiptUrl);
+ 
+      // 2. Cloud Finalization
       const placeOrder = httpsCallable(functions, 'placeOrder');
       const result: any = await placeOrder({
         userId: auth.currentUser.uid,
         cartItems: [{ productId: id, title: item.title, price: item.price, qty, vendorId: item.seller_id, sellerName: item.seller_name }],
-        delivery_type: deliveryType, dropOffLocation, receiptUrl
+        deliveryType: deliveryType, // Match Cloud Function camelCase
+        dropOffLocation, 
+        receiptUrl
       });
+      
+      console.log("[Pulse Handshake] Transaction Sealed:", result.data);
       router.push(`/orders/success?id=${result.data.parentId}`);
     } catch (e: any) {
-      setErrorToast({ message: "Transaction Failed", type: 'error' });
+      console.error("[Pulse Handshake] FAILURE:", e);
+      setErrorToast({ message: e.message || "Institutional Transaction Failed", type: 'error' });
+      // Clear toast after 5s
+      setTimeout(() => setErrorToast(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -264,6 +276,21 @@ export default function ItemDetails() {
           <Share2 size={18} />
         </button>
       </nav>
+
+      {/* ── ERROR TOAST ── */}
+      <AnimatePresence>
+        {errorToast && (
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className="fixed top-24 left-6 right-6 z-200 p-4 bg-red-600 text-white rounded-2xl shadow-xl shadow-red-900/20 flex items-center gap-3"
+          >
+             <X size={18} />
+             <p className="text-[12px] font-black uppercase tracking-widest">{errorToast.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="max-w-xl mx-auto pb-40">
         {/* ── IMAGE ── */}

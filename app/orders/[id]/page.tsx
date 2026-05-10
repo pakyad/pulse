@@ -93,6 +93,29 @@ export default function EdgeToEdgeOrderStatus() {
   const title = status === 'DELIVERED' ? 'Asset Secured' : status === 'CANCELLED' ? 'Directive Terminated' : 'Handshake Active';
   const subtext = status === 'DELIVERED' ? 'Final handshake completed. Asset registered to your inventory.' : 'Live telemetry tracking your marketplace asset.';
 
+  const handleConfirmReceipt = async () => {
+    if (!navigator.geolocation) {
+      alert("Institutional Location Services Required.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const { functions } = await import('@/lib/firebase');
+        const { httpsCallable } = await import('firebase/functions');
+        const completeHandshake = httpsCallable(functions, 'completeHandshake');
+        await completeHandshake({ orderId: id, role: 'buyer', coords });
+        alert("Institutional Confirmation Sent. Asset registry updated upon merchant confirmation.");
+      } catch (e) {
+        console.error(e);
+        alert("Handshake Transmission Failed.");
+      }
+    }, (err) => {
+      alert("Location Access Denied. Handshake cannot be institutionalized.");
+    });
+  };
+
   return (
     <main className="min-h-screen bg-[#FDFDFD] text-slate-900 selection:bg-blue-100 font-sans antialiased overflow-x-hidden">
       {/* ── 1. NAVIGATION LAYER ── */}
@@ -261,6 +284,15 @@ export default function EdgeToEdgeOrderStatus() {
 
          {/* ── 5. GOVERNANCE & HELP ── */}
          <section className="pt-10 flex flex-col gap-4">
+            {status !== 'DELIVERED' && status !== 'COMPLETED' && (
+              <button 
+                onClick={handleConfirmReceipt}
+                className="w-full h-18 bg-black text-white rounded-[28px] flex items-center justify-center gap-3 text-[14px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10 active:scale-95 transition-all mb-4"
+              >
+                 <CheckCircle2 size={20} />
+                 Confirm Receipt
+              </button>
+            )}
             <button 
               onClick={() => setIsReportModalOpen(true)}
               className="w-full h-18 border-[0.5px] border-slate-200 rounded-[28px] flex items-center justify-center gap-3 text-[13px] font-bold text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all"
@@ -268,11 +300,27 @@ export default function EdgeToEdgeOrderStatus() {
                <ShieldAlert size={18} />
                Report Institutional Conflict
             </button>
-            <div className="p-6 bg-slate-50/50 rounded-[28px] border border-slate-100 flex items-start gap-4">
-               <Info size={16} className="text-blue-400 shrink-0 mt-1" />
-               <p className="text-[12px] text-slate-400 font-medium leading-relaxed italic">
-                  Registry Directive: All handshakes are logged and audited. Institutional conflicts are resolved within 24 hours of report.
-               </p>
+            <div className="p-8 bg-slate-50/50 rounded-[32px] border border-slate-100 space-y-6">
+               <div className="flex items-start gap-4">
+                  <Info size={20} className="text-blue-500 shrink-0 mt-1" />
+                  <div>
+                     <p className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-2">End Process & Mediation</p>
+                     <p className="text-[12px] text-slate-400 font-medium leading-relaxed italic">
+                        "If a conflict arises, the Pulse Admin will conduct a <strong>GPS Proximity Audit</strong>. If coordinates match, the dispute is dismissed. If they diverge, a refund or credit will be issued within 24 hours."
+                     </p>
+                  </div>
+               </div>
+               <div className="h-px bg-slate-100 w-full" />
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                     <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">SLA Timeframe</p>
+                     <p className="text-[12px] font-bold text-slate-900">24 Hours</p>
+                  </div>
+                  <div className="space-y-1">
+                     <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Adjudication</p>
+                     <p className="text-[12px] font-bold text-slate-900">GPS Verified</p>
+                  </div>
+               </div>
             </div>
          </section>
       </div>

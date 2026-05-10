@@ -60,7 +60,7 @@ export default function PerfectSignUp() {
         matric_no: matricNo,
         campus: campus,
         role: 'STUDENT', // Default role
-        is_verified: false,
+        is_verified: true, // Automatic verification for student base
         is_verified_runner: false,
         balance: 0,
         created_at: serverTimestamp()
@@ -246,9 +246,13 @@ export default function PerfectSignUp() {
         </AnimatePresence>
 
         {/* Footer */}
-        <div className="mt-auto text-center pb-4">
+        <div className="mt-auto text-center pb-4 space-y-4">
           <p className="text-[13px] text-slate-400">
             Already have an account? <button onClick={() => router.push('/auth')} className="text-[#0A66C2] font-bold">Sign in</button>
+          </p>
+          <div className="h-px bg-slate-100 w-24 mx-auto" />
+          <p className="text-[11px] text-slate-300 font-medium px-10 italic">
+            Clubs or Verified Merchants: Institutional identities are provisioned solely through the Pulse Admin Terminal.
           </p>
         </div>
 

@@ -12,9 +12,12 @@ export default function DesktopMerchant({
   activeOrdersCount, 
   attentionCount, 
   recentOrders,
+  items,
   onViewProof,
   handleAcceptOrder,
-  handleCallRunner
+  handleCallRunner,
+  handleConfirmDelivery,
+  toggleItemStatus
 }: any) {
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
@@ -230,6 +233,21 @@ export default function DesktopMerchant({
                                Runner Called
                              </span>
                            )}
+                           
+                           {/* 🏛️ The Handshake Directive */}
+                           {o.status !== 'DELIVERED' && o.status !== 'COMPLETED' && (
+                             <button 
+                               onClick={() => handleConfirmDelivery(o.id)}
+                               disabled={o.handshake?.seller_confirmed}
+                               className={`h-8 px-4 rounded text-[11px] font-bold transition-all shadow-sm ${
+                                 o.handshake?.seller_confirmed 
+                                 ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                                 : 'bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95'
+                               }`}
+                             >
+                               {o.handshake?.seller_confirmed ? 'Handoff Sent' : 'Confirm Delivery'}
+                             </button>
+                           )}
                            <button 
                              onClick={() => onViewProof(o)}
                              className="h-8 px-4 border border-slate-200 rounded text-[11px] font-bold text-slate-600 hover:bg-slate-50"
@@ -239,6 +257,61 @@ export default function DesktopMerchant({
                         </div>
                      </div>
                    ))}
+                </div>
+             </div>
+
+             {/* My Inventory: Visual Grid */}
+             <div className="space-y-6">
+                <div className="flex items-center justify-between px-1">
+                   <div className="flex items-center gap-3">
+                      <h3 className="text-[14px] font-bold text-slate-900">My Inventory</h3>
+                      <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                         <Info size={12} /> Manage your listed items and stock.
+                      </div>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                   {items?.length === 0 ? (
+                      <p className="col-span-2 text-center py-12 text-slate-400 italic text-[13px]">No assets registered in the registry.</p>
+                   ) : (
+                      items.map((item: any) => (
+                         <div key={item.id} className="p-6 bg-white border border-slate-100 rounded-[32px] shadow-sm flex items-center gap-6 hover:border-slate-300 transition-all group">
+                            {/* 🖼️ Precise Asset Thumbnail */}
+                            <div className="w-20 h-20 bg-slate-50 rounded-[20px] overflow-hidden shrink-0 border-[0.5px] border-slate-100">
+                               {item.image_url ? (
+                                  <img src={item.image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="" />
+                               ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-slate-200">
+                                     <LayoutGrid size={24} strokeWidth={1.5} />
+                                  </div>
+                               )}
+                            </div>
+
+                            {/* 📄 Metadata Block */}
+                            <div className="flex-1 min-w-0">
+                               <p className="text-[15px] font-black text-slate-900 truncate tracking-tight mb-1">{item.title}</p>
+                               <div className="flex items-center gap-3">
+                                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">RM{item.price}</p>
+                                   <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{item.stock_count ?? 0} STOCK</p>
+                               </div>
+                            </div>
+
+                            {/* 🛠️ Subtle Control Node */}
+                            <button 
+                               onClick={() => toggleItemStatus(item.id, item.status)}
+                               className={`h-10 px-5 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all ${
+                                  item.status === 'active' 
+                                  ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100' 
+                                  : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'
+                               }`}
+                            >
+                               {item.status === 'active' ? 'Active' : 'Hidden'}
+                            </button>
+                         </div>
+                      ))
+                   )}
                 </div>
              </div>
 

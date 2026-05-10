@@ -12,6 +12,7 @@ import { doc, setDoc } from "firebase/firestore";
  */
 export const isValidUniKLEmail = (email: string) => {
   const uniklRegex = /^[a-zA-Z0-9._%+-]+@(s\.)?unikl\.edu\.my$/;
+  // Note: External merchant whitelisting is handled post-auth in the login flow
   return uniklRegex.test(email.toLowerCase());
 };
 
