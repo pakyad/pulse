@@ -124,7 +124,7 @@ function MarziaDeliverySheet({
                         </p>
                       </div>
                     </div>
-                    {choice === type && <Check size={18} strokeWidth={3} />}
+                    {choice === type && <Check size={18} strokeWidth={2.5} />}
                   </button>
                 ))}
               </div>
@@ -183,7 +183,7 @@ function MarziaDeliverySheet({
                     <input type="file" className="hidden" onChange={(e) => setReceipt(e.target.files?.[0] || null)} />
                     {receipt ? (
                       <span className="text-[13px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
-                        <Check size={18} strokeWidth={3} /> Receipt Logged
+                        <Check size={18} strokeWidth={2.5} /> Receipt Logged
                       </span>
                     ) : (
                       <span className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Upload Receipt</span>
@@ -199,7 +199,7 @@ function MarziaDeliverySheet({
               else onConfirm(choice!, choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : undefined, receipt!, qty);
             }}
             disabled={!choice || (step === 'PAYMENT' && !receipt) || loading}
-            className="w-full h-14 bg-slate-900 text-white rounded-xl font-black text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10 mt-4"
+            className="w-full h-14 bg-slate-900 text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10 mt-4"
           >
             {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" /> : step === 'FULFILLMENT' ? 'Continue' : 'Complete Handshake'}
           </button>
@@ -269,11 +269,11 @@ export default function ItemDetails() {
     <div className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-slate-100">
       {/* ── TOP NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-100 px-6 py-6 flex items-center justify-between pointer-events-none">
-        <button onClick={() => router.back()} className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-900 shadow-sm pointer-events-auto active:scale-90 transition-all">
-          <ChevronLeft size={20} />
+        <button onClick={() => router.back()} className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-900 shadow-sm pointer-events-auto active:scale-90 transition-all">
+          <ChevronLeft size={18} />
         </button>
-        <button className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-900 shadow-sm pointer-events-auto active:scale-90 transition-all">
-          <Share2 size={18} />
+        <button className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-900 shadow-sm pointer-events-auto active:scale-90 transition-all">
+          <Share2 size={16} />
         </button>
       </nav>
 
@@ -292,86 +292,95 @@ export default function ItemDetails() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-xl mx-auto pb-40">
+      <div className="pt-6 px-6 max-w-xl mx-auto pb-40 space-y-10">
         {/* ── IMAGE ── */}
-        <section className="w-full aspect-square bg-slate-50 overflow-hidden">
+        <section className="w-full aspect-square bg-slate-50 rounded-[28px] overflow-hidden border border-slate-100 shadow-sm relative">
           {item.image_url ? (
             <img src={item.image_url} className="w-full h-full object-cover" alt={item.title} />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-slate-200"><Package size={64} /></div>
           )}
+          <div className="absolute top-6 left-6">
+             <div className="px-3 py-1.5 bg-white/90 backdrop-blur-md rounded-xl shadow-sm border border-slate-100">
+                <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{item.category || "General"}</p>
+             </div>
+          </div>
         </section>
 
         {/* ── CONTENT ── */}
-        <main className="px-6 pt-10 space-y-12">
-          <div className="space-y-4">
+        <main className="space-y-12">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">{item.category || "Institutional"}</span>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 rounded-full border border-slate-100">
-                 <Star size={10} className="text-amber-500 fill-amber-500" />
-                 <span className="text-[10px] font-black text-slate-900">4.9</span>
+              <div className="flex items-center gap-1">
+                 {[1,2,3,4,5].map(i => <Star key={i} size={10} className="text-emerald-500 fill-emerald-500" />)}
+                 <span className="text-[10px] font-bold text-slate-400 ml-1">12+ Sold</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
+                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                 <span className="text-[10px] font-black text-slate-900 uppercase tracking-wider">In Stock</span>
               </div>
             </div>
-            <div className="space-y-3">
-              <h1 className="text-[24px] font-medium text-slate-900 tracking-tighter leading-tight">{item.title}</h1>
-              <div className="flex items-baseline gap-2">
-                <span className="text-[20px] font-black text-slate-900">RM {item.price}</span>
-                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Registry Node</span>
+            
+            <div className="space-y-4">
+              <h1 className="text-[28px] font-bold text-slate-900 tracking-tight leading-tight">{item.title}</h1>
+              <div className="flex items-baseline gap-3">
+                <span className="text-[24px] font-black text-slate-900 tracking-tighter">RM {Number(item.price).toFixed(0)}</span>
+                <span className="px-2 py-0.5 bg-slate-50 border border-slate-100 rounded text-[9px] font-bold text-slate-400 uppercase tracking-widest">Registry Node</span>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
              {[
-                { icon: Truck, title: 'Institutional Delivery', desc: 'Verified Runner Node' },
-                { icon: Clock, title: 'Rapid Handoff', desc: '~24H Registry Lock' }
+                { icon: Truck, title: 'Pulse Delivery', desc: 'Verified Runner' },
+                { icon: Clock, title: 'Registry Lock', desc: '~24H Handoff' }
              ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-4 p-5 bg-white border border-slate-50 rounded-xl shadow-sm">
-                   <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400"><badge.icon size={20} /></div>
+                <div key={i} className="flex flex-col gap-4 p-5 bg-white border border-slate-100 rounded-[20px] shadow-xs">
+                   <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><badge.icon size={18} /></div>
                    <div>
-                      <p className="text-[14px] font-black text-slate-900 tracking-tight">{badge.title}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{badge.desc}</p>
+                      <p className="text-[14px] font-bold text-slate-900 tracking-tight">{badge.title}</p>
+                      <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{badge.desc}</p>
                    </div>
                 </div>
              ))}
           </div>
 
-          <div className="space-y-6">
-            <div className="flex gap-10 border-b border-slate-50 text-[13px] font-black uppercase tracking-widest">
-               <span className="pb-4 border-b-2 border-slate-900">Overview</span>
-               <span className="pb-4 text-slate-300">Details</span>
+          <div className="space-y-4">
+            <div className="flex gap-8 border-b border-slate-100 text-[11px] font-bold uppercase tracking-[0.15em]">
+               <span className="pb-3 border-b-2 border-slate-900 text-slate-900">Overview</span>
+               <span className="pb-3 text-slate-300 cursor-not-allowed">Technical Details</span>
             </div>
-            <p className="text-[15px] text-slate-500 leading-relaxed font-medium">
+            <p className="text-[14px] text-slate-500 leading-relaxed font-medium">
               {item.description || "Verified institutional asset listed on the Pulse network. High-fidelity handoff protocol enforced."}
             </p>
           </div>
 
-          <div className="pt-10 border-t border-slate-50 flex items-center justify-between">
+          <div className="pt-8 border-t border-slate-100 flex items-center justify-between">
              <div className="flex items-center gap-4">
                 <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center shadow-sm">
+                  <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center shadow-xs">
                     {item.seller_photo ? (
                       <img src={item.seller_photo} className="w-full h-full object-cover" alt="Seller" />
                     ) : (
-                      <span className="text-[18px] font-black text-slate-200">{item.seller_name?.[0] || 'V'}</span>
+                      <span className="text-[16px] font-bold text-slate-200">{item.seller_name?.[0] || 'V'}</span>
                     )}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white rounded-full" />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-sm" />
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-black text-slate-900 tracking-tight">{item.seller_name || 'Verified Vendor'}</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Institutional Merchant</p>
+                  <h3 className="text-[15px] font-bold text-slate-900 tracking-tight leading-none">{item.seller_name || 'Verified Vendor'}</h3>
+                  <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1.5">Official Merchant</p>
                 </div>
              </div>
-             <button className="w-12 h-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"><MessageSquare size={20} /></button>
+             <button className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 active:scale-95 transition-all"><MessageSquare size={18} /></button>
           </div>
         </main>
       </div>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-100 bg-white/80 backdrop-blur-xl border-t border-slate-50 px-6 py-6 pb-10">
+      <footer className="fixed bottom-0 left-0 right-0 z-100 bg-white/90 backdrop-blur-xl border-t border-slate-100 px-6 py-6 pb-12">
          <div className="max-w-xl mx-auto">
-            <button onClick={() => setShowDeliverySheet(true)} className="w-full h-16 bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 active:scale-95 transition-all">
-              Initiate Handshake <ArrowUpRight size={18} strokeWidth={3} />
+            <button onClick={() => setShowDeliverySheet(true)} className="w-full h-15 bg-[#1e293b] text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 active:scale-95 transition-all">
+              Initiate Handshake <ArrowUpRight size={18} strokeWidth={2.5} />
             </button>
          </div>
       </footer>
