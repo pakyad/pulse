@@ -425,14 +425,14 @@ export default function AdminDashboard() {
                   </div>
                </div>
 
-                <div className="bg-white rounded-[32px] border-[0.5px] border-[#F2F2F7] overflow-hidden shadow-sm">
+                <div className="bg-white border-[0.5px] border-[#F2F2F7] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.01)]">
                    <table className="w-full text-left border-collapse">
                       <thead>
                          <tr className="bg-[#FDFDFD] border-b-[0.5px] border-[#F2F2F7]">
-                            <th className="px-8 py-6 text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">Institutional Identity</th>
-                            <th className="px-8 py-6 text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">Verification State</th>
-                            <th className="px-8 py-6 text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">Tenure</th>
-                            <th className="px-8 py-6 text-[10px] font-black text-black/30 uppercase tracking-[0.2em] text-right">Audit</th>
+                            <th className="px-10 py-5 text-[9px] font-black text-black/20 uppercase tracking-[0.3em]">Identity Node</th>
+                            <th className="px-10 py-5 text-[9px] font-black text-black/20 uppercase tracking-[0.3em]">Clearance</th>
+                            <th className="px-10 py-5 text-[9px] font-black text-black/20 uppercase tracking-[0.3em]">Tenure</th>
+                            <th className="px-10 py-5 text-[9px] font-black text-black/20 uppercase tracking-[0.3em] text-right">Directive</th>
                          </tr>
                       </thead>
                       <tbody className="divide-y-[0.5px] divide-[#F2F2F7]">
@@ -445,31 +445,31 @@ export default function AdminDashboard() {
                              return true;
                            })
                            .map((u) => (
-                            <tr key={u.id} className="hover:bg-[#FDFDFD] transition-colors group cursor-pointer" onClick={() => setSelectedUser(u)}>
-                               <td className="px-8 py-6">
-                                  <div className="flex items-center gap-5">
-                                     <div className="w-12 h-12 rounded-2xl bg-slate-50 overflow-hidden border-[0.5px] border-[#F2F2F7] shadow-sm">
+                            <tr key={u.id} className="hover:bg-[#FDFDFD] transition-all group cursor-pointer" onClick={() => setSelectedUser(u)}>
+                               <td className="px-10 py-4">
+                                  <div className="flex items-center gap-4">
+                                     <div className="w-10 h-10 rounded-xl bg-slate-50 overflow-hidden border-[0.5px] border-[#F2F2F7] shadow-sm grayscale group-hover:grayscale-0 transition-all duration-500">
                                         <img src={u.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${u.full_name}`} alt="" className="w-full h-full object-cover" />
                                      </div>
                                      <div>
-                                        <p className="text-[16px] font-bold text-black tracking-tight">{u.full_name}</p>
-                                        <p className="text-[12px] font-medium text-black/30">{u.matric_no || 'UniKL ID: Pending'}</p>
+                                        <p className="text-[14px] font-black text-[#1C1C1E] tracking-tight leading-none mb-1">{u.full_name}</p>
+                                        <p className="text-[10px] font-bold text-black/20 uppercase tracking-widest">{u.matric_no || 'UniKL IDENTITY'}</p>
                                      </div>
                                   </div>
                                </td>
-                               <td className="px-8 py-6">
+                               <td className="px-10 py-4">
                                   <div className="flex gap-2">
-                                     {u.is_verified_runner && <span className="px-3 py-1.5 bg-[#1C1C1E] text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><ShieldCheck size={12} /> Runner</span>}
-                                     {u.is_seller && <span className="px-3 py-1.5 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Briefcase size={12} /> Merchant</span>}
-                                     {!u.is_verified_runner && !u.is_seller && <span className="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest">Student</span>}
+                                     {u.is_verified_runner && <span className="px-2.5 py-1 bg-[#1C1C1E] text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><ShieldCheck size={10} /> Runner</span>}
+                                     {u.is_seller && <span className="px-2.5 py-1 bg-blue-600 text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Briefcase size={10} /> Merchant</span>}
+                                     {!u.is_verified_runner && !u.is_seller && <span className="px-2.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-md text-[8px] font-black uppercase tracking-widest">Resident</span>}
                                   </div>
                                </td>
-                               <td className="px-8 py-6">
-                                  <span className="text-[14px] font-bold text-black/40">Class of 2026</span>
+                               <td className="px-10 py-4">
+                                  <span className="text-[12px] font-bold text-black/30 tracking-tight">Class of 2026</span>
                                </td>
-                               <td className="px-8 py-6 text-right">
-                                  <button className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-black/20 group-hover:bg-black group-hover:text-white transition-all">
-                                     <ChevronRight size={18} />
+                               <td className="px-10 py-4 text-right">
+                                  <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-black/10 group-hover:bg-[#1C1C1E] group-hover:text-white transition-all duration-300">
+                                     <ChevronRight size={14} strokeWidth={3} />
                                   </button>
                                </td>
                             </tr>
