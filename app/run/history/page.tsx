@@ -54,7 +54,7 @@ export default function RunnerHistoryPage() {
               <button onClick={() => router.push('/run')} className="p-2 -ml-2 text-slate-300 hover:text-navy transition-colors">
                  <ArrowLeft size={22} />
               </button>
-              <h1 className="text-[26px] font-bold tracking-tight">Job History</h1>
+              <h1 className="text-[17px] font-bold tracking-tight">Order History</h1>
            </div>
         </div>
 
@@ -71,7 +71,7 @@ export default function RunnerHistoryPage() {
 
       {/* ── HISTORY LIST ── */}
       <section className="px-6 py-6 space-y-4">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2 ml-1">Recent Syncs</p>
+        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] mb-2 ml-1">Recent Activity</p>
         
         {displayHistory.map((job) => (
           <motion.div 
@@ -92,9 +92,9 @@ export default function RunnerHistoryPage() {
                <p className="text-[16px] font-black text-navy">+RM {job.price.toFixed(2)}</p>
             </div>
 
-            <div className="flex items-center gap-2 text-[12px] font-medium text-slate-400 bg-slate-50 p-3 rounded-xl">
-               <span className="flex items-center gap-1.5 text-navy/70"><MapPin size={12}/> {job.from}</span>
-               <ChevronRight size={12} className="text-slate-300"/>
+            <div className="flex items-center gap-2 text-[11px] font-medium text-slate-400 bg-slate-50 p-3 rounded-xl">
+               <span className="flex items-center gap-1.5 text-navy/70"><MapPin size={11}/> {job.from}</span>
+               <ChevronRight size={11} className="text-slate-300"/>
                <span>{job.to}</span>
             </div>
           </motion.div>

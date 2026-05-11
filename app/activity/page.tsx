@@ -154,39 +154,51 @@ export default function ActivityPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let unsubs: (() => void)[] = [];
     const unsubAuth = auth.onAuthStateChanged(async (user) => {
+      // Clear existing listeners on auth change
+      unsubs.forEach(u => u());
+      unsubs = [];
+
       if (user) {
-        onSnapshot(doc(db, 'users', user.uid), (snap) => {
+        // 👤 Profile Sync
+        const uProfile = onSnapshot(doc(db, 'users', user.uid), (snap) => {
            const data = snap.data();
            setProfile({ ...data, uid: user.uid });
-           
-           if (data?.role === 'CLUB' || data?.role === 'OFFICIAL' || data?.is_verified_merchant) {
-              onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
-                 setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })));
-              });
-              setLoading(false);
-           } else {
-              // 🔔 Real Notifications Only
-              const qNotif = query(
-                collection(db, 'notifications'), 
-                where('user_id', '==', user.uid),
-                orderBy('created_at', 'desc'),
-                limit(20)
-              );
-              onSnapshot(qNotif, (s) => {
-                 setNotifications(s.docs.map(d => ({ id: d.id, ...d.data() })));
-                 setLoading(false);
-              }, (err) => {
-                 console.error(err);
-                 setLoading(false);
-              });
-           }
+           setLoading(false);
+        }, (err) => {
+           console.error("[Activity] Profile Sync Error:", err);
+           setLoading(false);
         });
+        unsubs.push(uProfile);
+
+        // 🛍️ Operational Analytics (for Merchants/Clubs)
+        if (profile?.role === 'CLUB' || profile?.role === 'OFFICIAL' || profile?.is_verified_merchant) {
+          const uOrders = onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
+             setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })));
+          }, (err) => console.error("[Activity] Orders Sync Error:", err));
+          unsubs.push(uOrders);
+        }
+
+        // 🔔 Notification Relay
+        const qNotif = query(
+          collection(db, 'notifications'), 
+          where('user_id', '==', user.uid),
+          orderBy('created_at', 'desc'),
+          limit(20)
+        );
+        const uNotif = onSnapshot(qNotif, (s) => {
+           setNotifications(s.docs.map(d => ({ id: d.id, ...d.data() })));
+        }, (err) => console.error("[Activity] Notification Sync Error:", err));
+        unsubs.push(uNotif);
       } else {
         router.push('/auth');
       }
     });
-    return () => unsubAuth();
+    return () => {
+      unsubAuth();
+      unsubs.forEach(u => u());
+    };
   }, [router]);
 
   if (loading) return null;

@@ -44,23 +44,51 @@ export default function PulseBulletinPage() {
   const [annIndex, setAnnIndex] = useState(0);
 
   useEffect(() => {
+    let unsubs: (() => void)[] = [];
+
     const unsubAuth = auth.onAuthStateChanged((user) => {
-      if (user) onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
+      // Clear existing listeners on auth change
+      unsubs.forEach(u => u());
+      unsubs = [];
+
+      if (user) {
+        // 👤 Profile Sync
+        const uProfile = onSnapshot(doc(db, 'users', user.uid), 
+          s => setProfile(s.data()),
+          e => console.error("[Pulse] Profile Sync Error:", e)
+        );
+        unsubs.push(uProfile);
+      }
+
+      // 📢 Announcements (Public)
+      const uAnn = onSnapshot(
+        query(collection(db, 'announcements'), orderBy('created_at', 'desc')), 
+        s => setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+        e => console.error("[Pulse] Announce Sync Error:", e)
+      );
+      unsubs.push(uAnn);
+
+      // 🏢 Facilities (Public)
+      const uFac = onSnapshot(
+        collection(db, 'facilities'), 
+        s => setFacilities(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+        e => console.error("[Pulse] Facilities Sync Error:", e)
+      );
+      unsubs.push(uFac);
+
+      // 📅 Events (Public)
+      const uEvents = onSnapshot(
+        query(collection(db, 'events'), orderBy('date', 'asc'), limit(10)), 
+        s => setEvents(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+        e => console.error("[Pulse] Events Sync Error:", e)
+      );
+      unsubs.push(uEvents);
     });
 
-    const unsubAnn = onSnapshot(query(collection(db, 'announcements'), orderBy('created_at', 'desc')), s => {
-      setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-
-    const unsubFac = onSnapshot(collection(db, 'facilities'), s => {
-      setFacilities(s.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-
-    const unsubEvents = onSnapshot(query(collection(db, 'events'), orderBy('date', 'asc'), limit(10)), s => {
-      setEvents(s.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-
-    return () => { unsubAuth(); unsubAnn(); unsubFac(); unsubEvents(); };
+    return () => { 
+      unsubAuth(); 
+      unsubs.forEach(u => u()); 
+    };
   }, []);
 
   useEffect(() => {

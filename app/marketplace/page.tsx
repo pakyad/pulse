@@ -16,13 +16,13 @@ import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/Marke
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[21px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[15px] font-bold text-[#1e293b] tracking-tight ${className}`}>
     {children}
   </h2>
 );
 
 const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-[13px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+  <p className={`text-[11px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
     {children}
   </p>
 );
@@ -50,17 +50,47 @@ export default function MarketplacePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubAuth = auth.onAuthStateChanged((user) => {
-      if (user) onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
-    });
-    
-    const q = query(collection(db, 'items'), where('status', '==', 'active'));
-    const unsubItems = onSnapshot(q, s => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-    
-    const qCamp = query(collection(db, 'campaigns'), where('status', '==', 'active'), limit(5));
-    const unsubCamp = onSnapshot(qCamp, s => setCampaigns(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    let unsubs: (() => void)[] = [];
 
-    return () => { unsubAuth(); unsubItems(); unsubCamp(); };
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      // Clear existing listeners on auth change
+      unsubs.forEach(u => u());
+      unsubs = [];
+
+      if (user) {
+        // 👤 Profile Sync
+        const uProfile = onSnapshot(doc(db, 'users', user.uid), 
+          s => setProfile(s.data()),
+          e => console.error("[Market] Profile Sync Error:", e)
+        );
+        unsubs.push(uProfile);
+
+        // 🛍️ Discover Items
+        const q = query(collection(db, 'items'), where('status', '==', 'active'));
+        const uItems = onSnapshot(q, 
+          s => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+          e => console.error("[Market] Items Sync Error:", e)
+        );
+        unsubs.push(uItems);
+
+        // 🏗️ Official Campaigns
+        const qCamp = query(collection(db, 'campaigns'), where('status', '==', 'active'), limit(5));
+        const uCamp = onSnapshot(qCamp, 
+          s => setCampaigns(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+          e => console.error("[Market] Campaigns Sync Error:", e)
+        );
+        unsubs.push(uCamp);
+      } else {
+        setProfile(null);
+        setItems([]);
+        setCampaigns([]);
+      }
+    });
+
+    return () => { 
+      unsubAuth(); 
+      unsubs.forEach(u => u()); 
+    };
   }, []);
 
   const filteredItems = useMemo(() => {
@@ -119,8 +149,8 @@ export default function MarketplacePage() {
                <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                   <div className="px-1 flex justify-between items-center">
                      <div>
-                        <h3 className="text-[18px] font-bold text-[#1e293b] tracking-tight">Official Store</h3>
-                        <p className="text-[12px] font-medium text-[#94a3b8]">Verified university drops</p>
+                        <h3 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Official Store</h3>
+                        <p className="text-[10px] font-medium text-[#94a3b8]">Verified campus items</p>
                      </div>
                      <Store size={18} className="text-slate-200" />
                   </div>
@@ -194,7 +224,7 @@ export default function MarketplacePage() {
             ) : (
                <div className="py-24 flex flex-col items-center justify-center text-[#94a3b8] gap-4 border-2 border-dashed border-slate-100 rounded-[16px]">
                   <Box size={48} strokeWidth={1} className="opacity-20" />
-                  <p className="text-[13px] font-bold uppercase tracking-widest">No listings found in this sector</p>
+                  <p className="text-[11px] font-bold uppercase tracking-widest">No listings found</p>
                </div>
             )}
          </section>

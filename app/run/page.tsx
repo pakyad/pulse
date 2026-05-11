@@ -90,7 +90,10 @@ export default function RunModule() {
 
     useEffect(() => {
         const unsubAuth = auth.onAuthStateChanged(user => {
-            if (user) onSnapshot(doc(db, "users", user.uid), (snap) => setProfile(snap.data()));
+            if (user) onSnapshot(doc(db, "users", user.uid), 
+                (snap) => setProfile(snap.data()),
+                (err) => console.error("[Runner] Profile Sync Error:", err)
+            );
         });
         return () => unsubAuth();
     }, []);

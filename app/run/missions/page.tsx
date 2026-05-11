@@ -19,29 +19,48 @@ export default function MissionBoard() {
   const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
+    let unsubMissions: (() => void) | null = null;
+
     const unsubAuth = auth.onAuthStateChanged((user) => {
       if (user) {
         onSnapshot(doc(db, "users", user.uid), (snap) => {
           const data = snap.data();
-          if (!data?.is_verified_runner) { router.push('/run'); return; }
+          if (!data?.is_verified_runner) { 
+            router.push('/run'); 
+            return; 
+          }
           setProfile(data);
           setLoading(false);
-        });
 
-        const q = query(
-          collection(db, "orders"), 
-          where("status", "in", ["AWAITING_RUNNER", "PREPARING", "READY_FOR_PICKUP"])
-        );
-        
-        return onSnapshot(q, (snap) => {
-          const allMissions = snap.docs
-            .map(d => ({ id: d.id, ...d.data() }))
-            .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER' || o.delivery_type === 'runner' || o.deliveryType === 'runner')
-            .filter((o: any) => !o.runner_id);
-          setMissions(allMissions);
+          // 🏛️ Start mission listener ONLY if verified
+          if (!unsubMissions) {
+            const q = query(
+              collection(db, "orders"), 
+              where("status", "in", ["AWAITING_RUNNER", "PREPARING", "READY_FOR_PICKUP"])
+            );
+            
+            unsubMissions = onSnapshot(q, (snap) => {
+              const allMissions = snap.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER' || o.delivery_type === 'runner' || o.deliveryType === 'runner')
+                .filter((o: any) => !o.runner_id);
+              setMissions(allMissions);
+            }, (err) => {
+              console.error("[Missions] Order Sync Error:", err);
+            });
+          }
+        }, (err) => {
+           console.error("[Missions] Profile Sync Error:", err);
         });
-      } else { router.push('/auth'); }
+      } else { 
+        router.push('/auth'); 
+      }
     });
+
+    return () => {
+      unsubAuth();
+      if (unsubMissions) unsubMissions();
+    };
   }, [router]);
 
   const handleClaim = async (missionId: string) => {

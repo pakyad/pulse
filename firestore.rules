@@ -9,7 +9,8 @@ service cloud.firestore {
       return isSignedIn() && (
         request.auth.token.email == 'admin@pulse.com' || 
         request.auth.token.email == 'official@pulse.com' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN'
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN')
       );
     }
 
@@ -50,6 +51,7 @@ service cloud.firestore {
     match /facilities/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
     match /vitals/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
     match /campaigns/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
+    match /pulse_posts/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     
     // ── TRANSACTIONS & REVIEWS ──
     match /transactions/{id} { 

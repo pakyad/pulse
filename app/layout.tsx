@@ -9,8 +9,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "PULSE | Institutional Logistics & Marketplace",
-  description: "High-end university logistics and marketplace ecosystem.",
+  title: "PULSE | Campus Delivery & Market",
+  description: "Easy campus delivery and marketplace.",
 };
 
 export const viewport = {
@@ -30,7 +30,7 @@ export default function RootLayout({
       <body suppressHydrationWarning className={`${inter.variable} ${inter.className} min-h-screen bg-white relative antialiased selection:bg-slate-100`}>
         <NavigationGate />
 
-        {/* 🏛️ INSTITUTIONAL MAIN CONTAINER */}
+        {/* 🏛️ CAMPUS MAIN CONTAINER */}
         <main className="relative">
           {children}
         </main>

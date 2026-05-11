@@ -16,13 +16,13 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[21px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[15px] font-bold text-[#1e293b] tracking-tight ${className}`}>
     {children}
   </h2>
 );
 
 const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-[13px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+  <p className={`text-[11px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
     {children}
   </p>
 );
@@ -37,23 +37,54 @@ export default function PulseHome() {
 
   useEffect(() => {
     setMounted(true);
+    let unsubs: (() => void)[] = [];
+
     const unsubAuth = auth.onAuthStateChanged((user) => {
-      if (user) onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
+      // Clear existing listeners on auth change
+      unsubs.forEach(u => u());
+      unsubs = [];
+
+      if (user) {
+        // 👤 Profile Sync
+        const uProfile = onSnapshot(doc(db, 'users', user.uid), 
+          s => setProfile(s.data()),
+          e => console.warn("[Home] Profile Error:", e)
+        );
+        unsubs.push(uProfile);
+
+        // 🛍️ Marketplace Items
+        const qItems = query(collection(db, 'items'), where('status', '==', 'active'), limit(6));
+        const uItems = onSnapshot(qItems, 
+          s => setLiveItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+          e => console.warn("[Home] Items Error:", e)
+        );
+        unsubs.push(uItems);
+      } else {
+        setProfile(null);
+        setLiveItems([]);
+      }
+
+      // 📰 Announcements (Public)
+      const qAnn = query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(3));
+      const uAnn = onSnapshot(qAnn, 
+        s => setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+        e => console.warn("[Home] Announce Error:", e)
+      );
+      unsubs.push(uAnn);
+      
+      // 💬 Pulse Posts (Public)
+      const qPulse = query(collection(db, 'pulse_posts'), orderBy('created_at', 'desc'), limit(3));
+      const uPulse = onSnapshot(qPulse, 
+        s => setPulsePosts(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+        e => console.warn("[Home] Pulse Error:", e)
+      );
+      unsubs.push(uPulse);
     });
     
-    // 🛍️ Real Items Only
-    const qItems = query(collection(db, 'items'), where('status', '==', 'active'), limit(6));
-    const unsubItems = onSnapshot(qItems, s => setLiveItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-    
-    // 📰 Real Announcements Only
-    const qAnn = query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(3));
-    const unsubAnn = onSnapshot(qAnn, s => setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-    
-    // 💬 Real Posts Only
-    const qPulse = query(collection(db, 'pulse_posts'), orderBy('created_at', 'desc'), limit(3));
-    const unsubPulse = onSnapshot(qPulse, s => setPulsePosts(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-
-    return () => { unsubAuth(); unsubItems(); unsubAnn(); unsubPulse(); };
+    return () => { 
+      unsubAuth(); 
+      unsubs.forEach(u => u()); 
+    };
   }, []);
 
   if (!mounted) return null;
@@ -68,8 +99,8 @@ export default function PulseHome() {
                <Sparkles size={18} />
             </div>
             <div>
-               <p className="text-[14px] font-bold tracking-tight leading-none">Pulse Hub</p>
-               <p className="text-[10px] font-medium text-[#94a3b8] mt-1 uppercase tracking-wider">Campus Center</p>
+               <p className="text-[13px] font-bold tracking-tight leading-none">Pulse</p>
+               <p className="text-[9px] font-medium text-[#94a3b8] mt-1 uppercase tracking-wider">Campus Hub</p>
             </div>
          </div>
          <div className="flex items-center gap-4">
@@ -113,8 +144,8 @@ export default function PulseHome() {
                   <Heading>Campus Activity</Heading>
                   <Subtext>See what students are sharing right now</Subtext>
                </div>
-               <button onClick={() => router.push('/pulse')} className="text-[12px] font-bold text-[#1e293b] flex items-center gap-1.5 active:scale-95 transition-all">
-                  See More <ArrowUpRight size={16} />
+               <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-[#1e293b] flex items-center gap-1.5 active:scale-95 transition-all">
+                  See More <ArrowUpRight size={14} />
                </button>
             </div>
 
@@ -131,7 +162,7 @@ export default function PulseHome() {
                            <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
                               <Activity size={14} />
                            </div>
-                           <p className="text-[13px] font-bold text-[#1e293b]">{post.author_name || 'Verified Student'}</p>
+                           <p className="text-[11px] font-bold text-[#1e293b]">{post.author_name || 'Verified Student'}</p>
                         </div>
                         <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">{post.time_ago || 'Recent'}</p>
                      </div>
@@ -142,7 +173,7 @@ export default function PulseHome() {
                )) : (
                   <div className="py-16 bg-slate-50/50 rounded-[40px] border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
                      <Activity size={32} strokeWidth={1} className="opacity-30" />
-                     <p className="text-[12px] font-bold uppercase tracking-widest">No recent activity</p>
+                     <p className="text-[11px] font-bold uppercase tracking-widest">No recent activity</p>
                   </div>
                )}
             </div>
@@ -155,8 +186,8 @@ export default function PulseHome() {
                   <Heading>Marketplace</Heading>
                   <Subtext>Browse items for sale from other students</Subtext>
                </div>
-               <button onClick={() => router.push('/marketplace')} className="text-[12px] font-bold text-[#1e293b] flex items-center gap-1.5 active:scale-95 transition-all">
-                  Browse All <LayoutGrid size={16} />
+               <button onClick={() => router.push('/marketplace')} className="text-[11px] font-bold text-[#1e293b] flex items-center gap-1.5 active:scale-95 transition-all">
+                  Browse All <LayoutGrid size={14} />
                </button>
             </div>
 

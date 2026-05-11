@@ -1,393 +1,295 @@
 'use client'
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { db, auth, functions, storage } from '@/lib/firebase';
-import { doc, getDoc, collection, onSnapshot, query, where } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import {
-  ChevronLeft, ShieldCheck, Star,
-  MessageSquare, Truck, X, Plus, Package, Clock, Share2, QrCode, Check, ArrowUpRight
+import { db } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { 
+  ChevronLeft, Share2, Heart, ShieldCheck, ShieldAlert,
+  ArrowUpRight, Clock, MapPin, Layers, AlertTriangle
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { MARKETPLACE_DOMAINS, DomainID } from '@/lib/marketplace/domains';
 
-// ── Marzia Drop-Off Locations ──
-const CAMPUS_HUBS: Record<string, any[]> = {
-  'MIIT': [
-    { id: 'k', label: 'Block K', sub: 'Main Lobby', zone: 'campus' },
-    { id: 'n', label: 'Block N', sub: 'Ground Floor', zone: 'campus' },
-    { id: 'lib', label: 'Library', sub: 'Level 1 entrance', zone: 'campus' },
-    { id: 'hostel_a', label: 'Kolej MARA', sub: 'Outside campus', zone: 'off_campus' },
-  ],
-  'UBIS': [
-    { id: 'ubis_l', label: 'UBIS Lobby', sub: 'Main Entrance', zone: 'campus' },
-    { id: 'ubis_c', label: 'UBIS Cafe', sub: 'Level 1', zone: 'campus' },
-  ],
-  'BMI': [
-    { id: 'bmi_m', label: 'BMI Main', sub: 'Security Post', zone: 'campus' },
-    { id: 'bmi_h', label: 'BMI Hostel', sub: 'Block B', zone: 'off_campus' },
-  ],
-};
+// ── DOMAIN REGISTRY RENDERER ──
+// Renders all metadata fields collected during listing, per domain.
+function DomainRegistry({ item }: { item: any }) {
+  const domain = MARKETPLACE_DOMAINS[item.domain as DomainID];
+  if (!domain || !item.metadata) return null;
 
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-}
+  const rows: { label: string; value: React.ReactNode }[] = [];
 
-const TARGET_COORDS = { lat: 3.1587, lng: 101.7005 };
-const MAX_DELIVERY_RADIUS_KM = 2.0;
+  if (item.domain === 'HUNGER') {
+    if (item.metadata.active_until) rows.push({
+      label: 'Available Until',
+      value: (
+        <span className="flex items-center gap-1.5 text-red-500 font-bold text-[13px]">
+          <Clock size={12} />
+          {item.metadata.active_until}
+        </span>
+      )
+    });
+    if (item.metadata.pickup_location) rows.push({
+      label: 'Pickup Point',
+      value: (
+        <span className="flex items-center gap-1.5 font-bold text-[13px] text-slate-900">
+          <MapPin size={12} className="text-slate-400" />
+          {item.metadata.pickup_location}
+        </span>
+      )
+    });
+  }
 
-function MarziaDeliverySheet({
-  item, onConfirm, onClose, loading,
-}: {
-  item: any;
-  onConfirm: (type: 'SELF_COLLECT' | 'RUNNER', location: string | undefined, receipt: File, qty: number) => void;
-  onClose: () => void;
-  loading: boolean;
-}) {
-  const campus = item.campus_id || 'MIIT';
-  const hubs = CAMPUS_HUBS[campus] || CAMPUS_HUBS['MIIT'];
-  
-  const [step, setStep] = useState<'FULFILLMENT' | 'PAYMENT'>('FULFILLMENT');
-  const [choice, setChoice] = useState<'SELF_COLLECT' | 'RUNNER' | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'QR' | 'TRANSFER'>('QR');
-  const [location, setLocation] = useState(hubs[0].id);
-  const [receipt, setReceipt] = useState<File | null>(null);
-  const [qty, setQty] = useState(1);
+  if (item.domain === 'ACADEMIC') {
+    if (item.metadata.department) rows.push({ label: 'Faculty', value: item.metadata.department });
+    if (item.metadata.year_semester) rows.push({ label: 'Year / Sem', value: item.metadata.year_semester });
+    if (item.metadata.subject_code) rows.push({ label: 'Subject Code', value: item.metadata.subject_code });
+  }
 
-  const selectedSpot = hubs.find(s => s.id === location) || hubs[0];
-  const runnerFee = selectedSpot.zone === 'campus' ? 3.50 : 5.00;
-  const itemPrice = Number(item.price) || 0;
-  const total = (itemPrice * qty) + (choice === 'RUNNER' ? runnerFee : 0);
+  if (item.domain === 'SERVICES') {
+    if (item.metadata.duration_type) rows.push({ label: 'Billing Basis', value: item.metadata.duration_type });
+    if (item.metadata.available_slots) rows.push({
+      label: 'Availability',
+      value: (
+        <span className="px-4 py-1.5 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest">
+          {item.metadata.available_slots}
+        </span>
+      )
+    });
+  }
+
+  if (item.domain === 'HOSTEL') {
+    if (item.metadata.pickup_difficulty) {
+      const isHeavy = item.metadata.pickup_difficulty.includes('Heavy');
+      const isMod = item.metadata.pickup_difficulty.includes('Moderate');
+      rows.push({
+        label: 'Pickup',
+        value: (
+          <span className={`text-[12px] font-black uppercase tracking-widest ${isHeavy ? 'text-red-500' : isMod ? 'text-amber-500' : 'text-emerald-500'}`}>
+            {item.metadata.pickup_difficulty}
+          </span>
+        )
+      });
+    }
+  }
+
+  if (item.domain === 'TECH') {
+    if (item.metadata.specs) rows.push({ label: 'Specs', value: item.metadata.specs });
+    if (item.metadata.warranty) rows.push({ label: 'Warranty', value: item.metadata.warranty });
+    if (item.metadata.validity_period) rows.push({ label: 'Valid For', value: item.metadata.validity_period });
+  }
+
+  if (rows.length === 0) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-200 bg-slate-900/40 backdrop-blur-sm flex items-end justify-center"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-xl bg-white rounded-t-2xl overflow-y-auto max-h-[90vh] pb-10 shadow-2xl"
-      >
-        <div className="px-8 pt-8 pb-4">
-          <div className="w-12 h-1 bg-slate-100 rounded-full mx-auto mb-8" />
-          <div className="flex items-center justify-between">
-            <h2 className="text-[18px] font-black text-slate-900 tracking-tight">
-              {step === 'FULFILLMENT' ? 'Logistics' : 'Payment'}
-            </h2>
-            <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
-              <X size={20} />
-            </button>
+    <section className="pt-8 border-t border-slate-50 space-y-6">
+      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+        {domain.label}
+      </h3>
+      <div className="space-y-5">
+        {rows.map((row, i) => (
+          <div key={i} className="flex items-start justify-between gap-4">
+            <span className="text-[13px] font-bold text-slate-400 shrink-0">{row.label}</span>
+            {typeof row.value === 'string'
+              ? <span className="text-[13px] font-bold text-slate-900 text-right">{row.value}</span>
+              : row.value
+            }
           </div>
-        </div>
-
-        <div className="px-8 py-6 space-y-8">
-          {step === 'FULFILLMENT' ? (
-            <div className="space-y-8">
-              <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[14px] font-bold text-slate-900">Quantity</p>
-                <div className="flex items-center gap-4 bg-white px-3 py-1.5 rounded-2xl border border-slate-100">
-                  <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-1 text-slate-400 hover:text-slate-900"><X size={14} className="rotate-45" /></button>
-                  <span className="text-[16px] font-black w-4 text-center">{qty}</span>
-                  <button onClick={() => setQty(qty + 1)} className="p-1 text-slate-400 hover:text-slate-900"><Plus size={14} /></button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {['SELF_COLLECT', 'RUNNER'].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setChoice(type as any)}
-                    className={`w-full p-4 rounded-2xl border text-left flex items-center justify-between transition-all ${
-                      choice === type ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/20' : 'bg-white border-slate-100 text-slate-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      {type === 'SELF_COLLECT' ? <Package size={20} /> : <Truck size={20} />}
-                      <div>
-                        <p className="text-[15px] font-black tracking-tight">{type === 'SELF_COLLECT' ? 'Self Collection' : 'Pulse Runner'}</p>
-                        <p className={`text-[11px] font-medium opacity-60 uppercase tracking-widest`}>
-                          {type === 'SELF_COLLECT' ? 'Meetup Location' : 'Institutional Delivery'}
-                        </p>
-                      </div>
-                    </div>
-                    {choice === type && <Check size={18} strokeWidth={2.5} />}
-                  </button>
-                ))}
-              </div>
-
-              {choice === 'RUNNER' && (
-                <div className="space-y-4">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Drop-off Hub</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {hubs.map((hub) => (
-                      <button
-                        key={hub.id}
-                        onClick={() => setLocation(hub.id)}
-                        className={`p-4 rounded-2xl border text-left transition-all ${
-                          location === hub.id ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-100 text-slate-600'
-                        }`}
-                      >
-                        <p className="text-[14px] font-black tracking-tight">{hub.label}</p>
-                        <p className="text-[10px] font-bold opacity-60 mt-0.5">RM {hub.zone === 'campus' ? '3.50' : '5.00'}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-8">
-               <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
-                 <div className="flex justify-between items-center text-[13px] font-bold text-slate-500">
-                    <span>Order Total</span>
-                    <span>RM {(itemPrice * qty).toFixed(2)}</span>
-                 </div>
-                 {choice === 'RUNNER' && (
-                   <div className="flex justify-between items-center text-[13px] font-bold text-slate-500">
-                      <span>Delivery Fee</span>
-                      <span>RM {runnerFee.toFixed(2)}</span>
-                   </div>
-                 )}
-                 <div className="pt-4 border-t border-slate-200 flex justify-between items-center">
-                    <span className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Payable</span>
-                    <span className="text-[20px] font-black text-slate-900 tracking-tighter">RM{total.toFixed(2)}</span>
-                 </div>
-               </div>
-
-               <div className="flex flex-col items-center gap-6 py-4">
-                 <div className="w-48 h-48 bg-white p-4 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-center">
-                    <QrCode size={120} className="text-slate-900 opacity-80" />
-                 </div>
-                 <div className="text-center space-y-1">
-                    <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Institutional Terminal</p>
-                    <p className="text-[15px] font-bold text-slate-900">Scan to settle registry</p>
-                 </div>
-               </div>
-
-               <div className="space-y-3">
-                  <label className="w-full h-24 rounded-3xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-all">
-                    <input type="file" className="hidden" onChange={(e) => setReceipt(e.target.files?.[0] || null)} />
-                    {receipt ? (
-                      <span className="text-[13px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
-                        <Check size={18} strokeWidth={2.5} /> Receipt Logged
-                      </span>
-                    ) : (
-                      <span className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Upload Receipt</span>
-                    )}
-                  </label>
-               </div>
-            </div>
-          )}
-
-          <button
-            onClick={() => {
-              if (step === 'FULFILLMENT') setStep('PAYMENT');
-              else onConfirm(choice!, choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : undefined, receipt!, qty);
-            }}
-            disabled={!choice || (step === 'PAYMENT' && !receipt) || loading}
-            className="w-full h-14 bg-slate-900 text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10 mt-4"
-          >
-            {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" /> : step === 'FULFILLMENT' ? 'Continue' : 'Complete Handshake'}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+        ))}
+      </div>
+    </section>
   );
 }
 
-export default function ItemDetails() {
+// ── GOVERNANCE STATUS BADGE ──
+function GovernanceTag({ status }: { status?: string }) {
+  if (!status || status === 'STABLE') return (
+    <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-500">
+      <ShieldCheck size={12} /> Verified
+    </span>
+  );
+  if (status === 'BLOCKED' || status === 'PENDING_REVIEW') return (
+    <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-500">
+      <ShieldAlert size={12} /> Under Review
+    </span>
+  );
+  return null;
+}
+
+// ── MAIN PAGE ──
+export default function ItemDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
   const [item, setItem] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true);
-  const [showDeliverySheet, setShowDeliverySheet] = useState(false);
-  const [errorToast, setErrorToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
-    const fetchItem = async () => {
-      const docRef = doc(db, 'items', id as string);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) setItem({ id: docSnap.id, ...docSnap.data() });
-      setPageLoading(false);
-    };
-    fetchItem();
+    if (!id) return;
+    const unsub = onSnapshot(doc(db, "items", id as string), (snap) => {
+      if (snap.exists()) setItem({ id: snap.id, ...snap.data() });
+      setLoading(false);
+    }, (err) => console.error(err));
+    return () => unsub();
   }, [id]);
 
-  const handleConfirmOrder = async (deliveryType: 'SELF_COLLECT' | 'RUNNER', dropOffLocation: string | undefined, receipt: File, qty: number) => {
-    if (!auth.currentUser) return router.push('/auth');
-    setLoading(true);
-    console.log("[Pulse Handshake] Initiating transaction...", { deliveryType, qty });
-    
-    try {
-      // 1. Storage Handshake
-      const receiptRef = ref(storage, `receipts/${Date.now()}_${receipt.name}`);
-      const uploadResult = await uploadBytes(receiptRef, receipt);
-      const receiptUrl = await getDownloadURL(uploadResult.ref);
-      console.log("[Pulse Handshake] Receipt logged to Storage:", receiptUrl);
- 
-      // 2. Cloud Finalization
-      const placeOrder = httpsCallable(functions, 'placeOrder');
-      const result: any = await placeOrder({
-        userId: auth.currentUser.uid,
-        cartItems: [{ productId: id, title: item.title, price: item.price, qty, vendorId: item.seller_id, sellerName: item.seller_name }],
-        deliveryType: deliveryType, // Match Cloud Function camelCase
-        dropOffLocation, 
-        receiptUrl
-      });
-      
-      console.log("[Pulse Handshake] Transaction Sealed:", result.data);
-      router.push(`/orders/success?id=${result.data.parentId}`);
-    } catch (e: any) {
-      console.error("[Pulse Handshake] FAILURE:", e);
-      setErrorToast({ message: e.message || "Institutional Transaction Failed", type: 'error' });
-      // Clear toast after 5s
-      setTimeout(() => setErrorToast(null), 5000);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-slate-900 rounded-full animate-spin" />
+    </div>
+  );
 
-  if (pageLoading) return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin" /></div>;
-  if (!item) return <div className="min-h-screen bg-white flex items-center justify-center text-[12px] font-black uppercase tracking-widest text-slate-300">Listing Void</div>;
+  if (!item) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <p className="text-[11px] font-black uppercase tracking-widest text-slate-300">Not Found</p>
+    </div>
+  );
+
+  const domain = MARKETPLACE_DOMAINS[item.domain as DomainID];
+  const images: string[] = item.images?.length ? item.images : item.image_url ? [item.image_url] : [];
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-slate-100">
-      {/* ── TOP NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-100 px-6 py-6 flex items-center justify-between pointer-events-none">
-        <button onClick={() => router.back()} className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-900 shadow-sm pointer-events-auto active:scale-90 transition-all">
+    <div className="min-h-screen bg-white font-sans text-slate-900 antialiased">
+
+      {/* ── NAV ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 pt-10 pb-4 flex items-center justify-between pointer-events-none">
+        <button
+          onClick={() => router.back()}
+          className="w-10 h-10 bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center shadow-lg active:scale-90 transition-all pointer-events-auto"
+        >
           <ChevronLeft size={18} />
         </button>
-        <button className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-900 shadow-sm pointer-events-auto active:scale-90 transition-all">
+        <button className="w-10 h-10 bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center shadow-lg active:scale-90 transition-all pointer-events-auto">
           <Share2 size={16} />
         </button>
       </nav>
 
-      {/* ── ERROR TOAST ── */}
-      <AnimatePresence>
-        {errorToast && (
-          <motion.div 
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -20, opacity: 0 }}
-            className="fixed top-24 left-6 right-6 z-200 p-4 bg-red-600 text-white rounded-2xl shadow-xl shadow-red-900/20 flex items-center gap-3"
-          >
-             <X size={18} />
-             <p className="text-[12px] font-black uppercase tracking-widest">{errorToast.message}</p>
-          </motion.div>
+      {/* ── SECTION 1: GALLERY ── */}
+      <section className="w-full aspect-square bg-slate-50 overflow-hidden relative">
+        {images.length > 0 ? (
+          <img
+            src={images[activeImage]}
+            className="w-full h-full object-cover"
+            alt={item.title}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-200">
+            <Layers size={48} strokeWidth={1} />
+          </div>
         )}
-      </AnimatePresence>
 
-      <div className="pt-6 px-6 max-w-xl mx-auto pb-40 space-y-10">
-        {/* ── IMAGE ── */}
-        <section className="w-full aspect-square bg-slate-50 rounded-[28px] overflow-hidden border border-slate-100 shadow-sm relative">
-          {item.image_url ? (
-            <img src={item.image_url} className="w-full h-full object-cover" alt={item.title} />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-200"><Package size={64} /></div>
-          )}
-          <div className="absolute top-6 left-6">
-             <div className="px-3 py-1.5 bg-white/90 backdrop-blur-md rounded-xl shadow-sm border border-slate-100">
-                <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{item.category || "General"}</p>
-             </div>
+        {/* Image Dots */}
+        {images.length > 1 && (
+          <div className="absolute bottom-5 left-0 right-0 flex justify-center gap-2">
+            {images.map((_: string, i: number) => (
+              <button
+                key={i}
+                onClick={() => setActiveImage(i)}
+                className={`w-1.5 h-1.5 transition-all ${i === activeImage ? 'bg-slate-900 w-4' : 'bg-slate-300'}`}
+              />
+            ))}
           </div>
-        </section>
+        )}
 
-        {/* ── CONTENT ── */}
-        <main className="space-y-12">
-          <div className="space-y-6">
+        {/* Domain Label */}
+        {domain && (
+          <div className="absolute top-20 left-6">
+            <span className="px-4 py-1.5 bg-white/90 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-slate-600 border border-slate-100">
+              {domain.label}
+            </span>
+          </div>
+        )}
+      </section>
+
+      {/* ── SCROLLABLE CONTENT ── */}
+      <div className="pb-40">
+        <div className="px-6 mt-8 space-y-10">
+
+          {/* ── SECTION 2: IDENTITY ── */}
+          <section className="space-y-3">
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-[24px] font-bold text-slate-900 leading-tight tracking-tight flex-1">
+                {item.title}
+              </h1>
+              <GovernanceTag status={item.governance_status} />
+            </div>
+
+            <div className="flex items-baseline gap-3">
+              <span className="text-[28px] font-bold text-slate-900 tracking-tighter">
+                RM{Number(item.price).toFixed(2)}
+              </span>
+              {item.subcategory && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+                  {item.subcategory}
+                </span>
+              )}
+            </div>
+          </section>
+
+          {/* ── SECTION 3: DOMAIN REGISTRY ── */}
+          {/* Renders all metadata fields collected during listing */}
+          <DomainRegistry item={item} />
+
+          {/* ── SELLER ROW ── */}
+          <section className="pt-8 border-t border-slate-50">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                 {[1,2,3,4,5].map(i => <Star key={i} size={10} className="text-emerald-500 fill-emerald-500" />)}
-                 <span className="text-[10px] font-bold text-slate-400 ml-1">12+ Sold</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
-                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                 <span className="text-[10px] font-black text-slate-900 uppercase tracking-wider">In Stock</span>
-              </div>
+              <span className="text-[13px] font-bold text-slate-400">Listed by</span>
+              <span className="text-[13px] font-bold text-slate-900">{item.seller_name || 'Pulse Student'}</span>
             </div>
-            
-            <div className="space-y-4">
-              <h1 className="text-[28px] font-bold text-slate-900 tracking-tight leading-tight">{item.title}</h1>
-              <div className="flex items-baseline gap-3">
-                <span className="text-[24px] font-black text-slate-900 tracking-tighter">RM {Number(item.price).toFixed(0)}</span>
-                <span className="px-2 py-0.5 bg-slate-50 border border-slate-100 rounded text-[9px] font-bold text-slate-400 uppercase tracking-widest">Registry Node</span>
+          </section>
+
+          {/* ── SECTION 4: DESCRIPTION ── */}
+          {item.description && (
+            <section className="pt-8 border-t border-slate-50 space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Description</h3>
+              <p className="text-[14px] font-medium text-slate-600 leading-relaxed">
+                {item.description}
+              </p>
+            </section>
+          )}
+
+          {/* ── HANDSHAKE PROTOCOL NOTE (Services) ── */}
+          {item.domain === 'SERVICES' && (
+            <section className="pt-8 border-t border-slate-50">
+              <div className="p-5 bg-slate-50 border border-slate-100 space-y-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Handshake Protocol</p>
+                <p className="text-[12px] font-bold text-slate-600 leading-relaxed">
+                  Payment is held until you confirm the service is complete. Only you can close this transaction.
+                </p>
               </div>
-            </div>
-          </div>
+            </section>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
-             {[
-                { icon: Truck, title: 'Pulse Delivery', desc: 'Verified Runner' },
-                { icon: Clock, title: 'Registry Lock', desc: '~24H Handoff' }
-             ].map((badge, i) => (
-                <div key={i} className="flex flex-col gap-4 p-5 bg-white border border-slate-100 rounded-[20px] shadow-xs">
-                   <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><badge.icon size={18} /></div>
-                   <div>
-                      <p className="text-[14px] font-bold text-slate-900 tracking-tight">{badge.title}</p>
-                      <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">{badge.desc}</p>
-                   </div>
-                </div>
-             ))}
-          </div>
+          {/* ── ACTIONS (inline, above footer) ── */}
+          <section className="pt-8 space-y-3 border-t border-slate-50">
+            <button
+              onClick={() => router.push(`/marketplace/${id}/checkout`)}
+              className="w-full h-14 bg-slate-900 text-white font-bold text-[13px] uppercase tracking-widest active:scale-[0.98] transition-all"
+            >
+              {item.domain === 'SERVICES' ? 'Book Now' : 'Buy Now'}
+            </button>
+            <button className="w-full h-14 border border-slate-100 text-slate-600 font-bold text-[13px] uppercase tracking-widest active:scale-[0.98] transition-all">
+              Message Seller
+            </button>
+          </section>
 
-          <div className="space-y-4">
-            <div className="flex gap-8 border-b border-slate-100 text-[11px] font-bold uppercase tracking-[0.15em]">
-               <span className="pb-3 border-b-2 border-slate-900 text-slate-900">Overview</span>
-               <span className="pb-3 text-slate-300 cursor-not-allowed">Technical Details</span>
-            </div>
-            <p className="text-[14px] text-slate-500 leading-relaxed font-medium">
-              {item.description || "Verified institutional asset listed on the Pulse network. High-fidelity handoff protocol enforced."}
-            </p>
-          </div>
-
-          <div className="pt-8 border-t border-slate-100 flex items-center justify-between">
-             <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center shadow-xs">
-                    {item.seller_photo ? (
-                      <img src={item.seller_photo} className="w-full h-full object-cover" alt="Seller" />
-                    ) : (
-                      <span className="text-[16px] font-bold text-slate-200">{item.seller_name?.[0] || 'V'}</span>
-                    )}
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-sm" />
-                </div>
-                <div>
-                  <h3 className="text-[15px] font-bold text-slate-900 tracking-tight leading-none">{item.seller_name || 'Verified Vendor'}</h3>
-                  <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1.5">Official Merchant</p>
-                </div>
-             </div>
-             <button className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 active:scale-95 transition-all"><MessageSquare size={18} /></button>
-          </div>
-        </main>
+        </div>
       </div>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-100 bg-white/90 backdrop-blur-xl border-t border-slate-100 px-6 py-6 pb-12">
-         <div className="max-w-xl mx-auto">
-            <button onClick={() => setShowDeliverySheet(true)} className="w-full h-15 bg-[#1e293b] text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 active:scale-95 transition-all">
-              Initiate Handshake <ArrowUpRight size={18} strokeWidth={2.5} />
-            </button>
-         </div>
+      {/* ── STICKY FOOTER ── */}
+      <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-50">
+        <div className="flex items-center gap-3">
+          <button className="w-12 h-12 border border-slate-100 flex items-center justify-center text-slate-300 active:scale-90 transition-all shrink-0">
+            <Heart size={18} />
+          </button>
+          <button
+            onClick={() => router.push(`/marketplace/${id}/checkout`)}
+            className="flex-1 h-12 bg-slate-900 text-white font-bold text-[12px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.97] transition-all"
+          >
+            {item.domain === 'SERVICES' ? 'Book Now' : 'Buy Now'}
+            <ArrowUpRight size={16} />
+          </button>
+        </div>
       </footer>
 
-      <AnimatePresence>
-        {showDeliverySheet && <MarziaDeliverySheet item={item} onConfirm={handleConfirmOrder} onClose={() => setShowDeliverySheet(false)} loading={loading} />}
-      </AnimatePresence>
     </div>
   );
 }
