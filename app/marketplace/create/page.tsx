@@ -41,7 +41,7 @@ export default function CreateListingPage() {
   const [metadata, setMetadata] = useState<Record<string, any>>({});
 
   const [governanceStatus, setGovernanceStatus] = useState<'STABLE' | 'WARNING' | 'BLOCKED'>('STABLE');
-  const [governanceMessage, setGovernanceMessage] = useState<string | null>(null);
+  const [governanceCeiling, setGovernanceCeiling] = useState<number | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const [isAppealOpen, setIsAppealOpen] = useState(false);
   const [appealText, setAppealText] = useState('');
@@ -52,25 +52,21 @@ export default function CreateListingPage() {
   useEffect(() => {
     if (!selectedDomain || !price) {
       setGovernanceStatus('STABLE');
-      setGovernanceMessage(null);
+      setGovernanceCeiling(null);
       return;
     }
     const domain = MARKETPLACE_DOMAINS[selectedDomain as DomainID];
     const numericPrice = parseFloat(price);
-    const subConfig = domain.subcategories.find(s => s.label === subcategory);
+    const subConfig = domain.subcategories.find((s: any) => s.label === subcategory);
     const ceiling = subConfig?.ceiling || domain.ceiling;
+    setGovernanceCeiling(ceiling || null);
 
     if (ceiling && numericPrice > ceiling) {
-      if (domain.governance === 'REGULATED') {
-        setGovernanceStatus('BLOCKED');
-        setGovernanceMessage(`Price cap for this category is RM${ceiling.toFixed(2)}.`);
-      } else {
-        setGovernanceStatus('WARNING');
-        setGovernanceMessage(`Recommended ceiling is RM${ceiling.toFixed(2)}.`);
-      }
+      setGovernanceStatus(domain.governance === 'REGULATED' ? 'BLOCKED' : 'WARNING');
+    } else if (ceiling && numericPrice >= ceiling * 0.8) {
+      setGovernanceStatus('WARNING');
     } else {
       setGovernanceStatus('STABLE');
-      setGovernanceMessage(null);
     }
   }, [selectedDomain, subcategory, price]);
 
@@ -240,7 +236,11 @@ export default function CreateListingPage() {
                 <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Price</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Set your asking price in Ringgit.</p>
               </div>
-              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-[#1e293b] transition-colors">
+              <div className={`flex items-center gap-0 h-12 bg-slate-50 border rounded-xl overflow-hidden focus-within:border-[#1e293b] transition-colors ${
+                governanceStatus === 'BLOCKED' ? 'border-red-200' :
+                governanceStatus === 'WARNING' ? 'border-amber-200' :
+                'border-slate-100'
+              }`}>
                 <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">RM</span>
                 <input
                   type="number"
@@ -251,27 +251,65 @@ export default function CreateListingPage() {
                 />
               </div>
 
-              {/* ── GOVERNANCE INLINE NOTICE ── */}
-              {governanceMessage && (
+              {/* ── LIVE PRICE GAUGE ── */}
+              {governanceCeiling && price && (
                 <motion.div
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex items-start gap-3 p-4 rounded-xl border ${
-                    governanceStatus === 'BLOCKED'
-                      ? 'bg-red-50 border-red-100 text-red-600'
-                      : 'bg-amber-50 border-amber-100 text-amber-600'
-                  }`}
+                  className="space-y-2"
                 >
-                  {governanceStatus === 'BLOCKED'
-                    ? <ShieldX size={16} className="shrink-0 mt-0.5" />
-                    : <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-                  }
-                  <div className="space-y-0.5">
-                    <p className="text-[12px] font-bold">
-                      {governanceStatus === 'BLOCKED' ? 'Price Ceiling Hit' : 'Advisory'}
-                    </p>
-                    <p className="text-[11px] font-medium leading-relaxed opacity-80">{governanceMessage}</p>
+                  {/* Bar */}
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div
+                      className={`h-full rounded-full transition-colors ${
+                        governanceStatus === 'BLOCKED' ? 'bg-red-400' :
+                        governanceStatus === 'WARNING' ? 'bg-amber-400' :
+                        'bg-emerald-400'
+                      }`}
+                      animate={{ width: `${Math.min(100, (parseFloat(price) / governanceCeiling) * 100)}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
                   </div>
+                  {/* Label */}
+                  <div className="flex items-center justify-between">
+                    <p className={`text-[11px] font-bold ${
+                      governanceStatus === 'BLOCKED' ? 'text-red-500' :
+                      governanceStatus === 'WARNING' ? 'text-amber-500' :
+                      'text-emerald-500'
+                    }`}>
+                      {governanceStatus === 'BLOCKED'
+                        ? `RM ${(parseFloat(price || '0') - governanceCeiling).toFixed(2)} over ceiling`
+                        : governanceStatus === 'WARNING'
+                        ? 'Approaching the price ceiling'
+                        : 'Within the price ceiling'}
+                    </p>
+                    <p className="text-[11px] font-medium text-[#94a3b8]">Ceiling: RM {governanceCeiling.toFixed(2)}</p>
+                  </div>
+
+                  {/* Appeal textarea — slides in when blocked */}
+                  <AnimatePresence>
+                    {governanceStatus === 'BLOCKED' && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-2 space-y-2">
+                          <p className="text-[11px] font-medium text-red-500">
+                            This item will be sent for admin review. Explain why it should be approved at this price:
+                          </p>
+                          <textarea
+                            value={appealText}
+                            onChange={e => setAppealText(e.target.value)}
+                            placeholder="e.g. Hardcover international edition, retails for RM 280..."
+                            rows={3}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-medium text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-red-200 transition-colors resize-none leading-relaxed"
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )}
             </section>
@@ -296,23 +334,24 @@ export default function CreateListingPage() {
             {/* ── POST BUTTON ── */}
             <div className="pt-4">
               <button
-                disabled={!canPost}
-                onClick={() => {
-                  if (governanceStatus === 'BLOCKED' && !isAppealOpen) {
-                    setIsAppealOpen(true);
-                  } else {
-                    handlePost();
-                  }
-                }}
+                disabled={!canPost || (governanceStatus === 'BLOCKED' && !appealText.trim())}
+                onClick={handlePost}
                 className={`w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
-                  canPost
+                  canPost && !(governanceStatus === 'BLOCKED' && !appealText.trim())
                     ? 'bg-[#1e293b] text-white active:scale-[0.98] shadow-sm'
                     : 'bg-slate-50 text-slate-200 border border-slate-100'
                 }`}
               >
                 {isPosting && <Loader2 size={16} className="animate-spin" />}
-                {isPosting ? 'Publishing...' : governanceStatus === 'BLOCKED' ? 'Request Exemption' : 'Publish Listing'}
+                {isPosting ? 'Publishing...'
+                  : governanceStatus === 'BLOCKED' ? 'Submit for Review'
+                  : 'Publish Listing'}
               </button>
+              {governanceStatus === 'BLOCKED' && !appealText.trim() && (
+                <p className="text-[11px] font-medium text-red-400 text-center mt-2">
+                  Add a reason above to submit for review.
+                </p>
+              )}
             </div>
 
           </motion.div>

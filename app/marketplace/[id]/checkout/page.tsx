@@ -1,17 +1,16 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { db, auth, functions, storage } from '@/lib/firebase';
+import { db, auth, functions } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {
   ChevronLeft, Truck, Plus, Package, Check,
-  QrCode, ArrowRight, ShieldCheck, CreditCard, Loader2
+  ArrowRight, ShieldCheck, CreditCard, Loader2, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Campus Drop-Off Locations (unchanged logic) ──
+// ── Campus Drop-Off Locations ──
 const CAMPUS_HUBS: Record<string, any[]> = {
   'MIIT': [
     { id: 'k', label: 'Block K', sub: 'Main Lobby', zone: 'campus' },
@@ -29,23 +28,39 @@ const CAMPUS_HUBS: Record<string, any[]> = {
   ],
 };
 
+// ── Format card number with spaces ──
+function formatCard(val: string) {
+  return val.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+}
+function formatExpiry(val: string) {
+  const digits = val.replace(/\D/g, '').slice(0, 4);
+  if (digits.length >= 3) return digits.slice(0, 2) + ' / ' + digits.slice(2);
+  return digits;
+}
+
 export default function CheckoutPage() {
   const { id } = useParams();
   const router = useRouter();
 
-  // ── State ──
+  // ── Page state ──
   const [item, setItem] = useState<any>(null);
   const [pageLoading, setPageLoading] = useState(true);
   const [posting, setPosting] = useState(false);
-  const [step, setStep] = useState<1 | 2>(1); // 1 = Delivery, 2 = Payment
+  const [step, setStep] = useState<1 | 2>(1);
 
+  // ── Step 1 state ──
   const [choice, setChoice] = useState<'SELF_COLLECT' | 'RUNNER' | null>(null);
   const [location, setLocation] = useState('');
-  const [receipt, setReceipt] = useState<File | null>(null);
   const [qty, setQty] = useState(1);
+
+  // ── Step 2: Payment state ──
+  const [cardNumber, setCardNumber] = useState('4242 4242 4242 4242');
+  const [cardExpiry, setCardExpiry] = useState('12 / 26');
+  const [cardCvv, setCardCvv] = useState('123');
+  const [cardName, setCardName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // ── Load Item ──
+  // ── Load item ──
   useEffect(() => {
     const load = async () => {
       try {
@@ -56,8 +71,6 @@ export default function CheckoutPage() {
           const hubs = CAMPUS_HUBS[data.campus_id || 'MIIT'] || CAMPUS_HUBS['MIIT'];
           setLocation(hubs[0].id);
         }
-      } catch (e) {
-        console.error('[Checkout Load]', e);
       } finally {
         setPageLoading(false);
       }
@@ -65,30 +78,34 @@ export default function CheckoutPage() {
     load();
   }, [id]);
 
-  // ── Derived Values ──
+  // ── Pre-fill cardholder name from auth ──
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged((user) => {
+      if (user?.displayName) setCardName(user.displayName);
+    });
+    return () => unsub();
+  }, []);
+
+  // ── Derived ──
   const hubs = item ? (CAMPUS_HUBS[item.campus_id || 'MIIT'] || CAMPUS_HUBS['MIIT']) : [];
   const selectedSpot = hubs.find((s: any) => s.id === location) || hubs[0];
   const runnerFee = selectedSpot?.zone === 'campus' ? 3.50 : 5.00;
   const itemPrice = Number(item?.price) || 0;
   const total = (itemPrice * qty) + (choice === 'RUNNER' ? runnerFee : 0);
 
-  // ── Step validation ──
-  const canProceedStep1 = !!choice && (choice === 'SELF_COLLECT' || (choice === 'RUNNER' && !!location));
-  const canProceedStep2 = !!receipt;
+  const canProceedStep1 = !!choice && (choice === 'SELF_COLLECT' || !!location);
+  const canPay = cardNumber.replace(/\s/g, '').length === 16 && cardCvv.length >= 3;
 
-  // ── Place Order (Cloud Function — unchanged) ──
-  const handlePlaceOrder = async () => {
+  // ── Place Order — Dummy Gateway ──
+  const handlePay = async () => {
     if (!auth.currentUser) { router.push('/auth'); return; }
-    if (!receipt) { setError('Please upload your payment receipt first.'); return; }
-
     setPosting(true);
     setError(null);
 
-    try {
-      const receiptRef = ref(storage, `receipts/${Date.now()}_${receipt.name}`);
-      const uploaded = await uploadBytes(receiptRef, receipt);
-      const receiptUrl = await getDownloadURL(uploaded.ref);
+    // Simulate payment processing delay
+    await new Promise(r => setTimeout(r, 2000));
 
+    try {
       const placeOrder = httpsCallable(functions, 'placeOrder');
       const result: any = await placeOrder({
         userId: auth.currentUser.uid,
@@ -102,19 +119,19 @@ export default function CheckoutPage() {
         }],
         deliveryType: choice,
         dropOffLocation: choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : undefined,
-        receiptUrl
+        payment_method: 'PULSE_PAY',
+        payment_ref: `PP_${Date.now()}`,
+        payment_status: 'PAID'
       });
 
-      // ✅ Navigate to success page
       router.push(`/orders/success?id=${result.data.parentId}`);
     } catch (e: any) {
-      console.error('[Checkout Failure]', e);
-      setError(e.message || 'Something went wrong. Please try again.');
+      console.error('[Payment Failure]', e);
+      setError(e.message || 'Payment failed. Please try again.');
       setPosting(false);
     }
   };
 
-  // ── Loading / Error States ──
   if (pageLoading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
@@ -167,19 +184,9 @@ export default function CheckoutPage() {
           </div>
           {/* Qty stepper */}
           <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-lg px-3 py-2 shrink-0">
-            <button
-              onClick={() => setQty(q => Math.max(1, q - 1))}
-              className="w-5 h-5 flex items-center justify-center text-[#94a3b8] active:scale-90 transition-all"
-            >
-              <span className="text-[18px] leading-none font-bold">−</span>
-            </button>
+            <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-5 h-5 flex items-center justify-center text-[#94a3b8] active:scale-90 transition-all text-lg font-bold leading-none">−</button>
             <span className="text-[14px] font-bold w-5 text-center">{qty}</span>
-            <button
-              onClick={() => setQty(q => q + 1)}
-              className="w-5 h-5 flex items-center justify-center text-[#94a3b8] active:scale-90 transition-all"
-            >
-              <Plus size={14} />
-            </button>
+            <button onClick={() => setQty(q => q + 1)} className="w-5 h-5 flex items-center justify-center active:scale-90 transition-all"><Plus size={14} className="text-[#94a3b8]" /></button>
           </div>
         </div>
 
@@ -187,14 +194,7 @@ export default function CheckoutPage() {
 
           {/* ════ STEP 1: DELIVERY ════ */}
           {step === 1 && (
-            <motion.div
-              key="step-delivery"
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 12 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-6"
-            >
+            <motion.div key="step-1" initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }} transition={{ duration: 0.2 }} className="space-y-6">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">How do you want it?</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Choose your preferred delivery method.</p>
@@ -202,23 +202,12 @@ export default function CheckoutPage() {
 
               <div className="space-y-3">
                 {/* Self Collect */}
-                <button
-                  onClick={() => setChoice('SELF_COLLECT')}
-                  className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-[0.98] ${
-                    choice === 'SELF_COLLECT'
-                      ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-sm'
-                      : 'bg-white border-slate-100 text-[#1e293b] hover:border-slate-300'
-                  }`}
-                >
+                <button onClick={() => setChoice('SELF_COLLECT')} className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-[0.98] ${choice === 'SELF_COLLECT' ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-sm' : 'bg-white border-slate-100 text-[#1e293b] hover:border-slate-300'}`}>
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${choice === 'SELF_COLLECT' ? 'bg-white/10' : 'bg-slate-50'}`}>
-                      <Package size={18} />
-                    </div>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${choice === 'SELF_COLLECT' ? 'bg-white/10' : 'bg-slate-50'}`}><Package size={18} /></div>
                     <div>
                       <p className="text-[13px] font-bold tracking-tight">Self Collect</p>
-                      <p className={`text-[11px] font-medium ${choice === 'SELF_COLLECT' ? 'text-white/60' : 'text-[#94a3b8]'}`}>
-                        Meet the seller on campus · Free
-                      </p>
+                      <p className={`text-[11px] font-medium ${choice === 'SELF_COLLECT' ? 'text-white/60' : 'text-[#94a3b8]'}`}>Meet the seller on campus · Free</p>
                     </div>
                   </div>
                   {choice === 'SELF_COLLECT' && <Check size={18} strokeWidth={2.5} />}
@@ -226,50 +215,24 @@ export default function CheckoutPage() {
 
                 {/* Pulse Runner */}
                 <div className="space-y-2">
-                  <button
-                    onClick={() => setChoice('RUNNER')}
-                    className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-[0.98] ${
-                      choice === 'RUNNER'
-                        ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-sm'
-                        : 'bg-white border-slate-100 text-[#1e293b] hover:border-slate-300'
-                    }`}
-                  >
+                  <button onClick={() => setChoice('RUNNER')} className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-[0.98] ${choice === 'RUNNER' ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-sm' : 'bg-white border-slate-100 text-[#1e293b] hover:border-slate-300'}`}>
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${choice === 'RUNNER' ? 'bg-white/10' : 'bg-slate-50'}`}>
-                        <Truck size={18} />
-                      </div>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${choice === 'RUNNER' ? 'bg-white/10' : 'bg-slate-50'}`}><Truck size={18} /></div>
                       <div>
                         <p className="text-[13px] font-bold tracking-tight">Pulse Runner</p>
-                        <p className={`text-[11px] font-medium ${choice === 'RUNNER' ? 'text-white/60' : 'text-[#94a3b8]'}`}>
-                          Delivered to your drop-off point
-                        </p>
+                        <p className={`text-[11px] font-medium ${choice === 'RUNNER' ? 'text-white/60' : 'text-[#94a3b8]'}`}>Delivered to your drop-off point</p>
                       </div>
                     </div>
                     {choice === 'RUNNER' && <Check size={18} strokeWidth={2.5} />}
                   </button>
 
-                  {/* Drop-off accordion */}
                   <AnimatePresence>
                     {choice === 'RUNNER' && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                         <div className="space-y-2 pt-2">
                           <p className="text-[11px] font-medium text-[#94a3b8] px-1">Select your drop-off point</p>
                           {hubs.map((hub: any) => (
-                            <button
-                              key={hub.id}
-                              onClick={() => setLocation(hub.id)}
-                              className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-[0.98] ${
-                                location === hub.id
-                                  ? 'bg-slate-50 border-[#1e293b]'
-                                  : 'bg-white border-slate-100 hover:border-slate-200'
-                              }`}
-                            >
+                            <button key={hub.id} onClick={() => setLocation(hub.id)} className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-[0.98] ${location === hub.id ? 'bg-slate-50 border-[#1e293b]' : 'bg-white border-slate-100 hover:border-slate-200'}`}>
                               <div>
                                 <p className="text-[13px] font-bold text-[#1e293b]">{hub.label}</p>
                                 <p className="text-[11px] font-medium text-[#94a3b8]">{hub.sub}</p>
@@ -289,17 +252,11 @@ export default function CheckoutPage() {
             </motion.div>
           )}
 
-          {/* ════ STEP 2: PAYMENT ════ */}
+          {/* ════ STEP 2: PAYMENT (Dummy Gateway) ════ */}
           {step === 2 && (
-            <motion.div
-              key="step-payment"
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -12 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-8"
-            >
-              {/* Price Breakdown (dark card) */}
+            <motion.div key="step-2" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ duration: 0.2 }} className="space-y-8">
+
+              {/* Price Breakdown */}
               <div className="bg-[#1e293b] rounded-xl p-6 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-[13px] font-medium text-white/60">Items ({qty})</span>
@@ -320,89 +277,102 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* QR Section */}
+              {/* Payment Form */}
               <section className="space-y-4">
-                <div className="space-y-0.5">
-                  <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Scan & Pay</h2>
-                  <p className="text-[11px] font-medium text-[#94a3b8]">Use any banking app to transfer to the seller.</p>
-                </div>
-                <div className="flex justify-center py-4">
-                  <div className="w-48 h-48 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center">
-                    <QrCode size={130} className="text-[#1e293b] opacity-80" />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Pulse Pay</h2>
+                    <p className="text-[11px] font-medium text-[#94a3b8]">Demo mode — no real charges.</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-[#94a3b8]">
+                    <Lock size={10} />
+                    Secured
                   </div>
                 </div>
-              </section>
 
-              {/* Receipt Upload */}
-              <section className="space-y-3">
-                <div className="space-y-0.5">
-                  <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Upload Receipt</h2>
-                  <p className="text-[11px] font-medium text-[#94a3b8]">Screenshot of your successful transfer.</p>
+                {/* Card Number */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">Card Number</label>
+                  <input
+                    value={cardNumber}
+                    onChange={e => setCardNumber(formatCard(e.target.value))}
+                    className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-[#1e293b] transition-colors tracking-widest"
+                    placeholder="1234 5678 9012 3456"
+                    inputMode="numeric"
+                  />
                 </div>
-                <label className={`w-full h-28 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
-                  receipt ? 'border-emerald-200 bg-emerald-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'
-                }`}>
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                    setReceipt(e.target.files?.[0] || null);
-                    setError(null);
-                  }} />
-                  {receipt ? (
-                    <>
-                      <div className="w-9 h-9 bg-emerald-100 text-emerald-500 rounded-xl flex items-center justify-center">
-                        <Check size={18} strokeWidth={2.5} />
-                      </div>
-                      <p className="text-[12px] font-bold text-emerald-600 px-4 text-center truncate max-w-full">{receipt.name}</p>
-                      <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Receipt Ready</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-9 h-9 bg-white border border-slate-100 rounded-xl flex items-center justify-center">
-                        <CreditCard size={16} className="text-[#94a3b8]" />
-                      </div>
-                      <p className="text-[12px] font-bold text-[#94a3b8]">Tap to upload proof</p>
-                    </>
-                  )}
-                </label>
+
+                {/* Expiry + CVV */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">Expiry</label>
+                    <input
+                      value={cardExpiry}
+                      onChange={e => setCardExpiry(formatExpiry(e.target.value))}
+                      className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-[#1e293b] transition-colors"
+                      placeholder="MM / YY"
+                      inputMode="numeric"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">CVV</label>
+                    <input
+                      value={cardCvv}
+                      onChange={e => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                      className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-[#1e293b] transition-colors"
+                      placeholder="123"
+                      inputMode="numeric"
+                      type="password"
+                    />
+                  </div>
+                </div>
+
+                {/* Cardholder Name */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">Name on Card</label>
+                  <input
+                    value={cardName}
+                    onChange={e => setCardName(e.target.value)}
+                    className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-[#1e293b] transition-colors"
+                    placeholder="Your full name"
+                  />
+                </div>
+
+                {/* Accepted cards row */}
+                <div className="flex items-center gap-2 pt-1">
+                  {['VISA', 'MC', 'AMEX'].map(brand => (
+                    <span key={brand} className="h-7 px-3 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-black text-[#94a3b8] tracking-widest flex items-center">{brand}</span>
+                  ))}
+                  <span className="text-[10px] font-medium text-slate-300 ml-1">& more</span>
+                </div>
               </section>
 
               {/* Error */}
               <AnimatePresence>
                 {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="p-4 bg-red-50 border border-red-100 rounded-xl"
-                  >
+                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="p-4 bg-red-50 border border-red-100 rounded-xl">
                     <p className="text-[12px] font-bold text-red-600 text-center">{error}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
+
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ── STICKY FOOTER CTA ── */}
+      {/* ── FOOTER CTA ── */}
       <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
         {step === 1 ? (
-          <button
-            onClick={() => setStep(2)}
-            disabled={!canProceedStep1}
-            className="w-full h-12 bg-[#1e293b] text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-30 transition-all"
-          >
+          <button onClick={() => setStep(2)} disabled={!canProceedStep1} className="w-full h-12 bg-[#1e293b] text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-30 transition-all">
             Continue to Payment <ArrowRight size={16} />
           </button>
         ) : (
-          <button
-            onClick={handlePlaceOrder}
-            disabled={!canProceedStep2 || posting}
-            className="w-full h-12 bg-[#1e293b] text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-30 transition-all"
-          >
+          <button onClick={handlePay} disabled={!canPay || posting} className="w-full h-12 bg-[#1e293b] text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-30 transition-all">
             {posting ? (
-              <Loader2 size={18} className="animate-spin" />
+              <><Loader2 size={16} className="animate-spin" /><span>Processing...</span></>
             ) : (
-              <><span>Place Order</span><Check size={16} strokeWidth={2.5} /></>
+              <><Lock size={14} /><span>Pay RM {total.toFixed(2)}</span></>
             )}
           </button>
         )}
