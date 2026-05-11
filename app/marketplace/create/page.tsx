@@ -5,11 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Camera, ChevronRight, Check, AlertCircle, 
   Plus, Trash2, Eye, Send, MapPin, Package,
-  Layers, Tag, Info, Sparkles
+  Layers, Tag, Info, Sparkles, Loader2, ShieldCheck, Handshake, Truck
 } from 'lucide-react';
 
-// Simple Category Chips (Carousell Style)
-const MAIN_CATEGORIES = ['Tech', 'Books', 'Food', 'Hobbies', 'Clothes', 'Other'];
+import { db, auth } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+const MAIN_CATEGORIES = ['Tech', 'Books', 'Food', 'Stationery', 'Clothes', 'Health', 'Sports', 'Hobbies', 'Services', 'Other'];
 
 const CONDITION_OPTS = [
   { label: 'New', desc: 'Brand new, never used' },
@@ -29,25 +31,46 @@ export default function CreateListingPage() {
   const [quantity, setQuantity] = useState('1');
   const [delivery, setDelivery] = useState('Pick up');
   const [priceError, setPriceError] = useState<string | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
+  const [isAppealOpen, setIsAppealOpen] = useState(false);
+  const [appealText, setAppealText] = useState('');
   
-  // USP 1: Price Safeguard Registry
-  const CATEGORY_LIMITS: Record<string, number> = {
-    'Books': 100,
-    'Food': 30,
-    'Tech': 5000,
-    'Other': 1000
+  const GOVERNANCE_REGISTRY: Record<string, { limit: number, type: 'REGULATED' | 'PREMIUM' }> = {
+    'Food': { limit: 30, type: 'REGULATED' },
+    'Books': { limit: 150, type: 'REGULATED' },
+    'Stationery': { limit: 50, type: 'REGULATED' },
+    'Tech': { limit: 5000, type: 'PREMIUM' },
+    'Clothes': { limit: 300, type: 'PREMIUM' },
+    'Health': { limit: 200, type: 'PREMIUM' },
+    'Sports': { limit: 400, type: 'PREMIUM' },
+    'Hobbies': { limit: 500, type: 'PREMIUM' },
+    'Services': { limit: 1000, type: 'PREMIUM' },
+    'Other': { limit: 1000, type: 'PREMIUM' }
   };
+
+  const [governanceStatus, setGovernanceStatus] = useState<'STABLE' | 'WARNING' | 'BLOCKED'>('STABLE');
 
   useEffect(() => {
     if (category && price) {
-      const limit = CATEGORY_LIMITS[category];
-      if (limit && parseFloat(price) > limit) {
-        setPriceError(`Institutional Limit: RM ${limit}.00 max for ${category}.`);
-      } else {
-        setPriceError(null);
+      const rule = GOVERNANCE_REGISTRY[category];
+      if (rule) {
+        const isOver = parseFloat(price) > rule.limit;
+        if (isOver) {
+          if (rule.type === 'REGULATED') {
+            setPriceError(`REGISTRY ALERT: RM ${rule.limit}.00 max ceiling for ${category.toUpperCase()}.`);
+            setGovernanceStatus('BLOCKED');
+          } else {
+            setPriceError(`MARKET NOTE: Recommended ceiling is RM ${rule.limit}.00.`);
+            setGovernanceStatus('WARNING');
+          }
+        } else {
+          setPriceError(null);
+          setGovernanceStatus('STABLE');
+        }
       }
     } else {
       setPriceError(null);
+      setGovernanceStatus('STABLE');
     }
   }, [category, price]);
   
@@ -68,200 +91,269 @@ export default function CreateListingPage() {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handlePost = async () => {
+    setIsPosting(true);
+    try {
+      const user = auth.currentUser;
+      await addDoc(collection(db, "items"), {
+        title,
+        description: appealText || description,
+        category,
+        condition,
+        price: parseFloat(price),
+        stock: parseInt(quantity),
+        delivery_mode: delivery,
+        images,
+        seller_id: user?.uid || 'ANON-SELLER',
+        seller_name: user?.displayName || 'Pulse Student',
+        status: governanceStatus === 'BLOCKED' ? 'pending_exemption' : 'ACTIVE',
+        governance_status: governanceStatus,
+        is_exemption_request: governanceStatus === 'BLOCKED',
+        created_at: serverTimestamp()
+      });
+      router.push('/marketplace');
+    } catch (e) {
+      console.error(e);
+      alert("Relay failed.");
+    } finally {
+      setIsPosting(false);
+    }
+  };
+
+  const getPostButtonText = () => {
+    if (isPosting) return 'RELAYING';
+    if (governanceStatus === 'BLOCKED') return 'APPEAL AUDIT';
+    return 'CONFIRM LISTING';
+  };
+
   return (
-    <main className="min-h-screen bg-[#FDFDFD] font-sans text-navy antialiased pb-40">
-      {/* ── HEADER ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 pt-12 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-50 flex items-center justify-between">
-        <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 active:scale-90 transition-all">
-          <X size={24} />
-        </button>
-        <h1 className="text-[17px] font-black tracking-tight uppercase">New Listing</h1>
-        <div className="w-10" />
+    <main className="min-h-screen bg-white font-sans text-[#1e293b] antialiased pb-40">
+      {/* ── HEADER (Compact Skibidi) ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-8 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b border-slate-50">
+         <div className="flex items-center gap-4">
+            <button onClick={() => router.back()} className="p-2 -ml-2 text-[#94a3b8] hover:text-[#1e293b] transition-all">
+               <X size={24} />
+            </button>
+            <div>
+               <h1 className="text-[15px] font-bold tracking-tight text-[#1e293b]">Institutional Registry</h1>
+               <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Campus Center</p>
+            </div>
+         </div>
       </nav>
 
-      {/* ── CONTENT ── */}
-      <div className="pt-32 space-y-0">
+      {/* ── CONTENT (Compact Skibidi) ── */}
+      <div className="pt-28 px-8">
         
-        {/* 1. PHOTO REEL (Carousell Style) */}
-        <section className="bg-white px-6 pb-8 border-b border-slate-50">
-           <div className="flex justify-between items-center mb-4">
-              <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-300">Visual Assets</h2>
-              <span className="text-[11px] font-black text-navy/20">{images.length}/10</span>
+        {/* 1. ASSETS SECTION */}
+        <section className="py-10 border-b border-slate-50">
+           <div className="flex justify-between items-center mb-8">
+              <h2 className="text-[17px] font-bold text-[#1e293b] tracking-tight">Visual Assets</h2>
+              <span className="text-[12px] font-bold text-[#94a3b8] leading-relaxed">{images.length}/10</span>
            </div>
            
            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="shrink-0 w-32 h-32 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-2 active:scale-95 transition-all group"
+                className="shrink-0 w-32 h-32 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 hover:bg-slate-100 transition-all group"
               >
-                <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:bg-navy group-hover:text-white transition-all">
-                   <Plus size={20} />
-                </div>
-                <span className="text-[11px] font-bold text-slate-400">Add Photo</span>
+                <Plus size={20} className="text-[#94a3b8] group-hover:text-[#1e293b]" />
+                <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Add</span>
               </button>
               
               <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
 
               {images.map((img, i) => (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  key={i} 
-                  className="shrink-0 w-32 h-32 relative rounded-3xl overflow-hidden border border-slate-100 shadow-sm"
-                >
+                <div key={i} className="shrink-0 w-32 h-32 relative rounded-xl border border-slate-50 group overflow-hidden">
                   <img src={img} className="w-full h-full object-cover" />
-                  <button onClick={() => removeImage(i)} className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-md rounded-full shadow-lg">
-                    <Trash2 size={12} className="text-red-500" />
+                  <button onClick={() => removeImage(i)} className="absolute top-2 right-2 w-7 h-7 bg-white shadow-xl rounded-full flex items-center justify-center text-[#1e293b] opacity-0 group-hover:opacity-100 transition-all">
+                    <Trash2 size={12} />
                   </button>
-                  {i === 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-emerald-500/90 py-1 text-center backdrop-blur-sm">
-                      <span className="text-[8px] font-black text-white uppercase tracking-widest">Main Cover</span>
-                    </div>
-                  )}
-                </motion.div>
+                </div>
               ))}
            </div>
         </section>
 
-        {/* 2. SMART CATEGORY CHIPS (Carousell/eBay Mix) */}
-        <section className="bg-white px-6 py-8 border-b border-slate-50">
-           <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-300 mb-4">Quick Category</h2>
-           <div className="flex flex-wrap gap-2">
-              {MAIN_CATEGORIES.map(cat => (
-                 <button 
-                  key={cat}
-                  onClick={() => setCategory(cat)}
-                  className={`px-5 py-2.5 rounded-full text-[13px] font-bold border transition-all ${
-                    category === cat ? 'bg-navy text-white border-navy shadow-lg shadow-navy/20' : 'bg-slate-50 border-slate-50 text-slate-400'
-                  }`}
-                 >
-                    {cat}
-                 </button>
-              ))}
-           </div>
-        </section>
-
-        {/* 3. CORE DETAILS (Simple Words Protocol) */}
-        <section className="px-6 py-10 space-y-10">
-           
-           {/* Listing Title */}
-           <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-300 ml-1">Listing Title</label>
-              <input 
-                type="text" 
-                placeholder="What are you selling?"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-0 text-[28px] font-black placeholder:text-slate-100 border-none focus:ring-0 leading-tight"
-              />
-           </div>
-
-           {/* Condition Ledger (eBay Style) */}
-           <div className="space-y-4">
-              <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-300 ml-1">Item Condition</label>
-              <div className="grid grid-cols-2 gap-3">
-                 {CONDITION_OPTS.map(opt => (
-                    <button 
-                      key={opt.label}
-                      onClick={() => setCondition(opt.label)}
-                      className={`p-5 rounded-3xl border text-left transition-all ${
-                        condition === opt.label ? 'bg-white border-navy shadow-xl shadow-navy/5' : 'bg-slate-50/50 border-transparent'
-                      }`}
-                    >
-                       <p className={`text-[15px] font-black ${condition === opt.label ? 'text-navy' : 'text-slate-400'}`}>{opt.label}</p>
-                       <p className="text-[11px] font-bold text-slate-300 mt-1">{opt.desc}</p>
-                    </button>
-                 ))}
-              </div>
-           </div>
-
-           {/* About Section */}
-           <div className="space-y-3">
-              <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-300 ml-1">Description</label>
-              <textarea 
-                placeholder="Tell us about the features, defects, or history..."
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-6 bg-slate-50 rounded-[2rem] border-none focus:ring-1 ring-navy/5 text-[15px] font-medium placeholder:text-slate-200"
-              />
-           </div>
-
-           {/* Price & Stock (Unified Ledger) */}
-           <div className="grid grid-cols-2 gap-6 bg-white border border-slate-100 p-8 rounded-[2.5rem] shadow-sm">
-              <div className="space-y-2">
-                 <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Price (RM)</p>
-                 <div className="flex items-center gap-1">
-                    <span className="text-[20px] font-black text-navy/20">RM</span>
-                    <input 
-                      type="number" 
-                      placeholder="0"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      className={`w-full bg-transparent p-0 text-[28px] font-black border-none focus:ring-0 ${priceError ? 'text-red-500' : 'text-navy'}`}
-                    />
-                 </div>
-                 {priceError && (
-                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 text-red-500">
-                       <AlertCircle size={12} />
-                       <span className="text-[10px] font-black uppercase tracking-widest">{priceError}</span>
-                    </motion.div>
-                 )}
-              </div>
-              <div className="space-y-2 border-l border-slate-50 pl-6">
-                 <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Stock</p>
-                 <input 
-                    type="number" 
-                    placeholder="1"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full bg-transparent p-0 text-[28px] font-black border-none focus:ring-0"
-                 />
-              </div>
-           </div>
-
-           {/* Delivery Mode */}
-           <div className="space-y-4">
-              <label className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-300 ml-1">Delivery Option</label>
-              <div className="flex gap-3">
-                {['Pick up', 'Runner'].map((opt) => (
-                  <button 
-                    key={opt}
-                    onClick={() => setDelivery(opt)}
-                    className={`flex-1 h-16 rounded-2xl flex items-center justify-center gap-3 border-2 transition-all ${
-                      delivery === opt ? 'bg-navy text-white border-navy shadow-xl shadow-navy/20' : 'bg-white border-slate-50 text-slate-300'
+        {/* ── FORM SECTION (Compact Flow) ── */}
+        <div className="space-y-12 py-10">
+          
+          {/* Classification */}
+          <section className="space-y-6 border-b border-slate-50 pb-10">
+             <h2 className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-[0.2em]">Classification</h2>
+             <div className="flex flex-wrap gap-3">
+                {MAIN_CATEGORIES.map(cat => (
+                   <button 
+                    key={cat}
+                    onClick={() => setCategory(cat)}
+                    className={`px-6 py-2.5 rounded-xl border transition-all duration-300 text-[13px] font-bold tracking-tight ${
+                      category === cat ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-lg shadow-slate-900/10' : 'bg-white border-slate-50 text-[#94a3b8] hover:border-slate-200'
                     }`}
-                  >
-                    {opt === 'Pick up' ? <MapPin size={18} /> : <Package size={18} />}
-                    <span className="text-[14px] font-bold">{opt}</span>
-                  </button>
+                   >
+                      {cat}
+                   </button>
                 ))}
+             </div>
+          </section>
+
+          {/* Product Identity */}
+          <div className="space-y-4 border-b border-slate-50 pb-10">
+             <h2 className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-[0.2em]">Product Identity</h2>
+             <input 
+               placeholder="ENTER TITLE..."
+               value={title}
+               onChange={(e) => setTitle(e.target.value.toUpperCase())}
+               className="w-full bg-transparent text-[24px] font-bold text-[#1e293b] placeholder:text-slate-100 focus:outline-none tracking-tight leading-none"
+             />
+          </div>
+
+          <div className="space-y-4 border-b border-slate-50 pb-10">
+             <h2 className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-[0.2em]">Specifications</h2>
+             <textarea 
+               placeholder="PROVIDE DETAILS..."
+               rows={3}
+               value={description}
+               onChange={(e) => setDescription(e.target.value)}
+               className="w-full bg-transparent text-[16px] font-bold text-[#1e293b] placeholder:text-slate-100 focus:outline-none resize-none leading-relaxed"
+             />
+          </div>
+
+          {/* Quality State */}
+          <div className="space-y-6 border-b border-slate-50 pb-10">
+             <h2 className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-[0.2em]">Quality State</h2>
+             <div className="grid grid-cols-1 gap-4">
+                {CONDITION_OPTS.map(opt => (
+                   <button 
+                     key={opt.label}
+                     onClick={() => setCondition(opt.label)}
+                     className={`p-6 rounded-xl border text-left transition-all duration-300 ${
+                       condition === opt.label ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-lg' : 'bg-white border-slate-50 text-[#94a3b8] hover:border-slate-200'
+                     }`}
+                   >
+                      <p className="text-[15px] font-bold tracking-tight uppercase">{opt.label}</p>
+                      <p className={`text-[12px] font-bold mt-1 leading-relaxed ${condition === opt.label ? 'text-white/40' : 'text-[#94a3b8]'}`}>{opt.desc}</p>
+                   </button>
+                ))}
+             </div>
+          </div>
+          
+          {/* Market Value */}
+          <div className="space-y-4 border-b border-slate-50 pb-10">
+             <h2 className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-[0.2em]">Market Value (RM)</h2>
+             <div className="flex items-baseline gap-4">
+                <span className="text-[21px] font-bold text-slate-100">RM</span>
+                <input 
+                  type="number" 
+                  placeholder="0.00"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full bg-transparent text-[32px] font-bold text-[#1e293b] focus:outline-none tracking-tighter"
+                />
+             </div>
+          </div>
+
+          {/* Inventory */}
+          <div className="space-y-4 border-b border-slate-50 pb-10">
+             <h2 className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-[0.2em]">Stock Inventory</h2>
+             <input 
+                type="number" 
+                placeholder="1"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                className="w-full bg-transparent text-[32px] font-bold text-[#1e293b] focus:outline-none tracking-tighter"
+             />
+          </div>
+
+          {/* Relay Strategy */}
+          <div className="space-y-8 pb-10">
+             <h2 className="text-[16px] font-bold text-[#1e293b] tracking-tight">Relay Strategy</h2>
+             <div className="space-y-6">
+               {['Pick up', 'Runner'].map((opt) => (
+                 <button 
+                   key={opt}
+                   onClick={() => setDelivery(opt)}
+                   className="flex items-center justify-between w-full group py-3 border-b border-slate-50 hover:border-slate-200 transition-all"
+                 >
+                    <div className="flex items-center gap-6 text-left">
+                       <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${delivery === opt ? 'bg-[#1e293b] text-white shadow-lg' : 'bg-slate-50 text-slate-300'}`}>
+                          {opt === 'Pick up' ? <Handshake size={18} /> : <Truck size={18} />}
+                       </div>
+                       <span className={`text-[16px] font-bold tracking-tight transition-all ${delivery === opt ? 'text-[#1e293b]' : 'text-[#94a3b8]'}`}>{opt}</span>
+                    </div>
+                    <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${delivery === opt ? 'bg-[#1e293b] border-[#1e293b]' : 'border-slate-100'}`}>
+                       {delivery === opt && <Check size={12} strokeWidth={3} className="text-white" />}
+                    </div>
+                 </button>
+               ))}
+             </div>
+          </div>
+        </div>
+
+        {/* ── AUDIT NOTICE ── */}
+        {priceError && (
+           <div className="py-12 border-t border-slate-100">
+              <div className="flex items-center gap-4 mb-4">
+                 <ShieldCheck size={18} className="text-[#1e293b]" />
+                 <h2 className="text-[16px] font-bold text-[#1e293b] tracking-tight">Audit Required</h2>
               </div>
+              <p className="text-[11px] font-bold text-[#94a3b8] leading-relaxed uppercase">
+                 {priceError}
+              </p>
            </div>
-
-        </section>
-
+        )}
       </div>
 
       {/* ── STICKY FOOTER ACTION ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 p-6 bg-white/80 backdrop-blur-2xl border-t border-slate-50">
-        <div className="flex gap-3 max-w-lg mx-auto">
-          <button className="flex-1 h-18 rounded-3xl border border-slate-100 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-all">
-            <Eye size={18} className="text-navy/40" />
-            <span className="text-[10px] font-black uppercase text-navy/40">Check Look</span>
-          </button>
-          <button 
-            disabled={!title || !price || !category || images.length === 0 || !!priceError}
-            className="flex-[2.5] h-18 bg-navy text-white rounded-[1.5rem] flex items-center justify-center gap-3 shadow-2xl shadow-navy/30 active:scale-[0.98] disabled:opacity-20 disabled:grayscale transition-all"
-          >
-            <div className="flex flex-col items-start">
-               <span className="text-[15px] font-black tracking-tight">Post Item</span>
-               <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Broadcast to Campus</span>
-            </div>
-            <ChevronRight size={20} />
-          </button>
-        </div>
+      <div className="fixed bottom-0 left-0 right-0 z-60 p-8 bg-white/90 backdrop-blur-2xl border-t border-slate-50">
+        <button 
+          disabled={!title || !price || !category || images.length === 0 || isPosting}
+          onClick={() => {
+             if (governanceStatus === 'BLOCKED' && !isAppealOpen) {
+                setIsAppealOpen(true);
+             } else {
+                handlePost();
+             }
+          }}
+          className={`w-full h-16 rounded-2xl flex items-center justify-center gap-4 transition-all duration-500 shadow-2xl ${
+            !title || !price || !category || images.length === 0 || isPosting
+              ? 'bg-slate-50 text-slate-200'
+              : 'bg-[#1e293b] text-white shadow-[#1e293b]/30'
+          }`}
+        >
+          <span className="text-[16px] font-bold uppercase tracking-[0.3em] ml-2">{getPostButtonText()}</span>
+          {isPosting && <Loader2 className="animate-spin" size={20} />}
+        </button>
       </div>
+
+      {/* ── EXEMPTION AUDIT MODAL ── */}
+      <AnimatePresence>
+         {isAppealOpen && (
+            <div className="fixed inset-0 z-1000 flex items-center justify-center p-8">
+               <motion.div 
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  onClick={() => setIsAppealOpen(false)}
+                  className="absolute inset-0 bg-[#1e293b]/60 backdrop-blur-md"
+               />
+               <motion.div 
+                  initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
+                  className="relative w-full max-w-md bg-white rounded-[32px] p-10 space-y-10 shadow-3xl"
+               >
+                  <div className="space-y-4">
+                     <p className="text-[11px] font-bold text-[#94a3b8] leading-relaxed">Administrative Audit</p>
+                     <h2 className="text-[18px] font-bold text-[#1e293b] tracking-tight">Request Exemption</h2>
+                  </div>
+                  <textarea 
+                     value={appealText}
+                     onChange={(e) => setAppealText(e.target.value)}
+                     placeholder="State justification..."
+                     className="w-full h-40 p-6 bg-slate-50 rounded-2xl border border-slate-100 text-[16px] font-bold text-[#1e293b] focus:outline-none resize-none shadow-inner"
+                  />
+                  <div className="flex gap-4">
+                     <button onClick={() => setIsAppealOpen(false)} className="flex-1 h-14 rounded-2xl border border-slate-100 text-[12px] font-bold uppercase tracking-[0.2em] text-[#94a3b8]">Cancel</button>
+                     <button onClick={() => { setIsAppealOpen(false); handlePost(); }} className="flex-1 h-14 rounded-2xl bg-[#1e293b] text-white text-[12px] font-bold uppercase tracking-[0.2em] shadow-xl">Submit</button>
+                  </div>
+               </motion.div>
+            </div>
+         )}
+      </AnimatePresence>
     </main>
   );
 }

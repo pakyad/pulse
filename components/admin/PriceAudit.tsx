@@ -5,7 +5,7 @@ import { ShieldAlert } from 'lucide-react';
 
 interface PriceAuditProps {
   items: any[];
-  guidelines: Record<string, number>;
+  guidelines: Record<string, any>;
   onReview: (item: any) => void;
   onOpenPolicy: () => void;
 }
@@ -26,10 +26,11 @@ export default function PriceAudit({ items, guidelines, onReview, onOpenPolicy }
 
   // 2. Automated Flagging Logic (Ceiling OR Spike)
   const flagged = items.filter(i => {
-    const ceiling = guidelines[i.category] || 9999;
+    const rule = guidelines[i.category];
+    const ceiling = rule?.max_price || rule?.maxBasePrice || 9999;
     const avg = categoryAverages[i.category] || i.price;
     const isOverCeiling = i.price > ceiling;
-    const isPriceSpike = i.price > avg * 1.5 && i.price > 10; // Only spike flag if above RM10 to avoid noise
+    const isPriceSpike = i.price > avg * 1.5 && i.price > 10;
     return isOverCeiling || isPriceSpike;
   });
   
@@ -66,36 +67,48 @@ export default function PriceAudit({ items, guidelines, onReview, onOpenPolicy }
         </div>
 
         <div className="divide-y-[0.5px] divide-slate-200">
-          {flagged.length > 0 ? flagged.map((item) => (
-            <div key={item.id} className="grid grid-cols-12 px-4 py-5 items-center hover:bg-slate-50/30 transition-colors">
-              <div className="col-span-5">
-                <p className="text-[14px] font-bold text-slate-900 leading-tight">{item.title}</p>
-                <p className="text-[11px] text-slate-400 font-medium uppercase tracking-tighter mt-0.5">{item.seller_name || 'Registry Vendor'}</p>
+          {flagged.length > 0 ? flagged.map((item) => {
+            const rule = guidelines[item.category];
+            const ceiling = rule?.max_price || rule?.maxBasePrice || 0;
+            const isRegulated = (rule?.governance_type || 'REGULATED') === 'REGULATED';
+            const isOver = item.price > ceiling;
+            
+            return (
+              <div key={item.id} className="grid grid-cols-12 px-4 py-5 items-center hover:bg-slate-50/30 transition-colors">
+                <div className="col-span-5">
+                  <p className="text-[14px] font-bold text-slate-900 leading-tight">{item.title}</p>
+                  <p className="text-[11px] text-slate-400 font-medium uppercase tracking-tighter mt-0.5">{item.seller_name || 'Registry Vendor'}</p>
+                </div>
+                <div className="col-span-2">
+                  <div className="flex flex-col gap-1.5 items-start">
+                    <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase tracking-widest">{item.category}</span>
+                    {item.status === 'pending_exemption' && (
+                      <span className="text-[8px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-sm uppercase tracking-widest shadow-sm">Exemption</span>
+                    )}
+                  </div>
+                </div>
+                <div className="col-span-2 text-[14px] font-black flex flex-col">
+                  <span className={isOver ? (isRegulated ? 'text-red-500' : 'text-amber-500') : 'text-orange-500'}>
+                    RM {Number(item.price).toFixed(2)}
+                  </span>
+                  {item.price > (categoryAverages[item.category] * 1.5) && (
+                    <span className="text-[8px] font-black text-orange-500 uppercase tracking-widest mt-1">Spike Warning</span>
+                  )}
+                </div>
+                <div className={`col-span-2 text-[14px] font-bold ${isRegulated ? 'text-emerald-600' : 'text-slate-400'}`}>
+                  RM {ceiling.toFixed(2)}
+                </div>
+                <div className="col-span-1 text-right">
+                  <button 
+                    onClick={() => onReview(item)}
+                    className="h-8 px-4 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all"
+                  >
+                    REVIEW
+                  </button>
+                </div>
               </div>
-              <div className="col-span-2">
-                <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase tracking-widest">{item.category}</span>
-              </div>
-              <div className="col-span-2 text-[14px] font-black flex flex-col">
-                <span className={item.price > (guidelines[item.category] || 9999) ? 'text-red-500' : 'text-orange-500'}>
-                  RM {Number(item.price).toFixed(2)}
-                </span>
-                {item.price > (categoryAverages[item.category] * 1.5) && (
-                  <span className="text-[8px] font-black text-orange-500 uppercase tracking-widest mt-1">Spike Warning</span>
-                )}
-              </div>
-              <div className="col-span-2 text-[14px] font-bold text-emerald-600">
-                RM {(guidelines[item.category] || 0).toFixed(2)}
-              </div>
-              <div className="col-span-1 text-right">
-                <button 
-                  onClick={() => onReview(item)}
-                  className="h-8 px-4 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all"
-                >
-                  REVIEW
-                </button>
-              </div>
-            </div>
-          )) : (
+            );
+          }) : (
             <div className="py-20 flex flex-col items-center justify-center">
               <p className="text-[12px] font-bold text-slate-300 uppercase tracking-widest">Audit Registry Stable</p>
             </div>

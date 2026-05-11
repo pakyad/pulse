@@ -13,15 +13,20 @@ import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, where, orderBy, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
-// ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
-const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[24px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+/**
+ * 🏛️ Pulse Activity & Insights
+ * concept: skibidi (standardized typography & subtext)
+ */
+
+// ── SKIBIDI TYPOGRAPHY COMPONENTS ──
+const SkibidiHeading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <h2 className={`text-[17px] font-bold text-[#1e293b] tracking-tight ${className}`}>
     {children}
   </h2>
 );
 
-const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-[14px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+const SkibidiSubtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <p className={`text-[11px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
     {children}
   </p>
 );
@@ -31,45 +36,45 @@ function InboxItemCard({ type, title, subtitle, statusText, isUnread, onClick, a
     <motion.button
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`w-full text-left flex items-start gap-4 p-5 border-b border-slate-50 transition-all ${isUnread ? 'bg-slate-50/50' : 'bg-white hover:bg-slate-50/30'}`}
+      className={`w-full text-left flex items-start gap-4 p-6 border-b border-slate-50 transition-all ${isUnread ? 'bg-slate-50/50' : 'bg-white hover:bg-slate-50/30'}`}
     >
       <div className="pt-1 shrink-0 relative">
          {avatarUrl ? (
-            <div className={`w-12 h-12 rounded-2xl overflow-hidden bg-white border border-slate-100 ${!isUnread && 'opacity-60'}`}>
+            <div className={`w-11 h-11 rounded-xl overflow-hidden bg-white border border-slate-100 ${!isUnread && 'opacity-60'}`}>
                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
             </div>
          ) : (
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-sm ${isUnread ? 'bg-white border-slate-200 text-[#1e293b]' : 'bg-slate-50 border-transparent text-slate-300'}`}>
-               {Icon ? <Icon size={22} /> : <Bell size={22} />}
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center border shadow-sm ${isUnread ? 'bg-white border-slate-200 text-[#1e293b]' : 'bg-slate-50 border-transparent text-slate-300'}`}>
+               {Icon ? <Icon size={20} /> : <Bell size={20} />}
             </div>
          )}
          {isUnread && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white" />
+            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white" />
          )}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <span className={`text-[10px] font-bold uppercase tracking-widest ${isUnread ? 'text-[#1e293b]' : 'text-[#94a3b8]'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-widest ${isUnread ? 'text-[#1e293b]' : 'text-[#94a3b8]'}`}>
             {type}
           </span>
-          <span className="text-[11px] font-medium text-[#94a3b8]">
+          <span className="text-[10px] font-bold text-[#94a3b8]">
             {statusText}
           </span>
         </div>
         
-        <p className={`text-[15px] leading-snug ${subtitle ? 'mb-1' : ''} ${isUnread ? 'text-[#1e293b] font-bold' : 'text-slate-500 font-medium'}`}>
+        <p className={`text-[15px] tracking-tight leading-snug ${subtitle ? 'mb-1' : ''} ${isUnread ? 'text-[#1e293b] font-bold' : 'text-slate-500 font-medium'}`}>
           {title}
         </p>
 
         {subtitle && (
-           <p className="text-[13px] leading-snug text-[#94a3b8] font-medium">
+           <p className="text-[12px] leading-relaxed text-[#94a3b8] font-medium">
               {subtitle}
            </p>
         )}
 
         {extraAction && (
-           <div className="mt-3 inline-flex items-center justify-center px-4 py-1.5 rounded-xl border border-slate-100 text-[11px] font-bold text-[#1e293b] bg-white shadow-sm">
+           <div className="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-[#1e293b] bg-white shadow-sm">
               {extraAction}
            </div>
         )}
@@ -85,52 +90,52 @@ function MerchantInsights({ profile, orders, items }: any) {
     <div className="flex flex-col space-y-12 animate-in fade-in duration-500 pb-32">
       <section className="space-y-6">
          <div className="p-6 bg-[#1e293b] rounded-[32px] text-white flex items-start gap-5 shadow-xl shadow-slate-900/10">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 text-amber-400">
-               <TrendingUp size={24} />
+            <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-amber-400">
+               <TrendingUp size={22} />
             </div>
             <div className="space-y-1">
-               <p className="text-[15px] font-bold tracking-tight">Weekly Performance</p>
-               <p className="text-[12px] text-white/50 font-medium leading-relaxed">Your store activity is up by 14% this week. Keep items updated to maintain momentum.</p>
+               <p className="text-[14px] font-bold tracking-tight">Weekly Performance</p>
+               <p className="text-[11px] text-white/50 font-medium leading-relaxed">Your store activity is up by 14% this week. Keep items updated to maintain momentum.</p>
             </div>
          </div>
 
-         <div className="px-1">
-            <h2 className="text-[24px] font-bold text-[#1e293b] tracking-tight">Merchant Insights</h2>
-            <p className="text-[14px] font-medium text-[#94a3b8]">Track your campus impact and store growth.</p>
+         <div className="px-1 space-y-1">
+            <SkibidiHeading>Merchant Insights</SkibidiHeading>
+            <SkibidiSubtext>Track your campus impact and store growth.</SkibidiSubtext>
          </div>
       </section>
 
       <div className="grid grid-cols-2 gap-4">
-         <div className="p-6 border border-slate-100 rounded-[32px] bg-white shadow-sm flex flex-col justify-between h-36">
-            <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest mb-2">Total Earnings</p>
+         <div className="p-6 border border-slate-50 rounded-[32px] bg-white shadow-sm flex flex-col justify-between h-32">
+            <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">Total Earnings</p>
             <div>
-               <p className="text-[22px] font-bold text-[#1e293b]">RM {totalRevenue.toFixed(2)}</p>
-               <p className="text-[10px] text-emerald-500 font-bold mt-1">+14% growth</p>
+               <p className="text-[20px] font-bold text-[#1e293b] tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
+               <p className="text-[10px] text-emerald-500 font-black uppercase tracking-wider mt-1">+14% Growth</p>
             </div>
          </div>
-         <div className="p-6 border border-slate-100 rounded-[32px] bg-white shadow-sm flex flex-col justify-between h-36">
-            <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest mb-2">Completion Rate</p>
+         <div className="p-6 border border-slate-50 rounded-[32px] bg-white shadow-sm flex flex-col justify-between h-32">
+            <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">Completion Rate</p>
             <div>
-               <p className="text-[22px] font-bold text-[#1e293b]">98.2%</p>
-               <p className="text-[10px] text-blue-500 font-bold mt-1">Excellent standing</p>
+               <p className="text-[20px] font-bold text-[#1e293b] tracking-tighter">98.2%</p>
+               <p className="text-[10px] text-blue-500 font-black uppercase tracking-wider mt-1">Institutional Standard</p>
             </div>
          </div>
       </div>
 
-      <section className="space-y-6 p-8 bg-slate-50/50 rounded-[40px] border border-slate-100">
-         <div className="px-1">
-            <h3 className="text-[16px] font-bold text-[#1e293b]">Traffic Breakdown</h3>
-            <p className="text-[12px] font-medium text-[#94a3b8]">Active buyers by faculty</p>
+      <section className="space-y-8 p-8 bg-slate-50/30 rounded-[40px] border border-slate-50">
+         <div className="px-1 space-y-1">
+            <SkibidiHeading>Traffic Breakdown</SkibidiHeading>
+            <SkibidiSubtext>Active buyers by faculty</SkibidiSubtext>
          </div>
-         <div className="space-y-4">
+         <div className="space-y-5">
             {[
                { name: 'MIIT (Information Tech)', color: 'bg-blue-500', pct: '62%' },
                { name: 'Business School', color: 'bg-emerald-500', pct: '24%' },
                { name: 'Engineering', color: 'bg-rose-500', pct: '14%' }
             ].map(f => (
                <div key={f.name} className="flex items-center gap-4">
-                  <div className={`w-2 h-2 rounded-full ${f.color}`} />
-                  <p className="text-[13px] font-bold text-slate-700 flex-1">{f.name}</p>
+                  <div className={`w-1.5 h-1.5 rounded-full ${f.color}`} />
+                  <p className="text-[13px] font-bold text-slate-500 flex-1">{f.name}</p>
                   <p className="text-[13px] font-black text-[#1e293b]">{f.pct}</p>
                </div>
             ))}
@@ -155,7 +160,7 @@ export default function ActivityPage() {
            const data = snap.data();
            setProfile({ ...data, uid: user.uid });
            
-           if (data?.role === 'CLUB' || data?.role === 'OFFICIAL') {
+           if (data?.role === 'CLUB' || data?.role === 'OFFICIAL' || data?.is_verified_merchant) {
               onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
                  setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })));
               });
@@ -189,20 +194,23 @@ export default function ActivityPage() {
   return (
     <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#1e293b]">
       
-      <section className="px-8 pt-12 pb-6">
+      <section className="px-8 pt-12 pb-6 border-b-[0.5px] border-slate-50">
          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-               <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-90 transition-all">
+            <div className="flex items-center gap-5">
+               <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-90 transition-all">
                   <ArrowLeft size={20} />
                </button>
-               <Heading>{profile?.role === 'CLUB' ? 'Insights' : 'Inbox'}</Heading>
+               <div className="space-y-0.5">
+                  <SkibidiHeading>{profile?.role === 'CLUB' || profile?.is_verified_merchant ? 'Insights' : 'Inbox'}</SkibidiHeading>
+                  <SkibidiSubtext>{profile?.role === 'CLUB' || profile?.is_verified_merchant ? 'Operational Analytics' : 'Terminal Relay'}</SkibidiSubtext>
+               </div>
             </div>
             <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
          </div>
       </section>
 
-      <section className="px-8 mt-6">
-         {profile?.role === 'CLUB' || profile?.role === 'OFFICIAL' ? (
+      <section className="px-8 mt-10">
+         {profile?.role === 'CLUB' || profile?.role === 'OFFICIAL' || profile?.is_verified_merchant ? (
             <MerchantInsights profile={profile} orders={orders} />
          ) : (
             <>
@@ -211,7 +219,7 @@ export default function ActivityPage() {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`shrink-0 px-5 py-2.5 rounded-[18px] text-[12px] font-bold transition-all ${
+                      className={`shrink-0 px-5 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all ${
                         activeTab === tab 
                           ? 'bg-[#1e293b] text-white shadow-lg shadow-slate-900/10' 
                           : 'bg-slate-50 text-[#94a3b8] hover:bg-slate-100'
@@ -238,7 +246,7 @@ export default function ActivityPage() {
                   ) : (
                     <div className="py-32 flex flex-col items-center justify-center text-[#94a3b8] gap-4">
                        <Inbox size={40} strokeWidth={1} className="opacity-20" />
-                       <p className="text-[12px] font-bold uppercase tracking-widest">Your inbox is clear</p>
+                       <p className="text-[10px] font-black uppercase tracking-widest">Inbox Terminal Clear</p>
                     </div>
                   )}
                </div>

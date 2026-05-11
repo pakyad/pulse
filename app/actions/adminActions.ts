@@ -7,12 +7,13 @@ import { revalidatePath } from "next/cache";
  * UPDATE PRICE GUIDELINE
  * Modifies the institutional price ceiling for a category.
  */
-export async function updatePriceGuideline(category: string, newMaxPrice: number) {
+export async function updatePriceGuideline(category: string, newMaxPrice: number, governanceType: 'REGULATED' | 'PREMIUM' = 'REGULATED') {
   try {
     const docId = category.toLowerCase();
     await adminDb.collection("PriceGuidelines").doc(docId).set({
       category: category,
       max_price: newMaxPrice,
+      governance_type: governanceType,
       updated_at: new Date().toISOString()
     }, { merge: true });
 

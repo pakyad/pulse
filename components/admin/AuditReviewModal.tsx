@@ -7,16 +7,23 @@ import { ShieldAlert, X, AlertCircle, Trash2, CheckCircle } from 'lucide-react';
 interface AuditReviewModalProps {
   item: any | null;
   limit: number;
+  isRegulated: boolean;
   onClose: () => void;
   onSuspend: (id: string) => void;
   onDismiss: (id: string) => void;
 }
 
-export default function AuditReviewModal({ item, limit, onClose, onSuspend, onDismiss }: AuditReviewModalProps) {
+export default function AuditReviewModal({ item, limit, isRegulated, onClose, onSuspend, onDismiss }: AuditReviewModalProps) {
   if (!item) return null;
 
   const violationAmount = item.price - limit;
   const violationPercent = (violationAmount / limit) * 100;
+
+  const accentColor = isRegulated ? 'text-red-600' : 'text-amber-600';
+  const bgColor = isRegulated ? 'bg-red-50' : 'bg-amber-50';
+  const iconColor = isRegulated ? 'text-red-500' : 'text-amber-500';
+  const labelText = isRegulated ? 'Audit Required' : 'Market Advisory';
+  const subLabelText = isRegulated ? 'Registry Violation Directive' : 'High Market Value Alert';
 
   return (
     <AnimatePresence>
@@ -41,12 +48,12 @@ export default function AuditReviewModal({ item, limit, onClose, onSuspend, onDi
           <div className="bg-white px-10 pt-10 pb-6 border-b border-slate-100">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center">
+                 <div className={`w-10 h-10 ${bgColor} ${iconColor} rounded-xl flex items-center justify-center`}>
                    <ShieldAlert size={20} />
                  </div>
                  <div>
-                    <h2 className="text-[17px] font-bold text-red-600 tracking-tight uppercase">Audit Required</h2>
-                    <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">Registry Violation Directive</p>
+                    <h2 className={`text-[17px] font-bold ${accentColor} tracking-tight uppercase`}>{labelText}</h2>
+                    <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">{subLabelText}</p>
                  </div>
               </div>
               <button onClick={onClose} className="p-2 hover:bg-slate-50 text-slate-300 hover:text-slate-900 rounded-full transition-all">
@@ -72,21 +79,21 @@ export default function AuditReviewModal({ item, limit, onClose, onSuspend, onDi
             <div className="grid grid-cols-2 gap-10">
                <div>
                   <p className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-2">Market Price</p>
-                  <p className="text-[26px] font-bold text-red-500 tracking-tight">RM {item.price.toFixed(2)}</p>
+                  <p className={`text-[26px] font-bold ${isRegulated ? 'text-red-500' : 'text-amber-500'} tracking-tight`}>RM {item.price.toFixed(2)}</p>
                </div>
                <div>
-                  <p className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-2">Inst. Ceiling</p>
-                  <p className="text-[26px] font-bold text-emerald-600 tracking-tight">RM {limit.toFixed(2)}</p>
+                  <p className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-2">{isRegulated ? 'Inst. Ceiling' : 'Adv. Ceiling'}</p>
+                  <p className={`text-[26px] font-bold ${isRegulated ? 'text-emerald-600' : 'text-slate-400'} tracking-tight`}>RM {limit.toFixed(2)}</p>
                </div>
             </div>
 
             <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100/50">
-               <div className="flex items-center gap-3 text-red-600 mb-3">
+               <div className={`flex items-center gap-3 ${iconColor} mb-3`}>
                   <AlertCircle size={15} />
-                  <p className="text-[10px] font-bold uppercase tracking-widest">Breach Intensity</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest">{isRegulated ? 'Breach Intensity' : 'Market Offset'}</p>
                </div>
                <p className="text-[14px] font-semibold text-slate-700 leading-relaxed">
-                  Asset exceeds category ceiling by <span className="text-red-500">RM {violationAmount.toFixed(2)}</span> ({violationPercent.toFixed(1)}%). Continuous violation may result in institutional blacklisting.
+                  Asset exceeds category {isRegulated ? 'hard ceiling' : 'suggested limit'} by <span className={iconColor}>RM {violationAmount.toFixed(2)}</span> ({violationPercent.toFixed(1)}%). {isRegulated ? 'Continuous violation may result in institutional blacklisting.' : 'This listing is permitted but monitored for predatory spikes.'}
                </p>
             </div>
 

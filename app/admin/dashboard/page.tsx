@@ -11,7 +11,7 @@ import {
   LayoutGrid, BarChart3, Users, Settings, LogOut, ShieldAlert,
   Search, ShieldCheck, UserCheck, Clock, ExternalLink, Filter, ChevronDown,
   X, Briefcase, GraduationCap, Mail, Smartphone, CheckCircle2, AlertCircle,
-  Blocks, UserPlus
+  Blocks, UserPlus, Sparkles
 } from 'lucide-react';
 import PriceAudit from '@/components/admin/PriceAudit';
 import SimplePolicyModal from '@/components/admin/SimplePolicyModal';
@@ -25,7 +25,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [flaggedItems, setFlaggedItems] = useState<any[]>([]);
   const [disputes, setDisputes] = useState<any[]>([]);
-  const [guidelines, setGuidelines] = useState<Record<string, number>>({});
+  const [guidelines, setGuidelines] = useState<Record<string, any>>({});
   const [activeTab, setActiveTab] = useState('command');
   const [isAddMerchantOpen, setIsAddMerchantOpen] = useState(false);
   const [appeals, setAppeals] = useState<any[]>([]);
@@ -64,8 +64,8 @@ export default function AdminDashboard() {
       // 1. Fetch Price Guidelines
       guidelinesUnsub = onSnapshot(collection(db, "PriceGuidelines"), 
         (snap) => {
-          const g: Record<string, number> = {};
-          snap.docs.forEach(d => g[d.id] = d.data().maxBasePrice);
+          const g: Record<string, any> = {};
+          snap.docs.forEach(d => g[d.id] = { id: d.id, ...d.data() });
           setGuidelines(g);
         },
         (err) => console.error("[Pulse Audit] PriceGuidelines Listener Failed:", err)
@@ -138,9 +138,9 @@ export default function AdminDashboard() {
     } catch (e) { console.error(e); } finally { setIsProcessing(null); }
   };
 
-  const saveGuideline = async (cat: string, price: number) => {
+  const saveGuideline = async (cat: string, price: number, governanceType: 'REGULATED' | 'PREMIUM' = 'REGULATED') => {
     try {
-      const res = await updatePriceGuideline(cat, price);
+      const res = await updatePriceGuideline(cat, price, governanceType);
       if (res.success) {
         alert("Institutional Limit Established.");
       } else {
@@ -731,35 +731,82 @@ export default function AdminDashboard() {
                   </button>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Object.entries(guidelines).map(([cat, price]) => (
-                    <div key={cat} className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-6">
-                       <div className="flex justify-between items-start">
-                          <div>
-                             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Asset Category</p>
-                             <p className="text-[17px] font-black text-slate-900 tracking-tight">{cat}</p>
-                          </div>
-                          <div className="w-10 h-10 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400">
-                             <Filter size={18} />
-                          </div>
-                       </div>
-                       <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
-                          <div>
-                             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Price Ceiling</p>
-                             <p className="text-[22px] font-black text-slate-900">RM {price.toFixed(2)}</p>
-                          </div>
-                          <button 
-                            onClick={() => {
-                              const newPrice = prompt(`Update ceiling for ${cat}:`, String(price));
-                              if (newPrice) saveGuideline(cat, Number(newPrice));
-                            }}
-                            className="text-[11px] font-black text-accent uppercase tracking-widest underline underline-offset-4"
-                          >
-                             Adjust
-                          </button>
-                       </div>
+                <div className="space-y-16">
+                  {/* GROUP 1: REGULATED NECESSITIES */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 px-2">
+                       <div className="w-2 h-6 bg-red-500 rounded-full" />
+                       <h3 className="text-[14px] font-black text-slate-400 uppercase tracking-widest">Institutional Necessities (Regulated)</h3>
                     </div>
-                  ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                       {Object.entries(guidelines).filter(([_, data]) => (data.governance_type || 'REGULATED') === 'REGULATED').map(([cat, data]) => (
+                         <div key={cat} className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-6">
+                            <div className="flex justify-between items-start">
+                               <div>
+                                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Asset Category</p>
+                                  <p className="text-[17px] font-black text-slate-900 tracking-tight">{data.category}</p>
+                               </div>
+                               <div className="w-10 h-10 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-red-400">
+                                  <ShieldAlert size={18} />
+                               </div>
+                            </div>
+                            <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
+                               <div>
+                                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Hard Ceiling</p>
+                                  <p className="text-[22px] font-black text-slate-900">RM {(data.max_price || data.maxBasePrice || 0).toFixed(2)}</p>
+                               </div>
+                               <button 
+                                 onClick={() => {
+                                   const newPrice = prompt(`Update ceiling for ${data.category}:`, String(data.max_price || data.maxBasePrice));
+                                   if (newPrice) saveGuideline(data.category, Number(newPrice), 'REGULATED');
+                                 }}
+                                 className="text-[11px] font-black text-red-500 uppercase tracking-widest underline underline-offset-4"
+                               >
+                                  Adjust
+                               </button>
+                            </div>
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+
+                  {/* GROUP 2: PREMIUM ASSETS */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 px-2">
+                       <div className="w-2 h-6 bg-amber-500 rounded-full" />
+                       <h3 className="text-[14px] font-black text-slate-400 uppercase tracking-widest">Premium Market Assets (Flexible)</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                       {Object.entries(guidelines).filter(([_, data]) => data.governance_type === 'PREMIUM').map(([cat, data]) => (
+                         <div key={cat} className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-6">
+                            <div className="flex justify-between items-start">
+                               <div>
+                                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Asset Category</p>
+                                  <p className="text-[17px] font-black text-slate-900 tracking-tight">{data.category}</p>
+                               </div>
+                               <div className="w-10 h-10 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-amber-400">
+                                  <Sparkles size={18} />
+                               </div>
+                            </div>
+                            <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
+                               <div>
+                                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Advisory Limit</p>
+                                  <p className="text-[22px] font-black text-slate-900">RM {(data.max_price || 0).toFixed(2)}</p>
+                               </div>
+                               <button 
+                                 onClick={() => {
+                                   const newPrice = prompt(`Update advisory limit for ${data.category}:`, String(data.max_price));
+                                   if (newPrice) saveGuideline(data.category, Number(newPrice), 'PREMIUM');
+                                 }}
+                                 className="text-[11px] font-black text-amber-600 uppercase tracking-widest underline underline-offset-4"
+                               >
+                                  Adjust
+                               </button>
+                            </div>
+                         </div>
+                       ))}
+                    </div>
+                  </div>
                </div>
             </section>
           )}
@@ -776,7 +823,8 @@ export default function AdminDashboard() {
 
       <AuditReviewModal 
         item={selectedReviewItem}
-        limit={selectedReviewItem ? guidelines[selectedReviewItem.category] : 0}
+        limit={selectedReviewItem ? (guidelines[selectedReviewItem.category]?.max_price || guidelines[selectedReviewItem.category]?.maxBasePrice || 0) : 0}
+        isRegulated={selectedReviewItem ? (guidelines[selectedReviewItem.category]?.governance_type !== 'PREMIUM') : true}
         onClose={() => setSelectedReviewItem(null)}
         onSuspend={handleSuspendAsset}
         onDismiss={handleDismissViolation}

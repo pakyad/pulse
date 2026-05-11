@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db, functions } from '@/lib/firebase';
@@ -129,7 +129,7 @@ export default function RunModule() {
          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
       </nav>
 
-      <div className="pt-28 px-6 space-y-10">
+      <div className="pt-28 px-6 space-y-12">
          {profile?.is_verified_runner && (
             <div className="space-y-6">
                    <div className="px-1">

@@ -1,13 +1,13 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, ShieldCheck, Zap } from 'lucide-react';
+import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, ShieldCheck, Zap, CheckCircle2 } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * 🏛️ Pulse Mobile Merchant Terminal
- * Optimized for high-velocity logistics fulfillment.
+ * concept: skibidi (institutional typography & identity)
  */
 export default function MobileMerchant({ 
   merchant, 
@@ -27,20 +27,29 @@ export default function MobileMerchant({
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
 
+  // ── SKIBIDI COMPONENTS ──
+  const SkibidiHeading = ({ children }: { children: React.ReactNode }) => (
+    <h1 className="text-[17px] font-bold text-[#1e293b] tracking-tight leading-none">{children}</h1>
+  );
+
+  const SkibidiSubtext = ({ children }: { children: React.ReactNode }) => (
+    <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">{children}</p>
+  );
+
   return (
-    <div className="min-h-screen bg-white flex flex-col text-slate-900 selection:bg-blue-100 md:hidden pb-32 font-sans antialiased">
+    <div className="min-h-screen bg-white flex flex-col text-[#1e293b] selection:bg-blue-100 md:hidden pb-32 font-sans antialiased">
       
-      {/* ── HEADER ── */}
-      <header className="px-8 py-8 border-b-[0.5px] border-slate-100 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
+      {/* ── HEADER (Skibidi concept) ── */}
+      <header className="px-8 py-8 border-b-[0.5px] border-slate-50 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
         <div className="flex items-center justify-between">
-           <div className="space-y-1">
-              <h1 className="text-[20px] font-bold text-slate-900 tracking-tight leading-none">{merchant?.full_name || 'Terminal'}</h1>
-              <p className="text-[12px] font-medium text-slate-400 leading-relaxed">Manage your shop and fulfill orders.</p>
+           <div className="space-y-1.5">
+              <SkibidiHeading>{merchant?.full_name || 'Terminal'}</SkibidiHeading>
+              <SkibidiSubtext>Manage your shop and fulfill orders.</SkibidiSubtext>
            </div>
            <div className="flex items-center gap-4">
-              <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 relative border border-slate-50">
-                 <Bell size={20} />
-                 {urgentOrders?.length > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white shadow-sm"></span>}
+              <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#1e293b] relative border border-slate-50">
+                 <Bell size={18} />
+                 {urgentOrders?.length > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>}
               </button>
                <AvatarDropdown 
                   photoUrl={merchant?.photo_url} 
@@ -50,44 +59,42 @@ export default function MobileMerchant({
         </div>
       </header>
 
-      <div className="flex-1 space-y-10 py-8 px-6">
+      <div className="flex-1 space-y-12 py-10 px-8">
          
-         {/* ── STATUS OVERVIEW ── */}
+         {/* ── STATUS OVERVIEW (Skibidi concept) ── */}
          <section className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
-               <div className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-50 space-y-4 shadow-sm">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Earnings</p>
+               <div className="p-6 bg-slate-50/30 rounded-[32px] border border-slate-50 space-y-4">
+                  <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest leading-none">Total Earnings</p>
                   <div className="space-y-0.5">
-                     <p className="text-[11px] font-bold text-slate-300">RM</p>
-                     <p className="text-[24px] font-black text-slate-900 tracking-tighter leading-none">{revenue.toFixed(2)}</p>
+                     <p className="text-[11px] font-bold text-slate-200">RM</p>
+                     <p className="text-[22px] font-bold text-[#1e293b] tracking-tighter leading-none">{revenue.toFixed(2)}</p>
                   </div>
                </div>
-               <div className="p-6 bg-slate-900 rounded-[32px] text-white space-y-4 shadow-xl shadow-slate-900/10">
-                  <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">Orders to Do</p>
+               <div className="p-6 bg-[#1e293b] rounded-[32px] text-white space-y-4 shadow-xl shadow-slate-900/10">
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none">Orders to Do</p>
                   <div className="space-y-0.5">
                      <p className="text-[11px] font-bold text-white/40">TOTAL</p>
-                     <p className="text-[24px] font-black text-white tracking-tighter leading-none">{activeOrdersCount}</p>
+                     <p className="text-[22px] font-bold text-white tracking-tighter leading-none">{activeOrdersCount}</p>
                   </div>
                </div>
             </div>
          </section>
 
-         {/* ── PENDING ACTIONS ── */}
-         <section className="space-y-4">
+         {/* ── PENDING ACTIONS (Skibidi concept) ── */}
+         <section className="space-y-6">
             <div className="flex items-center justify-between px-1">
-               <div className="flex items-center gap-2">
-                  <h3 className="text-[14px] font-bold text-slate-900">Pending Actions</h3>
-                  <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                     <span className="font-medium">Complete orders to keep your rating high.</span>
-                  </div>
+               <div className="space-y-1">
+                  <h3 className="text-[15px] font-bold text-[#1e293b] tracking-tight">Pending Actions</h3>
+                  <p className="text-[11px] font-medium text-[#94a3b8]">Complete orders to keep your rating high.</p>
                </div>
-               <span className="text-[11px] font-black text-blue-600 uppercase tracking-widest">{urgentOrders?.length || 0} Required</span>
+               <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{urgentOrders?.length || 0} Required</span>
             </div>
             
             {urgentOrders?.length === 0 ? (
-               <div className="py-16 bg-slate-50/30 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-200">
-                  <PackageCheck size={32} />
-                  <p className="text-[11px] mt-4 font-black uppercase tracking-widest">No Pending Orders</p>
+               <div className="py-20 bg-slate-50/20 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-100">
+                  <PackageCheck size={28} strokeWidth={1.5} />
+                  <p className="text-[10px] mt-4 font-black uppercase tracking-widest">No Pending Orders</p>
                </div>
             ) : (
                <div className="space-y-4">
@@ -95,216 +102,147 @@ export default function MobileMerchant({
                     <motion.div 
                       key={o.id} 
                       whileTap={{ scale: 0.98 }}
-                      className="p-6 bg-white border border-slate-50 rounded-[36px] shadow-sm shadow-slate-200/50 space-y-6"
+                      className="p-6 bg-white border border-slate-50 rounded-[32px] shadow-sm space-y-6"
                     >
                        <div className="flex justify-between items-start">
-                          <div className="space-y-1">
-                             <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">ORDER ID: {o.id.substring(0,8).toUpperCase()}</p>
-                             <h3 className="text-[18px] font-black text-slate-900 tracking-tight leading-none">{o.title}</h3>
+                          <div className="flex items-center gap-4">
+                             <div className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8]">
+                                <ClipboardList size={18} />
+                             </div>
+                             <div>
+                                <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">{o.customer_name || 'Student'}</p>
+                                <p className="text-[11px] font-medium text-[#94a3b8]">Order #{o.id.slice(-4).toUpperCase()}</p>
+                             </div>
                           </div>
-                          <p className="text-[18px] font-black text-slate-900">RM{o.price}</p>
+                          <div className="text-right">
+                             <p className="text-[15px] font-bold text-[#1e293b]">RM {o.total?.toFixed(2)}</p>
+                             <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">{o.status}</p>
+                          </div>
                        </div>
-                       <button 
-                          onClick={() => handleAcceptOrder(o.id)}
-                          className="w-full h-14 bg-blue-600 text-white rounded-[24px] font-black text-[13px] uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
-                       >
-                          Verify & Prep
-                       </button>
+
+                       <div className="flex gap-3 pt-2">
+                          {o.status === 'PENDING' ? (
+                            <button 
+                              onClick={() => handleAcceptOrder(o.id)}
+                              className="flex-1 h-12 bg-[#1e293b] text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10"
+                            >
+                               Accept Order
+                            </button>
+                          ) : o.status === 'PREPARING' ? (
+                            <button 
+                              onClick={() => handleCallRunner(o.id)}
+                              className="flex-1 h-12 bg-[#1e293b] text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
+                            >
+                               <Bike size={14} />
+                               Call Runner
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleConfirmDelivery(o.id)}
+                              className="flex-1 h-12 bg-emerald-500 text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-2"
+                            >
+                               <PackageCheck size={14} />
+                               Complete Delivery
+                            </button>
+                          )}
+                          <button className="w-12 h-12 rounded-2xl bg-slate-50 text-[#94a3b8] flex items-center justify-center border border-slate-50">
+                             <Info size={18} />
+                          </button>
+                       </div>
                     </motion.div>
                   ))}
                </div>
             )}
          </section>
 
-         {/* ── ACTIVE PIPELINE ── */}
-         <section className="space-y-4">
-            <div className="flex items-center gap-2 px-1">
-               <h3 className="text-[14px] font-bold text-slate-900">Current Orders</h3>
-               <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                  <Info size={12} />
-                  <span className="font-medium">Track your active orders here.</span>
+         {/* ── MANAGE LISTINGS ── */}
+         <section className="space-y-6">
+            <div className="flex items-center justify-between px-1">
+               <div className="space-y-1">
+                  <h3 className="text-[15px] font-bold text-[#1e293b] tracking-tight">Active Inventory</h3>
+                  <p className="text-[11px] font-medium text-[#94a3b8]">Live assets on the marketplace.</p>
                </div>
+               <button 
+                onClick={() => setIsCreateOpen(true)}
+                className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/10"
+               >
+                  <Plus size={18} />
+               </button>
             </div>
-            <div className="space-y-3 mt-6">
-               {preparingOrders?.length === 0 ? (
-                  <p className="text-[13px] text-slate-300 font-medium italic">No active orders.</p>
-               ) : (
-                  preparingOrders.map((o: any) => (
-                     <div key={o.id} className="flex flex-col gap-4 p-6 bg-slate-50/50 border border-slate-50 rounded-[32px] shadow-sm">
-                        <div className="flex items-center justify-between w-full">
-                           <div className="space-y-1">
-                              <p className="text-[15px] font-black text-slate-900 tracking-tight">{o.title}</p>
-                              <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">{o.status.replace(/_/g, ' ')}</p>
-                           </div>
-                           <button 
-                              onClick={() => handleCallRunner(o.id)}
-                              disabled={o.status === 'AWAITING_RUNNER' || o.status === 'IN_TRANSIT'}
-                              className={`h-11 px-5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
-                                 (o.status === 'AWAITING_RUNNER' || o.status === 'IN_TRANSIT')
-                                 ? 'bg-white text-slate-300 border border-slate-100 shadow-sm' 
-                                 : 'bg-slate-900 text-white shadow-xl shadow-slate-900/10 active:scale-95'
-                              }`}
-                           >
-                              {o.status === 'AWAITING_RUNNER' ? 'Runner Called' : o.status === 'IN_TRANSIT' ? 'In Transit' : 'Call Runner'}
-                           </button>
-                        </div>
 
-                        {/* 🏛️ The Handshake Layer */}
-                        <button 
-                           onClick={() => handleConfirmDelivery(o.id)}
-                           disabled={o.handshake?.seller_confirmed}
-                           className={`w-full h-12 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all ${
-                              o.handshake?.seller_confirmed 
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
-                              : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 active:scale-95'
-                           }`}
-                        >
-                           {o.handshake?.seller_confirmed ? 'Sent - Awaiting Buyer' : 'Confirm Delivery'}
-                        </button>
-                     </div>
-                  ))
-               )}
-            </div>
-         </section>
-
-         {/* ── SYSTEM DIRECTIVES ── */}
-         <section className="space-y-4">
-            <div className="flex items-center gap-2 px-1">
-               <h3 className="text-[14px] font-bold text-slate-900">Seller Tips</h3>
-               <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                  <Info size={12} />
-                  <span className="font-medium">Helpful guides for managing your shop.</span>
-               </div>
-            </div>
-            <div className="bg-slate-50/50 rounded-[40px] border border-slate-50 overflow-hidden mt-6">
-               {[
-                  { id: 'verify', icon: ShieldCheck, title: 'Verify Identity', text: 'Submit your ID to unlock faster payment processing.' },
-                  { id: 'assets', icon: Zap, title: 'Photo Guide', text: 'Use clear, square images to help your items sell faster.' },
-               ].map((tip, idx) => {
-                  const [isOpen, setIsOpen] = React.useState(false);
-                  return (
-                     <div key={tip.id} className={`border-b border-slate-50 last:border-0 ${isOpen ? 'bg-white' : ''}`}>
-                        <button 
-                           onClick={() => setIsOpen(!isOpen)}
-                           className="w-full px-8 py-6 flex items-center justify-between text-left transition-colors"
-                        >
-                           <div className="flex items-center gap-4">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isOpen ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                                 <tip.icon size={20} />
-                              </div>
-                              <span className="text-[14px] font-bold text-slate-900 tracking-tight">{tip.title}</span>
-                           </div>
-                           <Plus size={18} className={`text-slate-300 transition-transform ${isOpen ? 'rotate-45' : ''}`} />
-                        </button>
-                        <AnimatePresence>
-                          {isOpen && (
-                             <motion.div 
-                               initial={{ height: 0, opacity: 0 }}
-                               animate={{ height: 'auto', opacity: 1 }}
-                               exit={{ height: 0, opacity: 0 }}
-                               className="px-8 pb-8 overflow-hidden"
-                             >
-                                <p className="text-[13px] text-slate-500 leading-relaxed font-medium">{tip.text}</p>
-                                <button className="mt-5 text-[11px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
-                                  Initialize Protocol <ChevronRight size={14} strokeWidth={3} />
-                                </button>
-                             </motion.div>
-                          )}
-                        </AnimatePresence>
-                     </div>
-                  );
-               })}
-            </div>
-         </section>
-
-         {/* ── ASSET MANAGEMENT ── */}
-         <section className="space-y-4 pb-12">
-            <div className="flex items-center gap-2 px-1">
-               <h3 className="text-[14px] font-bold text-slate-900">My Inventory</h3>
-               <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                  <Info size={12} />
-                  <span className="font-medium">Manage your listed items and stock.</span>
-               </div>
-            </div>
-            <div className="grid grid-cols-1 gap-4 mt-6">
-               {topItems?.length === 0 ? (
-                  <p className="text-[13px] text-slate-300 italic">No assets registered.</p>
-               ) : (
-                  topItems.map((item: any) => (
-                     <div key={item.id} className="p-5 bg-white border border-slate-50 rounded-[32px] shadow-sm shadow-slate-200/50 flex items-center gap-5">
-                        {/* 🖼️ Precise Asset Thumbnail */}
-                        <div className="w-16 h-16 bg-slate-50 rounded-[20px] overflow-hidden shrink-0 border-[0.5px] border-slate-100">
+            <div className="grid grid-cols-1 gap-4">
+               {topItems?.map((item: any) => (
+                  <div key={item.id} className="p-5 bg-slate-50/50 border border-slate-50 rounded-[32px] flex items-center justify-between">
+                     <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 overflow-hidden">
                            {item.image_url ? (
-                              <img src={item.image_url} className="w-full h-full object-cover" alt="" />
+                              <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
                            ) : (
                               <div className="w-full h-full flex items-center justify-center text-slate-200">
-                                 <LayoutGrid size={24} strokeWidth={1.5} />
+                                 <LayoutGrid size={20} />
                               </div>
                            )}
                         </div>
-
-                        {/* 📄 Metadata Block */}
-                        <div className="flex-1 min-w-0">
-                           <p className="text-[14px] font-black text-slate-900 truncate tracking-tight mb-1">{item.title}</p>
-                           <div className="flex items-center gap-2">
-                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RM{item.price}</p>
-                               <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.stock_count ?? 0} STOCK</p>
-                           </div>
+                        <div>
+                           <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">{item.title}</p>
+                           <p className="text-[11px] font-medium text-[#94a3b8]">RM {item.price?.toFixed(2)} • {item.stock_count || 0} in stock</p>
                         </div>
-
-                        {/* 🛠️ Subtle Control Node */}
-                        <button 
-                           onClick={() => toggleItemStatus(item.id, item.status)}
-                           className={`h-9 px-4 rounded-[14px] text-[10px] font-black uppercase tracking-widest transition-all ${
-                              item.status === 'active' 
-                              ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100' 
-                              : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'
-                           }`}
-                        >
-                           {item.status === 'active' ? 'Active' : 'Hidden'}
-                        </button>
                      </div>
-                  ))
-               )}
+                     <button 
+                        onClick={() => toggleItemStatus(item.id, item.status)}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${item.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-100 text-slate-400'}`}
+                     >
+                        {item.status === 'ACTIVE' ? <CheckCircle2 size={18} /> : <Zap size={18} />}
+                     </button>
+                  </div>
+               ))}
             </div>
          </section>
-
       </div>
 
-      {/* ── ACTION FAB ── */}
-      <motion.button 
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setIsCreateOpen(true)}
-        className="fixed bottom-36 right-8 w-14 h-14 bg-slate-900 text-white rounded-[20px] flex items-center justify-center shadow-2xl shadow-slate-900/30 z-40 active:bg-black transition-all"
-      >
-         <Plus size={24} strokeWidth={3} />
-      </motion.button>
-
-      {/* ── BOTTOM NAV ── */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-[0.5px] border-slate-100 pb-8 pt-4 px-10 z-50 flex justify-between items-center shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
-         <button onClick={() => router.push('/merchant')} className="flex flex-col items-center gap-1.5 transition-all active:scale-90">
-            <LayoutGrid size={22} className={pathname === '/merchant' ? 'text-blue-600' : 'text-slate-300'} strokeWidth={pathname === '/merchant' ? 2.5 : 2} />
-            <span className={`text-[12px] font-bold ${pathname === '/merchant' ? 'text-blue-600' : 'text-slate-400'}`}>Dashboard</span>
-         </button>
-         <button onClick={() => router.push('/me/orders')} className="flex flex-col items-center gap-1.5 transition-all active:scale-90">
-            <ClipboardList size={22} className={pathname.includes('/me/orders') ? 'text-blue-600' : 'text-slate-300'} strokeWidth={pathname.includes('/me/orders') ? 2.5 : 2} />
-            <span className={`text-[12px] font-bold ${pathname.includes('/me/orders') ? 'text-blue-600' : 'text-slate-400'}`}>History</span>
-         </button>
-         <button onClick={() => router.push('/activity')} className="flex flex-col items-center gap-1.5 transition-all active:scale-90">
-            <BarChart3 size={22} className={pathname === '/activity' ? 'text-blue-600' : 'text-slate-300'} strokeWidth={pathname === '/activity' ? 2.5 : 2} />
-            <span className={`text-[12px] font-bold ${pathname === '/activity' ? 'text-blue-600' : 'text-slate-400'}`}>Insights</span>
-         </button>
-         <button onClick={() => router.push('/me')} className="flex flex-col items-center gap-1.5 transition-all active:scale-90">
-            <User size={22} className={pathname === '/me' ? 'text-blue-600' : 'text-slate-300'} strokeWidth={pathname === '/me' ? 2.5 : 2} />
-            <span className={`text-[12px] font-bold ${pathname === '/me' ? 'text-blue-600' : 'text-slate-400'}`}>Account</span>
-         </button>
+      {/* ── BOTTOM NAV (Skibidi concept) ── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t-[0.5px] border-slate-50 px-8 py-6">
+        <div className="flex items-center justify-between max-w-lg mx-auto">
+           {[
+             { id: 'dashboard', label: 'Terminal', icon: LayoutGrid, path: '/merchant' },
+             { id: 'history', label: 'Log', icon: ClipboardList, path: '/merchant/history' },
+             { id: 'insights', label: 'Stats', icon: BarChart3, path: '/activity' },
+             { id: 'account', label: 'Registry', icon: User, path: '/me' }
+           ].map((nav) => {
+             const active = pathname === nav.path || (nav.id === 'dashboard' && pathname === '/merchant');
+             return (
+               <button 
+                 key={nav.id}
+                 onClick={() => router.push(nav.path)}
+                 className="flex flex-col items-center gap-1.5 group"
+               >
+                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${active ? 'bg-[#1e293b] text-white shadow-lg shadow-slate-900/10' : 'text-[#94a3b8] group-hover:text-[#1e293b]'}`}>
+                   <nav.icon size={20} strokeWidth={active ? 2.5 : 2} />
+                 </div>
+                 <span className={`text-[10px] font-bold tracking-widest uppercase transition-all ${active ? 'text-[#1e293b]' : 'text-[#94a3b8] opacity-50'}`}>{nav.label}</span>
+               </button>
+             );
+           })}
+        </div>
       </nav>
 
+      {/* CREATE LISTING OVERLAY */}
       <AnimatePresence>
-        {isCreateOpen && (
-          <CreateListing userId={merchant?.uid} role="merchant" onClose={() => setIsCreateOpen(false)} />
-        )}
+         {isCreateOpen && (
+            <motion.div 
+               initial={{ y: '100%' }}
+               animate={{ y: 0 }}
+               exit={{ y: '100%' }}
+               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+               className="fixed inset-0 z-1000"
+            >
+               <CreateListing 
+                  userId={merchant?.uid} 
+                  role={merchant?.role} 
+                  onClose={() => setIsCreateOpen(false)} 
+               />
+            </motion.div>
+         )}
       </AnimatePresence>
     </div>
   );

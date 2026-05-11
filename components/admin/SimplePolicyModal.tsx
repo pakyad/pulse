@@ -7,12 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface SimplePolicyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (category: string, price: number) => void;
+  onSave: (category: string, price: number, governanceType: 'REGULATED' | 'PREMIUM') => void;
 }
 
 export default function SimplePolicyModal({ isOpen, onClose, onSave }: SimplePolicyModalProps) {
   const [category, setCategory] = useState('');
   const [price, setPrice] = useState('');
+  const [governanceType, setGovernanceType] = useState<'REGULATED' | 'PREMIUM'>('REGULATED');
 
   if (!isOpen) return null;
 
@@ -42,6 +43,24 @@ export default function SimplePolicyModal({ isOpen, onClose, onSave }: SimplePol
 
           <div className="space-y-6 mb-10">
             <div>
+              <label className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] block mb-2 text-center">Governance Tier</label>
+              <div className="flex gap-2 p-1 bg-slate-50 rounded-xl">
+                 <button 
+                  onClick={() => setGovernanceType('REGULATED')}
+                  className={`flex-1 h-9 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${governanceType === 'REGULATED' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
+                 >
+                    Regulated
+                 </button>
+                 <button 
+                  onClick={() => setGovernanceType('PREMIUM')}
+                  className={`flex-1 h-9 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${governanceType === 'PREMIUM' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
+                 >
+                    Premium
+                 </button>
+              </div>
+            </div>
+
+            <div>
               <label className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] block mb-2 text-center">Target Category</label>
               <input 
                 type="text" 
@@ -66,7 +85,7 @@ export default function SimplePolicyModal({ isOpen, onClose, onSave }: SimplePol
           <button 
             onClick={() => {
               if (category && price) {
-                onSave(category, Number(price));
+                onSave(category, Number(price), governanceType);
                 onClose();
               }
             }}

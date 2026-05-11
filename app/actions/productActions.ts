@@ -26,23 +26,33 @@ export async function submitProductListing(formData: FormData) {
     // STEP A: Fetch Institutional Guideline
     const guidelineRef = adminDb.collection("PriceGuidelines").doc(category);
     const guidelineSnap = await guidelineRef.get();
+    const guideline = guidelineSnap.exists ? guidelineSnap.data() : null;
 
-    if (!guidelineSnap.exists) {
-        console.warn(`[Pulse Audit] Missing guideline for category: ${category}. Proceeding with default vetting.`);
-    }
-
-    const maxBasePrice = guidelineSnap.exists ? guidelineSnap.data()?.maxBasePrice : Infinity;
+    const maxPrice = guideline ? (guideline.max_price || guideline.maxBasePrice) : Infinity;
+    const govType = guideline?.governance_type || formData.get("governance_type") as string || 'PREMIUM';
     
     // STEP B: Compare & Categorize
     let isFlagged = false;
     let adminStatus: 'approved' | 'pending' = 'approved';
     let message = "Listing published successfully.";
 
-    if (price > maxBasePrice) {
-        // STEP D: Flagged Execution
-        isFlagged = true;
-        adminStatus = 'pending';
-        message = "Price exceeds campus guidelines. Listing saved and sent to Admin for manual review.";
+    if (price > maxPrice) {
+        if (govType === 'REGULATED') {
+            const isExemptionRequest = formData.get("is_exemption_request") === 'true';
+            if (isExemptionRequest) {
+                isFlagged = true;
+                adminStatus = 'pending';
+                message = "Institutional Review Initiated: Your exemption request has been queued for Admin vetting.";
+                // We'll use 'PENDING_EXEMPTION' as a visual status for the merchant
+            } else {
+                return { success: false, message: `Institutional Violation: ${category} assets are capped at RM ${maxPrice}.00.` };
+            }
+        } else {
+            // STEP D: Flagged Execution for PREMIUM
+            isFlagged = true;
+            adminStatus = 'pending';
+            message = "Price exceeds suggested guidelines. Listing saved and sent to Admin for manual review.";
+        }
     }
 
     // STEP C/D: Central Registry Commit
@@ -51,11 +61,12 @@ export async function submitProductListing(formData: FormData) {
         title,
         price,
         category,
-        stock_count: parseInt(formData.get("stock_count") as string) || 1,
+        stock_count: stockCount,
         image_url: imageUrl,
-        status: adminStatus === 'approved' ? 'active' : 'pending',
+        status: (formData.get("is_exemption_request") === 'true') ? 'pending_exemption' : (adminStatus === 'approved' ? 'active' : 'pending'),
         isFlagged,
         adminStatus,
+        governance_type: govType,
         justification,
         created_at: new Date().toISOString()
     };
