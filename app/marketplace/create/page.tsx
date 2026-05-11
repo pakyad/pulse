@@ -95,6 +95,7 @@ export default function CreateListingPage() {
         seller_name: user?.displayName || 'Pulse Student',
         status: governanceStatus === 'BLOCKED' ? 'PENDING_REVIEW' : 'active',
         governance_status: governanceStatus,
+        governance_ceiling: governanceCeiling,   // ← admin review uses this
         is_exemption_request: governanceStatus === 'BLOCKED',
         appeal_note: appealText,
         created_at: serverTimestamp(),

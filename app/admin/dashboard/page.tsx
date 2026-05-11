@@ -40,6 +40,7 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [priceReviews, setPriceReviews] = useState<any[]>([]);
 
   useEffect(() => {
     let guidelinesUnsub: (() => void) | null = null;
@@ -48,6 +49,7 @@ export default function AdminDashboard() {
     let usersUnsub: (() => void) | null = null;
     let appealsUnsub: (() => void) | null = null;
     let logsUnsub: (() => void) | null = null;
+    let reviewsUnsub: (() => void) | null = null;
 
     const checkAccess = auth.onAuthStateChanged(async (user) => {
       if (guidelinesUnsub) guidelinesUnsub();
@@ -111,7 +113,13 @@ export default function AdminDashboard() {
         }
       );
 
-      setLoading(false);
+      // 7. Fetch PENDING_REVIEW items (price ceiling exceeded)
+      reviewsUnsub = onSnapshot(
+        query(collection(db, "items"), where("status", "==", "PENDING_REVIEW")),
+        (snap) => {
+          setPriceReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => b.created_at?.toMillis?.() - a.created_at?.toMillis?.()));
+        }
+      );
     });
 
     return () => {
@@ -122,6 +130,7 @@ export default function AdminDashboard() {
       if (usersUnsub) usersUnsub();
       if (appealsUnsub) appealsUnsub();
       if (logsUnsub) logsUnsub();
+      if (reviewsUnsub) reviewsUnsub();
     };
   }, [router]);
 
@@ -222,9 +231,36 @@ export default function AdminDashboard() {
   };
 
   const handleDismissViolation = async (itemId: string) => {
-    // For now, just close the modal. In production, we'd add an 'ignored' flag.
     setSelectedReviewItem(null);
     alert("Audit Registry Updated: Violation Dismissed.");
+  };
+
+  // ── Price Review: Approve / Reject ──
+  const handlePriceReview = async (itemId: string, action: 'APPROVE' | 'REJECT') => {
+    setIsProcessing(itemId);
+    try {
+      if (action === 'APPROVE') {
+        await updateDoc(doc(db, 'items', itemId), {
+          status: 'active',
+          governance_approved_by: auth.currentUser?.uid || 'ADMIN',
+          governance_approved_at: new Date(),
+        });
+      } else {
+        const reason = prompt('Rejection reason (shown to seller):');
+        if (!reason) { setIsProcessing(null); return; }
+        await updateDoc(doc(db, 'items', itemId), {
+          status: 'REJECTED',
+          rejection_reason: reason,
+          governance_rejected_by: auth.currentUser?.uid || 'ADMIN',
+          governance_rejected_at: new Date(),
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Action failed.');
+    } finally {
+      setIsProcessing(null);
+    }
   };
 
   if (loading) return (
@@ -236,6 +272,7 @@ export default function AdminDashboard() {
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutGrid },
     { id: 'command', label: 'Command Center', icon: Inbox },
+    { id: 'price_review', label: 'Price Review', icon: ShieldCheck, badge: priceReviews.length },
     { id: 'monitor', label: 'Price Monitor', icon: BarChart3 },
     { id: 'disputes', label: 'Dispute Mediation', icon: ShieldAlert, badge: disputes.length },
     { 
@@ -412,7 +449,114 @@ export default function AdminDashboard() {
             </section>
           )}
 
-          {/* 3. ACTIVE DISPUTES (TICKET SYSTEM) */}
+          {/* ── PRICE REVIEW QUEUE ── */}
+          {activeTab === 'price_review' && (
+            <section className="space-y-6">
+              <div className="flex justify-between items-center px-2">
+                <div>
+                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">Price Control</p>
+                  <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Price Review Queue</h2>
+                  <p className="text-[13px] font-medium text-slate-400 mt-1">Listings that exceeded their category ceiling and require admin approval.</p>
+                </div>
+                <div className="px-5 py-2 bg-amber-50 border border-amber-100 rounded-2xl">
+                  <span className="text-[11px] font-black text-amber-600 uppercase tracking-widest">{priceReviews.length} Pending</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {priceReviews.length === 0 ? (
+                  <div className="py-32 flex flex-col items-center justify-center gap-4">
+                    <div className="w-16 h-16 bg-emerald-50 rounded-[24px] flex items-center justify-center text-emerald-400">
+                      <ShieldCheck size={28} />
+                    </div>
+                    <p className="text-[13px] font-bold text-slate-300 uppercase tracking-widest">All clear — no items pending review</p>
+                  </div>
+                ) : (
+                  priceReviews.map((item) => {
+                    const overBy = item.price - (item.governance_ceiling || 0);
+                    const overPct = item.governance_ceiling ? Math.round((overBy / item.governance_ceiling) * 100) : 0;
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white rounded-[24px] border border-slate-100 p-8 flex items-start justify-between gap-8 shadow-sm"
+                      >
+                        {/* Left — item info */}
+                        <div className="flex-1 space-y-5">
+                          <div className="flex items-start gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
+                              {item.images?.[0]
+                                ? <img src={item.images[0]} className="w-full h-full object-cover" alt="" />
+                                : <div className="w-full h-full flex items-center justify-center text-slate-200"><ShieldAlert size={20} /></div>
+                              }
+                            </div>
+                            <div>
+                              <h3 className="text-[16px] font-black text-slate-900 tracking-tight">{item.title}</h3>
+                              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                                {item.domain} · {item.subcategory}
+                              </p>
+                              <p className="text-[12px] font-medium text-slate-400 mt-0.5">Seller: {item.seller_name || '—'}</p>
+                            </div>
+                          </div>
+
+                          {/* Price comparison */}
+                          <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div>
+                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Asked Price</p>
+                              <p className="text-[20px] font-black text-red-500">RM {Number(item.price).toFixed(2)}</p>
+                            </div>
+                            <div className="w-px h-8 bg-slate-200" />
+                            <div>
+                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Category Ceiling</p>
+                              <p className="text-[20px] font-black text-slate-900">RM {Number(item.governance_ceiling || 0).toFixed(2)}</p>
+                            </div>
+                            <div className="w-px h-8 bg-slate-200" />
+                            <div>
+                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Over By</p>
+                              <p className="text-[20px] font-black text-amber-500">+{overPct}%</p>
+                            </div>
+                          </div>
+
+                          {/* Seller's reason */}
+                          {item.appeal_note && (
+                            <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-100">
+                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Seller's Reason</p>
+                              <p className="text-[13px] font-medium text-slate-600 leading-relaxed italic">
+                                "{item.appeal_note}"
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right — actions */}
+                        <div className="flex flex-col gap-3 shrink-0 w-[180px]">
+                          <button
+                            onClick={() => handlePriceReview(item.id, 'APPROVE')}
+                            disabled={isProcessing === item.id}
+                            className="h-12 bg-[#1e293b] text-white rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-30"
+                          >
+                            {isProcessing === item.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handlePriceReview(item.id, 'REJECT')}
+                            disabled={isProcessing === item.id}
+                            className="h-12 bg-white text-red-500 border border-red-100 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-50 active:scale-95 transition-all disabled:opacity-30"
+                          >
+                            <X size={14} />
+                            Reject
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* 3. ACTIVE DISPUTES (TICKET SYSTEM) */}}
           {activeTab === 'disputes' && (
             <section className="space-y-6">
                <div className="flex justify-between items-center px-2">
