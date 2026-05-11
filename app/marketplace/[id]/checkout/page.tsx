@@ -149,7 +149,7 @@ export default function CheckoutPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center px-10 gap-6"
+            className="fixed inset-0 z-200 bg-white flex flex-col items-center justify-center px-10 gap-6"
           >
             {payStatus === 'processing' ? (
               <>
