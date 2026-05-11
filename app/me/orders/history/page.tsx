@@ -1,144 +1,161 @@
 'use client'
-
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Car, ShoppingBag, Utensils, Box, ChevronRight } from 'lucide-react';
+import { db, auth } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, Package, ShoppingBag } from 'lucide-react';
 
-const CATEGORIES = [
-  { id: 'All', label: 'All', icon: Box },
-  { id: 'Logistics', label: 'Logistics', icon: Box },
-  { id: 'PulseHub', label: 'Pulse Hub', icon: Box },
-  { id: 'Market', label: 'Market', icon: ShoppingBag },
-];
+type HistoryFilter = 'All' | 'Completed' | 'Cancelled';
+const FINAL = ['DELIVERED', 'COMPLETED', 'CANCELLED', 'ARRIVED'];
 
-const HISTORY_DATA = [
-  {
-    id: 'h1',
-    title: 'Parcel Pickup from Lvl 2 MIIT',
-    category: 'Logistics',
-    price: 5.00,
-    date: '30 Apr 2026, 04:07 PM',
-    icon: Box,
-    color: 'bg-blue-500'
-  },
-  {
-    id: 'h2',
-    title: 'MIIT Society Drop: 2026 Varsity Jersey',
-    category: 'Market',
-    price: 85.00,
-    date: '28 Apr 2026, 10:46 AM',
-    icon: ShoppingBag,
-    color: 'bg-purple-500'
-  },
-  {
-    id: 'h3',
-    title: 'Exam Prep Seminar: Discrete Math',
-    category: 'PulseHub',
-    price: 15.00,
-    date: '25 Apr 2026, 02:00 PM',
-    icon: Box,
-    color: 'bg-emerald-500'
-  },
-  {
-    id: 'h4',
-    title: 'Study Note Pack: Calculus IV',
-    category: 'Market',
-    price: 12.00,
-    date: '20 Apr 2026, 11:15 AM',
-    icon: ShoppingBag,
-    color: 'bg-purple-500'
-  },
-  {
-    id: 'h5',
-    title: 'Inter-Campus Document Courier',
-    category: 'Logistics',
-    price: 8.00,
-    date: '15 Apr 2026, 03:30 PM',
-    icon: Box,
-    color: 'bg-blue-500'
-  }
-];
+function StatusBadge({ status }: { status: string }) {
+  const s = (status || '').toUpperCase();
+  if (s === 'CANCELLED')
+    return <span className="text-[11px] font-bold text-red-400">{s.replace(/_/g, ' ')}</span>;
+  return <span className="text-[11px] font-bold text-emerald-500">{s.replace(/_/g, ' ')}</span>;
+}
+
+function HistoryCard({ order, onClick }: { order: any; onClick: () => void }) {
+  const dateStr = order.created_at?.toDate
+    ? order.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
+    : '—';
+  const img = order.image_url || order.images?.[0];
+
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white border border-slate-100 rounded-xl p-4 space-y-3 cursor-pointer active:scale-[0.99] transition-all hover:bg-slate-50/50"
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">
+          {dateStr} · #{order.order_code || order.id.slice(0, 6).toUpperCase()}
+        </p>
+        <StatusBadge status={order.status} />
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="w-14 h-14 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
+          {img ? (
+            <img src={img} className="w-full h-full object-cover" alt={order.title} />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-200">
+              <Package size={20} strokeWidth={1.5} />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.title}</p>
+          <p className="text-[11px] font-medium text-[#94a3b8]">{order.seller_name || 'Pulse Student'}</p>
+        </div>
+        <p className="text-[14px] font-bold text-[#1e293b] shrink-0">RM {Number(order.price).toFixed(2)}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function OrderHistoryPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('All');
+  const [filter, setFilter] = useState<HistoryFilter>('All');
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredHistory = HISTORY_DATA.filter(item => 
-    activeTab === 'All' || item.category === activeTab
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged((user) => {
+      if (!user) { router.push('/auth'); return; }
+      const q = query(collection(db, 'orders'), where('buyer_id', '==', user.uid));
+      return onSnapshot(q, (snap) => {
+        const docs = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter((o: any) => FINAL.includes((o.status || '').toUpperCase()))
+          .sort((a: any, b: any) => {
+            const ta = a.created_at?.toMillis?.() ?? 0;
+            const tb = b.created_at?.toMillis?.() ?? 0;
+            return tb - ta;
+          });
+        setOrders(docs);
+        setLoading(false);
+      });
+    });
+    return () => unsub?.();
+  }, [router]);
+
+  const displayed = orders.filter((o: any) => {
+    const s = (o.status || '').toUpperCase();
+    if (filter === 'Completed') return ['DELIVERED', 'COMPLETED', 'ARRIVED'].includes(s);
+    if (filter === 'Cancelled') return s === 'CANCELLED';
+    return true;
+  });
+
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
+    </div>
   );
 
   return (
-    <motion.main 
-      initial={{ x: "100%" }}
-      animate={{ x: 0 }}
-      exit={{ x: "100%" }}
-      transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="min-h-screen bg-white font-sans antialiased text-navy max-w-md mx-auto border-x border-[#F2F2F7]"
-    >
-      
-      {/* ── HEADER ── */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[#F2F2F7] px-8 pt-16 pb-6 flex items-center gap-4">
-        <button 
-          onClick={() => router.back()} 
-          className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy/40 hover:text-navy transition-all active:scale-90 border border-[#F2F2F7]"
+    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-24">
+
+      {/* ── NAV ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-100 active:scale-95 transition-all"
         >
-          <ArrowLeft size={18} strokeWidth={2.5} />
+          <ChevronLeft size={18} />
         </button>
-        <h1 className="text-[18px] font-bold tracking-tight text-navy">Order History</h1>
+        <div>
+          <p className="text-[14px] font-bold tracking-tight">Order History</p>
+          <p className="text-[11px] font-medium text-[#94a3b8]">{orders.length} past {orders.length === 1 ? 'order' : 'orders'}</p>
+        </div>
       </nav>
 
-      {/* ── CATEGORY PILLS ── */}
-      <section className="px-6 py-6 overflow-x-auto no-scrollbar flex gap-2">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setActiveTab(cat.id)}
-            className={`shrink-0 px-4 py-2 rounded-[8px] text-[12px] font-bold transition-all border ${
-              activeTab === cat.id 
-                ? 'bg-black text-white border-black shadow-[0_2px_8px_rgba(0,0,0,0.1)]' 
-                : 'bg-white text-slate-400 border-[#F2F2F7] hover:bg-slate-50'
-            }`}
+      <div className="pt-28 px-6 space-y-5">
+
+        {/* ── FILTER PILLS ── */}
+        <div className="flex gap-2">
+          {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`h-[32px] px-4 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
+                filter === f
+                  ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
+                  : 'bg-slate-50/50 border-slate-900/10 text-[#94a3b8]'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+
+        {/* ── LIST ── */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={filter}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="space-y-3"
           >
-            {cat.label}
-          </button>
-        ))}
-      </section>
+            {displayed.length === 0 ? (
+              <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
+                <ShoppingBag size={40} strokeWidth={1} className="opacity-30" />
+                <p className="text-[12px] font-bold uppercase tracking-widest opacity-40">No history yet</p>
+              </div>
+            ) : (
+              displayed.map(order => (
+                <HistoryCard
+                  key={order.id}
+                  order={order}
+                  onClick={() => router.push(`/orders/${order.id}`)}
+                />
+              ))
+            )}
+          </motion.div>
+        </AnimatePresence>
 
-      {/* ── HISTORY LIST ── */}
-      <section className="px-6 space-y-6 pt-2 pb-32">
-        {filteredHistory.map((item) => (
-          <div key={item.id} className="flex gap-4 items-center">
-            {/* Left Icon Block */}
-            <div className="relative shrink-0">
-               <div className="w-12 h-12 rounded-[8px] bg-[#FDFDFD] flex items-center justify-center border border-[#F2F2F7] shadow-[0_1px_3px_rgba(0,0,0,0.02)] relative">
-                  <item.icon size={20} className="text-black opacity-80" strokeWidth={1.5} />
-                  <div className={`absolute -top-1 -right-1 w-4 h-4 ${item.color} rounded-full border-2 border-white shadow-sm`} />
-               </div>
-            </div>
-
-            {/* Content Block */}
-            <div className="flex-1 min-w-0">
-               <div className="flex justify-between items-baseline mb-0.5">
-                  <h3 className="text-[13px] font-bold text-black leading-tight truncate pr-4">{item.title}</h3>
-                  <span className="text-[13px] font-black text-black whitespace-nowrap">RM{item.price.toFixed(2)}</span>
-               </div>
-               <p className="text-[11px] text-slate-400 font-medium tracking-tight uppercase mb-2">{item.date}</p>
-               
-               <button className="flex items-center gap-1 text-[11px] font-black text-[#0A66C2] hover:opacity-70 transition-opacity uppercase tracking-widest">
-                  View Status <ChevronRight size={10} strokeWidth={3} />
-               </button>
-            </div>
-          </div>
-        ))}
-
-        {filteredHistory.length === 0 && (
-          <div className="py-20 text-center space-y-2">
-            <p className="text-[13px] font-bold text-navy/10 uppercase tracking-widest">No history found.</p>
-          </div>
-        )}
-      </section>
-
-    </motion.main>
+      </div>
+    </main>
   );
 }
