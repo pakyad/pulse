@@ -1,59 +1,91 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ChevronLeft, 
-  ShoppingBag,
-  Clock,
-  Filter,
-  CheckCircle2,
-  XCircle,
-  MapPin,
-  LayoutGrid,
-  ClipboardList,
-  BarChart3,
-  User,
-  Info
-} from 'lucide-react';
+import { ChevronLeft, ShoppingBag, Package } from 'lucide-react';
 
-type MainTab = 'Active' | 'History';
+type Tab = 'Active' | 'History';
 type HistoryFilter = 'All' | 'Completed' | 'Cancelled';
 
-export default function SimplifiedPurchaseHub() {
+const FINAL = ['DELIVERED', 'COMPLETED', 'CANCELLED', 'ARRIVED'];
+
+function StatusDot({ status }: { status: string }) {
+  const s = status?.toUpperCase() || '';
+  if (s === 'CANCELLED') return <span className="text-[11px] font-bold text-red-500">{s.replace(/_/g, ' ')}</span>;
+  if (FINAL.includes(s)) return <span className="text-[11px] font-bold text-emerald-500">{s.replace(/_/g, ' ')}</span>;
+  return (
+    <span className="flex items-center gap-1.5 text-[11px] font-bold text-amber-500">
+      <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+      {s.replace(/_/g, ' ')}
+    </span>
+  );
+}
+
+function OrderCard({ order, onClick }: { order: any; onClick: () => void }) {
+  const dateStr = order.created_at?.toDate
+    ? order.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })
+    : '—';
+  const img = order.image_url || order.images?.[0];
+
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white border border-slate-100 rounded-xl p-4 space-y-3 cursor-pointer active:scale-[0.99] transition-all hover:bg-slate-50/50"
+    >
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">
+          {dateStr} · #{order.order_code || order.id.slice(0, 6).toUpperCase()}
+        </p>
+        <StatusDot status={order.status} />
+      </div>
+
+      {/* Content row */}
+      <div className="flex items-center gap-4">
+        <div className="w-14 h-14 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
+          {img ? <img src={img} className="w-full h-full object-cover" /> : (
+            <div className="w-full h-full flex items-center justify-center text-slate-200">
+              <Package size={20} strokeWidth={1.5} />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.title}</p>
+          <p className="text-[11px] font-medium text-[#94a3b8]">{order.seller_name || 'Pulse Student'}</p>
+        </div>
+        <p className="text-[14px] font-bold text-[#1e293b] shrink-0">RM {Number(order.price).toFixed(2)}</p>
+      </div>
+    </div>
+  );
+}
+
+export default function MyOrdersPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<MainTab>('Active');
-  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>('All');
+  const [tab, setTab] = useState<Tab>('Active');
+  const [histFilter, setHistFilter] = useState<HistoryFilter>('All');
   const [orders, setOrders] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        router.push('/auth');
-        return;
-      }
+      if (!user) { router.push('/auth'); return; }
 
       onSnapshot(doc(db, 'users', user.uid), (snap) => {
         const userData = snap.data();
         setProfile({ ...userData, uid: user.uid });
-        
+
         const field = userData?.role === 'CLUB' ? 'seller_id' : 'buyer_id';
-        const q = query(
-          collection(db, 'orders'),
-          where(field, '==', user.uid)
-        );
+        const q = query(collection(db, 'orders'), where(field, '==', user.uid));
 
         onSnapshot(q, (snap) => {
           const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           docs.sort((a: any, b: any) => {
-             const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : new Date(a.created_at).getTime();
-             const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : new Date(b.created_at).getTime();
-             return (timeB || 0) - (timeA || 0);
+            const ta = a.created_at?.toMillis?.() ?? new Date(a.created_at).getTime();
+            const tb = b.created_at?.toMillis?.() ?? new Date(b.created_at).getTime();
+            return (tb || 0) - (ta || 0);
           });
           setOrders(docs);
           setLoading(false);
@@ -64,171 +96,120 @@ export default function SimplifiedPurchaseHub() {
     return () => unsubAuth();
   }, [router]);
 
-  const FINAL_STATUSES = ['DELIVERED', 'COMPLETED', 'CANCELLED', 'ARRIVED'];
-  
-  const activeOrders = orders.filter(o => !FINAL_STATUSES.includes((o.status || '').toUpperCase()));
+  const activeOrders = orders.filter(o => !FINAL.includes((o.status || '').toUpperCase()));
   const historyOrders = orders.filter(o => {
-    const status = (o.status || '').toUpperCase();
-    const isHistory = FINAL_STATUSES.includes(status);
-    if (!isHistory) return false;
-    
-    if (historyFilter === 'Completed') return ['DELIVERED', 'COMPLETED', 'ARRIVED'].includes(status);
-    if (historyFilter === 'Cancelled') return status === 'CANCELLED';
+    const s = (o.status || '').toUpperCase();
+    if (!FINAL.includes(s)) return false;
+    if (histFilter === 'Completed') return ['DELIVERED', 'COMPLETED', 'ARRIVED'].includes(s);
+    if (histFilter === 'Cancelled') return s === 'CANCELLED';
     return true;
   });
 
+  const displayed = tab === 'Active' ? activeOrders : historyOrders;
+
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-slate-100 border-t-blue-600 rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white font-sans text-slate-900 antialiased pb-40">
-      
-      {/* ── HEADER ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 h-16 flex items-center justify-between">
-          <button onClick={() => router.push(profile?.role === 'CLUB' ? '/merchant' : '/me')} className="text-slate-400 hover:text-slate-900 transition-all">
-             <ChevronLeft size={24} />
-          </button>
-          <h1 className="text-[14px] font-bold tracking-[0.2em] uppercase opacity-40">
-             {profile?.role === 'CLUB' ? 'Sales Registry' : 'My Purchases'}
-          </h1>
-          <div className="w-6" /> 
+    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-24">
+
+      {/* ── NAV ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+        <button
+          onClick={() => router.push(profile?.role === 'CLUB' ? '/merchant' : '/me')}
+          className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-100 active:scale-95 transition-all"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <div>
+          <p className="text-[14px] font-bold tracking-tight">
+            {profile?.role === 'CLUB' ? 'Sales Registry' : 'My Orders'}
+          </p>
+          <p className="text-[11px] font-medium text-[#94a3b8]">
+            {activeOrders.length} active
+          </p>
+        </div>
       </nav>
 
       {/* ── TABS ── */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-white/80 backdrop-blur-md flex flex-col border-b border-slate-50">
-          <div className="flex px-6">
-            {(['Active', 'History'] as MainTab[]).map((tab) => (
-               <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className="relative flex-1 py-4 flex flex-col items-center group"
-               >
-                  <span className={`text-[13px] font-bold transition-colors ${activeTab === tab ? 'text-blue-600' : 'text-slate-300 group-hover:text-slate-400'}`}>
-                     {tab}
-                  </span>
-                  {activeTab === tab && (
-                     <motion.div 
-                        layoutId="active-tab-line"
-                        className="absolute bottom-0 left-6 right-6 h-[2px] bg-blue-600 rounded-full"
-                     />
-                  )}
-               </button>
-            ))}
-          </div>
-          
-          <div className="px-6 py-2.5 bg-slate-50/50 border-t border-slate-50 flex items-center gap-2">
-             <Info size={12} className="text-slate-400" />
-             <p className="text-[10px] font-medium text-slate-400 italic">
-                {profile?.role === 'CLUB' 
-                  ? 'Instruction: Registry monitors all outgoing asset handshakes and fulfillment integrity.' 
-                  : 'Directive: Tracking active marketplace handshakes and carrier delivery status.'}
-             </p>
-          </div>
+      <div className="fixed top-[68px] left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 flex gap-6">
+        {(['Active', 'History'] as Tab[]).map(t => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className="relative py-4 text-[13px] font-bold transition-colors"
+            style={{ color: tab === t ? '#1e293b' : '#94a3b8' }}
+          >
+            {t}
+            {tab === t && (
+              <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1e293b] rounded-full" />
+            )}
+          </button>
+        ))}
       </div>
 
-      <div className="pt-40 px-6 max-w-2xl mx-auto space-y-8">
-         {activeTab === 'History' && (
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-               {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map((f) => (
-                  <button
-                     key={f}
-                     onClick={() => setHistoryFilter(f)}
-                     className={`px-4 py-1.5 rounded-full text-[11px] font-bold border transition-all ${historyFilter === f ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/10' : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'}`}
-                  >
-                     {f}
-                  </button>
-               ))}
-            </div>
-         )}
+      <div className="pt-36 px-6 space-y-6">
 
-         <AnimatePresence mode="wait">
-            <motion.div 
-               key={activeTab + historyFilter}
-               initial={{ opacity: 0, y: 5 }}
-               animate={{ opacity: 1, y: 0 }}
-               exit={{ opacity: 0 }}
-               className="space-y-4"
+        {/* History sub-filters */}
+        <AnimatePresence>
+          {tab === 'History' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
             >
-               {(activeTab === 'Active' ? activeOrders : historyOrders).length === 0 ? (
-                  <div className="py-32 flex flex-col items-center justify-center text-center space-y-4 opacity-30">
-                     <ShoppingBag size={48} strokeWidth={1} />
-                     <p className="text-[12px] font-bold uppercase tracking-widest">Registry Empty</p>
-                  </div>
-               ) : (
-                  (activeTab === 'Active' ? activeOrders : historyOrders).map((order) => (
-                     <PurchaseCard key={order.id} order={order} router={router} />
-                  ))
-               )}
+              <div className="flex gap-2 pb-2">
+                {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setHistFilter(f)}
+                    className={`h-[32px] px-4 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
+                      histFilter === f
+                        ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-sm'
+                        : 'bg-slate-50/50 border-slate-900/10 text-[#94a3b8]'
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
             </motion.div>
-         </AnimatePresence>
-      </div>
+          )}
+        </AnimatePresence>
 
-      {/* RENDER MERCHANT BOTTOM NAV IF ROLE IS CLUB */}
-      {profile?.role === 'CLUB' && (
-         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-x border-slate-100 pb-8 pt-3 px-10 z-30 flex justify-between items-center shadow-sm max-w-md mx-auto">
-            <button onClick={() => router.push('/merchant')} className="flex flex-col items-center gap-1 group">
-               <LayoutGrid size={20} className="text-slate-400 group-active:text-blue-600 transition-colors" />
-               <span className="text-[10px] font-bold text-slate-400">Dashboard</span>
-            </button>
-            <button onClick={() => router.push('/me/orders')} className="flex flex-col items-center gap-1 group">
-               <ClipboardList size={20} className="text-blue-600" />
-               <span className="text-[10px] font-bold text-blue-600">History</span>
-            </button>
-            <button onClick={() => router.push('/activity')} className="flex flex-col items-center gap-1 group">
-               <BarChart3 size={20} className="text-slate-400 group-active:text-blue-600 transition-colors" />
-               <span className="text-[10px] font-bold text-slate-400">Insights</span>
-            </button>
-            <button onClick={() => router.push('/me')} className="flex flex-col items-center gap-1 group">
-               <User size={20} className="text-slate-400 group-active:text-blue-600 transition-colors" />
-               <span className="text-[10px] font-bold text-slate-400">Account</span>
-            </button>
-         </nav>
-      )}
+        {/* Orders list */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab + histFilter}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="space-y-3"
+          >
+            {displayed.length === 0 ? (
+              <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
+                <ShoppingBag size={40} strokeWidth={1} className="opacity-30" />
+                <p className="text-[12px] font-bold uppercase tracking-widest opacity-40">
+                  {tab === 'Active' ? 'No active orders' : 'No history yet'}
+                </p>
+              </div>
+            ) : (
+              displayed.map(order => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onClick={() => router.push(`/orders/${order.id}`)}
+                />
+              ))
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+      </div>
     </main>
   );
 }
-
-function PurchaseCard({ order, router }: { order: any, router: any }) {
-   const isHistory = ['DELIVERED', 'COMPLETED', 'CANCELLED', 'ARRIVED'].includes((order.status || '').toUpperCase());
-
-   return (
-      <div 
-         onClick={() => router.push(`/orders/${order.id}`)}
-         className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4 hover:bg-slate-50/50 transition-all cursor-pointer group"
-      >
-         <div className="flex items-center justify-between pb-3 border-b border-slate-50">
-            <div className="flex items-center gap-2">
-               <span className="text-[12px] font-bold text-slate-900 tracking-tight">{order.seller_name || 'Pulse Entity'}</span>
-            </div>
-            <span className={`text-[10px] font-bold uppercase tracking-widest ${order.status === 'CANCELLED' ? 'text-red-500' : isHistory ? 'text-green-600' : 'text-blue-600'}`}>
-               {order.status.replace(/_/g, ' ')}
-            </span>
-         </div>
-
-         <div className="flex gap-4">
-            <div className="w-16 h-16 bg-slate-50 rounded-xl overflow-hidden border border-slate-100 shrink-0">
-               {order.image_url && <img src={order.image_url} className="w-full h-full object-cover" />}
-            </div>
-            <div className="flex-1 min-w-0">
-               <h3 className="text-[14px] font-bold text-slate-900 truncate">{order.title}</h3>
-               <p className="text-[11px] text-slate-400 font-mono mt-1 uppercase">ID: {order.order_code || order.id.substring(0, 6).toUpperCase()}</p>
-            </div>
-         </div>
-
-         <div className="pt-3 border-t border-slate-50 flex items-center justify-between">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-               {new Date(order.created_at?.toMillis ? order.created_at.toMillis() : order.created_at).toLocaleDateString()}
-            </p>
-            <div className="flex items-baseline gap-1">
-               <span className="text-[10px] font-bold text-slate-400 uppercase">Total Credits</span>
-               <span className="text-[16px] font-bold text-slate-900">RM {Number(order.price).toFixed(2)}</span>
-            </div>
-         </div>
-      </div>
-   );
-}
-
-

@@ -138,9 +138,16 @@ export default function NavigationGate() {
     pathname?.startsWith('/marketplace/');
 
   // BottomNav Visibility (Dynamic Suppression)
+  // Hidden during the full buying process to avoid overlapping sticky CTAs
+  const isBuyingFlow =
+    pathname?.startsWith('/marketplace/') ||   // item detail + checkout
+    pathname?.startsWith('/orders/') ||         // live order status
+    pathname?.startsWith('/me/orders');          // orders list / history
+
   const showBottomNav = 
     !isAuthPage && 
     !isRoot && 
+    !isBuyingFlow &&
     !pathname?.startsWith('/admin') && 
     !pathname?.startsWith('/merchant') &&
     !(role === 'CLUB' && (pathname === '/me' || pathname === '/activity' || pathname?.startsWith('/me/orders')));

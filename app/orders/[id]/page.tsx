@@ -1,104 +1,75 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CheckCircle2, Package, Bike, ArrowLeft, 
-  Clock, ShieldCheck, MapPin, Receipt, 
-  ExternalLink, Info, AlertTriangle, MessageSquare,
-  ShieldAlert, ChevronLeft, ChevronRight, Truck, Zap, Activity,
-  Navigation
+import {
+  ChevronLeft, CheckCircle2, Package, Activity,
+  Clock, ShieldCheck, MapPin, Receipt,
+  ShieldAlert, Truck, Info
 } from 'lucide-react';
-import VoxelStatus, { VoxelPulse, VoxelRadar } from '@/components/shared/VoxelStatus';
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
-import { reportOrderIssue } from '@/lib/marketplace-utils';
 
-export default function EdgeToEdgeOrderStatus() {
+// ── Order phases ──
+const PHASES = [
+  { id: 1, label: 'Order Placed', key: 'PENDING_VENDOR', icon: Package },
+  { id: 2, label: 'Merchant Preparing', key: 'PREPARING', icon: Clock },
+  { id: 3, label: 'Awaiting Runner', key: 'AWAITING_RUNNER', icon: Truck },
+  { id: 4, label: 'Runner Picked Up', key: 'PICKED_UP', icon: Truck },
+  { id: 5, label: 'In Transit', key: 'IN_TRANSIT', icon: Truck },
+  { id: 6, label: 'Delivered', key: 'DELIVERED', icon: CheckCircle2 },
+];
+
+function getPhase(status: string): number {
+  const s = status.toUpperCase();
+  if (s === 'DELIVERED' || s === 'COMPLETED') return 6;
+  if (['IN_TRANSIT', 'ON_THE_WAY', 'ARRIVED_AT_DESTINATION'].includes(s)) return 5;
+  if (s === 'PICKED_UP') return 4;
+  if (s === 'AWAITING_RUNNER') return 3;
+  if (s === 'PREPARING') return 2;
+  return 1;
+}
+
+function StatusPill({ status }: { status: string }) {
+  const s = status?.toUpperCase() || '';
+  const isDone = ['DELIVERED', 'COMPLETED'].includes(s);
+  const isCancelled = s === 'CANCELLED';
+  return (
+    <span className={`flex items-center gap-1.5 text-[11px] font-bold ${isDone ? 'text-emerald-500' : isCancelled ? 'text-red-500' : 'text-amber-500'}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${isDone ? 'bg-emerald-400' : isCancelled ? 'bg-red-400' : 'bg-amber-400 animate-pulse'}`} />
+      {s.replace(/_/g, ' ')}
+    </span>
+  );
+}
+
+export default function LiveOrderPage() {
   const router = useRouter();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [reportSuccess, setReportSuccess] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [confirmingReceipt, setConfirmingReceipt] = useState(false);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
 
     const unsubAuth = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        if (unsub) unsub();
-        router.push('/auth');
-        return;
-      }
-      
-      const txRef = doc(db, 'orders', id as string);
-      unsub = onSnapshot(txRef, (snap) => {
-        if (snap.exists()) {
-          setOrder({ id: snap.id, ...snap.data() });
-        }
+      if (!user) { router.push('/auth'); return; }
+      unsub = onSnapshot(doc(db, 'orders', id as string), (snap) => {
+        if (snap.exists()) setOrder({ id: snap.id, ...snap.data() });
         setLoading(false);
       });
     });
 
-    return () => {
-      unsubAuth();
-      if (unsub) unsub();
-    };
+    return () => { unsubAuth(); unsub?.(); };
   }, [id, router]);
 
-  if (loading) return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center space-y-4">
-       <VoxelRadar size={40} className="text-blue-500" />
-       <p className="text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing Registry...</p>
-    </div>
-  );
-  
-  if (!order) return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-10 text-center space-y-6">
-       <ShieldAlert size={48} className="text-slate-200" />
-       <div className="space-y-2">
-         <h1 className="text-[20px] font-black text-slate-900 tracking-tight">Node Not Found</h1>
-         <p className="text-[14px] text-slate-400 font-medium">This transaction does not exist in the Pulse registry.</p>
-       </div>
-       <button onClick={() => router.push('/me')} className="h-14 px-8 bg-slate-900 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest">Return to Base</button>
-    </div>
-  );
-
-  const status = (order.status || 'PENDING').toUpperCase();
-  const phases = [
-    { id: 1, label: 'Order Placement', key: 'PENDING_VENDOR' },
-    { id: 2, label: 'Merchant Prep', key: 'PREPARING' },
-    { id: 3, label: 'Logistics Handoff', key: 'AWAITING_RUNNER' },
-    { id: 4, label: 'Runner Pickup', key: 'PICKED_UP' },
-    { id: 5, label: 'Asset in Transit', key: 'IN_TRANSIT' },
-    { id: 6, label: 'Final Handshake', key: 'DELIVERED' }
-  ];
-
-  const getPhase = () => {
-    if (status === 'DELIVERED' || status === 'COMPLETED') return 6;
-    if (status === 'IN_TRANSIT' || status === 'ON_THE_WAY' || status === 'ARRIVED_AT_DESTINATION') return 5;
-    if (status === 'PICKED_UP') return 4;
-    if (status === 'AWAITING_RUNNER') return 3;
-    if (status === 'PREPARING') return 2;
-    return 1;
-  };
-
-  const phase = getPhase();
-  const orderTime = order.created_at?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const title = status === 'DELIVERED' ? 'Asset Secured' : status === 'CANCELLED' ? 'Order Cancelled' : 'Order Active';
-  const subtext = status === 'DELIVERED' ? 'Delivery completed. Asset registered to your inventory.' : 'Live tracking your marketplace asset.';
-
+  // ── Confirm receipt (existing logic preserved) ──
   const handleConfirmReceipt = async () => {
-    if (!navigator.geolocation) {
-      alert("Institutional Location Services Required.");
-      return;
-    }
-
+    if (!navigator.geolocation) { alert('Location services required.'); return; }
+    setConfirmingReceipt(true);
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -106,247 +77,220 @@ export default function EdgeToEdgeOrderStatus() {
         const { httpsCallable } = await import('firebase/functions');
         const completeHandshake = httpsCallable(functions, 'completeHandshake');
         await completeHandshake({ orderId: id, role: 'buyer', coords });
-        alert("Verification Sent. Your order will update once the merchant confirms.");
+        alert('Confirmed! Your order will update once the seller confirms.');
       } catch (e) {
         console.error(e);
-        alert("Handshake Transmission Failed.");
+        alert('Confirmation failed. Please try again.');
+      } finally {
+        setConfirmingReceipt(false);
       }
-    }, (err) => {
-      alert("Location Access Denied. Handshake cannot be institutionalized.");
+    }, () => {
+      alert('Location access denied. Cannot confirm receipt.');
+      setConfirmingReceipt(false);
     });
   };
 
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
+    </div>
+  );
+
+  if (!order) return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+      <ShieldAlert size={40} className="text-slate-200" />
+      <p className="text-[13px] font-bold text-[#94a3b8]">Order not found</p>
+      <button onClick={() => router.push('/me/orders')} className="h-10 px-6 bg-[#1e293b] text-white rounded-xl text-[13px] font-bold">
+        Back to Orders
+      </button>
+    </div>
+  );
+
+  const status = (order.status || 'PENDING').toUpperCase();
+  const phase = getPhase(status);
+  const isDone = phase === 6;
+  const isCancelled = status === 'CANCELLED';
+  const orderImg = order.images?.[0] || order.image_url;
+
   return (
-    <main className="min-h-screen bg-[#FDFDFD] text-slate-900 selection:bg-blue-100 font-sans antialiased overflow-x-hidden">
-      {/* ── 1. NAVIGATION LAYER ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100 px-6 h-20 flex items-center justify-between">
-         <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900 active:scale-90 transition-all">
-            <ChevronLeft size={20} />
-         </button>
-         <div className="flex flex-col items-center">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Registry</p>
-            <p className="text-[14px] font-bold tracking-tight">#{order.order_code || order.id.substring(0, 6).toUpperCase()}</p>
-         </div>
-         <button className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900">
-            <ShieldCheck size={18} />
-         </button>
+    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-36">
+
+      {/* ── NAV ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push('/me/orders')}
+            className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-100 active:scale-95 transition-all"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <div>
+            <p className="text-[14px] font-bold tracking-tight">Order Status</p>
+            <p className="text-[11px] font-medium text-[#94a3b8]">
+              #{order.order_code || order.id.slice(0, 6).toUpperCase()}
+            </p>
+          </div>
+        </div>
+        <StatusPill status={status} />
       </nav>
 
-      <div className="pt-24 pb-32 px-6 max-w-2xl mx-auto space-y-10">
-         
-         {/* ── 2. LOGISTICS PULSE HERO ── */}
-         <section className="space-y-6">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-slate-900 rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl shadow-slate-900/10"
-            >
-               {/* Background Animated Pulse */}
-               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[100px] animate-pulse rounded-full -mr-20 -mt-20" />
-               
-               <div className="relative z-10 space-y-8">
-                  <div className="flex items-center gap-3">
-                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
-                        <VoxelPulse size={12} className="text-emerald-400" />
-                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Active Process</span>
-                     </div>
-                  </div>
+      <div className="pt-28 px-6 space-y-8">
 
-                  <div className="space-y-2">
-                     <motion.h1 
-                        key={title}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="text-[32px] font-black tracking-tighter leading-none"
-                     >
-                        {title}
-                     </motion.h1>
-                     <p className="text-slate-400 text-[15px] font-medium leading-relaxed max-w-[260px]">{subtext}</p>
-                  </div>
-
-                  {/* Voxel Progress Bar */}
-                  <div className="space-y-3 pt-4">
-                     <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden flex gap-1 p-0.5">
-                        {phases.map((p) => (
-                           <motion.div 
-                              key={p.id}
-                              initial={false}
-                              animate={{ 
-                                 backgroundColor: phase >= p.id ? '#10B981' : 'rgba(255,255,255,0.05)',
-                                 flex: phase === p.id ? 2 : 1
-                              }}
-                              className="h-full rounded-full transition-all"
-                           />
-                        ))}
-                     </div>
-                     <div className="flex items-center gap-3">
-                        <VoxelStatus status={order.status} size={14} />
-                        <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest leading-none">
-                           {order.status.replace(/_/g, ' ')}
-                        </span>
-                     </div>
-                     <div className="flex justify-between px-1">
-                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{phases[0].label}</p>
-                        <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">{phases[phase-1]?.label || 'Pending'}</p>
-                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{phases[5].label}</p>
-                     </div>
-                  </div>
-               </div>
-            </motion.div>
-         </section>
-
-         {/* ── 3. TRACKING TIMELINE ── */}
-         <section className="bg-white rounded-[40px] border-[0.5px] border-slate-100 p-10 shadow-xl shadow-slate-900/5 space-y-10">
-            <div className="relative">
-               {/* Tubular Progress Line */}
-               <div className="absolute left-4 top-4 bottom-4 w-1 bg-slate-50 rounded-full" />
-               <motion.div 
-                  initial={{ height: 0 }}
-                  animate={{ height: `${Math.min(100, ((phase - 1) / 5) * 100)}%` }}
-                  className="absolute left-4 top-4 w-1 bg-emerald-500 rounded-full z-10 transition-all duration-1000"
-               />
-
-               <div className="space-y-10 relative z-20">
-                  {phases.map((p) => {
-                     const isCurrent = phase === p.id;
-                     const isPast = phase > p.id;
-                     
-                     return (
-                        <div key={p.id} className="flex items-start gap-8 group">
-                           <div className={`w-9 h-9 rounded-[14px] flex items-center justify-center transition-all duration-500 border-2 ${
-                              isCurrent ? 'bg-slate-900 border-slate-900 text-white scale-110 shadow-xl shadow-slate-900/20' : 
-                              isPast ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/10' : 
-                              'bg-white border-slate-50 text-slate-200'
-                           }`}>
-                              {isPast ? <CheckCircle2 size={16} /> : isCurrent ? <Activity size={16} className="animate-pulse" /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
-                           </div>
-                           <div className="flex-1 pt-1 space-y-1">
-                              <div className="flex justify-between items-baseline">
-                                 <h4 className={`text-[15px] font-bold tracking-tight transition-colors ${isCurrent ? 'text-slate-900' : isPast ? 'text-slate-400' : 'text-slate-200'}`}>
-                                    {p.label} Node
-                                 </h4>
-                                 {isPast && <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">{p.id === 1 ? orderTime : ''}</span>}
-                              </div>
-                              {isCurrent && (
-                                 <motion.p 
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="text-[13px] text-slate-400 font-medium leading-relaxed"
-                                 >
-                                    Registry confirmed at this node. Awaiting verification.
-                                 </motion.p>
-                              )}
-                           </div>
-                        </div>
-                     );
-                  })}
-               </div>
-            </div>
-         </section>
-
-         {/* ── 4. ASSET BENTO NODE ── */}
-         <section className="grid grid-cols-1 gap-6">
-            <div className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-xl shadow-slate-900/5 flex items-center gap-6 group cursor-pointer hover:bg-slate-50 transition-all">
-               <div className="w-20 h-20 bg-slate-50 rounded-[28px] overflow-hidden border border-slate-100 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-500">
-                  {order.image_url ? (
-                    <img src={order.image_url} className="w-full h-full object-cover" />
-                  ) : (
-                    <Package size={28} className="text-slate-200" />
-                  )}
-               </div>
-               <div className="flex-1 space-y-1">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Asset Manifest</p>
-                  <h3 className="text-[18px] font-black text-slate-900 tracking-tighter leading-tight">{order.title}</h3>
-                  <div className="flex items-center gap-2 text-slate-400 font-bold text-[12px] uppercase tracking-widest">
-                     RM {Number(order.price).toFixed(2)} • {order.seller_name || 'Pulse Node'}
-                  </div>
-               </div>
-            </div>
-
-            {/* Merchant Details Node */}
-            <div className="grid grid-cols-2 gap-4">
-               <div className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-xl shadow-slate-900/5 space-y-3">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Drop-Off Hub</p>
-                  <div className="flex items-center gap-3">
-                     <MapPin size={16} className="text-blue-500" />
-                     <h4 className="text-[15px] font-bold text-slate-900 tracking-tight">Main Lobby</h4>
-                  </div>
-               </div>
-               <div className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-xl shadow-slate-900/5 space-y-3">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Asset Fee</p>
-                  <div className="flex items-center gap-3">
-                     <Receipt size={16} className="text-emerald-500" />
-                     <h4 className="text-[15px] font-bold text-slate-900 tracking-tight">RM {Number(order.price).toFixed(2)}</h4>
-                  </div>
-               </div>
-            </div>
-         </section>
-
-         {/* ── 5. GOVERNANCE & HELP ── */}
-         <section className="pt-10 flex flex-col gap-4">
-            {status !== 'DELIVERED' && status !== 'COMPLETED' && (
-              <button 
-                onClick={handleConfirmReceipt}
-                className="w-full h-18 bg-black text-white rounded-[28px] flex items-center justify-center gap-3 text-[14px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10 active:scale-95 transition-all mb-4"
-              >
-                 <CheckCircle2 size={20} />
-                 Confirm Receipt
-              </button>
+        {/* ── ITEM SUMMARY ── */}
+        <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+          <div className="w-14 h-14 rounded-xl bg-white border border-slate-100 overflow-hidden shrink-0">
+            {orderImg ? (
+              <img src={orderImg} className="w-full h-full object-cover" alt="" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-200">
+                <Package size={20} strokeWidth={1.5} />
+              </div>
             )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.title}</p>
+            <p className="text-[11px] font-medium text-[#94a3b8]">{order.seller_name || 'Pulse Student'}</p>
+          </div>
+          <p className="text-[14px] font-bold text-[#1e293b] shrink-0">RM {Number(order.price).toFixed(2)}</p>
+        </div>
 
-            {/* 🏛️ Dispute Gating Logic */}
-            <div className="space-y-3">
-              <button 
-                onClick={() => setIsReportModalOpen(true)}
-                disabled={!order.handshake?.seller_confirmed}
-                className="w-full h-18 border-[0.5px] border-slate-200 rounded-[28px] flex items-center justify-center gap-3 text-[13px] font-bold transition-all disabled:opacity-20 disabled:grayscale group"
-              >
-                 <ShieldAlert size={18} className="text-slate-400 group-hover:text-red-500 transition-colors" />
-                 <span className={order.handshake?.seller_confirmed ? 'text-slate-900' : 'text-slate-400'}>
-                   Report a Problem
-                 </span>
-              </button>
-              
-              {!order.handshake?.seller_confirmed && (
-                <p className="text-[11px] text-slate-400 font-medium text-center px-6 italic">
-                  Mediation is locked until the merchant initiates the delivery handshake.
-                </p>
-              )}
-            </div>
+        {/* ── PROGRESS HERO ── */}
+        <section>
+          <div className="space-y-0.5 mb-4">
+            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">
+              {isDone ? 'Delivered' : isCancelled ? 'Order Cancelled' : 'Tracking Progress'}
+            </h2>
+            <p className="text-[11px] font-medium text-[#94a3b8]">
+              {isDone ? 'Your item has been delivered successfully.' : isCancelled ? 'This order was cancelled.' : 'Live update from the registry.'}
+            </p>
+          </div>
 
-            <div className="p-8 bg-slate-50/50 rounded-[32px] border border-slate-100 space-y-6">
-               <div className="flex items-start gap-4">
-                  <Info size={20} className="text-blue-500 shrink-0 mt-1" />
-                  <div>
-                     <p className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-2">Refund & Support Process</p>
-                     <p className="text-[12px] text-slate-400 font-medium leading-relaxed italic">
-                        "If there is a problem, the Admin will check the <strong>GPS Location Data</strong>. If the locations match, the order is confirmed. If not, a refund will be issued within 24 hours."
-                     </p>
+          {/* Phase progress bar */}
+          <div className="flex gap-1 mb-6">
+            {PHASES.map(p => (
+              <motion.div
+                key={p.id}
+                className="h-1.5 flex-1 rounded-full"
+                animate={{ backgroundColor: phase >= p.id ? (isDone ? '#10b981' : isCancelled ? '#ef4444' : '#1e293b') : '#f1f5f9' }}
+                transition={{ duration: 0.4, delay: p.id * 0.05 }}
+              />
+            ))}
+          </div>
+
+          {/* Timeline */}
+          <div className="bg-slate-50 border border-slate-100 rounded-xl divide-y divide-slate-100">
+            {PHASES.map((p) => {
+              const isPast = phase > p.id;
+              const isCurrent = phase === p.id;
+              const Icon = p.icon;
+              return (
+                <div key={p.id} className={`flex items-center gap-4 px-4 py-3.5 ${!isPast && !isCurrent ? 'opacity-30' : ''}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    isPast ? 'bg-emerald-50 text-emerald-500' :
+                    isCurrent ? 'bg-[#1e293b] text-white' :
+                    'bg-slate-100 text-slate-300'
+                  }`}>
+                    {isPast ? <CheckCircle2 size={16} strokeWidth={2} /> : isCurrent ? <Activity size={14} className="animate-pulse" /> : <Icon size={14} />}
                   </div>
-               </div>
-               <div className="h-px bg-slate-100 w-full" />
-               <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                     <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">SLA Timeframe</p>
-                     <p className="text-[12px] font-bold text-slate-900">24 Hours</p>
+                  <div className="flex-1">
+                    <p className={`text-[13px] font-bold ${isCurrent ? 'text-[#1e293b]' : isPast ? 'text-[#94a3b8]' : 'text-slate-300'}`}>
+                      {p.label}
+                    </p>
+                    {isCurrent && (
+                      <p className="text-[11px] font-medium text-[#94a3b8]">Currently at this stage</p>
+                    )}
                   </div>
-                  <div className="space-y-1">
-                     <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Adjudication</p>
-                     <p className="text-[12px] font-bold text-slate-900">Location Check</p>
-                  </div>
-               </div>
+                  {isPast && <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── ORDER DETAILS ── */}
+        <section className="space-y-3">
+          <div className="space-y-0.5">
+            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Order Details</h2>
+          </div>
+          <div className="bg-slate-50 border border-slate-100 rounded-xl divide-y divide-slate-100">
+            {order.drop_off_location && (
+              <div className="flex items-center justify-between px-4 py-3.5">
+                <span className="text-[13px] font-medium text-[#94a3b8]">Drop-off</span>
+                <span className="flex items-center gap-1.5 text-[13px] font-bold text-[#1e293b]">
+                  <MapPin size={12} className="text-[#94a3b8]" />
+                  {order.drop_off_location}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-between px-4 py-3.5">
+              <span className="text-[13px] font-medium text-[#94a3b8]">Delivery</span>
+              <span className="text-[13px] font-bold text-[#1e293b]">
+                {order.delivery_type === 'RUNNER' ? 'Pulse Runner' : 'Self Collect'}
+              </span>
             </div>
-         </section>
+            <div className="flex items-center justify-between px-4 py-3.5">
+              <span className="text-[13px] font-medium text-[#94a3b8]">Total Paid</span>
+              <span className="text-[14px] font-bold text-[#1e293b]">RM {Number(order.price).toFixed(2)}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── HANDSHAKE NOTICE ── */}
+        <section className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
+            <Info size={14} className="text-[#1e293b]" />
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-[12px] font-bold text-[#1e293b]">Refund & Dispute Policy</p>
+            <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">
+              If there is a problem, admin will verify GPS data from both parties. Refunds are processed within 24 hours if locations don't match.
+            </p>
+          </div>
+        </section>
+
+        {/* ── DISPUTE ── */}
+        {!isDone && !isCancelled && (
+          <section className="space-y-2">
+            <button
+              onClick={() => setIsReportOpen(true)}
+              disabled={!order.handshake?.seller_confirmed}
+              className="w-full h-12 border border-slate-100 text-[13px] font-bold text-[#94a3b8] rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-30"
+            >
+              <ShieldAlert size={16} />
+              Report a Problem
+            </button>
+            {!order.handshake?.seller_confirmed && (
+              <p className="text-[11px] font-medium text-[#94a3b8] text-center">
+                Available after the seller initiates the delivery handshake.
+              </p>
+            )}
+          </section>
+        )}
+
       </div>
 
-      <ReportIssueModal 
-        isOpen={isReportModalOpen} 
-        onClose={() => setIsReportModalOpen(false)} 
+      {/* ── STICKY CONFIRM RECEIPT ── */}
+      {!isDone && !isCancelled && (
+        <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
+          <button
+            onClick={handleConfirmReceipt}
+            disabled={confirmingReceipt}
+            className="w-full h-12 bg-[#1e293b] text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-30 transition-all"
+          >
+            {confirmingReceipt ? (
+              <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            ) : (
+              <><CheckCircle2 size={18} /> I've Received My Order</>
+            )}
+          </button>
+        </footer>
+      )}
+
+      <ReportIssueModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
         order={order}
-        onSuccess={() => {
-          setReportSuccess(true);
-          // Refresh order data if needed
-        }}
+        onSuccess={() => setIsReportOpen(false)}
       />
     </main>
   );
