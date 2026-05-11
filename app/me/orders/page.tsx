@@ -4,60 +4,47 @@ import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ShoppingBag, Package } from 'lucide-react';
+import { ChevronLeft, ShoppingBag } from 'lucide-react';
 
 type Tab = 'Active' | 'History';
 type HistoryFilter = 'All' | 'Completed' | 'Cancelled';
 
 const FINAL = ['DELIVERED', 'COMPLETED', 'CANCELLED', 'ARRIVED'];
 
-function StatusDot({ status }: { status: string }) {
-  const s = status?.toUpperCase() || '';
-  if (s === 'CANCELLED') return <span className="text-[11px] font-bold text-red-500">{s.replace(/_/g, ' ')}</span>;
-  if (FINAL.includes(s)) return <span className="text-[11px] font-bold text-emerald-500">{s.replace(/_/g, ' ')}</span>;
+function StatusPill({ status }: { status: string }) {
+  const s = (status || '').toUpperCase();
+  if (s === 'CANCELLED')
+    return <span className="flex items-center gap-1 text-[11px] font-bold text-red-400"><span className="w-1.5 h-1.5 rounded-full bg-red-300" />Cancelled</span>;
+  if (FINAL.includes(s))
+    return <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-500"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />Completed</span>;
   return (
-    <span className="flex items-center gap-1.5 text-[11px] font-bold text-amber-500">
-      <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
-      {s.replace(/_/g, ' ')}
+    <span className="flex items-center gap-1 text-[11px] font-bold text-amber-500">
+      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+      {s.replace(/_/g, ' ').replace(/\b\w/g, c => c)}
     </span>
   );
 }
 
-function OrderCard({ order, onClick }: { order: any; onClick: () => void }) {
+function OrderRow({ order, onClick }: { order: any; onClick: () => void }) {
   const dateStr = order.created_at?.toDate
     ? order.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })
     : '—';
-  const img = order.image_url || order.images?.[0];
+  const code = `#${(order.order_code || order.id.slice(0, 6)).toUpperCase()}`;
 
   return (
-    <div
+    <button
       onClick={onClick}
-      className="bg-white border border-slate-100 rounded-xl p-4 space-y-3 cursor-pointer active:scale-[0.99] transition-all hover:bg-slate-50/50"
+      className="w-full flex items-center justify-between py-4 text-left group active:opacity-60 transition-opacity"
     >
-      {/* Header row */}
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">
-          {dateStr} · #{order.order_code || order.id.slice(0, 6).toUpperCase()}
-        </p>
-        <StatusDot status={order.status} />
+      <div className="flex-1 min-w-0 pr-4">
+        <p className="text-[14px] font-bold text-[#1e293b] truncate leading-snug">{order.title}</p>
+        <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{dateStr} · {code}</p>
       </div>
-
-      {/* Content row */}
-      <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
-          {img ? <img src={img} className="w-full h-full object-cover" /> : (
-            <div className="w-full h-full flex items-center justify-center text-slate-200">
-              <Package size={20} strokeWidth={1.5} />
-            </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.title}</p>
-          <p className="text-[11px] font-medium text-[#94a3b8]">{order.seller_name || 'Pulse Student'}</p>
-        </div>
-        <p className="text-[14px] font-bold text-[#1e293b] shrink-0">RM {Number(order.price).toFixed(2)}</p>
+      <div className="shrink-0 text-right space-y-1">
+        <p className="text-[14px] font-bold text-[#1e293b]">RM {Number(order.price).toFixed(2)}</p>
+        <StatusPill status={order.status} />
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -151,7 +138,7 @@ export default function MyOrdersPage() {
         ))}
       </div>
 
-      <div className="pt-36 px-6 space-y-6">
+      <div className="pt-[130px] px-6">
 
         {/* History sub-filters */}
         <AnimatePresence>
@@ -162,14 +149,14 @@ export default function MyOrdersPage() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="flex gap-2 pb-2">
+              <div className="flex gap-2 pb-4">
                 {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map(f => (
                   <button
                     key={f}
                     onClick={() => setHistFilter(f)}
-                    className={`h-[32px] px-4 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
+                    className={`h-[30px] px-3.5 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
                       histFilter === f
-                        ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-sm'
+                        ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
                         : 'bg-slate-50/50 border-slate-900/10 text-[#94a3b8]'
                     }`}
                   >
@@ -185,10 +172,10 @@ export default function MyOrdersPage() {
         <AnimatePresence mode="wait">
           <motion.div
             key={tab + histFilter}
-            initial={{ opacity: 0, y: 5 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-3"
+            className="divide-y divide-slate-100"
           >
             {displayed.length === 0 ? (
               <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
@@ -199,7 +186,7 @@ export default function MyOrdersPage() {
               </div>
             ) : (
               displayed.map(order => (
-                <OrderCard
+                <OrderRow
                   key={order.id}
                   order={order}
                   onClick={() => router.push(`/orders/${order.id}`)}
