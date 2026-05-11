@@ -10,128 +10,149 @@ interface SmartFormFieldsProps {
   onSubcategoryChange: (value: string) => void;
 }
 
-const SmartFormFields: React.FC<SmartFormFieldsProps> = ({ 
-  domainId, 
-  metadata, 
+const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
+  domainId,
+  metadata,
   onMetadataChange,
   subcategory,
-  onSubcategoryChange
+  onSubcategoryChange,
 }) => {
   const domain = MARKETPLACE_DOMAINS[domainId];
 
   return (
-    <div className="space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
-      {/* Subcategory Selection */}
-      <section className="space-y-6">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Classification</h2>
-        <div className="flex flex-wrap gap-2">
-          {domain.subcategories.map((sub) => (
-            <button
-              key={sub.label}
-              onClick={() => onSubcategoryChange(sub.label)}
-              className={`px-6 py-2.5 rounded-3xl border transition-all duration-300 text-[13px] font-bold tracking-tight ${
-                subcategory === sub.label 
-                  ? 'bg-slate-900 border-slate-900 text-white' 
-                  : 'bg-white border-slate-50 text-slate-400 hover:border-slate-200'
-              }`}
-            >
-              {sub.label}
-            </button>
-          ))}
+    <div className="space-y-6">
+
+      {/* ── Subcategory ── */}
+      <div className="space-y-3">
+        <div className="space-y-0.5">
+          <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">Subcategory</p>
+          <p className="text-[11px] font-medium text-[#94a3b8]">Pick the most specific match.</p>
         </div>
-      </section>
+        <div className="flex flex-wrap gap-2">
+          {domain.subcategories.map((sub) => {
+            const isActive = subcategory === sub.label;
+            return (
+              <button
+                key={sub.label}
+                onClick={() => onSubcategoryChange(sub.label)}
+                className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
+                  isActive
+                    ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
+                    : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
+                }`}
+              >
+                {sub.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-      {/* Conditional Fields Divider */}
-      <div className="h-[0.5px] bg-slate-100" />
-
-      {/* Domain Specific Fields */}
-      <div className="space-y-12">
-        {domain.customFields.map((field) => (
-          <section key={field.id} className="space-y-4">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">{field.label}</h2>
-            
-            {field.type === 'text' && (
-              <input
-                type="text"
-                placeholder={field.placeholder}
-                value={metadata[field.id] || ''}
-                onChange={(e) => onMetadataChange(field.id, e.target.value)}
-                className="w-full bg-transparent text-[22px] font-bold text-slate-900 placeholder:text-slate-100 focus:outline-none tracking-tight"
-              />
+      {/* ── Domain-specific fields ── */}
+      {domain.customFields.map((field) => (
+        <div key={field.id} className="space-y-3 pt-2 border-t border-slate-100">
+          <div className="space-y-0.5">
+            <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">{field.label}</p>
+            {field.placeholder && (
+              <p className="text-[11px] font-medium text-[#94a3b8]">{field.placeholder}</p>
             )}
+          </div>
 
-            {field.type === 'select' && (
-              <div className="flex flex-wrap gap-2">
-                {field.options?.map((opt) => (
+          {/* text input */}
+          {field.type === 'text' && (
+            <input
+              type="text"
+              placeholder={field.placeholder}
+              value={metadata[field.id] || ''}
+              onChange={(e) => onMetadataChange(field.id, e.target.value)}
+              className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-[#1e293b] transition-colors"
+            />
+          )}
+
+          {/* select — horizontal pill buttons */}
+          {field.type === 'select' && (
+            <div className="flex flex-wrap gap-2">
+              {field.options?.map((opt) => {
+                const isActive = metadata[field.id] === opt;
+                return (
                   <button
                     key={opt}
                     onClick={() => onMetadataChange(field.id, opt)}
-                    className={`px-6 py-2.5 rounded-3xl border transition-all duration-300 text-[13px] font-bold tracking-tight ${
-                      metadata[field.id] === opt 
-                        ? 'bg-slate-900 border-slate-900 text-white' 
-                        : 'bg-white border-slate-50 text-slate-400 hover:border-slate-200'
+                    className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
+                      isActive
+                        ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
+                        : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                     }`}
                   >
                     {opt}
                   </button>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
+          )}
 
-            {field.type === 'toggle' && (
-              <div className="grid grid-cols-1 gap-3">
-                {field.options?.map((opt) => (
+          {/* toggle — vertical stacked rows */}
+          {field.type === 'toggle' && (
+            <div className="bg-slate-50 border border-slate-100 rounded-xl divide-y divide-slate-100 overflow-hidden">
+              {field.options?.map((opt) => {
+                const isActive = metadata[field.id] === opt;
+                return (
                   <button
                     key={opt}
                     onClick={() => onMetadataChange(field.id, opt)}
-                    className={`p-6 rounded-3xl border text-left transition-all duration-300 ${
-                      metadata[field.id] === opt 
-                        ? 'bg-slate-900 border-slate-900 text-white' 
-                        : 'bg-white border-slate-50 text-slate-400 hover:border-slate-200'
+                    className={`w-full flex items-center justify-between px-4 py-3.5 text-left transition-all active:scale-[0.99] ${
+                      isActive ? 'bg-white' : 'hover:bg-white/60'
                     }`}
                   >
-                    <p className="text-[14px] font-bold tracking-tight">{opt}</p>
+                    <span className={`text-[13px] font-bold transition-colors ${
+                      isActive ? 'text-[#1e293b]' : 'text-[#94a3b8]'
+                    }`}>
+                      {opt}
+                    </span>
+                    {isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                    )}
                   </button>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
+          )}
 
-            {field.type === 'timestamp' && (
-              <div className="flex items-center gap-4">
-                <input
-                  type="time"
-                  value={metadata[field.id] || ''}
-                  onChange={(e) => onMetadataChange(field.id, e.target.value)}
-                  className="bg-slate-50 px-6 py-4 rounded-3xl text-[20px] font-bold text-slate-900 focus:outline-none tracking-tight"
-                />
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Local</span>
-              </div>
-            )}
+          {/* timestamp — time input */}
+          {field.type === 'timestamp' && (
+            <input
+              type="time"
+              value={metadata[field.id] || ''}
+              onChange={(e) => onMetadataChange(field.id, e.target.value)}
+              className="h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] focus:outline-none focus:border-[#1e293b] transition-colors"
+            />
+          )}
 
-            {field.type === 'calendar' && (
-              <div className="p-8 bg-slate-50 rounded-[40px] border border-slate-100 flex flex-col items-center justify-center gap-6">
-                 <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Available Slots</p>
-                 <div className="grid grid-cols-3 gap-2 w-full">
-                    {['MORNING', 'AFTERNOON', 'EVENING'].map(slot => (
-                       <button
-                          key={slot}
-                          onClick={() => onMetadataChange(field.id, slot)}
-                          className={`h-12 rounded-2xl border text-[11px] font-black uppercase tracking-[0.2em] transition-all ${
-                             metadata[field.id] === slot ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-400 border-slate-100'
-                          }`}
-                       >
-                          {slot}
-                       </button>
-                    ))}
-                 </div>
-              </div>
-            )}
-            
-            <div className="h-[0.5px] bg-slate-100 mt-8" />
-          </section>
-        ))}
-      </div>
+          {/* calendar — time slot multi-select pills */}
+          {field.type === 'calendar' && (
+            <div className="flex gap-2">
+              {['Morning', 'Afternoon', 'Evening'].map((slot) => {
+                const isActive = metadata[field.id] === slot;
+                return (
+                  <button
+                    key={slot}
+                    onClick={() => onMetadataChange(field.id, slot)}
+                    className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
+                      isActive
+                        ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
+                        : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
+                    }`}
+                  >
+                    {slot}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+        </div>
+      ))}
+
     </div>
   );
 };
