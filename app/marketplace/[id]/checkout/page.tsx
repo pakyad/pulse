@@ -91,30 +91,71 @@ export default function CheckoutPage() {
     setPayStatus('processing');
     await new Promise(r => setTimeout(r, 2500));
     try {
-      const placeOrder = httpsCallable(functions, 'placeOrder');
-      const result: any = await placeOrder({
-        userId:      auth.currentUser.uid,
-        cartItems: [{
-          productId:  id,
-          title:      item.title,
-          price:      item.price,
-          qty,
-          vendorId:   item.seller_id,
-          sellerName: item.seller_name,
-        }],
-        deliveryType:    choice,
-        dropOffLocation: choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : undefined,
-        payment_method:  'FPX',
-        payment_bank:    selectedBank,
-        payment_ref:     `FPX_${Date.now()}`,
-        payment_status:  'PAID',
+      // Option B: Direct Firestore Write (Bypassing Cloud Functions for Demo)
+      const { runTransaction, serverTimestamp, collection } = await import('firebase/firestore');
+      const parentOrderId = `PULSE-${Date.now()}`;
+      
+      await runTransaction(db, async (transaction) => {
+        // Decrement stock
+        const itemRef = doc(db, 'items', id as string);
+        const itemDoc = await transaction.get(itemRef);
+        if (itemDoc.exists()) {
+           const currentStock = itemDoc.data().stock_count || 0;
+           transaction.update(itemRef, { stock_count: Math.max(0, currentStock - qty) });
+        }
+
+        // Sub-order
+        const subOrderRef = doc(collection(db, 'orders'));
+        const dropOffStr = choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : null;
+        
+        // 🏛️ Runner-First Protocol:
+        // If RUNNER, it must go to the Radar first. If SELF_COLLECT, it goes to the Merchant to accept.
+        const initialStatus = choice === 'RUNNER' ? 'PENDING_RUNNER' : 'PENDING_VENDOR';
+
+        transaction.set(subOrderRef, {
+          order_id: subOrderRef.id,
+          parent_id: parentOrderId,
+          buyer_id: auth.currentUser!.uid,
+          seller_id: item.seller_id,
+          seller_name: item.seller_name || 'Merchant',
+          customer_name: auth.currentUser!.displayName || 'Student',
+          title: item.title,
+          price: itemPrice * qty,
+          total: total,
+          items: [{ productId: id, title: item.title, price: itemPrice, qty, vendorId: item.seller_id }],
+          delivery_type: choice,
+          drop_off_location: dropOffStr,
+          status: initialStatus,
+          handshake: {
+            seller_confirmed: false,
+            buyer_confirmed: false,
+            seller_coords: null,
+            buyer_coords: null,
+            verification_type: 'PENDING'
+          },
+          created_at: serverTimestamp()
+        });
+
+        // Parent Order
+        const parentRef = doc(db, 'parent_orders', parentOrderId);
+        transaction.set(parentRef, {
+          id: parentOrderId,
+          buyer_id: auth.currentUser!.uid,
+          total_price: total,
+          item_count: 1,
+          status: 'PAID',
+          items_summary: item.title,
+          created_at: serverTimestamp()
+        });
       });
+
       setPayStatus('done');
       await new Promise(r => setTimeout(r, 1600));
-      router.push(`/orders/success?id=${result.data.parentId}`);
+      router.push(`/orders/success?id=${parentOrderId}`);
     } catch (e: any) {
       console.error('[FPX Pay]', e);
       setPayStatus('idle');
+      alert("Order failed. Please try again.");
     }
   };
 

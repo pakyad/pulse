@@ -101,10 +101,50 @@ export default function MerchantDashboard() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const { functions } = await import('@/lib/firebase');
-        const { httpsCallable } = await import('firebase/functions');
-        const completeHandshake = httpsCallable(functions, 'completeHandshake');
-        await completeHandshake({ orderId, role: 'seller', coords });
+        
+        // Option B: Direct Firestore Write (Bypassing Undeployed Cloud Function)
+        const orderRef = doc(db, "orders", orderId);
+        const orderSnap = await getDoc(orderRef);
+        
+        if (!orderSnap.exists()) {
+          alert("Order not found.");
+          return;
+        }
+
+        const orderData = orderSnap.data();
+        const handshake = orderData.handshake || {};
+
+        handshake.seller_confirmed = true;
+        handshake.seller_coords = coords;
+
+        let newStatus = orderData.status;
+
+        // If buyer already confirmed, we run the proximity check
+        if (handshake.buyer_confirmed && handshake.buyer_coords) {
+          const R = 6371e3; // metres
+          const φ1 = coords.lat * Math.PI/180;
+          const φ2 = handshake.buyer_coords.lat * Math.PI/180;
+          const Δφ = (handshake.buyer_coords.lat - coords.lat) * Math.PI/180;
+          const Δλ = (handshake.buyer_coords.lng - coords.lng) * Math.PI/180;
+
+          const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const dist = R * c;
+
+          handshake.distance = dist;
+          const isSafe = dist <= 50;
+          handshake.verification_type = isSafe ? 'IN_PERSON_SAFE' : 'REMOTE';
+          
+          newStatus = isSafe ? 'COMPLETED' : 'DELIVERED';
+        }
+
+        await updateDoc(orderRef, { 
+          handshake,
+          ...(newStatus !== orderData.status ? { status: newStatus, completed_at: serverTimestamp(), auto_adjudicated: newStatus === 'COMPLETED' } : {})
+        });
+
         alert("Institutional Confirmation Sent. Waiting for buyer receipt.");
       } catch (e) {
         console.error(e);

@@ -36,7 +36,7 @@ export default function MissionBoard() {
           if (!unsubMissions) {
             const q = query(
               collection(db, "orders"), 
-              where("status", "in", ["AWAITING_RUNNER", "PREPARING", "READY_FOR_PICKUP"])
+              where("status", "in", ["PENDING_RUNNER", "AWAITING_RUNNER", "PREPARING", "READY_FOR_PICKUP"])
             );
             
             unsubMissions = onSnapshot(q, (snap) => {
@@ -64,10 +64,7 @@ export default function MissionBoard() {
   }, [router]);
 
   const handleClaim = async (missionId: string) => {
-    if (!auth.currentUser || !profile?.is_online) {
-       alert("You must be ONLINE to claim missions. Update your status in the Dashboard.");
-       return;
-    }
+    if (!auth.currentUser) return;
     setIsProcessing(true);
     try {
       await runTransaction(db, async (tx) => {
@@ -77,7 +74,7 @@ export default function MissionBoard() {
         tx.update(ref, { 
           runner_id: auth.currentUser?.uid, 
           runner_name: profile?.full_name || 'Runner',
-          status: 'IN_TRANSIT',
+          status: 'PREPARING',
           accepted_at: serverTimestamp()
         });
       });
@@ -140,7 +137,7 @@ export default function MissionBoard() {
                              </div>
                              <div>
                                 <h3 className="text-[16px] font-bold text-slate-900 tracking-tight">{mission.seller_name || 'Merchant'}</h3>
-                                <p className="text-[12px] text-slate-400 font-medium lowercase">#{mission.id.substring(0,8)}</p>
+                                <p className="text-[12px] text-slate-400 font-medium lowercase">{mission.title || 'Item'} • #{mission.id.substring(0,8)}</p>
                              </div>
                           </div>
                           <div className="text-right">
@@ -156,7 +153,7 @@ export default function MissionBoard() {
                           </div>
                           <div className="flex items-center gap-3">
                              <Clock size={14} className="text-slate-300" />
-                             <p className="text-[13px] font-medium text-slate-400 italic lowercase">"ready for pickup at miit level 2"</p>
+                             <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || 'merchant'}</p>
                           </div>
                        </div>
 

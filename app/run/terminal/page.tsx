@@ -83,7 +83,7 @@ export default function RunnerTerminal() {
         const qActive = query(
           collection(db, "orders"), 
           where("runner_id", "==", user.uid), 
-          where("status", "in", ["IN_TRANSIT", "PICKED_UP", "ARRIVED_AT_DESTINATION"])
+          where("status", "in", ["PREPARING", "READY_FOR_PICKUP", "IN_TRANSIT", "PICKED_UP", "ARRIVED_AT_DESTINATION"])
         );
         unsubActive = onSnapshot(qActive, (snap) => {
           setActiveMission(!snap.empty ? { id: snap.docs[0].id, ...snap.docs[0].data() } : null);
@@ -105,7 +105,7 @@ export default function RunnerTerminal() {
 
         const qRadar = query(
           collection(db, "orders"), 
-          where("status", "in", ["AWAITING_RUNNER", "PREPARING", "READY_FOR_PICKUP"])
+          where("status", "in", ["PENDING_RUNNER", "AWAITING_RUNNER", "PREPARING", "READY_FOR_PICKUP"])
         );
         unsubRadar = onSnapshot(qRadar, (snap) => {
           const allAwaiting = snap.docs
@@ -141,7 +141,7 @@ export default function RunnerTerminal() {
         tx.update(ref, { 
           runner_id: auth.currentUser?.uid, 
           runner_name: profile?.full_name || 'Runner',
-          status: 'IN_TRANSIT',
+          status: 'PREPARING',
           accepted_at: serverTimestamp()
         });
       });
@@ -235,18 +235,24 @@ export default function RunnerTerminal() {
                     <div className="space-y-6">
                        <div className="flex items-start gap-4">
                           <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 mt-1"><Navigation size={18}/></div>
-                          <div><Heading className="text-[15px] lowercase">{activeMission.seller_name || 'pickup point'}</Heading><Subtext className="text-[13px] mt-0.5 lowercase">miit level 2 cafe</Subtext></div>
+                          <div><Heading className="text-[15px] lowercase">{activeMission.seller_name || 'pickup point'}</Heading><Subtext className="text-[13px] mt-0.5 lowercase">collect item: {activeMission.title || 'package'}</Subtext></div>
                        </div>
                        <div className="ml-5 h-6 border-l-[0.5px] border-dashed border-slate-200" />
                        <div className="flex items-start gap-4">
                           <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white mt-1"><MapPin size={18}/></div>
-                          <div><Heading className="text-[15px] lowercase">{activeMission.drop_off_location || 'drop-off'}</Heading><Subtext className="text-[13px] mt-0.5 lowercase">{activeMission.buyer_name || 'student'}</Subtext></div>
+                          <div><Heading className="text-[15px] lowercase">{activeMission.drop_off_location || 'drop-off'}</Heading><Subtext className="text-[13px] mt-0.5 lowercase">deliver to: {activeMission.customer_name || 'student'}</Subtext></div>
                        </div>
                     </div>
-                    <div className="pt-2 flex gap-3">
+                     <div className="pt-2 flex gap-3">
                        <button className="flex-1 h-14 bg-slate-900 text-white rounded-full font-bold text-[13px] shadow-lg shadow-slate-900/10 active:scale-95 transition-all lowercase">navigate</button>
-                       <button onClick={() => setProofMode(activeMission.status === 'IN_TRANSIT' ? 'PICKUP' : 'DELIVERY')} className="flex-1 h-14 bg-white text-slate-900 border border-slate-100 rounded-full font-bold text-[13px] active:scale-95 transition-all lowercase">{activeMission.status === 'IN_TRANSIT' ? 'confirm pickup' : 'complete delivery'}</button>
-                    </div>
+                       {activeMission.status === 'PREPARING' ? (
+                         <button disabled className="flex-1 h-14 bg-slate-100 text-slate-400 rounded-full font-bold text-[13px] lowercase">waiting for merchant</button>
+                       ) : activeMission.status === 'READY_FOR_PICKUP' ? (
+                         <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-14 bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 rounded-full font-bold text-[13px] active:scale-95 transition-all lowercase">confirm pickup</button>
+                       ) : (
+                         <button onClick={() => setProofMode('DELIVERY')} className="flex-1 h-14 bg-white text-slate-900 border border-slate-100 rounded-full font-bold text-[13px] active:scale-95 transition-all lowercase">complete delivery</button>
+                       )}
+                     </div>
                  </motion.div>
               ) : (
                  <motion.div key="searching" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="py-24 flex flex-col items-center justify-center text-center space-y-8">
@@ -267,16 +273,27 @@ export default function RunnerTerminal() {
                         </div>
                     </div>
                     <div className="space-y-2">
-                       <p className="text-[16px] font-bold text-slate-900 lowercase">no active mission...</p>
-                       <p className="text-[12px] text-slate-400 font-medium lowercase leading-relaxed">
-                          go to orders to claim a mission.
-                       </p>
+                        {jobs.length > 0 ? (
+                           <>
+                              <p className="text-[18px] font-black text-emerald-600 uppercase tracking-widest animate-pulse">new mission alert</p>
+                              <p className="text-[12px] text-slate-400 font-medium lowercase leading-relaxed">
+                                 {jobs.length} pending order{jobs.length > 1 ? 's' : ''} in the area.
+                              </p>
+                           </>
+                        ) : (
+                           <>
+                              <p className="text-[16px] font-bold text-slate-900 lowercase">no active mission...</p>
+                              <p className="text-[12px] text-slate-400 font-medium lowercase leading-relaxed">
+                                 go to orders to claim a mission.
+                              </p>
+                           </>
+                        )}
                     </div>
                     <button 
                       onClick={() => router.push('/run/missions')}
-                      className="px-8 h-11 bg-slate-900 text-white rounded-full text-[12px] font-bold shadow-lg shadow-slate-900/10 active:scale-95 transition-all lowercase"
+                      className={`px-8 h-11 text-white rounded-full text-[12px] font-bold shadow-lg active:scale-95 transition-all lowercase ${jobs.length > 0 ? 'bg-emerald-500 shadow-emerald-500/20 animate-bounce' : 'bg-slate-900 shadow-slate-900/10'}`}
                     >
-                      browse orders
+                      {jobs.length > 0 ? 'claim now' : 'browse orders'}
                     </button>
                  </motion.div>
               )}

@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { deleteDoc, doc } from 'firebase/firestore';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import SwipeToReady from './SwipeToReady';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
@@ -123,7 +124,7 @@ export default function MobileMerchant({
                        </div>
 
                        <div className="flex gap-3 pt-2">
-                          {o.status === 'PENDING' ? (
+                          {o.status === 'PENDING_VENDOR' ? (
                             <button 
                               onClick={() => handleAcceptOrder(o.id)}
                               className="flex-1 h-12 bg-[#1e293b] text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10"
@@ -131,13 +132,9 @@ export default function MobileMerchant({
                                Accept Order
                             </button>
                           ) : o.status === 'PREPARING' ? (
-                            <button 
-                              onClick={() => handleCallRunner(o.id)}
-                              className="flex-1 h-12 bg-[#1e293b] text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
-                            >
-                               <Bike size={14} />
-                               Call Runner
-                            </button>
+                            <div className="flex-1">
+                              <SwipeToReady orderId={o.id} />
+                            </div>
                           ) : (
                             <button 
                               onClick={() => handleConfirmDelivery(o.id)}

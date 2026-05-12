@@ -1,6 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
+import SwipeToReady from './SwipeToReady';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info, Pencil, Trash2 } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
@@ -222,12 +223,7 @@ export default function DesktopMerchant({
                         </div>
                         <div className="flex items-center gap-4">
                            {o.status === 'PREPARING' && (
-                             <button 
-                               onClick={() => handleCallRunner(o.id)}
-                               className="h-8 px-4 bg-slate-900 text-white rounded text-[11px] font-bold hover:bg-black transition-all shadow-sm"
-                             >
-                               Call Runner
-                             </button>
+                             <div className="w-48"><SwipeToReady orderId={o.id} /></div>
                            )}
                            {o.status === 'AWAITING_RUNNER' && (
                              <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold border border-blue-100">

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,9 +15,9 @@ import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 
 // ── Order phases ──
 const PHASES = [
-  { id: 1, label: 'Order Placed', key: 'PENDING_VENDOR', icon: Package },
+  { id: 1, label: 'Finding Runner', key: 'PENDING_RUNNER', icon: Package },
   { id: 2, label: 'Merchant Preparing', key: 'PREPARING', icon: Clock },
-  { id: 3, label: 'Awaiting Runner', key: 'AWAITING_RUNNER', icon: Truck },
+  { id: 3, label: 'Ready for Pickup', key: 'READY_FOR_PICKUP', icon: Truck },
   { id: 4, label: 'Runner Picked Up', key: 'PICKED_UP', icon: Truck },
   { id: 5, label: 'In Transit', key: 'IN_TRANSIT', icon: Truck },
   { id: 6, label: 'Delivered', key: 'DELIVERED', icon: CheckCircle2 },
@@ -28,7 +28,7 @@ function getPhase(status: string): number {
   if (s === 'DELIVERED' || s === 'COMPLETED') return 6;
   if (['IN_TRANSIT', 'ON_THE_WAY', 'ARRIVED_AT_DESTINATION'].includes(s)) return 5;
   if (s === 'PICKED_UP') return 4;
-  if (s === 'AWAITING_RUNNER') return 3;
+  if (s === 'READY_FOR_PICKUP' || s === 'AWAITING_RUNNER') return 3;
   if (s === 'PREPARING') return 2;
   return 1;
 }
@@ -77,10 +77,53 @@ export default function LiveOrderPage() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const { functions } = await import('@/lib/firebase');
-        const { httpsCallable } = await import('firebase/functions');
-        const completeHandshake = httpsCallable(functions, 'completeHandshake');
-        await completeHandshake({ orderId: id, role: 'buyer', coords });
+        
+        // Option B: Direct Firestore Write (Bypassing Undeployed Cloud Function)
+        const orderRef = doc(db, "orders", id as string);
+        const orderSnap = await getDoc(orderRef);
+        
+        if (!orderSnap.exists()) {
+          alert("Order not found.");
+          setConfirmingReceipt(false);
+          return;
+        }
+
+        const orderData = orderSnap.data();
+        const handshake = orderData.handshake || {};
+
+        handshake.buyer_confirmed = true;
+        handshake.buyer_coords = coords;
+
+        let newStatus = orderData.status;
+
+        // If seller already confirmed, we run the proximity check
+        if (handshake.seller_confirmed && handshake.seller_coords) {
+          const R = 6371e3; // metres
+          const φ1 = handshake.seller_coords.lat * Math.PI/180;
+          const φ2 = coords.lat * Math.PI/180;
+          const Δφ = (coords.lat - handshake.seller_coords.lat) * Math.PI/180;
+          const Δλ = (coords.lng - handshake.seller_coords.lng) * Math.PI/180;
+
+          const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const dist = R * c;
+
+          handshake.distance = dist;
+          const isSafe = dist <= 50;
+          handshake.verification_type = isSafe ? 'IN_PERSON_SAFE' : 'REMOTE';
+          
+          newStatus = isSafe ? 'COMPLETED' : 'DELIVERED';
+        }
+
+        const { serverTimestamp } = await import('firebase/firestore');
+
+        await updateDoc(orderRef, { 
+          handshake,
+          ...(newStatus !== orderData.status ? { status: newStatus, completed_at: serverTimestamp(), auto_adjudicated: newStatus === 'COMPLETED' } : {})
+        });
+
         alert('Confirmed! Your order will update once the seller confirms.');
       } catch (e) {
         console.error(e);
