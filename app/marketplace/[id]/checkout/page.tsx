@@ -109,7 +109,7 @@ export default function CheckoutPage() {
         const dropOffStr = choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : null;
         
         // 🏛️ Runner-First Protocol:
-        // If RUNNER, it must go to the Radar first. If SELF_COLLECT, it goes to the Merchant to accept.
+        // If RUNNER, it hits the Radar first.
         const initialStatus = choice === 'RUNNER' ? 'PENDING_RUNNER' : 'PENDING_VENDOR';
 
         transaction.set(subOrderRef, {
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => step === 2 ? setStep(1) : router.back()}
+            onClick={() => step === 2 ? setStep(1) : router.push('/marketplace')}
             className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-100 active:scale-95 transition-all"
           >
             <ChevronLeft size={18} />

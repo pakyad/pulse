@@ -135,7 +135,7 @@ export default function ItemDetailsPage() {
       {/* ── NAV (matches platform pattern) ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between bg-transparent pointer-events-none">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push('/marketplace')}
           className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center text-[#1e293b] shadow-sm active:scale-95 transition-all pointer-events-auto"
         >
           <ChevronLeft size={18} />

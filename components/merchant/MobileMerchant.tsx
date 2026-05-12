@@ -7,6 +7,7 @@ import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import SwipeToReady from './SwipeToReady';
 import { motion, AnimatePresence } from 'framer-motion';
+import IncomingOrderAlert from './IncomingOrderAlert';
 
 /**
  * 🏛️ Pulse Mobile Merchant Terminal
@@ -16,6 +17,7 @@ export default function MobileMerchant({
   merchant, 
   revenue, 
   activeOrdersCount, 
+  incomingOrders,
   urgentOrders, 
   preparingOrders,
   topItems, 
@@ -259,6 +261,15 @@ export default function MobileMerchant({
                />
             </motion.div>
          )}
+      </AnimatePresence>
+      {/* Incoming Order Alert Overlay */}
+      <AnimatePresence>
+        {incomingOrders?.length > 0 && (
+          <IncomingOrderAlert 
+            key={incomingOrders[0].id}
+            order={incomingOrders[0]} 
+          />
+        )}
       </AnimatePresence>
     </div>
   );

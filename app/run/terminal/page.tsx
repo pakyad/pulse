@@ -105,7 +105,7 @@ export default function RunnerTerminal() {
 
         const qRadar = query(
           collection(db, "orders"), 
-          where("status", "in", ["PENDING_RUNNER", "AWAITING_RUNNER", "PREPARING", "READY_FOR_PICKUP"])
+          where("status", "in", ["PENDING_RUNNER"])
         );
         unsubRadar = onSnapshot(qRadar, (snap) => {
           const allAwaiting = snap.docs
@@ -141,7 +141,7 @@ export default function RunnerTerminal() {
         tx.update(ref, { 
           runner_id: auth.currentUser?.uid, 
           runner_name: profile?.full_name || 'Runner',
-          status: 'PREPARING',
+          status: 'AWAITING_MERCHANT_ACCEPT',
           accepted_at: serverTimestamp()
         });
       });

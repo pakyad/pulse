@@ -162,8 +162,9 @@ export default function MerchantDashboard() {
 
   // ── SHARED ANALYTICS LOGIC ──
   const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
-  const activeOrdersList = orders.filter(o => ["PENDING_VENDOR", "PREPARING", "AWAITING_RUNNER", "READY_FOR_PICKUP", "IN_TRANSIT", "ON_THE_WAY"].includes(o.status));
+  const activeOrdersList = orders.filter(o => ["PENDING_VENDOR", "AWAITING_MERCHANT_ACCEPT", "PREPARING", "AWAITING_RUNNER", "READY_FOR_PICKUP", "IN_TRANSIT", "ON_THE_WAY"].includes(o.status));
   
+  const incomingOrders = activeOrdersList.filter(o => o.status === 'AWAITING_MERCHANT_ACCEPT');
   const urgentOrders = activeOrdersList.filter(o => o.status === 'PENDING_VENDOR');
   const preparingOrders = activeOrdersList.filter(o => ['PREPARING', 'AWAITING_RUNNER', 'READY_FOR_PICKUP'].includes(o.status));
 
@@ -176,6 +177,7 @@ export default function MerchantDashboard() {
           merchant={merchant}
           revenue={revenue}
           activeOrdersCount={activeOrdersList.length}
+          incomingOrders={incomingOrders}
           urgentOrders={urgentOrders}
           preparingOrders={preparingOrders}
           topItems={items.slice(0, 5)}

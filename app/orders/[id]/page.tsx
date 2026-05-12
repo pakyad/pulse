@@ -220,7 +220,7 @@ export default function LiveOrderPage() {
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-start justify-between pointer-events-none">
         <div className="flex items-center gap-3 pointer-events-auto">
           <button
-            onClick={() => router.push('/me/orders')}
+            onClick={() => router.push('/marketplace')}
             className="w-10 h-10 rounded-[14px] bg-white/90 backdrop-blur-md flex items-center justify-center text-[#1e293b] border border-white shadow-sm active:scale-95 transition-all"
           >
             <ChevronLeft size={18} strokeWidth={2.5} />

@@ -153,7 +153,8 @@ export default function RunnerActivePage() {
          <div className="space-y-2">
             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Active Instruction</p>
             <h1 className="text-[32px] font-black tracking-tightest leading-none uppercase">
-               {order.status === 'ACCEPTED' && "Proceed to Merchant"}
+               {order.status === 'AWAITING_MERCHANT_ACCEPT' && "Waiting for Merchant"}
+               {['PREPARING', 'READY_FOR_PICKUP'].includes(order.status) && "Proceed to Merchant"}
                {order.status === 'ARRIVED_AT_MERCHANT' && "Verify Items"}
                {order.status === 'ON_THE_WAY' && "Start Transit"}
                {order.status === 'ARRIVED_AT_BUYER' && "Enter Handshake"}
@@ -167,7 +168,7 @@ export default function RunnerActivePage() {
             
             {/* NODE 1: MERCHANT */}
             <NodeItem 
-              active={['ACCEPTED', 'ARRIVED_AT_MERCHANT'].includes(order.status)}
+              active={['AWAITING_MERCHANT_ACCEPT', 'PREPARING', 'READY_FOR_PICKUP', 'ARRIVED_AT_MERCHANT'].includes(order.status)}
               completed={['ON_THE_WAY', 'ARRIVED_AT_BUYER', 'COMPLETED'].includes(order.status)}
               title="Merchant Point"
               detail={order.seller_name}
@@ -275,7 +276,23 @@ export default function RunnerActivePage() {
       {/* ── Sticky Action Terminal ── */}
       <div className="px-8 pt-8 pb-12 bg-white border-t border-slate-100 shrink-0">
          <AnimatePresence mode="wait">
-            {order.status === 'ACCEPTED' && (
+            {order.status === 'AWAITING_MERCHANT_ACCEPT' && (
+              <div className="w-full h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center gap-3 border border-slate-100">
+                <div className="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin" />
+                <span className="text-[11px] font-black uppercase tracking-widest text-navy/40">Waiting for Merchant to Accept</span>
+              </div>
+            )}
+
+            {order.status === 'PREPARING' && (
+              <ActionButton 
+                key="arrived_merchant"
+                label="Arrived at Merchant"
+                onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_MERCHANT' })}
+                color="navy"
+              />
+            )}
+
+            {order.status === 'READY_FOR_PICKUP' && (
               <ActionButton 
                 key="arrived_merchant"
                 label="Arrived at Merchant"

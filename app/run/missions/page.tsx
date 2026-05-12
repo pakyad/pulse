@@ -59,7 +59,7 @@ export default function MissionBoard() {
           if (!unsubMissions) {
             const q = query(
               collection(db, "orders"), 
-              where("status", "in", ["PENDING_RUNNER", "AWAITING_RUNNER", "PREPARING", "READY_FOR_PICKUP"])
+              where("status", "in", ["PENDING_RUNNER"])
             );
             
             unsubMissions = onSnapshot(q, (snap) => {
@@ -102,7 +102,7 @@ export default function MissionBoard() {
         tx.update(ref, { 
           runner_id: auth.currentUser?.uid, 
           runner_name: profile?.full_name || 'Runner',
-          status: 'PREPARING',
+          status: 'AWAITING_MERCHANT_ACCEPT',
           accepted_at: serverTimestamp()
         });
       });
