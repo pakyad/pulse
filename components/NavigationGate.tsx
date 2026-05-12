@@ -135,7 +135,8 @@ export default function NavigationGate() {
     pathname?.startsWith('/merchant') || 
     pathname?.startsWith('/admin') || 
     pathname?.startsWith('/run') || 
-    pathname?.startsWith('/marketplace/');
+    pathname?.startsWith('/marketplace/') ||
+    pathname?.startsWith('/orders/');
 
   // BottomNav Visibility (Dynamic Suppression)
   // Hidden during the full buying process to avoid overlapping sticky CTAs

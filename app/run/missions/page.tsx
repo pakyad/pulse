@@ -10,6 +10,23 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
+function formatTimeAgo(timestamp: any, nowMs: number) {
+  if (!timestamp) return 'just now';
+  try {
+    const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
+    const seconds = Math.floor((nowMs - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+  } catch (e) {
+    return 'recently';
+  }
+}
+
 export default function MissionBoard() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
@@ -17,6 +34,12 @@ export default function MissionBoard() {
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [filter, setFilter] = useState('ALL');
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     let unsubMissions: (() => void) | null = null;
@@ -43,7 +66,12 @@ export default function MissionBoard() {
               const allMissions = snap.docs
                 .map(d => ({ id: d.id, ...d.data() }))
                 .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER' || o.delivery_type === 'runner' || o.deliveryType === 'runner')
-                .filter((o: any) => !o.runner_id);
+                .filter((o: any) => !o.runner_id)
+                .sort((a: any, b: any) => {
+                   const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : new Date(a.created_at).getTime();
+                   const timeB = b.created_at?.toMillis ? b.created_at.toMillis() : new Date(b.created_at).getTime();
+                   return (timeB || 0) - (timeA || 0); // Newest first
+                });
               setMissions(allMissions);
             }, (err) => {
               console.error("[Missions] Order Sync Error:", err);
@@ -151,9 +179,14 @@ export default function MissionBoard() {
                              <MapPin size={14} className="text-slate-300" />
                              <p className="text-[13px] font-bold text-slate-700">{mission.drop_off_location || 'Campus Center'}</p>
                           </div>
-                          <div className="flex items-center gap-3">
-                             <Clock size={14} className="text-slate-300" />
-                             <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || 'merchant'}</p>
+                          <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-3">
+                                <Clock size={14} className="text-slate-300" />
+                                <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || 'merchant'}</p>
+                             </div>
+                             <span className="text-[11px] font-bold text-[#1e293b] bg-slate-200/50 px-2.5 py-0.5 rounded-full lowercase tracking-tight">
+                                {formatTimeAgo(mission.created_at, now)}
+                             </span>
                           </div>
                        </div>
 

@@ -1,4 +1,6 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 
 if (admin.apps.length === 0) {
@@ -274,3 +276,58 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
   return R * c; // in metres
 }
+
+/**
+ * 🚀 Push Notification Engine
+ * Listens for order status changes and sends FCM push notifications to the buyer.
+ */
+export const onOrderStatusChanged = onDocumentUpdated("orders/{orderId}", async (event) => {
+  const dataBefore = event.data?.before.data();
+  const dataAfter = event.data?.after.data();
+
+  if (!dataBefore || !dataAfter) return null;
+
+  const oldStatus = dataBefore.status;
+  const newStatus = dataAfter.status;
+
+  if (oldStatus === newStatus) return null;
+
+  const buyerId = dataAfter.buyer_id;
+  if (!buyerId) return null;
+
+  // Get buyer's FCM token
+  const userDoc = await db.collection('users').doc(buyerId).get();
+  const userData = userDoc.data();
+  const fcmToken = userData?.fcmToken;
+
+  if (!fcmToken) {
+    logger.log(`No FCM token found for user ${buyerId}`);
+    return null;
+  }
+
+  let title = "Order Update";
+  let body = "";
+
+  if (newStatus === 'ACCEPTED_BY_RUNNER' || newStatus === 'ON_THE_WAY') {
+    body = "Your order is on the way to pickup the order!";
+  } else if (newStatus === 'PICKED_UP') {
+    body = "Rider is on the way to you.";
+  }
+
+  if (!body) return null;
+
+  const message = {
+    notification: {
+      title,
+      body
+    },
+    token: fcmToken
+  };
+
+  try {
+    await admin.messaging().send(message);
+    logger.log(`Push notification sent to ${buyerId} for order ${event.params.orderId}`);
+  } catch (error) {
+    logger.error("Error sending push notification:", error);
+  }
+});

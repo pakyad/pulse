@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
 import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
+import OrderTracker from '@/components/shared/OrderTracker';
 
 // ── Order phases ──
 const PHASES = [
@@ -180,124 +181,122 @@ export default function LiveOrderPage() {
   const orderImg = order.images?.[0] || order.image_url;
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-36">
+    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-36 relative">
 
-      {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
-        <div className="flex items-center gap-3">
+      {/* ── FULL BLEED MAP HERO (MAX TOP) ── */}
+      <div className="absolute top-0 left-0 right-0 h-[320px] bg-[#f2f2f7] z-0">
+        <img 
+          src={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? `https://maps.googleapis.com/maps/api/staticmap?size=800x600&scale=2&maptype=roadmap&style=feature:all|element:labels.text.fill|color:0x9c9c9c&style=feature:all|element:labels.text.stroke|color:0xffffff&style=feature:landscape|color:0xf2f2f7&style=feature:poi|visibility:off&style=feature:road|color:0xffffff&style=feature:water|color:0xe5e5ea&center=3.1597,101.7000&zoom=16&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}` : '/map-bg.png'}
+          className="w-full h-full object-cover mix-blend-darken"
+          alt="Live Route Map"
+          onError={(e) => { e.currentTarget.src = '/map-bg.png'; }}
+        />
+        
+        {/* Transparent Glass Overlay (Logistics Data) */}
+        <div className="absolute bottom-6 left-6 z-20 w-[240px]">
+          <div className="bg-transparent p-1">
+            <div className="relative pl-5">
+              <div className="absolute left-[5px] top-1.5 bottom-1.5 w-[1.5px] bg-[#1e293b]/20"></div>
+              
+              <div className="mb-4 relative">
+                <div className="absolute -left-5 top-1 w-3 h-3 rounded-full bg-white border-[2.5px] border-[#1e293b] shadow-sm"></div>
+                <p className="text-[9px] font-black text-[#64748b] uppercase tracking-widest mb-0.5 leading-none drop-shadow-sm">Take from</p>
+                <p className="text-[13px] font-bold text-[#1e293b] leading-tight truncate drop-shadow-sm">{order.seller_name || 'Pulse Merchant'}</p>
+                <p className="text-[11px] font-bold text-[#64748b] mt-0.5 truncate drop-shadow-sm">{order.pickup_location || 'Student Hub Cafe, Lvl 2'}</p>
+              </div>
+              
+              <div className="relative">
+                <div className="absolute -left-5 top-1 w-3 h-3 rounded-full bg-white border-[2.5px] border-teal-500 shadow-sm"></div>
+                <p className="text-[9px] font-black text-[#64748b] uppercase tracking-widest mb-0.5 leading-none drop-shadow-sm">Deliver to</p>
+                <p className="text-[13px] font-bold text-[#1e293b] leading-tight truncate drop-shadow-sm">{order.buyer_name || 'You'}</p>
+                <p className="text-[11px] font-bold text-[#64748b] mt-0.5 truncate drop-shadow-sm">{order.drop_off_location || 'Block K — Library Foyer'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── NAV (Floating Over Map) ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-start justify-between pointer-events-none">
+        <div className="flex items-center gap-3 pointer-events-auto">
           <button
             onClick={() => router.push('/me/orders')}
-            className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-100 active:scale-95 transition-all"
+            className="w-10 h-10 rounded-[14px] bg-white/90 backdrop-blur-md flex items-center justify-center text-[#1e293b] border border-white shadow-sm active:scale-95 transition-all"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={18} strokeWidth={2.5} />
           </button>
-          <div>
-            <p className="text-[14px] font-bold tracking-tight">Order Status</p>
-            <p className="text-[11px] font-medium text-[#94a3b8]">
+          <div className="px-3 py-1.5 rounded-[12px] bg-white/80 backdrop-blur-md border border-white shadow-sm">
+            <p className="text-[13px] font-black tracking-tight text-[#1e293b] leading-tight drop-shadow-sm">Order Status</p>
+            <p className="text-[10px] font-bold text-[#64748b] leading-tight drop-shadow-sm">
               #{order.order_code || order.id.slice(0, 6).toUpperCase()}
             </p>
           </div>
         </div>
-        <StatusPill status={status} />
+        <div className="bg-white/80 backdrop-blur-md px-3 py-2 rounded-[12px] border border-white shadow-sm pointer-events-auto">
+          <StatusPill status={status} />
+        </div>
       </nav>
 
-      <div className="pt-28 px-6 space-y-8">
+      {/* ── MAIN CONTENT ── */}
+      <div className="pt-[340px] px-6 space-y-8 relative z-10">
 
-        {/* ── ITEM SUMMARY ── */}
-        <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-          <div className="w-14 h-14 rounded-xl bg-white border border-slate-100 overflow-hidden shrink-0">
-            {orderImg ? (
-              <img src={orderImg} className="w-full h-full object-cover" alt="" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-200">
-                <Package size={20} strokeWidth={1.5} />
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.title}</p>
-            <p className="text-[11px] font-medium text-[#94a3b8]">{order.seller_name || 'Pulse Student'}</p>
-          </div>
-          <p className="text-[14px] font-bold text-[#1e293b] shrink-0">RM {Number(order.price).toFixed(2)}</p>
-        </div>
-
-        {/* ── PROGRESS HERO ── */}
+        {/* ── PROGRESS HERO (New Order Tracker) ── */}
         <section>
-          <div className="space-y-0.5 mb-4">
-            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">
-              {isDone ? 'Delivered' : isCancelled ? 'Order Cancelled' : 'Tracking Progress'}
-            </h2>
-            <p className="text-[11px] font-medium text-[#94a3b8]">
-              {isDone ? 'Your item has been delivered successfully.' : isCancelled ? 'This order was cancelled.' : 'Live update from the registry.'}
-            </p>
-          </div>
-
-          {/* Phase progress bar */}
-          <div className="flex gap-1 mb-6">
-            {PHASES.map(p => (
-              <motion.div
-                key={p.id}
-                className="h-1.5 flex-1 rounded-full"
-                animate={{ backgroundColor: phase >= p.id ? (isDone ? '#10b981' : isCancelled ? '#ef4444' : '#1e293b') : '#f1f5f9' }}
-                transition={{ duration: 0.4, delay: p.id * 0.05 }}
-              />
-            ))}
-          </div>
-
-          {/* Timeline */}
-          <div className="bg-slate-50 border border-slate-100 rounded-xl divide-y divide-slate-100">
-            {PHASES.map((p) => {
-              const isPast = phase > p.id;
-              const isCurrent = phase === p.id;
-              const Icon = p.icon;
-              return (
-                <div key={p.id} className={`flex items-center gap-4 px-4 py-3.5 ${!isPast && !isCurrent ? 'opacity-30' : ''}`}>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                    isPast ? 'bg-emerald-50 text-emerald-500' :
-                    isCurrent ? 'bg-[#1e293b] text-white' :
-                    'bg-slate-100 text-slate-300'
-                  }`}>
-                    {isPast ? <CheckCircle2 size={16} strokeWidth={2} /> : isCurrent ? <Activity size={14} className="animate-pulse" /> : <Icon size={14} />}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`text-[13px] font-bold ${isCurrent ? 'text-[#1e293b]' : isPast ? 'text-[#94a3b8]' : 'text-slate-300'}`}>
-                      {p.label}
-                    </p>
-                    {isCurrent && (
-                      <p className="text-[11px] font-medium text-[#94a3b8]">Currently at this stage</p>
-                    )}
-                  </div>
-                  {isPast && <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />}
-                </div>
-              );
-            })}
-          </div>
+          <OrderTracker order={order} />
         </section>
 
-        {/* ── ORDER DETAILS ── */}
+        {/* ── PAYMENT RECEIPT ── */}
         <section className="space-y-3">
           <div className="space-y-0.5">
-            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Order Details</h2>
+            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Payment Receipt</h2>
           </div>
           <div className="bg-slate-50 border border-slate-100 rounded-xl divide-y divide-slate-100">
-            {order.drop_off_location && (
-              <div className="flex items-center justify-between px-4 py-3.5">
-                <span className="text-[13px] font-medium text-[#94a3b8]">Drop-off</span>
-                <span className="flex items-center gap-1.5 text-[13px] font-bold text-[#1e293b]">
-                  <MapPin size={12} className="text-[#94a3b8]" />
-                  {order.drop_off_location}
-                </span>
+            {/* Item Summary */}
+            <div className="flex items-start justify-between px-4 py-3.5">
+              <span className="text-[13px] font-medium text-[#94a3b8] shrink-0">Items</span>
+              <div className="text-right pl-4">
+                {order.items?.length > 0 ? (
+                  order.items.map((it: any, i: number) => (
+                    <p key={i} className="text-[13px] font-bold text-[#1e293b]">{it.qty}x {it.title}</p>
+                  ))
+                ) : (
+                  <p className="text-[13px] font-bold text-[#1e293b]">1x {order.title || 'Pulse Order'}</p>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Transaction Metadata */}
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-[13px] font-medium text-[#94a3b8]">Delivery</span>
-              <span className="text-[13px] font-bold text-[#1e293b]">
-                {order.delivery_type === 'RUNNER' ? 'Pulse Runner' : 'Self Collect'}
-              </span>
+              <span className="text-[13px] font-medium text-[#94a3b8]">Payment Method</span>
+              <span className="text-[13px] font-bold text-[#1e293b]">FPX Online Banking</span>
             </div>
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-[13px] font-medium text-[#94a3b8]">Total Paid</span>
-              <span className="text-[14px] font-bold text-[#1e293b]">RM {Number(order.price).toFixed(2)}</span>
+              <span className="text-[13px] font-medium text-[#94a3b8]">Order Time</span>
+              <span className="text-[13px] font-bold text-[#1e293b]">
+                {order.created_at?.toDate 
+                  ? order.created_at.toDate().toLocaleString('en-US', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
+                  : new Date(order.created_at || Date.now()).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
+              </span>
+            </div>
+            
+            {/* Price Breakdown */}
+            <div className="px-4 py-3.5 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-medium text-[#94a3b8]">Subtotal</span>
+                <span className="text-[13px] font-bold text-[#1e293b]">RM {Number(order.price || 0).toFixed(2)}</span>
+              </div>
+              {order.delivery_type === 'RUNNER' && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-medium text-[#94a3b8]">Runner Fee</span>
+                  <span className="text-[13px] font-bold text-[#1e293b]">RM {Number((order.total || order.price) - order.price).toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Total Paid */}
+            <div className="flex items-center justify-between px-4 py-3.5 bg-slate-100/50 rounded-b-xl">
+              <span className="text-[13px] font-bold text-[#1e293b]">Total Paid</span>
+              <span className="text-[15px] font-black text-[#1e293b]">RM {Number(order.total || order.price).toFixed(2)}</span>
             </div>
           </div>
         </section>

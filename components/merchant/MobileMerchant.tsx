@@ -91,17 +91,17 @@ export default function MobileMerchant({
                   <h3 className="text-[15px] font-bold text-[#1e293b] tracking-tight">Pending Actions</h3>
                   <p className="text-[11px] font-medium text-[#94a3b8]">Complete orders to keep your rating high.</p>
                </div>
-               <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{urgentOrders?.length || 0} Required</span>
+               <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{[...(urgentOrders || []), ...(preparingOrders || [])].length} Required</span>
             </div>
             
-            {urgentOrders?.length === 0 ? (
+            {[...(urgentOrders || []), ...(preparingOrders || [])].length === 0 ? (
                <div className="py-20 bg-slate-50/20 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-100">
                   <PackageCheck size={28} strokeWidth={1.5} />
                   <p className="text-[10px] mt-4 font-black uppercase tracking-widest">No Pending Orders</p>
                </div>
             ) : (
                <div className="space-y-4">
-                  {urgentOrders.map((o: any) => (
+                  {[...(urgentOrders || []), ...(preparingOrders || [])].map((o: any) => (
                     <motion.div 
                       key={o.id} 
                       whileTap={{ scale: 0.98 }}
@@ -135,6 +135,13 @@ export default function MobileMerchant({
                             <div className="flex-1">
                               <SwipeToReady orderId={o.id} />
                             </div>
+                          ) : o.status === 'READY_FOR_PICKUP' ? (
+                            <div className="flex-1 h-12 bg-amber-50 rounded-2xl flex items-center justify-center border border-amber-100">
+                              <p className="text-[11px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                                <Bike size={14} />
+                                Waiting for runner
+                              </p>
+                            </div>
                           ) : (
                             <button 
                               onClick={() => handleConfirmDelivery(o.id)}
@@ -144,7 +151,7 @@ export default function MobileMerchant({
                                Complete Delivery
                             </button>
                           )}
-                          <button className="w-12 h-12 rounded-2xl bg-slate-50 text-[#94a3b8] flex items-center justify-center border border-slate-50">
+                          <button className="w-12 h-12 rounded-2xl bg-slate-50 text-[#94a3b8] flex items-center justify-center border border-slate-50 hover:bg-slate-100 transition-colors">
                              <Info size={18} />
                           </button>
                        </div>

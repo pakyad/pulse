@@ -225,8 +225,14 @@ export default function DesktopMerchant({
                            {o.status === 'PREPARING' && (
                              <div className="w-48"><SwipeToReady orderId={o.id} /></div>
                            )}
+                           {o.status === 'READY_FOR_PICKUP' && (
+                             <span className="px-3 py-1.5 bg-amber-50 text-amber-600 rounded text-[11px] font-bold border border-amber-100 flex items-center gap-2">
+                               <Package size={12} />
+                               Waiting for Runner
+                             </span>
+                           )}
                            {o.status === 'AWAITING_RUNNER' && (
-                             <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold border border-blue-100">
+                             <span className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-[11px] font-bold border border-blue-100">
                                Runner Called
                              </span>
                            )}
