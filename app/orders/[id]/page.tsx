@@ -2,15 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, CheckCircle2, Package, Activity,
   Clock, ShieldCheck, MapPin, Receipt,
-  ShieldAlert, Truck, Info
+  ShieldAlert, Truck, Info, XCircle, Star
 } from 'lucide-react';
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
+import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 
 // ── Order phases ──
 const PHASES = [
@@ -49,14 +50,17 @@ export default function LiveOrderPage() {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
+  const [userId, setUserId] = useState<string>('');
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [confirmingReceipt, setConfirmingReceipt] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
 
     const unsubAuth = onAuthStateChanged(auth, (user) => {
       if (!user) { router.push('/auth'); return; }
+      setUserId(user.uid);
       unsub = onSnapshot(doc(db, 'orders', id as string), (snap) => {
         if (snap.exists()) setOrder({ id: snap.id, ...snap.data() });
         setLoading(false);
@@ -90,6 +94,24 @@ export default function LiveOrderPage() {
     });
   };
 
+  // ── Cancel order (PENDING_VENDOR only) ──
+  const handleCancelOrder = async () => {
+    if (!confirm('Cancel this order? This cannot be undone.')) return;
+    setCancelling(true);
+    try {
+      await updateDoc(doc(db, 'orders', id as string), {
+        status: 'CANCELLED',
+        cancelled_at: new Date().toISOString(),
+        cancelled_by: 'buyer',
+      });
+    } catch (e) {
+      console.error('[Cancel]', e);
+      alert('Could not cancel order. Please try again.');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
@@ -110,6 +132,8 @@ export default function LiveOrderPage() {
   const phase = getPhase(status);
   const isDone = phase === 6;
   const isCancelled = status === 'CANCELLED';
+  const isPending = status === 'PENDING_VENDOR';
+  const showReview = isDone && !order.isReviewed;
   const orderImg = order.images?.[0] || order.image_url;
 
   return (
@@ -248,8 +272,29 @@ export default function LiveOrderPage() {
           </div>
         </section>
 
+        {/* ── CANCEL ORDER (Pending only) ── */}
+        {isPending && (
+          <section>
+            <button
+              onClick={handleCancelOrder}
+              disabled={cancelling}
+              className="w-full h-12 border border-red-100 text-[13px] font-bold text-red-400 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-30"
+            >
+              {cancelling ? (
+                <span className="w-4 h-4 border-2 border-red-200 border-t-red-400 rounded-full animate-spin" />
+              ) : (
+                <XCircle size={16} />
+              )}
+              Cancel Order
+            </button>
+            <p className="text-[11px] font-medium text-[#94a3b8] text-center mt-2">
+              Only available before the seller accepts.
+            </p>
+          </section>
+        )}
+
         {/* ── DISPUTE ── */}
-        {!isDone && !isCancelled && (
+        {!isDone && !isCancelled && !isPending && (
           <section className="space-y-2">
             <button
               onClick={() => setIsReportOpen(true)}
@@ -264,6 +309,17 @@ export default function LiveOrderPage() {
                 Available after the seller initiates the delivery handshake.
               </p>
             )}
+          </section>
+        )}
+
+        {/* ── POST-DELIVERY REVIEW ── */}
+        {showReview && userId && (
+          <section className="space-y-4 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <Star size={14} className="text-amber-400" fill="currentColor" />
+              <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Rate Your Experience</h2>
+            </div>
+            <PostDeliveryReview order={order} userId={userId} />
           </section>
         )}
 

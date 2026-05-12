@@ -1,7 +1,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
-import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info } from 'lucide-react';
+import { auth, db } from '@/lib/firebase';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info, Pencil, Trash2 } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import VoxelStatus from '@/components/shared/VoxelStatus';
@@ -298,17 +299,33 @@ export default function DesktopMerchant({
                                </div>
                             </div>
 
-                            {/* 🛠️ Subtle Control Node */}
-                            <button 
-                               onClick={() => toggleItemStatus(item.id, item.status)}
-                               className={`h-10 px-5 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all ${
-                                  item.status === 'active' 
-                                  ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100' 
-                                  : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'
-                               }`}
-                            >
-                               {item.status === 'active' ? 'Active' : 'Hidden'}
-                            </button>
+                             {/* 🛠️ Control Nodes */}
+                             <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                   onClick={() => toggleItemStatus(item.id, item.status)}
+                                   className={`h-10 px-5 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all ${
+                                      item.status === 'active'
+                                      ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100'
+                                      : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'
+                                   }`}
+                                >
+                                   {item.status === 'active' ? 'Active' : 'Hidden'}
+                                </button>
+                                <button
+                                   onClick={() => router.push(`/marketplace/${item.id}/edit`)}
+                                   title="Edit listing"
+                                   className="h-10 w-10 rounded-[16px] bg-slate-50 border-[0.5px] border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#1e293b] hover:border-slate-300 transition-all"
+                                >
+                                   <Pencil size={14} />
+                                </button>
+                                <button
+                                   title="Delete listing"
+                                   onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed to delete.'); } }}
+                                   className="h-10 w-10 rounded-[16px] bg-red-50 border-[0.5px] border-red-100 flex items-center justify-center text-red-300 hover:text-red-500 hover:border-red-300 transition-all"
+                                >
+                                   <Trash2 size={14} />
+                                </button>
+                             </div>
                          </div>
                       ))
                    )}

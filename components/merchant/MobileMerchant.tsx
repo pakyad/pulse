@@ -1,6 +1,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, ShieldCheck, Zap, CheckCircle2 } from 'lucide-react';
+import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, ShieldCheck, Zap, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { deleteDoc, doc } from 'firebase/firestore';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -188,12 +190,22 @@ export default function MobileMerchant({
                            <p className="text-[11px] font-medium text-[#94a3b8]">RM {item.price?.toFixed(2)} • {item.stock_count || 0} in stock</p>
                         </div>
                      </div>
-                     <button 
-                        onClick={() => toggleItemStatus(item.id, item.status)}
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${item.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-100 text-slate-400'}`}
-                     >
-                        {item.status === 'ACTIVE' ? <CheckCircle2 size={18} /> : <Zap size={18} />}
-                     </button>
+                     <div className="flex items-center gap-2">
+                        <button
+                           onClick={() => router.push(`/marketplace/${item.id}/edit`)}
+                           title="Edit"
+                           className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#1e293b] transition-all"
+                        >
+                           <Pencil size={14} />
+                        </button>
+                        <button
+                           title="Delete"
+                           onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed.'); } }}
+                           className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-red-300 hover:text-red-500 transition-all"
+                        >
+                           <Trash2 size={14} />
+                        </button>
+                     </div>
                   </div>
                ))}
             </div>

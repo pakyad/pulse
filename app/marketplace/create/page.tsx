@@ -39,6 +39,7 @@ export default function CreateListingPage() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [metadata, setMetadata] = useState<Record<string, any>>({});
+  const [stock, setStock] = useState('');
 
   const [governanceStatus, setGovernanceStatus] = useState<'STABLE' | 'WARNING' | 'BLOCKED'>('STABLE');
   const [governanceCeiling, setGovernanceCeiling] = useState<number | null>(null);
@@ -89,13 +90,16 @@ export default function CreateListingPage() {
         domain: selectedDomain,
         subcategory,
         price: parseFloat(price),
+        stock_count: stock !== '' ? parseInt(stock, 10) : null,
         metadata,
         images,
         seller_id: user?.uid || 'ANON',
         seller_name: user?.displayName || 'Pulse Student',
-        status: governanceStatus === 'BLOCKED' ? 'PENDING_REVIEW' : 'active',
+        status: governanceStatus === 'BLOCKED'
+          ? 'PENDING_REVIEW'
+          : (stock !== '' && parseInt(stock, 10) === 0 ? 'sold_out' : 'active'),
         governance_status: governanceStatus,
-        governance_ceiling: governanceCeiling,   // ← admin review uses this
+        governance_ceiling: governanceCeiling,
         is_exemption_request: governanceStatus === 'BLOCKED',
         appeal_note: appealText,
         created_at: serverTimestamp(),
@@ -312,6 +316,27 @@ export default function CreateListingPage() {
                     )}
                   </AnimatePresence>
                 </motion.div>
+              )}
+            </section>
+
+            {/* ── SECTION: STOCK ── */}
+            <section className="space-y-3 pt-2 border-t border-slate-100">
+              <div className="space-y-0.5">
+                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Stock</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">How many do you have? Set to 0 to mark as sold out.</p>
+              </div>
+              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-[#1e293b] transition-colors">
+                <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">Qty</span>
+                <input
+                  type="number"
+                  placeholder="e.g. 5"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none"
+                />
+              </div>
+              {stock !== '' && parseInt(stock, 10) === 0 && (
+                <p className="text-[11px] font-bold text-red-400">This listing will be marked as Sold Out immediately.</p>
               )}
             </section>
 
