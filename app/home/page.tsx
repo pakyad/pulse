@@ -119,11 +119,15 @@ export default function PulseHome() {
                <motion.section initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                   <FeaturedBanner slides={announcements.map(a => ({ 
                     id: a.id, 
+                    tag: a.tag,
                     headline: a.headline, 
-                    subline: a.body || a.subline, 
+                    subline: a.subline || a.body, 
+                    imageUrl: a.imageUrl,
                     bgColor: a.color || '#1e293b', 
-                    ctaPath: '/pulse' 
+                    ctaPath: a.ctaPath || '/pulse' 
                   }))} />
+
+
                </motion.section>
             )}
          </AnimatePresence>

@@ -33,7 +33,7 @@ export default function MissionBoard() {
   const [missions, setMissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [filter, setFilter] = useState('ALL');
+  const [filter, setFilter] = useState('all');
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
