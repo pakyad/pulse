@@ -91,6 +91,8 @@ export default function MissionBoard() {
     };
   }, [router]);
 
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const handleClaim = async (missionId: string) => {
     if (!auth.currentUser) return;
     setIsProcessing(true);
@@ -102,14 +104,18 @@ export default function MissionBoard() {
         tx.update(ref, { 
           runner_id: auth.currentUser?.uid, 
           runner_name: profile?.full_name || 'Runner',
-          status: 'AWAITING_MERCHANT_ACCEPT',
+          status: 'PREPARING',
           accepted_at: serverTimestamp()
         });
       });
-      router.push('/run/terminal');
+      
+      // 🏛️ TRIGGER HIGH-FIDELITY SUCCESS UX
+      setShowSuccess(true);
+      setTimeout(() => {
+        router.push('/run/terminal');
+      }, 2000);
     } catch (e: any) { 
       alert(e); 
-    } finally { 
       setIsProcessing(false); 
     }
   };
@@ -229,6 +235,56 @@ export default function MissionBoard() {
             </AnimatePresence>
          </div>
       </div>
+
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-200 bg-[#1e293b] flex flex-col items-center justify-center text-white text-center p-10"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", damping: 15, stiffness: 200 }}
+              className="w-32 h-32 bg-emerald-500 rounded-[48px] flex items-center justify-center mb-10 shadow-2xl shadow-emerald-500/40"
+            >
+              <motion.div
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Zap size={56} className="fill-white text-white" />
+              </motion.div>
+            </motion.div>
+            
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-4"
+            >
+              <h2 className="text-[32px] font-black tracking-tighter uppercase">Mission Secured</h2>
+              <p className="text-[14px] text-white/60 font-medium lowercase tracking-wide max-w-xs mx-auto">
+                locking coordinates. transferring data to terminal hub...
+              </p>
+            </motion.div>
+
+            {/* PULSE RINGS */}
+            <motion.div 
+              animate={{ scale: [1, 2], opacity: [0.3, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="absolute w-64 h-64 border-2 border-emerald-500/20 rounded-full"
+            />
+            <motion.div 
+              animate={{ scale: [1, 1.5], opacity: [0.2, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+              className="absolute w-64 h-64 border-2 border-emerald-500/10 rounded-full"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
     </main>

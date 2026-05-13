@@ -53,7 +53,6 @@ export default function LiveOrderPage() {
   const [order, setOrder] = useState<any>(null);
   const [userId, setUserId] = useState<string>('');
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const [confirmingReceipt, setConfirmingReceipt] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
@@ -71,72 +70,6 @@ export default function LiveOrderPage() {
     return () => { unsubAuth(); unsub?.(); };
   }, [id, router]);
 
-  // ── Confirm receipt (existing logic preserved) ──
-  const handleConfirmReceipt = async () => {
-    if (!navigator.geolocation) { alert('Location services required.'); return; }
-    setConfirmingReceipt(true);
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        
-        // Option B: Direct Firestore Write (Bypassing Undeployed Cloud Function)
-        const orderRef = doc(db, "orders", id as string);
-        const orderSnap = await getDoc(orderRef);
-        
-        if (!orderSnap.exists()) {
-          alert("Order not found.");
-          setConfirmingReceipt(false);
-          return;
-        }
-
-        const orderData = orderSnap.data();
-        const handshake = orderData.handshake || {};
-
-        handshake.buyer_confirmed = true;
-        handshake.buyer_coords = coords;
-
-        let newStatus = orderData.status;
-
-        // If seller already confirmed, we run the proximity check
-        if (handshake.seller_confirmed && handshake.seller_coords) {
-          const R = 6371e3; // metres
-          const φ1 = handshake.seller_coords.lat * Math.PI/180;
-          const φ2 = coords.lat * Math.PI/180;
-          const Δφ = (coords.lat - handshake.seller_coords.lat) * Math.PI/180;
-          const Δλ = (coords.lng - handshake.seller_coords.lng) * Math.PI/180;
-
-          const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-          const dist = R * c;
-
-          handshake.distance = dist;
-          const isSafe = dist <= 50;
-          handshake.verification_type = isSafe ? 'IN_PERSON_SAFE' : 'REMOTE';
-          
-          newStatus = isSafe ? 'COMPLETED' : 'DELIVERED';
-        }
-
-        const { serverTimestamp } = await import('firebase/firestore');
-
-        await updateDoc(orderRef, { 
-          handshake,
-          ...(newStatus !== orderData.status ? { status: newStatus, completed_at: serverTimestamp(), auto_adjudicated: newStatus === 'COMPLETED' } : {})
-        });
-
-        alert('Confirmed! Your order will update once the seller confirms.');
-      } catch (e) {
-        console.error(e);
-        alert('Confirmation failed. Please try again.');
-      } finally {
-        setConfirmingReceipt(false);
-      }
-    }, () => {
-      alert('Location access denied. Cannot confirm receipt.');
-      setConfirmingReceipt(false);
-    });
-  };
 
   // ── Cancel order (PENDING_VENDOR only) ──
   const handleCancelOrder = async () => {
@@ -179,6 +112,20 @@ export default function LiveOrderPage() {
   const isPending = status === 'PENDING_VENDOR';
   const showReview = isDone && !order.isReviewed;
   const orderImg = order.images?.[0] || order.image_url;
+
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+
+  useEffect(() => {
+    if (isDone && !order.hasAcknowledgedSuccess) {
+      setShowSuccessOverlay(true);
+      const timer = setTimeout(() => {
+        setShowSuccessOverlay(false);
+        // We could also update firestore here to prevent it from showing again on refresh, 
+        // but for now, local state is sufficient for the "wow" effect.
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [isDone, order?.hasAcknowledgedSuccess]);
 
   return (
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-36 relative">
@@ -367,22 +314,56 @@ export default function LiveOrderPage() {
 
       </div>
 
-      {/* ── STICKY CONFIRM RECEIPT ── */}
-      {!isDone && !isCancelled && (
-        <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
-          <button
-            onClick={handleConfirmReceipt}
-            disabled={confirmingReceipt}
-            className="w-full h-12 bg-[#1e293b] text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-30 transition-all"
+      {/* ── MINIMALIST BACK TO PULSE (Appears after success dismissal) ── */}
+      {isDone && !showSuccessOverlay && (
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="fixed bottom-10 left-0 right-0 z-50 flex justify-center px-8"
+        >
+          <button 
+            onClick={() => router.push('/marketplace')}
+            className="w-full max-w-sm h-14 bg-[#1e293b] text-white rounded-[24px] font-bold text-[13px] uppercase tracking-widest active:scale-95 transition-all shadow-2xl shadow-slate-900/20"
           >
-            {confirmingReceipt ? (
-              <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-            ) : (
-              <><CheckCircle2 size={18} /> I've Received My Order</>
-            )}
+            Back to Marketplace
           </button>
-        </footer>
+        </motion.div>
       )}
+
+      {/* ── MATURED SUCCESS OVERLAY (Glassmorphism Redesign) ── */}
+      <AnimatePresence>
+        {showSuccessOverlay && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-1000 bg-white/40 backdrop-blur-xl flex flex-col items-center justify-center p-8"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: -10 }}
+              className="bg-white p-12 rounded-[48px] shadow-[0_32px_64px_-16px_rgba(30,41,59,0.15)] border-[0.5px] border-slate-100 text-center space-y-6 max-w-xs"
+            >
+              <div className="relative inline-block">
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 bg-emerald-500 blur-2xl rounded-full opacity-20"
+                />
+                <div className="w-20 h-20 bg-emerald-500 rounded-[28px] flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/20 relative z-10 text-white">
+                  <CheckCircle2 size={32} strokeWidth={2.5} />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h1 className="text-[24px] font-black tracking-tight text-[#1e293b] lowercase leading-none">Delivered</h1>
+                <p className="text-[12px] text-slate-400 font-medium lowercase leading-relaxed">your pulse mission is complete. enjoy your item!</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ReportIssueModal
         isOpen={isReportOpen}

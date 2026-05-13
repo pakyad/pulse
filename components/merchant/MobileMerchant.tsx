@@ -20,7 +20,8 @@ export default function MobileMerchant({
   incomingOrders,
   urgentOrders, 
   preparingOrders,
-  topItems, 
+  historyOrders,
+  topItems,
   recentOrders,
   handleAcceptOrder, 
   handleCallRunner,
@@ -40,6 +41,12 @@ export default function MobileMerchant({
   const SkibidiSubtext = ({ children }: { children: React.ReactNode }) => (
     <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">{children}</p>
   );
+
+  // ── TERMINAL STATE MANAGEMENT ──
+  const [activeTab, setActiveTab] = React.useState<'ACTIVE' | 'HISTORY'>('ACTIVE');
+
+  const pendingList = [...(urgentOrders || []), ...(preparingOrders || [])];
+  const historyList = historyOrders || [];
 
   return (
     <div className="min-h-screen bg-white flex flex-col text-[#1e293b] selection:bg-blue-100 md:hidden pb-32 font-sans antialiased">
@@ -88,79 +95,140 @@ export default function MobileMerchant({
 
          {/* ── PENDING ACTIONS (Skibidi concept) ── */}
          <section className="space-y-6">
-            <div className="flex items-center justify-between px-1">
-               <div className="space-y-1">
-                  <h3 className="text-[15px] font-bold text-[#1e293b] tracking-tight">Pending Actions</h3>
-                  <p className="text-[11px] font-medium text-[#94a3b8]">Complete orders to keep your rating high.</p>
+            <div className="space-y-4">
+               <div className="flex items-center justify-between px-1">
+                  <div className="space-y-1">
+                     <h3 className="text-[15px] font-bold text-[#1e293b] tracking-tight">Order Registry</h3>
+                     <p className="text-[11px] font-medium text-[#94a3b8]">Live lifecycle of campus commerce.</p>
+                  </div>
                </div>
-               <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{[...(urgentOrders || []), ...(preparingOrders || [])].length} Required</span>
-            </div>
-            
-            {[...(urgentOrders || []), ...(preparingOrders || [])].length === 0 ? (
-               <div className="py-20 bg-slate-50/20 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-100">
-                  <PackageCheck size={28} strokeWidth={1.5} />
-                  <p className="text-[10px] mt-4 font-black uppercase tracking-widest">No Pending Orders</p>
-               </div>
-            ) : (
-               <div className="space-y-4">
-                  {[...(urgentOrders || []), ...(preparingOrders || [])].map((o: any) => (
-                    <motion.div 
-                      key={o.id} 
-                      whileTap={{ scale: 0.98 }}
-                      className="p-6 bg-white border border-slate-50 rounded-[32px] shadow-sm space-y-6"
-                    >
-                       <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-4">
-                             <div className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8]">
-                                <ClipboardList size={18} />
-                             </div>
-                             <div>
-                                <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">{o.customer_name || 'Student'}</p>
-                                <p className="text-[11px] font-medium text-[#94a3b8]">Order #{o.id.slice(-4).toUpperCase()}</p>
-                             </div>
-                          </div>
-                          <div className="text-right">
-                             <p className="text-[15px] font-bold text-[#1e293b]">RM {o.total?.toFixed(2)}</p>
-                             <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">{o.status}</p>
-                          </div>
-                       </div>
 
-                       <div className="flex gap-3 pt-2">
-                          {o.status === 'PENDING_VENDOR' ? (
-                            <button 
-                              onClick={() => handleAcceptOrder(o.id)}
-                              className="flex-1 h-12 bg-[#1e293b] text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10"
-                            >
-                               Accept Order
-                            </button>
-                          ) : o.status === 'PREPARING' ? (
-                            <div className="flex-1">
-                              <SwipeToReady orderId={o.id} />
-                            </div>
-                          ) : o.status === 'READY_FOR_PICKUP' ? (
-                            <div className="flex-1 h-12 bg-amber-50 rounded-2xl flex items-center justify-center border border-amber-100">
-                              <p className="text-[11px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-2">
-                                <Bike size={14} />
-                                Waiting for runner
-                              </p>
-                            </div>
-                          ) : (
-                            <button 
-                              onClick={() => handleConfirmDelivery(o.id)}
-                              className="flex-1 h-12 bg-emerald-500 text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-2"
-                            >
-                               <PackageCheck size={14} />
-                               Complete Delivery
-                            </button>
-                          )}
-                          <button className="w-12 h-12 rounded-2xl bg-slate-50 text-[#94a3b8] flex items-center justify-center border border-slate-50 hover:bg-slate-100 transition-colors">
-                             <Info size={18} />
-                          </button>
-                       </div>
-                    </motion.div>
+               {/* TAB NAVIGATION */}
+               <div className="flex gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
+                  {(['ACTIVE', 'HISTORY'] as const).map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        activeTab === tab 
+                          ? 'bg-white text-[#1e293b] shadow-sm' 
+                          : 'text-[#94a3b8] opacity-50 hover:opacity-100'
+                      }`}
+                    >
+                      {tab}
+                      {tab === 'ACTIVE' && pendingList.length > 0 && ` (${pendingList.length})`}
+                    </button>
                   ))}
                </div>
-            )}
+            </div>
+            
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-4"
+              >
+                {activeTab === 'ACTIVE' && (
+                  pendingList.length === 0 ? (
+                    <div className="py-20 bg-slate-50/20 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-100">
+                        <PackageCheck size={28} strokeWidth={1.5} />
+                        <p className="text-[10px] mt-4 font-black uppercase tracking-widest">No Prep Orders</p>
+                    </div>
+                  ) : (
+                    pendingList.map((o: any) => (
+                      <motion.div 
+                        key={o.id} 
+                        whileTap={{ scale: 0.98 }}
+                        className="p-6 bg-white border border-slate-50 rounded-[32px] shadow-sm space-y-6"
+                      >
+                         <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-4">
+                               <div className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8]">
+                                  <ClipboardList size={18} />
+                               </div>
+                               <div>
+                                  <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">{o.customer_name || 'Student'}</p>
+                                  <p className="text-[11px] font-medium text-[#94a3b8]">Order #{o.id.slice(-4).toUpperCase()}</p>
+                               </div>
+                            </div>
+                            <div className="text-right">
+                               <p className="text-[15px] font-bold text-[#1e293b]">RM {o.total?.toFixed(2)}</p>
+                               <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">{o.status.replace(/_/g, ' ')}</p>
+                            </div>
+                         </div>
+
+                         <div className="flex gap-3 pt-2">
+                            {o.status === 'PENDING_VENDOR' ? (
+                              <button 
+                                onClick={() => handleAcceptOrder(o.id)}
+                                className="flex-1 h-12 bg-[#1e293b] text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10"
+                              >
+                                 Accept Order
+                              </button>
+                            ) : o.status === 'PREPARING' ? (
+                              <div className="flex-1">
+                                <SwipeToReady orderId={o.id} />
+                              </div>
+                            ) : (
+                              <div className="flex-1 h-12 bg-amber-50 rounded-2xl flex items-center justify-center border border-amber-100">
+                                <p className="text-[11px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                                  <Bike size={14} />
+                                  Waiting for runner
+                                </p>
+                              </div>
+                            )}
+                            <button className="w-12 h-12 rounded-2xl bg-slate-50 text-[#94a3b8] flex items-center justify-center border border-slate-50">
+                               <Info size={18} />
+                            </button>
+                         </div>
+                      </motion.div>
+                    ))
+                  )
+                )}
+
+                {activeTab === 'HISTORY' && (
+                  historyList.length === 0 ? (
+                    <div className="py-20 bg-slate-50/20 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-100">
+                        <ClipboardList size={28} strokeWidth={1.5} />
+                        <p className="text-[10px] mt-4 font-black uppercase tracking-widest">No Records Yet</p>
+                    </div>
+                  ) : (
+                    historyList.map((o: any) => (
+                      <div key={o.id} className="p-6 bg-white border border-slate-50 rounded-[32px] shadow-sm space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${o.status === 'CANCELLED' ? 'bg-red-50 text-red-400' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'bg-blue-50 text-blue-500' : 'bg-emerald-50 text-emerald-500'}`}>
+                              {o.status === 'CANCELLED' ? <Trash2 size={18} /> : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? <Bike size={18} /> : <CheckCircle2 size={18} />}
+                            </div>
+                            <div>
+                               <p className="text-[14px] font-bold text-[#1e293b]">{o.customer_name || 'Student'}</p>
+                               <p className="text-[10px] font-medium text-[#94a3b8] uppercase tracking-widest">Order #{o.id.slice(-4).toUpperCase()}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-[14px] font-bold text-[#1e293b]">RM {o.total?.toFixed(2)}</p>
+                             <p className={`text-[9px] font-black uppercase tracking-widest ${o.status === 'CANCELLED' ? 'text-red-500' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'text-blue-500' : 'text-emerald-500'}`}>
+                                {o.status.replace(/_/g, ' ')}
+                             </p>
+                          </div>
+                        </div>
+                        {['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) && (
+                          <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-50 flex items-center justify-between">
+                             <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest flex items-center gap-2">
+                                <User size={12} />
+                                With {o.runner_name || 'Runner'}
+                             </p>
+                             <p className="text-[10px] font-bold text-[#1e293b] truncate ml-4">{o.drop_off_location || 'Campus'}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )
+                )}
+              </motion.div>
+            </AnimatePresence>
          </section>
 
          {/* ── MANAGE LISTINGS ── */}

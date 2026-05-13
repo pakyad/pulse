@@ -206,53 +206,97 @@ export default function RunnerTerminal() {
         </nav>
 
         {/* ── MAP VIEWPORT ── */}
-        <section className="h-[30vh] w-full pt-20 relative">
+        <section className={`transition-all duration-700 ease-in-out relative ${activeMission ? 'h-[45vh]' : 'h-[30vh]'} w-full pt-20`}>
            <LiveMap hasActiveJob={!!activeMission} />
-           <div className="absolute inset-0 bg-linear-to-b from-white via-transparent to-white" />
+           <div className="absolute inset-0 bg-linear-to-b from-white via-transparent to-white/20" />
         </section>
 
         {/* ── STATS & ACTIONS ── */}
         <section className="px-8 -mt-10 relative z-10 space-y-12">
-           <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm space-y-4">
-                 <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em]">Earnings</p>
-                 <p className="text-[24px] font-bold text-emerald-600 tracking-tight leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
-              </div>
-              <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm space-y-4">
-                 <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em]">Rating</p>
-                 <p className="text-[24px] font-bold text-slate-900 tracking-tight leading-none">5.0</p>
-              </div>
-           </div>
+           {!activeMission && (
+             <motion.div 
+               initial={{ opacity: 0, y: 10 }}
+               animate={{ opacity: 1, y: 0 }}
+               className="grid grid-cols-2 gap-4"
+             >
+                <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm space-y-4">
+                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em]">Earnings</p>
+                   <p className="text-[24px] font-bold text-emerald-600 tracking-tight leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
+                </div>
+                <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm space-y-4">
+                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em]">Rating</p>
+                   <p className="text-[24px] font-bold text-slate-900 tracking-tight leading-none">5.0</p>
+                </div>
+             </motion.div>
+           )}
 
-           {/* ── ACTIVE JOB SLOT ── */}
-           <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait">
               {activeMission ? (
-                 <motion.div key="active" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-8 rounded-[40px] border-[0.5px] border-slate-100 shadow-2xl shadow-slate-900/5 space-y-8">
+                 <motion.div 
+                   key="active" 
+                   initial={{ opacity: 0, y: 30 }} 
+                   animate={{ opacity: 1, y: 0 }} 
+                   className="bg-white p-10 rounded-[48px] border-[0.5px] border-slate-100 shadow-[0_32px_64px_-16px_rgba(30,41,59,0.15)] space-y-10 relative overflow-hidden"
+                 >
+                    {/* ACCENT GLOW */}
+                    <div className={`absolute top-0 left-0 right-0 h-1.5 ${activeMission.status === 'PICKED_UP' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
+                    
                     <div className="flex justify-between items-start">
-                       <div><Heading className="lowercase">current job</Heading><Subtext className="lowercase mt-1">order #{activeMission.id.substring(0,8)}</Subtext></div>
-                       <div className="px-4 py-1.5 bg-slate-50 text-[#1e293b] rounded-full text-[9px] font-bold uppercase tracking-widest border border-slate-100">{activeMission.status.replace(/_/g, ' ')}</div>
+                       <div><Heading className="text-[20px] lowercase">Mission Active</Heading><Subtext className="lowercase mt-1">registry code: #{activeMission.id.substring(0,8).toUpperCase()}</Subtext></div>
+                       <div className={`px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border ${
+                          activeMission.status === 'PICKED_UP' || activeMission.status === 'IN_TRANSIT' 
+                            ? 'bg-blue-50 text-blue-600 border-blue-100' 
+                            : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                        }`}>
+                          {activeMission.status === 'PICKED_UP' ? 'ITEM SECURED' : activeMission.status.replace(/_/g, ' ')}
+                        </div>
                     </div>
-                    <div className="space-y-6">
-                       <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 mt-1"><Navigation size={18}/></div>
-                          <div><Heading className="text-[15px] lowercase">{activeMission.seller_name || 'pickup point'}</Heading><Subtext className="text-[13px] mt-0.5 lowercase">collect item: {activeMission.title || 'package'}</Subtext></div>
+
+                    <div className="space-y-8">
+                       {/* PICKUP NODE */}
+                       <div className={`flex items-start gap-5 transition-opacity ${activeMission.status === 'PICKED_UP' ? 'opacity-30' : 'opacity-100'}`}>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${
+                            activeMission.status === 'READY_FOR_PICKUP' ? 'bg-emerald-500 text-white border-emerald-500 animate-pulse' :
+                            activeMission.status === 'PICKED_UP' ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 
+                            'bg-slate-50 text-slate-400 border-slate-100'
+                          }`}>
+                             {activeMission.status === 'PICKED_UP' ? <Check size={20} /> : <Navigation size={20}/>}
+                          </div>
+                          <div>
+                            <Heading className="text-[17px] lowercase">{activeMission.seller_name || 'pickup point'}</Heading>
+                            <Subtext className={`text-[14px] mt-1 lowercase transition-all ${activeMission.status === 'READY_FOR_PICKUP' ? 'text-emerald-600 font-bold' : ''}`}>
+                              {activeMission.status === 'PICKED_UP' ? 'item collected' : 
+                               activeMission.status === 'READY_FOR_PICKUP' ? 'order is ready for collection' :
+                               `collect: ${activeMission.title || 'package'}`}
+                            </Subtext>
+                          </div>
                        </div>
-                       <div className="ml-5 h-6 border-l-[0.5px] border-dashed border-slate-200" />
-                       <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white mt-1"><MapPin size={18}/></div>
-                          <div><Heading className="text-[15px] lowercase">{activeMission.drop_off_location || 'drop-off'}</Heading><Subtext className="text-[13px] mt-0.5 lowercase">deliver to: {activeMission.customer_name || 'student'}</Subtext></div>
+
+                       {/* CONNECTOR */}
+                       <div className="ml-6 h-8 border-l border-dashed border-slate-200" />
+
+                       {/* DROP-OFF NODE */}
+                       <div className={`flex items-start gap-5 transition-all ${activeMission.status === 'PICKED_UP' ? 'scale-105' : 'opacity-100'}`}>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-xl transition-all ${activeMission.status === 'PICKED_UP' ? 'bg-blue-600 shadow-blue-600/30' : 'bg-slate-900 shadow-slate-900/10'}`}>
+                             <MapPin size={20}/>
+                          </div>
+                          <div>
+                             <Heading className="text-[17px] lowercase">{activeMission.drop_off_location || 'drop-off'}</Heading>
+                             <Subtext className="text-[14px] mt-1 lowercase">deliver to: {activeMission.customer_name || 'student'}</Subtext>
+                          </div>
                        </div>
                     </div>
-                     <div className="pt-2 flex gap-3">
-                       <button className="flex-1 h-14 bg-slate-900 text-white rounded-full font-bold text-[13px] shadow-lg shadow-slate-900/10 active:scale-95 transition-all lowercase">navigate</button>
+
+                    <div className="pt-4 flex gap-4">
+                       <button className="flex-1 h-16 bg-slate-50 text-slate-900 border border-slate-100 rounded-3xl font-bold text-[14px] active:scale-95 transition-all lowercase">navigate</button>
                        {activeMission.status === 'PREPARING' ? (
-                         <button disabled className="flex-1 h-14 bg-slate-100 text-slate-400 rounded-full font-bold text-[13px] lowercase">waiting for merchant</button>
+                         <button disabled className="flex-1 h-16 bg-slate-100 text-slate-400 rounded-3xl font-bold text-[14px] lowercase">merchant preparing</button>
                        ) : activeMission.status === 'READY_FOR_PICKUP' ? (
-                         <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-14 bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 rounded-full font-bold text-[13px] active:scale-95 transition-all lowercase">confirm pickup</button>
+                         <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-16 bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 rounded-3xl font-bold text-[14px] active:scale-95 transition-all lowercase">confirm pickup</button>
                        ) : (
-                         <button onClick={() => setProofMode('DELIVERY')} className="flex-1 h-14 bg-white text-slate-900 border border-slate-100 rounded-full font-bold text-[13px] active:scale-95 transition-all lowercase">complete delivery</button>
+                         <button onClick={() => setProofMode('DELIVERY')} className="flex-1 h-16 bg-blue-600 text-white shadow-xl shadow-blue-600/20 rounded-3xl font-bold text-[14px] active:scale-95 transition-all lowercase">Finalize Delivery</button>
                        )}
-                     </div>
+                    </div>
                  </motion.div>
               ) : (
                  <motion.div key="searching" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="py-24 flex flex-col items-center justify-center text-center space-y-8">
