@@ -1,6 +1,6 @@
 'use client'
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, ChevronLeft, LogOut, Bell, Settings } from 'lucide-react';
+import { Search, ChevronLeft, LogOut, Bell, Settings, ShoppingBag } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getDemoUser } from '@/lib/demo-utils';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import { useCart } from '@/lib/context/CartContext';
 
 export default function Header() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function Header() {
   const [profile, setProfile] = useState<any>(null);
   const [notificationCount, setNotificationCount] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { cartCount } = useCart();
 
   const isRootPage = pathname === '/home';
   const showSearchBar = !pathname?.startsWith('/run');
@@ -52,7 +54,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-[100] w-full bg-[#FDFDFD]/95 backdrop-blur-2xl border-b border-slate-50 px-5 pt-4 pb-5">
+      <header className="fixed top-0 left-0 right-0 z-100 w-full bg-[#FDFDFD]/95 backdrop-blur-2xl border-b border-slate-50 px-5 pt-4 pb-5">
         <div className="flex items-center gap-3 w-full max-w-2xl mx-auto">
           
           <AnimatePresence initial={false}>
@@ -89,6 +91,17 @@ export default function Header() {
           </motion.div>
 
           <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="flex items-center gap-3 shrink-0">
+            <button 
+              onClick={() => router.push('/cart')}
+              className="transition-all relative p-2 text-navy/40 hover:text-navy active:scale-90"
+            >
+              <ShoppingBag size={22} />
+              {cartCount > 0 && (
+                <div className="absolute top-1 right-1 bg-emerald-500 text-white text-[8px] font-black h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
+                  {cartCount}
+                </div>
+              )}
+            </button>
             <button 
               onClick={() => router.push('/activity')}
               className={`transition-all relative p-2 active:scale-90 ${pathname === '/activity' ? 'text-[#007AFF]' : 'text-navy/40 hover:text-navy'}`}

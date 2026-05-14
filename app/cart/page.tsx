@@ -23,18 +23,18 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
       
-      {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
-        <div className="flex items-center gap-3">
+      {/* ── NAV (Optical Institutionalism) ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => router.push('/marketplace')}
-            className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-100 active:scale-95 transition-all"
+            className="w-8 h-8 rounded-xl bg-slate-50/50 flex items-center justify-center text-slate-400 border border-slate-100/50 active:scale-95 transition-all"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} />
           </button>
           <div>
-            <p className="text-[14px] font-bold tracking-tight">Shopping Bag</p>
-            <p className="text-[10px] font-medium text-[#94a3b8]">{cartCount} items selected</p>
+            <p className="text-[15px] font-bold tracking-tight text-[#1e293b] leading-tight">Shopping Bag</p>
+            <p className="text-[10px] font-medium text-slate-400 mt-0.5">{cartCount} items selected</p>
           </div>
         </div>
       </nav>
@@ -44,23 +44,17 @@ export default function CartPage() {
         <AnimatePresence mode="popLayout">
           {cart.length === 0 ? (
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="py-40 flex flex-col items-center justify-center text-center gap-4"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-56 flex flex-col items-center justify-center text-center"
             >
-              <div className="w-20 h-20 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-200">
-                <ShoppingBag size={40} strokeWidth={1} />
+              <div className="w-24 h-24 flex items-center justify-center text-slate-200 mb-6">
+                <ShoppingBag size={48} strokeWidth={2} />
               </div>
-              <div className="space-y-1">
-                <p className="text-[16px] font-bold text-[#1e293b]">Your bag is empty</p>
-                <p className="text-[13px] font-medium text-[#94a3b8]">Add some items to start a mission.</p>
-              </div>
-              <button 
-                onClick={() => router.push('/marketplace')}
-                className="mt-4 h-12 px-8 bg-[#1e293b] text-white rounded-xl font-bold text-[13px] active:scale-95 transition-all"
-              >
-                Back to Marketplace
-              </button>
+              <h2 className="text-[17px] font-bold tracking-tight text-[#1e293b] mb-2">Your bag is empty</h2>
+              <p className="text-[13px] font-medium text-slate-400 max-w-[200px] leading-relaxed">
+                Nothing here yet. Browse the marketplace?
+              </p>
             </motion.div>
           ) : (
             <div className="space-y-6">
