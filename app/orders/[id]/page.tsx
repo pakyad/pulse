@@ -109,7 +109,7 @@ export default function LiveOrderPage() {
   const phase = getPhase(status);
   const isDone = phase === 6;
   const isCancelled = status === 'CANCELLED';
-  const isPending = status === 'PENDING_VENDOR';
+  const isPending = status === 'PENDING_VENDOR' || status === 'PENDING';
   const showReview = isDone && !order.isReviewed;
   const orderImg = order.images?.[0] || order.image_url;
 

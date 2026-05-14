@@ -135,6 +135,7 @@ export default function NavigationGate() {
     pathname?.startsWith('/merchant') || 
     pathname?.startsWith('/admin') || 
     pathname?.startsWith('/run') || 
+    pathname?.startsWith('/cart') ||
     pathname?.startsWith('/marketplace/') ||
     pathname?.startsWith('/orders/');
 
@@ -142,6 +143,7 @@ export default function NavigationGate() {
   // Hidden during the full buying process to avoid overlapping sticky CTAs
   const isBuyingFlow =
     pathname?.startsWith('/marketplace/') ||   // item detail + checkout
+    pathname?.startsWith('/cart') ||            // shopping bag + checkout
     pathname?.startsWith('/orders/') ||         // live order status
     pathname?.startsWith('/me/orders');          // orders list / history
 
