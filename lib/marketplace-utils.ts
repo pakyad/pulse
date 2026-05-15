@@ -137,3 +137,41 @@ export const reportOrderIssue = async (orderId: string, data: any, evidence?: Fi
     updated_at: serverTimestamp()
   });
 };
+
+/**
+ * respondToDispute
+ * Allows merchants to submit their counter-evidence to the Admin.
+ */
+export const respondToDispute = async (disputeId: string, data: any, evidence?: File) => {
+  const { doc, getDoc, updateDoc, serverTimestamp } = await import("firebase/firestore");
+  const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+
+  let merchantEvidenceUrl = '';
+  if (evidence) {
+    const fileName = `${Date.now()}_merchant_response_${disputeId}.jpg`;
+    const storageRef = ref(storage, `disputes/${disputeId}/merchant_${fileName}`);
+    const uploadResult = await uploadBytes(storageRef, evidence);
+    merchantEvidenceUrl = await getDownloadURL(uploadResult.ref);
+  }
+
+  // 1. Update Dispute Record
+  const disputeRef = doc(db, "disputes", disputeId);
+  const disputeSnap = await getDoc(disputeRef);
+  
+  await updateDoc(disputeRef, {
+    merchant_response: data.narrative,
+    merchant_evidence_url: merchantEvidenceUrl,
+    status: 'MERCHANT_RESPONDED',
+    merchant_responded_at: serverTimestamp(),
+  });
+
+  // 2. Update Order Status if possible
+  if (disputeSnap.exists()) {
+    const orderId = disputeSnap.data().order_id;
+    const orderRef = doc(db, "orders", orderId);
+    await updateDoc(orderRef, {
+      dispute_status: 'MERCHANT_RESPONDED',
+      updated_at: serverTimestamp()
+    });
+  }
+};

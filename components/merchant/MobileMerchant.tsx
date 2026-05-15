@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, ShieldCheck, Zap, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, ShieldCheck, Zap, CheckCircle2, Pencil, Trash2, ShieldAlert } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { deleteDoc, doc } from 'firebase/firestore';
 import CreateListing from '@/components/CreateListing';
@@ -291,7 +291,7 @@ export default function MobileMerchant({
         <div className="flex items-center justify-between max-w-lg mx-auto">
            {[
              { id: 'dashboard', label: 'Terminal', icon: LayoutGrid, path: '/merchant' },
-             { id: 'history', label: 'Log', icon: ClipboardList, path: '/merchant/history' },
+             { id: 'disputes', label: 'Log', icon: ClipboardList, path: '/merchant/disputes' },
              { id: 'insights', label: 'Stats', icon: BarChart3, path: '/activity' },
              { id: 'account', label: 'Registry', icon: User, path: '/me' }
            ].map((nav) => {

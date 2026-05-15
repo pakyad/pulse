@@ -33,7 +33,7 @@ const MENU_GROUPS = [
     label: 'My Commerce',
     items: [
       { icon: ShoppingBag, label: 'Order History', path: '/me/orders' },
-      { icon: Store, label: 'Seller Dashboard', path: '/merchant' },
+      { icon: Store, label: 'Merchant Hub', path: '/merchant' },
       { icon: Heart, label: 'Saved Items', path: '/me/saved' },
     ],
   },
@@ -80,7 +80,7 @@ export default function MePage() {
             <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
                <ChevronLeft size={20} />
             </button>
-            <p className="text-[14px] font-bold tracking-tight">Identity Terminal</p>
+            <p className="text-[14px] font-bold tracking-tight">Profile</p>
          </div>
          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
       </nav>
@@ -116,31 +116,42 @@ export default function MePage() {
          </section>
 
          {/* ── MENU GROUPS ── */}
-         {MENU_GROUPS.map((group, idx) => (
-            <section key={idx} className="space-y-8">
-               <div className="px-1 space-y-1">
-                  <Heading>{group.label}</Heading>
-                  <Subtext>Manage your account and preferences</Subtext>
-               </div>
-               <div className="space-y-4">
-                  {group.items.map((item, i) => (
-                     <div key={i} className="space-y-4">
-                        <button 
-                           onClick={() => router.push(item.path)}
-                           className="w-full flex items-center justify-between group py-2"
-                        >
-                           <div className="text-left">
-                              <p className="text-[15px] font-bold text-slate-500 group-hover:text-[#1e293b] tracking-tight transition-colors">{item.label}</p>
-                              <p className="text-[11px] text-[#94a3b8] font-medium">View your {item.label.toLowerCase()}</p>
+         {MENU_GROUPS.map((group, idx) => {
+            const filteredItems = group.items.filter(item => {
+               if (item.label === 'Merchant Hub') {
+                  return !isStudent;
+               }
+               return true;
+            });
+
+            if (filteredItems.length === 0) return null;
+
+            return (
+               <section key={idx} className="space-y-8">
+                  <div className="px-1 space-y-1">
+                     <Heading>{group.label}</Heading>
+                     <Subtext>Manage your account and preferences</Subtext>
+                  </div>
+                  <div className="space-y-4">
+                     {filteredItems.map((item, i) => (
+                        <div key={i} className="space-y-4">
+                           <button 
+                              onClick={() => router.push(item.path)}
+                              className="w-full flex items-center justify-between group py-2"
+                           >
+                              <div className="text-left">
+                                 <p className="text-[15px] font-bold text-slate-500 group-hover:text-[#1e293b] tracking-tight transition-colors">{item.label}</p>
+                                 <p className="text-[11px] text-[#94a3b8] font-medium">View your {item.label.toLowerCase()}</p>
+                                 </div>
+                                 <ChevronRight size={16} className="text-slate-200 group-hover:text-[#1e293b] group-hover:translate-x-1 transition-all" />
+                              </button>
+                              {i < filteredItems.length - 1 && <div className="h-[0.5px] bg-slate-50" />}
                            </div>
-                           <ChevronRight size={16} className="text-slate-200 group-hover:text-[#1e293b] group-hover:translate-x-1 transition-all" />
-                        </button>
-                        {i < group.items.length - 1 && <div className="h-[0.5px] bg-slate-50" />}
+                        ))}
                      </div>
-                  ))}
-               </div>
-            </section>
-         ))}
+                  </section>
+               );
+            })}
 
          {/* ── LISTINGS SECTION (Horizontal Visuals) ── */}
          {isStudent && (

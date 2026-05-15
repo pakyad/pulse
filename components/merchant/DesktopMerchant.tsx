@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import SwipeToReady from './SwipeToReady';
 import { deleteDoc, doc } from 'firebase/firestore';
-import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info, Pencil, Trash2, ShieldAlert, ClipboardList } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import VoxelStatus from '@/components/shared/VoxelStatus';
@@ -61,6 +61,13 @@ export default function DesktopMerchant({
           >
             <Package size={20} />
             <span className="text-[15px] tracking-[-0.24px]">Products</span>
+          </button>
+          <button 
+            onClick={() => router.push('/merchant/disputes')}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
+          >
+            <ClipboardList size={20} />
+            <span className="text-[15px] tracking-[-0.24px]">Log</span>
           </button>
           <button 
             onClick={() => router.push('/activity')}
