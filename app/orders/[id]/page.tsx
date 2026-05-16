@@ -162,14 +162,21 @@ export default function LiveOrderPage() {
                  <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-white border-[2.5px] border-[#6366f1] shadow-sm" />
                  <p className="text-[9px] font-black text-[#6366f1] uppercase tracking-widest leading-none mb-1">Pick up</p>
                  <p className="text-[13px] font-bold text-[#1e293b] leading-tight truncate">{order.seller_name || 'Merchant'}</p>
-                 <p className="text-[11px] font-medium text-slate-400 mt-0.5 truncate">{order.pickup_location || 'Campus Hub'}</p>
+                 <p className="text-[11px] font-medium text-slate-400 mt-0.5 truncate">{order.pickup_location || 'Campus Shop'}</p>
                </div>
                
                <div className="relative">
                  <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-white border-[2.5px] border-emerald-500 shadow-sm" />
-                 <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Deliver to</p>
+                 <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Meet at</p>
                  <p className="text-[13px] font-bold text-[#1e293b] leading-tight truncate">{order.buyer_name || 'You'}</p>
                  <p className="text-[11px] font-medium text-slate-400 mt-0.5 truncate">{order.drop_off_location || 'Main Lobby'}</p>
+                 {(order.floorLevel || order.roomNumber) && (
+                   <span className="ml-1 text-[#1e293b] font-bold">
+                     ({order.floorLevel ? `${order.floorLevel}` : ''}
+                     {order.floorLevel && order.roomNumber ? ', ' : ''}
+                     {order.roomNumber ? `${order.roomNumber}` : ''})
+                   </span>
+                 )}
                </div>
              </div>
           </div>
@@ -265,9 +272,9 @@ export default function LiveOrderPage() {
             <Info size={14} className="text-[#1e293b]" />
           </div>
           <div className="space-y-0.5">
-            <p className="text-[12px] font-bold text-[#1e293b]">Refund & Dispute Policy</p>
+            <p className="text-[12px] font-bold text-[#1e293b]">Help & Returns</p>
             <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">
-              If there is a problem, admin will verify GPS data from both parties. Refunds are processed within 24 hours if locations don't match.
+              If there is a problem, our team will check the delivery data. We process returns within 24 hours.
             </p>
           </div>
         </section>
@@ -303,9 +310,9 @@ export default function LiveOrderPage() {
             
             <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-2xl space-y-4">
                <div className="space-y-1">
-                  <p className="text-[14px] font-bold text-[#1e293b]">Something wrong?</p>
+                  <p className="text-[14px] font-bold text-[#1e293b]">Need help?</p>
                   <p className="text-[11px] text-[#94a3b8] leading-relaxed">
-                     You have a 24-hour window to report issues or discovery defects after delivery. 
+                     You can report any issues within 24 hours after your order arrives.
                   </p>
                </div>
                
@@ -373,8 +380,8 @@ export default function LiveOrderPage() {
               </div>
               
               <div className="space-y-2">
-                <h1 className="text-[28px] font-black tracking-tight text-[#1e293b] leading-none">Delivered</h1>
-                <p className="text-[12px] text-slate-400 font-medium leading-relaxed">Your Pulse mission is complete.<br/>Enjoy your item!</p>
+                <h1 className="text-[28px] font-black tracking-tight text-[#1e293b] leading-none">Delivered!</h1>
+                <p className="text-[12px] text-slate-400 font-medium leading-relaxed">Your order is complete.<br/>Enjoy your item!</p>
               </div>
             </motion.div>
           </motion.div>

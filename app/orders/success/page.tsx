@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { motion } from 'framer-motion';
-import { Check, ArrowRight, ShieldCheck, Package } from 'lucide-react';
+import { Check, ArrowRight, ShieldCheck, Package, X } from 'lucide-react';
 
 export default function OrderSuccessPage() {
   const searchParams = useSearchParams();
@@ -39,7 +39,18 @@ export default function OrderSuccessPage() {
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased flex flex-col px-6 pt-24 pb-16">
+    <main className="min-h-screen bg-white text-[#1e293b] antialiased flex flex-col px-6 pt-20 pb-16">
+
+      {/* ── TOP NAV EXIT ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl">
+        <div />
+        <button 
+          onClick={() => router.push('/marketplace')}
+          className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#94a3b8] active:scale-95 transition-all"
+        >
+          <X size={20} />
+        </button>
+      </nav>
 
       {/* ── SUCCESS HEADER ── */}
       <motion.div

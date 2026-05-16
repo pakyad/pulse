@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ChevronLeft, Plus, Trash2, Loader2,
   UtensilsCrossed, BookOpen, Wrench, Home, Cpu,
-  ShieldCheck, ArrowUpRight
+  ShieldCheck, ArrowUpRight, Zap, Info
 } from 'lucide-react';
 
 import { db, auth } from '@/lib/firebase';
@@ -18,6 +18,7 @@ interface CreateListingProps {
   userId: string;
   role: string;
   onClose: () => void;
+  existingItem?: any;
 }
 
 const DOMAIN_ICONS: Record<DomainID, React.ElementType> = {
@@ -36,21 +37,21 @@ const DOMAIN_LABELS: Record<DomainID, string> = {
   TECH: 'Tech',
 };
 
-export default function CreateListing({ userId, role, onClose }: CreateListingProps) {
+export default function CreateListing({ userId, role, onClose, existingItem }: CreateListingProps) {
   const router = useRouter();
-  const [selectedDomain, setSelectedDomain] = useState<DomainID | ''>('');
-  const [subcategory, setSubcategory] = useState('');
-  const [images, setImages] = useState<string[]>([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [metadata, setMetadata] = useState<Record<string, any>>({});
-  const [stock, setStock] = useState('1');
+  const [selectedDomain, setSelectedDomain] = useState<DomainID | ''>(existingItem?.domain || '');
+  const [subcategory, setSubcategory] = useState(existingItem?.subcategory || '');
+  const [images, setImages] = useState<string[]>(existingItem?.images || []);
+  const [title, setTitle] = useState(existingItem?.title || '');
+  const [description, setDescription] = useState(existingItem?.description || '');
+  const [price, setPrice] = useState(existingItem?.price?.toString() || '');
+  const [metadata, setMetadata] = useState<Record<string, any>>(existingItem?.metadata || {});
+  const [stock, setStock] = useState(existingItem?.stock_count?.toString() || '1');
 
   const [governanceStatus, setGovernanceStatus] = useState<'STABLE' | 'WARNING' | 'BLOCKED'>('STABLE');
   const [governanceCeiling, setGovernanceCeiling] = useState<number | null>(null);
   const [isPosting, setIsPosting] = useState(false);
-  const [appealText, setAppealText] = useState('');
+  const [appealText, setAppealText] = useState(existingItem?.appeal_note || '');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,10 +77,39 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
     }
   }, [selectedDomain, subcategory, price]);
 
+  // 🏛️ Institutional Image Compressor: Prevents 1MB Firestore limit crashes
+  const compressImage = (base64: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        // Compress to 0.7 quality to stay well under the 1MB limit
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+    });
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     Array.from(e.target.files || []).forEach(file => {
       const reader = new FileReader();
-      reader.onloadend = () => setImages(prev => [...prev, reader.result as string].slice(0, 10));
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setImages(prev => [...prev, compressed].slice(0, 10));
+      };
       reader.readAsDataURL(file);
     });
   };
@@ -88,8 +118,9 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
     if (!selectedDomain) return;
     setIsPosting(true);
     try {
+      const { updateDoc, doc } = await import('firebase/firestore');
       const user = auth.currentUser;
-      await addDoc(collection(db, 'items'), {
+      const data = {
         title,
         description,
         domain: selectedDomain,
@@ -108,12 +139,22 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
         is_exemption_request: governanceStatus === 'BLOCKED',
         appeal_note: appealText,
         is_official: role?.toUpperCase() === 'CLUB' || role?.toUpperCase() === 'MERCHANT',
-        created_at: serverTimestamp(),
-      });
+        updated_at: serverTimestamp(),
+      };
+
+      if (existingItem) {
+        await updateDoc(doc(db, 'items', existingItem.id), data);
+      } else {
+        const { addDoc, collection } = await import('firebase/firestore');
+        await addDoc(collection(db, 'items'), {
+          ...data,
+          created_at: serverTimestamp()
+        });
+      }
       onClose();
     } catch (e) {
       console.error(e);
-      alert('Failed to post listing.');
+      alert('Failed to process listing.');
     } finally {
       setIsPosting(false);
     }
@@ -134,13 +175,40 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
             <X size={18} />
           </button>
           <div>
-            <p className="text-[14px] font-bold tracking-tight">New Listing</p>
+            <p className="text-[14px] font-bold tracking-tight">{existingItem ? 'Edit Listing' : 'New Listing'}</p>
             <p className="text-[10px] font-medium text-[#94a3b8]">Institutional Registry</p>
           </div>
         </div>
       </nav>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-40 px-6 pt-10">
+
+        {/* 🏛️ Actionable Intelligence (Institutional Guidance) */}
+        {existingItem && existingItem.stock_count <= 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            className="mb-10 p-6 bg-slate-900 rounded-[32px] text-white shadow-xl shadow-slate-900/10"
+          >
+            <div className="flex items-center gap-2 mb-4 text-amber-400">
+               <Zap size={16} />
+               <p className="text-[10px] font-black uppercase tracking-widest">Opportunity Detected</p>
+            </div>
+            <h3 className="text-[16px] font-bold tracking-tight mb-2">Demand is peaking for this asset.</h3>
+            <p className="text-[12px] text-white/60 font-medium leading-relaxed mb-6">
+              Students have been viewing this listing even while it was out of stock. Restock now to capture the current campus demand velocity.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+               <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                  <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Recommendation</p>
+                  <p className="text-[12px] font-bold italic text-white/90">Restock +10 units</p>
+               </div>
+               <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                  <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Pricing Health</p>
+                  <p className="text-[12px] font-bold text-emerald-400">Competitive</p>
+               </div>
+            </div>
+          </motion.div>
+        )}
         
         {/* ── SECTION: CLASSIFICATION ── */}
         <section className="space-y-4">
@@ -355,7 +423,7 @@ export default function CreateListing({ userId, role, onClose }: CreateListingPr
           }`}
         >
           {isPosting ? <Loader2 size={16} className="animate-spin" /> : <ArrowUpRight size={18} />}
-          {isPosting ? 'Publishing...' : 'Publish Listing'}
+          {isPosting ? 'Publishing...' : (existingItem ? 'Update Listing' : 'Publish Listing')}
         </button>
       </div>
 

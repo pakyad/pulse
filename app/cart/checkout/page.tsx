@@ -30,14 +30,14 @@ const CAMPUS_HUBS: Record<string, any[]> = {
 };
 
 const FPX_BANKS = [
-  { id: 'maybank', label: 'Maybank2u' },
-  { id: 'cimb',    label: 'CIMB Clicks' },
-  { id: 'rhb',     label: 'RHB Now' },
-  { id: 'hlb',     label: 'Hong Leong Connect' },
-  { id: 'pbb',     label: 'Public Bank' },
-  { id: 'ambank',  label: 'AmOnline' },
-  { id: 'bsn',     label: 'BSN' },
-  { id: 'affin',   label: 'Affin Online' },
+  { id: 'maybank', label: 'Maybank2u', logo: 'https://seeklogo.com/images/M/maybank-logo-72F7E91D24-seeklogo.com.png' },
+  { id: 'cimb',    label: 'CIMB Clicks', logo: 'https://seeklogo.com/images/C/cimb-bank-logo-2782A7D2C0-seeklogo.com.png' },
+  { id: 'rhb',     label: 'RHB Now', logo: 'https://seeklogo.com/images/R/rhb-bank-logo-18E29A7264-seeklogo.com.png' },
+  { id: 'hlb',     label: 'Hong Leong Connect', logo: 'https://seeklogo.com/images/H/hong-leong-bank-logo-720C731776-seeklogo.com.png' },
+  { id: 'pbb',     label: 'Public Bank', logo: 'https://seeklogo.com/images/P/public-bank-logo-7704204D7F-seeklogo.com.png' },
+  { id: 'ambank',  label: 'AmOnline', logo: 'https://seeklogo.com/images/A/ambank-logo-A27E742A94-seeklogo.com.png' },
+  { id: 'bsn',     label: 'BSN', logo: 'https://seeklogo.com/images/B/bsn-logo-B1389D6613-seeklogo.com.png' },
+  { id: 'bank_islam', label: 'Bank Islam', logo: 'https://seeklogo.com/images/B/bank-islam-logo-6677F67E3F-seeklogo.com.png' },
 ];
 
 type PayStatus = 'idle' | 'processing' | 'done';
@@ -47,7 +47,7 @@ export default function CartCheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart();
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [preferences, setPreferences] = useState<Record<string, { type: 'RUNNER' | 'SELF_COLLECT', location: string }>>({});
+  const [preferences, setPreferences] = useState<Record<string, { type: 'RUNNER' | 'SELF_COLLECT', location: string, floor?: string, room?: string }>>({});
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [payStatus,    setPayStatus]    = useState<PayStatus>('idle');
 
@@ -101,7 +101,9 @@ export default function CartCheckoutPage() {
         return {
           ...item,
           deliveryType: pref.type,
-          dropOffLocation: pref.type === 'RUNNER' ? `${hub.label} — ${hub.sub}` : null
+          dropOffLocation: pref.type === 'RUNNER' ? `${hub.label} — ${hub.sub}` : null,
+          floorLevel: pref.floor || null,
+          roomNumber: pref.room || null
         };
       });
       
@@ -141,8 +143,8 @@ export default function CartCheckoutPage() {
                   <span className="text-[#1e293b] font-black text-[13px] tracking-widest">FPX</span>
                 </div>
                 <div className="space-y-1 text-center">
-                  <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">Decomposing Cart...</p>
-                  <p className="text-[12px] font-medium text-[#94a3b8]">Distributing items to vendors</p>
+                  <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">Almost there...</p>
+                  <p className="text-[12px] font-medium text-[#94a3b8]">Sending your orders to shops</p>
                 </div>
                 <div className="w-44 h-1 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div
@@ -152,7 +154,7 @@ export default function CartCheckoutPage() {
                     transition={{ duration: 3, ease: 'easeInOut' }}
                   />
                 </div>
-                <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Atomic Transaction in Progress</p>
+                <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Processing Payment</p>
               </>
             ) : (
               <>
@@ -165,8 +167,8 @@ export default function CartCheckoutPage() {
                   <CheckCircle2 size={32} className="text-white" strokeWidth={2} />
                 </motion.div>
                 <div className="space-y-1 text-center">
-                  <p className="text-[16px] font-bold text-[#1e293b] tracking-tight">Mission Initiated</p>
-                  <p className="text-[12px] font-medium text-[#94a3b8]">RM {total.toFixed(2)} distributed</p>
+                  <p className="text-[16px] font-bold text-[#1e293b] tracking-tight">Order Placed!</p>
+                  <p className="text-[12px] font-medium text-[#94a3b8]">RM {total.toFixed(2)} paid successfully</p>
                 </div>
               </>
             )}
@@ -186,7 +188,7 @@ export default function CartCheckoutPage() {
           <div>
             <p className="text-[14px] font-bold tracking-tight">Cart Checkout</p>
             <p className="text-[11px] font-medium text-[#94a3b8]">
-              {step === 1 ? 'Logistics Selection' : 'Payment Handshake'}
+              {step === 1 ? 'Choose Delivery' : 'Select Bank'}
             </p>
           </div>
         </div>
@@ -203,8 +205,8 @@ export default function CartCheckoutPage() {
               className="space-y-8"
             >
               <div className="space-y-1">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Logistics Selection</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">Choose delivery for each item in your mission.</p>
+                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Delivery Method</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">How would you like to get your items?</p>
               </div>
 
               <div className="space-y-6">
@@ -242,7 +244,7 @@ export default function CartCheckoutPage() {
                        {/* Location Selection (If Runner) */}
                        {pref.type === 'RUNNER' && (
                           <div className="pt-2 space-y-2">
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Drop-off Point</p>
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Meeting Point</p>
                              <div className="grid grid-cols-2 gap-2">
                                 {hubs.map(hub => (
                                    <button 
@@ -254,6 +256,38 @@ export default function CartCheckoutPage() {
                                       <p className="text-[9px] font-medium text-[#94a3b8]">RM {hub.zone === 'campus' ? '3.50' : '5.00'}</p>
                                    </button>
                                 ))}
+                             </div>
+                          </div>
+                       )}
+
+                       {/* 🏢 Indoor Details */}
+                       {pref.type === 'RUNNER' && (
+                          <div className="pt-2 space-y-3 animate-in fade-in slide-in-from-top-2 duration-500">
+                             <div className="flex items-center gap-2 px-1">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inside Building (Optional)</p>
+                                <div className="h-px flex-1 bg-slate-100" />
+                             </div>
+                             <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                   <label className="text-[9px] font-black text-slate-300 uppercase tracking-tightest ml-1">Floor</label>
+                                   <input 
+                                      type="text" 
+                                      placeholder="e.g. Lvl 4"
+                                      value={pref.floor || ''}
+                                      onChange={(e) => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, floor: e.target.value } }))}
+                                      className="w-full h-11 px-4 bg-white border border-slate-100 rounded-xl text-[12px] font-bold text-[#1e293b] outline-none focus:ring-2 focus:ring-slate-900/5 transition-all placeholder:text-slate-200"
+                                   />
+                                </div>
+                                <div className="space-y-1.5">
+                                   <label className="text-[9px] font-black text-slate-300 uppercase tracking-tightest ml-1">Room / Wing</label>
+                                   <input 
+                                      type="text" 
+                                      placeholder="e.g. Lab 4.1"
+                                      value={pref.room || ''}
+                                      onChange={(e) => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, room: e.target.value } }))}
+                                      className="w-full h-11 px-4 bg-white border border-slate-100 rounded-xl text-[12px] font-bold text-[#1e293b] outline-none focus:ring-2 focus:ring-slate-900/5 transition-all placeholder:text-slate-200"
+                                   />
+                                </div>
                              </div>
                           </div>
                        )}
@@ -281,20 +315,34 @@ export default function CartCheckoutPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden divide-y divide-slate-100">
-                {FPX_BANKS.map(bank => (
-                  <button
-                    key={bank.id}
-                    onClick={() => setSelectedBank(bank.id)}
-                    className={`w-full flex items-center justify-between px-5 py-4 transition-all ${
-                      selectedBank === bank.id ? 'bg-white' : ''
-                    }`}
-                  >
-                    <span className={`text-[14px] font-bold ${selectedBank === bank.id ? 'text-[#1e293b]' : 'text-[#94a3b8]'}`}>{bank.label}</span>
-                    {selectedBank === bank.id && <CheckCircle2 size={18} className="text-emerald-500" />}
-                  </button>
-                ))}
-              </div>
+               <div className="space-y-3">
+                 {FPX_BANKS.map(bank => (
+                   <button
+                     key={bank.id}
+                     onClick={() => setSelectedBank(bank.id)}
+                     className={`w-full h-16 px-5 rounded-2xl flex items-center justify-between border transition-all ${
+                       selectedBank === bank.id 
+                       ? 'bg-white border-[#1e293b] shadow-lg shadow-slate-900/5 ring-1 ring-[#1e293b]' 
+                       : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-slate-200'
+                     }`}
+                   >
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-white border border-slate-100 p-1.5 flex items-center justify-center shrink-0">
+                           <img src={bank.logo} alt={bank.label} className="w-full h-full object-contain" />
+                        </div>
+                        <span className={`text-[13px] font-bold ${selectedBank === bank.id ? 'text-[#1e293b]' : 'text-slate-400'}`}>
+                           {bank.label}
+                        </span>
+                     </div>
+                     
+                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        selectedBank === bank.id ? 'bg-[#1e293b] border-[#1e293b]' : 'bg-white border-slate-200'
+                     }`}>
+                        {selectedBank === bank.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                     </div>
+                   </button>
+                 ))}
+               </div>
             </motion.div>
           )}
         </AnimatePresence>

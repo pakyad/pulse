@@ -116,7 +116,7 @@ export default function RunnerActivePage() {
     <div className="min-h-screen bg-navy flex items-center justify-center p-8">
        <div className="flex flex-col items-center gap-6">
           <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
-          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Synchronizing Tactical Intel</p>
+          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Loading Delivery Data</p>
        </div>
     </div>
   );
@@ -138,8 +138,8 @@ export default function RunnerActivePage() {
            <ChevronLeft size={20} />
         </button>
         <div className="flex flex-col items-center">
-           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Terminal Node #{order.id.slice(0,6)}</span>
-           <h2 className="text-[14px] font-black uppercase tracking-tightest mt-1">Tactical Command</h2>
+           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Order ID: {order.id.slice(0,6).toUpperCase()}</span>
+           <h2 className="text-[14px] font-black uppercase tracking-tightest mt-1">Order Status</h2>
         </div>
         <button onClick={() => setShowCancelModal(true)} className="w-12 h-12 rounded-[1.5rem] bg-red-50 border border-red-100 flex items-center justify-center text-red-500 transition-all active:scale-90">
            <X size={20} />
@@ -157,8 +157,8 @@ export default function RunnerActivePage() {
                {['PREPARING', 'READY_FOR_PICKUP'].includes(order.status) && "Proceed to Merchant"}
                {order.status === 'ARRIVED_AT_MERCHANT' && "Verify Items"}
                {order.status === 'ON_THE_WAY' && "Start Transit"}
-               {order.status === 'ARRIVED_AT_BUYER' && "Enter Handshake"}
-               {isCOMPLETED && "Mission Secured"}
+               {order.status === 'ARRIVED_AT_BUYER' && "Ready to Handover"}
+               {isCOMPLETED && "Delivery Successful"}
             </h1>
          </div>
 
@@ -183,7 +183,21 @@ export default function RunnerActivePage() {
               title="Destination Node"
               detail={order.drop_off_location}
               icon={<MapPin size={20} />}
-              description="Drop off at specified campus zone."
+              description={
+                <>
+                  Drop off at specified campus zone.
+                  {(order.floorLevel || order.roomNumber) && (
+                    <div className="mt-2 p-3 bg-navy/5 rounded-xl border border-navy/5">
+                      <p className="text-[10px] font-black text-navy uppercase tracking-widest leading-none mb-1">Floor & Room</p>
+                      <p className="text-[13px] font-bold text-navy">
+                        {order.floorLevel ? `Floor: ${order.floorLevel}` : ''}
+                        {order.floorLevel && order.roomNumber ? ' • ' : ''}
+                        {order.roomNumber ? `Room: ${order.roomNumber}` : ''}
+                      </p>
+                    </div>
+                  )}
+                </>
+              }
             />
          </div>
 
@@ -197,7 +211,7 @@ export default function RunnerActivePage() {
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                        <ClipboardList className="text-emerald-400" size={24} />
-                       <h4 className="text-[14px] font-black uppercase tracking-widest">Verify Handoff</h4>
+                       <h4 className="text-[14px] font-black uppercase tracking-widest">Verify Items</h4>
                     </div>
                     <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">
                        {Object.values(checklist).filter(Boolean).length}/{items.length} Checked
@@ -229,7 +243,7 @@ export default function RunnerActivePage() {
                         <Info size={24} />
                      </div>
                      <div>
-                        <p className="text-[14px] font-black uppercase tracking-tightest">Rendezvous Details</p>
+                        <p className="text-[14px] font-black uppercase tracking-tightest">Meeting Details</p>
                         <p className="text-[12px] text-slate-400 font-medium leading-relaxed mt-1">
                            The merchant is located at the <span className="text-navy font-bold">Main Cafeteria, Stall 04</span>. Please verify the order number upon arrival.
                         </p>
@@ -311,14 +325,31 @@ export default function RunnerActivePage() {
                />
             )}
 
-            {order.status === 'ON_THE_WAY' && (
-               <ActionButton 
-                 key="arrived_buyer"
-                 label="Arrived at Drop-off"
-                 onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
-                 color="navy"
-               />
-            )}
+             {order.status === 'ON_THE_WAY' && (
+                <div className="space-y-3">
+                   <ActionButton 
+                    key="arrived_building"
+                    label="Arrived at Building"
+                    onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUILDING' })}
+                    color="navy"
+                  />
+                  <button 
+                    onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
+                    className="w-full h-12 bg-white border border-slate-100 text-slate-300 rounded-2xl font-bold text-[11px] uppercase tracking-widest"
+                  >
+                    Skip to Buyer Arrived
+                  </button>
+                </div>
+             )}
+
+             {order.status === 'ARRIVED_AT_BUILDING' && (
+                <ActionButton 
+                  key="arrived_buyer"
+                  label="Arrived at Drop-off"
+                  onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
+                  color="emerald"
+                />
+             )}
 
             {order.status === 'ARRIVED_AT_BUYER' && !isCOMPLETED && (
                <motion.div 
@@ -346,8 +377,8 @@ export default function RunnerActivePage() {
                    disabled={verificationCode.length !== 4 || isVerifying}
                    className="w-full h-20 bg-navy text-white rounded-[2rem] font-black text-[15px] uppercase tracking-widest disabled:opacity-30 flex items-center justify-center gap-3"
                   >
-                    {isVerifying ? 'Authenticating...' : (
-                      <>Secure Delivery <ArrowRight size={20} /></>
+                    {isVerifying ? 'Checking...' : (
+                      <>Finish Delivery <ArrowRight size={20} /></>
                     )}
                   </button>
                </motion.div>
@@ -362,8 +393,8 @@ export default function RunnerActivePage() {
                      <CheckCircle2 size={40} />
                   </div>
                   <div className="text-center">
-                     <h2 className="text-[24px] font-black uppercase tracking-tightest">Mission Secured</h2>
-                     <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">RM 2.00 Credited to Ledger</p>
+                     <h2 className="text-[24px] font-black uppercase tracking-tightest">Delivery Done</h2>
+                     <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">RM 2.00 Earned</p>
                   </div>
                   <button onClick={() => router.push('/run')} className="w-full h-16 bg-slate-50 text-navy rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest border border-slate-100">Return to Hub</button>
                </motion.div>
@@ -383,14 +414,14 @@ export default function RunnerActivePage() {
                      <AlertTriangle size={32} />
                   </div>
                   <div className="text-center space-y-2">
-                     <h3 className="text-[20px] font-black uppercase tracking-tightest">Abort Mission?</h3>
+                     <h3 className="text-[20px] font-black uppercase tracking-tightest">Cancel Delivery?</h3>
                      <p className="text-[13px] text-slate-400 font-medium leading-relaxed">
-                        Aborting this protocol will incur a <span className="text-red-500 font-bold">-50 Hustle Score</span> penalty.
+                        Cancelling this will reduce your <span className="text-red-500 font-bold">Hustle Score by 50</span>.
                      </p>
                   </div>
                   <div className="space-y-3 pt-2">
-                     <button onClick={handleCancelMission} className="w-full h-16 bg-red-500 text-white rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest">Confirm Abort</button>
-                     <button onClick={() => setShowCancelModal(false)} className="w-full h-16 bg-slate-50 text-slate-400 rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest">Dismiss</button>
+                     <button onClick={handleCancelMission} className="w-full h-16 bg-red-500 text-white rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest">Yes, Cancel</button>
+                     <button onClick={() => setShowCancelModal(false)} className="w-full h-16 bg-slate-50 text-slate-400 rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest">No, Keep Delivery</button>
                   </div>
                </motion.div>
             </div>

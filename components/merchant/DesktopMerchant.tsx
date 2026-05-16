@@ -23,6 +23,14 @@ export default function DesktopMerchant({
 }: any) {
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  const filteredAttentionItems = items?.filter((item: any) => {
+    const isAttention = (item.stock_count ?? 99) <= 5;
+    if (!isAttention) return false;
+    if (!searchTerm) return true;
+    return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="min-h-screen bg-[#F2F2F7] selection:bg-gray-100 hidden md:flex">
@@ -140,28 +148,6 @@ export default function DesktopMerchant({
         {/* ── ADMINISTRATIVE VIEW ── */}
         <div className="p-10 space-y-12">
           
-          {/* Key Indicators */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 px-1">
-               <Info size={14} className="text-slate-400" />
-               <p className="text-[11px] font-medium text-slate-400 italic">Daily summary of shop activity for {merchant?.full_name}.</p>
-            </div>
-            <div className="grid grid-cols-3 gap-6">
-              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Total Earnings</p>
-                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">RM {revenue.toFixed(2)}</h2>
-              </div>
-              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Orders to Do</p>
-                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">{activeOrdersCount}</h2>
-              </div>
-              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">System Reach</p>
-                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">Institutional</h2>
-              </div>
-            </div>
-          </section>
-
           {/* Data Tables */}
           <div className="grid grid-cols-1 gap-12">
              
@@ -270,6 +256,83 @@ export default function DesktopMerchant({
                 </div>
              </div>
 
+          {/* Key Indicators */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 px-1">
+               <Info size={14} className="text-slate-400" />
+               <p className="text-[11px] font-medium text-slate-400 italic">Daily summary of shop activity for {merchant?.full_name}.</p>
+            </div>
+            <div className="grid grid-cols-3 gap-6">
+              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Total Earnings</p>
+                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">RM {revenue.toFixed(2)}</h2>
+              </div>
+              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Orders to Do</p>
+                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">{activeOrdersCount}</h2>
+              </div>
+              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">System Reach</p>
+                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">Institutional</h2>
+              </div>
+            </div>
+          </section>
+
+          {/* 🏛️ Minimal Inventory Registry (Matured) */}
+          {items?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
+            <section className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert size={14} className="text-amber-500" />
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Inventory Attention</p>
+                </div>
+                
+                {/* 🔍 Drake Searchbar */}
+                <div className="relative group">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
+                  <input 
+                    type="text"
+                    placeholder="Search registry..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="h-9 w-64 pl-9 pr-4 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-medium text-slate-900 placeholder:text-slate-300 focus:outline-none focus:bg-white focus:border-slate-200 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="divide-y divide-slate-100 border border-slate-100 rounded-xl overflow-hidden shadow-sm">
+                {filteredAttentionItems?.length > 0 ? (
+                  filteredAttentionItems.map((item: any) => (
+                    <div key={item.id} className="flex items-center justify-between px-6 py-4 bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300">
+                          <Package size={14} />
+                        </div>
+                        <span className="text-[13px] font-bold text-[#1e293b]">{item.title}</span>
+                      </div>
+                      <div className="flex items-center gap-8">
+                        <span className={`text-[13px] font-black ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                          {item.stock_count <= 0 ? 'OUT OF STOCK' : `${item.stock_count} REMAINING`}
+                        </span>
+                        <button 
+                          onClick={() => router.push(`/marketplace/${item.id}/edit`)}
+                          className="text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest"
+                        >
+                          Restock
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-6 py-12 bg-white flex flex-col items-center justify-center text-center">
+                    <Search size={24} className="text-slate-100 mb-2" />
+                    <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">No matching assets found</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
              {/* My Inventory: Visual Grid */}
              <div className="space-y-6">
                 <div className="flex items-center justify-between px-1">
@@ -304,7 +367,21 @@ export default function DesktopMerchant({
                                <div className="flex items-center gap-3">
                                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">RM{item.price}</p>
                                    <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{item.stock_count ?? 0} STOCK</p>
+                                   <div className="flex items-center gap-1.5">
+                                      <p className={`text-[11px] font-black uppercase tracking-widest ${
+                                         (item.stock_count ?? 0) === 0 ? 'text-red-500' :
+                                         (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 
+                                         'text-slate-400'
+                                      }`}>
+                                         {item.stock_count ?? 0} STOCK
+                                      </p>
+                                      {(item.stock_count ?? 0) <= 5 && (item.stock_count ?? 0) > 0 && (
+                                         <span className="text-[9px] font-black bg-amber-50 text-amber-500 px-2 py-0.5 rounded-full border border-amber-100">LOW</span>
+                                      )}
+                                      {(item.stock_count ?? 0) === 0 && (
+                                         <span className="text-[9px] font-black bg-red-50 text-red-500 px-2 py-0.5 rounded-full border border-red-100">EMPTY</span>
+                                      )}
+                                   </div>
                                </div>
                             </div>
 

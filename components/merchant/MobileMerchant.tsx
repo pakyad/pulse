@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, ShieldCheck, Zap, CheckCircle2, Pencil, Trash2, ShieldAlert } from 'lucide-react';
+import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, ShieldCheck, Zap, CheckCircle2, Pencil, Trash2, ShieldAlert, Package } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { deleteDoc, doc } from 'firebase/firestore';
 import CreateListing from '@/components/CreateListing';
@@ -73,26 +73,6 @@ export default function MobileMerchant({
 
       <div className="flex-1 space-y-12 py-10 px-8">
          
-         {/* ── STATUS OVERVIEW (Skibidi concept) ── */}
-         <section className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-               <div className="p-6 bg-slate-50/30 rounded-[32px] border border-slate-50 space-y-4">
-                  <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest leading-none">Total Earnings</p>
-                  <div className="space-y-0.5">
-                     <p className="text-[11px] font-bold text-slate-200">RM</p>
-                     <p className="text-[22px] font-bold text-[#1e293b] tracking-tighter leading-none">{revenue.toFixed(2)}</p>
-                  </div>
-               </div>
-               <div className="p-6 bg-[#1e293b] rounded-[32px] text-white space-y-4 shadow-xl shadow-slate-900/10">
-                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none">Orders to Do</p>
-                  <div className="space-y-0.5">
-                     <p className="text-[11px] font-bold text-white/40">TOTAL</p>
-                     <p className="text-[22px] font-bold text-white tracking-tighter leading-none">{activeOrdersCount}</p>
-                  </div>
-               </div>
-            </div>
-         </section>
-
          {/* ── PENDING ACTIONS (Skibidi concept) ── */}
          <section className="space-y-6">
             <div className="space-y-4">
@@ -231,6 +211,62 @@ export default function MobileMerchant({
             </AnimatePresence>
          </section>
 
+         {/* ── STATUS OVERVIEW (Skibidi concept) ── */}
+         <section className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+               <div className="p-6 bg-slate-50/30 rounded-[32px] border border-slate-50 space-y-4">
+                  <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest leading-none">Total Earnings</p>
+                  <div className="space-y-0.5">
+                     <p className="text-[11px] font-bold text-slate-200">RM</p>
+                     <p className="text-[22px] font-bold text-[#1e293b] tracking-tighter leading-none">{revenue.toFixed(2)}</p>
+                  </div>
+               </div>
+               <div className="p-6 bg-[#1e293b] rounded-[32px] text-white space-y-4 shadow-xl shadow-slate-900/10">
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none">Orders to Do</p>
+                  <div className="space-y-0.5">
+                     <p className="text-[11px] font-bold text-white/40">TOTAL</p>
+                     <p className="text-[22px] font-bold text-white tracking-tighter leading-none">{activeOrdersCount}</p>
+                  </div>
+               </div>
+            </div>
+         </section>
+
+         {/* ── Minimal Inventory Registry (Matured) ── */}
+         {topItems?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
+           <section className="space-y-4">
+              <div className="flex items-center gap-2 px-1">
+                 <ShieldAlert size={14} className="text-amber-500" />
+                 <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest leading-none">Inventory Attention</p>
+              </div>
+              <div className="bg-white border border-slate-50 rounded-[32px] overflow-hidden shadow-sm divide-y divide-slate-50">
+                 {topItems.filter((i: any) => (i.stock_count ?? 99) <= 5).map((item: any) => (
+                    <div key={item.id} className="p-6 flex items-center justify-between bg-white active:bg-slate-50 transition-colors">
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-100">
+                             <Package size={18} />
+                          </div>
+                          <div>
+                             <p className="text-[13px] font-bold text-[#1e293b] truncate max-w-[120px]">{item.title}</p>
+                             <button 
+                                onClick={() => router.push(`/marketplace/${item.id}/edit`)}
+                                className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mt-0.5"
+                             >
+                                Restock Item
+                             </button>
+                          </div>
+                       </div>
+                       <div className="text-right">
+                          <p className={`text-[14px] font-black leading-none ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                             {item.stock_count <= 0 ? 'EMPTY' : item.stock_count}
+                          </p>
+                          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Units</p>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+           </section>
+         )}
+
          {/* ── MANAGE LISTINGS ── */}
          <section className="space-y-6">
             <div className="flex items-center justify-between px-1">
@@ -261,7 +297,17 @@ export default function MobileMerchant({
                         </div>
                         <div>
                            <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">{item.title}</p>
-                           <p className="text-[11px] font-medium text-[#94a3b8]">RM {item.price?.toFixed(2)} • {item.stock_count || 0} in stock</p>
+                           <div className="flex items-center gap-2">
+                              <p className="text-[11px] font-medium text-[#94a3b8]">RM {item.price?.toFixed(2)}</p>
+                              <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                              <p className={`text-[11px] font-bold uppercase tracking-tight ${
+                                 (item.stock_count ?? 0) === 0 ? 'text-red-500' :
+                                 (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 
+                                 'text-[#94a3b8]'
+                              }`}>
+                                 {item.stock_count ?? 0} in stock
+                              </p>
+                           </div>
                         </div>
                      </div>
                      <div className="flex items-center gap-2">

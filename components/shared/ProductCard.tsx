@@ -13,12 +13,13 @@ interface ProductCardProps {
     time_ago?: string;
     is_official?: boolean;
     status?: string;
+    stock_count?: number;
   };
   onClick?: () => void;
 }
 
 export default function ProductCard({ item, onClick }: ProductCardProps) {
-  const isSold = item.status === 'SOLD';
+  const isSold = item.status === 'SOLD' || (item.stock_count !== undefined && item.stock_count !== null && item.stock_count <= 0);
 
   return (
     <motion.div
@@ -46,7 +47,9 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
 
         {isSold && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-             <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em] bg-black/40 px-4 py-1.5 rounded-full backdrop-blur-md border border-white/20">Sold</p>
+             <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em] bg-black/40 px-4 py-1.5 rounded-full backdrop-blur-md border border-white/20">
+               {item.status === 'SOLD' ? 'Sold' : 'Out of Stock'}
+             </p>
           </div>
         )}
       </div>

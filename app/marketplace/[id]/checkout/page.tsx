@@ -1,9 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { db, auth, functions } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
+import { db, auth } from '@/lib/firebase';
+import { doc, getDoc, runTransaction, serverTimestamp, collection } from 'firebase/firestore';
 import {
   ChevronLeft, Truck, Plus, Package, Check,
   ArrowRight, ShieldCheck, CheckCircle2
@@ -58,6 +57,8 @@ export default function CheckoutPage() {
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [payStatus,    setPayStatus]    = useState<PayStatus>('idle');
 
+  const [errorState, setErrorState] = useState<null | 'INSUFFICIENT_STOCK'>(null);
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -67,13 +68,17 @@ export default function CheckoutPage() {
           setItem({ id: snap.id, ...data });
           const hubs = CAMPUS_HUBS[data.campus_id || 'MIIT'] || CAMPUS_HUBS['MIIT'];
           setLocation(hubs[0].id);
+          // 🏛️ Pulse Reset: If item is sold out, we shouldn't even be here
+          if (data.stock_count !== undefined && data.stock_count !== null && data.stock_count <= 0) {
+            router.push(`/marketplace/${id}`);
+          }
         }
       } finally {
         setPageLoading(false);
       }
     };
     load();
-  }, [id]);
+  }, [id, router]);
 
   // ── Derived ──
   const hubs         = item ? (CAMPUS_HUBS[item.campus_id || 'MIIT'] || CAMPUS_HUBS['MIIT']) : [];
@@ -83,33 +88,43 @@ export default function CheckoutPage() {
   const total        = (itemPrice * qty) + (choice === 'RUNNER' ? runnerFee : 0);
 
   const canProceedStep1 = !!choice && (choice === 'SELF_COLLECT' || !!location);
-  const canPay          = !!selectedBank && payStatus === 'idle';
+  const canPay          = !!selectedBank && payStatus === 'idle' && !errorState;
 
   // ── FPX Pay ──
   const handlePay = async () => {
     if (!auth.currentUser || !selectedBank) return;
+
+    // 🏛️ Pre-Payment Guard
+    if (item.stock_count !== undefined && item.stock_count !== null && item.stock_count < qty) {
+      setErrorState('INSUFFICIENT_STOCK');
+      return;
+    }
+
     setPayStatus('processing');
     await new Promise(r => setTimeout(r, 2500));
     try {
-      // Option B: Direct Firestore Write (Bypassing Cloud Functions for Demo)
-      const { runTransaction, serverTimestamp, collection } = await import('firebase/firestore');
       const parentOrderId = `PULSE-${Date.now()}`;
       
       await runTransaction(db, async (transaction) => {
-        // Decrement stock
         const itemRef = doc(db, 'items', id as string);
         const itemDoc = await transaction.get(itemRef);
-        if (itemDoc.exists()) {
-           const currentStock = itemDoc.data().stock_count || 0;
-           transaction.update(itemRef, { stock_count: Math.max(0, currentStock - qty) });
+        
+        if (!itemDoc.exists()) throw new Error("ITEM_NOT_FOUND");
+        
+        const currentStock = itemDoc.data().stock_count;
+        
+        if (currentStock !== undefined && currentStock !== null) {
+           if (currentStock < qty) {
+              throw new Error("SOLD_OUT");
+           }
+           transaction.update(itemRef, { stock_count: currentStock - qty });
         }
 
         // Sub-order
         const subOrderRef = doc(collection(db, 'orders'));
         const dropOffStr = choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : null;
         
-        // 🏛️ Runner-First Protocol:
-        // If RUNNER, it hits the Radar first.
+        // 🏛️ Runner-First Protocol
         const initialStatus = choice === 'RUNNER' ? 'PENDING_RUNNER' : 'PENDING_VENDOR';
 
         transaction.set(subOrderRef, {
@@ -155,7 +170,12 @@ export default function CheckoutPage() {
     } catch (e: any) {
       console.error('[FPX Pay]', e);
       setPayStatus('idle');
-      alert("Order failed. Please try again.");
+      
+      if (e.message === 'SOLD_OUT') {
+        setErrorState('INSUFFICIENT_STOCK');
+      } else {
+        alert("Order failed. Please try again.");
+      }
     }
   };
 
@@ -174,6 +194,31 @@ export default function CheckoutPage() {
 
   return (
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
+
+      {/* ════ ERROR: INSUFFICIENT STOCK OVERLAY ════ */}
+      <AnimatePresence>
+        {errorState === 'INSUFFICIENT_STOCK' && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-200 bg-white flex flex-col items-center justify-center px-10 text-center"
+          >
+            <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center mb-6">
+              <Lock size={32} className="text-red-500" />
+            </div>
+            <h2 className="text-[20px] font-bold text-[#1e293b] tracking-tight mb-2">Insufficient Stock</h2>
+            <p className="text-[13px] font-medium text-[#94a3b8] leading-relaxed mb-8">
+              Someone just bought the last remaining units while you were in checkout. 
+              We have not charged your account.
+            </p>
+            <button 
+              onClick={() => router.push(`/marketplace/${id}`)}
+              className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[14px] active:scale-95 transition-all"
+            >
+              Return to Item
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ════ PAYMENT PROCESSING OVERLAY ════ */}
       <AnimatePresence>
@@ -264,7 +309,11 @@ export default function CheckoutPage() {
           <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-lg px-3 py-2 shrink-0">
             <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-5 h-5 flex items-center justify-center text-[#94a3b8] active:scale-90 transition-all text-lg font-bold leading-none">−</button>
             <span className="text-[13px] font-bold w-5 text-center">{qty}</span>
-            <button onClick={() => setQty(q => q + 1)} className="w-5 h-5 flex items-center justify-center active:scale-90 transition-all">
+            <button 
+              onClick={() => setQty(q => q + 1)} 
+              disabled={qty >= (item?.stock_count || 99)}
+              className="w-5 h-5 flex items-center justify-center active:scale-90 transition-all disabled:opacity-20"
+            >
               <Plus size={14} className="text-[#94a3b8]" />
             </button>
           </div>

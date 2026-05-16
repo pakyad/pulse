@@ -156,6 +156,8 @@ export default function ItemDetailsPage() {
   };
   const DomainIcon = domain ? DOMAIN_ICONS[item.domain as DomainID] : Layers;
 
+  const isSoldOut = item.stock_count !== undefined && item.stock_count !== null && item.stock_count <= 0;
+
   return (
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
 
@@ -208,13 +210,21 @@ export default function ItemDetailsPage() {
       {/* ── GALLERY ── */}
       <section className="w-full aspect-square bg-slate-50 overflow-hidden relative">
         {images.length > 0 ? (
-          <img src={images[activeImage]} className="w-full h-full object-cover" alt={item.title} />
+          <img src={images[activeImage]} className={`w-full h-full object-cover ${isSoldOut ? 'blur-[2px] grayscale opacity-70' : ''}`} alt={item.title} />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-200">
             <Layers size={48} strokeWidth={1} />
           </div>
         )}
 
+        {isSoldOut && (
+          <div className="absolute inset-0 bg-black/10 flex items-center justify-center z-20">
+             <div className="px-6 py-2 bg-white/90 backdrop-blur-xl rounded-full border border-white shadow-xl">
+                <p className="text-[12px] font-black text-red-500 uppercase tracking-[0.2em]">Restocking Soon</p>
+             </div>
+          </div>
+        )}
+        
         {/* Image strip (multiple photos) */}
         {images.length > 1 && (
           <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
@@ -243,12 +253,16 @@ export default function ItemDetailsPage() {
       <div className="px-6 pt-6 space-y-8">
 
         {/* ── IDENTITY ── */}
-        <section className="space-y-2">
+        <section className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-[22px] font-bold text-[#1e293b] leading-tight tracking-tight flex-1">
               {item.title}
             </h1>
-            {item.governance_status !== 'BLOCKED' ? (
+            {isSoldOut ? (
+              <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 uppercase tracking-widest">
+                <ShieldAlert size={12} /> Out of Stock
+              </span>
+            ) : item.governance_status !== 'BLOCKED' ? (
               <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 shrink-0 pt-1">
                 <ShieldCheck size={12} /> Verified
               </span>
@@ -259,14 +273,25 @@ export default function ItemDetailsPage() {
             )}
           </div>
 
-          <div className="flex items-baseline gap-3">
-            <span className="text-[28px] font-bold text-[#1e293b] tracking-tighter">
-              RM{Number(item.price).toFixed(2)}
-            </span>
-            {item.subcategory && (
-              <span className="h-[22px] px-3 bg-slate-50 border border-slate-100 rounded-full text-[10px] font-bold text-[#94a3b8] flex items-center">
-                {item.subcategory}
+          <div className="flex items-baseline justify-between gap-3">
+            <div className="flex items-baseline gap-3">
+              <span className="text-[28px] font-bold text-[#1e293b] tracking-tighter">
+                RM{Number(item.price).toFixed(2)}
               </span>
+              {item.subcategory && (
+                <span className="h-[22px] px-3 bg-slate-50 border border-slate-100 rounded-full text-[10px] font-bold text-[#94a3b8] flex items-center">
+                  {item.subcategory}
+                </span>
+              )}
+            </div>
+            
+            {item.stock_count !== undefined && item.stock_count !== null && item.stock_count > 0 && (
+              <div className="flex items-center gap-2">
+                <div className={`w-1.5 h-1.5 rounded-full ${item.stock_count <= 5 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+                  {item.stock_count} Available
+                </p>
+              </div>
             )}
           </div>
         </section>
@@ -352,11 +377,14 @@ export default function ItemDetailsPage() {
         {/* ── INLINE ACTIONS (above footer) ── */}
         <section className="space-y-3 pt-2">
           <button
+            disabled={isSoldOut}
             onClick={() => router.push(`/marketplace/${id}/checkout`)}
-            className="w-full h-12 bg-[#1e293b] text-white font-bold text-[14px] tracking-tight rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-sm"
+            className={`w-full h-12 font-bold text-[14px] tracking-tight rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-sm ${
+               isSoldOut ? 'bg-slate-50 text-slate-200 border border-slate-100' : 'bg-[#1e293b] text-white'
+            }`}
           >
-            {item.domain === 'SERVICES' ? 'Book Now' : 'Buy Now'}
-            <ArrowUpRight size={16} />
+            {isSoldOut ? 'Restocking Soon' : item.domain === 'SERVICES' ? 'Book Now' : 'Buy Now'}
+            {!isSoldOut && <ArrowUpRight size={16} />}
           </button>
           <button className="w-full h-12 border border-slate-100 text-[#94a3b8] font-bold text-[13px] tracking-tight rounded-xl active:scale-[0.98] transition-all">
             Message Seller
@@ -375,18 +403,20 @@ export default function ItemDetailsPage() {
             <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
           </button>
           <button
+            disabled={isSoldOut}
             onClick={handleAddToCart}
-            className="h-12 px-6 border border-slate-100 bg-slate-50 text-[#1e293b] font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all"
+            className="h-12 px-6 border border-slate-100 bg-slate-50 text-[#1e293b] font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-30"
           >
             <ShoppingCart size={16} />
-            Add to Cart
+            {isSoldOut ? 'Out of Stock' : 'Add to Cart'}
           </button>
           <button
+            disabled={isSoldOut}
             onClick={() => router.push(`/marketplace/${id}/checkout`)}
-            className="flex-1 h-12 bg-[#1e293b] text-white font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all"
+            className="flex-1 h-12 bg-[#1e293b] text-white font-bold text-[13px] rounded-xl flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20"
           >
-            {item.domain === 'SERVICES' ? 'Book Now' : 'Buy Now'}
-            <ArrowUpRight size={16} />
+            {isSoldOut ? 'Sold Out' : item.domain === 'SERVICES' ? 'Book Now' : 'Buy Now'}
+            {!isSoldOut && <ArrowUpRight size={16} />}
           </button>
         </div>
       </footer>

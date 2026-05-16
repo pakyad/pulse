@@ -52,7 +52,11 @@ export default function MerchantDashboard() {
       }
       
       unsubItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid)), 
-        (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+        (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => {
+          const timeA = a.created_at?.seconds || Date.now();
+          const timeB = b.created_at?.seconds || Date.now();
+          return timeB - timeA;
+        })));
 
       unsubOrders = onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
         setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
@@ -182,7 +186,7 @@ export default function MerchantDashboard() {
           urgentOrders={urgentOrders}
           preparingOrders={preparingOrders}
           historyOrders={historyOrders}
-          topItems={items.slice(0, 5)}
+          topItems={items}
           recentOrders={orders.slice(0, 10)}
           handleAcceptOrder={handleAcceptOrder}
           handleCallRunner={handleCallRunner}
