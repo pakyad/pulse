@@ -41,7 +41,7 @@ export default function AdminLedgerPage() {
     // 2. Fetch Pending Payout Requests
     const qPending = query(collection(db, "payout_requests"));
     const unsub = onSnapshot(qPending, (sn) => {
-       const list = sn.docs.map(d => ({ id: d.id, ...d.data() }));
+       const list = sn.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
        setRequests(list.filter(r => r.status === 'pending'));
        setHistory(list.filter(r => r.status !== 'pending'));
        setLoading(false);

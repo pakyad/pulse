@@ -89,18 +89,35 @@ function ActiveRunContent() {
       };
    }, [router]);
 
-   useEffect(() => {
-      if (typeof window === 'undefined' || !navigator.geolocation) return;
-      const watchId = navigator.geolocation.watchPosition((pos) => {
-         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-         setUserCoords(coords);
-         if (step === 1) {
-            const dist = getDistance(coords.lat, coords.lng, PICKUP_COORD.lat, PICKUP_COORD.lng);
-            setDistanceToTarget(dist);
-         }
-      }, (err) => console.warn("Geolocation denied:", err), { enableHighAccuracy: true });
-      return () => navigator.geolocation.clearWatch(watchId);
-   }, [step]);
+    useEffect(() => {
+       if (typeof window === 'undefined' || !navigator.geolocation) return;
+       let lastWriteTime = 0;
+
+       const watchId = navigator.geolocation.watchPosition(async (pos) => {
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserCoords(coords);
+          if (step === 1) {
+             const dist = getDistance(coords.lat, coords.lng, PICKUP_COORD.lat, PICKUP_COORD.lng);
+             setDistanceToTarget(dist);
+          }
+
+          if (step === 3 && mission) {
+             const now = Date.now();
+             if (now - lastWriteTime > 5000) {
+                lastWriteTime = now;
+                try {
+                   await updateDoc(doc(db, 'orders', mission.orderId || mission.id), {
+                      runner_location: { latitude: coords.lat, longitude: coords.lng },
+                      runner_location_updated_at: new Date().toISOString()
+                   });
+                } catch (err) {
+                   console.warn("Failed to update GPS in active step:", err);
+                }
+             }
+          }
+       }, (err) => console.warn("Geolocation denied:", err), { enableHighAccuracy: true });
+       return () => navigator.geolocation.clearWatch(watchId);
+    }, [step, mission]);
 
    useEffect(() => {
      if (!isApiConfigured || !isLoaded || !mission || !step) return;

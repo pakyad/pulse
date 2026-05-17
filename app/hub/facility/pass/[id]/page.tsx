@@ -20,19 +20,21 @@ import { doc, getDoc } from 'firebase/firestore';
 export default function BookingPassPage() {
   const router = useRouter();
   const params = useParams();
+  const bookingId = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : "";
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!bookingId) return;
     const fetchBooking = async () => {
-      const snap = await getDoc(doc(db, "bookings", params.id as string));
+      const snap = await getDoc(doc(db, "bookings", bookingId));
       if (snap.exists()) {
         setBooking(snap.data());
       }
       setLoading(false);
     };
     fetchBooking();
-  }, [params.id]);
+  }, [bookingId]);
 
   if (loading) return null;
 
@@ -138,7 +140,7 @@ export default function BookingPassPage() {
                     </div>
                     <span className="text-[11px] font-bold text-white/60 tracking-tight uppercase">Verified Student Pass</span>
                  </div>
-                 <span className="text-[12px] font-mono text-white/20">#{params.id.toString().substring(0, 8)}</span>
+                  <span className="text-[12px] font-mono text-white/20">#{bookingId ? bookingId.substring(0, 8) : ""}</span>
               </div>
            </div>
         </motion.div>

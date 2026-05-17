@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc, arrayRemove, increment } from 'firebase/firestore';
@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function RunnerActivePage() {
+function RunnerActivePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('order');
@@ -47,6 +47,40 @@ export default function RunnerActivePage() {
       if (unsub) unsub();
     };
   }, [orderId, router]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !navigator.geolocation) return;
+    if (!order) return;
+
+    const enRouteStatuses = ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'ARRIVED_AT_DESTINATION'];
+    if (!enRouteStatuses.includes(order.status)) return;
+
+    const currentOrderId = order.id;
+    let lastWriteTime = 0;
+
+    const watchId = navigator.geolocation.watchPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const now = Date.now();
+        
+        if (now - lastWriteTime > 5000) {
+          lastWriteTime = now;
+          try {
+            await updateDoc(doc(db, 'orders', currentOrderId), {
+              runner_location: { latitude, longitude },
+              runner_location_updated_at: new Date().toISOString()
+            });
+          } catch (err) {
+            console.warn("Failed to write live GPS coordinates:", err);
+          }
+        }
+      },
+      (err) => console.warn("Geolocation watch error:", err),
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [order?.id, order?.status]);
 
   const handlePickup = async () => {
     if (!orderId) return;
@@ -121,7 +155,7 @@ export default function RunnerActivePage() {
     </div>
   );
 
-  if (!order) return router.push('/run');
+  if (!order) { router.push('/run'); return null; }
 
   const isONTHEWAY = order.status === 'ON_THE_WAY';
   const isCOMPLETED = order.status === 'COMPLETED';
@@ -428,6 +462,21 @@ export default function RunnerActivePage() {
          )}
       </AnimatePresence>
     </main>
+  );
+}
+
+export default function RunnerActivePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-navy flex items-center justify-center p-8">
+         <div className="flex flex-col items-center gap-6">
+            <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Loading Delivery Data</p>
+         </div>
+      </div>
+    }>
+      <RunnerActivePageContent />
+    </Suspense>
   );
 }
 

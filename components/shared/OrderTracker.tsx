@@ -37,7 +37,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
       <div className="flex items-center justify-between relative px-6">
         <div className="absolute left-10 right-10 top-[11px] h-[1.5px] bg-slate-100 z-0"></div>
         <motion.div 
-          className="absolute left-10 top-[11px] h-[1.5px] bg-[#6366f1] z-0 shadow-[0_0_8px_rgba(99,102,241,0.4)]" 
+          className="absolute left-10 top-[11px] h-[1.5px] bg-amber-500 z-0 shadow-[0_0_8px_rgba(245,158,11,0.4)]" 
           initial={{ width: 0 }}
           animate={{ width: `calc(${((step - 1) / 3) * 100}% - 4px)` }}
           transition={{ duration: 0.8, ease: "circOut" }}
@@ -50,15 +50,15 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
             <div key={label} className="relative z-10 flex flex-col items-center gap-3">
               <motion.div 
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition-all duration-500 border-2 ${
-                   isPast ? 'bg-[#6366f1] border-[#6366f1] text-white' : 
-                   isCurrent ? 'bg-white border-[#6366f1] text-[#6366f1] shadow-[0_0_12px_rgba(99,102,241,0.3)]' : 
+                   isPast ? 'bg-amber-500 border-amber-500 text-white' : 
+                   isCurrent ? 'bg-white border-amber-500 text-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.3)]' : 
                    'bg-white border-slate-200 text-slate-300'
                 }`}
                 animate={isCurrent ? { scale: [1, 1.15, 1] } : { scale: 1 }}
                 transition={{ repeat: isCurrent ? Infinity : 0, duration: 2.5 }}
               >
                 {isPast ? <CheckCircle2 size={12} strokeWidth={3} /> : (
-                   <span className={`font-black ${isCurrent ? 'text-[#6366f1]' : ''}`}>{i + 1}</span>
+                   <span className={`font-black ${isCurrent ? 'text-amber-500' : ''}`}>{i + 1}</span>
                 )}
               </motion.div>
               <span className={`text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-colors duration-500 ${isPast || isCurrent ? 'text-[#1e293b]' : 'text-slate-300'}`}>
@@ -91,10 +91,10 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#1e293b] hover:bg-[#6366f1] hover:text-white transition-all active:scale-90 border border-slate-100">
+            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#1e293b] hover:bg-amber-500 hover:text-white transition-all active:scale-90 border border-slate-100">
               <Phone size={16} />
             </button>
-            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#1e293b] hover:bg-[#6366f1] hover:text-white transition-all active:scale-90 border border-slate-100">
+            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#1e293b] hover:bg-amber-500 hover:text-white transition-all active:scale-90 border border-slate-100">
               <MessageSquare size={16} />
             </button>
           </div>
@@ -119,7 +119,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
           </div>
           <div className="text-right">
              <p className="text-[15px] font-black text-[#1e293b]">RM {Number(order.price).toFixed(2)}</p>
-             <p className="text-[9px] font-bold text-[#6366f1] uppercase tracking-widest">Paid</p>
+             <p className="text-[9px] font-bold text-amber-500 uppercase tracking-widest">Paid</p>
           </div>
         </div>
       </div>

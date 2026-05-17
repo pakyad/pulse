@@ -122,6 +122,40 @@ export default function RunnerTerminal() {
     };
   }, [router]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || !navigator.geolocation) return;
+    if (!isOnline || !activeMission) return;
+
+    const enRouteStatuses = ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'ARRIVED_AT_DESTINATION'];
+    if (!enRouteStatuses.includes(activeMission.status)) return;
+
+    const orderId = activeMission.id;
+    let lastWriteTime = 0;
+
+    const watchId = navigator.geolocation.watchPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const now = Date.now();
+        
+        if (now - lastWriteTime > 5000) {
+          lastWriteTime = now;
+          try {
+            await updateDoc(doc(db, 'orders', orderId), {
+              runner_location: { latitude, longitude },
+              runner_location_updated_at: new Date().toISOString()
+            });
+          } catch (err) {
+            console.warn("Failed to write live GPS coordinates:", err);
+          }
+        }
+      },
+      (err) => console.warn("Geolocation watch position error:", err),
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [isOnline, activeMission?.id, activeMission?.status]);
+
   const toggleStatus = async () => {
     if (!auth.currentUser) return;
     setIsProcessing(true);

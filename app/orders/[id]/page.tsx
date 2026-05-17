@@ -8,11 +8,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, CheckCircle2, Package, Activity,
   Clock, ShieldCheck, MapPin, Receipt,
-  ShieldAlert, Truck, Info, XCircle, Star
+  ShieldAlert, Truck, Info, XCircle, Star, Navigation
 } from 'lucide-react';
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
 import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 import OrderTracker from '@/components/shared/OrderTracker';
+import dynamic from 'next/dynamic';
+
+const BuyerLiveMap = dynamic(() => import('@/components/shared/BuyerLiveMap'), { ssr: false });
+
+function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371e3; // metres
+  const φ1 = lat1 * Math.PI/180;
+  const φ2 = lat2 * Math.PI/180;
+  const Δφ = (lat2-lat1) * Math.PI/180;
+  const Δλ = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
 
 // ── Order phases ──
 const PHASES = [
@@ -44,14 +59,419 @@ function StatusPill({ status }: { status: string }) {
     <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 ${
       isDone ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
       isCancelled ? 'bg-red-50 border-red-100 text-red-600' : 
-      'bg-indigo-50 border-indigo-100 text-[#6366f1]'
+      'bg-amber-50 border-amber-100 text-amber-600'
     }`}>
       <span className={`w-1.5 h-1.5 rounded-full ${
         isDone ? 'bg-emerald-500' : 
         isCancelled ? 'bg-red-500' : 
-        'bg-[#6366f1] animate-pulse'
+        'bg-amber-500 animate-pulse'
       }`} />
       <span className="text-[11px] font-black uppercase tracking-widest">{s.replace(/_/g, ' ')}</span>
+    </div>
+  );
+}
+
+function getPathPoint(progress: number) {
+  // Seg 1: (70,160) -> (70,100)  [len = 60]
+  // Seg 2: (70,100) -> (330,100) [len = 260]
+  // Seg 3: (330,100) -> (330,150)[len = 50]
+  
+  if (progress <= 0) return { x: 70, y: 160 };
+  if (progress >= 1) return { x: 330, y: 150 };
+  
+  const total = 370;
+  const p1 = 60 / total;
+  const p2 = 320 / total;
+  
+  if (progress < p1) {
+    const ratio = progress / p1;
+    return {
+      x: 70,
+      y: 160 + (100 - 160) * ratio
+    };
+  } else if (progress < p2) {
+    const ratio = (progress - p1) / (p2 - p1);
+    return {
+      x: 70 + (330 - 70) * ratio,
+      y: 100
+    };
+  } else {
+    const ratio = (progress - p2) / (1 - p2);
+    return {
+      x: 330,
+      y: 100 + (150 - 100) * ratio
+    };
+  }
+}
+
+function StatusKinetics({ status }: { status: string }) {
+  const s = status?.toUpperCase() || '';
+  
+  // Determine kinetic state
+  let state: 'WAITING' | 'PREPARING' | 'RUNNING' | 'DELIVERED' = 'RUNNING';
+  if (['PENDING', 'PENDING_RUNNER', 'PENDING_VENDOR', 'AWAITING_RUNNER'].includes(s)) {
+    state = 'WAITING';
+  } else if (['PREPARING', 'READY_FOR_PICKUP'].includes(s)) {
+    state = 'PREPARING';
+  } else if (['DELIVERED', 'COMPLETED'].includes(s)) {
+    state = 'DELIVERED';
+  }
+
+  return (
+    <div className="w-full h-[380px] bg-linear-to-b from-amber-500/5 via-[#f8fafc] to-white relative flex flex-col items-center justify-center pt-8 select-none overflow-hidden">
+      <AnimatePresence mode="wait">
+        {state === 'WAITING' && (
+          <motion.div
+            key="waiting"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center justify-center"
+          >
+            <div className="relative w-48 h-48">
+              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+                <line x1="15" y1="82" x2="85" y2="82" stroke="#e2e8f0" strokeWidth="2.5" strokeLinecap="round" />
+                
+                <motion.circle
+                  cx="50"
+                  cy="50"
+                  r="24"
+                  stroke="#cbd5e1"
+                  strokeWidth="1"
+                  strokeDasharray="4 4"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+                />
+
+                <g>
+                  <rect x="42" y="30" width="16" height="30" rx="8" fill="#1e293b" />
+                  <circle cx="50" cy="20" r="7" fill="#1e293b" />
+                  <path d="M 43 16 L 57 16 L 62 19 L 43 19 Z" fill="#f59e0b" />
+                  
+                  <path d="M 45 60 L 45 82" stroke="#1e293b" strokeWidth="4.5" strokeLinecap="round" />
+                  
+                  <motion.path
+                    stroke="#1e293b"
+                    strokeWidth="4.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    animate={{
+                      d: [
+                        "M 55 60 L 58 72 L 55 82",
+                        "M 55 60 L 58 70 L 59 78",
+                        "M 55 60 L 58 72 L 55 82"
+                      ]
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 0.6,
+                      ease: "easeInOut"
+                    }}
+                  />
+
+                  <path d="M 42 36 L 36 44 L 42 48" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M 58 36 L 64 42 L 54 44" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+
+                  <rect x="51" y="42" width="6" height="8" rx="1.5" fill="#f59e0b" />
+                  <motion.circle
+                    cx="54"
+                    cy="46"
+                    r="4"
+                    stroke="#f59e0b"
+                    strokeWidth="1.5"
+                    animate={{ scale: [1, 2.5, 1], opacity: [0.8, 0, 0.8] }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
+                  />
+                </g>
+              </svg>
+            </div>
+            <p className="text-[11px] font-black text-amber-600 uppercase tracking-widest leading-none mt-2 animate-pulse">
+              Finding a courier...
+            </p>
+          </motion.div>
+        )}
+
+        {state === 'PREPARING' && (
+          <motion.div
+            key="preparing"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center justify-center"
+          >
+            <div className="relative w-48 h-48">
+              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+                <rect x="20" y="76" width="60" height="6" rx="2" fill="#cbd5e1" />
+
+                <motion.g
+                  animate={{ y: [0, -1, 0] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                >
+                  <rect x="42" y="58" width="16" height="18" rx="3" fill="#f59e0b" />
+                  <line x1="50" y1="58" x2="50" y2="76" stroke="#d97706" strokeWidth="1.5" />
+                  <line x1="42" y1="67" x2="58" y2="67" stroke="#d97706" strokeWidth="1.5" />
+                </motion.g>
+
+                <motion.path
+                  d="M 45 52 Q 43 44 47 38"
+                  stroke="#f59e0b"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  animate={{ opacity: [0, 0.6, 0], y: [5, -15] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                />
+                <motion.path
+                  d="M 50 50 Q 52 42 48 36"
+                  stroke="#f59e0b"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  animate={{ opacity: [0, 0.6, 0], y: [5, -15] }}
+                  transition={{ repeat: Infinity, duration: 2, delay: 0.6, ease: "easeInOut" }}
+                />
+                <motion.path
+                  d="M 55 52 Q 53 44 57 38"
+                  stroke="#f59e0b"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  animate={{ opacity: [0, 0.6, 0], y: [5, -15] }}
+                  transition={{ repeat: Infinity, duration: 2, delay: 1.2, ease: "easeInOut" }}
+                />
+
+                <motion.g
+                  animate={{ y: [0, 1.5, 0] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                >
+                  <rect x="42" y="32" width="16" height="26" rx="8" fill="#1e293b" />
+                  <circle cx="50" cy="22" r="7" fill="#1e293b" />
+                  <path d="M 43 18 L 57 18 L 62 21 L 43 21 Z" fill="#f59e0b" />
+                  <path d="M 44 40 L 48 48 L 56 40" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                </motion.g>
+              </svg>
+            </div>
+            <p className="text-[11px] font-black text-amber-600 uppercase tracking-widest leading-none mt-2 animate-pulse">
+              Merchant is preparing...
+            </p>
+          </motion.div>
+        )}
+
+        {state === 'RUNNING' && (
+          <motion.div
+            key="running"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center justify-center w-full"
+          >
+            <div className="relative w-48 h-48">
+              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+                <motion.line
+                  x1="15"
+                  y1="82"
+                  x2="85"
+                  y2="82"
+                  stroke="#cbd5e1"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeDasharray="8 8"
+                  animate={{ strokeDashoffset: [0, 16] }}
+                  transition={{ repeat: Infinity, duration: 0.45, ease: "linear" }}
+                />
+
+                <motion.path
+                  d="M 80 30 L 90 30"
+                  stroke="#cbd5e1"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  animate={{ x: [0, -100], opacity: [0, 0.6, 0] }}
+                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                />
+                <motion.path
+                  d="M 75 48 L 82 48"
+                  stroke="#cbd5e1"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  animate={{ x: [0, -100], opacity: [0, 0.6, 0] }}
+                  transition={{ repeat: Infinity, duration: 0.6, delay: 0.2, ease: "linear" }}
+                />
+                
+                <motion.g
+                  animate={{
+                    y: [0, -3, 0, -3, 0],
+                    rotate: [6, 8, 6, 8, 6]
+                  }}
+                  style={{ transformOrigin: "50px 60px" }}
+                  transition={{ repeat: Infinity, duration: 0.55, ease: "easeInOut" }}
+                >
+                  <ellipse cx="50" cy="82" rx="12" ry="2" fill="#e2e8f0" />
+
+                  <rect x="42" y="32" width="16" height="28" rx="8" fill="#1e293b" />
+                  <circle cx="50" cy="22" r="7" fill="#1e293b" />
+                  <path d="M 43 18 L 57 18 L 62 21 L 43 21 Z" fill="#f59e0b" />
+                  
+                  <motion.path
+                    stroke="#1e293b"
+                    strokeWidth="4.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    animate={{
+                      d: [
+                        "M 46 60 L 36 71 L 46 81",
+                        "M 46 60 L 43 72 L 44 82",
+                        "M 46 60 L 52 70 L 44 78",
+                        "M 46 60 L 42 68 L 38 76"
+                      ]
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 0.55,
+                      ease: "linear"
+                    }}
+                  />
+
+                  <motion.path
+                    stroke="#1e293b"
+                    strokeWidth="4.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    animate={{
+                      d: [
+                        "M 54 60 L 60 70 L 52 78",
+                        "M 54 60 L 50 68 L 46 76",
+                        "M 54 60 L 44 71 L 54 81",
+                        "M 54 60 L 51 72 L 52 82"
+                      ]
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 0.55,
+                      ease: "linear"
+                    }}
+                  />
+
+                  <motion.path
+                    stroke="#1e293b"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    animate={{
+                      d: [
+                        "M 54 36 L 64 42 L 58 48",
+                        "M 54 36 L 62 44 L 56 46",
+                        "M 54 36 L 64 42 L 58 48"
+                      ]
+                    }}
+                    transition={{ repeat: Infinity, duration: 0.55, ease: "easeInOut" }}
+                  />
+                  
+                  <motion.g
+                    animate={{
+                      y: [0, -2, 0, -2, 0],
+                      rotate: [0, 3, 0, 3, 0]
+                    }}
+                    transition={{ repeat: Infinity, duration: 0.275, ease: "easeInOut" }}
+                  >
+                    <rect x="58" y="38" width="14" height="12" rx="3.5" fill="#f59e0b" />
+                    <line x1="65" y1="38" x2="65" y2="50" stroke="#d97706" strokeWidth="1.5" />
+                    <line x1="58" y1="44" x2="72" y2="44" stroke="#d97706" strokeWidth="1.5" />
+                  </motion.g>
+                </motion.g>
+              </svg>
+            </div>
+            <p className="text-[11px] font-black text-amber-600 uppercase tracking-widest leading-none mt-2 animate-pulse">
+              Courier is speeding your way
+            </p>
+          </motion.div>
+        )}
+
+        {state === 'DELIVERED' && (
+          <motion.div
+            key="delivered"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center justify-center"
+          >
+            <div className="relative w-48 h-48">
+              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
+                <line x1="15" y1="82" x2="85" y2="82" stroke="#e2e8f0" strokeWidth="2.5" strokeLinecap="round" />
+
+                <motion.g
+                  animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                >
+                  <polygon points="28,25 30,30 35,30 31,33 33,38 28,35 23,38 25,33 21,30 26,30" fill="#f59e0b" />
+                  <polygon points="72,20 74,25 79,25 75,28 77,33 72,30 67,33 69,28 65,25 70,25" fill="#f59e0b" />
+                </motion.g>
+
+                <motion.g
+                  animate={{
+                    y: [0, -16, 0]
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 1.2,
+                    ease: [0.175, 0.885, 0.32, 1.275]
+                  }}
+                >
+                  <motion.ellipse
+                    cx="50"
+                    cy="82"
+                    rx="8"
+                    ry="1.5"
+                    fill="#e2e8f0"
+                    animate={{ scale: [1, 0.5, 1], opacity: [0.8, 0.3, 0.8] }}
+                    transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                  />
+
+                  <rect x="42" y="30" width="16" height="30" rx="8" fill="#1e293b" />
+                  <circle cx="50" cy="20" r="7" fill="#1e293b" />
+                  <path d="M 43 16 L 57 16 L 62 19 L 43 19 Z" fill="#f59e0b" />
+                  
+                  <motion.path
+                    stroke="#1e293b"
+                    strokeWidth="4.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    animate={{
+                      d: [
+                        "M 45 60 L 45 80",
+                        "M 45 60 L 40 70 L 43 76",
+                        "M 45 60 L 45 80"
+                      ]
+                    }}
+                    transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                  />
+
+                  <motion.path
+                    stroke="#1e293b"
+                    strokeWidth="4.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    animate={{
+                      d: [
+                        "M 55 60 L 55 80",
+                        "M 55 60 L 60 70 L 57 76",
+                        "M 55 60 L 55 80"
+                      ]
+                    }}
+                    transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                  />
+
+                  <path d="M 42 36 L 30 20" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                  <path d="M 58 36 L 70 20" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                </motion.g>
+              </svg>
+            </div>
+            <p className="text-[11px] font-black text-emerald-600 uppercase tracking-widest leading-none mt-2">
+              Delivered & Complete!
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -64,6 +484,17 @@ export default function LiveOrderPage() {
   const [userId, setUserId] = useState<string>('');
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [mapSrc, setMapSrc] = useState('/map-bg.png');
+
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '';
+    if (key) {
+      setMapSrc(`https://maps.googleapis.com/maps/api/staticmap?size=800x600&scale=2&maptype=roadmap&center=3.1594,101.6998&zoom=18&path=color:0xf59e0b|weight:6|3.159194,101.699500|3.1592,101.7000|3.159722,101.700278&markers=color:0xf59e0b%7Clabel:M%7C3.159194,101.699500&markers=color:0x10b981%7Clabel:B%7C3.159722,101.700278&style=feature:all%7Celement:labels.text.fill%7Ccolor:0x9c9c9c&style=feature:all%7Celement:labels.text.stroke%7Ccolor:0xffffff&style=feature:landscape%7Ccolor:0xf2f2f7&style=feature:poi%7Cvisibility:off&style=feature:road%7Ccolor:0xffffff&style=feature:water%7Ccolor:0xe5e5ea&key=${key}`);
+    } else {
+      setMapSrc('/map-bg.png');
+    }
+  }, []);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -115,6 +546,42 @@ export default function LiveOrderPage() {
     }
   }, [order?.status, order?.hasAcknowledgedSuccess]);
 
+  // Live GPS Telemetry Walk Simulation
+  useEffect(() => {
+    if (!order) return;
+    const statusUpper = (order.status || '').toUpperCase();
+    const phase = getPhase(statusUpper);
+
+    if (phase === 6) {
+      setProgress(1);
+      return;
+    }
+
+    if (['ON_THE_WAY', 'IN_TRANSIT', 'PICKED_UP'].includes(statusUpper)) {
+      setProgress(0.05); // Start slightly forward
+      const duration = 20000; // 20 seconds simulated transit walk
+      const intervalTime = 100;
+      const steps = duration / intervalTime;
+      const increment = 1 / steps;
+
+      const timer = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 1) {
+            clearInterval(timer);
+            return 1;
+          }
+          return Math.min(prev + increment, 1);
+        });
+      }, intervalTime);
+
+      return () => clearInterval(timer);
+    } else {
+      setProgress(0);
+    }
+  }, [order?.status]);
+
+  const runnerPos = getPathPoint(progress);
+
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="w-10 h-10 border-[3px] border-slate-100 border-t-[#6366f1] rounded-xl animate-spin" />
@@ -140,43 +607,111 @@ export default function LiveOrderPage() {
   const isPending = status === 'PENDING_VENDOR' || status === 'PENDING';
   const showReview = isDone && !order.isReviewed;
 
+  const dropoffLat = 3.1594;
+  const dropoffLng = 101.6998;
+  const realDistance = order.runner_location?.latitude && order.runner_location?.longitude
+    ? getDistance(order.runner_location.latitude, order.runner_location.longitude, dropoffLat, dropoffLng)
+    : null;
+
+  const distance = realDistance !== null 
+    ? Math.max(0, Math.round(realDistance))
+    : Math.max(0, Math.round(250 * (1 - progress)));
+
+  const durationMin = Math.max(1, Math.ceil(distance / 80));
+  const isClose = distance > 0 && distance < 200;
+  const isMoving = ['ON_THE_WAY', 'IN_TRANSIT', 'PICKED_UP'].includes(status);
+  const isRunner = userId === order.runner_id;
+  const showBuyerMap = isMoving && !!order.runner_location;
+
   return (
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-36 relative">
 
       {/* ── VIBRANT MAP HERO ── */}
       <div className="absolute top-0 left-0 right-0 h-[380px] z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-b from-[#6366f1]/10 to-white z-10" />
-        <img 
-          src={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? `https://maps.googleapis.com/maps/api/staticmap?size=800x600&scale=2&maptype=roadmap&style=feature:all|element:labels.text.fill|color:0x9c9c9c&style=feature:all|element:labels.text.stroke|color:0xffffff&style=feature:landscape|color:0xf2f2f7&style=feature:poi|visibility:off&style=feature:road|color:0xffffff&style=feature:water|color:0xe5e5ea&center=3.1597,101.7000&zoom=16&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}` : '/map-bg.png'}
-          className="w-full h-full object-cover grayscale-[0.2] saturate-[1.2]"
-          alt="Live Route Map"
-        />
+        <div className="absolute inset-0 bg-linear-to-b from-amber-500/10 to-white z-10 pointer-events-none" />
         
-        {/* Logistics Data Card (Glassmorphic) */}
-        <div className="absolute bottom-12 left-6 z-20">
-          <div className="bg-white/80 backdrop-blur-xl p-6 rounded-[28px] border border-white shadow-xl shadow-indigo-900/5 space-y-4 w-[280px]">
-             <div className="relative pl-6 space-y-5">
-               <div className="absolute left-[7px] top-2 bottom-2 w-[1.5px] bg-linear-to-b from-[#6366f1] to-emerald-500 opacity-20" />
+        {/* Google Maps Walking Directions HUD (Runner Only) */}
+        {isRunner && isMoving && (
+          <div className="absolute top-[96px] left-6 right-6 z-30 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="bg-[#0f9d58] text-white px-4 py-3.5 rounded-2xl shadow-xl flex items-center gap-3.5 border border-[#0d8a4d]">
+              <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 shadow-sm animate-pulse">
+                <Navigation size={18} className="text-white fill-white -rotate-45" />
+              </div>
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <div className="flex items-baseline gap-1.5 flex-wrap">
+                  <span className="text-[14px] font-black tracking-tight leading-none">Walk {distance}m</span>
+                  <span className="text-[11px] font-semibold text-white/80">• {durationMin} min{durationMin > 1 ? 's' : ''}</span>
+                </div>
+                <p className="text-[10px] font-bold text-white/95 uppercase tracking-widest leading-none truncate">
+                  {isClose ? 'Arriving soon at drop-off' : 'Proceed toward meet location'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isRunner ? (
+          /* Styled Walking Distance Static Google Map (Runner Only) */
+          <div className="w-full h-[380px] bg-[#f8fafc] relative">
+            <img 
+              src={mapSrc}
+              onError={() => setMapSrc('/map-bg.png')}
+              className="w-full h-full object-cover grayscale-[0.1] saturate-[1.2]"
+              alt="Live Route Map"
+            />
+
+            {/* Simulated Live SVG Telemetry Glider Overlay */}
+            <svg className="absolute inset-0 w-full h-full select-none pointer-events-none" viewBox="0 0 400 240">
+              {progress > 0 && progress < 1 && (
+                <g>
+                  <circle cx={runnerPos.x} cy={runnerPos.y} r="7" fill="#1e293b" className="shadow-md" />
+                  <circle cx={runnerPos.x} cy={runnerPos.y} r="2.5" fill="#ffffff" className={isClose ? 'animate-ping' : 'animate-pulse'} />
+                </g>
+              )}
+            </svg>
+          </div>
+        ) : showBuyerMap ? (
+          <div className="w-full h-[380px] bg-[#f8fafc] relative overflow-hidden">
+            <BuyerLiveMap runnerLocation={order.runner_location} />
+          </div>
+        ) : (
+          <StatusKinetics status={status} />
+        )}
+        
+        {/* Logistics Data (Ultra-Minimalist & Transparent) */}
+        <div className="absolute bottom-8 left-6 z-20 pointer-events-none">
+          <div className="bg-transparent space-y-4 w-[280px]">
+             <div className="relative pl-5 space-y-4">
+               {/* Crisp vertical alignment track line */}
+               <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-slate-300 opacity-60" />
                
+               {/* Pickup Node */}
                <div className="relative">
-                 <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-white border-[2.5px] border-[#6366f1] shadow-sm" />
-                 <p className="text-[9px] font-black text-[#6366f1] uppercase tracking-widest leading-none mb-1">Pick up</p>
-                 <p className="text-[13px] font-bold text-[#1e293b] leading-tight truncate">{order.seller_name || 'Merchant'}</p>
-                 <p className="text-[11px] font-medium text-slate-400 mt-0.5 truncate">{order.pickup_location || 'Campus Shop'}</p>
+                 <div className="absolute -left-[19.5px] top-[4px] w-2 h-2 rounded-full bg-amber-500" />
+                 <div className="flex items-baseline gap-2">
+                   <span className="text-[12px] font-bold text-[#1e293b]">{order.seller_name || 'Merchant'}</span>
+                   <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Pickup</span>
+                 </div>
+                 <p className="text-[10px] font-medium text-slate-400 mt-0.5 truncate">{order.pickup_location || 'Campus Shop'}</p>
                </div>
                
+               {/* Meet At Node */}
                <div className="relative">
-                 <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-white border-[2.5px] border-emerald-500 shadow-sm" />
-                 <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Meet at</p>
-                 <p className="text-[13px] font-bold text-[#1e293b] leading-tight truncate">{order.buyer_name || 'You'}</p>
-                 <p className="text-[11px] font-medium text-slate-400 mt-0.5 truncate">{order.drop_off_location || 'Main Lobby'}</p>
-                 {(order.floorLevel || order.roomNumber) && (
-                   <span className="ml-1 text-[#1e293b] font-bold">
-                     ({order.floorLevel ? `${order.floorLevel}` : ''}
-                     {order.floorLevel && order.roomNumber ? ', ' : ''}
-                     {order.roomNumber ? `${order.roomNumber}` : ''})
-                   </span>
-                 )}
+                 <div className="absolute -left-[19.5px] top-[4px] w-2 h-2 rounded-full bg-emerald-500" />
+                 <div className="flex items-baseline gap-2">
+                   <span className="text-[12px] font-bold text-[#1e293b]">{order.buyer_name || 'You'}</span>
+                   <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Meet</span>
+                 </div>
+                 <p className="text-[10px] font-medium text-slate-400 mt-0.5 truncate">
+                   {order.drop_off_location || 'Main Lobby'}
+                   {(order.floorLevel || order.roomNumber) && (
+                     <span className="ml-1 font-bold text-slate-600">
+                       ({order.floorLevel ? `Lvl ${order.floorLevel}` : ''}
+                       {order.floorLevel && order.roomNumber ? ', ' : ''}
+                       {order.roomNumber ? `Rm ${order.roomNumber}` : ''})
+                     </span>
+                   )}
+                 </p>
                </div>
              </div>
           </div>
@@ -184,26 +719,41 @@ export default function LiveOrderPage() {
       </div>
 
       {/* ── FLOATING NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-start justify-between pointer-events-none">
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between pointer-events-none select-none">
         <div className="flex items-center gap-3 pointer-events-auto">
           <button
             onClick={() => router.push('/marketplace')}
-            className="w-12 h-12 rounded-2xl bg-white/90 backdrop-blur-md flex items-center justify-center text-[#1e293b] border border-white shadow-lg shadow-slate-900/5 active:scale-95 transition-all"
+            className="w-10 h-10 rounded-full flex items-center justify-center text-[#1e293b] hover:bg-slate-100/50 active:scale-95 transition-all"
           >
             <ChevronLeft size={20} strokeWidth={2.5} />
           </button>
-          <div className="px-4 py-2 rounded-2xl bg-white/90 backdrop-blur-md border border-white shadow-lg shadow-slate-900/5">
-            <p className="text-[13px] font-bold text-[#1e293b]">Order Details</p>
-            <p className="text-[10px] font-bold text-[#64748b]">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>
+          <div className="flex flex-col justify-center">
+            <p className="text-[13px] font-black text-[#1e293b] tracking-tight leading-tight">Order Details</p>
+            <p className="text-[10px] font-black text-amber-600 tracking-wider leading-none mt-0.5">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>
           </div>
         </div>
-        <div className="bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white shadow-lg shadow-slate-900/5 pointer-events-auto">
+        <div className="pointer-events-auto">
           <StatusPill status={status} />
         </div>
       </nav>
 
       {/* ── MAIN CONTENT ── */}
       <div className="pt-[420px] px-6 space-y-10 relative z-10">
+
+        {/* Proximity Alert Banner (< 200m) */}
+        {isClose && (
+          <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center gap-3.5 animate-pulse shadow-sm shadow-emerald-500/5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0">
+              <MapPin size={16} />
+            </div>
+            <div className="space-y-0.5 flex-1 min-w-0">
+              <p className="text-[12px] font-black text-emerald-950 uppercase tracking-widest leading-none mb-1">Nearby Alert</p>
+              <p className="text-[11px] font-semibold text-emerald-700 leading-tight">
+                Runner is under {distance}m away! Meet at drop-off point now.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* ── PROGRESS VIBRANCY ── */}
         <section className="bg-white/50 backdrop-blur-sm p-4 rounded-[32px] border border-slate-50">

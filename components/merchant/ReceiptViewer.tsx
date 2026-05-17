@@ -1,6 +1,6 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ZoomIn, Download, ShieldCheck, Clock, ExternalLink } from "lucide-react";
+import { X, ZoomIn, Download, ShieldCheck, Clock, ExternalLink, Package } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface ReceiptViewerProps {
@@ -31,13 +31,13 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-12"
+          className="fixed inset-0 z-1000 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-12"
           onClick={onClose}
         >
           {/* Close Button */}
           <button 
             onClick={onClose}
-            className="fixed top-8 right-8 z-[1010] w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10"
+            className="fixed top-8 right-8 z-1010 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10"
           >
             <X size={24} />
           </button>

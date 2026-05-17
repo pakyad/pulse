@@ -31,6 +31,7 @@ export default function MissionBoard() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [missions, setMissions] = useState<any[]>([]);
+  const [activeMission, setActiveMission] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -43,6 +44,7 @@ export default function MissionBoard() {
 
   useEffect(() => {
     let unsubMissions: (() => void) | null = null;
+    let unsubActive: (() => void) | null = null;
 
     const unsubAuth = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -77,6 +79,18 @@ export default function MissionBoard() {
               console.error("[Missions] Order Sync Error:", err);
             });
           }
+
+          // 🏛️ Start active mission listener to verify activity state
+          if (!unsubActive) {
+            const qActive = query(
+              collection(db, "orders"), 
+              where("runner_id", "==", user.uid), 
+              where("status", "in", ["PREPARING", "READY_FOR_PICKUP", "IN_TRANSIT", "PICKED_UP", "ARRIVED_AT_DESTINATION"])
+            );
+            unsubActive = onSnapshot(qActive, (snap) => {
+              setActiveMission(!snap.empty ? { id: snap.docs[0].id, ...snap.docs[0].data() } : null);
+            });
+          }
         }, (err) => {
            console.error("[Missions] Profile Sync Error:", err);
         });
@@ -88,6 +102,7 @@ export default function MissionBoard() {
     return () => {
       unsubAuth();
       if (unsubMissions) unsubMissions();
+      if (unsubActive) unsubActive();
     };
   }, [router]);
 
@@ -95,6 +110,10 @@ export default function MissionBoard() {
 
   const handleClaim = async (missionId: string) => {
     if (!auth.currentUser) return;
+    if (activeMission) {
+      alert("You must finish your current active delivery before claiming new missions.");
+      return;
+    }
     setIsProcessing(true);
     try {
       await runTransaction(db, async (tx) => {
@@ -138,102 +157,130 @@ export default function MissionBoard() {
       </nav>
 
       <div className="pt-24 pb-32 px-6 space-y-8">
-         {/* ── RELAXED FILTER PILLS ── */}
-         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {['all', 'food', 'parcels', 'academic', 'errands'].map(t => (
-               <button 
-                 key={t} 
-                 onClick={() => setFilter(t)}
-                 className={`px-5 h-9 rounded-full text-[12px] font-medium transition-all whitespace-nowrap ${filter === t.toLowerCase() ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-50 text-slate-400 border border-slate-100/50'}`}
-               >
-                 {t}
-               </button>
-            ))}
-         </div>
-
-         {/* ── MISSION LIST ── */}
-         <div className="space-y-4">
-            <AnimatePresence mode="popLayout">
-               {missions.length > 0 ? (
-                  missions.filter(m => filter === 'all' || m.type?.toLowerCase() === filter).map((mission, idx) => (
-                    <motion.div 
-                      key={mission.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-6"
+         {activeMission ? (
+           /* ── ACTIVE TASK BLOCKED PANEL ── */
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.98 }}
+             animate={{ opacity: 1, scale: 1 }}
+             className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-[0_24px_48px_-12px_rgba(245,158,11,0.08)] text-center space-y-8 max-w-md mx-auto mt-8"
+           >
+             <div className="w-16 h-16 bg-amber-50 rounded-[24px] mx-auto flex items-center justify-center text-amber-500 border border-amber-100/50">
+               <Activity size={26} className="animate-pulse" />
+             </div>
+             <div className="space-y-2">
+               <h3 className="text-[18px] font-black text-slate-900 tracking-tight lowercase">active delivery in progress</h3>
+               <p className="text-[13px] text-slate-400 font-medium lowercase leading-relaxed">
+                 you currently have an active job assignment in progress (<span className="font-bold text-slate-600">#{activeMission.id.substring(0,8).toUpperCase()}</span>). pulse runners must complete their current job before taking new tasks to maintain high-quality campus deliveries.
+               </p>
+             </div>
+             <button 
+               onClick={() => router.push('/run/terminal')}
+               className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10 lowercase"
+             >
+               <span>return to active terminal</span>
+               <ArrowRight size={16} />
+             </button>
+           </motion.div>
+         ) : (
+           <>
+              {/* ── RELAXED FILTER PILLS ── */}
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                 {['all', 'food', 'parcels', 'academic', 'errands'].map(t => (
+                    <button 
+                      key={t} 
+                      onClick={() => setFilter(t)}
+                      className={`px-5 h-9 rounded-full text-[12px] font-medium transition-all whitespace-nowrap ${filter === t.toLowerCase() ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-50 text-slate-400 border border-slate-100/50'}`}
                     >
-                       <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-4">
-                             <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-                                <Package size={22} />
-                             </div>
-                             <div>
-                                <h3 className="text-[16px] font-bold text-slate-900 tracking-tight">{mission.seller_name || 'Merchant'}</h3>
-                                <p className="text-[12px] text-slate-400 font-medium lowercase">{mission.title || 'Item'} • #{mission.id.substring(0,8)}</p>
+                      {t}
+                    </button>
+                 ))}
+              </div>
+
+              {/* ── MISSION LIST ── */}
+              <div className="space-y-4">
+                 <AnimatePresence mode="popLayout">
+                    {missions.length > 0 ? (
+                       missions.filter(m => filter === 'all' || m.type?.toLowerCase() === filter).map((mission, idx) => (
+                         <motion.div 
+                           key={mission.id}
+                           initial={{ opacity: 0, y: 20 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           exit={{ opacity: 0, scale: 0.95 }}
+                           transition={{ delay: idx * 0.05 }}
+                           className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-6"
+                         >
+                            <div className="flex justify-between items-start">
+                               <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                     <Package size={22} />
+                                  </div>
+                                  <div>
+                                     <h3 className="text-[16px] font-bold text-slate-900 tracking-tight">{mission.seller_name || 'Merchant'}</h3>
+                                     <p className="text-[12px] text-slate-400 font-medium lowercase">{mission.title || 'Item'} • #{mission.id.substring(0,8)}</p>
+                                  </div>
+                               </div>
+                               <div className="text-right">
+                                  <p className="text-[18px] font-bold text-emerald-600">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
+                                  <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Payout</p>
+                               </div>
+                            </div>
+
+                            <div className="space-y-3 bg-slate-50/50 p-5 rounded-[24px] border border-slate-100/50">
+                               <div className="flex items-center gap-3">
+                                  <MapPin size={14} className="text-slate-300" />
+                                  <p className="text-[13px] font-bold text-slate-700">{mission.drop_off_location || 'Campus Center'}</p>
+                               </div>
+                               <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                     <Clock size={14} className="text-slate-300" />
+                                     <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || 'merchant'}</p>
+                                  </div>
+                                  <span className="text-[11px] font-bold text-[#1e293b] bg-slate-200/50 px-2.5 py-0.5 rounded-full lowercase tracking-tight">
+                                     {formatTimeAgo(mission.created_at, now)}
+                                  </span>
+                               </div>
+                            </div>
+
+                            <button 
+                              disabled={isProcessing}
+                              onClick={() => handleClaim(mission.id)}
+                              className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10 disabled:opacity-50"
+                            >
+                               {isProcessing ? <Activity className="animate-spin" size={18} /> : <Zap size={18} className="text-amber-400 fill-amber-400" />}
+                               <span className="lowercase">claim mission</span>
+                            </button>
+                         </motion.div>
+                       ))
+                    ) : (
+                       <div className="py-24 flex flex-col items-center justify-center text-center space-y-8">
+                          <div className="relative w-20 h-20">
+                             <motion.div 
+                               animate={{ 
+                                 scale: [1, 1.2, 1],
+                                 rotate: [0, 90, 180, 270, 360],
+                                 borderRadius: ["20%", "50%", "20%"]
+                               }}
+                               transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                               className="absolute inset-0 border-2 border-dashed border-slate-100" 
+                             />
+                             <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="grid grid-cols-2 gap-1 animate-pulse">
+                                   {[1,2,3,4].map(i => <div key={i} className="w-2 h-2 bg-slate-200 rounded-xs" />)}
+                                </div>
                              </div>
                           </div>
-                          <div className="text-right">
-                             <p className="text-[18px] font-bold text-emerald-600">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
-                             <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Payout</p>
+                          <div className="space-y-2">
+                             <p className="text-[16px] font-bold text-slate-900 lowercase">searching for orders...</p>
+                             <p className="text-[12px] text-slate-400 font-medium lowercase leading-relaxed">
+                                no orders yet. we'll let you know.
+                             </p>
                           </div>
                        </div>
-
-                       <div className="space-y-3 bg-slate-50/50 p-5 rounded-[24px] border border-slate-100/50">
-                          <div className="flex items-center gap-3">
-                             <MapPin size={14} className="text-slate-300" />
-                             <p className="text-[13px] font-bold text-slate-700">{mission.drop_off_location || 'Campus Center'}</p>
-                          </div>
-                          <div className="flex items-center justify-between">
-                             <div className="flex items-center gap-3">
-                                <Clock size={14} className="text-slate-300" />
-                                <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || 'merchant'}</p>
-                             </div>
-                             <span className="text-[11px] font-bold text-[#1e293b] bg-slate-200/50 px-2.5 py-0.5 rounded-full lowercase tracking-tight">
-                                {formatTimeAgo(mission.created_at, now)}
-                             </span>
-                          </div>
-                       </div>
-
-                       <button 
-                         disabled={isProcessing}
-                         onClick={() => handleClaim(mission.id)}
-                         className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10 disabled:opacity-50"
-                       >
-                          {isProcessing ? <Activity className="animate-spin" size={18} /> : <Zap size={18} className="text-amber-400 fill-amber-400" />}
-                          <span className="lowercase">claim mission</span>
-                       </button>
-                    </motion.div>
-                  ))
-               ) : (
-                  <div className="py-24 flex flex-col items-center justify-center text-center space-y-8">
-                     <div className="relative w-20 h-20">
-                        <motion.div 
-                          animate={{ 
-                            scale: [1, 1.2, 1],
-                            rotate: [0, 90, 180, 270, 360],
-                            borderRadius: ["20%", "50%", "20%"]
-                          }}
-                          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                          className="absolute inset-0 border-2 border-dashed border-slate-100" 
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                           <div className="grid grid-cols-2 gap-1 animate-pulse">
-                              {[1,2,3,4].map(i => <div key={i} className="w-2 h-2 bg-slate-200 rounded-xs" />)}
-                           </div>
-                        </div>
-                     </div>
-                     <div className="space-y-2">
-                        <p className="text-[16px] font-bold text-slate-900 lowercase">searching for orders...</p>
-                        <p className="text-[12px] text-slate-400 font-medium lowercase leading-relaxed">
-                           no orders yet. we'll let you know.
-                        </p>
-                     </div>
-                  </div>
-               )}
-            </AnimatePresence>
-         </div>
+                    )}
+                 </AnimatePresence>
+              </div>
+           </>
+         )}
       </div>
 
       <AnimatePresence>

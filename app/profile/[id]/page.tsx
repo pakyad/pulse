@@ -50,7 +50,7 @@ export default function PublicProfile() {
         // fallback: no ordering if no index
         const q2 = query(collection(db, 'items'), where('seller_id', '==', uid));
         const snap2 = await getDocs(q2);
-        setListings(snap2.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => d.is_active));
+        setListings(snap2.docs.map(d => ({ id: d.id, ...d.data() } as any)).filter(d => d.is_active));
       }
 
       // Check if this is the current user's own profile

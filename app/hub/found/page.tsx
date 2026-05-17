@@ -117,7 +117,7 @@ export default function FoundHub() {
                     time_ago: item.time,
                     subtitle: item.location,
                     badge: item.status
-                  }}
+                  } as any}
                   onClick={() => {}}
                 />
               ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { Suspense, useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-export default function PromoteHub() {
+function PromoteHubContent() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [assets, setAssets] = useState<any[]>([]);
   const [merchant, setMerchant] = useState<any>(null);
@@ -28,7 +28,9 @@ export default function PromoteHub() {
     headline: '',
     caption: '',
     cta: 'Sync Now',
-    image_url: ''
+    image_url: '',
+    campus: '',
+    schedule_slot: ''
   });
 
   useEffect(() => {
@@ -201,7 +203,7 @@ export default function PromoteHub() {
                   <h3 className="text-[14px] font-bold text-navy tracking-tight">Active Pulse Registry</h3>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest tracking-widest">Live Sync</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Sync</span>
                   </div>
                </div>
 
@@ -470,5 +472,17 @@ export default function PromoteHub() {
       </AnimatePresence>
 
     </main>
+  );
+}
+
+export default function PromoteHub() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center">
+         <div className="w-8 h-8 border-4 border-navy/10 border-t-navy rounded-full animate-spin" />
+      </div>
+    }>
+      <PromoteHubContent />
+    </Suspense>
   );
 }

@@ -5,7 +5,7 @@ import { db, auth } from '@/lib/firebase';
 import { doc, getDoc, runTransaction, serverTimestamp, collection } from 'firebase/firestore';
 import {
   ChevronLeft, Truck, Plus, Package, Check,
-  ArrowRight, ShieldCheck, CheckCircle2
+  ArrowRight, ShieldCheck, CheckCircle2, Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

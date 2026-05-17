@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -20,7 +20,7 @@ import { submitInstitutionalApplication } from '@/lib/auth-utils';
 
 type RegisterStep = 'identity' | 'logistics' | 'payouts' | 'agreement' | 'complete';
 
-export default function RunnerRegistration() {
+function RunnerRegistrationContent() {
   const router = useRouter();
   const [step, setStep] = useState<RegisterStep>('identity');
   const [formData, setFormData] = useState({
@@ -418,7 +418,7 @@ export default function RunnerRegistration() {
               </p>
               <button 
                 onClick={() => router.push('/run')}
-                className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all flex border border-white/10"
+                className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all border border-white/10"
               >
                 Back to Dashboard
               </button>
@@ -427,5 +427,17 @@ export default function RunnerRegistration() {
         </AnimatePresence>
       </div>
     </main>
+  );
+}
+
+export default function RunnerRegistration() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-navy/10 border-t-navy rounded-full animate-spin" />
+      </div>
+    }>
+      <RunnerRegistrationContent />
+    </Suspense>
   );
 }

@@ -556,7 +556,7 @@ export default function AdminDashboard() {
             </section>
           )}
 
-          {/* 3. ACTIVE DISPUTES (TICKET SYSTEM) */}}
+          {/* 3. ACTIVE DISPUTES (TICKET SYSTEM) */}
           {activeTab === 'disputes' && (
             <section className="space-y-6">
                <div className="flex justify-between items-center px-2">

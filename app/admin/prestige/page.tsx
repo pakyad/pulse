@@ -42,7 +42,7 @@ export default function AdminPrestigePage() {
     const unsub = onSnapshot(q, async (sn) => {
        const list = [];
        for (const d of sn.docs) {
-          const camp = { id: d.id, ...d.data() };
+          const camp = { id: d.id, ...d.data() } as any;
           const itemSnap = await getDoc(doc(db, "items", camp.item_id));
           list.push({ ...camp, item: itemSnap.data() });
        }
