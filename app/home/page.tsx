@@ -210,7 +210,7 @@ export default function PulseHome() {
                         <div className="p-5 space-y-1">
                            <h4 className="text-[14px] font-bold text-[#1e293b] truncate">{item.title}</h4>
                            <div className="flex justify-between items-center">
-                              <p className="text-[15px] font-bold text-emerald-600">RM {Number(item.price).toFixed(0)}</p>
+                              <p className="text-[15px] font-bold text-[#1e293b]">RM {Number(item.price).toFixed(0)}</p>
                               <ChevronRight size={14} className="text-slate-300" />
                            </div>
                         </div>

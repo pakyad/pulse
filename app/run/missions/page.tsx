@@ -107,6 +107,7 @@ export default function MissionBoard() {
   }, [router]);
 
   const [showError, setShowError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleClaim = async (missionId: string) => {
     if (!auth.currentUser) return;
@@ -230,7 +231,7 @@ export default function MissionBoard() {
                                   </div>
                                </div>
                                <div className="text-right">
-                                  <p className="text-[18px] font-bold text-emerald-600">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
+                                  <p className="text-[18px] font-bold text-[#1e293b]">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
                                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Payout</p>
                                </div>
                             </div>

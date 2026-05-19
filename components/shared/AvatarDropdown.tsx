@@ -56,7 +56,6 @@ export default function AvatarDropdown({ photoUrl, userName, className = "" }: A
               alt="Avatar"
             />
           </div>
-          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />
         </div>
         <ChevronDown size={14} className={`text-slate-300 group-hover:text-slate-900 transition-all ${isOpen ? 'rotate-180' : ''}`} />
       </button>

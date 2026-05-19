@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
 
 interface ProductCardProps {
   item: {
@@ -28,52 +29,52 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       className="flex flex-col cursor-pointer group"
     >
       {/* ── IMAGE BOX ── */}
-      <div className="relative aspect-4/5 bg-slate-50 rounded-xl overflow-hidden mb-4 border border-slate-100 shadow-sm transition-all group-hover:border-slate-300">
+      <div className="relative aspect-4/5 bg-slate-50 rounded-[22px] overflow-hidden mb-4 border-[0.5px] border-slate-100 transition-all group-hover:border-slate-200">
         <motion.img 
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.04 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           src={item.image_url || `https://picsum.photos/seed/${item.id || item.title}/400/400`} 
-          className={`w-full h-full object-cover transition-all ${isSold ? 'blur-[1px] grayscale opacity-60' : ''}`}
+          className={`w-full h-full object-cover transition-all ${isSold ? 'blur-[1px] grayscale opacity-50' : ''}`}
           loading="lazy"
         />
         
         {item.is_official && (
-          <div className="absolute top-4 left-4">
-             <div className="px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-sm border border-slate-100">
-                <p className="text-[8px] font-bold text-[#1e293b] uppercase tracking-widest">Official</p>
-             </div>
+          <div className="absolute top-3 left-3">
+            <div className="px-2.5 py-1 bg-white/95 backdrop-blur-md rounded-lg border-[0.5px] border-slate-100">
+              <p className="text-[8px] font-bold text-[#1e293b] uppercase tracking-[0.15em]">Official</p>
+            </div>
           </div>
         )}
 
         {isSold && (
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-             <p className="text-[10px] font-bold text-white uppercase tracking-[0.2em] bg-black/40 px-4 py-1.5 rounded-full backdrop-blur-md border border-white/20">
-               {item.status === 'SOLD' ? 'Sold' : 'Out of Stock'}
-             </p>
+          <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+            <p className="text-[9px] font-bold text-white uppercase tracking-[0.2em] bg-black/50 px-4 py-1.5 rounded-full backdrop-blur-md border border-white/10">
+              {item.status === 'SOLD' ? 'Sold' : 'Out of Stock'}
+            </p>
           </div>
         )}
       </div>
 
       {/* ── INFORMATION BLOCK ── */}
-      <div className="px-1 space-y-3">
-        <h4 className="text-[14px] font-medium text-slate-900 tracking-tight leading-snug">
+      <div className="px-1 space-y-2">
+        <h4 className="text-[13px] font-semibold text-slate-900 tracking-tight leading-snug line-clamp-2">
           {item.title}
         </h4>
 
-        <div className="flex items-center gap-1">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <div key={s} className="w-2.5 h-2.5 bg-emerald-500 rounded-[2px]" />
-          ))}
-          <span className="text-[10px] font-bold text-slate-300 ml-1">(121)</span>
-        </div>
+        {/* ── SELLER (if available) ── */}
+        {item.seller_name && (
+          <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">
+            {item.seller_name}
+          </p>
+        )}
 
         <div className="flex items-center justify-between pt-1">
-           <p className="text-[16px] font-black text-slate-900 tracking-tighter">
-             RM {Number(item.price || 0).toFixed(0)}
-           </p>
-           <div className="h-8 px-4 border border-slate-200 rounded-full flex items-center justify-center">
-              <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">View</span>
-           </div>
+          <p className="text-[16px] font-black text-[#1e293b] tracking-tighter">
+            RM {Number(item.price || 0).toFixed(0)}
+          </p>
+          <div className="w-7 h-7 rounded-full bg-slate-50 border-[0.5px] border-slate-200 flex items-center justify-center group-hover:bg-[#1e293b] group-hover:border-[#1e293b] transition-all duration-300">
+            <ArrowUpRight size={13} className="text-slate-400 group-hover:text-white transition-colors duration-300" />
+          </div>
         </div>
       </div>
     </motion.div>

@@ -39,7 +39,7 @@ const MENU_GROUPS = [
   {
     label: 'Account Settings',
     items: [
-      { icon: Wallet, label: 'Payments & Wallet', path: '/me/wallet' },
+      { icon: Wallet, label: 'Payments & Wallet', path: '/run/wallet' },
     ]
   }
 ];
@@ -105,7 +105,7 @@ export default function MePage() {
          <section className="grid grid-cols-2 gap-4">
             <div className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-50 space-y-3">
                <Subtext className="text-[10px] uppercase font-black tracking-widest leading-none">Trust Rating</Subtext>
-               <p className="text-[20px] font-bold text-emerald-600">{(profile?.trust || 100)}%</p>
+               <p className="text-[20px] font-bold text-[#1e293b]">{(profile?.trust || 100)}%</p>
             </div>
             <div className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-50 space-y-3">
                <Subtext className="text-[10px] uppercase font-black tracking-widest leading-none">Active Assets</Subtext>

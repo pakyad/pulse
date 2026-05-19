@@ -1,24 +1,48 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth, storage } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { 
   Camera, X, Loader2, 
-  MapPin, ChevronRight, Phone, MessageSquare, 
-  Navigation, Check, Package, Activity, 
-  DollarSign, Award, Settings,
+  MapPin, Navigation, Check,
   ArrowUpRight, ShieldCheck,
-  ChevronLeft, Filter, Search, Maximize2, Minimize2,
-  ChevronDown
+  ChevronLeft, Clock, Zap
 } from 'lucide-react';
 import { completeDelivery } from '@/app/actions/deliveryActions';
-import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 const LiveMap = dynamic(() => import('@/components/runner/LiveMap'), { ssr: false });
+
+// ── HAVERSINE DISTANCE ──
+function haversineMetres(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371000;
+  const toRad = (d: number) => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function fmtDist(m: number) {
+  if (m < 1000) return `${Math.round(m)}m`;
+  return `${(m / 1000).toFixed(1)}km`;
+}
+
+function fmtElapsed(s: number) {
+  const m = Math.floor(s / 60).toString().padStart(2, '0');
+  const sec = (s % 60).toString().padStart(2, '0');
+  return `${m}:${sec}`;
+}
+
+function timerColor(s: number) {
+  if (s >= 1200) return 'text-red-500';
+  if (s >= 600) return 'text-amber-500';
+  return 'text-slate-400';
+}
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -59,6 +83,9 @@ export default function RunnerTerminal() {
   const [proofMode, setProofMode] = useState<'PICKUP' | 'DELIVERY' | null>(null);
   const [isPoolExpanded, setIsPoolExpanded] = useState(false);
   const [filter, setFilter] = useState('ALL');
+  const [runnerCoords, setRunnerCoords] = useState<{lat: number; lng: number} | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let unsubProfile: (() => void) | null = null;
@@ -122,22 +149,22 @@ export default function RunnerTerminal() {
     };
   }, [router]);
 
+  // ── GPS BROADCAST + LOCAL COORDS CAPTURE ──
   useEffect(() => {
     if (typeof window === 'undefined' || !navigator.geolocation) return;
     if (!isOnline || !activeMission) return;
 
-    const enRouteStatuses = ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'ARRIVED_AT_DESTINATION'];
-    if (!enRouteStatuses.includes(activeMission.status)) return;
-
     const orderId = activeMission.id;
     let lastWriteTime = 0;
+    const enRouteStatuses = ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'ARRIVED_AT_DESTINATION'];
+    const shouldBroadcast = enRouteStatuses.includes(activeMission.status);
 
     const watchId = navigator.geolocation.watchPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+        setRunnerCoords({ lat: latitude, lng: longitude });
         const now = Date.now();
-        
-        if (now - lastWriteTime > 5000) {
+        if (shouldBroadcast && now - lastWriteTime > 5000) {
           lastWriteTime = now;
           try {
             await updateDoc(doc(db, 'orders', orderId), {
@@ -145,16 +172,29 @@ export default function RunnerTerminal() {
               runner_location_updated_at: new Date().toISOString()
             });
           } catch (err) {
-            console.warn("Failed to write live GPS coordinates:", err);
+            console.warn("Failed to write live GPS:", err);
           }
         }
       },
-      (err) => console.warn("Geolocation watch position error:", err),
+      (err) => console.warn("Geolocation error:", err),
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
   }, [isOnline, activeMission?.id, activeMission?.status]);
+
+  // ── ELAPSED TIMER ──
+  useEffect(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (!activeMission?.accepted_at) { setElapsedSeconds(0); return; }
+    const startMs = activeMission.accepted_at?.toMillis
+      ? activeMission.accepted_at.toMillis()
+      : new Date(activeMission.accepted_at).getTime();
+    const tick = () => setElapsedSeconds(Math.floor((Date.now() - startMs) / 1000));
+    tick();
+    timerRef.current = setInterval(tick, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [activeMission?.id, activeMission?.accepted_at]);
 
   const toggleStatus = async () => {
     if (!auth.currentUser) return;
@@ -208,6 +248,26 @@ export default function RunnerTerminal() {
   };
 
   if (loading) return null;
+
+  // ── PRE-COMPUTE MISSION DATA (before JSX) ──
+  const isPickedUp = activeMission?.status === 'PICKED_UP' || activeMission?.status === 'IN_TRANSIT';
+
+  const pickupDistM = runnerCoords && activeMission?.pickup_lat && activeMission?.pickup_lng
+    ? haversineMetres(runnerCoords.lat, runnerCoords.lng, activeMission.pickup_lat, activeMission.pickup_lng)
+    : null;
+
+  const dropoffDistM = runnerCoords && activeMission?.dropoff_lat && activeMission?.dropoff_lng
+    ? haversineMetres(runnerCoords.lat, runnerCoords.lng, activeMission.dropoff_lat, activeMission.dropoff_lng)
+    : null;
+
+  const displayDist = isPickedUp ? dropoffDistM : pickupDistM;
+
+  const navTarget = activeMission
+    ? isPickedUp
+      ? activeMission.drop_off_location || 'Block K Main Lobby'
+      : activeMission.pickup_location || activeMission.seller_name || 'UniKL MIIT'
+    : '';
+  const navUrl = `https://maps.google.com/maps?q=${encodeURIComponent(navTarget + ', UniKL MIIT, Kuala Lumpur')}`;
 
   return (
     <main className="min-h-screen bg-white font-sans antialiased text-[#1e293b] selection:bg-slate-100 relative overflow-hidden">
@@ -266,72 +326,142 @@ export default function RunnerTerminal() {
 
             <AnimatePresence mode="wait">
               {activeMission ? (
-                 <motion.div 
-                   key="active" 
-                   initial={{ opacity: 0, y: 30 }} 
-                   animate={{ opacity: 1, y: 0 }} 
-                   className="bg-white p-10 rounded-[48px] border-[0.5px] border-slate-100 shadow-[0_32px_64px_-16px_rgba(30,41,59,0.15)] space-y-10 relative overflow-hidden"
-                 >
-                    {/* ACCENT GLOW */}
-                    <div className={`absolute top-0 left-0 right-0 h-1.5 ${activeMission.status === 'PICKED_UP' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
-                    
-                    <div className="flex justify-between items-start">
-                       <div><Heading className="text-[20px] lowercase">Mission Active</Heading><Subtext className="lowercase mt-1">registry code: #{activeMission.id.substring(0,8).toUpperCase()}</Subtext></div>
-                       <div className={`px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border ${
-                          activeMission.status === 'PICKED_UP' || activeMission.status === 'IN_TRANSIT' 
-                            ? 'bg-blue-50 text-blue-600 border-blue-100' 
-                            : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                        }`}>
-                          {activeMission.status === 'PICKED_UP' ? 'ITEM SECURED' : activeMission.status.replace(/_/g, ' ')}
+                  <motion.div 
+                    key="active" 
+                    initial={{ opacity: 0, y: 30 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    className="bg-white rounded-[40px] border-[0.5px] border-slate-100 shadow-[0_32px_64px_-16px_rgba(30,41,59,0.12)] relative overflow-hidden"
+                  >
+                    {/* STATUS ACCENT LINE */}
+                    <div className={`absolute top-0 left-0 right-0 h-1 ${isPickedUp ? 'bg-blue-500' : 'bg-[#1e293b]'}`} />
+
+                    {/* ── CARD HEADER ── */}
+                    <div className="px-8 pt-10 pb-6 flex items-start justify-between">
+                      <div>
+                        <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.18em]">Mission Active</p>
+                        <p className="text-[11px] font-medium text-slate-300 mt-0.5 lowercase">#{activeMission.id.substring(0,8).toUpperCase()}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {/* TIMER */}
+                        <div className={`flex items-center gap-1.5 ${timerColor(elapsedSeconds)}`}>
+                          <Clock size={13} strokeWidth={2} />
+                          <span className="text-[13px] font-black tabular-nums">{fmtElapsed(elapsedSeconds)}</span>
                         </div>
+                        {/* STATUS BADGE */}
+                        <div className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+                          isPickedUp 
+                            ? 'bg-blue-50 text-blue-600 border-blue-100' 
+                            : 'bg-slate-50 text-slate-600 border-slate-100'
+                        }`}>
+                          {activeMission.status === 'PICKED_UP' ? 'Secured' : activeMission.status.replace(/_/g, ' ')}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="space-y-8">
-                       {/* PICKUP NODE */}
-                       <div className={`flex items-start gap-5 transition-opacity ${activeMission.status === 'PICKED_UP' ? 'opacity-30' : 'opacity-100'}`}>
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${
-                            activeMission.status === 'READY_FOR_PICKUP' ? 'bg-emerald-500 text-white border-emerald-500 animate-pulse' :
-                            activeMission.status === 'PICKED_UP' ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 
-                            'bg-slate-50 text-slate-400 border-slate-100'
+                    {/* ── TELEMETRY STRIP ── */}
+                    <div className="mx-8 mb-6 px-5 py-3 bg-slate-50 rounded-2xl border-[0.5px] border-slate-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <MapPin size={13} className="text-slate-400" />
+                        <span className="text-[12px] font-bold text-[#1e293b]">
+                          {displayDist !== null ? `~${fmtDist(displayDist)} away` : 'GPS locating...'}
+                        </span>
+                        <span className="text-[10px] text-slate-300 font-medium">
+                          {isPickedUp ? '↗ to drop-off' : '↗ to pickup'}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => window.open(navUrl, '_blank')}
+                        className="flex items-center gap-1 text-[11px] font-black text-[#1e293b] uppercase tracking-widest active:scale-95 transition-all"
+                      >
+                        <Navigation size={12} /> Navigate
+                      </button>
+                    </div>
+
+                    {/* ── ROUTE NODES ── */}
+                    <div className="px-8 pb-6 space-y-0">
+
+                      {/* PICKUP NODE */}
+                      <div className={`flex items-start gap-4 p-5 rounded-2xl transition-all ${
+                        isPickedUp ? 'opacity-30' : 'bg-slate-50/60'
+                      }`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border shrink-0 transition-all ${
+                          activeMission.status === 'READY_FOR_PICKUP' ? 'bg-[#1e293b] text-white border-[#1e293b] animate-pulse' :
+                          isPickedUp ? 'bg-slate-100 text-slate-300 border-slate-100' :
+                          'bg-white text-slate-400 border-slate-200'
+                        }`}>
+                          {isPickedUp ? <Check size={16} /> : <Navigation size={16} />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold text-[#1e293b] tracking-tight">{activeMission.seller_name || 'Merchant'}</p>
+                          {activeMission.pickup_location && (
+                            <p className="text-[11px] font-medium text-slate-500 mt-0.5 leading-snug">{activeMission.pickup_location}</p>
+                          )}
+                          <p className={`text-[11px] font-semibold mt-1 ${
+                            activeMission.status === 'READY_FOR_PICKUP' ? 'text-[#1e293b] font-black' : 'text-slate-400'
                           }`}>
-                             {activeMission.status === 'PICKED_UP' ? <Check size={20} /> : <Navigation size={20}/>}
-                          </div>
-                          <div>
-                            <Heading className="text-[17px] lowercase">{activeMission.seller_name || 'pickup point'}</Heading>
-                            <Subtext className={`text-[14px] mt-1 lowercase transition-all ${activeMission.status === 'READY_FOR_PICKUP' ? 'text-emerald-600 font-bold' : ''}`}>
-                              {activeMission.status === 'PICKED_UP' ? 'item collected' : 
-                               activeMission.status === 'READY_FOR_PICKUP' ? 'order is ready for collection' :
-                               `collect: ${activeMission.title || 'package'}`}
-                            </Subtext>
-                          </div>
-                       </div>
+                            {isPickedUp ? '✓ Item collected' :
+                             activeMission.status === 'READY_FOR_PICKUP' ? '⚡ Ready — Go collect now' :
+                             `Collect: ${activeMission.title || 'package'}`}
+                          </p>
+                          {pickupDistM !== null && !isPickedUp && (
+                            <p className="text-[10px] font-bold text-slate-300 mt-1">{fmtDist(pickupDistM)} from you</p>
+                          )}
+                        </div>
+                      </div>
 
-                       {/* CONNECTOR */}
-                       <div className="ml-6 h-8 border-l border-dashed border-slate-200" />
+                      {/* CONNECTOR LINE */}
+                      <div className="ml-12 h-6 border-l border-dashed border-slate-200" />
 
-                       {/* DROP-OFF NODE */}
-                       <div className={`flex items-start gap-5 transition-all ${activeMission.status === 'PICKED_UP' ? 'scale-105' : 'opacity-100'}`}>
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-xl transition-all ${activeMission.status === 'PICKED_UP' ? 'bg-blue-600 shadow-blue-600/30' : 'bg-slate-900 shadow-slate-900/10'}`}>
-                             <MapPin size={20}/>
-                          </div>
-                          <div>
-                             <Heading className="text-[17px] lowercase">{activeMission.drop_off_location || 'drop-off'}</Heading>
-                             <Subtext className="text-[14px] mt-1 lowercase">deliver to: {activeMission.customer_name || 'student'}</Subtext>
-                          </div>
-                       </div>
+                      {/* DROP-OFF NODE */}
+                      <div className={`flex items-start gap-4 p-5 rounded-2xl transition-all ${
+                        isPickedUp ? 'bg-blue-50/60 ring-1 ring-blue-100' : ''
+                      }`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 transition-all ${
+                          isPickedUp ? 'bg-blue-600 shadow-blue-600/25 scale-110' : 'bg-[#1e293b] shadow-slate-900/10'
+                        }`}>
+                          <MapPin size={16} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold text-[#1e293b] tracking-tight">{activeMission.drop_off_location || 'Drop-off'}</p>
+                          {/* Floor + Room detail */}
+                          {(activeMission.floorLevel || activeMission.roomNumber) && (
+                            <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                              {activeMission.floorLevel ? `Level ${activeMission.floorLevel}` : ''}
+                              {activeMission.floorLevel && activeMission.roomNumber ? ' · ' : ''}
+                              {activeMission.roomNumber ? `Room ${activeMission.roomNumber}` : ''}
+                            </p>
+                          )}
+                          <p className="text-[11px] font-semibold text-slate-400 mt-1">
+                            Deliver to: {activeMission.customer_name || activeMission.buyer_name || 'Student'}
+                          </p>
+                          {dropoffDistM !== null && isPickedUp && (
+                            <p className="text-[11px] font-black text-blue-500 mt-1">{fmtDist(dropoffDistM)} away</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="pt-4 flex gap-4">
-                       <button className="flex-1 h-16 bg-slate-50 text-slate-900 border border-slate-100 rounded-3xl font-bold text-[14px] active:scale-95 transition-all lowercase">navigate</button>
-                       {activeMission.status === 'PREPARING' ? (
-                         <button disabled className="flex-1 h-16 bg-slate-100 text-slate-400 rounded-3xl font-bold text-[14px] lowercase">merchant preparing</button>
-                       ) : activeMission.status === 'READY_FOR_PICKUP' ? (
-                         <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-16 bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 rounded-3xl font-bold text-[14px] active:scale-95 transition-all lowercase">confirm pickup</button>
-                       ) : (
-                         <button onClick={() => setProofMode('DELIVERY')} className="flex-1 h-16 bg-blue-600 text-white shadow-xl shadow-blue-600/20 rounded-3xl font-bold text-[14px] active:scale-95 transition-all lowercase">Finalize Delivery</button>
-                       )}
+                    {/* ── ACTION BUTTONS ── */}
+                    <div className="px-8 pb-8 flex gap-3">
+                      <button
+                        onClick={() => window.open(navUrl, '_blank')}
+                        className="flex-1 h-14 bg-slate-50 text-[#1e293b] border border-slate-100 rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"
+                      >
+                        <Navigation size={15} /> Navigate
+                      </button>
+                      {activeMission.status === 'PREPARING' ? (
+                        <button disabled className="flex-1 h-14 bg-slate-100 text-slate-300 rounded-2xl font-bold text-[13px]">Preparing...</button>
+                      ) : activeMission.status === 'READY_FOR_PICKUP' ? (
+                        <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-14 bg-[#1e293b] text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-slate-900/10">
+                          <Check size={15} /> Confirm Pickup
+                        </button>
+                      ) : (
+                        <button onClick={() => setProofMode('DELIVERY')} className="flex-1 h-14 bg-blue-600 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-blue-600/15">
+                          <Zap size={15} /> Deliver
+                        </button>
+                      )}
                     </div>
-                 </motion.div>
+                  </motion.div>
               ) : (
                  <motion.div key="searching" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="py-24 flex flex-col items-center justify-center text-center space-y-8">
                     <div className="relative w-20 h-20">
