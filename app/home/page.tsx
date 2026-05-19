@@ -104,7 +104,7 @@ export default function PulseHome() {
             </div>
          </div>
          <div className="flex items-center gap-4">
-            <button className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+            <button onClick={() => router.push('/marketplace')} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
                <Search size={18} />
             </button>
             <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />

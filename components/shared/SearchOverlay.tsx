@@ -11,7 +11,9 @@ import {
   GraduationCap, 
   Users,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  Clock,
+  ChevronLeft
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -40,12 +42,32 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
     }).slice(0, 10);
   }, [query, items]);
 
-  const itemCategories = [
-    { label: 'Marketplace Assets', icon: ShoppingBag, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Campus Logistics', icon: Truck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Registry Archive', icon: Newspaper, color: 'text-slate-600', bg: 'bg-slate-50' },
-    { label: 'Node Operations', icon: Smartphone, color: 'text-amber-600', bg: 'bg-amber-50' },
-  ];
+  const [recent, setRecent] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('pulse_recent_searches');
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const saveSearch = (term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed) return;
+    setRecent(prev => {
+      const next = [trimmed, ...prev.filter(t => t !== trimmed)].slice(0, 5);
+      localStorage.setItem('pulse_recent_searches', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const clearRecent = () => {
+    setRecent([]);
+    localStorage.removeItem('pulse_recent_searches');
+  };
 
   return (
     <AnimatePresence>
@@ -60,15 +82,23 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
           {/* ── HEADER ── */}
           <div className="px-6 pt-16 pb-6 flex flex-col gap-10">
             <div className="flex justify-between items-center">
-              <div className="space-y-1">
-                <h2 className="text-[26px] font-bold text-slate-900 tracking-tight">Discovery</h2>
-                <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Institutional Directory</p>
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => query ? setQuery('') : onClose()}
+                  className="w-11 h-11 rounded-[18px] bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all border border-slate-100 active:scale-95 shadow-sm"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="space-y-0.5">
+                  <h2 className="text-[26px] font-bold text-slate-900 tracking-tight leading-none">Search</h2>
+                  <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest leading-none">Institutional Directory</p>
+                </div>
               </div>
               <button 
                 onClick={onClose}
-                className="w-12 h-12 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all border border-slate-100 shadow-sm"
+                className="w-11 h-11 rounded-[18px] bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all border border-slate-100 active:scale-95 shadow-sm"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
@@ -109,6 +139,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.05 }}
                       onClick={() => {
+                        saveSearch(query);
                         onClose();
                         router.push(`/marketplace/${item.id}`);
                       }}
@@ -135,21 +166,41 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="space-y-12"
+                  className="space-y-8"
                 >
-                  {/* Registry Categories */}
-                  <section>
-                    <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Marketplace Hub</h3>
-                    <div className="grid grid-cols-1 gap-3">
-                      {itemCategories.map((cat, i) => (
-                        <button key={i} className="w-full h-20 bg-white border border-slate-100 rounded-3xl flex items-center justify-between px-6 hover:bg-slate-50 transition-all group shadow-sm shadow-slate-200/50">
-                          <div className="flex items-center gap-5">
-                            <div className={`w-11 h-11 rounded-2xl ${cat.bg} flex items-center justify-center border border-white/20`}>
-                              <cat.icon size={22} strokeWidth={2.2} className={cat.color} />
-                            </div>
-                            <span className="font-bold text-[15px] text-slate-900 tracking-tight">{cat.label}</span>
-                          </div>
-                          <ChevronRight size={18} className="text-slate-200 group-hover:text-slate-900" />
+                  {/* Recent Searches */}
+                  {recent.length > 0 && (
+                    <section className="space-y-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recent Searches</h4>
+                        <button onClick={clearRecent} className="text-[10px] font-bold text-slate-300 hover:text-slate-500 transition-colors uppercase tracking-widest">Clear</button>
+                      </div>
+                      <div className="flex flex-col divide-y divide-slate-50">
+                        {recent.map((term, i) => (
+                          <button 
+                            key={i}
+                            onClick={() => setQuery(term)}
+                            className="w-full h-11 flex items-center justify-between text-left py-2 hover:bg-slate-50/50 px-2 rounded-xl transition-all"
+                          >
+                            <span className="text-[13px] font-bold text-slate-600">{term}</span>
+                            <Clock size={14} className="text-slate-300" />
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Suggestion Tags */}
+                  <section className="space-y-4">
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Popular Searches</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {['Books', 'Food', 'Charger', 'Notes', 'Jacket'].map((tag, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setQuery(tag)}
+                          className="px-4 py-2 bg-slate-50 border border-slate-100 hover:border-slate-200 text-[12px] font-bold text-slate-600 rounded-full active:scale-95 transition-all shadow-sm shadow-slate-100/50"
+                        >
+                          {tag}
                         </button>
                       ))}
                     </div>

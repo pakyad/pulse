@@ -17,6 +17,8 @@ function PromoteHubContent() {
   const [assets, setAssets] = useState<any[]>([]);
   const [merchant, setMerchant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [launchError, setLaunchError] = useState<string | null>(null);
+  const [launchSuccess, setLaunchSuccess] = useState(false);
   const [studioStep, setStudioStep] = useState<0 | 1 | 1.5 | 1.7 | 2 | 3>(0); // 0 is Hub, 1-3 is Studio
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -102,7 +104,11 @@ function PromoteHubContent() {
   }, [campaigns]);
 
   const handleLaunch = async () => {
-    if (tokensRemaining <= 0) return alert("INSTITUTIONAL QUOTA EXCEEDED. Please wait 24hrs for token reset.");
+    if (tokensRemaining <= 0) {
+      setLaunchError('Daily quota exceeded. Tokens reset every 24 hours.');
+      setTimeout(() => setLaunchError(null), 4000);
+      return;
+    }
     const selectedAsset = assets.find(a => a.id === draft.item_id);
     
     await addDoc(collection(db, "campaigns"), {
@@ -122,8 +128,9 @@ function PromoteHubContent() {
       expires_at: Date.now() + (48 * 60 * 60 * 1000)
     });
 
+    setLaunchSuccess(true);
     setStudioStep(0);
-    alert("PRESTIGE SYNC: Campaign transmitted to Pulse Command for review.");
+    setTimeout(() => setLaunchSuccess(false), 4000);
   };
 
   if (loading) return (
@@ -160,6 +167,18 @@ function PromoteHubContent() {
            </div>
         </div>
       </section>
+
+      {/* ── IN-UI FEEDBACK TOASTS ── */}
+      {launchError && (
+        <div className="fixed top-24 left-6 right-6 z-200 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-lg">
+          {launchError}
+        </div>
+      )}
+      {launchSuccess && (
+        <div className="fixed top-24 left-6 right-6 z-200 bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-lg">
+          ✓ Campaign transmitted to Pulse Command for review.
+        </div>
+      )}
 
       {/* HUB CONTENT (THE LEDGER) */}
       {studioStep === 0 && (

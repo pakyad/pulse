@@ -484,6 +484,8 @@ export default function LiveOrderPage() {
   const [userId, setUserId] = useState<string>('');
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [mapSrc, setMapSrc] = useState('/map-bg.png');
 
@@ -514,17 +516,18 @@ export default function LiveOrderPage() {
 
   // ── Cancel order (PENDING_VENDOR only) ──
   const handleCancelOrder = async () => {
-    if (!confirm('Cancel this order? This cannot be undone.')) return;
     setCancelling(true);
+    setCancelError(null);
     try {
       await updateDoc(doc(db, 'orders', id as string), {
         status: 'CANCELLED',
         cancelled_at: new Date().toISOString(),
         cancelled_by: 'buyer',
       });
+      setShowCancelConfirm(false);
     } catch (e) {
       console.error('[Cancel]', e);
-      alert('Could not cancel order. Please try again.');
+      setCancelError('Could not cancel. Please try again.');
     } finally {
       setCancelling(false);
     }
@@ -539,8 +542,14 @@ export default function LiveOrderPage() {
 
     if (isDone && !order?.hasAcknowledgedSuccess) {
       setShowSuccessOverlay(true);
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
         setShowSuccessOverlay(false);
+        // Write acknowledgement flag so overlay never replays on reload
+        try {
+          await updateDoc(doc(db, 'orders', id as string), { hasAcknowledgedSuccess: true });
+        } catch (e) {
+          console.warn('[Success] Could not write acknowledgement flag:', e);
+        }
       }, 3500);
       return () => clearTimeout(timer);
     }
@@ -722,7 +731,7 @@ export default function LiveOrderPage() {
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between pointer-events-none select-none">
         <div className="flex items-center gap-3 pointer-events-auto">
           <button
-            onClick={() => router.push('/marketplace')}
+            onClick={() => router.push('/home')}
             className="w-10 h-10 rounded-full flex items-center justify-center text-[#1e293b] hover:bg-slate-100/50 active:scale-95 transition-all"
           >
             <ChevronLeft size={20} strokeWidth={2.5} />
@@ -833,7 +842,7 @@ export default function LiveOrderPage() {
         {isPending && (
           <section>
             <button
-              onClick={handleCancelOrder}
+              onClick={() => setShowCancelConfirm(true)}
               disabled={cancelling}
               className="w-full h-12 border border-red-100 text-[13px] font-bold text-red-400 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-30"
             >
@@ -935,6 +944,53 @@ export default function LiveOrderPage() {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── CANCEL CONFIRMATION BOTTOM-SHEET ── */}
+      <AnimatePresence>
+        {showCancelConfirm && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => !cancelling && setShowCancelConfirm(false)}
+              className="fixed inset-0 z-400 bg-black/30 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+              className="fixed bottom-0 left-0 right-0 z-401 bg-white rounded-t-[32px] px-6 pt-6 pb-10 space-y-6"
+            >
+              <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto" />
+              <div className="space-y-1">
+                <h2 className="text-[17px] font-bold text-[#1e293b] tracking-tight">Cancel this order?</h2>
+                <p className="text-[12px] font-medium text-[#94a3b8] leading-relaxed">
+                  This cannot be undone. Your payment will be reviewed for refund.
+                </p>
+              </div>
+              {cancelError && (
+                <p className="text-[12px] font-bold text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+                  {cancelError}
+                </p>
+              )}
+              <div className="space-y-3">
+                <button
+                  onClick={handleCancelOrder}
+                  disabled={cancelling}
+                  className="w-full h-12 bg-red-500 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
+                >
+                  {cancelling ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Yes, Cancel Order'}
+                </button>
+                <button
+                  onClick={() => setShowCancelConfirm(false)}
+                  disabled={cancelling}
+                  className="w-full h-12 border border-slate-100 text-[#94a3b8] font-bold text-[13px] rounded-2xl active:scale-[0.98] transition-all"
+                >
+                  Keep Order
+                </button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 

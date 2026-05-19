@@ -125,7 +125,6 @@ export default function MarketplacePage() {
   return (
     <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
       
-      {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
             <button onClick={() => router.push('/home')} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
@@ -134,7 +133,10 @@ export default function MarketplacePage() {
             <p className="text-[14px] font-bold tracking-tight">Marketplace</p>
          </div>
          <div className="flex items-center gap-4">
-            <button className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
+            <button
+               onClick={() => setIsFilterOpen(true)}
+               className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all"
+            >
                <Search size={18} />
             </button>
             <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />

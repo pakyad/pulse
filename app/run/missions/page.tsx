@@ -106,12 +106,13 @@ export default function MissionBoard() {
     };
   }, [router]);
 
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState<string | null>(null);
 
   const handleClaim = async (missionId: string) => {
     if (!auth.currentUser) return;
     if (activeMission) {
-      alert("You must finish your current active delivery before claiming new missions.");
+      setShowError('Finish your current active delivery before claiming new missions.');
+      setTimeout(() => setShowError(null), 3000);
       return;
     }
     setIsProcessing(true);
@@ -134,7 +135,9 @@ export default function MissionBoard() {
         router.push('/run/terminal');
       }, 2000);
     } catch (e: any) { 
-      alert(e); 
+      console.error('[Claim]', e);
+      setShowError('Mission may have been claimed already. Try another.');
+      setTimeout(() => setShowError(null), 3000);
       setIsProcessing(false); 
     }
   };
@@ -143,6 +146,13 @@ export default function MissionBoard() {
 
   return (
     <main className="min-h-screen bg-white font-sans antialiased text-[#1e293b]">
+
+      {/* \u2500\u2500 IN-UI ERROR TOAST \u2500\u2500 */}
+      {showError && (
+        <div className="fixed top-24 left-6 right-6 z-200 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-lg text-center">
+          {showError}
+        </div>
+      )}
       {/* ── MATURED NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">

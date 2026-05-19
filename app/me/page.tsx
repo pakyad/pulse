@@ -34,14 +34,12 @@ const MENU_GROUPS = [
     items: [
       { icon: ShoppingBag, label: 'Order History', path: '/me/orders' },
       { icon: Store, label: 'Merchant Hub', path: '/merchant' },
-      { icon: Heart, label: 'Saved Items', path: '/me/saved' },
     ],
   },
   {
     label: 'Account Settings',
     items: [
-      { icon: MapPin, label: 'My Locations', path: '/me/locations' },
-      { icon: Wallet, label: 'Payments', path: '/me/wallet' },
+      { icon: Wallet, label: 'Payments & Wallet', path: '/me/wallet' },
     ]
   }
 ];
@@ -175,9 +173,10 @@ export default function MePage() {
 
                   {/* ACTIVE LISTINGS */}
                   {myListings.map((item) => (
-                     <div 
+                     <button 
                         key={item.id} 
-                        className="shrink-0 w-36 h-48 rounded-[32px] bg-slate-50/50 border border-slate-50 overflow-hidden relative group flex flex-col"
+                        onClick={() => router.push(`/marketplace/${item.id}`)}
+                        className="shrink-0 w-36 h-48 rounded-[32px] bg-slate-50/50 border border-slate-50 overflow-hidden relative group flex flex-col text-left active:scale-[0.97] transition-all"
                      >
                         <div className="h-28 w-full bg-white relative">
                            {item.images?.[0] ? (
@@ -198,8 +197,8 @@ export default function MePage() {
                               <Edit3 size={12} className="text-slate-200 group-hover:text-[#1e293b] transition-colors" />
                            </div>
                         </div>
-                     </div>
-                  ))}
+                      </button>
+                   ))}
                </div>
             </section>
          )}

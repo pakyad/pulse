@@ -38,18 +38,6 @@ export default function MerchantDashboard() {
       const userData = snap.data();
       setMerchant(snap.exists() ? { ...userData, uid: user.uid } : { full_name: user.displayName || "Pulse Vendor", uid: user.uid });
       
-      // 🏛️ Pulse Institutional Repair: Force-align orphan assets
-      if (userData?.role === 'CLUB' || userData?.is_verified_merchant) {
-        console.log("🏛️ Registry Repair Initiated for Merchant:", user.uid);
-        const { seedKelabBolaItems } = await import('@/lib/utils/seed-kelab-bola');
-        const { seedSEClubItems } = await import('@/lib/utils/seed-se-club');
-        
-        if (user.email?.includes('kelabbola') || user.email?.includes('kelab-bola')) {
-          await seedKelabBolaItems(user.uid);
-        } else if (user.email?.includes('se-club')) {
-          await seedSEClubItems(user.uid);
-        }
-      }
       
       unsubItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid)), 
         (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => {
@@ -87,33 +75,28 @@ export default function MerchantDashboard() {
   };
 
   const handleCallRunner = async (orderId: string) => {
-    // Exact status match for @/app/run/terminal/page.tsx radar query
+    // Status PENDING_RUNNER matches the runner radar query in /run/terminal and /run/missions
     await updateDoc(doc(db, "orders", orderId), { 
-      status: "AWAITING_RUNNER",
-      delivery_type: "RUNNER", // Force-align with logistics schema
+      status: "PENDING_RUNNER",
+      delivery_type: "RUNNER",
+      deliveryType: "RUNNER",
       ready_at: serverTimestamp() 
     });
-    alert("Institutional Logistics: Order is now visible to the Runner Radar.");
   };
 
   const handleConfirmDelivery = async (orderId: string) => {
     if (!navigator.geolocation) {
-      alert("Institutional Location Services Required.");
+      console.warn("[Merchant] Geolocation not available.");
       return;
     }
     
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        
-        // Option B: Direct Firestore Write (Bypassing Undeployed Cloud Function)
         const orderRef = doc(db, "orders", orderId);
         const orderSnap = await getDoc(orderRef);
         
-        if (!orderSnap.exists()) {
-          alert("Order not found.");
-          return;
-        }
+        if (!orderSnap.exists()) return;
 
         const orderData = orderSnap.data();
         const handshake = orderData.handshake || {};
@@ -123,24 +106,18 @@ export default function MerchantDashboard() {
 
         let newStatus = orderData.status;
 
-        // If buyer already confirmed, we run the proximity check
         if (handshake.buyer_confirmed && handshake.buyer_coords) {
-          const R = 6371e3; // metres
+          const R = 6371e3;
           const φ1 = coords.lat * Math.PI/180;
           const φ2 = handshake.buyer_coords.lat * Math.PI/180;
           const Δφ = (handshake.buyer_coords.lat - coords.lat) * Math.PI/180;
           const Δλ = (handshake.buyer_coords.lng - coords.lng) * Math.PI/180;
-
-          const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+          const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
           const dist = R * c;
-
           handshake.distance = dist;
           const isSafe = dist <= 50;
           handshake.verification_type = isSafe ? 'IN_PERSON_SAFE' : 'REMOTE';
-          
           newStatus = isSafe ? 'COMPLETED' : 'DELIVERED';
         }
 
@@ -148,14 +125,11 @@ export default function MerchantDashboard() {
           handshake,
           ...(newStatus !== orderData.status ? { status: newStatus, completed_at: serverTimestamp(), auto_adjudicated: newStatus === 'COMPLETED' } : {})
         });
-
-        alert("Institutional Confirmation Sent. Waiting for buyer receipt.");
       } catch (e) {
-        console.error(e);
-        alert("Handshake Transmission Failed.");
+        console.error("[Merchant] Confirm delivery error:", e);
       }
     }, (err) => {
-      alert("Location Access Denied. Handshake cannot be institutionalized.");
+      console.warn("[Merchant] Location access denied:", err);
     });
   };
 
@@ -215,11 +189,7 @@ export default function MerchantDashboard() {
         order={selectedOrder}
       />
 
-      <PriceAppealModal 
-        isOpen={!!selectedFlaggedItem}
-        onClose={() => setSelectedFlaggedItem(null)}
-        item={selectedFlaggedItem}
-      />
+      {/* PriceAppealModal reserved for future governance flow */}
     </>
   );
 }

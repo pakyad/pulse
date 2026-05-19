@@ -174,7 +174,8 @@ export default function CheckoutPage() {
       if (e.message === 'SOLD_OUT') {
         setErrorState('INSUFFICIENT_STOCK');
       } else {
-        alert("Order failed. Please try again.");
+        setErrorState('INSUFFICIENT_STOCK'); // Reuse overlay for all errors gracefully
+        console.error('[FPX Pay] Unexpected failure:', e.message);
       }
     }
   };

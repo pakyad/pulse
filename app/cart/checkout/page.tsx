@@ -6,7 +6,7 @@ import { db, auth, functions } from '@/lib/firebase';
 import { httpsCallable } from 'firebase/functions';
 import { useCart } from '@/lib/context/CartContext';
 import {
-  ChevronLeft, Truck, Package, Check,
+  ChevronLeft, Truck, Package, Check, X,
   ArrowRight, ShieldCheck, CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,6 +50,7 @@ export default function CartCheckoutPage() {
   const [preferences, setPreferences] = useState<Record<string, { type: 'RUNNER' | 'SELF_COLLECT', location: string, floor?: string, room?: string }>>({});
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [payStatus,    setPayStatus]    = useState<PayStatus>('idle');
+  const [orderError,   setOrderError]   = useState<string | null>(null);
 
   // Initialize preferences
   useEffect(() => {
@@ -109,7 +110,6 @@ export default function CartCheckoutPage() {
       
       const result = await placeOrder({
         cartItems: itemsWithPrefs,
-        // Global fallbacks for legacy support in cloud function
         deliveryType: 'MULTI_DISPATCH',
         receiptUrl: 'https://pulse.edu/demo-receipt.pdf'
       });
@@ -123,7 +123,8 @@ export default function CartCheckoutPage() {
     } catch (e: any) {
       console.error('[Cart Checkout]', e);
       setPayStatus('idle');
-      alert("Order failed: " + (e.message || "Institutional connectivity error."));
+      // Show in-page error instead of alert()
+      setOrderError(e.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -172,6 +173,23 @@ export default function CartCheckoutPage() {
                 </div>
               </>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── IN-UI ERROR TOAST (replaces alert()) ── */}
+      <AnimatePresence>
+        {orderError && (
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className="fixed top-20 left-6 right-6 z-300 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-2xl flex items-center justify-between shadow-lg"
+          >
+            <p className="text-[12px] font-bold leading-tight">{orderError}</p>
+            <button onClick={() => setOrderError(null)} className="w-6 h-6 flex items-center justify-center text-red-400 ml-3 shrink-0">
+              <X size={14} />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

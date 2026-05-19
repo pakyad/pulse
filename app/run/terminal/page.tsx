@@ -180,7 +180,7 @@ export default function RunnerTerminal() {
         });
       });
       setIsPoolExpanded(false);
-    } catch (e: any) { alert(e); } finally { setIsProcessing(false); }
+    } catch (e: any) { console.error('[Accept]', e); } finally { setIsProcessing(false); }
   };
 
   const handleConfirmPickup = async () => {
@@ -192,7 +192,7 @@ export default function RunnerTerminal() {
       const url = await getDownloadURL(uploadRes.ref);
       await updateDoc(doc(db, "orders", activeMission.id), { status: 'PICKED_UP', pickup_proof_url: url, picked_up_at: serverTimestamp() });
       setPodPhoto(null); setPodPreview(null); setProofMode(null);
-    } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
+    } catch (e: any) { console.error('[Pickup]', e); } finally { setIsProcessing(false); }
   };
 
   const handleFinalizeDelivery = async () => {
@@ -204,7 +204,7 @@ export default function RunnerTerminal() {
       const url = await getDownloadURL(uploadRes.ref);
       const res = await completeDelivery(activeMission.id, url);
       if (res.success) { setPodPhoto(null); setPodPreview(null); setProofMode(null); }
-    } catch (e: any) { alert(e.message); } finally { setIsProcessing(false); }
+    } catch (e: any) { console.error('[Delivery]', e); } finally { setIsProcessing(false); }
   };
 
   if (loading) return null;

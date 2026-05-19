@@ -62,6 +62,8 @@ export default function AdminDashboard() {
       if (profile?.role !== 'ADMIN' && user.email !== 'admin@pulse.com') {
         router.push('/home'); return;
       }
+      
+      setLoading(false);
 
       // 1. Fetch Price Guidelines
       guidelinesUnsub = onSnapshot(collection(db, "PriceGuidelines"), 

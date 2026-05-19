@@ -8,8 +8,9 @@ import {
   ShieldAlert, ShieldX
 } from 'lucide-react';
 
-import { db, auth } from '@/lib/firebase';
+import { db, auth, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { MARKETPLACE_DOMAINS, DomainID } from '@/lib/marketplace/domains';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
 
@@ -44,6 +45,8 @@ export default function CreateListingPage() {
   const [governanceStatus, setGovernanceStatus] = useState<'STABLE' | 'WARNING' | 'BLOCKED'>('STABLE');
   const [governanceCeiling, setGovernanceCeiling] = useState<number | null>(null);
   const [isPosting, setIsPosting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
   const [isAppealOpen, setIsAppealOpen] = useState(false);
   const [appealText, setAppealText] = useState('');
 
@@ -82,8 +85,22 @@ export default function CreateListingPage() {
   const handlePost = async () => {
     if (!selectedDomain) return;
     setIsPosting(true);
+    setPostError(null);
     try {
       const user = auth.currentUser;
+      if (!user) throw new Error('Not authenticated');
+
+      // Upload images to Firebase Storage → get download URLs
+      setIsUploading(true);
+      const imageUrls: string[] = await Promise.all(
+        images.map(async (base64, i) => {
+          const storageRef = ref(storage, `listings/${user.uid}_${Date.now()}_${i}.jpg`);
+          await uploadString(storageRef, base64, 'data_url');
+          return getDownloadURL(storageRef);
+        })
+      );
+      setIsUploading(false);
+
       await addDoc(collection(db, 'items'), {
         title,
         description,
@@ -92,9 +109,10 @@ export default function CreateListingPage() {
         price: parseFloat(price),
         stock_count: stock !== '' ? parseInt(stock, 10) : null,
         metadata,
-        images,
-        seller_id: user?.uid || 'ANON',
-        seller_name: user?.displayName || 'Pulse Student',
+        images: imageUrls,
+        image_url: imageUrls[0] || null,
+        seller_id: user.uid,
+        seller_name: user.displayName || 'Pulse Student',
         status: governanceStatus === 'BLOCKED'
           ? 'PENDING_REVIEW'
           : (stock !== '' && parseInt(stock, 10) === 0 ? 'sold_out' : 'active'),
@@ -105,9 +123,12 @@ export default function CreateListingPage() {
         created_at: serverTimestamp(),
       });
       router.push('/marketplace');
-    } catch (e) {
-      console.error(e);
-      alert('Failed to post listing.');
+    } catch (e: any) {
+      console.error('[CreateListing]', e);
+      setIsUploading(false);
+      setPostError(e?.code === 'storage/unauthorized'
+        ? 'Image upload failed. Please check your connection.'
+        : 'Failed to post listing. Please try again.');
     } finally {
       setIsPosting(false);
     }
@@ -360,22 +381,29 @@ export default function CreateListingPage() {
             {/* ── POST BUTTON ── */}
             <div className="pt-4">
               <button
-                disabled={!canPost || (governanceStatus === 'BLOCKED' && !appealText.trim())}
+                disabled={!canPost || (governanceStatus === 'BLOCKED' && !appealText.trim()) || isUploading}
                 onClick={handlePost}
                 className={`w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
-                  canPost && !(governanceStatus === 'BLOCKED' && !appealText.trim())
+                  canPost && !(governanceStatus === 'BLOCKED' && !appealText.trim()) && !isUploading
                     ? 'bg-[#1e293b] text-white active:scale-[0.98] shadow-sm'
                     : 'bg-slate-50 text-slate-200 border border-slate-100'
                 }`}
               >
-                {isPosting && <Loader2 size={16} className="animate-spin" />}
-                {isPosting ? 'Publishing...'
+                {(isPosting || isUploading) && <Loader2 size={16} className="animate-spin" />}
+                {isUploading ? 'Uploading Photos...'
+                  : isPosting ? 'Publishing...'
                   : governanceStatus === 'BLOCKED' ? 'Submit for Review'
                   : 'Publish Listing'}
               </button>
               {governanceStatus === 'BLOCKED' && !appealText.trim() && (
                 <p className="text-[11px] font-medium text-red-400 text-center mt-2">
                   Add a reason above to submit for review.
+                </p>
+              )}
+            {/* ── POST ERROR TOAST ── */}
+              {postError && (
+                <p className="text-[11px] font-bold text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-center">
+                  {postError}
                 </p>
               )}
             </div>
