@@ -15,14 +15,14 @@ export default function SwipeToReady({ orderId, onSuccess }: { orderId: string, 
 
   useEffect(() => {
     if (containerRef.current) {
-      // Container width minus thumb width (56px) and left/right padding (8px)
-      setDragBound(containerRef.current.offsetWidth - 56 - 8); 
+      // Container width minus thumb width (40px) and left/right padding (8px)
+      setDragBound(containerRef.current.offsetWidth - 40 - 8); 
     }
     
     // Update on resize
     const handleResize = () => {
       if (containerRef.current) {
-        setDragBound(containerRef.current.offsetWidth - 56 - 8);
+        setDragBound(containerRef.current.offsetWidth - 40 - 8);
       }
     };
     window.addEventListener('resize', handleResize);
@@ -55,8 +55,8 @@ export default function SwipeToReady({ orderId, onSuccess }: { orderId: string, 
 
   if (isDone) {
     return (
-      <div className="w-full h-16 bg-[#1e293b] rounded-[24px] flex items-center justify-center text-white font-bold text-[12px] tracking-widest uppercase shadow-md shadow-slate-900/10 transition-all">
-        <CheckCircle2 size={18} className="mr-2 text-emerald-400" /> Ready for Pickup
+      <div className="w-full h-11 bg-[#1e293b] rounded-xl flex items-center justify-center text-white font-bold text-[11px] tracking-widest uppercase shadow-sm shadow-slate-900/5 transition-all">
+        <CheckCircle2 size={16} className="mr-2 text-emerald-400" /> Ready for Pickup
       </div>
     );
   }
@@ -64,9 +64,9 @@ export default function SwipeToReady({ orderId, onSuccess }: { orderId: string, 
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-16 bg-slate-50 border-[0.5px] border-slate-200 rounded-[24px] overflow-hidden flex items-center justify-center touch-none select-none"
+      className="relative w-full h-11 bg-slate-50 border-[0.5px] border-slate-200 rounded-xl overflow-hidden flex items-center justify-center touch-none select-none"
     >
-      <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] pointer-events-none z-0 ml-6">
+      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest pointer-events-none z-0 ml-4">
         Swipe to ready
       </span>
       
@@ -78,9 +78,9 @@ export default function SwipeToReady({ orderId, onSuccess }: { orderId: string, 
         animate={controls}
         onDragEnd={handleDragEnd}
         style={{ x }}
-        className="absolute left-1 top-1 bottom-1 w-14 bg-white rounded-[20px] shadow-sm border-[0.5px] border-slate-100 flex items-center justify-center text-[#1e293b] z-10 cursor-grab active:cursor-grabbing hover:bg-slate-50 transition-colors"
+        className="absolute left-1 top-1 bottom-1 w-10 bg-white rounded-lg shadow-sm border border-slate-100 flex items-center justify-center text-[#1e293b] z-10 cursor-grab active:cursor-grabbing hover:bg-slate-50 transition-colors"
       >
-        {isLoading ? <Loader2 size={20} className="animate-spin text-slate-400" /> : <ChevronRight size={20} strokeWidth={2.5} />}
+        {isLoading ? <Loader2 size={16} className="animate-spin text-slate-400" /> : <ChevronRight size={16} strokeWidth={2.5} />}
       </motion.div>
     </div>
   );

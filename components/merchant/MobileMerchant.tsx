@@ -32,6 +32,7 @@ export default function MobileMerchant({
   const router = useRouter();
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+  const [editingItem, setEditingItem] = React.useState<any>(null);
 
   // ── SKIBIDI COMPONENTS ──
   const SkibidiHeading = ({ children }: { children: React.ReactNode }) => (
@@ -112,38 +113,43 @@ export default function MobileMerchant({
               >
                 {activeTab === 'ACTIVE' && (
                   pendingList.length === 0 ? (
-                    <div className="py-20 bg-slate-50/20 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-100">
-                        <PackageCheck size={28} strokeWidth={1.5} />
-                        <p className="text-[10px] mt-4 font-black uppercase tracking-widest">No Prep Orders</p>
+                    <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[32px] flex flex-col items-center justify-center text-center">
+                        <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4 shadow-sm border border-slate-100">
+                            <PackageCheck size={24} strokeWidth={1.5} />
+                        </div>
+                        <h3 className="text-[14px] font-bold text-[#1e293b] tracking-tight mb-1">You're all caught up!</h3>
+                        <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed max-w-[220px]">
+                           No active orders right now. Incoming requests from students will appear here.
+                        </p>
                     </div>
                   ) : (
                     pendingList.map((o: any) => (
                       <motion.div 
                         key={o.id} 
                         whileTap={{ scale: 0.98 }}
-                        className="p-6 bg-white border border-slate-50 rounded-[32px] shadow-sm space-y-6"
+                        className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-4"
                       >
                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-4">
-                               <div className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8]">
-                                  <ClipboardList size={18} />
+                            <div className="flex items-center gap-3">
+                               <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-[#94a3b8]">
+                                  <ClipboardList size={16} />
                                </div>
                                <div>
-                                  <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">{o.customer_name || 'Student'}</p>
-                                  <p className="text-[11px] font-medium text-[#94a3b8]">Order #{o.id.slice(-4).toUpperCase()}</p>
+                                  <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">{o.customer_name || 'Student'}</p>
+                                  <p className="text-[10px] font-medium text-[#94a3b8]">Order #{o.id.slice(-4).toUpperCase()}</p>
                                </div>
                             </div>
                             <div className="text-right">
-                               <p className="text-[15px] font-bold text-[#1e293b]">RM {o.total?.toFixed(2)}</p>
-                               <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">{o.status.replace(/_/g, ' ')}</p>
+                               <p className="text-[14px] font-bold text-[#1e293b]">RM {o.total?.toFixed(2)}</p>
+                               <p className="text-[9px] font-bold text-blue-500 uppercase tracking-wider">{o.status.replace(/_/g, ' ')}</p>
                             </div>
                          </div>
 
-                         <div className="flex gap-3 pt-2">
+                         <div className="flex gap-2 pt-1 border-t border-slate-50">
                             {o.status === 'PENDING_VENDOR' ? (
                               <button 
                                 onClick={() => handleAcceptOrder(o.id)}
-                                className="flex-1 h-12 bg-[#1e293b] text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-slate-900/10"
+                                className="flex-1 h-11 bg-[#1e293b] text-white rounded-xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-sm shadow-slate-900/5"
                               >
                                  Accept Order
                               </button>
@@ -152,15 +158,15 @@ export default function MobileMerchant({
                                 <SwipeToReady orderId={o.id} />
                               </div>
                             ) : (
-                              <div className="flex-1 h-12 bg-amber-50 rounded-2xl flex items-center justify-center border border-amber-100">
-                                <p className="text-[11px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                              <div className="flex-1 h-11 bg-amber-50 rounded-xl flex items-center justify-center border border-amber-100">
+                                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-1.5">
                                   <Bike size={14} />
                                   Waiting for runner
                                 </p>
                               </div>
                             )}
-                            <button className="w-12 h-12 rounded-2xl bg-slate-50 text-[#94a3b8] flex items-center justify-center border border-slate-50">
-                               <Info size={18} />
+                            <button className="w-11 h-11 rounded-xl bg-slate-50 text-[#94a3b8] flex items-center justify-center border border-slate-100">
+                               <Info size={16} />
                             </button>
                          </div>
                       </motion.div>
@@ -170,9 +176,14 @@ export default function MobileMerchant({
 
                 {activeTab === 'HISTORY' && (
                   historyList.length === 0 ? (
-                    <div className="py-20 bg-slate-50/20 border border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center text-slate-100">
-                        <ClipboardList size={28} strokeWidth={1.5} />
-                        <p className="text-[10px] mt-4 font-black uppercase tracking-widest">No Records Yet</p>
+                    <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[32px] flex flex-col items-center justify-center text-center">
+                        <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4 shadow-sm border border-slate-100">
+                            <ClipboardList size={24} strokeWidth={1.5} />
+                        </div>
+                        <h3 className="text-[14px] font-bold text-[#1e293b] tracking-tight mb-1">No past records</h3>
+                        <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed max-w-[220px]">
+                           Once you complete or cancel an order, the receipt will be securely archived here.
+                        </p>
                     </div>
                   ) : (
                     historyList.map((o: any) => (
@@ -211,25 +222,23 @@ export default function MobileMerchant({
             </AnimatePresence>
          </section>
 
-         {/* ── STATUS OVERVIEW (Skibidi concept) ── */}
-         <section className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-               <div className="p-6 bg-slate-50/30 rounded-[32px] border border-slate-50 space-y-4">
-                  <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest leading-none">Total Earnings</p>
-                  <div className="space-y-0.5">
-                     <p className="text-[11px] font-bold text-slate-200">RM</p>
-                     <p className="text-[22px] font-bold text-[#1e293b] tracking-tighter leading-none">{revenue.toFixed(2)}</p>
+         {/* ── SECTION: QUICK STATS ── */}
+            <div className="grid grid-cols-2 gap-3 mt-6">
+               <div className="p-5 bg-white border border-slate-100 rounded-[28px] flex flex-col justify-between shadow-sm shadow-slate-200/50">
+                  <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Total Earnings</p>
+                  <div className="mt-4 flex items-baseline gap-1">
+                     <span className="text-[12px] font-bold text-slate-400">RM</span>
+                     <span className="text-[24px] font-black text-[#1e293b] tracking-tight">{revenue.toFixed(2)}</span>
                   </div>
                </div>
-               <div className="p-6 bg-[#1e293b] rounded-[32px] text-white space-y-4 shadow-xl shadow-slate-900/10">
-                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none">Orders to Do</p>
-                  <div className="space-y-0.5">
-                     <p className="text-[11px] font-bold text-white/40">TOTAL</p>
-                     <p className="text-[22px] font-bold text-white tracking-tighter leading-none">{activeOrdersCount}</p>
+               <div className="p-5 bg-slate-50 border border-slate-100 rounded-[28px] flex flex-col justify-between">
+                  <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Orders To Do</p>
+                  <div className="mt-4 flex items-baseline gap-1.5">
+                     <span className="text-[24px] font-black text-[#1e293b] tracking-tight">{activeOrdersCount}</span>
+                     <span className="text-[12px] font-bold text-slate-400">Active</span>
                   </div>
                </div>
             </div>
-         </section>
 
          {/* ── Minimal Inventory Registry (Matured) ── */}
          {topItems?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
@@ -248,8 +257,8 @@ export default function MobileMerchant({
                           <div>
                              <p className="text-[13px] font-bold text-[#1e293b] truncate max-w-[120px]">{item.title}</p>
                              <button 
-                                onClick={() => router.push(`/marketplace/${item.id}/edit`)}
-                                className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mt-0.5"
+                                onClick={() => setEditingItem(item)}
+                                className="mt-2 h-8 px-4 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 hover:text-[#1e293b] hover:bg-slate-100 flex items-center justify-center uppercase tracking-widest transition-all shadow-sm shadow-slate-900/5 active:scale-95"
                              >
                                 Restock Item
                              </button>
@@ -312,7 +321,7 @@ export default function MobileMerchant({
                      </div>
                      <div className="flex items-center gap-2">
                         <button
-                           onClick={() => router.push(`/marketplace/${item.id}/edit`)}
+                           onClick={() => setEditingItem(item)}
                            title="Edit"
                            className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#1e293b] transition-all"
                         >
@@ -358,20 +367,22 @@ export default function MobileMerchant({
         </div>
       </nav>
 
-      {/* CREATE LISTING OVERLAY */}
+      {/* CREATE/EDIT LISTING OVERLAY */}
       <AnimatePresence>
-         {isCreateOpen && (
+         {(isCreateOpen || editingItem) && (
             <motion.div 
                initial={{ y: '100%' }}
                animate={{ y: 0 }}
                exit={{ y: '100%' }}
                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-               className="fixed inset-0 z-1000"
+               className="fixed inset-0 z-[1000]"
             >
                <CreateListing 
+                  key={editingItem?.id || 'create'}
                   userId={merchant?.uid} 
                   role={merchant?.role} 
-                  onClose={() => setIsCreateOpen(false)} 
+                  onClose={() => { setIsCreateOpen(false); setEditingItem(null); }} 
+                  existingItem={editingItem}
                />
             </motion.div>
          )}

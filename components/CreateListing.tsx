@@ -53,6 +53,21 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const [isPosting, setIsPosting] = useState(false);
   const [appealText, setAppealText] = useState(existingItem?.appeal_note || '');
 
+  // ── FORCE SYNC EXISTING ITEM DATA ──
+  useEffect(() => {
+    if (existingItem) {
+      setSelectedDomain(existingItem.domain || '');
+      setSubcategory(existingItem.subcategory || '');
+      setImages(existingItem.images || []);
+      setTitle(existingItem.title || '');
+      setDescription(existingItem.description || '');
+      setPrice(existingItem.price?.toString() || '');
+      setMetadata(existingItem.metadata || {});
+      setStock(existingItem.stock_count?.toString() || '0');
+      setAppealText(existingItem.appeal_note || '');
+    }
+  }, [existingItem]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── GOVERNANCE LOGIC (Mirroring Student Role) ──
@@ -213,8 +228,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         {/* ── SECTION: CLASSIFICATION ── */}
         <section className="space-y-4">
           <div className="space-y-0.5">
-            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">What are you listing?</h2>
-            <p className="text-[11px] font-medium text-[#94a3b8]">Choose the category that fits your item.</p>
+            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Category' : 'What are you listing?'}</h2>
+            <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Change the category if needed.' : 'Choose the category that fits your item.'}</p>
           </div>
 
           <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 -mx-6 px-6">
@@ -251,8 +266,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             <section className="space-y-4 pt-2 border-t border-slate-100">
               <div className="flex justify-between items-center pt-6">
                 <div className="space-y-0.5">
-                  <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Photos</h2>
-                  <p className="text-[11px] font-medium text-[#94a3b8]">Add up to 10 images.</p>
+                  <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Photos' : 'Photos'}</h2>
+                  <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update your product photos (max 10).' : 'Add up to 10 images.'}</p>
                 </div>
                 <span className="text-[11px] font-bold text-[#94a3b8]">{images.length}/10</span>
               </div>
@@ -283,8 +298,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             {/* ── SECTION: NAME ── */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Name</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">Keep it short and clear.</p>
+                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Item Name' : 'Name'}</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update the name of this item.' : 'Keep it short and clear.'}</p>
               </div>
               <input
                 placeholder="e.g. Calculus Textbook, Canon EOS..."
@@ -297,8 +312,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             {/* ── SECTION: DETAILS ── */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Description</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">Condition, reason for selling, any notes.</p>
+                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Description' : 'Description'}</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update condition or add new details.' : 'Condition, reason for selling, any notes.'}</p>
               </div>
               <textarea
                 placeholder="Tell the buyer what they need to know..."
@@ -312,8 +327,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             {/* ── SECTION: PRICE ── */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Price</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">Set your asking price in Ringgit.</p>
+                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Price' : 'Price'}</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Change your asking price.' : 'Set your asking price in Ringgit.'}</p>
               </div>
               <div className={`flex items-center gap-0 h-12 bg-slate-50 border rounded-xl overflow-hidden focus-within:border-[#1e293b] transition-colors ${
                 governanceStatus === 'BLOCKED' ? 'border-red-200' :
@@ -378,8 +393,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             {/* ── SECTION: STOCK ── */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Stock</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">How many do you have? Set to 0 to mark as sold out.</p>
+                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Stock' : 'Stock'}</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update how many you have left. Set to 0 if sold out.' : 'How many do you have? Set to 0 to mark as sold out.'}</p>
               </div>
               <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-[#1e293b] transition-colors">
                 <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">Qty</span>
@@ -396,8 +411,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             {/* ── SECTION: SMART DOMAIN FIELDS ── */}
             <section className="pt-6 border-t border-slate-100">
               <div className="space-y-0.5 mb-6">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">More Details</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">Specific information about this type of listing.</p>
+                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'More Details' : 'More Details'}</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update specific information for this item.' : 'Specific information about this type of listing.'}</p>
               </div>
               <SmartFormFields
                 domainId={selectedDomain as DomainID}
