@@ -41,6 +41,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [priceReviews, setPriceReviews] = useState<any[]>([]);
+  const [flaggedReviews, setFlaggedReviews] = useState<any[]>([]);
 
   useEffect(() => {
     let guidelinesUnsub: (() => void) | null = null;
@@ -115,11 +116,12 @@ export default function AdminDashboard() {
         }
       );
 
-      // 7. Fetch PENDING_REVIEW items (price ceiling exceeded)
+      // 7. Fetch PENDING_REVIEW items AND algorithmically auto-flagged items
       reviewsUnsub = onSnapshot(
-        query(collection(db, "items"), where("status", "==", "PENDING_REVIEW")),
+        query(collection(db, "items"), where("is_price_flagged", "==", true)),
         (snap) => {
-          setPriceReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => b.created_at?.toMillis?.() - a.created_at?.toMillis?.()));
+          const flagged = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => b.created_at?.toMillis?.() - a.created_at?.toMillis?.());
+          setPriceReviews(flagged);
         }
       );
     });
@@ -237,21 +239,26 @@ export default function AdminDashboard() {
     alert("Audit Registry Updated: Violation Dismissed.");
   };
 
-  // ── Price Review: Approve / Reject ──
-  const handlePriceReview = async (itemId: string, action: 'APPROVE' | 'REJECT') => {
+  // ── Price Review: Dismiss Flag / Remove Listing ──
+  const handlePriceReview = async (itemId: string, action: 'DISMISS' | 'REMOVE') => {
     setIsProcessing(itemId);
     try {
-      if (action === 'APPROVE') {
+      if (action === 'DISMISS') {
+        // Clear the flag — listing stays live
         await updateDoc(doc(db, 'items', itemId), {
-          status: 'active',
-          governance_approved_by: auth.currentUser?.uid || 'ADMIN',
-          governance_approved_at: new Date(),
+          is_price_flagged: false,
+          price_flag_count: 0,
+          flag_source: null,
+          flag_dismissed_by: auth.currentUser?.uid || 'ADMIN',
+          flag_dismissed_at: new Date(),
         });
       } else {
-        const reason = prompt('Rejection reason (shown to seller):');
+        // Remove listing from marketplace
+        const reason = prompt('Reason for removal (shown to seller):');
         if (!reason) { setIsProcessing(null); return; }
         await updateDoc(doc(db, 'items', itemId), {
           status: 'REJECTED',
+          is_price_flagged: false,
           rejection_reason: reason,
           governance_rejected_by: auth.currentUser?.uid || 'ADMIN',
           governance_rejected_at: new Date(),
@@ -451,17 +458,18 @@ export default function AdminDashboard() {
             </section>
           )}
 
-          {/* ── PRICE REVIEW QUEUE ── */}
           {activeTab === 'price_review' && (
             <section className="space-y-6">
               <div className="flex justify-between items-center px-2">
                 <div>
-                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">Price Control</p>
-                  <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Price Review Queue</h2>
-                  <p className="text-[13px] font-medium text-slate-400 mt-1">Listings that exceeded their category ceiling and require admin approval.</p>
+                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">Market Governance</p>
+                  <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Flagged Listings Queue</h2>
+                  <p className="text-[13px] font-medium text-slate-400 mt-1">
+                    Items auto-flagged by the system (price &gt; 150% ceiling) or reported by 3+ buyers.
+                  </p>
                 </div>
                 <div className="px-5 py-2 bg-amber-50 border border-amber-100 rounded-2xl">
-                  <span className="text-[11px] font-black text-amber-600 uppercase tracking-widest">{priceReviews.length} Pending</span>
+                  <span className="text-[11px] font-black text-amber-600 uppercase tracking-widest">{priceReviews.length} Flagged</span>
                 </div>
               </div>
 
@@ -471,12 +479,13 @@ export default function AdminDashboard() {
                     <div className="w-16 h-16 bg-emerald-50 rounded-[24px] flex items-center justify-center text-emerald-400">
                       <ShieldCheck size={28} />
                     </div>
-                    <p className="text-[13px] font-bold text-slate-300 uppercase tracking-widest">All clear — no items pending review</p>
+                    <p className="text-[13px] font-bold text-slate-300 uppercase tracking-widest">All clear — no flagged listings</p>
                   </div>
                 ) : (
                   priceReviews.map((item) => {
                     const overBy = item.price - (item.governance_ceiling || 0);
                     const overPct = item.governance_ceiling ? Math.round((overBy / item.governance_ceiling) * 100) : 0;
+                    const isSystemFlag = item.flag_source === 'SYSTEM';
                     return (
                       <motion.div
                         key={item.id}
@@ -494,39 +503,56 @@ export default function AdminDashboard() {
                               }
                             </div>
                             <div>
-                              <h3 className="text-[16px] font-black text-slate-900 tracking-tight">{item.title}</h3>
-                              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-[16px] font-black text-slate-900 tracking-tight">{item.title}</h3>
+                                {/* Flag source badge */}
+                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
+                                  isSystemFlag
+                                    ? 'bg-red-50 text-red-500 border border-red-100'
+                                    : 'bg-amber-50 text-amber-600 border border-amber-100'
+                                }`}>
+                                  {isSystemFlag ? '⚡ Auto-Flagged' : '👥 Community Report'}
+                                </span>
+                              </div>
+                              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
                                 {item.domain} · {item.subcategory}
                               </p>
                               <p className="text-[12px] font-medium text-slate-400 mt-0.5">Seller: {item.seller_name || '—'}</p>
+                              {!isSystemFlag && (
+                                <p className="text-[11px] font-bold text-amber-500 mt-0.5">
+                                  {item.price_flag_count || 0} buyer report{(item.price_flag_count || 0) !== 1 ? 's' : ''}
+                                </p>
+                              )}
                             </div>
                           </div>
 
                           {/* Price comparison */}
                           <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                             <div>
-                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Asked Price</p>
+                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Listed Price</p>
                               <p className="text-[20px] font-black text-red-500">RM {Number(item.price).toFixed(2)}</p>
                             </div>
-                            <div className="w-px h-8 bg-slate-200" />
-                            <div>
-                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Category Ceiling</p>
-                              <p className="text-[20px] font-black text-slate-900">RM {Number(item.governance_ceiling || 0).toFixed(2)}</p>
-                            </div>
-                            <div className="w-px h-8 bg-slate-200" />
-                            <div>
-                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Over By</p>
-                              <p className="text-[20px] font-black text-amber-500">+{overPct}%</p>
-                            </div>
+                            {item.governance_ceiling && (
+                              <>
+                                <div className="w-px h-8 bg-slate-200" />
+                                <div>
+                                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Category Ceiling</p>
+                                  <p className="text-[20px] font-black text-slate-900">RM {Number(item.governance_ceiling).toFixed(2)}</p>
+                                </div>
+                                <div className="w-px h-8 bg-slate-200" />
+                                <div>
+                                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Over By</p>
+                                  <p className="text-[20px] font-black text-amber-500">+{overPct}%</p>
+                                </div>
+                              </>
+                            )}
                           </div>
 
-                          {/* Seller's reason */}
-                          {item.appeal_note && (
-                            <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-100">
-                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Seller's Reason</p>
-                              <p className="text-[13px] font-medium text-slate-600 leading-relaxed italic">
-                                "{item.appeal_note}"
-                              </p>
+                          {/* Seller Justification / Appeal */}
+                          {item.price_appeal && (
+                            <div className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 space-y-1">
+                              <p className="text-[9px] font-black text-red-400 uppercase tracking-widest">Seller Justification</p>
+                              <p className="text-[12px] font-semibold text-red-700 italic">"{item.price_appeal}"</p>
                             </div>
                           )}
                         </div>
@@ -534,20 +560,20 @@ export default function AdminDashboard() {
                         {/* Right — actions */}
                         <div className="flex flex-col gap-3 shrink-0 w-[180px]">
                           <button
-                            onClick={() => handlePriceReview(item.id, 'APPROVE')}
+                            onClick={() => handlePriceReview(item.id, 'DISMISS')}
                             disabled={isProcessing === item.id}
-                            className="h-12 bg-[#1e293b] text-white rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-30"
+                            className="h-12 bg-blue-600 text-white rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-30"
                           >
                             {isProcessing === item.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                            Approve
+                            Clear Flag
                           </button>
                           <button
-                            onClick={() => handlePriceReview(item.id, 'REJECT')}
+                            onClick={() => handlePriceReview(item.id, 'REMOVE')}
                             disabled={isProcessing === item.id}
                             className="h-12 bg-white text-red-500 border border-red-100 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-50 active:scale-95 transition-all disabled:opacity-30"
                           >
                             <X size={14} />
-                            Reject
+                            Remove
                           </button>
                         </div>
                       </motion.div>

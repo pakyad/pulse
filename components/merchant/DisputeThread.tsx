@@ -74,24 +74,24 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
   const StrategyCard = ({ id, title, desc, icon: Icon, color }: any) => (
     <button 
       onClick={() => { setStrategy(id); setStep(2); }}
-      className="w-full p-6 bg-white border border-slate-100 rounded-2xl text-left group hover:border-[#1e293b] hover:shadow-md transition-all flex items-center justify-between"
+      className="w-full p-6 bg-white border border-slate-100 rounded-2xl text-left group hover:border-blue-600 hover:shadow-md transition-all flex items-center justify-between"
     >
        <div className="flex gap-5 items-center">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center border border-slate-100 group-hover:bg-[#1e293b] group-hover:text-white transition-all`}>
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center border border-slate-100 group-hover:bg-blue-600 group-hover:text-white transition-all`}>
              <Icon size={20} />
           </div>
           <div className="space-y-1">
-             <p className="text-[14px] font-bold text-[#1e293b]">{title}</p>
+             <p className="text-[14px] font-bold text-[#000000]">{title}</p>
              <p className="text-[11px] font-medium text-[#94a3b8]">{desc}</p>
           </div>
        </div>
-       <ArrowRight size={16} className="text-slate-200 group-hover:text-[#1e293b] transition-all" />
+       <ArrowRight size={16} className="text-slate-200 group-hover:text-[#000000] transition-all" />
     </button>
   );
 
   return (
     <div className="fixed inset-0 z-1000 flex items-center justify-end">
-       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-[#1e293b]/20 backdrop-blur-md" />
+       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-blue-600/20 backdrop-blur-md" />
 
        <motion.div 
          initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
@@ -101,18 +101,18 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
           {/* MATURE HEADER */}
           <div className="px-8 py-8 border-b border-slate-50 flex items-center justify-between bg-white/80 backdrop-blur-xl z-20">
              <div className="flex items-center gap-5">
-                <button onClick={step === 1 ? onClose : () => setStep(1)} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#1e293b] border border-slate-50 transition-all">
+                <button onClick={step === 1 ? onClose : () => setStep(1)} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] border border-slate-50 transition-all">
                    <ChevronLeft size={18} />
                 </button>
                 <div className="space-y-1">
-                   <h2 className="text-[17px] font-bold tracking-tight text-[#1e293b]">{step === 1 ? 'Select Strategy' : 'Execute Action'}</h2>
+                   <h2 className="text-[17px] font-bold tracking-tight text-[#000000]">{step === 1 ? 'Select Strategy' : 'Execute Action'}</h2>
                    <p className="text-[11px] font-medium text-[#94a3b8]">Step {step} of 2</p>
                 </div>
              </div>
              {step === 2 && (
                 <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
-                   <div className="w-1.5 h-1.5 rounded-full bg-[#1e293b] animate-pulse" />
-                   <span className="text-[9px] font-black uppercase tracking-widest text-[#1e293b]">{strategy}</span>
+                   <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                   <span className="text-[9px] font-black uppercase tracking-widest text-[#000000]">{strategy}</span>
                 </div>
              )}
           </div>
@@ -129,11 +129,11 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                       <span className="text-[10px] font-black text-red-500 uppercase tracking-widest bg-white px-2 py-0.5 rounded border border-red-50">{dispute.reason}</span>
                    </div>
                    <div className="px-6 py-5 bg-white">
-                      <p className="text-[14px] font-medium text-[#1e293b] leading-relaxed italic">"{dispute.narrative}"</p>
+                      <p className="text-[14px] font-medium text-[#000000] leading-relaxed italic">"{dispute.narrative}"</p>
                    </div>
                    <div className="px-6 py-4 flex items-center justify-between text-[13px] font-bold">
                       <span className="text-[#94a3b8]">Order Amount</span>
-                      <span className="text-[#1e293b]">RM {order?.total?.toFixed(2)}</span>
+                      <span className="text-[#000000]">RM {order?.total?.toFixed(2)}</span>
                    </div>
                 </div>
              </section>
@@ -147,7 +147,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                      className="space-y-6"
                    >
                       <div className="space-y-1">
-                         <h3 className="text-[15px] font-bold text-[#1e293b]">How would you like to handle this?</h3>
+                         <h3 className="text-[15px] font-bold text-[#000000]">How would you like to handle this?</h3>
                          <p className="text-[11px] text-[#94a3b8]">Choose a professional strategy based on your evidence.</p>
                       </div>
 
@@ -187,7 +187,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                      className="space-y-8"
                    >
                       <div className="space-y-1">
-                         <h3 className="text-[15px] font-bold text-[#1e293b]">Finalize Your {strategy} Strategy</h3>
+                         <h3 className="text-[15px] font-bold text-[#000000]">Finalize Your {strategy} Strategy</h3>
                          <p className="text-[11px] text-[#94a3b8]">Provide the necessary details to execute this action.</p>
                       </div>
 
@@ -196,7 +196,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                             <div className="flex items-center gap-2 text-blue-600 font-bold text-[11px] uppercase tracking-widest">
                                <CheckCircle2 size={14} /> Submitted for Review
                             </div>
-                            <p className="text-[14px] font-medium text-[#1e293b]">{dispute.merchant_response}</p>
+                            <p className="text-[14px] font-medium text-[#000000]">{dispute.merchant_response}</p>
                          </div>
                       ) : (
                          <form onSubmit={handleSubmit} className="space-y-8">
@@ -207,7 +207,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                                      <textarea 
                                        value={narrative} onChange={(e) => setNarrative(e.target.value)} required
                                        placeholder="Provide specific details (e.g., 'Left at the guardhouse as per student's request')."
-                                       className="w-full h-40 bg-white border border-slate-100 rounded-xl p-5 text-[14px] font-medium text-[#1e293b] focus:border-[#1e293b] transition-all outline-none resize-none leading-relaxed"
+                                       className="w-full h-40 bg-white border border-slate-100 rounded-xl p-5 text-[14px] font-medium text-[#000000] focus:border-blue-600 transition-all outline-none resize-none leading-relaxed"
                                      />
                                   </div>
                                   <div className="space-y-2">
@@ -215,7 +215,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                                      <label className="group w-full h-24 border-2 border-dashed border-slate-100 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-all relative overflow-hidden bg-white">
                                         <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                                         {previewUrl && <img src={previewUrl} className="absolute inset-0 w-full h-full object-cover opacity-10" alt="" />}
-                                        <ImageIcon size={18} className="text-slate-300 group-hover:text-[#1e293b]" />
+                                        <ImageIcon size={18} className="text-slate-300 group-hover:text-[#000000]" />
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{image ? image.name : 'Upload Delivery Proof'}</span>
                                      </label>
                                   </div>
@@ -225,7 +225,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                             {strategy === 'PARTIAL' && (
                                <div className="space-y-6">
                                   <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-2xl space-y-4">
-                                     <p className="text-[12px] font-bold text-[#1e293b]">Set Compromise Amount</p>
+                                     <p className="text-[12px] font-bold text-[#000000]">Set Compromise Amount</p>
                                      <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-100">
                                         <span className="text-[14px] font-bold text-[#94a3b8]">RM</span>
                                         <input 
@@ -256,7 +256,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                                  type="submit"
                                  disabled={isSubmitting || (strategy === 'CONTEST' && !narrative)}
                                  className={`w-full py-5 rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 disabled:opacity-20 ${
-                                    strategy === 'FULL' ? 'bg-red-500 text-white shadow-red-500/10' : 'bg-[#1e293b] text-white shadow-[#1e293b]/10'
+                                    strategy === 'FULL' ? 'bg-red-500 text-white shadow-red-500/10' : 'bg-blue-600 text-white shadow-[#000000]/10'
                                  }`}
                                >
                                   {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : (
@@ -271,7 +271,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                                <button 
                                  type="button" 
                                  onClick={() => setStep(1)}
-                                 className="w-full py-4 text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest hover:text-[#1e293b] transition-colors"
+                                 className="w-full py-4 text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest hover:text-[#000000] transition-colors"
                                >
                                   Change Strategy
                                </button>

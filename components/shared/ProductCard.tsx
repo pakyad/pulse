@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight } from 'lucide-react';
 
 interface ProductCardProps {
   item: {
@@ -11,6 +10,7 @@ interface ProductCardProps {
     price?: number;
     image_url: string;
     seller_name?: string;
+    seller_photo_url?: string;
     time_ago?: string;
     is_official?: boolean;
     status?: string;
@@ -22,33 +22,31 @@ interface ProductCardProps {
 export default function ProductCard({ item, onClick }: ProductCardProps) {
   const isSold = item.status === 'SOLD' || (item.stock_count !== undefined && item.stock_count !== null && item.stock_count <= 0);
 
+  // Mocking timeAgo if not provided by DB for the demo view
+  const timeAgo = item.time_ago || "Just now";
+  
+  // Format price safely
+  const formattedPrice = item.price !== undefined ? Number(item.price).toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0';
+
   return (
     <motion.div
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="flex flex-col cursor-pointer group"
+      className="flex flex-col cursor-pointer group h-full"
     >
       {/* ── IMAGE BOX ── */}
-      <div className="relative aspect-4/5 bg-slate-50 rounded-[22px] overflow-hidden mb-4 border-[0.5px] border-slate-100 transition-all group-hover:border-slate-200">
-        <motion.img 
-          whileHover={{ scale: 1.04 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      <div className="relative aspect-square bg-slate-50 rounded-xl overflow-hidden mb-3">
+        <img 
           src={item.image_url || `https://picsum.photos/seed/${item.id || item.title}/400/400`} 
-          className={`w-full h-full object-cover transition-all ${isSold ? 'blur-[1px] grayscale opacity-50' : ''}`}
+          onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${item.id}/400/400`; }}
+          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${isSold ? 'blur-[1px] grayscale opacity-50' : ''}`}
           loading="lazy"
+          alt={item.title}
         />
         
-        {item.is_official && (
-          <div className="absolute top-3 left-3">
-            <div className="px-2.5 py-1 bg-white/95 backdrop-blur-md rounded-lg border-[0.5px] border-slate-100">
-              <p className="text-[8px] font-bold text-[#1e293b] uppercase tracking-[0.15em]">Official</p>
-            </div>
-          </div>
-        )}
-
         {isSold && (
           <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-            <p className="text-[9px] font-bold text-white uppercase tracking-[0.2em] bg-black/50 px-4 py-1.5 rounded-full backdrop-blur-md border border-white/10">
+            <p className="text-[10px] font-black text-white uppercase tracking-[0.15em] bg-black/50 px-4 py-1.5 rounded-full backdrop-blur-md">
               {item.status === 'SOLD' ? 'Sold' : 'Out of Stock'}
             </p>
           </div>
@@ -56,26 +54,38 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       </div>
 
       {/* ── INFORMATION BLOCK ── */}
-      <div className="px-1 space-y-2">
-        <h4 className="text-[13px] font-semibold text-slate-900 tracking-tight leading-snug line-clamp-2">
-          {item.title}
-        </h4>
-
-        {/* ── SELLER (if available) ── */}
-        {item.seller_name && (
-          <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">
-            {item.seller_name}
-          </p>
-        )}
-
-        <div className="flex items-center justify-between pt-1">
-          <p className="text-[16px] font-black text-[#1e293b] tracking-tighter">
-            RM {Number(item.price || 0).toFixed(0)}
-          </p>
-          <div className="w-7 h-7 rounded-full bg-slate-50 border-[0.5px] border-slate-200 flex items-center justify-center group-hover:bg-[#1e293b] group-hover:border-[#1e293b] transition-all duration-300">
-            <ArrowUpRight size={13} className="text-slate-400 group-hover:text-white transition-colors duration-300" />
-          </div>
+      <div className="flex flex-col justify-between flex-1 px-0.5">
+        
+        {/* Title & Time */}
+        <div className="flex items-start justify-between gap-3">
+          <h4 className="text-[15px] font-bold text-[#000000] leading-tight tracking-tight line-clamp-2">
+            {item.title}
+          </h4>
+          <span className="text-[12px] font-medium text-[#94a3b8] shrink-0 pt-0.5">
+            {timeAgo}
+          </span>
         </div>
+
+        {/* Seller Avatar & Name + Price */}
+        <div className="flex items-end justify-between mt-3 pb-1">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+               <img 
+                 src={item.seller_photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name || 'S'}`} 
+                 className="w-full h-full object-cover" 
+                 alt={item.seller_name}
+               />
+            </div>
+            <p className="text-[12px] font-semibold text-[#64748b] line-clamp-1">
+              {item.seller_name || 'Seller'}
+            </p>
+          </div>
+          
+          <p className="text-[16px] font-black text-[#000000] tracking-tight shrink-0 pl-2">
+            RM {formattedPrice}
+          </p>
+        </div>
+
       </div>
     </motion.div>
   );

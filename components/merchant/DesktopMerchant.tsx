@@ -308,7 +308,7 @@ export default function DesktopMerchant({
                         <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300">
                           <Package size={14} />
                         </div>
-                        <span className="text-[13px] font-bold text-[#1e293b]">{item.title}</span>
+                        <span className="text-[13px] font-bold text-[#000000]">{item.title}</span>
                       </div>
                       <div className="flex items-center gap-8">
                         <span className={`text-[13px] font-black ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
@@ -400,7 +400,7 @@ export default function DesktopMerchant({
                                 <button
                                    onClick={() => router.push(`/marketplace/${item.id}/edit`)}
                                    title="Edit listing"
-                                   className="h-10 w-10 rounded-[16px] bg-slate-50 border-[0.5px] border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#1e293b] hover:border-slate-300 transition-all"
+                                   className="h-10 w-10 rounded-[16px] bg-slate-50 border-[0.5px] border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#000000] hover:border-slate-300 transition-all"
                                 >
                                    <Pencil size={14} />
                                 </button>

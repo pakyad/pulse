@@ -25,7 +25,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
     <div className="space-y-10">
       {/* ── HEADER ── */}
       <div className="px-2">
-        <h2 className="text-[20px] font-bold text-[#1e293b] tracking-tight mb-1">
+        <h2 className="text-[20px] font-bold text-[#000000] tracking-tight mb-1">
           {step === 4 ? 'Delivered' : step === 3 ? 'Runner is on the way' : step === 2 ? 'Preparing your order' : 'Finding a runner'}
         </h2>
         <p className="text-[13px] font-medium text-[#94a3b8]">
@@ -61,7 +61,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
                    <span className={`font-black ${isCurrent ? 'text-amber-500' : ''}`}>{i + 1}</span>
                 )}
               </motion.div>
-              <span className={`text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-colors duration-500 ${isPast || isCurrent ? 'text-[#1e293b]' : 'text-slate-300'}`}>
+              <span className={`text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-colors duration-500 ${isPast || isCurrent ? 'text-[#000000]' : 'text-slate-300'}`}>
                 {label}
               </span>
             </div>
@@ -79,7 +79,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
               <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${order.runner_name || 'Runner'}`} className="w-full h-full object-cover" alt="Runner" />
             </div>
             <div className="space-y-0.5">
-              <p className="text-[15px] font-bold text-[#1e293b]">{order.runner_name || 'Pulse Runner'}</p>
+              <p className="text-[15px] font-bold text-[#000000]">{order.runner_name || 'Pulse Runner'}</p>
               <div className="flex items-center gap-1.5">
                 <div className="flex items-center gap-1 text-[11px] font-black text-amber-500">
                   <Star size={12} fill="currentColor" />
@@ -91,10 +91,10 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#1e293b] hover:bg-amber-500 hover:text-white transition-all active:scale-90 border border-slate-100">
+            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#000000] hover:bg-amber-500 hover:text-white transition-all active:scale-90 border border-slate-100">
               <Phone size={16} />
             </button>
-            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#1e293b] hover:bg-amber-500 hover:text-white transition-all active:scale-90 border border-slate-100">
+            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#000000] hover:bg-amber-500 hover:text-white transition-all active:scale-90 border border-slate-100">
               <MessageSquare size={16} />
             </button>
           </div>
@@ -114,11 +114,11 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.title}</p>
+            <p className="text-[14px] font-bold text-[#000000] truncate">{order.title}</p>
             <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-tight">{order.seller_name || 'Merchant'}</p>
           </div>
           <div className="text-right">
-             <p className="text-[15px] font-black text-[#1e293b]">RM {Number(order.price).toFixed(2)}</p>
+             <p className="text-[15px] font-black text-[#000000]">RM {Number(order.price).toFixed(2)}</p>
              <p className="text-[9px] font-bold text-amber-500 uppercase tracking-widest">Paid</p>
           </div>
         </div>

@@ -16,7 +16,7 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[15px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[15px] font-bold text-[#000000] tracking-tight ${className}`}>
     {children}
   </h2>
 );
@@ -90,12 +90,12 @@ export default function PulseHome() {
   if (!mounted) return null;
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
       
       {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#1e293b] flex items-center justify-center text-white shadow-lg shadow-slate-900/10">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-slate-900/10">
                <Sparkles size={18} />
             </div>
             <div>
@@ -123,7 +123,7 @@ export default function PulseHome() {
                     headline: a.headline, 
                     subline: a.subline || a.body, 
                     imageUrl: a.imageUrl,
-                    bgColor: a.color || '#1e293b', 
+                    bgColor: a.color || '#000000', 
                     ctaPath: a.ctaPath || '/pulse' 
                   }))} />
 
@@ -148,7 +148,7 @@ export default function PulseHome() {
                   <Heading>Campus Activity</Heading>
                   <Subtext>See what students are sharing right now</Subtext>
                </div>
-               <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-[#1e293b] flex items-center gap-1.5 active:scale-95 transition-all">
+               <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-[#000000] flex items-center gap-1.5 active:scale-95 transition-all">
                   See More <ArrowUpRight size={14} />
                </button>
             </div>
@@ -166,7 +166,7 @@ export default function PulseHome() {
                            <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
                               <Activity size={14} />
                            </div>
-                           <p className="text-[11px] font-bold text-[#1e293b]">{post.author_name || 'Verified Student'}</p>
+                           <p className="text-[11px] font-bold text-[#000000]">{post.author_name || 'Verified Student'}</p>
                         </div>
                         <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">{post.time_ago || 'Recent'}</p>
                      </div>
@@ -190,7 +190,7 @@ export default function PulseHome() {
                   <Heading>Marketplace</Heading>
                   <Subtext>Browse items for sale from other students</Subtext>
                </div>
-               <button onClick={() => router.push('/marketplace')} className="text-[11px] font-bold text-[#1e293b] flex items-center gap-1.5 active:scale-95 transition-all">
+               <button onClick={() => router.push('/marketplace')} className="text-[11px] font-bold text-[#000000] flex items-center gap-1.5 active:scale-95 transition-all">
                   Browse All <LayoutGrid size={14} />
                </button>
             </div>
@@ -208,9 +208,9 @@ export default function PulseHome() {
                            <img src={item.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={item.title} />
                         </div>
                         <div className="p-5 space-y-1">
-                           <h4 className="text-[14px] font-bold text-[#1e293b] truncate">{item.title}</h4>
+                           <h4 className="text-[14px] font-bold text-[#000000] truncate">{item.title}</h4>
                            <div className="flex justify-between items-center">
-                              <p className="text-[15px] font-bold text-[#1e293b]">RM {Number(item.price).toFixed(0)}</p>
+                              <p className="text-[15px] font-bold text-[#000000]">RM {Number(item.price).toFixed(0)}</p>
                               <ChevronRight size={14} className="text-slate-300" />
                            </div>
                         </div>

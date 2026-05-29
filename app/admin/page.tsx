@@ -29,7 +29,7 @@ export default function AdminRedirect() {
   }, [router]);
 
   return (
-    <div className="h-screen w-full bg-[#0f172a] flex items-center justify-center">
+    <div className="h-screen w-full bg-[#111111] flex items-center justify-center">
       <div className="w-8 h-8 border-4 border-white/10 border-t-[#007AFF] rounded-full animate-spin" />
     </div>
   );

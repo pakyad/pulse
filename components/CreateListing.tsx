@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, ChevronLeft, Plus, Trash2, Loader2,
+  X, Plus, Trash2, Loader2,
   UtensilsCrossed, BookOpen, Wrench, Home, Cpu,
-  ShieldCheck, ArrowUpRight, Zap, Info
+  ArrowUpRight, Zap, TrendingUp
 } from 'lucide-react';
 
 import { db, auth } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { MARKETPLACE_DOMAINS, DomainID } from '@/lib/marketplace/domains';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
+import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
 
 interface CreateListingProps {
   userId: string;
@@ -47,11 +48,9 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const [price, setPrice] = useState(existingItem?.price?.toString() || '');
   const [metadata, setMetadata] = useState<Record<string, any>>(existingItem?.metadata || {});
   const [stock, setStock] = useState(existingItem?.stock_count?.toString() || '1');
+  const [justification, setJustification] = useState(existingItem?.price_appeal || '');
 
-  const [governanceStatus, setGovernanceStatus] = useState<'STABLE' | 'WARNING' | 'BLOCKED'>('STABLE');
-  const [governanceCeiling, setGovernanceCeiling] = useState<number | null>(null);
   const [isPosting, setIsPosting] = useState(false);
-  const [appealText, setAppealText] = useState(existingItem?.appeal_note || '');
 
   // ── FORCE SYNC EXISTING ITEM DATA ──
   useEffect(() => {
@@ -64,32 +63,16 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       setPrice(existingItem.price?.toString() || '');
       setMetadata(existingItem.metadata || {});
       setStock(existingItem.stock_count?.toString() || '0');
-      setAppealText(existingItem.appeal_note || '');
     }
   }, [existingItem]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── GOVERNANCE LOGIC (Mirroring Student Role) ──
-  useEffect(() => {
-    if (!selectedDomain || !price) {
-      setGovernanceStatus('STABLE');
-      setGovernanceCeiling(null);
-      return;
-    }
-    const domain = MARKETPLACE_DOMAINS[selectedDomain as DomainID];
+  // ── MARKET INTELLIGENCE ENGINE (Trust-First, Advisory Only) ──
+  const priceIntel: PriceIntelligence | null = useMemo(() => {
     const numericPrice = parseFloat(price);
-    const subConfig = domain.subcategories.find((s: any) => s.label === subcategory);
-    const ceiling = subConfig?.ceiling || domain.ceiling;
-    setGovernanceCeiling(ceiling || null);
-
-    if (ceiling && numericPrice > ceiling) {
-      setGovernanceStatus(domain.governance === 'REGULATED' ? 'BLOCKED' : 'WARNING');
-    } else if (ceiling && numericPrice >= ceiling * 0.8) {
-      setGovernanceStatus('WARNING');
-    } else {
-      setGovernanceStatus('STABLE');
-    }
+    if (!selectedDomain || !price || isNaN(numericPrice) || numericPrice <= 0) return null;
+    return analysePrice(numericPrice, selectedDomain as DomainID, subcategory);
   }, [selectedDomain, subcategory, price]);
 
   // 🏛️ Institutional Image Compressor: Prevents 1MB Firestore limit crashes
@@ -135,24 +118,33 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     try {
       const { updateDoc, doc } = await import('firebase/firestore');
       const user = auth.currentUser;
+
+      // Trust-First: ALL listings go live. Auto-flag only the egregious ones.
+      const isAutoFlagged = priceIntel?.shouldAutoFlag === true;
+      const stockCount = stock !== '' ? parseInt(stock, 10) : null;
+      const itemStatus = stockCount === 0 ? 'sold_out' : 'active';
+
       const data = {
         title,
         description,
         domain: selectedDomain,
         subcategory,
         price: parseFloat(price),
-        stock_count: stock !== '' ? parseInt(stock, 10) : null,
+        stock_count: stockCount,
         metadata,
         images,
         seller_id: userId || user?.uid || 'ANON',
         seller_name: user?.displayName || 'Pulse Vendor',
-        status: governanceStatus === 'BLOCKED'
-          ? 'PENDING_REVIEW'
-          : (stock !== '' && parseInt(stock, 10) === 0 ? 'sold_out' : 'active'),
-        governance_status: governanceStatus,
-        governance_ceiling: governanceCeiling,
-        is_exemption_request: governanceStatus === 'BLOCKED',
-        appeal_note: appealText,
+        // Always goes live — trust the seller by default
+        status: itemStatus,
+        // Governance intelligence stored for admin reference
+        price_tier: priceIntel?.tier || 'COMPLIANT',
+        governance_ceiling: priceIntel?.ceiling || null,
+        // Auto-flag if price > 150% of ceiling (algorithmic, no buyer needed)
+        is_price_flagged: isAutoFlagged,
+        price_flag_count: isAutoFlagged ? 1 : 0,
+        flag_source: isAutoFlagged ? 'SYSTEM' : null,
+        price_appeal: isAutoFlagged ? justification : '',
         is_official: role?.toUpperCase() === 'CLUB' || role?.toUpperCase() === 'MERCHANT',
         updated_at: serverTimestamp(),
       };
@@ -175,10 +167,11 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     }
   };
 
+  // Sellers are never blocked — canPost has no price restriction
   const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting;
 
   return (
-    <div className="fixed inset-0 z-1000 flex flex-col bg-white overflow-hidden font-sans antialiased text-[#1e293b]">
+    <div className="fixed inset-0 z-1000 flex flex-col bg-white overflow-hidden font-sans antialiased text-[#000000]">
       
       {/* ── HEADER (Mirroring student navigation) ── */}
       <nav className="px-6 py-5 flex items-center justify-between bg-white border-b-[0.5px] border-slate-100">
@@ -228,7 +221,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         {/* ── SECTION: CLASSIFICATION ── */}
         <section className="space-y-4">
           <div className="space-y-0.5">
-            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Category' : 'What are you listing?'}</h2>
+            <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{existingItem ? 'Category' : 'What are you listing?'}</h2>
             <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Change the category if needed.' : 'Choose the category that fits your item.'}</p>
           </div>
 
@@ -242,7 +235,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                   onClick={() => { setSelectedDomain(id); setSubcategory(''); }}
                   className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                     isActive
-                      ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-sm'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
                       : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                   }`}
                 >
@@ -266,7 +259,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             <section className="space-y-4 pt-2 border-t border-slate-100">
               <div className="flex justify-between items-center pt-6">
                 <div className="space-y-0.5">
-                  <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Photos' : 'Photos'}</h2>
+                  <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{existingItem ? 'Photos' : 'Photos'}</h2>
                   <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update your product photos (max 10).' : 'Add up to 10 images.'}</p>
                 </div>
                 <span className="text-[11px] font-bold text-[#94a3b8]">{images.length}/10</span>
@@ -286,7 +279,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                     <img src={img} className="w-full h-full object-cover" />
                     <button
                       onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
-                      className="absolute inset-0 bg-[#1e293b]/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
+                      className="absolute inset-0 bg-blue-600/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -298,21 +291,21 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             {/* ── SECTION: NAME ── */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Item Name' : 'Name'}</h2>
+                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{existingItem ? 'Item Name' : 'Name'}</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update the name of this item.' : 'Keep it short and clear.'}</p>
               </div>
               <input
                 placeholder="e.g. Calculus Textbook, Canon EOS..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-[#1e293b] transition-colors"
+                className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#000000] placeholder:text-slate-200 focus:outline-none focus:border-blue-600 transition-colors"
               />
             </section>
 
             {/* ── SECTION: DETAILS ── */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Description' : 'Description'}</h2>
+                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{existingItem ? 'Description' : 'Description'}</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update condition or add new details.' : 'Condition, reason for selling, any notes.'}</p>
               </div>
               <textarea
@@ -320,90 +313,103 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-medium text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-[#1e293b] transition-colors resize-none leading-relaxed"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-medium text-[#000000] placeholder:text-slate-200 focus:outline-none focus:border-blue-600 transition-colors resize-none leading-relaxed"
               />
             </section>
 
             {/* ── SECTION: PRICE ── */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Price' : 'Price'}</h2>
+                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Price</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Change your asking price.' : 'Set your asking price in Ringgit.'}</p>
               </div>
-              <div className={`flex items-center gap-0 h-12 bg-slate-50 border rounded-xl overflow-hidden focus-within:border-[#1e293b] transition-colors ${
-                governanceStatus === 'BLOCKED' ? 'border-red-200' :
-                governanceStatus === 'WARNING' ? 'border-amber-200' :
-                'border-slate-100'
-              }`}>
+
+              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-blue-600 transition-colors">
                 <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">RM</span>
                 <input
                   type="number"
                   placeholder="0.00"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none"
+                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-[#000000] placeholder:text-slate-200 focus:outline-none"
                 />
               </div>
 
-              {/* ── LIVE PRICE GAUGE ── */}
-              {governanceCeiling && price && (
-                <div className="space-y-2">
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      className={`h-full rounded-full transition-colors ${
-                        governanceStatus === 'BLOCKED' ? 'bg-red-400' :
-                        governanceStatus === 'WARNING' ? 'bg-amber-400' :
-                        'bg-emerald-400'
-                      }`}
-                      animate={{ width: `${Math.min(100, (parseFloat(price) / governanceCeiling) * 100)}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <p className={`text-[11px] font-bold ${
-                      governanceStatus === 'BLOCKED' ? 'text-red-500' :
-                      governanceStatus === 'WARNING' ? 'text-amber-500' :
-                      'text-emerald-500'
-                    }`}>
-                      {governanceStatus === 'BLOCKED'
-                        ? `RM ${(parseFloat(price || '0') - governanceCeiling).toFixed(2)} over ceiling`
-                        : governanceStatus === 'WARNING'
-                        ? 'Approaching price ceiling'
-                        : 'Within price ceiling'}
-                    </p>
-                    <p className="text-[11px] font-medium text-[#94a3b8]">Ceiling: RM {governanceCeiling.toFixed(2)}</p>
-                  </div>
-                  {governanceStatus === 'BLOCKED' && (
-                    <div className="pt-2 space-y-2">
-                      <p className="text-[11px] font-medium text-red-500">
-                        This item will be sent for admin review. Explain why:
-                      </p>
-                      <textarea
-                        value={appealText}
-                        onChange={e => setAppealText(e.target.value)}
-                        placeholder="Justification..."
-                        rows={3}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-medium text-[#1e293b] focus:outline-none focus:border-red-200 resize-none"
-                      />
+              {/* ── MARKET INTELLIGENCE PANEL (Airbnb-style, advisory only) ── */}
+              <AnimatePresence>
+                {priceIntel && price && (
+                  <motion.div
+                    key={priceIntel.tier}
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className={`rounded-2xl p-4 border transition-all ${
+                      priceIntel.tier === 'COMPLIANT'
+                        ? 'bg-emerald-50 border-emerald-100'
+                        : priceIntel.tier === 'ADVISORY'
+                        ? 'bg-amber-50 border-amber-100'
+                        : 'bg-slate-50 border-slate-200/60 shadow-sm'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                        priceIntel.tier === 'COMPLIANT' ? 'bg-emerald-100' :
+                        priceIntel.tier === 'ADVISORY' ? 'bg-amber-100' : 'bg-slate-200/60'
+                      }`}>
+                        <TrendingUp size={14} className={`${
+                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-600' :
+                          priceIntel.tier === 'ADVISORY' ? 'text-amber-600' : 'text-slate-600'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className={`text-[12px] font-bold mb-1 ${
+                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-700' :
+                          priceIntel.tier === 'ADVISORY' ? 'text-amber-700' : 'text-slate-800'
+                        }`}>
+                          {priceIntel.message}
+                        </p>
+                        <p className={`text-[11px] font-medium leading-relaxed ${
+                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-600' :
+                          priceIntel.tier === 'ADVISORY' ? 'text-amber-600' : 'text-slate-500'
+                        }`}>
+                          {priceIntel.subMessage}
+                        </p>
+                        {priceIntel.tier === 'AUTO_FLAG' && (
+                          <div className="mt-3 space-y-2">
+                            <p className="text-[10px] font-semibold text-slate-400">
+                              System Advisory: This asking price is outside typical campus boundaries. It will be published live, but flagged silently for market review.
+                            </p>
+                            <textarea
+                              value={justification}
+                              onChange={(e) => setJustification(e.target.value)}
+                              placeholder="Describe any features justifying this price (e.g., custom bundle, premium packaging...)"
+                              className="w-full min-h-[60px] p-3 text-[11px] font-semibold bg-white border border-slate-200/80 rounded-xl focus:outline-none focus:border-slate-800 placeholder:text-slate-300 transition-colors text-slate-800"
+                              rows={2}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </section>
 
             {/* ── SECTION: STOCK ── */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'Stock' : 'Stock'}</h2>
+                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{existingItem ? 'Stock' : 'Stock'}</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update how many you have left. Set to 0 if sold out.' : 'How many do you have? Set to 0 to mark as sold out.'}</p>
               </div>
-              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-[#1e293b] transition-colors">
+              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-blue-600 transition-colors">
                 <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">Qty</span>
                 <input
                   type="number"
                   placeholder="e.g. 5"
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
-                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none"
+                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-[#000000] placeholder:text-slate-200 focus:outline-none"
                 />
               </div>
             </section>
@@ -411,7 +417,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             {/* ── SECTION: SMART DOMAIN FIELDS ── */}
             <section className="pt-6 border-t border-slate-100">
               <div className="space-y-0.5 mb-6">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">{existingItem ? 'More Details' : 'More Details'}</h2>
+                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{existingItem ? 'More Details' : 'More Details'}</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update specific information for this item.' : 'Specific information about this type of listing.'}</p>
               </div>
               <SmartFormFields
@@ -429,11 +435,11 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       {/* ── STICKY FOOTER ACTION ── */}
       <div className="fixed bottom-0 left-0 right-0 z-60 p-8 bg-white/90 backdrop-blur-2xl border-t border-slate-50">
         <button 
-          disabled={!canPost || (governanceStatus === 'BLOCKED' && !appealText.trim())}
+          disabled={!canPost}
           onClick={handlePost}
           className={`w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
-            canPost && !(governanceStatus === 'BLOCKED' && !appealText.trim())
-              ? 'bg-[#1e293b] text-white active:scale-[0.98] shadow-sm'
+            canPost
+              ? 'bg-blue-600 text-white active:scale-[0.98] shadow-sm'
               : 'bg-slate-50 text-slate-200 border border-slate-100'
           }`}
         >

@@ -59,7 +59,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-1000 flex items-center justify-center p-6">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-[#1e293b]/40 backdrop-blur-md" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-blue-600/40 backdrop-blur-md" />
 
           <motion.div 
             initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 10 }}
@@ -69,7 +69,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
               <div className="p-12 text-center space-y-6">
                  <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto text-emerald-500 border border-emerald-100"><CheckCircle2 size={32} /></div>
                  <div className="space-y-2">
-                    <h3 className="text-[17px] font-bold text-[#1e293b]">Dispute Logged</h3>
+                    <h3 className="text-[17px] font-bold text-[#000000]">Dispute Logged</h3>
                     <p className="text-[11px] text-[#94a3b8] font-medium leading-relaxed">Your case is now in the Admin Queue. Check your orders for live status updates.</p>
                  </div>
               </div>
@@ -80,11 +80,11 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                    <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500 border border-red-100"><ShieldAlert size={20} /></div>
                       <div className="space-y-0.5">
-                         <h2 className="text-[15px] font-bold text-[#1e293b]">{step === 1 ? 'Report Issue' : 'Provide Evidence'}</h2>
+                         <h2 className="text-[15px] font-bold text-[#000000]">{step === 1 ? 'Report Issue' : 'Provide Evidence'}</h2>
                          <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">Case Registration</p>
                       </div>
                    </div>
-                   <button type="button" onClick={step === 1 ? onClose : () => setStep(1)} className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#1e293b]"><X size={16} /></button>
+                   <button type="button" onClick={step === 1 ? onClose : () => setStep(1)} className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#000000]"><X size={16} /></button>
                 </div>
 
                 <div className="p-8 space-y-8 overflow-y-auto max-h-[70vh] no-scrollbar">
@@ -97,13 +97,13 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                             <span className="text-[11px] font-medium text-[#94a3b8]">Items</span>
                             <div className="text-right">
                                {order?.items?.map((it: any, i: number) => (
-                                  <p key={i} className="text-[11px] font-bold text-[#1e293b]">{it.qty}x {it.title}</p>
-                               )) || <p className="text-[11px] font-bold text-[#1e293b]">1x {order?.title}</p>}
+                                  <p key={i} className="text-[11px] font-bold text-[#000000]">{it.qty}x {it.title}</p>
+                               )) || <p className="text-[11px] font-bold text-[#000000]">1x {order?.title}</p>}
                             </div>
                          </div>
                          <div className="px-5 py-3 flex items-center justify-between">
                             <span className="text-[11px] font-medium text-[#94a3b8]">Refund Value</span>
-                            <span className="text-[11px] font-black text-[#1e293b]">RM {order?.total?.toFixed(2)}</span>
+                            <span className="text-[11px] font-black text-[#000000]">RM {order?.total?.toFixed(2)}</span>
                          </div>
                       </div>
                    </div>
@@ -117,16 +117,16 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                                   <button 
                                     key={s.id} type="button"
                                     onClick={() => { setReason(s.id); setStep(2); }}
-                                    className="w-full p-5 bg-white border border-slate-100 rounded-2xl text-left group hover:border-[#1e293b] hover:shadow-md transition-all flex items-center justify-between"
+                                    className="w-full p-5 bg-white border border-slate-100 rounded-2xl text-left group hover:border-blue-600 hover:shadow-md transition-all flex items-center justify-between"
                                   >
                                      <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] group-hover:bg-[#1e293b] group-hover:text-white transition-all border border-slate-50"><s.icon size={18} /></div>
+                                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] group-hover:bg-blue-600 group-hover:text-white transition-all border border-slate-50"><s.icon size={18} /></div>
                                         <div className="space-y-0.5">
-                                           <p className="text-[13px] font-bold text-[#1e293b]">{s.title}</p>
+                                           <p className="text-[13px] font-bold text-[#000000]">{s.title}</p>
                                            <p className="text-[10px] font-medium text-[#94a3b8]">{s.desc}</p>
                                         </div>
                                      </div>
-                                     <ArrowRight size={14} className="text-slate-200 group-hover:text-[#1e293b]" />
+                                     <ArrowRight size={14} className="text-slate-200 group-hover:text-[#000000]" />
                                   </button>
                                ))}
                             </div>
@@ -139,7 +139,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                                  value={narrative} onChange={(e) => setNarrative(e.target.value)}
                                  placeholder={reason === 'Damaged Asset' ? 'Tell us exactly where the damage is...' : 'Tell us what happened...'} 
                                  required
-                                 className="w-full h-32 bg-white border border-slate-100 rounded-xl p-5 text-[13px] font-medium text-[#1e293b] placeholder:text-slate-300 focus:border-[#1e293b] transition-all outline-none resize-none leading-relaxed"
+                                 className="w-full h-32 bg-white border border-slate-100 rounded-xl p-5 text-[13px] font-medium text-[#000000] placeholder:text-slate-300 focus:border-blue-600 transition-all outline-none resize-none leading-relaxed"
                                />
                             </div>
 
@@ -162,13 +162,13 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                                <div className="flex items-center gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-widest">
                                   <Scale size={12} /> Expected Outcome
                                </div>
-                               <p className="text-[11px] text-[#1e293b] font-medium">Full Refund of RM {order?.total?.toFixed(2)} to Original Payment Method if verified.</p>
+                               <p className="text-[11px] text-[#000000] font-medium">Full Refund of RM {order?.total?.toFixed(2)} to Original Payment Method if verified.</p>
                             </div>
 
                             <button
                               type="submit"
                               disabled={isSubmitting || !narrative}
-                              className="w-full h-14 bg-[#1e293b] text-white rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg shadow-[#1e293b]/10 active:scale-95 transition-all disabled:opacity-20"
+                              className="w-full h-14 bg-blue-600 text-white rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg shadow-[#000000]/10 active:scale-95 transition-all disabled:opacity-20"
                             >
                               {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <>Submit Case <Send size={16} className="rotate-45" /></>}
                             </button>

@@ -37,11 +37,11 @@ function OrderRow({ order, onClick }: { order: any; onClick: () => void }) {
       className="w-full flex items-center justify-between py-4 text-left group active:opacity-60 transition-opacity"
     >
       <div className="flex-1 min-w-0 pr-4">
-        <p className="text-[14px] font-bold text-[#1e293b] truncate leading-snug">{order.title}</p>
+        <p className="text-[14px] font-bold text-[#000000] truncate leading-snug">{order.title}</p>
         <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{dateStr} · {code}</p>
       </div>
       <div className="shrink-0 text-right space-y-1">
-        <p className="text-[14px] font-bold text-[#1e293b]">RM {Number(order.price).toFixed(2)}</p>
+        <p className="text-[14px] font-bold text-[#000000]">RM {Number(order.price).toFixed(2)}</p>
         <StatusPill status={order.status} />
       </div>
     </button>
@@ -96,12 +96,12 @@ export default function MyOrdersPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#000000] rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-24">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-24">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -128,11 +128,11 @@ export default function MyOrdersPage() {
             key={t}
             onClick={() => setTab(t)}
             className="relative py-4 text-[13px] font-bold transition-colors"
-            style={{ color: tab === t ? '#1e293b' : '#94a3b8' }}
+            style={{ color: tab === t ? '#000000' : '#94a3b8' }}
           >
             {t}
             {tab === t && (
-              <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1e293b] rounded-full" />
+              <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 rounded-full" />
             )}
           </button>
         ))}
@@ -156,7 +156,7 @@ export default function MyOrdersPage() {
                     onClick={() => setHistFilter(f)}
                     className={`h-[30px] px-3.5 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
                       histFilter === f
-                        ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
+                        ? 'bg-slate-50 border-slate-400 text-[#000000]'
                         : 'bg-slate-50/50 border-slate-900/10 text-[#94a3b8]'
                     }`}
                   >

@@ -46,7 +46,7 @@ function timerColor(s: number) {
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h3 className={`text-[17px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h3 className={`text-[17px] font-bold text-[#000000] tracking-tight ${className}`}>
     {children}
   </h3>
 );
@@ -57,7 +57,7 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
   </p>
 );
 
-const StatCard = ({ label, value, icon: Icon, color = "text-[#1e293b]" }: any) => (
+const StatCard = ({ label, value, icon: Icon, color = "text-[#000000]" }: any) => (
   <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm flex flex-col justify-between h-36">
     <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border-[0.5px] border-slate-100">
       <Icon size={18} strokeWidth={1.5} />
@@ -270,7 +270,7 @@ export default function RunnerTerminal() {
   const navUrl = `https://maps.google.com/maps?q=${encodeURIComponent(navTarget + ', UniKL MIIT, Kuala Lumpur')}`;
 
   return (
-    <main className="min-h-screen bg-white font-sans antialiased text-[#1e293b] selection:bg-slate-100 relative overflow-hidden">
+    <main className="min-h-screen bg-white font-sans antialiased text-[#000000] selection:bg-slate-100 relative overflow-hidden">
       
       {/* ── BACKGROUND LAYER ── */}
       <motion.div 
@@ -333,7 +333,7 @@ export default function RunnerTerminal() {
                     className="bg-white rounded-[40px] border-[0.5px] border-slate-100 shadow-[0_32px_64px_-16px_rgba(30,41,59,0.12)] relative overflow-hidden"
                   >
                     {/* STATUS ACCENT LINE */}
-                    <div className={`absolute top-0 left-0 right-0 h-1 ${isPickedUp ? 'bg-blue-500' : 'bg-[#1e293b]'}`} />
+                    <div className={`absolute top-0 left-0 right-0 h-1 ${isPickedUp ? 'bg-blue-500' : 'bg-blue-600'}`} />
 
                     {/* ── CARD HEADER ── */}
                     <div className="px-8 pt-10 pb-6 flex items-start justify-between">
@@ -362,7 +362,7 @@ export default function RunnerTerminal() {
                     <div className="mx-8 mb-6 px-5 py-3 bg-slate-50 rounded-2xl border-[0.5px] border-slate-100 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <MapPin size={13} className="text-slate-400" />
-                        <span className="text-[12px] font-bold text-[#1e293b]">
+                        <span className="text-[12px] font-bold text-[#000000]">
                           {displayDist !== null ? `~${fmtDist(displayDist)} away` : 'GPS locating...'}
                         </span>
                         <span className="text-[10px] text-slate-300 font-medium">
@@ -371,7 +371,7 @@ export default function RunnerTerminal() {
                       </div>
                       <button
                         onClick={() => window.open(navUrl, '_blank')}
-                        className="flex items-center gap-1 text-[11px] font-black text-[#1e293b] uppercase tracking-widest active:scale-95 transition-all"
+                        className="flex items-center gap-1 text-[11px] font-black text-[#000000] uppercase tracking-widest active:scale-95 transition-all"
                       >
                         <Navigation size={12} /> Navigate
                       </button>
@@ -385,19 +385,19 @@ export default function RunnerTerminal() {
                         isPickedUp ? 'opacity-30' : 'bg-slate-50/60'
                       }`}>
                         <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border shrink-0 transition-all ${
-                          activeMission.status === 'READY_FOR_PICKUP' ? 'bg-[#1e293b] text-white border-[#1e293b] animate-pulse' :
+                          activeMission.status === 'READY_FOR_PICKUP' ? 'bg-blue-600 text-white border-blue-600 animate-pulse' :
                           isPickedUp ? 'bg-slate-100 text-slate-300 border-slate-100' :
                           'bg-white text-slate-400 border-slate-200'
                         }`}>
                           {isPickedUp ? <Check size={16} /> : <Navigation size={16} />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold text-[#1e293b] tracking-tight">{activeMission.seller_name || 'Merchant'}</p>
+                          <p className="text-[13px] font-bold text-[#000000] tracking-tight">{activeMission.seller_name || 'Merchant'}</p>
                           {activeMission.pickup_location && (
                             <p className="text-[11px] font-medium text-slate-500 mt-0.5 leading-snug">{activeMission.pickup_location}</p>
                           )}
                           <p className={`text-[11px] font-semibold mt-1 ${
-                            activeMission.status === 'READY_FOR_PICKUP' ? 'text-[#1e293b] font-black' : 'text-slate-400'
+                            activeMission.status === 'READY_FOR_PICKUP' ? 'text-[#000000] font-black' : 'text-slate-400'
                           }`}>
                             {isPickedUp ? '✓ Item collected' :
                              activeMission.status === 'READY_FOR_PICKUP' ? '⚡ Ready — Go collect now' :
@@ -417,12 +417,12 @@ export default function RunnerTerminal() {
                         isPickedUp ? 'bg-blue-50/60 ring-1 ring-blue-100' : ''
                       }`}>
                         <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 transition-all ${
-                          isPickedUp ? 'bg-blue-600 shadow-blue-600/25 scale-110' : 'bg-[#1e293b] shadow-slate-900/10'
+                          isPickedUp ? 'bg-blue-600 shadow-blue-600/25 scale-110' : 'bg-blue-600 shadow-slate-900/10'
                         }`}>
                           <MapPin size={16} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold text-[#1e293b] tracking-tight">{activeMission.drop_off_location || 'Drop-off'}</p>
+                          <p className="text-[13px] font-bold text-[#000000] tracking-tight">{activeMission.drop_off_location || 'Drop-off'}</p>
                           {/* Floor + Room detail */}
                           {(activeMission.floorLevel || activeMission.roomNumber) && (
                             <p className="text-[11px] font-medium text-slate-500 mt-0.5">
@@ -445,14 +445,14 @@ export default function RunnerTerminal() {
                     <div className="px-8 pb-8 flex gap-3">
                       <button
                         onClick={() => window.open(navUrl, '_blank')}
-                        className="flex-1 h-14 bg-slate-50 text-[#1e293b] border border-slate-100 rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        className="flex-1 h-14 bg-slate-50 text-[#000000] border border-slate-100 rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"
                       >
                         <Navigation size={15} /> Navigate
                       </button>
                       {activeMission.status === 'PREPARING' ? (
                         <button disabled className="flex-1 h-14 bg-slate-100 text-slate-300 rounded-2xl font-bold text-[13px]">Preparing...</button>
                       ) : activeMission.status === 'READY_FOR_PICKUP' ? (
-                        <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-14 bg-[#1e293b] text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-slate-900/10">
+                        <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-14 bg-blue-600 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-slate-900/10">
                           <Check size={15} /> Confirm Pickup
                         </button>
                       ) : (
@@ -531,7 +531,7 @@ export default function RunnerTerminal() {
                       <Subtext>Tap to take photo</Subtext>
                     </label>
                  )}
-                 <button disabled={!podPhoto || isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className="w-full h-16 bg-[#1e293b] text-white rounded-[24px] font-bold text-[14px] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10">
+                 <button disabled={!podPhoto || isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className="w-full h-16 bg-blue-600 text-white rounded-[24px] font-bold text-[14px] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10">
                    {isProcessing ? <Loader2 className="animate-spin" /> : <ShieldCheck size={20} />}
                    {proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Complete Delivery'}
                  </button>

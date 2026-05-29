@@ -129,7 +129,7 @@ export default function CartCheckoutPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
 
       {/* ════ PAYMENT PROCESSING OVERLAY ════ */}
       <AnimatePresence>
@@ -141,10 +141,10 @@ export default function CartCheckoutPage() {
             {payStatus === 'processing' ? (
               <>
                 <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center">
-                  <span className="text-[#1e293b] font-black text-[13px] tracking-widest">FPX</span>
+                  <span className="text-[#000000] font-black text-[13px] tracking-widest">FPX</span>
                 </div>
                 <div className="space-y-1 text-center">
-                  <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">Almost there...</p>
+                  <p className="text-[15px] font-bold text-[#000000] tracking-tight">Almost there...</p>
                   <p className="text-[12px] font-medium text-[#94a3b8]">Sending your orders to shops</p>
                 </div>
                 <div className="w-44 h-1 bg-slate-100 rounded-full overflow-hidden">
@@ -168,7 +168,7 @@ export default function CartCheckoutPage() {
                   <CheckCircle2 size={32} className="text-white" strokeWidth={2} />
                 </motion.div>
                 <div className="space-y-1 text-center">
-                  <p className="text-[16px] font-bold text-[#1e293b] tracking-tight">Order Placed!</p>
+                  <p className="text-[16px] font-bold text-[#000000] tracking-tight">Order Placed!</p>
                   <p className="text-[12px] font-medium text-[#94a3b8]">RM {total.toFixed(2)} paid successfully</p>
                 </div>
               </>
@@ -223,7 +223,7 @@ export default function CartCheckoutPage() {
               className="space-y-8"
             >
               <div className="space-y-1">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Delivery Method</h2>
+                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Delivery Method</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">How would you like to get your items?</p>
               </div>
 
@@ -238,7 +238,7 @@ export default function CartCheckoutPage() {
                              {item.image ? <img src={item.image} className="w-full h-full object-cover" /> : <Package size={18} />}
                           </div>
                           <div className="flex-1 min-w-0">
-                             <p className="text-[13px] font-bold text-[#1e293b] truncate">{item.title}</p>
+                             <p className="text-[13px] font-bold text-[#000000] truncate">{item.title}</p>
                              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">RM {item.price.toFixed(2)}</p>
                           </div>
                        </div>
@@ -247,13 +247,13 @@ export default function CartCheckoutPage() {
                        <div className="grid grid-cols-2 gap-2">
                           <button 
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'SELF_COLLECT' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all ${pref.type === 'SELF_COLLECT' ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all ${pref.type === 'SELF_COLLECT' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Package size={14} /> Self-Collect
                           </button>
                           <button 
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'RUNNER' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all ${pref.type === 'RUNNER' ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all ${pref.type === 'RUNNER' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Truck size={14} /> Runner
                           </button>
@@ -270,7 +270,7 @@ export default function CartCheckoutPage() {
                                       onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, location: hub.id } }))}
                                       className={`h-12 px-3 rounded-xl border text-left flex flex-col justify-center transition-all ${pref.location === hub.id ? 'bg-white border-slate-400 ring-1 ring-slate-400' : 'bg-white/50 border-slate-200 opacity-60'}`}
                                    >
-                                      <p className="text-[11px] font-bold text-[#1e293b] truncate">{hub.label}</p>
+                                      <p className="text-[11px] font-bold text-[#000000] truncate">{hub.label}</p>
                                       <p className="text-[9px] font-medium text-[#94a3b8]">RM {hub.zone === 'campus' ? '3.50' : '5.00'}</p>
                                    </button>
                                 ))}
@@ -293,7 +293,7 @@ export default function CartCheckoutPage() {
                                       placeholder="e.g. Lvl 4"
                                       value={pref.floor || ''}
                                       onChange={(e) => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, floor: e.target.value } }))}
-                                      className="w-full h-11 px-4 bg-white border border-slate-100 rounded-xl text-[12px] font-bold text-[#1e293b] outline-none focus:ring-2 focus:ring-slate-900/5 transition-all placeholder:text-slate-200"
+                                      className="w-full h-11 px-4 bg-white border border-slate-100 rounded-xl text-[12px] font-bold text-[#000000] outline-none focus:ring-2 focus:ring-slate-900/5 transition-all placeholder:text-slate-200"
                                    />
                                 </div>
                                 <div className="space-y-1.5">
@@ -303,7 +303,7 @@ export default function CartCheckoutPage() {
                                       placeholder="e.g. Lab 4.1"
                                       value={pref.room || ''}
                                       onChange={(e) => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, room: e.target.value } }))}
-                                      className="w-full h-11 px-4 bg-white border border-slate-100 rounded-xl text-[12px] font-bold text-[#1e293b] outline-none focus:ring-2 focus:ring-slate-900/5 transition-all placeholder:text-slate-200"
+                                      className="w-full h-11 px-4 bg-white border border-slate-100 rounded-xl text-[12px] font-bold text-[#000000] outline-none focus:ring-2 focus:ring-slate-900/5 transition-all placeholder:text-slate-200"
                                    />
                                 </div>
                              </div>
@@ -325,7 +325,7 @@ export default function CartCheckoutPage() {
               <div className="flex items-center justify-between px-1">
                 <div className="space-y-0.5">
                   <p className="text-[11px] font-medium text-[#94a3b8]">Final Amount</p>
-                  <p className="text-[28px] font-black text-[#1e293b] tracking-tighter">RM {total.toFixed(2)}</p>
+                  <p className="text-[28px] font-black text-[#000000] tracking-tighter">RM {total.toFixed(2)}</p>
                 </div>
                 <div className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
                    <ShieldCheck size={12} />
@@ -340,7 +340,7 @@ export default function CartCheckoutPage() {
                      onClick={() => setSelectedBank(bank.id)}
                      className={`w-full h-16 px-5 rounded-2xl flex items-center justify-between border transition-all ${
                        selectedBank === bank.id 
-                       ? 'bg-white border-[#1e293b] shadow-lg shadow-slate-900/5 ring-1 ring-[#1e293b]' 
+                       ? 'bg-white border-blue-600 shadow-lg shadow-slate-900/5 ring-1 ring-[#000000]' 
                        : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-slate-200'
                      }`}
                    >
@@ -348,13 +348,13 @@ export default function CartCheckoutPage() {
                         <div className="w-10 h-10 rounded-lg bg-white border border-slate-100 p-1.5 flex items-center justify-center shrink-0">
                            <img src={bank.logo} alt={bank.label} className="w-full h-full object-contain" />
                         </div>
-                        <span className={`text-[13px] font-bold ${selectedBank === bank.id ? 'text-[#1e293b]' : 'text-slate-400'}`}>
+                        <span className={`text-[13px] font-bold ${selectedBank === bank.id ? 'text-[#000000]' : 'text-slate-400'}`}>
                            {bank.label}
                         </span>
                      </div>
                      
                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedBank === bank.id ? 'bg-[#1e293b] border-[#1e293b]' : 'bg-white border-slate-200'
+                        selectedBank === bank.id ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'
                      }`}>
                         {selectedBank === bank.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                      </div>
@@ -370,7 +370,7 @@ export default function CartCheckoutPage() {
         <button
           onClick={() => step === 1 ? setStep(2) : handlePay()}
           disabled={(step === 1 && !canProceedStep1) || (step === 2 && !canPay)}
-          className="w-full h-14 bg-[#1e293b] text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10"
+          className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10"
         >
           {step === 1 ? 'Review Payment' : `Pay RM ${total.toFixed(2)}`}
           <ArrowRight size={18} />

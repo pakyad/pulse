@@ -16,7 +16,7 @@ import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/Marke
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[15px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[15px] font-bold text-[#000000] tracking-tight ${className}`}>
     {children}
   </h2>
 );
@@ -123,7 +123,7 @@ export default function MarketplacePage() {
   }, [items, activeCategory, filters]);
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
       
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
@@ -151,28 +151,51 @@ export default function MarketplacePage() {
                <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                   <div className="px-1 flex justify-between items-center">
                      <div>
-                        <h3 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Official Store</h3>
+                        <h3 className="text-[14px] font-bold text-[#000000] tracking-tight">Official Store</h3>
                         <p className="text-[10px] font-medium text-[#94a3b8]">Verified campus items</p>
                      </div>
                      <Store size={18} className="text-slate-200" />
                   </div>
                   
-                  <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-8 px-8 pb-1">
+                  <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-8 px-8 pb-4 pt-1">
                      {campaigns.map(camp => (
                         <motion.div
                           key={camp.id}
                           whileTap={{ scale: 0.98 }}
-                          className={`shrink-0 w-[240px] h-[130px] p-6 rounded-xl ${camp.color || 'bg-[#1e293b]'} text-white flex flex-col justify-between shadow-lg shadow-slate-900/5 cursor-pointer group relative overflow-hidden`}
+                          className="shrink-0 w-[280px] bg-white rounded-2xl border-[0.5px] border-slate-200 flex p-3 cursor-pointer group hover:border-slate-300 transition-colors shadow-sm"
                         >
-                           <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 blur-2xl" />
-                           <div className="space-y-0.5 relative z-10">
-                              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/40">{camp.club_name}</p>
-                              <h4 className="text-[16px] font-bold tracking-tight leading-tight pr-2">{camp.title}</h4>
+                           {/* Left Side: Typography */}
+                           <div className="flex flex-1 flex-col justify-between pr-3">
+                              <div>
+                                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 block">
+                                    {camp.tag}
+                                 </span>
+                                 <h4 className="text-[14px] font-bold text-[#000000] leading-snug tracking-tight line-clamp-2">
+                                    {camp.title}
+                                 </h4>
+                              </div>
+                              
+                              <div className="flex items-center justify-between mt-3">
+                                 <div className="flex items-center gap-1.5">
+                                    <div className="w-4 h-4 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
+                                       <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${camp.club_name}`} className="w-full h-full object-cover" />
+                                    </div>
+                                    <p className="text-[10px] font-semibold text-slate-500 truncate">{camp.club_name}</p>
+                                 </div>
+                              </div>
                            </div>
-                           <div className="flex justify-between items-center pt-3 border-t border-white/10 relative z-10">
-                              <span className="text-[8px] font-bold uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full">{camp.tag}</span>
-                              <ArrowUpRight size={16} className="text-white/60 group-hover:text-white transition-colors" />
-                           </div>
+
+                           {/* Right Side: Image Thumbnail */}
+                           {camp.image_url && (
+                             <div className="w-[84px] h-[84px] shrink-0 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
+                                <img src={camp.image_url} alt={camp.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                {camp.urgency && (
+                                   <div className="absolute bottom-1 right-1 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-black uppercase text-[#000000]">
+                                      {camp.urgency}
+                                   </div>
+                                )}
+                             </div>
+                           )}
                         </motion.div>
                      ))}
                   </div>
@@ -206,8 +229,8 @@ export default function MarketplacePage() {
                       onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
                       className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                         isActive 
-                          ? 'bg-[#1e293b] border-[#1e293b] text-white shadow-sm' 
-                          : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
+                          ? 'bg-[#F8FAFC] border-slate-200 text-[#000000] shadow-sm' 
+                          : 'bg-transparent border-transparent text-[#64748b] hover:bg-slate-50/50'
                       }`}
                     >
                        <cat.icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
@@ -218,7 +241,7 @@ export default function MarketplacePage() {
             </div>
 
             {items.length > 0 ? (
-               <div className="grid grid-cols-2 gap-x-5 gap-y-12">
+               <div className="grid grid-cols-2 gap-x-5 gap-y-8">
                   {filteredItems.map(item => (
                      <ProductCard key={item.id} item={item} onClick={() => router.push(`/marketplace/${item.id}`)} />
                   ))}

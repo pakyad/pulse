@@ -25,7 +25,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
       {/* ── Subcategory ── */}
       <div className="space-y-3">
         <div className="space-y-0.5">
-          <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">Subcategory</p>
+          <p className="text-[14px] font-bold text-[#000000] tracking-tight">Subcategory</p>
           <p className="text-[11px] font-medium text-[#94a3b8]">Pick the most specific match.</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -37,7 +37,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
                 onClick={() => onSubcategoryChange(sub.label)}
                 className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
                   isActive
-                    ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
+                    ? 'bg-slate-50 border-slate-400 text-[#000000]'
                     : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                 }`}
               >
@@ -52,7 +52,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
       {domain.customFields.map((field) => (
         <div key={field.id} className="space-y-3 pt-2 border-t border-slate-100">
           <div className="space-y-0.5">
-            <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">{field.label}</p>
+            <p className="text-[14px] font-bold text-[#000000] tracking-tight">{field.label}</p>
             {field.placeholder && (
               <p className="text-[11px] font-medium text-[#94a3b8]">{field.placeholder}</p>
             )}
@@ -65,7 +65,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
               placeholder={field.placeholder}
               value={metadata[field.id] || ''}
               onChange={(e) => onMetadataChange(field.id, e.target.value)}
-              className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] placeholder:text-slate-200 focus:outline-none focus:border-[#1e293b] transition-colors"
+              className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#000000] placeholder:text-slate-200 focus:outline-none focus:border-blue-600 transition-colors"
             />
           )}
 
@@ -80,7 +80,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
                     onClick={() => onMetadataChange(field.id, opt)}
                     className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
                       isActive
-                        ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
+                        ? 'bg-slate-50 border-slate-400 text-[#000000]'
                         : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                     }`}
                   >
@@ -105,7 +105,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
                     }`}
                   >
                     <span className={`text-[13px] font-bold transition-colors ${
-                      isActive ? 'text-[#1e293b]' : 'text-[#94a3b8]'
+                      isActive ? 'text-[#000000]' : 'text-[#94a3b8]'
                     }`}>
                       {opt}
                     </span>
@@ -124,7 +124,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
               type="time"
               value={metadata[field.id] || ''}
               onChange={(e) => onMetadataChange(field.id, e.target.value)}
-              className="h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#1e293b] focus:outline-none focus:border-[#1e293b] transition-colors"
+              className="h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#000000] focus:outline-none focus:border-blue-600 transition-colors"
             />
           )}
 
@@ -139,7 +139,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
                     onClick={() => onMetadataChange(field.id, slot)}
                     className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
                       isActive
-                        ? 'bg-slate-50 border-slate-400 text-[#1e293b]'
+                        ? 'bg-slate-50 border-slate-400 text-[#000000]'
                         : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                     }`}
                   >

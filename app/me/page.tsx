@@ -17,7 +17,7 @@ import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS (Concept: Skibidi) ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[17px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[17px] font-bold text-[#000000] tracking-tight ${className}`}>
     {children}
   </h2>
 );
@@ -70,7 +70,7 @@ export default function MePage() {
   const isStudent = !profile?.role || profile?.role === 'STUDENT';
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40 font-sans">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40 font-sans">
       
       {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
@@ -105,11 +105,11 @@ export default function MePage() {
          <section className="grid grid-cols-2 gap-4">
             <div className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-50 space-y-3">
                <Subtext className="text-[10px] uppercase font-black tracking-widest leading-none">Trust Rating</Subtext>
-               <p className="text-[20px] font-bold text-[#1e293b]">{(profile?.trust || 100)}%</p>
+               <p className="text-[20px] font-bold text-[#000000]">{(profile?.trust || 100)}%</p>
             </div>
             <div className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-50 space-y-3">
                <Subtext className="text-[10px] uppercase font-black tracking-widest leading-none">Active Assets</Subtext>
-               <p className="text-[20px] font-bold text-[#1e293b]">{myListings.length}</p>
+               <p className="text-[20px] font-bold text-[#000000]">{myListings.length}</p>
             </div>
          </section>
 
@@ -138,10 +138,10 @@ export default function MePage() {
                               className="w-full flex items-center justify-between group py-2"
                            >
                               <div className="text-left">
-                                 <p className="text-[15px] font-bold text-slate-500 group-hover:text-[#1e293b] tracking-tight transition-colors">{item.label}</p>
+                                 <p className="text-[15px] font-bold text-slate-500 group-hover:text-[#000000] tracking-tight transition-colors">{item.label}</p>
                                  <p className="text-[11px] text-[#94a3b8] font-medium">View your {item.label.toLowerCase()}</p>
                                  </div>
-                                 <ChevronRight size={16} className="text-slate-200 group-hover:text-[#1e293b] group-hover:translate-x-1 transition-all" />
+                                 <ChevronRight size={16} className="text-slate-200 group-hover:text-[#000000] group-hover:translate-x-1 transition-all" />
                               </button>
                               {i < filteredItems.length - 1 && <div className="h-[0.5px] bg-slate-50" />}
                            </div>
@@ -165,7 +165,7 @@ export default function MePage() {
                      onClick={() => router.push('/marketplace/create')}
                      className="shrink-0 w-36 h-48 rounded-[32px] bg-white border border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-all group"
                   >
-                     <div className="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] group-hover:bg-[#1e293b] group-hover:text-white transition-all">
+                     <div className="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] group-hover:bg-blue-600 group-hover:text-white transition-all">
                         <Plus size={20} />
                      </div>
                      <span className="text-[10px] font-black uppercase tracking-widest text-[#94a3b8]">Add Listing</span>
@@ -187,14 +187,14 @@ export default function MePage() {
                               </div>
                            )}
                            <div className="absolute top-2 right-2 px-2 py-1 bg-white/80 backdrop-blur-md rounded-lg border border-slate-100 shadow-sm">
-                              <p className="text-[8px] font-black text-[#1e293b] uppercase tracking-tighter">RM {item.price?.toFixed(2)}</p>
+                              <p className="text-[8px] font-black text-[#000000] uppercase tracking-tighter">RM {item.price?.toFixed(2)}</p>
                            </div>
                         </div>
                         <div className="flex-1 p-4 flex flex-col justify-between">
-                           <p className="text-[12px] font-bold text-[#1e293b] tracking-tight truncate">{item.title}</p>
+                           <p className="text-[12px] font-bold text-[#000000] tracking-tight truncate">{item.title}</p>
                            <div className="flex items-center justify-between">
                               <span className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest">{item.status}</span>
-                              <Edit3 size={12} className="text-slate-200 group-hover:text-[#1e293b] transition-colors" />
+                              <Edit3 size={12} className="text-slate-200 group-hover:text-[#000000] transition-colors" />
                            </div>
                         </div>
                       </button>
@@ -207,7 +207,7 @@ export default function MePage() {
          <section>
             <button 
                onClick={() => setIsEnrollmentOpen(true)}
-               className="w-full p-8 bg-[#1e293b] text-white rounded-[40px] flex items-center justify-between shadow-2xl shadow-slate-900/10 group"
+               className="w-full p-8 bg-blue-600 text-white rounded-[40px] flex items-center justify-between shadow-2xl shadow-slate-900/10 group"
             >
                <div className="flex items-center gap-6">
                   <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400">
@@ -218,7 +218,7 @@ export default function MePage() {
                      <p className="text-[11px] text-white/50 font-medium">Join the campus delivery team</p>
                   </div>
                </div>
-               <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-[#1e293b] transition-all">
+               <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-[#000000] transition-all">
                   <ArrowUpRight size={20} />
                </div>
             </button>
@@ -228,7 +228,7 @@ export default function MePage() {
          <section className="pt-6">
             <button 
                onClick={() => { auth.signOut(); router.push('/auth'); }}
-               className="w-full h-16 rounded-[28px] border border-slate-100 text-[#1e293b] font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-all"
+               className="w-full h-16 rounded-[28px] border border-slate-100 text-[#000000] font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-all"
             >
                Sign Out <LayoutGrid size={16} className="opacity-30" />
             </button>

@@ -47,7 +47,7 @@ export default function MessagesPage() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#1e293b] max-w-md mx-auto border-x border-slate-50">
+    <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#000000] max-w-md mx-auto border-x border-slate-50">
       
       <section className="px-8 pt-12 pb-4">
         <div className="flex justify-between items-center mb-10">
@@ -61,7 +61,7 @@ export default function MessagesPage() {
         </div>
 
         <div className="relative group">
-           <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#1e293b] transition-colors" />
+           <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#000000] transition-colors" />
            <input 
               type="text" 
               placeholder="Search conversations..."
@@ -95,13 +95,13 @@ export default function MessagesPage() {
 
                  <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-1">
-                       <h3 className={`text-[15px] font-bold tracking-tight ${isUnread ? 'text-[#1e293b]' : 'text-slate-600'}`}>
+                       <h3 className={`text-[15px] font-bold tracking-tight ${isUnread ? 'text-[#000000]' : 'text-slate-600'}`}>
                           {otherParticipant.name}
                        </h3>
                        <span className="text-[11px] font-medium text-[#94a3b8]">{chat.last_message_time || 'Just now'}</span>
                     </div>
                     
-                    <p className={`text-[13px] font-medium leading-tight truncate pr-8 ${isUnread ? 'text-[#1e293b] font-bold' : 'text-[#94a3b8]'}`}>
+                    <p className={`text-[13px] font-medium leading-tight truncate pr-8 ${isUnread ? 'text-[#000000] font-bold' : 'text-[#94a3b8]'}`}>
                        {chat.last_message_text || 'No messages yet'}
                     </p>
                  </div>

@@ -15,7 +15,7 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[24px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[24px] font-bold text-[#000000] tracking-tight ${className}`}>
     {children}
   </h2>
 );
@@ -68,12 +68,12 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 bg-[#1e293b]/5 pointer-events-none z-10"
+          className="absolute inset-0 bg-blue-600/5 pointer-events-none z-10"
         >
            <motion.div 
              animate={{ y: [-10, 300] }}
              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-             className="w-full h-2 bg-[#1e293b]/10 blur-sm"
+             className="w-full h-2 bg-blue-600/10 blur-sm"
            />
         </motion.div>
       )}
@@ -82,12 +82,12 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
       <motion.div 
         initial={{ width: 0 }}
         animate={{ width: `${holdProgress}%` }}
-        className="absolute bottom-0 left-0 h-1.5 bg-[#1e293b] pointer-events-none z-20 transition-all duration-75"
+        className="absolute bottom-0 left-0 h-1.5 bg-blue-600 pointer-events-none z-20 transition-all duration-75"
       />
 
       <div className="flex items-start justify-between mb-8">
         <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#1e293b] shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#000000] shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
              {order.image_url ? (
                 <img src={order.image_url} className="w-full h-full object-cover" alt="" />
              ) : (
@@ -95,7 +95,7 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
              )}
           </div>
           <div>
-            <h3 className="text-[18px] font-bold text-[#1e293b] tracking-tight mb-1">{order.title || 'Delivery Request'}</h3>
+            <h3 className="text-[18px] font-bold text-[#000000] tracking-tight mb-1">{order.title || 'Delivery Request'}</h3>
             <div className="flex items-center gap-3">
                <span className="text-[11px] font-bold text-emerald-600">RM {runnerCut.toFixed(2)} payout</span>
                <div className="w-1 h-1 rounded-full bg-slate-200" />
@@ -116,17 +116,17 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
           </div>
           <div className="flex-1">
              <p className="text-[9px] font-bold text-[#94a3b8] uppercase tracking-widest">Pickup Point</p>
-             <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.seller_name || 'Merchant point'}</p>
+             <p className="text-[14px] font-bold text-[#000000] truncate">{order.seller_name || 'Merchant point'}</p>
           </div>
         </div>
         <div className="ml-5 h-4 border-l border-dashed border-slate-200" />
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-[#1e293b] text-white flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
              <MapPin size={18} />
           </div>
           <div className="flex-1">
              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Drop-off Point</p>
-             <p className="text-[14px] font-bold text-[#1e293b] truncate">{order.drop_off_location}</p>
+             <p className="text-[14px] font-bold text-[#000000] truncate">{order.drop_off_location}</p>
           </div>
         </div>
       </div>
@@ -143,8 +143,8 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
           disabled 
           ? 'bg-slate-50 text-slate-300 cursor-not-allowed' 
           : isHolding 
-            ? 'bg-[#1e293b] text-white scale-[0.98] shadow-2xl shadow-slate-900/10' 
-            : 'bg-slate-50 text-[#1e293b] border border-slate-100 hover:bg-slate-100'
+            ? 'bg-blue-600 text-white scale-[0.98] shadow-2xl shadow-slate-900/10' 
+            : 'bg-slate-50 text-[#000000] border border-slate-100 hover:bg-slate-100'
         }`}
       >
         {disabled ? 'Capacity Reached' : isHolding ? `Accepting Job... ${holdProgress}%` : 'Hold to Accept Job'}
@@ -162,7 +162,7 @@ function SuccessOverlay({ onInitiate }: { onInitiate: () => void }) {
   }, [onInitiate]);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-1000 bg-[#1e293b] flex flex-col items-center justify-center p-12 text-center">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-1000 bg-blue-600 flex flex-col items-center justify-center p-12 text-center">
        <div className="w-24 h-24 bg-white/10 rounded-[40px] flex items-center justify-center mb-10 border border-white/5 shadow-2xl">
           <Truck size={40} className="text-white" />
        </div>
@@ -245,7 +245,7 @@ export default function MissionBoard() {
   };
 
   return (
-    <main className="min-h-screen bg-white pt-32 pb-40 font-sans antialiased text-[#1e293b]">
+    <main className="min-h-screen bg-white pt-32 pb-40 font-sans antialiased text-[#000000]">
       <AnimatePresence>
          {showSuccess && (
             <SuccessOverlay onInitiate={() => router.push(`/run/terminal?active=${securedOrderId}`)} />
@@ -266,7 +266,7 @@ export default function MissionBoard() {
          <Heading className="text-[32px] leading-tight">Job Board</Heading>
          <div className="flex items-center gap-3 mt-4">
             <div className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-xl">
-               <span className="text-[10px] font-bold text-[#1e293b] uppercase tracking-widest">{orders.length} Available</span>
+               <span className="text-[10px] font-bold text-[#000000] uppercase tracking-widest">{orders.length} Available</span>
             </div>
             <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 ${activeMissionsCount >= 2 ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-slate-50 border-slate-100 text-[#94a3b8]'}`}>
                <span className="text-[10px] font-bold uppercase tracking-widest">Limit: {activeMissionsCount}/2</span>
@@ -278,7 +278,7 @@ export default function MissionBoard() {
       <section className="px-8 space-y-6">
         {loading ? (
           <div className="py-20 flex flex-col items-center gap-4 text-[#94a3b8]">
-             <div className="w-10 h-10 border-4 border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
+             <div className="w-10 h-10 border-4 border-slate-100 border-t-[#000000] rounded-full animate-spin" />
              <p className="text-[11px] font-bold uppercase tracking-widest">Searching for jobs...</p>
           </div>
         ) : orders.length > 0 ? (

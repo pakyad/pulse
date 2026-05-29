@@ -64,7 +64,7 @@ export default function InventorySimulation() {
       <div className="max-w-md w-full bg-white rounded-[40px] shadow-2xl border border-slate-100 overflow-hidden">
         
         {/* Header */}
-        <div className="p-8 bg-[#1e293b] text-white">
+        <div className="p-8 bg-blue-600 text-white">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
               <Zap size={20} className="text-amber-400" />
@@ -91,7 +91,7 @@ export default function InventorySimulation() {
               <button 
                 onClick={startSimulation}
                 disabled={loading}
-                className="w-full h-14 bg-[#1e293b] text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
+                className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
               >
                 Launch Hoodie Drop <ArrowRight size={18} />
               </button>

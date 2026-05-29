@@ -13,7 +13,7 @@ import DisputeThread from '../../../components/merchant/DisputeThread';
 
 // ── SKIBIDI TYPOGRAPHY (From MobileMerchant DNA) ──
 const SkibidiHeading = ({ children }: { children: React.ReactNode }) => (
-  <h1 className="text-[17px] font-bold text-[#1e293b] tracking-tight leading-none">{children}</h1>
+  <h1 className="text-[17px] font-bold text-[#000000] tracking-tight leading-none">{children}</h1>
 );
 
 const SkibidiSubtext = ({ children }: { children: React.ReactNode }) => (
@@ -65,12 +65,12 @@ export default function MerchantDisputes() {
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <Loader2 className="animate-spin text-[#1e293b]" size={32} />
+      <Loader2 className="animate-spin text-[#000000]" size={32} />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] font-sans antialiased pb-32">
+    <main className="min-h-screen bg-white text-[#000000] font-sans antialiased pb-32">
       
       {/* ── SIMPLE HEADER ── */}
       <header className="px-8 py-8 border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
@@ -78,7 +78,7 @@ export default function MerchantDisputes() {
            <div className="flex items-center gap-4">
               <button 
                 onClick={() => window.history.back()} 
-                className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#1e293b] border border-slate-100 transition-all"
+                className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] border border-slate-100 transition-all"
               >
                  <ChevronLeft size={18} />
               </button>
@@ -100,7 +100,7 @@ export default function MerchantDisputes() {
                   <p className="text-[22px] font-bold tracking-tighter leading-none">{resolvedDisputes.length}</p>
                </div>
             </div>
-            <div className="p-6 bg-[#1e293b] rounded-2xl text-white space-y-4 shadow-sm">
+            <div className="p-6 bg-blue-600 rounded-2xl text-white space-y-4 shadow-sm">
                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none">To Fix</p>
                <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
@@ -124,15 +124,15 @@ export default function MerchantDisputes() {
                  onClick={() => setActiveTab(tab.id as any)}
                  className={`pb-4 text-[15px] font-bold transition-all relative ${
                     activeTab === tab.id 
-                    ? 'text-[#1e293b]' 
-                    : 'text-[#94a3b8] hover:text-[#1e293b]'
+                    ? 'text-[#000000]' 
+                    : 'text-[#94a3b8] hover:text-[#000000]'
                  }`}
                >
                  {tab.label}
                  {activeTab === tab.id && (
                     <motion.div 
                        layoutId="activeTab"
-                       className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1e293b]"
+                       className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
                     />
                  )}
                </button>
@@ -176,7 +176,7 @@ export default function MerchantDisputes() {
                                  </p>
                               </div>
                            </div>
-                           <ChevronRight size={18} className="text-slate-200 group-hover:text-[#1e293b] transition-colors shrink-0 mt-2" />
+                           <ChevronRight size={18} className="text-slate-200 group-hover:text-[#000000] transition-colors shrink-0 mt-2" />
                         </div>
                         
                         <div className="flex items-center justify-between pt-4 border-t border-slate-50">

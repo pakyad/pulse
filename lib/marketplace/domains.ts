@@ -3,7 +3,7 @@
  * Logic: Student Life Cycle Model
  */
 
-export type DomainID = 'HUNGER' | 'ACADEMIC' | 'SERVICES' | 'HOSTEL' | 'TECH';
+export type DomainID = 'HUNGER' | 'ACADEMIC' | 'SERVICES' | 'HOSTEL' | 'TECH' | 'APPAREL';
 
 export interface DomainConfig {
   id: DomainID;
@@ -174,6 +174,34 @@ export const MARKETPLACE_DOMAINS: Record<DomainID, DomainConfig> = {
         label: 'Validity (Digital Keys)',
         type: 'text',
         placeholder: 'e.g. 1 Year, Lifetime'
+      }
+    ]
+  },
+  APPAREL: {
+    id: 'APPAREL',
+    label: 'Campus Apparel',
+    subtext: 'Merch, club shirts, and preloved',
+    governance: 'OPEN',
+    subcategories: [
+      { label: 'Official Merch' },
+      { label: 'Club/Faculty Shirts' },
+      { label: 'Preloved Clothes' },
+      { label: 'Accessories' }
+    ],
+    customFields: [
+      {
+        id: 'size',
+        label: 'Size',
+        type: 'select',
+        options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free Size'],
+        required: true
+      },
+      {
+        id: 'condition',
+        label: 'Condition',
+        type: 'select',
+        options: ['Brand New', 'Like New', 'Used - Good', 'Used - Fair'],
+        required: true
       }
     ]
   }

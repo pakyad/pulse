@@ -36,7 +36,7 @@ export default function MobileMerchant({
 
   // ── SKIBIDI COMPONENTS ──
   const SkibidiHeading = ({ children }: { children: React.ReactNode }) => (
-    <h1 className="text-[17px] font-bold text-[#1e293b] tracking-tight leading-none">{children}</h1>
+    <h1 className="text-[17px] font-bold text-[#000000] tracking-tight leading-none">{children}</h1>
   );
 
   const SkibidiSubtext = ({ children }: { children: React.ReactNode }) => (
@@ -50,7 +50,7 @@ export default function MobileMerchant({
   const historyList = historyOrders || [];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col text-[#1e293b] selection:bg-blue-100 md:hidden pb-32 font-sans antialiased">
+    <div className="min-h-screen bg-white flex flex-col text-[#000000] selection:bg-blue-100 md:hidden pb-32 font-sans antialiased">
       
       {/* ── HEADER (Skibidi concept) ── */}
       <header className="px-8 py-8 border-b-[0.5px] border-slate-50 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
@@ -60,7 +60,7 @@ export default function MobileMerchant({
               <SkibidiSubtext>Manage your shop and fulfill orders.</SkibidiSubtext>
            </div>
            <div className="flex items-center gap-4">
-              <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#1e293b] relative border border-slate-50">
+              <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] relative border border-slate-50">
                  <Bell size={18} />
                  {urgentOrders?.length > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>}
               </button>
@@ -79,7 +79,7 @@ export default function MobileMerchant({
             <div className="space-y-4">
                <div className="flex items-center justify-between px-1">
                   <div className="space-y-1">
-                     <h3 className="text-[15px] font-bold text-[#1e293b] tracking-tight">Order Registry</h3>
+                     <h3 className="text-[15px] font-bold text-[#000000] tracking-tight">Order Registry</h3>
                      <p className="text-[11px] font-medium text-[#94a3b8]">Live lifecycle of campus commerce.</p>
                   </div>
                </div>
@@ -92,7 +92,7 @@ export default function MobileMerchant({
                       onClick={() => setActiveTab(tab)}
                       className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                         activeTab === tab 
-                          ? 'bg-white text-[#1e293b] shadow-sm' 
+                          ? 'bg-white text-[#000000] shadow-sm' 
                           : 'text-[#94a3b8] opacity-50 hover:opacity-100'
                       }`}
                     >
@@ -117,7 +117,7 @@ export default function MobileMerchant({
                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4 shadow-sm border border-slate-100">
                             <PackageCheck size={24} strokeWidth={1.5} />
                         </div>
-                        <h3 className="text-[14px] font-bold text-[#1e293b] tracking-tight mb-1">You're all caught up!</h3>
+                        <h3 className="text-[14px] font-bold text-[#000000] tracking-tight mb-1">You're all caught up!</h3>
                         <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed max-w-[220px]">
                            No active orders right now. Incoming requests from students will appear here.
                         </p>
@@ -135,12 +135,12 @@ export default function MobileMerchant({
                                   <ClipboardList size={16} />
                                </div>
                                <div>
-                                  <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">{o.customer_name || 'Student'}</p>
+                                  <p className="text-[14px] font-bold text-[#000000] tracking-tight">{o.customer_name || 'Student'}</p>
                                   <p className="text-[10px] font-medium text-[#94a3b8]">Order #{o.id.slice(-4).toUpperCase()}</p>
                                </div>
                             </div>
                             <div className="text-right">
-                               <p className="text-[14px] font-bold text-[#1e293b]">RM {o.total?.toFixed(2)}</p>
+                               <p className="text-[14px] font-bold text-[#000000]">RM {o.total?.toFixed(2)}</p>
                                <p className="text-[9px] font-bold text-blue-500 uppercase tracking-wider">{o.status.replace(/_/g, ' ')}</p>
                             </div>
                          </div>
@@ -149,7 +149,7 @@ export default function MobileMerchant({
                             {o.status === 'PENDING_VENDOR' ? (
                               <button 
                                 onClick={() => handleAcceptOrder(o.id)}
-                                className="flex-1 h-11 bg-[#1e293b] text-white rounded-xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-sm shadow-slate-900/5"
+                                className="flex-1 h-11 bg-blue-600 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-sm shadow-slate-900/5"
                               >
                                  Accept Order
                               </button>
@@ -180,7 +180,7 @@ export default function MobileMerchant({
                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4 shadow-sm border border-slate-100">
                             <ClipboardList size={24} strokeWidth={1.5} />
                         </div>
-                        <h3 className="text-[14px] font-bold text-[#1e293b] tracking-tight mb-1">No past records</h3>
+                        <h3 className="text-[14px] font-bold text-[#000000] tracking-tight mb-1">No past records</h3>
                         <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed max-w-[220px]">
                            Once you complete or cancel an order, the receipt will be securely archived here.
                         </p>
@@ -194,12 +194,12 @@ export default function MobileMerchant({
                               {o.status === 'CANCELLED' ? <Trash2 size={18} /> : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? <Bike size={18} /> : <CheckCircle2 size={18} />}
                             </div>
                             <div>
-                               <p className="text-[14px] font-bold text-[#1e293b]">{o.customer_name || 'Student'}</p>
+                               <p className="text-[14px] font-bold text-[#000000]">{o.customer_name || 'Student'}</p>
                                <p className="text-[10px] font-medium text-[#94a3b8] uppercase tracking-widest">Order #{o.id.slice(-4).toUpperCase()}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                             <p className="text-[14px] font-bold text-[#1e293b]">RM {o.total?.toFixed(2)}</p>
+                             <p className="text-[14px] font-bold text-[#000000]">RM {o.total?.toFixed(2)}</p>
                              <p className={`text-[9px] font-black uppercase tracking-widest ${o.status === 'CANCELLED' ? 'text-red-500' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'text-blue-500' : 'text-emerald-500'}`}>
                                 {o.status.replace(/_/g, ' ')}
                              </p>
@@ -211,7 +211,7 @@ export default function MobileMerchant({
                                 <User size={12} />
                                 With {o.runner_name || 'Runner'}
                              </p>
-                             <p className="text-[10px] font-bold text-[#1e293b] truncate ml-4">{o.drop_off_location || 'Campus'}</p>
+                             <p className="text-[10px] font-bold text-[#000000] truncate ml-4">{o.drop_off_location || 'Campus'}</p>
                           </div>
                         )}
                       </div>
@@ -228,13 +228,13 @@ export default function MobileMerchant({
                   <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Total Earnings</p>
                   <div className="mt-4 flex items-baseline gap-1">
                      <span className="text-[12px] font-bold text-slate-400">RM</span>
-                     <span className="text-[24px] font-black text-[#1e293b] tracking-tight">{revenue.toFixed(2)}</span>
+                     <span className="text-[24px] font-black text-[#000000] tracking-tight">{revenue.toFixed(2)}</span>
                   </div>
                </div>
                <div className="p-5 bg-slate-50 border border-slate-100 rounded-[28px] flex flex-col justify-between">
                   <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Orders To Do</p>
                   <div className="mt-4 flex items-baseline gap-1.5">
-                     <span className="text-[24px] font-black text-[#1e293b] tracking-tight">{activeOrdersCount}</span>
+                     <span className="text-[24px] font-black text-[#000000] tracking-tight">{activeOrdersCount}</span>
                      <span className="text-[12px] font-bold text-slate-400">Active</span>
                   </div>
                </div>
@@ -255,10 +255,10 @@ export default function MobileMerchant({
                              <Package size={18} />
                           </div>
                           <div>
-                             <p className="text-[13px] font-bold text-[#1e293b] truncate max-w-[120px]">{item.title}</p>
+                             <p className="text-[13px] font-bold text-[#000000] truncate max-w-[120px]">{item.title}</p>
                              <button 
                                 onClick={() => setEditingItem(item)}
-                                className="mt-2 h-8 px-4 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 hover:text-[#1e293b] hover:bg-slate-100 flex items-center justify-center uppercase tracking-widest transition-all shadow-sm shadow-slate-900/5 active:scale-95"
+                                className="mt-2 h-8 px-4 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 hover:text-[#000000] hover:bg-slate-100 flex items-center justify-center uppercase tracking-widest transition-all shadow-sm shadow-slate-900/5 active:scale-95"
                              >
                                 Restock Item
                              </button>
@@ -280,7 +280,7 @@ export default function MobileMerchant({
          <section className="space-y-6">
             <div className="flex items-center justify-between px-1">
                <div className="space-y-1">
-                  <h3 className="text-[15px] font-bold text-[#1e293b] tracking-tight">Active Inventory</h3>
+                  <h3 className="text-[15px] font-bold text-[#000000] tracking-tight">Active Inventory</h3>
                   <p className="text-[11px] font-medium text-[#94a3b8]">Live assets on the marketplace.</p>
                </div>
                <button 
@@ -305,7 +305,7 @@ export default function MobileMerchant({
                            )}
                         </div>
                         <div>
-                           <p className="text-[14px] font-bold text-[#1e293b] tracking-tight">{item.title}</p>
+                           <p className="text-[14px] font-bold text-[#000000] tracking-tight">{item.title}</p>
                            <div className="flex items-center gap-2">
                               <p className="text-[11px] font-medium text-[#94a3b8]">RM {item.price?.toFixed(2)}</p>
                               <span className="w-1 h-1 bg-slate-200 rounded-full" />
@@ -323,7 +323,7 @@ export default function MobileMerchant({
                         <button
                            onClick={() => setEditingItem(item)}
                            title="Edit"
-                           className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#1e293b] transition-all"
+                           className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#000000] transition-all"
                         >
                            <Pencil size={14} />
                         </button>
@@ -357,10 +357,10 @@ export default function MobileMerchant({
                  onClick={() => router.push(nav.path)}
                  className="flex flex-col items-center gap-1.5 group"
                >
-                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${active ? 'bg-[#1e293b] text-white shadow-lg shadow-slate-900/10' : 'text-[#94a3b8] group-hover:text-[#1e293b]'}`}>
+                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${active ? 'bg-blue-600 text-white shadow-lg shadow-slate-900/10' : 'text-[#94a3b8] group-hover:text-[#000000]'}`}>
                    <nav.icon size={20} strokeWidth={active ? 2.5 : 2} />
                  </div>
-                 <span className={`text-[10px] font-bold tracking-widest uppercase transition-all ${active ? 'text-[#1e293b]' : 'text-[#94a3b8] opacity-50'}`}>{nav.label}</span>
+                 <span className={`text-[10px] font-bold tracking-widest uppercase transition-all ${active ? 'text-[#000000]' : 'text-[#94a3b8] opacity-50'}`}>{nav.label}</span>
                </button>
              );
            })}

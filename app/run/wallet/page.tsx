@@ -53,12 +53,12 @@ export default function RunnerEarningsPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#1e293b] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#000000] rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-24">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-24">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -80,7 +80,7 @@ export default function RunnerEarningsPage() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#1e293b] rounded-xl p-6 space-y-2"
+          className="bg-blue-600 rounded-xl p-6 space-y-2"
         >
           <p className="text-[11px] font-bold text-white/40 uppercase tracking-widest">This Month</p>
           <p className="text-[38px] font-bold text-white tracking-tighter leading-none">
@@ -95,22 +95,22 @@ export default function RunnerEarningsPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-1">
             <p className="text-[11px] font-medium text-[#94a3b8]">All-time deliveries</p>
-            <p className="text-[22px] font-bold text-[#1e293b] tracking-tight">{deliveries.length}</p>
+            <p className="text-[22px] font-bold text-[#000000] tracking-tight">{deliveries.length}</p>
           </div>
           <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-1">
             <p className="text-[11px] font-medium text-[#94a3b8]">Average per job</p>
-            <p className="text-[22px] font-bold text-[#1e293b] tracking-tight">RM {avgPerJob.toFixed(2)}</p>
+            <p className="text-[22px] font-bold text-[#000000] tracking-tight">RM {avgPerJob.toFixed(2)}</p>
           </div>
           <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-1 col-span-2">
             <p className="text-[11px] font-medium text-[#94a3b8]">All-time earned</p>
-            <p className="text-[22px] font-bold text-[#1e293b] tracking-tight">RM {totalEarned.toFixed(2)}</p>
+            <p className="text-[22px] font-bold text-[#000000] tracking-tight">RM {totalEarned.toFixed(2)}</p>
           </div>
         </div>
 
         {/* ── DELIVERY HISTORY ── */}
         <section className="space-y-4">
           <div className="space-y-0.5">
-            <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">Recent Deliveries</h2>
+            <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Recent Deliveries</h2>
             <p className="text-[11px] font-medium text-[#94a3b8]">All your completed jobs</p>
           </div>
 
@@ -138,7 +138,7 @@ export default function RunnerEarningsPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-bold text-[#1e293b] truncate">{delivery.title || 'Delivery'}</p>
+                      <p className="text-[13px] font-bold text-[#000000] truncate">{delivery.title || 'Delivery'}</p>
                       <p className="text-[11px] font-medium text-[#94a3b8]">
                         {delivery.drop_off_location || 'On campus'} · {dateStr}
                       </p>

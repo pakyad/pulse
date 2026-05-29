@@ -35,7 +35,7 @@ export default function GenesisSetup() {
   };
 
   return (
-    <div className="h-screen w-full bg-[#0f172a] flex flex-col items-center justify-center font-sans p-6 text-center">
+    <div className="h-screen w-full bg-[#111111] flex flex-col items-center justify-center font-sans p-6 text-center">
       <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-8 border border-blue-500/20">
         <Shield className="text-[#007AFF]" size={32} />
       </div>

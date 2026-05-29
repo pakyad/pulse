@@ -50,6 +50,7 @@ service cloud.firestore {
     match /PriceGuidelines/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
     match /announcements/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
     match /facilities/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
+    match /events/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
     match /vitals/{id} { allow read, list: if true; allow write: if isSuperAdmin(); }
     match /campaigns/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /pulse_posts/{id} { allow read, list: if true; allow write: if isSignedIn(); }
@@ -89,6 +90,15 @@ service cloud.firestore {
 
     match /governance_logs/{id} {
       allow read, list, write: if isSignedIn();
+    }
+
+    // ── PRICE REPORTS (Community Flagging System) ──
+    // Any signed-in user can submit a report.
+    // Only admins can read the full list (for review queue).
+    match /price_reports/{id} {
+      allow create: if isSignedIn();
+      allow read, list: if isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
     }
   }
 }

@@ -146,7 +146,7 @@ export default function MissionBoard() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white font-sans antialiased text-[#1e293b]">
+    <main className="min-h-screen bg-white font-sans antialiased text-[#000000]">
 
       {/* \u2500\u2500 IN-UI ERROR TOAST \u2500\u2500 */}
       {showError && (
@@ -231,7 +231,7 @@ export default function MissionBoard() {
                                   </div>
                                </div>
                                <div className="text-right">
-                                  <p className="text-[18px] font-bold text-[#1e293b]">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
+                                  <p className="text-[18px] font-bold text-[#000000]">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
                                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Payout</p>
                                </div>
                             </div>
@@ -246,7 +246,7 @@ export default function MissionBoard() {
                                      <Clock size={14} className="text-slate-300" />
                                      <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || 'merchant'}</p>
                                   </div>
-                                  <span className="text-[11px] font-bold text-[#1e293b] bg-slate-200/50 px-2.5 py-0.5 rounded-full lowercase tracking-tight">
+                                  <span className="text-[11px] font-bold text-[#000000] bg-slate-200/50 px-2.5 py-0.5 rounded-full lowercase tracking-tight">
                                      {formatTimeAgo(mission.created_at, now)}
                                   </span>
                                </div>
@@ -300,7 +300,7 @@ export default function MissionBoard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-200 bg-[#1e293b] flex flex-col items-center justify-center text-white text-center p-10"
+            className="fixed inset-0 z-200 bg-blue-600 flex flex-col items-center justify-center text-white text-center p-10"
           >
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}

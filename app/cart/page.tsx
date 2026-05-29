@@ -21,7 +21,7 @@ export default function CartPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
       
       {/* ── NAV (Optical Institutionalism) ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -33,7 +33,7 @@ export default function CartPage() {
             <ChevronLeft size={16} />
           </button>
           <div>
-            <p className="text-[15px] font-bold tracking-tight text-[#1e293b] leading-tight">Shopping Bag</p>
+            <p className="text-[15px] font-bold tracking-tight text-[#000000] leading-tight">Shopping Bag</p>
             <p className="text-[10px] font-medium text-slate-400 mt-0.5">{cartCount} items selected</p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function CartPage() {
               <div className="w-24 h-24 flex items-center justify-center text-slate-200 mb-6">
                 <ShoppingBag size={48} strokeWidth={2} />
               </div>
-              <h2 className="text-[17px] font-bold tracking-tight text-[#1e293b] mb-2">Your bag is empty</h2>
+              <h2 className="text-[17px] font-bold tracking-tight text-[#000000] mb-2">Your bag is empty</h2>
               <p className="text-[13px] font-medium text-slate-400 max-w-[200px] leading-relaxed">
                 Nothing here yet. Browse the marketplace?
               </p>
@@ -81,7 +81,7 @@ export default function CartPage() {
                     
                     <div className="flex-1 min-w-0 flex flex-col justify-between h-20 py-0.5">
                       <div>
-                        <p className="text-[14px] font-bold text-[#1e293b] truncate">{item.title}</p>
+                        <p className="text-[14px] font-bold text-[#000000] truncate">{item.title}</p>
                         <p className="text-[12px] font-bold text-[#94a3b8]">RM {item.price.toFixed(2)}</p>
                       </div>
                       
@@ -90,14 +90,14 @@ export default function CartPage() {
                          <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-lg px-2 py-1">
                             <button 
                               onClick={() => updateQty(item.productId, item.qty - 1)}
-                              className="w-6 h-6 flex items-center justify-center text-[#94a3b8] hover:text-[#1e293b]"
+                              className="w-6 h-6 flex items-center justify-center text-[#94a3b8] hover:text-[#000000]"
                             >
                               <Minus size={14} />
                             </button>
                             <span className="text-[13px] font-bold w-4 text-center">{item.qty}</span>
                             <button 
                               onClick={() => updateQty(item.productId, item.qty + 1)}
-                              className="w-6 h-6 flex items-center justify-center text-[#94a3b8] hover:text-[#1e293b]"
+                              className="w-6 h-6 flex items-center justify-center text-[#94a3b8] hover:text-[#000000]"
                             >
                               <Plus size={14} />
                             </button>
@@ -120,20 +120,20 @@ export default function CartPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-[13px] font-medium text-[#94a3b8]">
                     <span>Subtotal</span>
-                    <span className="text-[#1e293b] font-bold">RM {cartTotal.toFixed(2)}</span>
+                    <span className="text-[#000000] font-bold">RM {cartTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px] font-medium text-[#94a3b8]">
                     <span>Service Fee</span>
                     <span className="text-emerald-500 font-bold">Free</span>
                   </div>
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[15px] font-bold text-[#1e293b]">Order Total</span>
-                    <span className="text-[20px] font-black text-[#1e293b]">RM {cartTotal.toFixed(2)}</span>
+                    <span className="text-[15px] font-bold text-[#000000]">Order Total</span>
+                    <span className="text-[20px] font-black text-[#000000]">RM {cartTotal.toFixed(2)}</span>
                   </div>
                 </div>
 
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
-                  <ShieldCheck size={16} className="text-[#1e293b] shrink-0 mt-0.5" />
+                  <ShieldCheck size={16} className="text-[#000000] shrink-0 mt-0.5" />
                   <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">
                     Transactions are held in escrow until you confirm receipt. Real-time GPS verification ensures secure campus delivery.
                   </p>
@@ -149,7 +149,7 @@ export default function CartPage() {
         <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
           <button
             onClick={handleCheckout}
-            className="w-full h-14 bg-[#1e293b] text-white rounded-2xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10"
+            className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10"
           >
             Checkout All <ArrowRight size={18} />
           </button>

@@ -10,7 +10,7 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[24px] font-bold text-[#1e293b] tracking-tight ${className}`}>
+  <h2 className={`text-[24px] font-bold text-[#000000] tracking-tight ${className}`}>
     {children}
   </h2>
 );
@@ -57,7 +57,7 @@ export default function LeaderboardPage() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
       
       {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -95,7 +95,7 @@ export default function LeaderboardPage() {
                               {index < 3 ? <RankIcon size={20} /> : <p className="text-[14px] font-bold">#{index + 1}</p>}
                            </div>
                            <div className="text-left">
-                              <p className="text-[16px] font-bold text-[#1e293b] tracking-tight">{club.full_name}</p>
+                              <p className="text-[16px] font-bold text-[#000000] tracking-tight">{club.full_name}</p>
                               <div className="flex items-center gap-2 mt-0.5">
                                  <p className="text-[12px] font-medium text-[#94a3b8]">{club.hustle_score || 0} HP</p>
                                  <div className="w-1 h-1 rounded-full bg-slate-200" />
@@ -107,7 +107,7 @@ export default function LeaderboardPage() {
                         <div className="flex items-center gap-4">
                            <div className="hidden sm:flex flex-col items-end">
                               <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Level</p>
-                              <p className="text-[14px] font-bold text-[#1e293b]">{Math.floor((club.hustle_score || 0) / 100) + 1}</p>
+                              <p className="text-[14px] font-bold text-[#000000]">{Math.floor((club.hustle_score || 0) / 100) + 1}</p>
                            </div>
                            <ChevronRight size={18} className="text-slate-200" />
                         </div>
@@ -128,7 +128,7 @@ export default function LeaderboardPage() {
             <div className="p-8 bg-slate-50/50 rounded-[32px] border border-slate-100">
                <div className="flex items-center gap-3 mb-2">
                   <ShieldCheck size={16} className="text-slate-400" />
-                  <p className="text-[11px] font-bold text-[#1e293b] uppercase tracking-widest">Fair Play</p>
+                  <p className="text-[11px] font-bold text-[#000000] uppercase tracking-widest">Fair Play</p>
                </div>
                <p className="text-[12px] text-[#94a3b8] font-medium leading-relaxed">
                   Rankings are updated in real-time based on verified deliveries and student interactions within the Pulse app.

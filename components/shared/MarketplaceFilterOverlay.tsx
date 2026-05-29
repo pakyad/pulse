@@ -169,7 +169,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                   onApply(tempFilters);
                   onClose();
                 }}
-                className="w-full h-14 bg-[#1e293b] text-white rounded-[20px] font-bold text-[14px] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full h-14 bg-blue-600 text-white rounded-[20px] font-bold text-[14px] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 Sync Registry
                 <ChevronRight size={16} />

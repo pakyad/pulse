@@ -194,7 +194,7 @@ export default function CheckoutPage() {
   const itemImage = item.images?.[0] || item.image_url || '';
 
   return (
-    <main className="min-h-screen bg-white text-[#1e293b] antialiased pb-40">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
 
       {/* ════ ERROR: INSUFFICIENT STOCK OVERLAY ════ */}
       <AnimatePresence>
@@ -206,7 +206,7 @@ export default function CheckoutPage() {
             <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center mb-6">
               <Lock size={32} className="text-red-500" />
             </div>
-            <h2 className="text-[20px] font-bold text-[#1e293b] tracking-tight mb-2">Insufficient Stock</h2>
+            <h2 className="text-[20px] font-bold text-[#000000] tracking-tight mb-2">Insufficient Stock</h2>
             <p className="text-[13px] font-medium text-[#94a3b8] leading-relaxed mb-8">
               Someone just bought the last remaining units while you were in checkout. 
               We have not charged your account.
@@ -231,10 +231,10 @@ export default function CheckoutPage() {
             {payStatus === 'processing' ? (
               <>
                 <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center">
-                  <span className="text-[#1e293b] font-black text-[13px] tracking-widest">FPX</span>
+                  <span className="text-[#000000] font-black text-[13px] tracking-widest">FPX</span>
                 </div>
                 <div className="space-y-1 text-center">
-                  <p className="text-[15px] font-bold text-[#1e293b] tracking-tight">Connecting to bank...</p>
+                  <p className="text-[15px] font-bold text-[#000000] tracking-tight">Connecting to bank...</p>
                   <p className="text-[12px] font-medium text-[#94a3b8]">
                     {FPX_BANKS.find(b => b.id === selectedBank)?.label}
                   </p>
@@ -260,7 +260,7 @@ export default function CheckoutPage() {
                   <CheckCircle2 size={32} className="text-emerald-500" strokeWidth={2} />
                 </motion.div>
                 <div className="space-y-1 text-center">
-                  <p className="text-[16px] font-bold text-[#1e293b] tracking-tight">Payment Successful</p>
+                  <p className="text-[16px] font-bold text-[#000000] tracking-tight">Payment Successful</p>
                   <p className="text-[12px] font-medium text-[#94a3b8]">RM {total.toFixed(2)} via FPX</p>
                 </div>
                 <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Placing your order...</p>
@@ -303,7 +303,7 @@ export default function CheckoutPage() {
               : <div className="w-full h-full bg-slate-50" />}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-bold text-[#1e293b] truncate">{item.title}</p>
+            <p className="text-[13px] font-bold text-[#000000] truncate">{item.title}</p>
             <p className="text-[11px] font-medium text-[#94a3b8]">RM {itemPrice.toFixed(2)} per unit</p>
           </div>
           {/* Qty stepper */}
@@ -331,7 +331,7 @@ export default function CheckoutPage() {
               className="space-y-6"
             >
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">How do you want it?</h2>
+                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">How do you want it?</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Choose your preferred delivery method.</p>
               </div>
 
@@ -350,13 +350,13 @@ export default function CheckoutPage() {
                       <Package size={18} />
                     </div>
                     <div>
-                      <p className="text-[13px] font-bold text-[#1e293b] tracking-tight">Self Collect</p>
+                      <p className="text-[13px] font-bold text-[#000000] tracking-tight">Self Collect</p>
                       <p className="text-[11px] font-medium text-[#94a3b8]">Meet the seller on campus · Free</p>
                     </div>
                   </div>
                   {choice === 'SELF_COLLECT' && (
                     <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                      <Check size={12} strokeWidth={3} className="text-[#1e293b]" />
+                      <Check size={12} strokeWidth={3} className="text-[#000000]" />
                     </div>
                   )}
                 </button>
@@ -376,13 +376,13 @@ export default function CheckoutPage() {
                         <Truck size={18} />
                       </div>
                       <div>
-                        <p className="text-[13px] font-bold text-[#1e293b] tracking-tight">Pulse Runner</p>
+                        <p className="text-[13px] font-bold text-[#000000] tracking-tight">Pulse Runner</p>
                         <p className="text-[11px] font-medium text-[#94a3b8]">Delivered to your drop-off point</p>
                       </div>
                     </div>
                     {choice === 'RUNNER' && (
                       <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                        <Check size={12} strokeWidth={3} className="text-[#1e293b]" />
+                        <Check size={12} strokeWidth={3} className="text-[#000000]" />
                       </div>
                     )}
                   </button>
@@ -406,11 +406,11 @@ export default function CheckoutPage() {
                               }`}
                             >
                               <div>
-                                <p className="text-[13px] font-bold text-[#1e293b]">{hub.label}</p>
+                                <p className="text-[13px] font-bold text-[#000000]">{hub.label}</p>
                                 <p className="text-[11px] font-medium text-[#94a3b8]">{hub.sub}</p>
                               </div>
                               <div className="text-right shrink-0">
-                                <p className="text-[13px] font-bold text-[#1e293b]">RM {hub.zone === 'campus' ? '3.50' : '5.00'}</p>
+                                <p className="text-[13px] font-bold text-[#000000]">RM {hub.zone === 'campus' ? '3.50' : '5.00'}</p>
                                 <p className="text-[10px] font-medium text-[#94a3b8]">{hub.zone === 'campus' ? 'on campus' : 'off campus'}</p>
                               </div>
                             </button>
@@ -438,7 +438,7 @@ export default function CheckoutPage() {
                   <p className="text-[11px] font-medium text-[#94a3b8]">
                     {qty} item{qty > 1 ? 's' : ''}{choice === 'RUNNER' ? ` · Runner RM${runnerFee.toFixed(2)}` : ''}
                   </p>
-                  <p className="text-[22px] font-bold text-[#1e293b] tracking-tight leading-none">RM {total.toFixed(2)}</p>
+                  <p className="text-[22px] font-bold text-[#000000] tracking-tight leading-none">RM {total.toFixed(2)}</p>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-bold text-slate-300 uppercase tracking-widest">
                   <ShieldCheck size={11} />
@@ -448,7 +448,7 @@ export default function CheckoutPage() {
 
               {/* ── Section header ── */}
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#1e293b] tracking-tight">How would you like to pay?</h2>
+                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">How would you like to pay?</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Select your payment method below.</p>
               </div>
 
@@ -457,10 +457,10 @@ export default function CheckoutPage() {
                 {/* Method header */}
                 <div className="flex items-center gap-4 px-4 py-4 border-b border-slate-100 bg-white">
                   <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                    <span className="text-[#1e293b] font-black text-[11px] tracking-widest">FPX</span>
+                    <span className="text-[#000000] font-black text-[11px] tracking-widest">FPX</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-[13px] font-bold text-[#1e293b]">FPX Online Banking</p>
+                    <p className="text-[13px] font-bold text-[#000000]">FPX Online Banking</p>
                     <p className="text-[11px] font-medium text-[#94a3b8]">Pay directly from your bank</p>
                   </div>
                   {/* Radio — always selected */}
@@ -482,13 +482,13 @@ export default function CheckoutPage() {
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg border flex items-center justify-center text-[10px] font-black tracking-wider shrink-0 transition-all ${
                           selectedBank === bank.id
-                            ? 'bg-slate-100 border-slate-200 text-[#1e293b]'
+                            ? 'bg-slate-100 border-slate-200 text-[#000000]'
                             : 'bg-white border-slate-100 text-[#94a3b8]'
                         }`}>
                           {bank.label.slice(0, 2).toUpperCase()}
                         </div>
                         <span className={`text-[13px] font-bold transition-colors ${
-                          selectedBank === bank.id ? 'text-[#1e293b]' : 'text-[#94a3b8]'
+                          selectedBank === bank.id ? 'text-[#000000]' : 'text-[#94a3b8]'
                         }`}>
                           {bank.label}
                         </span>
