@@ -281,11 +281,32 @@ export default function DevSeedPage() {
                 });
             }
             
-            log("🚀 Injecting Official Campaigns...");
+            log("🚀 Injecting Official Campaigns & Syncing to Marketplace...");
             for (const camp of DEMO_CAMPAIGNS) {
+                // Insert into Campaigns for the Banner
                 await setDoc(doc(db, "campaigns", camp.id), {
                     ...camp,
                     created_at: serverTimestamp(),
+                });
+                
+                // Also insert into Items so the end-to-end process works (detail page -> checkout)
+                await setDoc(doc(db, "items", camp.id), {
+                    id: camp.id,
+                    seller_id: 'official_store_123',
+                    seller_name: camp.club_name,
+                    title: camp.title,
+                    price: camp.id === 'camp_1' ? 60.00 : 25.00, // Dummy prices
+                    stock_count: 50,
+                    domain: 'APPAREL',
+                    subcategory: camp.tag,
+                    governance_status: 'OPEN_MARKET',
+                    image_url: camp.image_url,
+                    description: 'This is an official campaign item. Limited stock available.',
+                    metadata: { type: camp.tag, priority: 'High' },
+                    status: 'active',
+                    is_official: true,
+                    created_at: serverTimestamp(),
+                    updated_at: serverTimestamp(),
                 });
             }
             

@@ -143,7 +143,7 @@ export default function MarketplacePage() {
          </div>
       </nav>
 
-      <div className="pt-28 px-6 space-y-12">
+      <div className="pt-28 px-4 space-y-12">
 
          {/* ── OFFICIAL STORE BANNER ── */}
          <AnimatePresence>
@@ -157,45 +157,42 @@ export default function MarketplacePage() {
                      <Store size={18} className="text-slate-200" />
                   </div>
                   
-                  <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-8 px-8 pb-4 pt-1">
+                  <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-8 px-8 pb-4 pt-2 snap-x snap-mandatory">
                      {campaigns.map(camp => (
                         <motion.div
                           key={camp.id}
                           whileTap={{ scale: 0.98 }}
-                          className="shrink-0 w-[280px] bg-white rounded-2xl border-[0.5px] border-slate-200 flex p-3 cursor-pointer group hover:border-slate-300 transition-colors shadow-sm"
+                          onClick={() => router.push(`/marketplace/${camp.id}`)}
+                          className="shrink-0 w-[320px] h-[180px] snap-center rounded-[24px] overflow-hidden relative cursor-pointer group shadow-md border border-slate-100 bg-[#111111]"
                         >
-                           {/* Left Side: Typography */}
-                           <div className="flex flex-1 flex-col justify-between pr-3">
+                           {/* Background Image & Gradient Overlays */}
+                           {camp.image_url && (
+                             <img src={camp.image_url} alt={camp.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                           )}
+                           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80" />
+                           
+                           {/* Top Pill (Urgency) */}
+                           {camp.urgency && (
+                              <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-md border border-white/20 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                                 {camp.urgency}
+                              </div>
+                           )}
+
+                           {/* Bottom Content */}
+                           <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-2">
                               <div>
-                                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 block">
-                                    {camp.tag}
+                                 <span className="text-[10px] font-bold uppercase tracking-widest text-white/80 drop-shadow-sm block mb-1">
+                                    {camp.tag} • {camp.club_name}
                                  </span>
-                                 <h4 className="text-[14px] font-bold text-[#000000] leading-snug tracking-tight line-clamp-2">
+                                 <h4 className="text-[20px] font-black text-white leading-tight tracking-tight drop-shadow-md">
                                     {camp.title}
                                  </h4>
                               </div>
                               
-                              <div className="flex items-center justify-between mt-3">
-                                 <div className="flex items-center gap-1.5">
-                                    <div className="w-4 h-4 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
-                                       <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${camp.club_name}`} className="w-full h-full object-cover" />
-                                    </div>
-                                    <p className="text-[10px] font-semibold text-slate-500 truncate">{camp.club_name}</p>
-                                 </div>
+                              <div className="flex items-center gap-1.5 text-[12px] font-bold text-white group-hover:text-emerald-300 transition-colors mt-1">
+                                 {camp.cta || 'Explore Official Collection'} <ArrowUpRight size={14} strokeWidth={2.5} />
                               </div>
                            </div>
-
-                           {/* Right Side: Image Thumbnail */}
-                           {camp.image_url && (
-                             <div className="w-[84px] h-[84px] shrink-0 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 relative">
-                                <img src={camp.image_url} alt={camp.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                {camp.urgency && (
-                                   <div className="absolute bottom-1 right-1 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-black uppercase text-[#000000]">
-                                      {camp.urgency}
-                                   </div>
-                                )}
-                             </div>
-                           )}
                         </motion.div>
                      ))}
                   </div>
@@ -241,7 +238,7 @@ export default function MarketplacePage() {
             </div>
 
             {items.length > 0 ? (
-               <div className="grid grid-cols-2 gap-x-5 gap-y-8">
+               <div className="grid grid-cols-2 gap-x-3 gap-y-8">
                   {filteredItems.map(item => (
                      <ProductCard key={item.id} item={item} onClick={() => router.push(`/marketplace/${item.id}`)} />
                   ))}

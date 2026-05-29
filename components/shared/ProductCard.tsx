@@ -35,7 +35,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       className="flex flex-col cursor-pointer group h-full"
     >
       {/* ── IMAGE BOX ── */}
-      <div className="relative aspect-square bg-slate-50 rounded-xl overflow-hidden mb-3">
+      <div className="relative aspect-square bg-slate-50 rounded-lg overflow-hidden mb-2">
         <img 
           src={item.image_url || `https://picsum.photos/seed/${item.id || item.title}/400/400`} 
           onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${item.id}/400/400`; }}
@@ -57,31 +57,31 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       <div className="flex flex-col justify-between flex-1 px-0.5">
         
         {/* Title & Time */}
-        <div className="flex items-start justify-between gap-3">
-          <h4 className="text-[15px] font-bold text-[#000000] leading-tight tracking-tight line-clamp-2">
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="text-[13px] font-medium text-[#000000] leading-[1.3] tracking-tight line-clamp-2">
             {item.title}
           </h4>
-          <span className="text-[12px] font-medium text-[#94a3b8] shrink-0 pt-0.5">
+          <span className="text-[11px] font-medium text-[#94a3b8] shrink-0 pt-0.5">
             {timeAgo}
           </span>
         </div>
 
         {/* Seller Avatar & Name + Price */}
-        <div className="flex items-end justify-between mt-3 pb-1">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+        <div className="flex items-end justify-between mt-2.5 pb-1">
+          <div className="flex items-center gap-1.5">
+            <div className="w-4 h-4 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                <img 
                  src={item.seller_photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name || 'S'}`} 
                  className="w-full h-full object-cover" 
                  alt={item.seller_name}
                />
             </div>
-            <p className="text-[12px] font-semibold text-[#64748b] line-clamp-1">
+            <p className="text-[11px] font-medium text-[#64748b] line-clamp-1">
               {item.seller_name || 'Seller'}
             </p>
           </div>
           
-          <p className="text-[16px] font-black text-[#000000] tracking-tight shrink-0 pl-2">
+          <p className="text-[15px] font-bold text-[#000000] tracking-tight shrink-0 pl-2">
             RM {formattedPrice}
           </p>
         </div>
