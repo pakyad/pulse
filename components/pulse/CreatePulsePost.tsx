@@ -57,7 +57,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }} 
             onClick={onClose}
-            className="absolute inset-0 bg-navy/20 backdrop-blur-md" 
+            className="absolute inset-0 bg-[#111111]/20 backdrop-blur-md" 
           />
           
           <motion.div 
@@ -69,15 +69,15 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
             {/* Header */}
             <div className="px-8 pt-8 pb-6 border-b border-slate-50 flex items-center justify-between">
                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-navy rounded-2xl flex items-center justify-center text-white">
+                  <div className="w-10 h-10 bg-[#111111] rounded-2xl flex items-center justify-center text-white">
                      <Sparkles size={20} />
                   </div>
                   <div>
-                     <h2 className="text-[18px] font-black text-navy tracking-tight">Initiate Pulse</h2>
+                     <h2 className="text-[18px] font-black text-[#000000] tracking-tight">Initiate Pulse</h2>
                      <p className="text-[11px] text-slate-400 font-medium">Broadcast to the campus network</p>
                   </div>
                </div>
-               <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy/20 hover:text-navy transition-all">
+               <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-[#000000]/20 hover:text-[#000000] transition-all">
                   <X size={20} />
                </button>
             </div>
@@ -94,7 +94,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                           onClick={() => setSelectedTag(tag.id)}
                           className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all border ${
                             selectedTag === tag.id 
-                              ? 'bg-navy text-white border-navy' 
+                              ? 'bg-[#111111] text-white border-[#111111]' 
                               : 'bg-white text-slate-400 border-slate-100'
                           }`}
                         >
@@ -111,7 +111,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                     value={headline}
                     onChange={e => setHeadline(e.target.value)}
                     placeholder="Brief, high-impact title..."
-                    className="w-full h-14 px-6 bg-slate-50 rounded-2xl border-none text-[16px] font-bold text-navy placeholder:text-slate-300 focus:ring-2 focus:ring-navy/5 transition-all"
+                    className="w-full h-14 px-6 bg-slate-50 rounded-2xl border-none text-[16px] font-bold text-[#000000] placeholder:text-slate-300 focus:ring-2 focus:ring-[#111111]/5 transition-all"
                   />
                </div>
 
@@ -122,13 +122,13 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                     value={body}
                     onChange={e => setBody(e.target.value)}
                     placeholder="Provide granular context for this update..."
-                    className="w-full h-40 p-6 bg-slate-50 rounded-3xl border-none text-[15px] font-medium text-navy placeholder:text-slate-300 focus:ring-2 focus:ring-navy/5 transition-all resize-none"
+                    className="w-full h-40 p-6 bg-slate-50 rounded-3xl border-none text-[15px] font-medium text-[#000000] placeholder:text-slate-300 focus:ring-2 focus:ring-[#111111]/5 transition-all resize-none"
                   />
                </div>
 
                {/* Image Attachment (Placeholder) */}
-               <div className="h-48 rounded-[32px] bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-3 group cursor-pointer hover:border-navy transition-all">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-navy group-hover:text-white transition-all">
+               <div className="h-48 rounded-[32px] bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-3 group cursor-pointer hover:border-[#111111] transition-all">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-[#111111] group-hover:text-white transition-all">
                      <ImageIcon size={24} />
                   </div>
                   <p className="text-[11px] font-bold uppercase tracking-widest">Attach Media Assets</p>
@@ -146,7 +146,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                <button 
                  disabled={submitting || !headline || !body}
                  onClick={handleSubmit}
-                 className="h-14 px-8 bg-navy text-white rounded-2xl font-bold text-[14px] uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-navy/20 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
+                 className="h-14 px-8 bg-[#111111] text-white rounded-2xl font-bold text-[14px] uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
                >
                   {submitting ? (
                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
