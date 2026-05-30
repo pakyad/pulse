@@ -7,6 +7,8 @@ import {
   ChevronLeft, Package, Zap, ArrowRight, Activity, 
   MapPin, Clock, DollarSign, Filter, Search
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
@@ -157,9 +159,7 @@ export default function MissionBoard() {
       {/* ── MATURED NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/run')} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 active:scale-95 transition-all">
-               <ChevronLeft size={20} />
-            </button>
+            <BackButton fallback="/run" />
             <div>
                <p className="text-[24px] font-bold tracking-tight text-slate-900 leading-none">Orders</p>
             </div>

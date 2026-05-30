@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, orderBy, limit, onSnapshot, doc } from 'firebase/firestore';
 import { Trophy, Medal, Star, Zap, Crown, ChevronLeft, LayoutGrid, ShieldCheck, Activity, ChevronRight } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
@@ -62,9 +64,7 @@ export default function LeaderboardPage() {
       {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
-               <ChevronLeft size={20} />
-            </button>
+            <BackButton />
             <p className="text-[15px] font-bold tracking-tight">Leaderboard</p>
          </div>
          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />

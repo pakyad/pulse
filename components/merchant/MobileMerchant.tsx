@@ -347,7 +347,7 @@ export default function MobileMerchant({
            {[
              { id: 'dashboard', label: 'Terminal', icon: LayoutGrid, path: '/merchant' },
              { id: 'disputes', label: 'Log', icon: ClipboardList, path: '/merchant/disputes' },
-             { id: 'insights', label: 'Stats', icon: BarChart3, path: '/activity' },
+             { id: 'insights', label: 'Stats', icon: BarChart3, path: '/me/insights' },
              { id: 'account', label: 'Registry', icon: User, path: '/me' }
            ].map((nav) => {
              const active = pathname === nav.path || (nav.id === 'dashboard' && pathname === '/merchant');
@@ -375,7 +375,7 @@ export default function MobileMerchant({
                animate={{ y: 0 }}
                exit={{ y: '100%' }}
                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-               className="fixed inset-0 z-[1000]"
+               className="fixed inset-0 z-1000"
             >
                <CreateListing 
                   key={editingItem?.id || 'create'}

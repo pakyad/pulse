@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { ArrowLeft, ShieldCheck, Package, MapPin, ExternalLink, Store } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import ProductCard from '@/components/shared/ProductCard';
@@ -94,12 +96,7 @@ export default function PublicProfile() {
       {/* BACK BUTTON — floats over header */}
       <div className="fixed top-0 left-0 right-0 z-50 px-6 pt-12 pb-4 pointer-events-none">
         <div className="flex justify-between items-center pointer-events-auto">
-          <button
-            onClick={() => router.back()}
-            className="w-11 h-11 bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg flex items-center justify-center text-navy border border-white/60 active:scale-90 transition-all"
-          >
-            <ArrowLeft size={20} />
-          </button>
+          <BackButton variant="overlay" />
           {isOwn && (
             <button
               onClick={() => router.push('/me')}

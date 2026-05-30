@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, Loader2, CheckCircle2, AlertCircle, X
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { auth, db } from '@/lib/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -111,12 +113,7 @@ export default function PerfectSignUp() {
         
         {/* ── NAV BAR ── */}
         <div className="flex items-center justify-between mb-12 relative">
-          <button 
-            onClick={() => step === 'complete' ? setStep('form') : router.back()}
-            className="w-10 h-10 rounded-full bg-[#F2F8FF] flex items-center justify-center text-black hover:opacity-70 transition-all active:scale-90"
-          >
-            <ChevronLeft size={20} strokeWidth={2.5} />
-          </button>
+          <BackButton />
           <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">
             {step === 'form' ? 'Sign up' : 'Welcome'}
           </h1>

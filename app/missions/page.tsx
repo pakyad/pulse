@@ -10,6 +10,8 @@ import {
   Truck, Search, Bell, Radio, InboxIcon, AlertCircle,
   ShieldCheck, Phone
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
@@ -254,9 +256,7 @@ export default function MissionBoard() {
 
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-4">
-            <button onClick={() => router.push('/run')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-90 transition-all">
-               <ChevronLeft size={20} />
-            </button>
+            <BackButton fallback="/run" />
             <p className="text-[15px] font-bold tracking-tight">Find Jobs</p>
          </div>
          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />

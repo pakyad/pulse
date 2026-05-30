@@ -55,6 +55,20 @@ service cloud.firestore {
     match /campaigns/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /pulse_posts/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     
+    // ── NOTIFICATIONS ──
+    // ── NOTIFICATIONS ──
+    match /notifications/{id} {
+      allow read, list, write: if isSignedIn();
+    }
+    
+    // ── IN-APP MESSAGING (SYNC SESSIONS) ──
+    match /chats/{chatId} {
+      allow read, list, write: if isSignedIn();
+      match /messages/{messageId} {
+        allow read, list, write: if isSignedIn();
+      }
+    }
+    
     // ── TRANSACTIONS & REVIEWS ──
     match /transactions/{id} { 
       allow read, list: if isSignedIn(); 

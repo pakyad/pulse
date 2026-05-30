@@ -16,6 +16,8 @@ import {
   Zap,
   Radio
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import FacilityCanvas from '@/components/hub/FacilityCanvas';
 import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -93,12 +95,7 @@ export default function FacilityBookingPage() {
       {/* ── 1. FRIENDLY HEADER (Consumer baseline) ── */}
       <section className="px-6 pt-12 pb-8">
          <div className="flex items-center justify-between mb-8">
-            <button 
-              onClick={() => router.back()}
-              className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all"
-            >
-              <ChevronLeft size={20} />
-            </button>
+            <BackButton />
             <div className="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Live Campus Data</span>

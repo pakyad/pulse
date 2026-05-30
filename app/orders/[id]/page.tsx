@@ -10,6 +10,8 @@ import {
   Clock, ShieldCheck, MapPin, Receipt,
   ShieldAlert, Truck, Info, XCircle, Star, Navigation
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
 import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 import OrderTracker from '@/components/shared/OrderTracker';
@@ -730,12 +732,7 @@ export default function LiveOrderPage() {
       {/* ── FLOATING NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between pointer-events-none select-none">
         <div className="flex items-center gap-3 pointer-events-auto">
-          <button
-            onClick={() => router.push('/home')}
-            className="w-10 h-10 rounded-full flex items-center justify-center text-[#000000] hover:bg-slate-100/50 active:scale-95 transition-all"
-          >
-            <ChevronLeft size={20} strokeWidth={2.5} />
-          </button>
+          <BackButton />
           <div className="flex flex-col justify-center">
             <p className="text-[13px] font-black text-[#000000] tracking-tight leading-tight">Order Details</p>
             <p className="text-[10px] font-black text-amber-600 tracking-wider leading-none mt-0.5">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>

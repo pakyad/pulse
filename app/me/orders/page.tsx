@@ -5,6 +5,8 @@ import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ShoppingBag } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 
 type Tab = 'Active' | 'History';
 type HistoryFilter = 'All' | 'Completed' | 'Cancelled';
@@ -105,12 +107,7 @@ export default function MyOrdersPage() {
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
-        <button
-          onClick={() => router.push('/marketplace')}
-          className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-100 active:scale-95 transition-all"
-        >
-          <ChevronLeft size={18} />
-        </button>
+        <BackButton fallback="/marketplace" />
         <div>
           <p className="text-[14px] font-bold tracking-tight">
             {profile?.role === 'CLUB' ? 'Sales Registry' : 'My Orders'}

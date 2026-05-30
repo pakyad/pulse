@@ -9,6 +9,8 @@ import {
   AlertTriangle, CheckCircle2, Navigation, ClipboardList, Info,
   ExternalLink, ArrowRight
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 function RunnerActivePageContent() {
@@ -168,9 +170,7 @@ function RunnerActivePageContent() {
       
       {/* ── Institutional Header ── */}
       <nav className="px-8 pt-16 pb-8 flex items-center justify-between shrink-0 bg-white border-b border-slate-100">
-        <button onClick={() => router.push('/run')} className="w-12 h-12 rounded-[1.5rem] bg-slate-50 border border-slate-100 flex items-center justify-center transition-all active:scale-90">
-           <ChevronLeft size={20} />
-        </button>
+        <BackButton fallback="/run" />
         <div className="flex flex-col items-center">
            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Order ID: {order.id.slice(0,6).toUpperCase()}</span>
            <h2 className="text-[14px] font-black uppercase tracking-tightest mt-1">Order Status</h2>

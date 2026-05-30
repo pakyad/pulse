@@ -14,6 +14,8 @@ import {
   XCircle,
   Zap
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -43,12 +45,7 @@ export default function BookingPassPage() {
       
       {/* ── 1. DARK NAV ── */}
       <nav className="px-6 pt-12 pb-6 flex items-center justify-between z-10">
-        <button 
-          onClick={() => router.push('/pulse')}
-          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-all"
-        >
-          <ChevronLeft size={20} />
-        </button>
+        <BackButton fallback="/pulse" />
         <div className="text-center">
           <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Institutional Pass</p>
           <h1 className="text-[14px] font-bold tracking-widest text-white uppercase">Reservation Registry</h1>

@@ -10,6 +10,8 @@ import {
   ArrowUpRight, ShieldCheck,
   ChevronLeft, Clock, Zap
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { completeDelivery } from '@/app/actions/deliveryActions';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
@@ -286,9 +288,7 @@ export default function RunnerTerminal() {
         {/* ── MATURED NAVIGATION ── */}
         <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
            <div className="flex items-center gap-3">
-              <button onClick={() => router.push('/run')} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 active:scale-95 transition-all">
-                 <ChevronLeft size={18} />
-              </button>
+              <BackButton fallback="/run" />
               <div>
                  <p className="text-[21px] font-bold tracking-tight text-slate-900 leading-none">Terminal Hub</p>
               </div>

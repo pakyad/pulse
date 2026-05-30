@@ -19,6 +19,8 @@ import {
   Briefcase,
   GraduationCap
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { db, auth } from '@/lib/firebase';
 import { collection, query, onSnapshot, doc, updateDoc, getDoc } from 'firebase/firestore';
 
@@ -82,7 +84,7 @@ export default function AdminUserManagement() {
       <aside className="w-[280px] h-screen bg-white border-r-[0.5px] border-[#F2F2F7] fixed left-0 top-0 flex flex-col z-30">
         <div className="px-8 py-12 flex flex-col gap-8">
            <div className="flex items-center gap-3">
-              <button onClick={() => router.push('/admin/dashboard')} className="p-2 -ml-2 text-[#8E8E93] hover:text-[#1C1C1E] transition-all active:scale-90"><ChevronLeft size={24} /></button>
+              <BackButton fallback="/admin/dashboard" />
               <h1 className="text-[22px] font-black tracking-tighter text-[#1C1C1E] uppercase">Registry</h1>
            </div>
 

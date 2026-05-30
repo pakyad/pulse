@@ -8,6 +8,8 @@ import {
   ChevronLeft, ShoppingBag, Trash2, Plus, Minus, 
   ArrowRight, ShieldCheck, ShoppingCart
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 
 export default function CartPage() {
   const router = useRouter();
@@ -26,12 +28,7 @@ export default function CartPage() {
       {/* ── NAV (Optical Institutionalism) ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push('/marketplace')}
-            className="w-8 h-8 rounded-xl bg-slate-50/50 flex items-center justify-center text-slate-400 border border-slate-100/50 active:scale-95 transition-all"
-          >
-            <ChevronLeft size={16} />
-          </button>
+          <BackButton fallback="/marketplace" />
           <div>
             <p className="text-[15px] font-bold tracking-tight text-[#000000] leading-tight">Shopping Bag</p>
             <p className="text-[10px] font-medium text-slate-400 mt-0.5">{cartCount} items selected</p>

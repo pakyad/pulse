@@ -1,6 +1,6 @@
 'use client'
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, ChevronLeft, LogOut, Bell, Settings, ShoppingBag } from 'lucide-react';
+import { Search, ChevronLeft, LogOut, Bell, Settings, ShoppingBag, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
@@ -102,6 +102,7 @@ export default function Header() {
                 </div>
               )}
             </button>
+
             <button 
               onClick={() => router.push('/activity')}
               className={`transition-all relative p-2 active:scale-90 ${pathname === '/activity' ? 'text-[#007AFF]' : 'text-navy/40 hover:text-navy'}`}

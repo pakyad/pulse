@@ -78,7 +78,7 @@ export default function DesktopMerchant({
             <span className="text-[15px] tracking-[-0.24px]">Log</span>
           </button>
           <button 
-            onClick={() => router.push('/activity')}
+            onClick={() => router.push('/me/insights')}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
           >
             <BarChart3 size={20} />

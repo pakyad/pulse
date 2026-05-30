@@ -13,6 +13,35 @@ import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, where, orderBy, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
+const DEMO_NOTIFICATIONS = [
+  {
+    id: 'demo_n1',
+    category: 'COMMERCE',
+    type: 'ORDER ALERT',
+    title: 'Order #8012 Ready for Pickup',
+    body: 'Your Nike Vintage Hoodie is ready. Please collect it at the SE Club booth before 5 PM.',
+    time_ago: '10m ago',
+    is_read: false,
+  },
+  {
+    id: 'demo_n2',
+    category: 'CAMPUS',
+    type: 'RADAR MATCH',
+    title: 'Potential Match for Lost Keys',
+    body: "A user just posted a found item that matches your 'Honda Keys' description.",
+    time_ago: '2h ago',
+    is_read: false,
+  },
+  {
+    id: 'demo_n3',
+    category: 'COMMERCE',
+    type: 'LOGISTICS UPDATE',
+    title: 'Runner Assigned',
+    body: 'Runner Ahmad has accepted your delivery request and is heading to the pickup point.',
+    time_ago: 'Yesterday',
+    is_read: true,
+  }
+];
 /**
  * 🏛️ Pulse Activity & Insights
  * concept: skibidi (standardized typography & subtext)
@@ -204,7 +233,7 @@ export default function ActivityPage() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#000000]">
+    <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#000000] w-full max-w-2xl mx-auto">
       
       <section className="px-8 pt-12 pb-6 border-b-[0.5px] border-slate-50">
          <div className="flex items-center justify-between">
@@ -213,11 +242,16 @@ export default function ActivityPage() {
                   <ArrowLeft size={20} />
                </button>
                <div className="space-y-0.5">
-                  <SkibidiHeading>{profile?.role === 'CLUB' || profile?.is_verified_merchant ? 'Insights' : 'Inbox'}</SkibidiHeading>
-                  <SkibidiSubtext>{profile?.role === 'CLUB' || profile?.is_verified_merchant ? 'Operational Analytics' : 'Terminal Relay'}</SkibidiSubtext>
+                  <SkibidiHeading>Activity</SkibidiHeading>
+                  <SkibidiSubtext>Terminal Relay</SkibidiSubtext>
                </div>
             </div>
-            <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
+            <div className="flex items-center gap-3">
+               <button onClick={() => router.push('/messages')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] border border-slate-50 active:scale-90 transition-all shrink-0">
+                  <MessageSquare size={18} />
+               </button>
+               <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
+            </div>
          </div>
       </section>
 
@@ -243,8 +277,9 @@ export default function ActivityPage() {
                </div>
 
                <div className="flex flex-col -mx-8">
-                  {notifications.length > 0 ? (
-                    notifications.filter(it => activeTab === 'All' || it.category === tabMap[activeTab]).map((item) => (
+                  {(notifications.length > 0 ? notifications : DEMO_NOTIFICATIONS)
+                    .filter(it => activeTab === 'All' || it.category === tabMap[activeTab])
+                    .map((item) => (
                       <InboxItemCard 
                         key={item.id}
                         type={item.type || 'NOTIFICATION'}
@@ -252,10 +287,11 @@ export default function ActivityPage() {
                         subtitle={item.body || item.message}
                         statusText={item.time_ago || 'Now'}
                         isUnread={!item.is_read}
+                        icon={Bell}
                         onClick={() => {}}
                       />
-                    ))
-                  ) : (
+                    ))}
+                  {(notifications.length > 0 ? notifications : DEMO_NOTIFICATIONS).filter(it => activeTab === 'All' || it.category === tabMap[activeTab]).length === 0 && (
                     <div className="py-32 flex flex-col items-center justify-center text-[#94a3b8] gap-4">
                        <Inbox size={40} strokeWidth={1} className="opacity-20" />
                        <p className="text-[10px] font-black uppercase tracking-widest">Inbox Terminal Clear</p>

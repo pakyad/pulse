@@ -5,6 +5,7 @@ import { auth, db, functions } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { ChevronLeft, X, Loader2, ChevronRight, ArrowRight } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
@@ -215,8 +216,8 @@ export default function RunModule() {
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.push('/home')} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
-            <ChevronLeft size={18} />
+          <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-90 transition-all">
+             <ChevronLeft size={20} />
           </button>
           <p className="text-[14px] font-bold tracking-tight">Deliveries</p>
         </div>
@@ -293,7 +294,7 @@ export default function RunModule() {
       <AnimatePresence>
         {activeService && (
           <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-0 z-[200] bg-white flex flex-col">
+            className="fixed inset-0 z-200 bg-white flex flex-col">
 
             {/* Progress bar */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-slate-50">

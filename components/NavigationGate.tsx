@@ -88,6 +88,7 @@ export default function NavigationGate() {
              const isAllowedSharedPath = 
                pathname === '/me' || 
                pathname === '/activity' || 
+               pathname === '/me/insights' ||
                pathname?.startsWith('/me/orders') || 
                pathname?.startsWith('/orders/');
                
@@ -126,6 +127,8 @@ export default function NavigationGate() {
 
   // ── LAYOUT VISIBILITY PROTOCOL ──
   
+  const isChatRoom = pathname?.startsWith('/messages/') && pathname !== '/messages';
+
   // Header Visibility (Institutional Silence)
   const hideHeader = 
     isAuthPage || 
@@ -137,7 +140,8 @@ export default function NavigationGate() {
     pathname?.startsWith('/run') || 
     pathname?.startsWith('/cart') ||
     pathname?.startsWith('/marketplace/') ||
-    pathname?.startsWith('/orders/');
+    pathname?.startsWith('/orders/') ||
+    isChatRoom;
 
   // BottomNav Visibility (Dynamic Suppression)
   // Hidden during the full buying process to avoid overlapping sticky CTAs
@@ -151,6 +155,8 @@ export default function NavigationGate() {
     !isAuthPage && 
     !isRoot && 
     !isBuyingFlow &&
+    pathname !== '/me/insights' &&
+    !pathname?.startsWith('/messages') &&
     !pathname?.startsWith('/admin') && 
     !pathname?.startsWith('/merchant') &&
     !(role === 'CLUB' && (pathname === '/me' || pathname === '/activity' || pathname?.startsWith('/me/orders')));

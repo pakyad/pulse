@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, History, Search, MapPin, ChevronRight, Package, CheckCircle2 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 
@@ -51,9 +53,7 @@ export default function RunnerHistoryPage() {
       <header className="px-6 pt-12 pb-6 sticky top-0 bg-white/80 backdrop-blur-xl z-50 border-b border-slate-50">
         <div className="flex items-center justify-between mb-8">
            <div className="flex items-center gap-3">
-              <button onClick={() => router.push('/run')} className="p-2 -ml-2 text-slate-300 hover:text-navy transition-colors">
-                 <ArrowLeft size={22} />
-              </button>
+              <BackButton fallback="/run" />
               <h1 className="text-[17px] font-bold tracking-tight">Order History</h1>
            </div>
         </div>

@@ -6,6 +6,8 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ChevronRight, Check } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 
 const FACULTIES = ['MIIT', 'FBT', 'FST', 'FBEST', 'FIS', 'IFP'];
 const YEARS = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Postgrad'];
@@ -74,9 +76,7 @@ export default function EditProfilePage() {
       
       {/* ── HEADER (Apple Standard) ── */}
       <header className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white z-50">
-        <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/30 hover:text-navy transition-all active:scale-90">
-          <ArrowLeft size={22} strokeWidth={2.5} />
-        </button>
+        <BackButton />
         <h1 className="text-[17px] font-bold tracking-tight">Edit Profile</h1>
         <button 
           onClick={handleSave}

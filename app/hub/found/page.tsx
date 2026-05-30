@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   ShieldCheck
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { useRouter } from 'next/navigation';
 import ProductCard from '@/components/shared/ProductCard';
 
@@ -38,12 +40,7 @@ export default function FoundHub() {
     <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
       {/* 1. DYNAMIC HEADER */}
       <section className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50 border-b border-slate-50">
-        <button 
-          onClick={() => router.back()}
-          className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-navy hover:bg-slate-50 transition-all"
-        >
-          <ChevronLeft size={20} />
-        </button>
+        <BackButton />
         <div className="text-center">
           <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Items</p>
           <h1 className="text-[18px] font-bold tracking-widest text-navy">Lost & Found</h1>

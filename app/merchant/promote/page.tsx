@@ -10,6 +10,8 @@ import {
   Clock, XCircle, ChevronRight, ArrowLeft, Image as ImageIcon, Sparkles,
   Info, BarChart3, AlertCircle
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { useSearchParams } from 'next/navigation';
 
 function PromoteHubContent() {
@@ -146,12 +148,7 @@ function PromoteHubContent() {
       <section className="px-6 pt-16 pb-8 border-b border-slate-50 sticky top-0 bg-white z-50">
         <div className="flex items-center justify-between mb-8">
            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => studioStep > 0 ? setStudioStep(0) : router.push('/merchant')}
-                className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy active:scale-95 transition-all"
-              >
-                 <ArrowLeft size={18} />
-              </button>
+              <BackButton fallback="/merchant" />
               <div>
                  <h1 className="text-[24px] font-bold tracking-widest text-navy">Promotion Center</h1>
                  <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest leading-none mt-1">Boost your items to the front page</p>

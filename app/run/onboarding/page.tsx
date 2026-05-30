@@ -15,6 +15,8 @@ import {
   X,
   CheckCircle2
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { onSnapshot, doc, updateDoc } from 'firebase/firestore';
@@ -93,9 +95,7 @@ export default function RunnerOnboarding() {
       {/* ── MINIMAL HEADER ── */}
       <nav className="px-8 pt-12 pb-6 flex items-center justify-between bg-white border-b-[0.5px] border-slate-50">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/20 active:scale-90 transition-all">
-            <ChevronLeft size={24} />
-          </button>
+          <BackButton />
           <h2 className="text-[17px] font-bold tracking-tight">Apply to Run</h2>
         </div>
         <div className="flex gap-1.5">

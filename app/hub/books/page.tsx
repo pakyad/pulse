@@ -14,6 +14,8 @@ import {
   Clock,
   Sparkles
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { useRouter } from 'next/navigation';
 
 const RECENT_BOOKS = [
@@ -36,12 +38,7 @@ export default function BooksHub() {
     <main className="min-h-screen bg-white pb-32 font-sans antialiased text-navy">
       {/* 1. KNOWLEDGE HEADER */}
       <section className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50">
-        <button 
-          onClick={() => router.back()}
-          className="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center text-navy hover:bg-slate-50 transition-all"
-        >
-          <ChevronLeft size={20} />
-        </button>
+        <BackButton />
         <div className="text-center">
           <p className="text-[10px] font-black text-violet-500 uppercase tracking-[0.4em] mb-1">Knowledge Sync</p>
           <h1 className="text-[20px] font-bold tracking-widest text-navy">Campus Library Hub</h1>

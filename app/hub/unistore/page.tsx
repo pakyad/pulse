@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
 import { ChevronLeft, ShieldCheck } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { useRouter } from 'next/navigation';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ProductCard from '@/components/shared/ProductCard';
@@ -101,9 +103,7 @@ export default function UniStorePage() {
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-100 px-5 pt-8 pb-4 flex items-center gap-3 bg-[#FDFDFD]/90 backdrop-blur-xl border-b border-slate-50">
-        <button onClick={() => router.back()} className="p-2 -ml-2 text-navy/40 hover:text-navy transition-all active:scale-90">
-          <ChevronLeft size={28} strokeWidth={2} />
-        </button>
+        <BackButton />
         <div className="flex-1">
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">UniKL Official</span>

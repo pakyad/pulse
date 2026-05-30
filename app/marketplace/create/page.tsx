@@ -7,6 +7,8 @@ import {
   UtensilsCrossed, BookOpen, Wrench, Home, Cpu,
   TrendingUp
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 
 import { db, auth, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -131,12 +133,7 @@ export default function CreateListingPage() {
       {/* ── NAV (matches Marketplace page nav exactly) ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all"
-          >
-            <ChevronLeft size={18} />
-          </button>
+          <BackButton />
           <div>
             <p className="text-[14px] font-bold tracking-tight">New Listing</p>
             <p className="text-[10px] font-medium text-[#94a3b8]">Institutional Registry</p>

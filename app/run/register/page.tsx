@@ -14,6 +14,8 @@ import {
   Building,
   Loader2
 } from 'lucide-react';
+import BackButton from '@/components/shared/BackButton';
+
 import { useSearchParams } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { submitInstitutionalApplication } from '@/lib/auth-utils';
@@ -81,12 +83,7 @@ function RunnerRegistrationContent() {
       <div className="max-w-md mx-auto px-6 pt-16 pb-12">
         
         {/* Navigation */}
-        <button 
-          onClick={() => step === 'identity' ? router.back() : setStep('identity')} 
-          className="mb-8 p-1 -ml-1 text-slate-400 hover:text-navy transition-colors"
-        >
-          <ChevronLeft size={28} />
-        </button>
+        <BackButton />
 
         <AnimatePresence mode="wait">
           {step === 'identity' && (
