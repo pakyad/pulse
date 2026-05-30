@@ -12,6 +12,7 @@ import { MARKETPLACE_DOMAINS, DomainID } from '@/lib/marketplace/domains';
 import { useCart } from '@/lib/context/CartContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import ReportPriceButton from '@/components/shared/ReportPriceButton';
+import BackButton from '@/components/shared/BackButton';
 
 // ── DOMAIN REGISTRY RENDERER ──
 function DomainRegistry({ item }: { item: any }) {
@@ -199,12 +200,9 @@ export default function ItemDetailsPage() {
 
       {/* ── NAV (matches platform pattern) ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-transparent pointer-events-none">
-        <button
-          onClick={() => router.push('/marketplace')}
-          className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center text-[#000000] shadow-sm active:scale-95 transition-all pointer-events-auto"
-        >
-          <ChevronLeft size={18} />
-        </button>
+        <div className="pointer-events-auto">
+          <BackButton fallback="/marketplace" variant="overlay" />
+        </div>
         <div className="flex items-center gap-2 pointer-events-auto">
           <button 
             onClick={() => router.push('/cart')}

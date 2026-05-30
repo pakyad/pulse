@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Send, Search, Image as ImageIcon, ShoppingBag, Radio, ChevronRight } from 'lucide-react';
-import BackButton from '@/components/shared/BackButton';
+import BackButton from '../../../components/shared/BackButton';
 
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
