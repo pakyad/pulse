@@ -169,7 +169,7 @@ export default function MarketplacePage() {
                            {camp.image_url && (
                              <img src={camp.image_url} alt={camp.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                            )}
-                           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80" />
+                           <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-black/80" />
                            
                            {/* Top Pill (Urgency) */}
                            {camp.urgency && (
