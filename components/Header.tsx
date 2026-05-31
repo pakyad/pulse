@@ -1,6 +1,6 @@
 'use client'
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, ChevronLeft, LogOut, Bell, Settings, ShoppingBag, MessageSquare } from 'lucide-react';
+import { Search, ChevronLeft, LogOut, Bell, Settings, ShoppingCart, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
@@ -95,7 +95,7 @@ export default function Header() {
               onClick={() => router.push('/cart')}
               className="transition-all relative p-2 text-navy/40 hover:text-navy active:scale-90"
             >
-              <ShoppingBag size={22} />
+              <ShoppingCart size={22} />
               {cartCount > 0 && (
                 <div className="absolute top-1 right-1 bg-emerald-500 text-white text-[8px] font-black h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
                   {cartCount}
