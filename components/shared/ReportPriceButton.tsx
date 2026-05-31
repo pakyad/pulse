@@ -69,7 +69,7 @@ export default function ReportPriceButton({ itemId, sellerId, compact = false }:
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-end justify-center bg-black/20 backdrop-blur-sm px-4 pb-6"
+            className="fixed inset-0 z-[200] flex items-end justify-center bg-black/20 backdrop-blur-md px-4 pb-6"
             onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false); }}
           >
             <motion.div
@@ -77,7 +77,7 @@ export default function ReportPriceButton({ itemId, sellerId, compact = false }:
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-              className="w-full max-w-sm bg-white rounded-3xl border border-slate-100 shadow-2xl shadow-slate-900/10 overflow-hidden"
+              className="w-full max-w-sm bg-white rounded-2xl border border-slate-100 shadow-md shadow-slate-900/10 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {submitted ? (

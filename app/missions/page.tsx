@@ -63,7 +63,7 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm hover:border-slate-300 transition-all group overflow-hidden relative"
+      className="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm hover:border-slate-300 transition-all group overflow-hidden relative"
     >
       {/* Scanning Overlay */}
       {isHolding && (
@@ -111,7 +111,7 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
       </div>
 
       {/* Logistics Detail */}
-      <div className="space-y-4 mb-8 bg-slate-50/50 p-6 rounded-[24px] border border-slate-100/50">
+      <div className="space-y-4 mb-8 bg-slate-50/50 p-6 rounded-2xl border border-slate-100/50">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-300">
              <MapPin size={18} />
@@ -141,11 +141,11 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
         onTouchStart={() => !disabled && setIsHolding(true)}
         onTouchEnd={() => setIsHolding(false)}
         disabled={disabled}
-        className={`w-full h-16 rounded-[24px] font-bold text-[14px] transition-all select-none relative z-20 ${
+        className={`w-full h-16 rounded-2xl font-bold text-[14px] transition-all select-none relative z-20 ${
           disabled 
           ? 'bg-slate-50 text-slate-300 cursor-not-allowed' 
           : isHolding 
-            ? 'bg-blue-600 text-white scale-[0.98] shadow-2xl shadow-slate-900/10' 
+            ? 'bg-blue-600 text-white scale-[0.98] shadow-md shadow-slate-900/10' 
             : 'bg-slate-50 text-[#000000] border border-slate-100 hover:bg-slate-100'
         }`}
       >
@@ -165,7 +165,7 @@ function SuccessOverlay({ onInitiate }: { onInitiate: () => void }) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-1000 bg-blue-600 flex flex-col items-center justify-center p-12 text-center">
-       <div className="w-24 h-24 bg-white/10 rounded-[40px] flex items-center justify-center mb-10 border border-white/5 shadow-2xl">
+       <div className="w-24 h-24 bg-white/10 rounded-2xl flex items-center justify-center mb-10 border border-white/5 shadow-md">
           <Truck size={40} className="text-white" />
        </div>
        <h2 className="text-[32px] font-bold text-white tracking-tight leading-tight mb-4">Job Accepted</h2>
@@ -291,7 +291,7 @@ export default function MissionBoard() {
             />
           ))
         ) : (
-          <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-[40px] flex flex-col items-center">
+          <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center">
              <Radio className="text-slate-100 mb-4" size={48} />
              <p className="text-[14px] font-bold text-[#94a3b8] uppercase tracking-widest">No active jobs found</p>
           </div>

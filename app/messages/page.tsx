@@ -80,7 +80,7 @@ export default function MessagesPage() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#000000] w-full max-w-2xl mx-auto">
+    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-[#000000] w-full max-w-2xl mx-auto">
       
       <section className="px-6 pt-24 pb-4">
         <div className="mb-6">
@@ -110,7 +110,7 @@ export default function MessagesPage() {
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ delay: i * 0.02 }}
                  onClick={() => router.push(`/messages/${chat.id}`)}
-                 className={`w-full flex items-start gap-4 p-4 rounded-[28px] transition-all text-left group relative ${isUnread ? 'bg-slate-50/50' : 'bg-transparent'}`}
+                 className={`w-full flex items-start gap-4 p-4 rounded-2xl transition-all text-left group relative ${isUnread ? 'bg-slate-50/50' : 'bg-transparent'}`}
               >
                  <div className="relative shrink-0 mt-0.5">
                     <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white border border-slate-100 group-active:scale-90 transition-transform">
@@ -134,7 +134,7 @@ export default function MessagesPage() {
                  </div>
 
                  <div className="flex-1 min-w-0 pt-0.5">
-                    <h3 className={`text-[15px] tracking-tight mb-0.5 ${isUnread ? 'text-[#000000] font-bold' : 'text-slate-800 font-bold'}`}>
+                    <h3 className={`text-[15px] tracking-tight mb-0.5 truncate ${isUnread ? 'text-[#000000] font-bold' : 'text-slate-800 font-bold'}`}>
                        {otherParticipant.name}
                     </h3>
                     
@@ -160,7 +160,7 @@ export default function MessagesPage() {
          })}
          {(conversations.length > 0 ? conversations : DEMO_CONVERSATIONS).length === 0 && (
            <div className="py-32 flex flex-col items-center justify-center text-[#94a3b8] gap-4">
-              <MessageSquare size={40} strokeWidth={1} className="opacity-20" />
+              <MessageSquare size={40} strokeWidth={1} className="text-slate-300" />
               <p className="text-[12px] font-bold uppercase tracking-widest">No conversations yet</p>
            </div>
          )}

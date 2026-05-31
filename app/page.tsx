@@ -68,7 +68,7 @@ export default function Home() {
 
       {/* Floating Bottom Nav for Mobile UX */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <div className="soft-lens rounded-full px-8 py-4 flex gap-12 items-center shadow-2xl border-[0.5px] border-white/50">
+        <div className="soft-lens rounded-full px-8 py-4 flex gap-12 items-center shadow-md border-[0.5px] border-white/50">
           <div className="w-2 h-2 rounded-full bg-navy" />
           <div className="w-2 h-2 rounded-full bg-navy opacity-20" />
           <div className="w-2 h-2 rounded-full bg-navy opacity-20" />

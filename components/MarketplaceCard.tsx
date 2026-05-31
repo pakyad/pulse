@@ -33,13 +33,13 @@ export default function MarketplaceCard({ item, onPurchase }: MarketplaceCardPro
         />
         
         {/* Pricing Badge */}
-        <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-navy/5 shadow-lg">
+        <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-navy/5 shadow-md">
           <p className="text-[11px] font-black text-navy tabular-nums">RM {item.price.toFixed(2)}</p>
         </div>
 
         {/* Official Stakeholder Tag */}
         {item.is_official && (
-            <div className="absolute top-3 left-3 bg-orange/90 backdrop-blur-md p-1.5 rounded-full shadow-lg">
+            <div className="absolute top-3 left-3 bg-orange/90 backdrop-blur-md p-1.5 rounded-full shadow-md">
                 <ShieldCheck className="text-white w-3 h-3" />
             </div>
         )}
@@ -51,7 +51,7 @@ export default function MarketplaceCard({ item, onPurchase }: MarketplaceCardPro
                     e.stopPropagation();
                     onPurchase?.(item.id);
                 }}
-                className="w-full bg-white text-navy py-2 rounded-xl text-[10px] font-black  tracking-widest shadow-xl flex items-center justify-center gap-2"
+                className="w-full bg-white text-navy py-2 rounded-xl text-[10px] font-black  tracking-widest shadow-md flex items-center justify-center gap-2"
             >
                 <ShoppingBag size={12} />
                 Acquire Pulse

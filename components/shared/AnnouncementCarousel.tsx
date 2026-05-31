@@ -76,7 +76,7 @@ const AnnouncementCarousel = () => {
                 <span className="text-[10px] font-bold text-navy/30">
                   {item.date}
                 </span>
-                <div className={`w-8 h-8 rounded-xl ${item.color} shadow-lg shadow-black/5`} />
+                <div className={`w-8 h-8 rounded-xl ${item.color} shadow-md shadow-black/5`} />
               </div>
 
               {/* Subtle Background Accent */}

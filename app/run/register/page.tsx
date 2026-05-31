@@ -159,7 +159,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={() => nextStep('campus' as any)}
                   disabled={!formData.fullName || !formData.matricId || !formData.emergencyContact || !formData.emergencyPhone}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   Confirm Identity
                 </button>
@@ -221,7 +221,7 @@ function RunnerRegistrationContent() {
                         }}
                         className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${
                           formData.zones.includes(zone) 
-                            ? 'bg-navy text-white border-navy shadow-lg shadow-navy/10' 
+                            ? 'bg-navy text-white border-navy shadow-md shadow-navy/10' 
                             : 'bg-white text-slate-400 border-slate-100'
                         }`}
                       >
@@ -236,7 +236,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={() => nextStep('logistics')}
                   disabled={!formData.campus || (formData.campus === 'City Campus' && formData.zones.length === 0)}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   Verify Campus
                 </button>
@@ -296,7 +296,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={() => nextStep('payouts')}
                   disabled={!formData.transport}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   Confirm Profile
                 </button>
@@ -355,7 +355,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={() => nextStep('agreement')}
                   disabled={!formData.bankName || !formData.accountNumber}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   Link Payment Gateway
                 </button>
@@ -391,7 +391,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={handleFinalize}
                   disabled={loading}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   {loading ? <Loader2 size={24} className="animate-spin opacity-40" /> : 'Agree & Synchronize'}
                 </button>
@@ -415,7 +415,7 @@ function RunnerRegistrationContent() {
               </p>
               <button 
                 onClick={() => router.push('/run')}
-                className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-xl shadow-navy/20 active:scale-[0.98] transition-all border border-white/10"
+                className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-[0.98] transition-all border border-white/10"
               >
                 Back to Dashboard
               </button>

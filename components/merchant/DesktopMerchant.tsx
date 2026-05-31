@@ -349,7 +349,7 @@ export default function DesktopMerchant({
                       <p className="col-span-2 text-center py-12 text-slate-400 italic text-[13px]">No assets registered in the registry.</p>
                    ) : (
                       items.map((item: any) => (
-                         <div key={item.id} className="p-6 bg-white border border-slate-100 rounded-[32px] shadow-sm flex items-center gap-6 hover:border-slate-300 transition-all group">
+                         <div key={item.id} className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-6 hover:border-slate-300 transition-all group">
                             {/* 🖼️ Precise Asset Thumbnail */}
                             <div className="w-20 h-20 bg-slate-50 rounded-[20px] overflow-hidden shrink-0 border-[0.5px] border-slate-100">
                                {item.image_url ? (

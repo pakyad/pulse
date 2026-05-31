@@ -64,7 +64,7 @@ export default function CartPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="p-4 bg-slate-50/50 border border-slate-100 rounded-[24px] flex items-center gap-4"
+                    className="p-4 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center gap-4"
                   >
                     <div className="w-20 h-20 rounded-xl bg-white border border-slate-100 overflow-hidden shrink-0">
                       {item.image ? (
@@ -146,14 +146,14 @@ export default function CartPage() {
         <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
           <button
             onClick={handleCheckout}
-            className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10"
+            className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md shadow-slate-900/10"
           >
             Checkout All <ArrowRight size={18} />
           </button>
         </footer>
       )}
 
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
     </main>
   );
 }

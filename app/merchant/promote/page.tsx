@@ -142,7 +142,7 @@ function PromoteHubContent() {
   );
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
+    <main className="min-h-screen bg-[#FDFDFD] pb-40 font-sans antialiased text-navy">
       
       {/* 1. HUB HEADER */}
       <section className="px-6 pt-16 pb-8 border-b border-slate-50 sticky top-0 bg-white z-50">
@@ -155,7 +155,7 @@ function PromoteHubContent() {
               </div>
            </div>
            
-           <div className="flex items-center gap-3 px-4 py-2.5 bg-[#0A1121] rounded-3xl border border-white/10 shadow-xl shadow-navy/20">
+           <div className="flex items-center gap-3 px-4 py-2.5 bg-[#0A1121] rounded-2xl border border-white/10 shadow-md shadow-navy/20">
               <Sparkles size={14} className="text-accent" />
               <div className="flex flex-col">
                  <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest leading-none">Prestige Tokens</span>
@@ -167,12 +167,12 @@ function PromoteHubContent() {
 
       {/* ── IN-UI FEEDBACK TOASTS ── */}
       {launchError && (
-        <div className="fixed top-24 left-6 right-6 z-200 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-lg">
+        <div className="fixed top-24 left-6 right-6 z-200 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md">
           {launchError}
         </div>
       )}
       {launchSuccess && (
-        <div className="fixed top-24 left-6 right-6 z-200 bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-lg">
+        <div className="fixed top-24 left-6 right-6 z-200 bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md">
           ✓ Campaign transmitted to Pulse Command for review.
         </div>
       )}
@@ -188,7 +188,7 @@ function PromoteHubContent() {
                  onClick={() => setStudioStep(1)}
                  disabled={tokensRemaining <= 0}
                  className={`p-10 rounded-[3rem] text-left relative overflow-hidden group transition-all
-                   ${tokensRemaining > 0 ? 'bg-navy shadow-2xl shadow-navy/20' : 'bg-slate-100'}`}
+                   ${tokensRemaining > 0 ? 'bg-navy shadow-md shadow-navy/20' : 'bg-slate-100'}`}
                >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#1e3a8a_0%,transparent_70%)] opacity-30" />
                   <div className="relative z-10 space-y-6">
@@ -286,7 +286,7 @@ function PromoteHubContent() {
                                key={campus.id}
                                onClick={() => { setDraft({ ...draft, campus: campus.id }); setStudioStep(1.5 as any); }}
                                className={`p-10 bg-white border rounded-[3rem] text-left transition-all active:scale-95 shadow-sm
-                                 ${draft.campus === campus.id ? 'border-navy bg-navy text-white shadow-xl shadow-navy/20' : 'border-slate-100'}`}
+                                 ${draft.campus === campus.id ? 'border-navy bg-navy text-white shadow-md shadow-navy/20' : 'border-slate-100'}`}
                              >
                                 <h4 className="text-[18px] font-bold mb-1">{campus.name}</h4>
                                 <p className={`text-[10px] font-bold uppercase tracking-widest ${draft.campus === campus.id ? 'text-white/40' : 'text-slate-300'}`}>{campus.sub}</p>
@@ -312,7 +312,7 @@ function PromoteHubContent() {
                                key={slot.id}
                                onClick={() => { setDraft({ ...draft, schedule_slot: slot.id }); setStudioStep(1.7 as any); }}
                                className={`p-10 bg-white border rounded-[3rem] text-left transition-all active:scale-95
-                                 ${draft.schedule_slot === slot.id ? 'border-navy bg-navy text-white shadow-xl shadow-navy/10' : 'border-slate-100'}`}
+                                 ${draft.schedule_slot === slot.id ? 'border-navy bg-navy text-white shadow-md shadow-navy/10' : 'border-slate-100'}`}
                              >
                                 <h4 className="text-[18px] font-bold mb-1">{slot.name}</h4>
                                 <p className={`text-[11px] font-medium ${draft.schedule_slot === slot.id ? 'text-white/40' : 'text-slate-400'}`}>{slot.time} GMT+8</p>
@@ -335,7 +335,7 @@ function PromoteHubContent() {
                                key={asset.id}
                                onClick={() => { setDraft({ ...draft, item_id: asset.id, headline: asset.title }); setStudioStep(2); }}
                                className={`p-6 bg-white border rounded-[2.5rem] text-left transition-all group overflow-hidden
-                                 ${draft.item_id === asset.id ? 'border-navy shadow-xl shadow-navy/10' : 'border-slate-100'}`}
+                                 ${draft.item_id === asset.id ? 'border-navy shadow-md shadow-navy/10' : 'border-slate-100'}`}
                              >
                                 <img src={asset.image_url} className="w-full aspect-square object-cover rounded-2xl mb-4 grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
                                 <h4 className="text-[14px] font-bold line-clamp-1">{asset.title}</h4>
@@ -368,7 +368,7 @@ function PromoteHubContent() {
                                       <button 
                                         key={t.id}
                                         onClick={() => setDraft({ ...draft, template_id: t.id, cta: 'Sync Listing' })}
-                                        className={`flex flex-col items-center gap-3 p-6 rounded-3xl border transition-all ${draft.template_id === t.id ? 'bg-navy border-navy text-white shadow-xl shadow-navy/20' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                                        className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all ${draft.template_id === t.id ? 'bg-navy border-navy text-white shadow-md shadow-navy/20' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                                       >
                                          <t.icon size={20} />
                                          <p className="text-[9px] font-black uppercase tracking-widest">{t.id}</p>
@@ -382,11 +382,11 @@ function PromoteHubContent() {
                              <div className="space-y-6">
                                 <div className="space-y-2">
                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">Campaign Headline</p>
-                                   <input value={draft.headline} onChange={e => setDraft({ ...draft, headline: e.target.value })} className="w-full h-14 bg-slate-50 border border-slate-100 rounded-3xl px-6 font-bold text-navy outline-none focus:border-navy transition-all" />
+                                   <input value={draft.headline} onChange={e => setDraft({ ...draft, headline: e.target.value })} className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 font-bold text-navy outline-none focus:border-navy transition-all" />
                                 </div>
                                 <div className="space-y-2">
                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">Creative Caption</p>
-                                   <textarea value={draft.caption} onChange={e => setDraft({ ...draft, caption: e.target.value })} className="w-full h-32 bg-slate-50 border border-slate-100 rounded-3xl p-6 font-bold text-navy outline-none focus:border-navy transition-all resize-none" />
+                                   <textarea value={draft.caption} onChange={e => setDraft({ ...draft, caption: e.target.value })} className="w-full h-32 bg-slate-50 border border-slate-100 rounded-2xl p-6 font-bold text-navy outline-none focus:border-navy transition-all resize-none" />
                                 </div>
                              </div>
                              
@@ -401,7 +401,7 @@ function PromoteHubContent() {
                                       <button 
                                         key={a.id}
                                         onClick={() => setDraft({ ...draft, cta: a.sub })}
-                                        className={`flex flex-col p-5 rounded-3xl border transition-all text-left ${draft.cta === a.sub ? 'bg-navy border-navy text-white shadow-xl shadow-navy/20' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                                        className={`flex flex-col p-5 rounded-2xl border transition-all text-left ${draft.cta === a.sub ? 'bg-navy border-navy text-white shadow-md shadow-navy/20' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                                       >
                                          <p className="text-[11px] font-bold leading-none mb-1">{a.name}</p>
                                          <p className="text-[9px] font-medium opacity-50 uppercase tracking-widest">{a.sub}</p>
@@ -412,7 +412,7 @@ function PromoteHubContent() {
                              
                              <button 
                                onClick={() => setStudioStep(3)}
-                               className="w-full py-6 bg-navy text-white rounded-4xl font-bold uppercase tracking-widest text-[13px] shadow-2xl shadow-navy/20 active:scale-95 transition-all"
+                               className="w-full py-6 bg-navy text-white rounded-4xl font-bold uppercase tracking-widest text-[13px] shadow-md shadow-navy/20 active:scale-95 transition-all"
                              >
                                 Review Final Sync
                              </button>
@@ -428,7 +428,7 @@ function PromoteHubContent() {
                              </div>
                              
                              {/* THE PHONE MOCKUP */}
-                             <div className="w-full max-w-[320px] aspect-9/17 bg-[#0A1121] rounded-[4rem] p-6 relative overflow-hidden border-8 border-slate-900 shadow-2xl">
+                             <div className="w-full max-w-[320px] aspect-9/17 bg-[#0A1121] rounded-[4rem] p-6 relative overflow-hidden border-8 border-slate-900 shadow-md">
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#1e3a8a_0%,transparent_70%)] opacity-30" />
                                 <div className="relative z-10 space-y-6 pt-10">
                                    <div className="px-3 py-1 bg-white/10 rounded-full border border-white/10 w-fit">
@@ -436,7 +436,7 @@ function PromoteHubContent() {
                                    </div>
                                    
                                    {/* CAMPAIGN CARD PEEK */}
-                                   <div className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
+                                   <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
                                       <h4 className="text-white text-[18px] font-bold leading-tight">{draft.headline || 'Your Headline'}</h4>
                                       <p className="text-white/40 text-[10px] leading-relaxed line-clamp-2">{draft.caption || 'Your brand story here...'}</p>
                                       <div className="pt-4 border-t border-white/5 flex justify-between items-center">
@@ -476,7 +476,7 @@ function PromoteHubContent() {
                        </div>
                        
                        <div className="flex flex-col items-center gap-4">
-                          <button onClick={handleLaunch} className="w-64 py-6 bg-navy text-white rounded-full font-bold shadow-2xl shadow-navy/20 active:scale-95 transition-all">Synchronize Campaign</button>
+                          <button onClick={handleLaunch} className="w-64 py-6 bg-navy text-white rounded-full font-bold shadow-md shadow-navy/20 active:scale-95 transition-all">Synchronize Campaign</button>
                           <button onClick={() => setStudioStep(2)} className="text-[13px] font-bold text-slate-300 hover:text-navy transition-colors">Return to Studio</button>
                        </div>
                     </div>

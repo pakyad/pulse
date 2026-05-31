@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Star, MessageSquare, CheckCircle2, Send, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { submitReview } from '@/app/actions/reviewActions';
 
 interface PostDeliveryReviewProps {
@@ -16,9 +17,12 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
   const [comment, setComment] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+
+  const isRunnerDelivery = order.delivery_type === 'RUNNER' && order.runner_id;
 
   const handleSubmit = async () => {
-    if (vendorRating === 0 || runnerRating === 0) return;
+    if (vendorRating === 0 || (isRunnerDelivery && runnerRating === 0)) return;
     setIsSubmitting(true);
     
     try {
@@ -26,14 +30,17 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
         orderId: order.id,
         buyerId: userId,
         vendorRating,
-        runnerRating,
+        runnerRating: isRunnerDelivery ? runnerRating : 0,
         vendorId: order.seller_id,
-        runnerId: order.runner_id,
+        runnerId: isRunnerDelivery ? order.runner_id : null,
         comment
       });
 
       if (res.success) {
         setIsSubmitted(true);
+        setTimeout(() => {
+          router.push('/me/orders');
+        }, 1500);
       }
     } catch (err) {
       console.error(err);
@@ -45,7 +52,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
   if (isSubmitted) {
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-10 bg-slate-50/50 rounded-2xl border border-slate-100 text-center space-y-4">
-        <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center mx-auto border border-emerald-100">
+        <div className="w-12 h-12 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center mx-auto border border-slate-200">
           <CheckCircle2 size={24} />
         </div>
         <div className="space-y-1">
@@ -75,13 +82,15 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
       </div>
 
       {/* Runner Review */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
-        <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Runner</p>
-        <div className="space-y-4">
-           <h4 className="text-[14px] font-bold text-[#000000]">Delivery Runner</h4>
-           <StarRating value={runnerRating} onChange={setRunnerRating} />
+      {isRunnerDelivery && (
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
+          <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Runner</p>
+          <div className="space-y-4">
+             <h4 className="text-[14px] font-bold text-[#000000]">Delivery Runner</h4>
+             <StarRating value={runnerRating} onChange={setRunnerRating} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Comments */}
       <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
@@ -96,8 +105,8 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
 
       <button 
         onClick={handleSubmit}
-        disabled={vendorRating === 0 || runnerRating === 0 || isSubmitting}
-        className="w-full h-14 bg-blue-600 text-white rounded-xl font-bold text-[12px] uppercase tracking-[0.2em] shadow-lg shadow-slate-900/5 disabled:opacity-20 transition-all flex items-center justify-center gap-3 active:scale-95"
+        disabled={vendorRating === 0 || (isRunnerDelivery && runnerRating === 0) || isSubmitting}
+        className="w-full h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[12px] uppercase tracking-widest shadow-sm hover:bg-slate-50 disabled:opacity-20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
       >
         {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <>Submit Feedback <Send size={16} className="rotate-45" /></>}
       </button>

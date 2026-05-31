@@ -56,7 +56,7 @@ export default function PriceAppealModal({ isOpen, onClose, item }: PriceAppealM
           <motion.div 
             initial={{ scale: 0.9, y: 20 }}
             animate={{ scale: 1, y: 0 }}
-            className="w-full max-w-md bg-white rounded-[40px] border-[0.5px] border-white/20 shadow-2xl overflow-hidden relative"
+            className="w-full max-w-md bg-white rounded-2xl border-[0.5px] border-white/20 shadow-md overflow-hidden relative"
           >
             {/* Header */}
             <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
@@ -70,14 +70,14 @@ export default function PriceAppealModal({ isOpen, onClose, item }: PriceAppealM
             <div className="p-10 space-y-8">
                {isSuccess ? (
                  <div className="py-10 text-center space-y-6">
-                    <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/10">
+                    <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-md shadow-emerald-500/10">
                        <CheckCircle2 size={40} />
                     </div>
                     <div className="space-y-2">
                        <h4 className="text-[20px] font-black tracking-tight">Appeal Registered</h4>
                        <p className="text-[14px] font-medium text-slate-400">Your justification has been queued for administrative audit. The asset remains locked until a decision is reached.</p>
                     </div>
-                    <button onClick={onClose} className="w-full h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10">Close Terminal</button>
+                    <button onClick={onClose} className="w-full h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-md shadow-black/10">Close Terminal</button>
                  </div>
                ) : (
                  <>
@@ -97,14 +97,14 @@ export default function PriceAppealModal({ isOpen, onClose, item }: PriceAppealM
                         value={justification}
                         onChange={(e) => setJustification(e.target.value)}
                         placeholder="Detail why this asset requires a premium price ceiling (e.g., Rare club merch, imported tech, bundle pack)..."
-                        className="w-full h-32 p-6 bg-slate-50 rounded-3xl border border-slate-100 text-[14px] font-medium placeholder:text-slate-300 focus:border-slate-900 transition-all outline-none resize-none"
+                        className="w-full h-32 p-6 bg-slate-50 rounded-2xl border border-slate-100 text-[14px] font-medium placeholder:text-slate-300 focus:border-slate-900 transition-all outline-none resize-none"
                       />
                    </div>
 
                    <button 
                      onClick={handleSubmit}
                      disabled={isSubmitting || justification.length < 10}
-                     className="w-full h-16 bg-black text-white rounded-3xl font-black text-[13px] uppercase tracking-[0.2em] shadow-xl shadow-black/10 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-20 flex items-center justify-center gap-3"
+                     className="w-full h-16 bg-black text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] shadow-md shadow-black/10 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-20 flex items-center justify-center gap-3"
                    >
                       {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : 'Submit Directive Appeal'}
                    </button>

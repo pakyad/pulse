@@ -28,7 +28,7 @@ const GovernanceBanner: React.FC<GovernanceBannerProps> = ({ status, message }) 
         </div>
       </div>
       
-      <div className={`p-6 rounded-[32px] border ${isBlocked ? 'bg-red-50/30 border-red-50 text-red-700' : 'bg-amber-50/30 border-amber-50 text-amber-700'}`}>
+      <div className={`p-6 rounded-2xl border ${isBlocked ? 'bg-red-50/30 border-red-50 text-red-700' : 'bg-amber-50/30 border-amber-50 text-amber-700'}`}>
         <p className="text-[12px] font-bold leading-relaxed tracking-tight">
           {message}
         </p>

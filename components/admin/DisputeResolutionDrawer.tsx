@@ -25,7 +25,7 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"
+          className="absolute inset-0 bg-slate-900/20 backdrop-blur-md"
         />
 
         {/* Drawer */}
@@ -71,7 +71,7 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
             {/* Proximity Trust Protocol */}
             {dispute.handshake?.verification_type && (
               <section>
-                 <div className={`p-6 rounded-[24px] border-[0.5px] flex items-center gap-6 ${
+                 <div className={`p-6 rounded-2xl border-[0.5px] flex items-center gap-6 ${
                    dispute.handshake.verification_type === 'IN_PERSON_SAFE' 
                    ? 'bg-emerald-50 border-emerald-100' 
                    : 'bg-amber-50 border-amber-100'
@@ -105,7 +105,7 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <Image size={14} className="text-slate-400" /> Audit Evidence
               </h4>
-              <div className="aspect-video bg-slate-100 rounded-[24px] border-[0.5px] border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-3 group relative overflow-hidden">
+              <div className="aspect-video bg-slate-100 rounded-2xl border-[0.5px] border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-3 group relative overflow-hidden">
                 {dispute.evidence_url ? (
                    <img src={dispute.evidence_url} className="w-full h-full object-cover" />
                 ) : (
@@ -169,7 +169,7 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
             </button>
             <button 
               onClick={() => onResolve(dispute.id, 'RELEASE')}
-              className="h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-slate-900/20"
+              className="h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95 shadow-md shadow-slate-900/20"
             >
               <CheckCircle size={18} /> Release Funds
             </button>

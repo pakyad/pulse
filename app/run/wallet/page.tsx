@@ -60,7 +60,7 @@ export default function RunnerEarningsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-24">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">

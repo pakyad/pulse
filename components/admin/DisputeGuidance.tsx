@@ -98,7 +98,7 @@ export default function AdminDisputeGuide() {
         </div>
       </div>
       
-      <button className="w-full py-4 bg-red-500 text-white rounded-xl text-[12px] font-bold uppercase tracking-widest shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+      <button className="w-full py-4 bg-red-500 text-white rounded-xl text-[12px] font-bold uppercase tracking-widest shadow-md shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
         <AlertTriangle size={16} /> Execute Verdict
       </button>
     </div>

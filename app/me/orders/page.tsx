@@ -36,7 +36,7 @@ function OrderRow({ order, onClick }: { order: any; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between py-4 text-left group active:opacity-60 transition-opacity"
+      className="w-full flex items-center justify-between py-4 px-2 -mx-2 rounded-xl text-left group hover:bg-slate-50 active:scale-[0.98] transition-all"
     >
       <div className="flex-1 min-w-0 pr-4">
         <p className="text-[14px] font-bold text-[#000000] truncate leading-snug">{order.title}</p>
@@ -103,7 +103,7 @@ export default function MyOrdersPage() {
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-24">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -176,7 +176,7 @@ export default function MyOrdersPage() {
           >
             {displayed.length === 0 ? (
               <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
-                <ShoppingBag size={40} strokeWidth={1} className="opacity-30" />
+                <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
                 <p className="text-[12px] font-bold uppercase tracking-widest opacity-40">
                   {tab === 'Active' ? 'No active orders' : 'No history yet'}
                 </p>

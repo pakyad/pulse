@@ -113,7 +113,7 @@ export default function MobileMerchant({
               >
                 {activeTab === 'ACTIVE' && (
                   pendingList.length === 0 ? (
-                    <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[32px] flex flex-col items-center justify-center text-center">
+                    <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center">
                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4 shadow-sm border border-slate-100">
                             <PackageCheck size={24} strokeWidth={1.5} />
                         </div>
@@ -176,7 +176,7 @@ export default function MobileMerchant({
 
                 {activeTab === 'HISTORY' && (
                   historyList.length === 0 ? (
-                    <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[32px] flex flex-col items-center justify-center text-center">
+                    <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center">
                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4 shadow-sm border border-slate-100">
                             <ClipboardList size={24} strokeWidth={1.5} />
                         </div>
@@ -187,7 +187,7 @@ export default function MobileMerchant({
                     </div>
                   ) : (
                     historyList.map((o: any) => (
-                      <div key={o.id} className="p-6 bg-white border border-slate-50 rounded-[32px] shadow-sm space-y-4">
+                      <div key={o.id} className="p-6 bg-white border border-slate-50 rounded-2xl shadow-sm space-y-4">
                         <div className="flex justify-between items-start">
                           <div className="flex items-center gap-4">
                             <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${o.status === 'CANCELLED' ? 'bg-red-50 text-red-400' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'bg-blue-50 text-blue-500' : 'bg-emerald-50 text-emerald-500'}`}>
@@ -224,14 +224,14 @@ export default function MobileMerchant({
 
          {/* ── SECTION: QUICK STATS ── */}
             <div className="grid grid-cols-2 gap-3 mt-6">
-               <div className="p-5 bg-white border border-slate-100 rounded-[28px] flex flex-col justify-between shadow-sm shadow-slate-200/50">
+               <div className="p-5 bg-white border border-slate-100 rounded-2xl flex flex-col justify-between shadow-sm shadow-slate-200/50">
                   <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Total Earnings</p>
                   <div className="mt-4 flex items-baseline gap-1">
                      <span className="text-[12px] font-bold text-slate-400">RM</span>
                      <span className="text-[24px] font-black text-[#000000] tracking-tight">{revenue.toFixed(2)}</span>
                   </div>
                </div>
-               <div className="p-5 bg-slate-50 border border-slate-100 rounded-[28px] flex flex-col justify-between">
+               <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col justify-between">
                   <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Orders To Do</p>
                   <div className="mt-4 flex items-baseline gap-1.5">
                      <span className="text-[24px] font-black text-[#000000] tracking-tight">{activeOrdersCount}</span>
@@ -247,7 +247,7 @@ export default function MobileMerchant({
                  <ShieldAlert size={14} className="text-amber-500" />
                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest leading-none">Inventory Attention</p>
               </div>
-              <div className="bg-white border border-slate-50 rounded-[32px] overflow-hidden shadow-sm divide-y divide-slate-50">
+              <div className="bg-white border border-slate-50 rounded-2xl overflow-hidden shadow-sm divide-y divide-slate-50">
                  {topItems.filter((i: any) => (i.stock_count ?? 99) <= 5).map((item: any) => (
                     <div key={item.id} className="p-6 flex items-center justify-between bg-white active:bg-slate-50 transition-colors">
                        <div className="flex items-center gap-4">
@@ -285,7 +285,7 @@ export default function MobileMerchant({
                </div>
                <button 
                 onClick={() => setIsCreateOpen(true)}
-                className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-900/10"
+                className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-md shadow-slate-900/10"
                >
                   <Plus size={18} />
                </button>
@@ -293,7 +293,7 @@ export default function MobileMerchant({
 
             <div className="grid grid-cols-1 gap-4">
                {topItems?.map((item: any) => (
-                  <div key={item.id} className="p-5 bg-slate-50/50 border border-slate-50 rounded-[32px] flex items-center justify-between">
+                  <div key={item.id} className="p-5 bg-slate-50/50 border border-slate-50 rounded-2xl flex items-center justify-between">
                      <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 overflow-hidden">
                            {item.image_url ? (
@@ -357,7 +357,7 @@ export default function MobileMerchant({
                  onClick={() => router.push(nav.path)}
                  className="flex flex-col items-center gap-1.5 group"
                >
-                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${active ? 'bg-blue-600 text-white shadow-lg shadow-slate-900/10' : 'text-[#94a3b8] group-hover:text-[#000000]'}`}>
+                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${active ? 'bg-blue-600 text-white shadow-md shadow-slate-900/10' : 'text-[#94a3b8] group-hover:text-[#000000]'}`}>
                    <nav.icon size={20} strokeWidth={active ? 2.5 : 2} />
                  </div>
                  <span className={`text-[10px] font-bold tracking-widest uppercase transition-all ${active ? 'text-[#000000]' : 'text-[#94a3b8] opacity-50'}`}>{nav.label}</span>

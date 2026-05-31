@@ -58,7 +58,7 @@ export default function BooksHub() {
            <input 
               type="text" 
               placeholder="Search library or textbook exchange..."
-              className="w-full h-16 bg-slate-50 border border-slate-100 rounded-4xl pl-16 pr-6 text-[14px] font-medium outline-none focus:bg-white focus:border-violet-500 focus:shadow-2xl focus:shadow-violet-500/10 transition-all"
+              className="w-full h-16 bg-slate-50 border border-slate-100 rounded-4xl pl-16 pr-6 text-[14px] font-medium outline-none focus:bg-white focus:border-violet-500 focus:shadow-md focus:shadow-violet-500/10 transition-all"
            />
         </div>
 
@@ -92,7 +92,7 @@ export default function BooksHub() {
            
            <div className="space-y-4">
               {RECENT_BOOKS.map((book) => (
-                <div key={book.id} className="p-6 bg-white border border-slate-50 rounded-[2.5rem] flex items-center gap-6 group cursor-pointer hover:shadow-xl hover:shadow-navy/5 transition-all">
+                <div key={book.id} className="p-6 bg-white border border-slate-50 rounded-[2.5rem] flex items-center gap-6 group cursor-pointer hover:shadow-md hover:shadow-navy/5 transition-all">
                    <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-violet-600 group-hover:text-white transition-all">
                       <BookOpen size={22} strokeWidth={1.5} />
                    </div>

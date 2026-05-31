@@ -215,7 +215,7 @@ export default function CheckoutPage() {
             </p>
             <button 
               onClick={() => router.push(`/marketplace/${id}`)}
-              className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[14px] active:scale-95 transition-all"
+              className="w-full h-12 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl font-bold text-[14px] active:scale-[0.98] transition-all"
             >
               Return to Item
             </button>
@@ -517,7 +517,7 @@ export default function CheckoutPage() {
           <button
             onClick={() => setStep(2)}
             disabled={!canProceedStep1}
-            className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-20 transition-all"
+            className="w-full h-12 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-20 transition-all"
           >
             Continue to Payment <ArrowRight size={16} />
           </button>
@@ -525,7 +525,7 @@ export default function CheckoutPage() {
           <button
             onClick={handlePay}
             disabled={!canPay}
-            className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-20 transition-all"
+            className="w-full h-12 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-20 transition-all"
           >
             Pay RM {total.toFixed(2)} via FPX
           </button>

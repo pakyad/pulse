@@ -50,7 +50,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-slate-900/10 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-slate-900/10 backdrop-blur-md"
           />
 
           {/* Filter Panel */}
@@ -59,7 +59,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 z-[101] w-full max-w-[320px] bg-white shadow-2xl flex flex-col border-l border-slate-100"
+            className="fixed top-0 right-0 bottom-0 z-[101] w-full max-w-[320px] bg-white shadow-md flex flex-col border-l border-slate-100"
           >
             {/* Header */}
             <div className="px-6 pt-12 pb-6 border-b border-slate-50 flex items-center justify-between">
@@ -90,7 +90,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                       onClick={() => setTempFilters({ ...tempFilters, sortBy: opt.id as any })}
                       className={`w-full h-14 px-4 rounded-2xl flex items-center justify-between border transition-all ${
                         tempFilters.sortBy === opt.id 
-                          ? 'bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-900/10' 
+                          ? 'bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-900/10' 
                           : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
                       }`}
                     >
@@ -136,7 +136,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                 </div>
                 <button
                   onClick={() => setTempFilters({ ...tempFilters, officialOnly: !tempFilters.officialOnly })}
-                  className={`w-full p-5 rounded-3xl border flex items-center justify-between transition-all ${
+                  className={`w-full p-5 rounded-2xl border flex items-center justify-between transition-all ${
                     tempFilters.officialOnly 
                       ? 'bg-blue-50 border-blue-200 shadow-sm' 
                       : 'bg-slate-50/50 border-slate-100'

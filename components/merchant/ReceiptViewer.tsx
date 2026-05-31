@@ -74,7 +74,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
             <motion.div 
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              className="w-full md:w-96 bg-white rounded-[2.5rem] p-8 flex flex-col justify-between shadow-2xl"
+              className="w-full md:w-96 bg-white rounded-[2.5rem] p-8 flex flex-col justify-between shadow-md"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="space-y-8">

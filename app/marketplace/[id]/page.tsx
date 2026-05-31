@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { 
-  ChevronLeft, Share2, Heart, ShieldCheck, ShieldAlert,
+  ChevronLeft, ChevronRight, Share2, Heart, ShieldCheck, ShieldAlert,
   ArrowUpRight, Clock, MapPin, Layers, Shirt,
   UtensilsCrossed, BookOpen, Wrench, Home, Cpu, Star, ShoppingCart, CheckCircle2
 } from 'lucide-react';
@@ -83,7 +83,7 @@ function DomainRegistry({ item }: { item: any }) {
         <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{domain.label}</h2>
         <p className="text-[11px] font-medium text-[#94a3b8]">Details provided by seller</p>
       </div>
-      <div className="bg-slate-50 border border-slate-100 rounded-[32px] divide-y divide-slate-100 overflow-hidden">
+      <div className="bg-slate-50 border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden">
         {rows.map((row, i) => (
           <div key={i} className="flex items-center justify-between px-6 py-4 gap-4">
             <span className="text-[13px] font-medium text-[#94a3b8] shrink-0">{row.label}</span>
@@ -228,7 +228,7 @@ export default function ItemDetailsPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-20 left-6 right-6 z-100 bg-blue-600 text-white px-4 py-3 rounded-full flex items-center justify-between shadow-xl"
+            className="fixed top-20 left-6 right-6 z-100 bg-blue-600 text-white px-4 py-3 rounded-full flex items-center justify-between shadow-md"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
@@ -253,7 +253,7 @@ export default function ItemDetailsPage() {
 
         {isSoldOut && (
           <div className="absolute inset-0 bg-black/10 flex items-center justify-center z-20">
-             <div className="px-6 py-2 bg-white/90 backdrop-blur-xl rounded-full border border-white shadow-xl">
+             <div className="px-6 py-2 bg-white/90 backdrop-blur-xl rounded-full border border-white shadow-md">
                 <p className="text-[12px] font-black text-red-500 uppercase tracking-[0.2em]">Restocking Soon</p>
              </div>
           </div>
@@ -332,13 +332,16 @@ export default function ItemDetailsPage() {
 
         {/* ── SELLER ROW ── */}
         <section className="py-4 border-y border-slate-100 space-y-3">
-          <div className="flex items-center justify-between">
+          <button 
+             onClick={() => router.push(`/user/${item.seller_id}`)}
+             className="w-full flex items-center justify-between group active:scale-[0.98] transition-all text-left"
+          >
             <div className="flex items-center gap-3">
                <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
                   <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name || 'Pulse'}`} className="w-full h-full object-cover" />
                </div>
                <div>
-                  <p className="text-[13px] font-bold text-[#000000]">{item.seller_name || 'Pulse Student'}</p>
+                  <p className="text-[13px] font-bold text-[#000000] group-hover:text-blue-600 transition-colors">{item.seller_name || 'Pulse Student'}</p>
                   <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500">
                      <Star size={12} fill="currentColor" />
                      <span>{seller?.averageRating || '5.0'}</span>
@@ -346,10 +349,8 @@ export default function ItemDetailsPage() {
                   </div>
                </div>
             </div>
-            <button className="h-8 px-4 bg-slate-50 border border-slate-100 rounded-full text-[11px] font-bold text-[#94a3b8] active:scale-95 transition-all">
-              View Profile
-            </button>
-          </div>
+            <ChevronRight size={18} className="text-slate-200 group-hover:text-blue-600 transition-colors" />
+          </button>
           {/* Subtle report link — non-intrusive, placed below seller info */}
           <div className="flex justify-end">
             <ReportPriceButton itemId={item.id} sellerId={item.seller_id} />
@@ -371,7 +372,7 @@ export default function ItemDetailsPage() {
           
           {/* Mock Review if none exist yet - for demo integrity */}
           <div className="space-y-4">
-             <div className="p-5 bg-slate-50/50 border border-slate-50 rounded-3xl space-y-3">
+             <div className="p-5 bg-slate-50/50 border border-slate-50 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                    <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-white border border-slate-100 flex items-center justify-center text-[10px] font-bold">AZ</div>
@@ -401,7 +402,7 @@ export default function ItemDetailsPage() {
 
         {/* ── HANDSHAKE NOTICE (Services only) ── */}
         {item.domain === 'SERVICES' && (
-          <section className="p-6 bg-slate-50 border border-slate-100 rounded-[32px] flex items-start gap-4">
+          <section className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-4">
             <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm">
               <ShieldCheck size={16} className="text-[#000000]" />
             </div>
@@ -453,7 +454,7 @@ export default function ItemDetailsPage() {
         </div>
       </footer>
 
-      <style>{`.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
+      
     </main>
   );
 }

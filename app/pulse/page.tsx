@@ -193,7 +193,7 @@ function ActiveOrderCard({ order }: { order: any }) {
     <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
       <button
         onClick={() => router.push(`/orders/${order.id}`)}
-        className="w-full text-left bg-[#111111] rounded-[24px] p-5 flex items-center justify-between group active:scale-[0.98] transition-transform"
+        className="w-full text-left bg-[#111111] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-transform"
       >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
@@ -444,7 +444,7 @@ export default function PulsePage() {
             </p>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-[24px] overflow-hidden">
+          <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
             {loadingAnn ? (
               // Skeleton
               <div className="divide-y divide-slate-100">
@@ -495,7 +495,7 @@ export default function PulsePage() {
           </div>
 
           {/* Horizontal scroll cards */}
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-6 px-6">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-6 px-6">
             {displayRadar.map((item: any) => (
               <RadarCard key={item.id} item={item} />
             ))}
@@ -511,11 +511,11 @@ export default function PulsePage() {
             </p>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6">
             {(events.length > 0 ? events : DEMO_EVENTS).map((ev: any) => (
               <div
                 key={ev.id}
-                className="shrink-0 w-[240px] bg-white border border-slate-100 rounded-[24px] overflow-hidden shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-slate-200 transition-all group"
+                className="shrink-0 w-[240px] bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-slate-200 transition-all group"
               >
                 {/* Image Header */}
                 <div className="h-[120px] relative bg-slate-100 overflow-hidden">
@@ -568,7 +568,7 @@ export default function PulsePage() {
       <AnimatePresence>
         {isReportOpen && <ReportRadarModal onClose={() => setIsReportOpen(false)} />}
       </AnimatePresence>
-      <style>{`.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
+      
     </main>
   );
 }

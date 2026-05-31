@@ -47,7 +47,7 @@ export default function EKGModule({
   return (
     <motion.div
       whileHover={{ y: -6, scale: 1.02 }}
-      className="bg-white border border-slate-100 p-8 rounded-[2.5rem] transition-all cursor-pointer space-y-8 group shadow-sm hover:shadow-2xl hover:shadow-navy/5 relative overflow-hidden"
+      className="bg-white border border-slate-100 p-8 rounded-[2.5rem] transition-all cursor-pointer space-y-8 group shadow-sm hover:shadow-md hover:shadow-navy/5 relative overflow-hidden"
     >
       {type === 'WAVE' && <Waveform color={status === 'CRITICAL' ? 'stroke-red-500' : 'stroke-emerald-500'} />}
       

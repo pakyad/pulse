@@ -46,7 +46,7 @@ export default function TreasuryView() {
         </div>
 
         {/* Global Analytics Bridge */}
-        <div className="bg-black rounded-[22px] p-10 flex flex-col items-center text-center border-[0.5px] border-white/10 shadow-2xl shadow-black/20">
+        <div className="bg-black rounded-[22px] p-10 flex flex-col items-center text-center border-[0.5px] border-white/10 shadow-md shadow-black/20">
            <div className="w-16 h-16 rounded-[16px] bg-white/5 border border-white/5 flex items-center justify-center mb-10">
               <BarChart3 size={32} className="text-[#00927C]" />
            </div>

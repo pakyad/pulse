@@ -157,13 +157,13 @@ export default function MarketplacePage() {
                      <Store size={18} className="text-slate-200" />
                   </div>
                   
-                  <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-8 px-8 pb-4 pt-2 snap-x snap-mandatory">
+                  <div className="flex gap-4 overflow-x-auto scrollbar-hide -mx-8 px-8 pb-4 pt-2 snap-x snap-mandatory">
                      {campaigns.map(camp => (
                         <motion.div
                           key={camp.id}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => router.push(`/marketplace/${camp.id}`)}
-                          className="shrink-0 w-[320px] h-[180px] snap-center rounded-[24px] overflow-hidden relative cursor-pointer group shadow-md border border-slate-100 bg-[#111111]"
+                          className="shrink-0 w-[320px] h-[180px] snap-center rounded-2xl overflow-hidden relative cursor-pointer group shadow-md border border-slate-100 bg-[#111111]"
                         >
                            {/* Background Image & Gradient Overlays */}
                            {camp.image_url && (
@@ -217,7 +217,7 @@ export default function MarketplacePage() {
             </div>
 
             {/* ── MINIMALIST METADATA PILLS (FILTERS) ── */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar py-2 -mx-8 px-8">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2 -mx-8 px-8">
                {CATEGORIES.map(cat => {
                   const isActive = activeCategory === cat.filter;
                   return (
@@ -245,7 +245,7 @@ export default function MarketplacePage() {
                </div>
             ) : (
                <div className="py-24 flex flex-col items-center justify-center text-[#94a3b8] gap-4 border-2 border-dashed border-slate-100 rounded-[16px]">
-                  <Box size={48} strokeWidth={1} className="opacity-20" />
+                  <Box size={48} strokeWidth={1} className="text-slate-300" />
                   <p className="text-[11px] font-bold uppercase tracking-widest">No listings found</p>
                </div>
             )}
@@ -260,7 +260,7 @@ export default function MarketplacePage() {
         onApply={setFilters}
       />
 
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
     </main>
   );
 }

@@ -605,7 +605,7 @@ export default function LiveOrderPage() {
         <ShieldAlert size={32} />
       </div>
       <p className="text-[14px] font-bold text-[#94a3b8]">Order not found</p>
-      <button onClick={() => router.push('/me/orders')} className="h-12 px-8 bg-blue-600 text-white rounded-xl text-[13px] font-bold shadow-lg shadow-slate-900/10 active:scale-95 transition-all">
+      <button onClick={() => router.push('/me/orders')} className="h-12 px-8 bg-blue-600 text-white rounded-xl text-[13px] font-bold shadow-md shadow-slate-900/10 active:scale-95 transition-all">
         Back to Orders
       </button>
     </div>
@@ -644,7 +644,7 @@ export default function LiveOrderPage() {
         {/* Google Maps Walking Directions HUD (Runner Only) */}
         {isRunner && isMoving && (
           <div className="absolute top-[96px] left-6 right-6 z-30 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
-            <div className="bg-[#0f9d58] text-white px-4 py-3.5 rounded-2xl shadow-xl flex items-center gap-3.5 border border-[#0d8a4d]">
+            <div className="bg-[#0f9d58] text-white px-4 py-3.5 rounded-2xl shadow-md flex items-center gap-3.5 border border-[#0d8a4d]">
               <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 shadow-sm animate-pulse">
                 <Navigation size={18} className="text-white fill-white -rotate-45" />
               </div>
@@ -762,7 +762,7 @@ export default function LiveOrderPage() {
         )}
 
         {/* ── PROGRESS VIBRANCY ── */}
-        <section className="bg-white/50 backdrop-blur-sm p-4 rounded-[32px] border border-slate-50">
+        <section className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-slate-50">
           <OrderTracker order={order} />
         </section>
 
@@ -922,7 +922,7 @@ export default function LiveOrderPage() {
               initial={{ scale: 0.9, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: -10 }}
-              className="bg-white p-12 rounded-[40px] shadow-[0_32px_80px_-16px_rgba(99,102,241,0.15)] border border-slate-50 text-center space-y-8 max-w-xs"
+              className="bg-white p-12 rounded-2xl shadow-[0_32px_80px_-16px_rgba(99,102,241,0.15)] border border-slate-50 text-center space-y-8 max-w-xs"
             >
               <div className="relative inline-block">
                 <motion.div 
@@ -930,7 +930,7 @@ export default function LiveOrderPage() {
                   transition={{ duration: 2, repeat: Infinity }}
                   className="absolute inset-0 bg-emerald-500 blur-3xl rounded-full"
                 />
-                <div className="w-20 h-20 bg-emerald-500 rounded-[28px] flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/40 relative z-10 text-white">
+                <div className="w-20 h-20 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto shadow-md shadow-emerald-500/40 relative z-10 text-white">
                   <CheckCircle2 size={32} strokeWidth={2.5} />
                 </div>
               </div>
@@ -951,7 +951,7 @@ export default function LiveOrderPage() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => !cancelling && setShowCancelConfirm(false)}
-              className="fixed inset-0 z-400 bg-black/30 backdrop-blur-sm"
+              className="fixed inset-0 z-400 bg-black/30 backdrop-blur-md"
             />
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}

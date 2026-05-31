@@ -97,7 +97,7 @@ export default function AdminLedgerPage() {
                Promotion Admin
             </button>
             <div className="h-10 w-px bg-white/10" />
-            <div className="p-6 bg-white/5 rounded-3xl border border-white/10 flex items-center gap-8">
+            <div className="p-6 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-8">
                <div className="text-center">
                   <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Pulse Fee (10%)</p>
                   <p className="text-[20px] font-bold text-emerald-500">RM 48.50</p>
@@ -146,7 +146,7 @@ export default function AdminLedgerPage() {
                           </div>
                        </div>
 
-                       <div className="grid grid-cols-3 gap-8 mb-8 p-6 bg-white/5 rounded-3xl">
+                       <div className="grid grid-cols-3 gap-8 mb-8 p-6 bg-white/5 rounded-2xl">
                           <div>
                              <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">Gross Revenue</p>
                              <p className="text-[16px] font-bold tracking-widest text-white">RM {req.total_revenue.toFixed(2)}</p>
@@ -164,7 +164,7 @@ export default function AdminLedgerPage() {
                        <div className="flex gap-3">
                           <button 
                             onClick={() => handleAuthorizePayout(req)}
-                            className="flex-1 h-14 bg-white text-navy rounded-full font-bold text-[13px] uppercase tracking-widest active:scale-95 transition-all shadow-xl shadow-white/5"
+                            className="flex-1 h-14 bg-white text-navy rounded-full font-bold text-[13px] uppercase tracking-widest active:scale-95 transition-all shadow-md shadow-white/5"
                           >
                              Authorize Fund Transfer
                           </button>

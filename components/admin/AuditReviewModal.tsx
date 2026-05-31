@@ -42,7 +42,7 @@ export default function AuditReviewModal({ item, limit, isRegulated, onClose, on
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          className="relative w-full max-w-[500px] bg-white rounded-[32px] shadow-[0_48px_96px_-24px_rgba(0,0,0,0.15)] overflow-hidden border border-slate-100"
+          className="relative w-full max-w-[500px] bg-white rounded-2xl shadow-[0_48px_96px_-24px_rgba(0,0,0,0.15)] overflow-hidden border border-slate-100"
         >
           {/* Header */}
           <div className="bg-white px-10 pt-10 pb-6 border-b border-slate-100">
@@ -107,7 +107,7 @@ export default function AuditReviewModal({ item, limit, isRegulated, onClose, on
                </button>
                <button 
                   onClick={() => onSuspend(item.id)}
-                  className="h-14 bg-slate-900 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-900/10 flex items-center justify-center gap-2"
+                  className="h-14 bg-slate-900 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest hover:bg-black transition-all shadow-md shadow-slate-900/10 flex items-center justify-center gap-2"
                >
                   <Trash2 size={18} /> Suspend Asset
                </button>

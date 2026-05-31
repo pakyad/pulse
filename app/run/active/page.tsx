@@ -12,7 +12,8 @@ import { auth, db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { completeDelivery } from '@/app/actions/deliveryActions';
 import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection } from 'firebase/firestore';
-import { GoogleMap, useJsApiLoader, DirectionsRenderer } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
+import MapErrorBoundary from '@/components/shared/MapErrorBoundary';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -30,6 +31,7 @@ const MAP_OPTIONS = {
 
 const LIBRARIES_CENTER = { lat: 3.1718, lng: 101.7538 }; 
 const PICKUP_COORD = { lat: 3.1718, lng: 101.7538 }; 
+const DROPOFF_COORD = { lat: 3.1725, lng: 101.7545 }; 
 
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3;
@@ -224,19 +226,28 @@ function ActiveRunContent() {
          </nav>
 
          <div className="absolute inset-0 z-0 pt-28">
-            {isApiConfigured && isLoaded ? (
-               <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={LIBRARIES_CENTER} zoom={16} options={MAP_OPTIONS as any}>
-                  {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: false }} />}
-               </GoogleMap>
-            ) : (
-               <div className="w-full h-full bg-[#FDFDFD] flex items-center justify-center opacity-10">
-                  <MapPin size={64} strokeWidth={1} />
-               </div>
-            )}
+            <MapErrorBoundary>
+               {isApiConfigured && isLoaded ? (
+                  <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={step <= 2 ? PICKUP_COORD : DROPOFF_COORD} zoom={17} options={MAP_OPTIONS as any}>
+                     {directions && <DirectionsRenderer directions={directions} options={{ 
+                        suppressMarkers: true,
+                        polylineOptions: { strokeColor: '#0f172a', strokeWeight: 3, strokeOpacity: 0.8 } 
+                     }} />}
+                     
+                     {/* Shopee-style Minimalist Nodes */}
+                     {step <= 2 && <Marker position={PICKUP_COORD} label={{ text: '1', color: '#fff', fontSize: '12px', fontWeight: 'bold' }} icon={{ path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: '#0f172a', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }} />}
+                     {step >= 3 && <Marker position={DROPOFF_COORD} label={{ text: '2', color: '#0f172a', fontSize: '12px', fontWeight: 'bold' }} icon={{ path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: '#fff', fillOpacity: 1, strokeColor: '#0f172a', strokeWeight: 2 }} />}
+                  </GoogleMap>
+               ) : (
+                  <div className="w-full h-full bg-[#FDFDFD] flex items-center justify-center opacity-10">
+                     <MapPin size={64} strokeWidth={1} />
+                  </div>
+               )}
+            </MapErrorBoundary>
          </div>
 
          <motion.div initial={{ y: 200 }} animate={{ y: 0 }} className="fixed bottom-0 left-0 right-0 z-40 px-5 pb-8">
-            <div className={`bg-white/95 backdrop-blur-2xl border border-white shadow-2xl rounded-[2.5rem] p-7 pt-8 transition-all duration-500 ${step === 4 ? 'bg-navy/95 text-white' : ''}`}>
+            <div className={`bg-white/95 backdrop-blur-2xl border border-white shadow-md rounded-[2.5rem] p-7 pt-8 transition-all duration-500 ${step === 4 ? 'bg-navy/95 text-white' : ''}`}>
                 <AnimatePresence mode="wait">
                    {step <= 4 ? (
                       <motion.div key="mission" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -252,7 +263,18 @@ function ActiveRunContent() {
                                   )}
                                </div>
                             </div>
-                            <button className="w-12 h-12 rounded-full bg-slate-100/10 flex items-center justify-center"><Phone size={20} /></button>
+                             <div className="flex gap-2">
+                               <button 
+                                 onClick={() => {
+                                   const target = step <= 2 ? PICKUP_COORD : DROPOFF_COORD;
+                                   window.location.href = `https://waze.com/ul?ll=${target.lat},${target.lng}&navigate=yes`;
+                                 }}
+                                 className="h-12 px-5 rounded-full bg-blue-50 text-blue-600 font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                               >
+                                 <Navigation size={16} /> Waze
+                               </button>
+                               <button className="w-12 h-12 rounded-full bg-slate-100/10 flex items-center justify-center border border-slate-100"><Phone size={20} /></button>
+                             </div>
                          </div>
 
                          {(step === 2 || step === 5) && (
@@ -277,7 +299,7 @@ function ActiveRunContent() {
                                      }} />
                                   </label>
                                ) : (
-                                  <div className="relative w-full h-32 rounded-2xl overflow-hidden border border-white/20 shadow-lg">
+                                  <div className="relative w-full h-32 rounded-2xl overflow-hidden border border-white/20 shadow-md">
                                      <img src={(step === 5 ? podPreview : evidencePhoto) as string} className="w-full h-full object-cover" />
                                      <button onClick={() => step === 5 ? setPodPreview(null) : setEvidencePhoto(null)} className="absolute top-2 right-2 p-1 bg-white/90 rounded-full"><X size={12} /></button>
                                   </div>
@@ -300,7 +322,7 @@ function ActiveRunContent() {
                          <button 
                            onClick={step === 5 ? handleCompleteDelivery : handleStepUpdate} 
                            disabled={isTooFar || (step === 2 && !evidencePhoto) || (step === 5 && !podPhoto) || isCompleting} 
-                           className="w-full h-16 bg-navy text-white rounded-2xl font-bold shadow-xl disabled:opacity-30 disabled:grayscale transition-all flex items-center justify-center gap-3"
+                           className="w-full h-16 bg-navy text-white rounded-2xl font-bold shadow-md disabled:opacity-30 disabled:grayscale transition-all flex items-center justify-center gap-3"
                          >
                             {isCompleting && <Loader2 size={20} className="animate-spin" />}
                             {step === 1 ? "Arrived at Pickup" : 
@@ -320,12 +342,12 @@ function ActiveRunContent() {
                          </div>
                          
                          {podPreview ? (
-                            <div className="relative w-full h-48 rounded-3xl overflow-hidden border-2 border-slate-100 shadow-xl">
+                            <div className="relative w-full h-48 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-md">
                                <img src={podPreview} className="w-full h-full object-cover" />
-                               <button onClick={() => setPodPreview(null)} className="absolute top-4 right-4 p-2 bg-white/90 rounded-full shadow-lg"><X size={16} /></button>
+                               <button onClick={() => setPodPreview(null)} className="absolute top-4 right-4 p-2 bg-white/90 rounded-full shadow-md"><X size={16} /></button>
                             </div>
                          ) : (
-                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
                                <Camera className="w-10 h-10 text-slate-300 mb-4" />
                                <p className="text-[14px] font-black text-slate-400 uppercase tracking-widest">Open Camera</p>
                                <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
@@ -341,7 +363,7 @@ function ActiveRunContent() {
                          <button 
                             onClick={handleCompleteDelivery} 
                             disabled={!podPhoto || isCompleting} 
-                            className="w-full h-18 bg-navy text-white rounded-[1.5rem] font-black text-[14px] uppercase tracking-widest flex items-center justify-center gap-3 shadow-2xl shadow-navy/20 disabled:opacity-20"
+                            className="w-full h-18 bg-navy text-white rounded-[1.5rem] font-black text-[14px] uppercase tracking-widest flex items-center justify-center gap-3 shadow-md shadow-navy/20 disabled:opacity-20"
                          >
                             {isCompleting && <Loader2 size={20} className="animate-spin" />}
                             {isCompleting ? "Processing..." : "Complete Drop-off"}

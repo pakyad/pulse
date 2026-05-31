@@ -33,7 +33,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         {/* Front: Hologram ID */}
-        <div className="absolute inset-0 backface-hidden hologram-card rounded-3xl p-8 flex flex-col justify-between overflow-hidden">
+        <div className="absolute inset-0 backface-hidden hologram-card rounded-2xl p-8 flex flex-col justify-between overflow-hidden">
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-8">
               <div className="w-12 h-12 rounded-full bg-navy/10 flex items-center justify-center">
@@ -74,7 +74,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
         </div>
 
         {/* Back: Dynamic QR */}
-        <div className="absolute inset-0 backface-hidden hologram-card rounded-3xl p-8 flex flex-col items-center justify-center rotate-y-180">
+        <div className="absolute inset-0 backface-hidden hologram-card rounded-2xl p-8 flex flex-col items-center justify-center rotate-y-180">
           <div className="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
              <div className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" />
              <p className="text-[9px] text-navy/40 tracking-[0.2em] font-black uppercase">Dynamic Security Active</p>

@@ -89,10 +89,10 @@ export default function MePage() {
          {/* ── PROFILE HEADER (Concept: Skibidi) ── */}
          <section className="flex items-center gap-6">
             <button onClick={() => setIsIDOpen(true)} className="relative group">
-               <div className="w-20 h-20 rounded-[32px] bg-slate-50 border border-slate-100 overflow-hidden shadow-sm group-hover:border-slate-300 transition-all">
+               <div className="w-20 h-20 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm group-hover:border-slate-300 transition-all">
                   <img src={profile?.photo_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name}`} className="w-full h-full object-cover" alt="Profile" />
                </div>
-               <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-[#94a3b8] shadow-lg">
+               <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-[#94a3b8] shadow-md">
                   <ShieldCheck size={14} />
                </div>
             </button>
@@ -104,11 +104,16 @@ export default function MePage() {
 
          {/* ── ACCOUNT STATS ── */}
          <section className="grid grid-cols-2 gap-4">
-            <div className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-50 space-y-3">
+            <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-50 space-y-3">
                <Subtext className="text-[10px] uppercase font-black tracking-widest leading-none">Trust Rating</Subtext>
-               <p className="text-[20px] font-bold text-[#000000]">{(profile?.trust || 100)}%</p>
+               <div className="flex items-center gap-1.5 text-amber-500" onClick={() => router.push(`/user/${user?.uid}/reviews`)} style={{cursor:'pointer'}}>
+                 <p className="text-[20px] font-bold text-[#000000] hover:text-amber-600 transition-colors">
+                    {profile?.averageRating ? Number(profile.averageRating).toFixed(1) : '5.0'}
+                 </p>
+                 <Sparkles size={16} fill="currentColor" className="mt-0.5 hover:text-amber-600 transition-colors" />
+               </div>
             </div>
-            <div className="p-6 bg-slate-50/50 rounded-[32px] border border-slate-50 space-y-3">
+            <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-50 space-y-3">
                <Subtext className="text-[10px] uppercase font-black tracking-widest leading-none">Active Assets</Subtext>
                <p className="text-[20px] font-bold text-[#000000]">{myListings.length}</p>
             </div>
@@ -160,11 +165,11 @@ export default function MePage() {
                   <Subtext>Operational assets in the marketplace</Subtext>
                </div>
 
-               <div className="flex gap-5 overflow-x-auto no-scrollbar -mx-8 px-8 pb-4">
+               <div className="flex gap-5 overflow-x-auto scrollbar-hide -mx-8 px-8 pb-4">
                   {/* ADD LISTING CARD */}
                   <button 
                      onClick={() => router.push('/marketplace/create')}
-                     className="shrink-0 w-36 h-48 rounded-[32px] bg-white border border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-all group"
+                     className="shrink-0 w-36 h-48 rounded-2xl bg-white border border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-all group"
                   >
                      <div className="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] group-hover:bg-blue-600 group-hover:text-white transition-all">
                         <Plus size={20} />
@@ -177,7 +182,7 @@ export default function MePage() {
                      <button 
                         key={item.id} 
                         onClick={() => router.push(`/marketplace/${item.id}`)}
-                        className="shrink-0 w-36 h-48 rounded-[32px] bg-slate-50/50 border border-slate-50 overflow-hidden relative group flex flex-col text-left active:scale-[0.97] transition-all"
+                        className="shrink-0 w-36 h-48 rounded-2xl bg-slate-50/50 border border-slate-50 overflow-hidden relative group flex flex-col text-left active:scale-[0.97] transition-all"
                      >
                         <div className="h-28 w-full bg-white relative">
                            {item.images?.[0] ? (
@@ -208,7 +213,7 @@ export default function MePage() {
          <section>
             <button 
                onClick={() => setIsEnrollmentOpen(true)}
-               className="w-full p-8 bg-blue-600 text-white rounded-[40px] flex items-center justify-between shadow-2xl shadow-slate-900/10 group"
+               className="w-full p-8 bg-blue-600 text-white rounded-2xl flex items-center justify-between shadow-md shadow-slate-900/10 group"
             >
                <div className="flex items-center gap-6">
                   <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400">
@@ -229,7 +234,7 @@ export default function MePage() {
          <section className="pt-6">
             <button 
                onClick={() => { auth.signOut(); router.push('/auth'); }}
-               className="w-full h-16 rounded-[28px] border border-slate-100 text-[#000000] font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-all"
+               className="w-full h-16 rounded-2xl border border-slate-100 text-[#000000] font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-all"
             >
                Sign Out <LayoutGrid size={16} className="opacity-30" />
             </button>
@@ -243,7 +248,7 @@ export default function MePage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsIDOpen(false)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative z-10 w-full max-w-sm">
               <HologramID name={profile?.full_name || 'Pulse Member'} role={profile?.is_verified_runner ? 'Pulse Runner' : 'Student'} matricNo={profile?.matric_no || '—'} qrValue={user?.uid || 'anonymous'} />
-              <button onClick={() => setIsIDOpen(false)} className="mt-8 w-full h-16 bg-white/10 rounded-3xl text-white font-bold uppercase text-[12px] tracking-widest">Close ID</button>
+              <button onClick={() => setIsIDOpen(false)} className="mt-8 w-full h-16 bg-white/10 rounded-2xl text-white font-bold uppercase text-[12px] tracking-widest">Close ID</button>
             </motion.div>
           </div>
         )}

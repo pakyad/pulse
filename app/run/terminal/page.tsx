@@ -79,7 +79,7 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
 );
 
 const StatCard = ({ label, value, icon: Icon, color = "text-[#000000]" }: any) => (
-  <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm flex flex-col justify-between h-36">
+  <div className="bg-white p-6 rounded-2xl border-[0.5px] border-slate-100 shadow-sm flex flex-col justify-between h-36">
     <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border-[0.5px] border-slate-100">
       <Icon size={18} strokeWidth={1.5} />
     </div>
@@ -360,11 +360,11 @@ export default function RunnerTerminal() {
                animate={{ opacity: 1, y: 0 }}
                className="grid grid-cols-2 gap-4"
              >
-                <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm space-y-4">
+                <div className="bg-white p-6 rounded-2xl border-[0.5px] border-slate-100 shadow-sm space-y-4">
                    <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em]">Earnings</p>
                    <p className="text-[24px] font-bold text-emerald-600 tracking-tight leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
                 </div>
-                <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-slate-100 shadow-sm space-y-4">
+                <div className="bg-white p-6 rounded-2xl border-[0.5px] border-slate-100 shadow-sm space-y-4">
                    <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.2em]">Rating</p>
                    <p className="text-[24px] font-bold text-slate-900 tracking-tight leading-none">5.0</p>
                 </div>
@@ -377,7 +377,7 @@ export default function RunnerTerminal() {
                     key="active" 
                     initial={{ opacity: 0, y: 30 }} 
                     animate={{ opacity: 1, y: 0 }} 
-                    className="bg-white rounded-[40px] border-[0.5px] border-slate-100 shadow-[0_32px_64px_-16px_rgba(30,41,59,0.12)] relative overflow-hidden"
+                    className="bg-white rounded-2xl border-[0.5px] border-slate-100 shadow-[0_32px_64px_-16px_rgba(30,41,59,0.12)] relative overflow-hidden"
                   >
                     {/* STATUS ACCENT LINE */}
                     <div className={`absolute top-0 left-0 right-0 h-1 ${isPickedUp ? 'bg-blue-500' : 'bg-blue-600'}`} />
@@ -468,7 +468,7 @@ export default function RunnerTerminal() {
                       <div className={`flex items-start gap-4 p-5 rounded-2xl transition-all ${
                         isPickedUp ? 'bg-blue-50/60 ring-1 ring-blue-100' : ''
                       }`}>
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 transition-all ${
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0 transition-all ${
                           isPickedUp ? 'bg-blue-600 shadow-blue-600/25 scale-110' : 'bg-blue-600 shadow-slate-900/10'
                         }`}>
                           <MapPin size={16} />
@@ -504,11 +504,11 @@ export default function RunnerTerminal() {
                       {activeMission.status === 'PREPARING' ? (
                         <button disabled className="flex-1 h-14 bg-slate-100 text-slate-300 rounded-2xl font-bold text-[13px]">Preparing...</button>
                       ) : activeMission.status === 'READY_FOR_PICKUP' ? (
-                        <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-14 bg-blue-600 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-slate-900/10">
+                        <button onClick={() => setProofMode('PICKUP')} className="flex-1 h-14 bg-blue-600 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-slate-900/10">
                           <Check size={15} /> Confirm Pickup
                         </button>
                       ) : (
-                        <button onClick={() => setProofMode('DELIVERY')} className="flex-1 h-14 bg-blue-600 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl shadow-blue-600/15">
+                        <button onClick={() => setProofMode('DELIVERY')} className="flex-1 h-14 bg-blue-600 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-blue-600/15">
                           <Zap size={15} /> Deliver
                         </button>
                       )}
@@ -558,7 +558,7 @@ export default function RunnerTerminal() {
                     </div>
                     <button 
                       onClick={() => router.push('/run/missions')}
-                      className={`px-8 h-11 text-white rounded-full text-[12px] font-bold shadow-lg active:scale-95 transition-all lowercase ${jobs.length > 0 ? 'bg-emerald-500 shadow-emerald-500/20 animate-bounce' : 'bg-slate-900 shadow-slate-900/10'}`}
+                      className={`px-8 h-11 text-white rounded-full text-[12px] font-bold shadow-md active:scale-95 transition-all lowercase ${jobs.length > 0 ? 'bg-emerald-500 shadow-emerald-500/20 animate-bounce' : 'bg-slate-900 shadow-slate-900/10'}`}
                     >
                       {jobs.length > 0 ? 'claim now' : 'browse orders'}
                     </button>
@@ -571,7 +571,7 @@ export default function RunnerTerminal() {
       {/* ── OPTIONS DRAWER ── */}
       <AnimatePresence>{optionsDrawerOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-1000 bg-black/60 backdrop-blur-md flex items-end justify-center">
-            <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} className="bg-white w-full max-w-md rounded-t-[40px] p-8 pb-12 shadow-2xl relative">
+            <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} className="bg-white w-full max-w-md rounded-t-[40px] p-8 pb-12 shadow-md relative">
                <button onClick={() => setOptionsDrawerOpen(false)} className="absolute top-6 right-6 w-8 h-8 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center"><X size={16}/></button>
                
                {!reportStep ? (
@@ -610,26 +610,26 @@ export default function RunnerTerminal() {
       {/* ── PROOF MODAL ── */}
       <AnimatePresence>{proofMode && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-1000 bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-4">
-            <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="bg-white w-full max-w-md rounded-[40px] p-10 space-y-10 shadow-2xl">
+            <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} className="bg-white w-full max-w-md rounded-2xl p-10 space-y-10 shadow-md">
                <div className="text-center space-y-3">
-                 <div className="w-20 h-20 bg-slate-50 rounded-[32px] mx-auto flex items-center justify-center text-slate-300 border border-slate-100"><Camera size={32} strokeWidth={1.5} /></div>
+                 <div className="w-20 h-20 bg-slate-50 rounded-2xl mx-auto flex items-center justify-center text-slate-300 border border-slate-100"><Camera size={32} strokeWidth={1.5} /></div>
                  <Heading className="text-[22px]">{proofMode === 'PICKUP' ? 'Photo Proof of Pickup' : 'Photo Proof of Delivery'}</Heading>
                  <Subtext className="px-6">{proofMode === 'PICKUP' ? 'Take a photo of the items at the pickup point.' : 'Take a photo of the items at the drop-off point.'}</Subtext>
                </div>
                <div className="space-y-6">
                  <input type="file" accept="image/*" capture="environment" id="pod-capture" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) { setPodPhoto(file); setPodPreview(URL.createObjectURL(file)); } }} />
                  {podPreview ? (
-                    <div className="relative aspect-video rounded-[32px] overflow-hidden border border-slate-100 group">
+                    <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-100 group">
                       <img src={podPreview} className="w-full h-full object-cover" />
                       <button onClick={() => { setPodPhoto(null); setPodPreview(null); }} className="absolute top-4 right-4 w-10 h-10 bg-black/40 backdrop-blur-md text-white rounded-full flex items-center justify-center"><X size={18}/></button>
                     </div>
                  ) : (
-                    <label htmlFor="pod-capture" className="w-full h-[160px] border-2 border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-slate-50 transition-all">
+                    <label htmlFor="pod-capture" className="w-full h-[160px] border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-slate-50 transition-all">
                       <Camera size={24} className="text-slate-200" />
                       <Subtext>Tap to take photo</Subtext>
                     </label>
                  )}
-                 <button disabled={!podPhoto || isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className="w-full h-16 bg-blue-600 text-white rounded-[24px] font-bold text-[14px] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10">
+                 <button disabled={!podPhoto || isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className="w-full h-16 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 disabled:opacity-20 transition-all shadow-md shadow-slate-900/10">
                    {isProcessing ? <Loader2 className="animate-spin" /> : <ShieldCheck size={20} />}
                    {proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Complete Delivery'}
                  </button>
@@ -639,7 +639,7 @@ export default function RunnerTerminal() {
           </motion.div>
       )}</AnimatePresence>
 
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
     </main>
   );
 }

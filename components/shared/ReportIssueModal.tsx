@@ -63,7 +63,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
 
           <motion.div 
             initial={{ opacity: 0, scale: 0.98, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 10 }}
-            className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            className="relative w-full max-w-md bg-white rounded-2xl shadow-md overflow-hidden flex flex-col"
           >
             {isSuccess ? (
               <div className="p-12 text-center space-y-6">
@@ -168,7 +168,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                             <button
                               type="submit"
                               disabled={isSubmitting || !narrative}
-                              className="w-full h-14 bg-blue-600 text-white rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg shadow-[#000000]/10 active:scale-95 transition-all disabled:opacity-20"
+                              className="w-full h-14 bg-blue-600 text-white rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-md shadow-[#000000]/10 active:scale-95 transition-all disabled:opacity-20"
                             >
                               {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <>Submit Case <Send size={16} className="rotate-45" /></>}
                             </button>

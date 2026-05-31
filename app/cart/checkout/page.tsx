@@ -186,7 +186,7 @@ export default function CartCheckoutPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-20 left-6 right-6 z-300 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-2xl flex items-center justify-between shadow-lg"
+            className="fixed top-20 left-6 right-6 z-300 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-2xl flex items-center justify-between shadow-md"
           >
             <p className="text-[12px] font-bold leading-tight">{orderError}</p>
             <button onClick={() => setOrderError(null)} className="w-6 h-6 flex items-center justify-center text-red-400 ml-3 shrink-0">
@@ -228,7 +228,7 @@ export default function CartCheckoutPage() {
                 {cart.map((item) => {
                   const pref = preferences[item.productId] || { type: 'RUNNER', location: 'k' };
                   return (
-                    <div key={item.productId} className="space-y-3 p-5 bg-slate-50 border border-slate-100 rounded-[28px]">
+                    <div key={item.productId} className="space-y-3 p-5 bg-slate-50 border border-slate-100 rounded-2xl">
                        {/* Item Header */}
                        <div className="flex items-center gap-3 pb-3 border-b border-slate-200/50">
                           <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-200 shrink-0 overflow-hidden">
@@ -337,7 +337,7 @@ export default function CartCheckoutPage() {
                      onClick={() => setSelectedBank(bank.id)}
                      className={`w-full h-16 px-5 rounded-2xl flex items-center justify-between border transition-all ${
                        selectedBank === bank.id 
-                       ? 'bg-white border-blue-600 shadow-lg shadow-slate-900/5 ring-1 ring-[#000000]' 
+                       ? 'bg-white border-blue-600 shadow-md shadow-slate-900/5 ring-1 ring-[#000000]' 
                        : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-slate-200'
                      }`}
                    >
@@ -367,7 +367,7 @@ export default function CartCheckoutPage() {
         <button
           onClick={() => step === 1 ? setStep(2) : handlePay()}
           disabled={(step === 1 && !canProceedStep1) || (step === 2 && !canPay)}
-          className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-xl shadow-slate-900/10"
+          className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-md shadow-slate-900/10"
         >
           {step === 1 ? 'Review Payment' : `Pay RM ${total.toFixed(2)}`}
           <ArrowRight size={18} />

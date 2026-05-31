@@ -85,7 +85,7 @@ export default function BottomNav() {
               href={item.path} 
               className="flex-1 flex flex-col items-center justify-center relative group"
             >
-              <div className="relative p-2 rounded-3xl transition-all duration-300">
+              <div className="relative p-2 rounded-2xl transition-all duration-300">
                 <Icon 
                   size={22} 
                   strokeWidth={isActive ? 2.5 : 2}

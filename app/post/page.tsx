@@ -65,7 +65,7 @@ export default function DeployAsset() {
   const canNext = step === 1 ? !!preview : step === 2 ? title.trim() && price && Number(price) > 0 : true;
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] font-sans text-navy antialiased pb-32">
+    <main className="min-h-screen bg-[#FDFDFD] font-sans text-navy antialiased pb-40">
       
       {/* ── Compact 45% Container ── */}
       <div className="max-w-[480px] mx-auto px-6">
@@ -100,13 +100,13 @@ export default function DeployAsset() {
                 {preview ? (
                   <>
                     <img src={preview} className="w-full h-full object-cover" />
-                    <button type="button" onClick={() => { setPreview(null); setImage(null); }} className="absolute top-6 right-6 w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-navy shadow-lg">
+                    <button type="button" onClick={() => { setPreview(null); setImage(null); }} className="absolute top-6 right-6 w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-navy shadow-md">
                       <X size={20} />
                     </button>
                   </>
                 ) : (
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-20 h-20 bg-white rounded-[2.5rem] flex items-center justify-center shadow-xl shadow-black/5 text-slate-200">
+                    <div className="w-20 h-20 bg-white rounded-[2.5rem] flex items-center justify-center shadow-md shadow-black/5 text-slate-200">
                       <ImageIcon size={32} />
                     </div>
                     <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Select Visual Asset</p>
@@ -146,7 +146,7 @@ export default function DeployAsset() {
                   <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Category</label>
                   <div className="flex flex-wrap gap-2">
                     {CATEGORIES.map(c => (
-                      <button key={c} type="button" onClick={() => setCategory(c)} className={`px-4 py-2.5 rounded-xl text-[11px] font-bold border-2 transition-all ${category === c ? 'bg-navy text-white border-navy shadow-lg' : 'bg-white text-slate-400 border-slate-50'}`}>
+                      <button key={c} type="button" onClick={() => setCategory(c)} className={`px-4 py-2.5 rounded-xl text-[11px] font-bold border-2 transition-all ${category === c ? 'bg-navy text-white border-navy shadow-md' : 'bg-white text-slate-400 border-slate-50'}`}>
                         {c}
                       </button>
                     ))}
@@ -190,7 +190,7 @@ export default function DeployAsset() {
               whileTap={{ scale: 0.98, y: 1 }}
               disabled={!canNext}
               onClick={() => setStep(s => s + 1)}
-              className="w-full h-[72px] bg-navy text-white rounded-4xl font-bold text-[16px] flex items-center justify-center gap-3 disabled:opacity-30 shadow-2xl shadow-navy/20"
+              className="w-full h-[72px] bg-navy text-white rounded-4xl font-bold text-[16px] flex items-center justify-center gap-3 disabled:opacity-30 shadow-md shadow-navy/20"
             >
               Continue <ChevronRight size={20} />
             </motion.button>
@@ -199,7 +199,7 @@ export default function DeployAsset() {
               whileTap={{ scale: 0.98, y: 1 }}
               disabled={loading}
               onClick={handleDeploy}
-              className="w-full h-[72px] bg-navy text-white rounded-4xl font-bold text-[16px] flex items-center justify-center gap-3 shadow-2xl shadow-navy/30"
+              className="w-full h-[72px] bg-navy text-white rounded-4xl font-bold text-[16px] flex items-center justify-center gap-3 shadow-md shadow-navy/30"
             >
               {loading ? <><Loader2 size={20} className="animate-spin" /> Posting...</> : <>Post Item <ChevronRight size={20} /></>}
             </motion.button>

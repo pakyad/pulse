@@ -92,12 +92,12 @@ export default function MarketInsightsPage() {
       </section>
 
       <section className="px-8 mt-10">
-        <div className="flex flex-col space-y-12 animate-in fade-in duration-500 pb-32">
+        <div className="flex flex-col space-y-12 animate-in fade-in duration-500 pb-40">
           
           {/* TOP BANNER */}
           {isProMode ? (
              <section className="space-y-6">
-                <div className="p-6 bg-blue-600 rounded-[32px] text-white flex items-start gap-5 shadow-xl shadow-slate-900/10">
+                <div className="p-6 bg-blue-600 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
                    <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-amber-400">
                       <TrendingUp size={22} />
                    </div>
@@ -113,7 +113,7 @@ export default function MarketInsightsPage() {
              </section>
           ) : (
              <section className="space-y-6">
-                <div className="p-6 bg-slate-900 rounded-[32px] text-white flex items-start gap-5 shadow-xl shadow-slate-900/10">
+                <div className="p-6 bg-slate-900 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
                    <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-white">
                       <Shirt size={22} />
                    </div>
@@ -131,28 +131,28 @@ export default function MarketInsightsPage() {
 
           {/* METRICS GRID (2x2) */}
           <div className="grid grid-cols-2 gap-4">
-             <div className="p-6 border border-slate-50 rounded-[32px] bg-white shadow-sm flex flex-col justify-between h-32">
+             <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Total Earnings' : 'Money Earned'}</p>
                 <div>
                    <p className="text-[20px] font-bold text-[#000000] tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
                 </div>
              </div>
              
-             <div className="p-6 border border-slate-50 rounded-[32px] bg-white shadow-sm flex flex-col justify-between h-32">
+             <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Sales Volume' : 'Items Sold'}</p>
                 <div>
                    <p className="text-[20px] font-bold text-[#000000] tracking-tighter">{salesVolume}</p>
                 </div>
              </div>
 
-             <div className="p-6 border border-slate-50 rounded-[32px] bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
+             <div className="p-6 border border-slate-50 rounded-2xl bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Inventory Value' : 'Closet Value'}</p>
                 <div>
                    <p className="text-[20px] font-bold text-[#000000] tracking-tighter">RM {inventoryValue.toFixed(2)}</p>
                 </div>
              </div>
 
-             <div className="p-6 border border-slate-50 rounded-[32px] bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
+             <div className="p-6 border border-slate-50 rounded-2xl bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Total Units' : 'Items Left'}</p>
                 <div>
                    <p className="text-[20px] font-bold text-[#000000] tracking-tighter">{totalUnitsAvailable}</p>
@@ -164,7 +164,7 @@ export default function MarketInsightsPage() {
           {isProMode ? (
              <>
                 {/* PRO MODE: STOCK HEALTH */}
-                <section className="space-y-8 p-8 bg-slate-50/30 rounded-[40px] border border-slate-50">
+                <section className="space-y-8 p-8 bg-slate-50/30 rounded-2xl border border-slate-50">
                    <div className="px-1 space-y-1">
                       <SkibidiHeading>Stock Health</SkibidiHeading>
                       <SkibidiSubtext>Live inventory status across all assets</SkibidiSubtext>
@@ -200,7 +200,7 @@ export default function MarketInsightsPage() {
                    
                    <div className="space-y-3">
                       {itemSales.slice(0, 3).map((item, idx) => (
-                         <div key={item.id} className="p-4 rounded-3xl border border-slate-50 bg-white shadow-sm flex items-center justify-between hover:border-slate-200 transition-colors">
+                         <div key={item.id} className="p-4 rounded-2xl border border-slate-50 bg-white shadow-sm flex items-center justify-between hover:border-slate-200 transition-colors">
                             <div className="flex items-center gap-4">
                                <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-300 text-[11px]">
                                   #{idx + 1}
@@ -216,7 +216,7 @@ export default function MarketInsightsPage() {
                          </div>
                       ))}
                       {itemSales.length === 0 && (
-                         <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-3xl">
+                         <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-2xl">
                             <ShoppingBag size={24} className="opacity-20" />
                             <p className="text-[11px] font-bold uppercase tracking-widest">No Sales Data Yet</p>
                          </div>
@@ -240,7 +240,7 @@ export default function MarketInsightsPage() {
                    
                    <div className="space-y-3">
                       {completedOrders.slice(0, 5).map(order => (
-                         <div key={order.id} className="p-5 rounded-3xl border border-slate-50 bg-white shadow-sm flex items-center justify-between">
+                         <div key={order.id} className="p-5 rounded-2xl border border-slate-50 bg-white shadow-sm flex items-center justify-between">
                             <div className="space-y-0.5">
                                <p className="text-[13px] font-bold text-[#000000] tracking-tight truncate max-w-[200px]">{order.title}</p>
                                <p className="text-[10px] text-slate-400 font-medium">To: {order.buyer_name || 'Anonymous Student'}</p>
@@ -249,7 +249,7 @@ export default function MarketInsightsPage() {
                          </div>
                       ))}
                       {completedOrders.length === 0 && (
-                         <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
+                         <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
                             <Shirt size={24} className="opacity-20" />
                             <p className="text-[11px] font-bold uppercase tracking-widest">No Items Sold Yet</p>
                          </div>

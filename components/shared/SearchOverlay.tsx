@@ -111,7 +111,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                 placeholder="Search items, nodes, or news..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full h-14 bg-slate-50 rounded-[24px] pl-16 pr-6 font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 border border-slate-100 focus:border-slate-200 transition-all text-[15px] placeholder:text-slate-300"
+                className="w-full h-14 bg-slate-50 rounded-2xl pl-16 pr-6 font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 border border-slate-100 focus:border-slate-200 transition-all text-[15px] placeholder:text-slate-300"
               />
             </div>
           </div>
@@ -143,7 +143,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                         onClose();
                         router.push(`/marketplace/${item.id}`);
                       }}
-                      className="p-4 bg-white border border-slate-100 rounded-3xl flex items-center gap-4 hover:bg-slate-50 active:scale-[0.98] transition-all cursor-pointer shadow-sm shadow-slate-200/50"
+                      className="p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-4 hover:bg-slate-50 active:scale-[0.98] transition-all cursor-pointer shadow-sm shadow-slate-200/50"
                     >
                        <div className="w-16 h-16 rounded-2xl bg-slate-50 overflow-hidden shrink-0 border border-slate-100">
                           {item.image_url && <img src={item.image_url} alt="" className="w-full h-full object-cover" />}

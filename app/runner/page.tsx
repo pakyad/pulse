@@ -203,7 +203,7 @@ export default function MobileRunnerDashboard() {
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-600">Active Delivery In Progress</p>
               </div>
               
-              <div className="bg-white p-6 rounded-[32px] border-[0.5px] border-[#F2F2F7] shadow-xl shadow-black/5 space-y-6">
+              <div className="bg-white p-6 rounded-2xl border-[0.5px] border-[#F2F2F7] shadow-md shadow-black/5 space-y-6">
                  <div className="flex justify-between items-start">
                     <div className="space-y-1">
                        <h3 className="text-[22px] font-black tracking-tight leading-none">{activeJob.title}</h3>
@@ -227,13 +227,13 @@ export default function MobileRunnerDashboard() {
                   <div className="flex gap-4">
                     <button 
                       onClick={() => router.push(`/orders/${activeJob.id}`)}
-                      className="flex-1 h-14 bg-slate-50 text-slate-400 rounded-2xl font-black text-[11px] uppercase tracking-widest border border-slate-100 active:scale-95 transition-all"
+                      className="flex-1 h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                     >
                         Logistics Map
                     </button>
                     <button 
                       onClick={startCamera}
-                      className="flex-1 h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-black/10 active:scale-95 transition-all flex items-center justify-center gap-3"
+                      className="flex-1 h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                     >
                         <Camera size={18} /> Complete Job
                     </button>
@@ -257,7 +257,7 @@ export default function MobileRunnerDashboard() {
               <div className="space-y-4">
                  {nearbyJobs.length === 0 ? (
                    <div className="py-20 flex flex-col items-center gap-4 text-center">
-                      <div className="w-20 h-20 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-200"><Zap size={40} /></div>
+                      <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300"><Zap size={40} /></div>
                       <p className="text-[14px] font-bold text-slate-300 uppercase tracking-widest px-12">Radar is currently clear.</p>
                    </div>
                  ) : (
@@ -288,7 +288,7 @@ export default function MobileRunnerDashboard() {
                           <button 
                             onClick={() => handleAcceptJob(job.id)}
                             disabled={!isOnline}
-                            className={`h-12 px-6 bg-slate-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] transition-all ${isOnline ? 'hover:scale-105 active:scale-95 shadow-xl shadow-black/10' : 'opacity-20 cursor-not-allowed'}`}
+                            className={`h-12 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${isOnline ? 'hover:scale-[1.02] active:scale-[0.98] hover:bg-slate-50' : 'opacity-20 cursor-not-allowed'}`}
                           >
                              Initiate
                           </button>
@@ -309,7 +309,7 @@ export default function MobileRunnerDashboard() {
                </div>
 
                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-6 bg-black rounded-[32px] text-white space-y-4">
+                  <div className="p-6 bg-black rounded-2xl text-white space-y-4">
                      <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Net Earnings</p>
                      <div className="space-y-0.5">
                         <p className="text-[11px] font-bold opacity-60">RM</p>
@@ -327,7 +327,7 @@ export default function MobileRunnerDashboard() {
 
                <div className="p-8 bg-white rounded-[36px] border-[0.5px] border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-5">
-                     <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center"><Activity size={24} /></div>
+                     <div className="w-12 h-12 bg-slate-100 text-slate-900 rounded-2xl flex items-center justify-center"><Activity size={24} /></div>
                      <div>
                         <p className="text-[15px] font-bold">Node Health</p>
                         <p className="text-[12px] font-medium text-slate-400 uppercase tracking-widest">Optimized</p>
@@ -414,7 +414,7 @@ export default function MobileRunnerDashboard() {
                   disabled={isUploading}
                   className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-3xl border border-white/20 flex items-center justify-center group"
                >
-                  <div className={`w-16 h-16 rounded-full border-2 border-white transition-all ${isUploading ? 'bg-emerald-500 scale-75' : 'bg-white group-hover:scale-110'}`}>
+                  <div className={`w-16 h-16 rounded-full border-2 border-white transition-all ${isUploading ? 'bg-slate-900 scale-75' : 'bg-white group-hover:scale-110'}`}>
                      {isUploading && <Loader2 className="animate-spin text-white w-full h-full p-4" />}
                   </div>
                </motion.button>

@@ -33,7 +33,7 @@ export default function Navbar() {
                <Link 
                  key={link.href}
                  href={link.href} 
-                 className={`p-2 rounded-xl transition-all ${isActive ? 'bg-navy text-white shadow-xl scale-110' : 'hover:text-navy hover:bg-navy/5'}`}
+                 className={`p-2 rounded-xl transition-all ${isActive ? 'bg-navy text-white shadow-md scale-110' : 'hover:text-navy hover:bg-navy/5'}`}
                >
                  <Icon size={20} />
                </Link>

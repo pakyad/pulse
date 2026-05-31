@@ -172,7 +172,7 @@ export default function RegistryList({ type }: RegistryListProps) {
               <div className="flex items-center gap-3 mt-10 md:mt-0 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                 <button 
                   onClick={() => handleAction(item.id, 'APPROVED')}
-                  className="h-14 px-10 rounded-[16px] bg-black text-white font-black text-[11px] hover:bg-[#00927C] hover:shadow-2xl hover:shadow-[#00927C]/20 transition-all active:scale-95 flex items-center gap-3 uppercase tracking-widest"
+                  className="h-14 px-10 rounded-[16px] bg-black text-white font-black text-[11px] hover:bg-[#00927C] hover:shadow-md hover:shadow-[#00927C]/20 transition-all active:scale-95 flex items-center gap-3 uppercase tracking-widest"
                 >
                   <Check size={18} strokeWidth={3} />
                   Authorize

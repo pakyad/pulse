@@ -35,7 +35,7 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-200 bg-black/50 backdrop-blur-sm flex items-end justify-center p-4"
+      className="fixed inset-0 z-200 bg-black/50 backdrop-blur-md flex items-end justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -43,7 +43,7 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="bg-white w-full max-w-sm rounded-[32px] p-8 space-y-6"
+        className="bg-white w-full max-w-sm rounded-2xl p-8 space-y-6"
         onClick={e => e.stopPropagation()}
       >
         <div className="space-y-1">
@@ -86,7 +86,7 @@ export function RadarCard({ item, onMarkResolved }: { item: RadarItem; onMarkRes
 
   return (
     <>
-      <div className={`shrink-0 w-[240px] rounded-[24px] p-5 space-y-4 border flex flex-col transition-all ${
+      <div className={`shrink-0 w-[240px] rounded-2xl p-5 space-y-4 border flex flex-col transition-all ${
         item.resolved
           ? 'bg-slate-50/50 border-slate-100 opacity-60'
           : 'bg-white border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-slate-200'
@@ -189,7 +189,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-200 bg-black/50 backdrop-blur-sm flex items-end justify-center p-4"
+      className="fixed inset-0 z-200 bg-black/50 backdrop-blur-md flex items-end justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -197,7 +197,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 80, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="bg-white w-full max-w-sm rounded-[32px] p-8 space-y-6"
+        className="bg-white w-full max-w-sm rounded-2xl p-8 space-y-6"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

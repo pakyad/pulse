@@ -48,7 +48,7 @@ export default function GenesisSetup() {
       {status === 'idle' && (
         <button 
           onClick={createAdmin}
-          className="bg-[#007AFF] text-white font-bold px-10 py-4 rounded-2xl hover:bg-blue-600 transition-all active:scale-95 shadow-xl shadow-blue-500/20"
+          className="bg-[#007AFF] text-white font-bold px-10 py-4 rounded-2xl hover:bg-blue-600 transition-all active:scale-95 shadow-md shadow-blue-500/20"
         >
           Create admin@pulse.com
         </button>

@@ -152,7 +152,7 @@ export default function ScannerPage() {
                     initial={{ y: 20, rotate: -12 }}
                     animate={{ y: 0, rotate: 12 }}
                     transition={{ type: "spring", repeat: Infinity, repeatType: "mirror" }}
-                    className="w-32 h-32 bg-white rounded-[40px] flex items-center justify-center mb-10 shadow-[0_40px_100px_rgba(255,133,27,0.4)]"
+                    className="w-32 h-32 bg-white rounded-2xl flex items-center justify-center mb-10 shadow-[0_40px_100px_rgba(255,133,27,0.4)]"
                 >
                   <Award size={64} className="text-orange" />
                 </motion.div>
@@ -161,7 +161,7 @@ export default function ScannerPage() {
                 <p className="text-orange text-sm font-black  tracking-[0.5em] mb-12 animate-pulse">Handshake Verified +50 HP</p>
                 
                 <div className="flex flex-col gap-4 w-full max-w-xs">
-                    <Link href="/me" className="flex items-center justify-center gap-4 bg-white text-navy px-12 py-6 rounded-[28px] font-black  tracking-[0.2em] text-[11px] shadow-2xl hover:bg-orange hover:text-white transition-all active:scale-95 group">
+                    <Link href="/me" className="flex items-center justify-center gap-4 bg-white text-navy px-12 py-6 rounded-2xl font-black  tracking-[0.2em] text-[11px] shadow-md hover:bg-orange hover:text-white transition-all active:scale-95 group">
                       Return to Hub 
                       <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
                     </Link>
@@ -186,7 +186,7 @@ export default function ScannerPage() {
                 <div className="w-14" />
             </header>
 
-            <div className="mt-28 relative group w-full max-w-sm aspect-square rounded-[40px] overflow-hidden border-4 border-white/5 shadow-2xl bg-black">
+            <div className="mt-28 relative group w-full max-w-sm aspect-square rounded-2xl overflow-hidden border-4 border-white/5 shadow-md bg-black">
                 <div id="pulse-reader" className="w-full h-full relative z-10" />
                 <div className="absolute inset-0 border-60 border-black/40 backdrop-blur-[2px] z-20 pointer-events-none" />
             </div>

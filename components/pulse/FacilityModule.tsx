@@ -24,7 +24,7 @@ export default function FacilityModule({
     <motion.div 
       whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
       whileTap={{ scale: 0.98 }}
-      className="p-6 flex items-center justify-between group cursor-pointer transition-all rounded-3xl border border-transparent hover:border-white/10"
+      className="p-6 flex items-center justify-between group cursor-pointer transition-all rounded-2xl border border-transparent hover:border-white/10"
     >
       <div className="flex items-center gap-6">
         <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all shadow-inner">

@@ -117,7 +117,7 @@ export default function LeaderboardPage() {
             </AnimatePresence>
 
             {clubs.length === 0 && (
-               <div className="py-20 bg-slate-50/50 rounded-[40px] border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
+               <div className="py-20 bg-slate-50/50 rounded-2xl border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
                   <Activity size={32} strokeWidth={1} className="opacity-30" />
                   <p className="text-[12px] font-bold uppercase tracking-widest">No rankings available yet</p>
                </div>
@@ -125,7 +125,7 @@ export default function LeaderboardPage() {
          </section>
 
          <footer className="pt-10 px-4">
-            <div className="p-8 bg-slate-50/50 rounded-[32px] border border-slate-100">
+            <div className="p-8 bg-slate-50/50 rounded-2xl border border-slate-100">
                <div className="flex items-center gap-3 mb-2">
                   <ShieldCheck size={16} className="text-slate-400" />
                   <p className="text-[11px] font-bold text-[#000000] uppercase tracking-widest">Fair Play</p>
@@ -137,7 +137,7 @@ export default function LeaderboardPage() {
          </footer>
       </div>
 
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
     </main>
   );
 }

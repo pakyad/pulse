@@ -72,7 +72,7 @@ export default function SwipeToAccept({
   return (
     <div 
       ref={trackRef}
-      className={`relative w-full h-14 rounded-full flex items-center justify-center overflow-hidden shadow-lg transition-colors duration-300 mt-4 ${isSuccess ? 'bg-emerald-500' : 'bg-neutral-900'}`}
+      className={`relative w-full h-14 rounded-full flex items-center justify-center overflow-hidden shadow-md transition-colors duration-300 mt-4 ${isSuccess ? 'bg-emerald-500' : 'bg-neutral-900'}`}
       style={{ touchAction: 'none' }}
     >
       <div 

@@ -70,7 +70,7 @@ export default function MerchantDisputes() {
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] font-sans antialiased pb-32">
+    <main className="min-h-screen bg-white text-[#000000] font-sans antialiased pb-40">
       
       {/* ── SIMPLE HEADER ── */}
       <header className="px-8 py-8 border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-xl z-50">

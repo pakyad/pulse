@@ -46,7 +46,7 @@ export default function AvatarDropdown({ photoUrl, userName, className = "" }: A
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 group active:scale-95 transition-all"
+        className="flex items-center gap-2 group active:scale-95 transition-all -m-2 p-2 rounded-2xl"
       >
         <div className="relative shrink-0">
           <div className="h-10 w-10 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm group-hover:border-slate-300 transition-colors">
@@ -66,7 +66,7 @@ export default function AvatarDropdown({ photoUrl, userName, className = "" }: A
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute right-0 mt-3 w-60 bg-white rounded-3xl shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden z-200"
+            className="absolute right-0 mt-3 w-60 bg-white rounded-2xl shadow-md shadow-slate-200 border border-slate-100 overflow-hidden z-200"
           >
             <div className="p-3">
               {menuItems.map((section, idx) => (

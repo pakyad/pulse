@@ -55,7 +55,7 @@ export default function ChatOverlay({ tx_id, status, recipientName, isOpen, onCl
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           className="fixed bottom-0 left-0 w-full z-60 h-[80vh] md:h-[60vh] max-w-2xl mx-auto right-0"
         >
-          <div className="h-full soft-lens rounded-t-[40px] border-t border-x border-navy/10 flex flex-col overflow-hidden shadow-2xl">
+          <div className="h-full soft-lens rounded-t-[40px] border-t border-x border-navy/10 flex flex-col overflow-hidden shadow-md">
             {/* Header */}
             <div className="p-8 border-b border-navy/5 flex justify-between items-center bg-white/40 backdrop-blur-xl">
                <div className="flex items-center gap-4">
@@ -81,7 +81,7 @@ export default function ChatOverlay({ tx_id, status, recipientName, isOpen, onCl
                  <div key={msg.id} className={`flex ${msg.sender === 'ME' ? 'justify-end' : 'justify-start'} mb-6`}>
                     <div className={`max-w-[80%] px-5 py-3 rounded-2xl text-[13px] font-medium leading-relaxed tracking-widest ${
                        msg.sender === 'ME' 
-                       ? 'bg-navy text-white rounded-tr-none shadow-lg' 
+                       ? 'bg-navy text-white rounded-tr-none shadow-md' 
                        : 'soft-lens text-navy rounded-tl-none border-[0.5px] border-navy/10 shadow-sm'
                     }`}>
                        {msg.text}

@@ -72,7 +72,7 @@ export default function PublicProfile() {
 
   if (!profile) return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-6 p-8 text-center">
-      <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 border border-slate-100">
+      <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 border border-slate-100">
         <Package size={32} strokeWidth={1.5} />
       </div>
       <div>
@@ -91,7 +91,7 @@ export default function PublicProfile() {
   const campus = profile.campus || profile.faculty || null;
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pb-24 font-sans antialiased text-navy">
+    <main className="min-h-screen bg-[#FDFDFD] pb-40 font-sans antialiased text-navy">
 
       {/* BACK BUTTON — floats over header */}
       <div className="fixed top-0 left-0 right-0 z-50 px-6 pt-12 pb-4 pointer-events-none">
@@ -100,7 +100,7 @@ export default function PublicProfile() {
           {isOwn && (
             <button
               onClick={() => router.push('/me')}
-              className="px-5 py-2.5 bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg text-[11px] font-black uppercase tracking-widest text-navy border border-white/60 active:scale-95 transition-all"
+              className="px-5 py-2.5 bg-white/90 backdrop-blur-xl rounded-2xl shadow-md text-[11px] font-black uppercase tracking-widest text-navy border border-white/60 active:scale-95 transition-all"
             >
               Edit Profile
             </button>
@@ -117,7 +117,7 @@ export default function PublicProfile() {
           className="flex items-start gap-6"
         >
           {/* Avatar */}
-          <div className={`shrink-0 w-24 h-24 rounded-[2.5rem] overflow-hidden border-4 shadow-2xl ${isClub ? 'border-accent/30' : 'border-slate-100'}`}>
+          <div className={`shrink-0 w-24 h-24 rounded-[2.5rem] overflow-hidden border-4 shadow-md ${isClub ? 'border-accent/30' : 'border-slate-100'}`}>
             <img
               src={profile.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`}
               alt={displayName}
@@ -224,7 +224,7 @@ export default function PublicProfile() {
 
         {listings.length === 0 ? (
           <div className="py-20 flex flex-col items-center gap-4 text-center">
-            <div className="w-16 h-16 bg-slate-50 rounded-4xl flex items-center justify-center text-slate-200 border border-slate-100">
+            <div className="w-16 h-16 bg-slate-50 rounded-4xl flex items-center justify-center text-slate-300 border border-slate-100">
               <Package size={28} strokeWidth={1.5} />
             </div>
             <p className="text-[13px] font-medium text-slate-400">No active listings yet.</p>

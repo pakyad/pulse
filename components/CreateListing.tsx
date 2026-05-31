@@ -195,7 +195,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         {existingItem && existingItem.stock_count <= 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-            className="mb-10 p-6 bg-slate-900 rounded-[32px] text-white shadow-xl shadow-slate-900/10"
+            className="mb-10 p-6 bg-slate-900 rounded-2xl text-white shadow-md shadow-slate-900/10"
           >
             <div className="flex items-center gap-2 mb-4 text-amber-400">
                <Zap size={16} />

@@ -119,7 +119,7 @@ export default function AuthPage() {
             <div className="w-full space-y-4 pb-8">
                <button 
                  onClick={() => setView('login')}
-                 className="w-full py-4 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-[2rem] font-semibold text-[16px] transition-all"
+                 className="w-full py-4 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-900 rounded-[2rem] font-semibold text-[16px] active:scale-[0.98] transition-all"
                >
                   Use email or username
                </button>
@@ -201,7 +201,7 @@ export default function AuthPage() {
 
                <button 
                  onClick={handleLogin} disabled={loading}
-                 className="w-full h-[60px] bg-[#0A66C2] hover:bg-[#004182] text-white rounded-full font-bold text-[16px] shadow-lg shadow-[#0A66C2]/10 active:scale-95 transition-all flex items-center justify-center mt-4"
+                 className="w-full h-[60px] bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-900 rounded-full font-bold text-[16px] active:scale-95 transition-all flex items-center justify-center mt-4"
                >
                  {loading ? <Loader2 className="animate-spin" size={24} /> : 'Sign in'}
                </button>
@@ -294,7 +294,7 @@ export default function AuthPage() {
                   <button 
                      onClick={handleRegister}
                      disabled={loading || !regData.email || !regData.password}
-                     className="w-full h-16 bg-navy text-white rounded-2xl font-bold text-[15px] shadow-2xl shadow-navy/20 active:scale-[0.98] transition-all flex items-center justify-center disabled:opacity-20"
+                     className="w-full h-16 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[15px] active:scale-[0.98] transition-all flex items-center justify-center disabled:opacity-20"
                   >
                      {loading ? <Loader2 className="animate-spin" size={20} /> : 'Finalize Synchronize'}
                   </button>

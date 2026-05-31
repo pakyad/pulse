@@ -61,7 +61,7 @@ export default function BookingPassPage() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full max-w-sm bg-white rounded-[40px] overflow-hidden shadow-2xl shadow-black/40 flex flex-col"
+          className="w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-md shadow-black/40 flex flex-col"
         >
            {/* Top Section: Facility Context */}
            <div className="bg-neutral-50 px-8 py-8 border-b border-neutral-100 flex justify-between items-start">
@@ -87,7 +87,7 @@ export default function BookingPassPage() {
               />
               
               {/* QR Placeholder (High Fidelity SVG) */}
-              <div className="relative z-10 w-48 h-48 bg-white p-4 rounded-3xl border border-neutral-100 shadow-sm">
+              <div className="relative z-10 w-48 h-48 bg-white p-4 rounded-2xl border border-neutral-100 shadow-sm">
                  <svg viewBox="0 0 100 100" className="w-full h-full text-navy">
                     <rect width="25" height="25" fill="currentColor" />
                     <rect x="75" width="25" height="25" fill="currentColor" />
@@ -103,7 +103,7 @@ export default function BookingPassPage() {
                  
                  {/* Center Icon Overlay */}
                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-10 h-10 bg-white rounded-xl shadow-lg border border-neutral-50 flex items-center justify-center text-navy">
+                    <div className="w-10 h-10 bg-white rounded-xl shadow-md border border-neutral-50 flex items-center justify-center text-navy">
                        <Zap size={20} className="fill-navy" />
                     </div>
                  </div>

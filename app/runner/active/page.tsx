@@ -181,7 +181,7 @@ function RunnerActivePageContent() {
       </nav>
 
       {/* ── Dashboard Content ── */}
-      <div className="flex-1 overflow-y-auto px-8 py-10 space-y-12 no-scrollbar">
+      <div className="flex-1 overflow-y-auto px-8 py-10 space-y-12 scrollbar-hide">
          
          {/* Instruction Block */}
          <div className="space-y-2">
@@ -240,7 +240,7 @@ function RunnerActivePageContent() {
             {order.status === 'ARRIVED_AT_MERCHANT' && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-navy rounded-[2.5rem] p-8 text-white space-y-6 shadow-2xl shadow-navy/20"
+                className="bg-navy rounded-[2.5rem] p-8 text-white space-y-6 shadow-md shadow-navy/20"
               >
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -423,7 +423,7 @@ function RunnerActivePageContent() {
                  initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                  className="flex flex-col items-center gap-6"
                >
-                  <div className="w-20 h-20 rounded-[2rem] bg-emerald-500 flex items-center justify-center text-white shadow-2xl shadow-emerald-500/20">
+                  <div className="w-20 h-20 rounded-[2rem] bg-emerald-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
                      <CheckCircle2 size={40} />
                   </div>
                   <div className="text-center">
@@ -485,12 +485,12 @@ export default function RunnerActivePage() {
 function NodeItem({ active, completed, title, detail, icon, description }: any) {
   return (
     <div className="flex items-start gap-8">
-       <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center border transition-all duration-500 shrink-0 ${active ? 'bg-navy text-white border-navy shadow-xl shadow-navy/20 scale-110' : completed ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-slate-50 text-slate-200 border-slate-100'}`}>
+       <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center border transition-all duration-500 shrink-0 ${active ? 'bg-navy text-white border-navy shadow-md shadow-navy/20 scale-110' : completed ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-slate-50 text-slate-200 border-slate-100'}`}>
           {completed ? <CheckCircle2 size={20} /> : icon}
        </div>
        <div className="pt-1">
           <p className={`text-[11px] font-black uppercase tracking-widest ${active ? 'text-navy' : 'text-slate-300'}`}>{title}</p>
-          <p className={`text-[16px] font-black tracking-tightest uppercase ${active ? 'text-navy' : 'text-slate-300'}`}>{detail}</p>
+          <p className={`text-[16px] font-black tracking-tightest uppercase truncate max-w-[200px] ${active ? 'text-navy' : 'text-slate-300'}`}>{detail}</p>
           {active && <p className="text-[12px] text-slate-400 font-medium leading-relaxed mt-2">{description}</p>}
        </div>
     </div>
@@ -506,7 +506,7 @@ function ActionButton({ label, onClick, color, disabled }: any) {
       exit={{ opacity: 0, y: -20 }}
       disabled={disabled}
       onClick={onClick}
-      className={`w-full h-20 ${bg} text-white rounded-[2rem] font-black text-[15px] uppercase tracking-widest shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-30`}
+      className={`w-full h-20 ${bg} text-white rounded-[2rem] font-black text-[15px] uppercase tracking-widest shadow-md active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-30`}
     >
        {label} <ArrowRight size={20} />
     </motion.button>

@@ -20,7 +20,7 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
   if (monitorItems.length === 0) {
     return (
       <div className="py-20 flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 rounded-[24px] bg-emerald-50 flex items-center justify-center mb-6">
+        <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6">
           <Check size={24} className="text-emerald-500" />
         </div>
         <h3 className="text-[17px] font-black text-slate-900 uppercase tracking-widest">Registry Stable</h3>
@@ -53,7 +53,7 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-white rounded-[32px] border-[0.5px] border-slate-100 p-8 shadow-sm hover:shadow-xl shadow-slate-200/50 transition-all group"
+              className="bg-white rounded-2xl border-[0.5px] border-slate-100 p-8 shadow-sm hover:shadow-md shadow-slate-200/50 transition-all group"
             >
               {/* Header */}
               <div className="flex justify-between items-start mb-8">
@@ -111,7 +111,7 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
               <button 
                 disabled={processingId === item.id}
                 onClick={() => handleSuspend(item.id)}
-                className="w-full h-[64px] bg-slate-900 text-white rounded-[24px] font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-xl shadow-black/10 active:scale-95"
+                className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-md shadow-black/10 active:scale-95"
               >
                 {processingId === item.id ? <Loader2 className="animate-spin" size={20} /> : <ShieldAlert size={20} />}
                 SUSPEND ASSET IMMEDIATELY

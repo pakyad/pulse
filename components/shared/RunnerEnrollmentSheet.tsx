@@ -143,7 +143,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                                 <button 
                                   key={f}
                                   onClick={() => setForm({ ...form, faculty: f })}
-                                  className={`h-14 px-6 rounded-xl text-left text-[14px] font-bold transition-all ${form.faculty === f ? 'bg-navy text-white shadow-lg shadow-navy/10' : 'bg-slate-50 text-navy'}`}
+                                  className={`h-14 px-6 rounded-xl text-left text-[14px] font-bold transition-all ${form.faculty === f ? 'bg-navy text-white shadow-md shadow-navy/10' : 'bg-slate-50 text-navy'}`}
                                 >
                                   {f}
                                 </button>
@@ -152,7 +152,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                         </div>
                         <div className="space-y-4">
                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Student ID Card</label>
-                           <div className="h-48 rounded-[28px] bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-3 group hover:border-navy/10 transition-colors cursor-pointer">
+                           <div className="h-48 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-3 group hover:border-navy/10 transition-colors cursor-pointer">
                               <Camera size={24} className="group-hover:text-navy transition-colors" />
                               <p className="text-[12px] font-bold uppercase tracking-wider">Tap to Capture ID</p>
                            </div>
@@ -180,7 +180,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                              <button 
                                key={m.id}
                                onClick={() => setForm({ ...form, transitMode: m.id })}
-                               className={`h-24 rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all ${form.transitMode === m.id ? 'bg-navy text-white border-navy shadow-xl shadow-navy/10' : 'bg-slate-50 text-navy border-transparent'}`}
+                               className={`h-24 rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all ${form.transitMode === m.id ? 'bg-navy text-white border-navy shadow-md shadow-navy/10' : 'bg-slate-50 text-navy border-transparent'}`}
                              >
                                <m.icon size={20} />
                                <span className="text-[13px] font-bold">{m.label}</span>
@@ -190,7 +190,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
 
                         {form.transitMode === 'motor' && (
                           <div className="space-y-6">
-                             <div className="p-6 bg-amber-50 rounded-[28px] border border-amber-100 flex items-start gap-4">
+                             <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-4">
                                 <ShieldCheck className="text-amber-600 shrink-0" size={20} />
                                 <div>
                                    <p className="text-[12px] font-bold text-amber-900 uppercase tracking-widest">License Required</p>
@@ -214,7 +214,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                                 <button 
                                   key={item}
                                   onClick={() => toggleEquipment(item)}
-                                  className={`h-16 px-6 rounded-xl flex items-center justify-between transition-all ${form.equipment.includes(item) ? 'bg-navy text-white shadow-lg' : 'bg-slate-50 text-navy'}`}
+                                  className={`h-16 px-6 rounded-xl flex items-center justify-between transition-all ${form.equipment.includes(item) ? 'bg-navy text-white shadow-md' : 'bg-slate-50 text-navy'}`}
                                 >
                                   <span className="text-[14px] font-bold">{item}</span>
                                   {form.equipment.includes(item) && <Check size={18} />}
@@ -242,7 +242,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                                 <button 
                                   key={h}
                                   onClick={() => toggleHotspot(h)}
-                                  className={`px-6 py-3 rounded-full text-[13px] font-bold border transition-all ${form.preferredHotspots.includes(h) ? 'bg-navy text-white border-navy shadow-lg' : 'bg-slate-50 text-navy border-transparent'}`}
+                                  className={`px-6 py-3 rounded-full text-[13px] font-bold border transition-all ${form.preferredHotspots.includes(h) ? 'bg-navy text-white border-navy shadow-md' : 'bg-slate-50 text-navy border-transparent'}`}
                                 >
                                   {h}
                                 </button>
@@ -293,7 +293,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                      </div>
 
                      <div className="space-y-8">
-                        <div className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-6">
+                        <div className="p-8 bg-slate-50 rounded-2xl border border-slate-100 space-y-6">
                            <div className="flex items-center gap-3">
                               <ShieldCheck className="text-navy" size={24} />
                               <h4 className="text-[15px] font-bold text-navy uppercase tracking-widest">Protocol Agreement</h4>
@@ -307,7 +307,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
 
                         <button 
                           onClick={() => setForm({ ...form, agreedToTerms: !form.agreedToTerms })}
-                          className={`w-full h-20 px-8 rounded-[24px] flex items-center justify-between border-2 transition-all ${form.agreedToTerms ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : 'bg-slate-50 border-transparent text-navy'}`}
+                          className={`w-full h-20 px-8 rounded-2xl flex items-center justify-between border-2 transition-all ${form.agreedToTerms ? 'bg-emerald-50 border-emerald-500 text-emerald-900' : 'bg-slate-50 border-transparent text-navy'}`}
                         >
                            <span className="text-[14px] font-bold">I swear the Registry Oath</span>
                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${form.agreedToTerms ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200'}`}>
@@ -321,7 +321,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                 {/* STEP 5: SUCCESS */}
                 {step === 5 && (
                   <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-10 py-20">
-                     <div className="w-24 h-24 bg-emerald-50 rounded-[40px] mx-auto flex items-center justify-center text-emerald-500 shadow-inner">
+                     <div className="w-24 h-24 bg-emerald-50 rounded-2xl mx-auto flex items-center justify-center text-emerald-500 shadow-inner">
                         <CheckCircle2 size={48} />
                      </div>
                      <div className="space-y-3">
@@ -332,7 +332,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                      </div>
                      <button 
                        onClick={onClose}
-                       className="w-full h-16 bg-navy text-white rounded-[22px] font-bold text-[15px] tracking-tight active:scale-95 transition-all shadow-xl shadow-navy/20"
+                       className="w-full h-16 bg-navy text-white rounded-[22px] font-bold text-[15px] tracking-tight active:scale-95 transition-all shadow-md shadow-navy/20"
                      >
                         Return to Terminal
                      </button>
@@ -348,7 +348,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                <button 
                  onClick={step === 4 ? handleSubmit : next}
                  disabled={isSubmitting || (step === 4 && !form.agreedToTerms)}
-                 className={`w-full h-16 rounded-[22px] font-bold text-[15px] tracking-tight flex items-center justify-center gap-3 transition-all ${isSubmitting ? 'bg-slate-50 text-slate-200' : 'bg-navy text-white shadow-xl shadow-navy/10 active:scale-[0.98]'}`}
+                 className={`w-full h-16 rounded-[22px] font-bold text-[15px] tracking-tight flex items-center justify-center gap-3 transition-all ${isSubmitting ? 'bg-slate-50 text-slate-200' : 'bg-navy text-white shadow-md shadow-navy/10 active:scale-[0.98]'}`}
                >
                   {isSubmitting ? <Loader2 className="animate-spin" /> : (
                     <>

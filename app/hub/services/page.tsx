@@ -91,17 +91,17 @@ export default function ServicesHub() {
               <motion.div 
                 animate={{ x: [20, 200, 20], y: [40, 100, 40] }}
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute w-10 h-10 bg-navy rounded-full border-4 border-white shadow-xl flex items-center justify-center text-white"
+                className="absolute w-10 h-10 bg-navy rounded-full border-4 border-white shadow-md flex items-center justify-center text-white"
               >
                 <Bus size={16} />
               </motion.div>
 
               <div className="absolute bottom-5 left-5 right-5 flex gap-2">
-                 <div className="flex-1 bg-white/90 backdrop-blur-md p-3.5 rounded-2xl shadow-lg">
+                 <div className="flex-1 bg-white/90 backdrop-blur-md p-3.5 rounded-2xl shadow-md">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Current Stop</p>
                     <p className="text-[13px] font-bold text-navy">Main Gate</p>
                  </div>
-                 <div className="w-12 h-12 bg-white shadow-lg rounded-2xl flex items-center justify-center text-navy hover:bg-slate-50 cursor-pointer">
+                 <div className="w-12 h-12 bg-white shadow-md rounded-2xl flex items-center justify-center text-navy hover:bg-slate-50 cursor-pointer">
                     <Map size={18} />
                  </div>
               </div>
@@ -132,7 +132,7 @@ export default function ServicesHub() {
                <h3 className="text-[17px] font-bold text-navy tracking-tight">New Application</h3>
                <div 
                  onClick={() => router.push('/hub/facility/hostel-new')}
-                 className="bg-navy rounded-[2.5rem] p-6 text-white h-[184px] flex flex-col justify-between group cursor-pointer hover:bg-navy/90 transition-all shadow-xl shadow-navy/20"
+                 className="bg-navy rounded-[2.5rem] p-6 text-white h-[184px] flex flex-col justify-between group cursor-pointer hover:bg-navy/90 transition-all shadow-md shadow-navy/20"
                >
                   <div className="flex justify-between items-start">
                      <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-emerald-400">
@@ -156,7 +156,7 @@ export default function ServicesHub() {
              { name: "Bus Schedule", icon: Bus },
              { name: "Campus Map", icon: Map },
            ].map((u, i) => (
-             <div key={i} className="p-5 bg-white border border-slate-50 rounded-3xl flex items-center justify-between group cursor-pointer hover:bg-slate-50 transition-all">
+             <div key={i} className="p-5 bg-white border border-slate-50 rounded-2xl flex items-center justify-between group cursor-pointer hover:bg-slate-50 transition-all">
                 <div className="flex items-center gap-4">
                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-navy group-hover:text-white transition-all">
                       <u.icon size={18} />

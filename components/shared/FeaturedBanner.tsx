@@ -46,7 +46,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
 
   return (
     <div className="relative">
-      <div className={`relative ${height} rounded-[2.5rem] overflow-hidden shadow-xl shadow-black/10 group`}>
+      <div className={`relative ${height} rounded-[2.5rem] overflow-hidden shadow-md shadow-black/10 group`}>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={index}
@@ -106,7 +106,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
                {/* Square CTA Button */}
                <button
                  onClick={() => router.push(slide.ctaPath)}
-                 className="shrink-0 w-16 h-16 bg-white rounded-[22px] shadow-2xl shadow-black/20 flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50 border border-white/40"
+                 className="shrink-0 w-16 h-16 bg-white rounded-[22px] shadow-md shadow-black/20 flex items-center justify-center active:scale-90 transition-all hover:bg-slate-50 border border-white/40"
                >
                  <ArrowUpRight size={28} className="text-black" strokeWidth={3} />
                </button>

@@ -33,11 +33,11 @@ export default function PriceControlModal({ isOpen, onClose, onSave }: PriceCont
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          className="relative w-full max-w-[500px] bg-white rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden border border-white"
+          className="relative w-full max-w-[500px] bg-white rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden border border-white"
         >
           <div className="p-10">
             <div className="flex justify-between items-start mb-8">
-              <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-slate-900/20">
+              <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-md shadow-slate-900/20">
                 <ShieldCheck size={28} />
               </div>
               <button 
@@ -86,7 +86,7 @@ export default function PriceControlModal({ isOpen, onClose, onSave }: PriceCont
                   onClose();
                 }
               }}
-              className="w-full h-[64px] bg-slate-900 text-white rounded-[24px] font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-900/20 active:scale-[0.98]"
+              className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-md shadow-slate-900/20 active:scale-[0.98]"
             >
               Set Institutional Limit
             </button>

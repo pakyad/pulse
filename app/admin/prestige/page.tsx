@@ -90,7 +90,7 @@ export default function AdminPrestigePage() {
             <h1 className="text-[36px] font-bold tracking-tight">Prestige Authorization</h1>
          </div>
          
-         <div className="flex items-center gap-8 p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-md">
+         <div className="flex items-center gap-8 p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md">
             <div className="text-center">
                <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Pending Syncs</p>
                <p className="text-[20px] font-bold">{campaigns.length}</p>
@@ -157,7 +157,7 @@ export default function AdminPrestigePage() {
                              </button>
                              <button 
                                onClick={() => handleAuthorize(camp.id)}
-                               className="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-green-500/20"
+                               className="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md shadow-green-500/20"
                              >
                                 <CheckCircle2 size={18} />
                              </button>
@@ -187,7 +187,7 @@ export default function AdminPrestigePage() {
             />
             <motion.div 
                initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-               className="bg-[#0A1121] w-full max-w-md rounded-[4rem] p-12 relative z-10 shadow-2xl border border-white/10 overflow-hidden"
+               className="bg-[#0A1121] w-full max-w-md rounded-[4rem] p-12 relative z-10 shadow-md border border-white/10 overflow-hidden"
             >
                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#1e3a8a_0%,transparent_70%)] opacity-30" />
                
@@ -223,7 +223,7 @@ export default function AdminPrestigePage() {
                         </div>
                         <div className="flex items-center justify-between pt-6 border-t border-white/5">
                            <p className="text-[18px] font-bold text-white">RM {selectedCamp.item?.price?.toFixed(2)}</p>
-                           <div className="px-6 py-3 bg-accent text-[11px] font-bold rounded-full text-white uppercase tracking-widest shadow-xl shadow-accent/20">
+                           <div className="px-6 py-3 bg-accent text-[11px] font-bold rounded-full text-white uppercase tracking-widest shadow-md shadow-accent/20">
                               {selectedCamp.creative?.cta_text}
                            </div>
                         </div>
@@ -243,7 +243,7 @@ export default function AdminPrestigePage() {
                   <div className="flex gap-4">
                      <button 
                         onClick={() => handleAuthorize(selectedCamp.id)}
-                        className="flex-1 h-16 bg-white text-navy rounded-full font-bold text-[13px] uppercase tracking-widest shadow-2xl shadow-white/10 active:scale-95 transition-all"
+                        className="flex-1 h-16 bg-white text-navy rounded-full font-bold text-[13px] uppercase tracking-widest shadow-md shadow-white/10 active:scale-95 transition-all"
                      >
                         Authorize Sync
                      </button>

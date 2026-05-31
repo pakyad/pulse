@@ -95,7 +95,7 @@ export default function PulseHome() {
       {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-slate-900/10">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-slate-900/10">
                <Sparkles size={18} />
             </div>
             <div>
@@ -159,14 +159,14 @@ export default function PulseHome() {
                     key={post.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-slate-50/50 p-7 rounded-[32px] border-[0.5px] border-slate-100 group hover:bg-white hover:border-slate-300 transition-all"
+                    className="bg-slate-50/50 p-7 rounded-2xl border-[0.5px] border-slate-100 group hover:bg-white hover:border-slate-300 transition-all"
                   >
                      <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                            <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
                               <Activity size={14} />
                            </div>
-                           <p className="text-[11px] font-bold text-[#000000]">{post.author_name || 'Verified Student'}</p>
+                           <p className="text-[11px] font-bold text-[#000000] truncate max-w-[120px]">{post.author_name || 'Verified Student'}</p>
                         </div>
                         <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">{post.time_ago || 'Recent'}</p>
                      </div>
@@ -175,7 +175,7 @@ export default function PulseHome() {
                      </p>
                   </motion.div>
                )) : (
-                  <div className="py-16 bg-slate-50/50 rounded-[40px] border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
+                  <div className="py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
                      <Activity size={32} strokeWidth={1} className="opacity-30" />
                      <p className="text-[11px] font-bold uppercase tracking-widest">No recent activity</p>
                   </div>
@@ -218,7 +218,7 @@ export default function PulseHome() {
                   ))}
                </div>
             ) : (
-               <div className="py-16 bg-slate-50/50 rounded-[40px] border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
+               <div className="py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
                   <Box size={32} strokeWidth={1} className="opacity-30" />
                   <p className="text-[12px] font-bold uppercase tracking-widest">No listings found</p>
                </div>
@@ -227,7 +227,7 @@ export default function PulseHome() {
 
       </div>
 
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
     </main>
   );
 }

@@ -152,7 +152,7 @@ export default function MissionBoard() {
 
       {/* \u2500\u2500 IN-UI ERROR TOAST \u2500\u2500 */}
       {showError && (
-        <div className="fixed top-24 left-6 right-6 z-200 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-lg text-center">
+        <div className="fixed top-24 left-6 right-6 z-200 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md text-center">
           {showError}
         </div>
       )}
@@ -167,15 +167,15 @@ export default function MissionBoard() {
          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} className="scale-90" />
       </nav>
 
-      <div className="pt-24 pb-32 px-6 space-y-8">
+      <div className="pt-24 pb-40 px-6 space-y-8">
          {activeMission ? (
            /* ── ACTIVE TASK BLOCKED PANEL ── */
            <motion.div 
              initial={{ opacity: 0, scale: 0.98 }}
              animate={{ opacity: 1, scale: 1 }}
-             className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-[0_24px_48px_-12px_rgba(245,158,11,0.08)] text-center space-y-8 max-w-md mx-auto mt-8"
+             className="bg-white p-8 rounded-2xl border border-slate-100 shadow-[0_24px_48px_-12px_rgba(245,158,11,0.08)] text-center space-y-8 max-w-md mx-auto mt-8"
            >
-             <div className="w-16 h-16 bg-amber-50 rounded-[24px] mx-auto flex items-center justify-center text-amber-500 border border-amber-100/50">
+             <div className="w-16 h-16 bg-amber-50 rounded-2xl mx-auto flex items-center justify-center text-amber-500 border border-amber-100/50">
                <Activity size={26} className="animate-pulse" />
              </div>
              <div className="space-y-2">
@@ -186,7 +186,7 @@ export default function MissionBoard() {
              </div>
              <button 
                onClick={() => router.push('/run/terminal')}
-               className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10 lowercase"
+               className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all lowercase"
              >
                <span>return to active terminal</span>
                <ArrowRight size={16} />
@@ -195,7 +195,7 @@ export default function MissionBoard() {
          ) : (
            <>
               {/* ── RELAXED FILTER PILLS ── */}
-              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
                  {['all', 'food', 'parcels', 'academic', 'errands'].map(t => (
                     <button 
                       key={t} 
@@ -218,7 +218,7 @@ export default function MissionBoard() {
                            animate={{ opacity: 1, y: 0 }}
                            exit={{ opacity: 0, scale: 0.95 }}
                            transition={{ delay: idx * 0.05 }}
-                           className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-6"
+                           className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6"
                          >
                             <div className="flex justify-between items-start">
                                <div className="flex items-center gap-4">
@@ -226,7 +226,7 @@ export default function MissionBoard() {
                                      <Package size={22} />
                                   </div>
                                   <div>
-                                     <h3 className="text-[16px] font-bold text-slate-900 tracking-tight">{mission.seller_name || 'Merchant'}</h3>
+                                     <h3 className="text-[16px] font-bold text-slate-900 tracking-tight truncate max-w-[200px]">{mission.seller_name || 'Merchant'}</h3>
                                      <p className="text-[12px] text-slate-400 font-medium lowercase">{mission.title || 'Item'} • #{mission.id.substring(0,8)}</p>
                                   </div>
                                </div>
@@ -236,7 +236,7 @@ export default function MissionBoard() {
                                </div>
                             </div>
 
-                            <div className="space-y-3 bg-slate-50/50 p-5 rounded-[24px] border border-slate-100/50">
+                            <div className="space-y-3 bg-slate-50/50 p-5 rounded-2xl border border-slate-100/50">
                                <div className="flex items-center gap-3">
                                   <MapPin size={14} className="text-slate-300" />
                                   <p className="text-[13px] font-bold text-slate-700">{mission.drop_off_location || 'Campus Center'}</p>
@@ -255,7 +255,7 @@ export default function MissionBoard() {
                             <button 
                               disabled={isProcessing}
                               onClick={() => handleClaim(mission.id)}
-                              className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10 disabled:opacity-50"
+                              className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50"
                             >
                                {isProcessing ? <Activity className="animate-spin" size={18} /> : <Zap size={18} className="text-amber-400 fill-amber-400" />}
                                <span className="lowercase">claim mission</span>
@@ -306,7 +306,7 @@ export default function MissionBoard() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", damping: 15, stiffness: 200 }}
-              className="w-32 h-32 bg-emerald-500 rounded-[48px] flex items-center justify-center mb-10 shadow-2xl shadow-emerald-500/40"
+              className="w-32 h-32 bg-emerald-500 rounded-[48px] flex items-center justify-center mb-10 shadow-md shadow-emerald-500/40"
             >
               <motion.div
                 initial={{ pathLength: 0 }}
@@ -344,7 +344,7 @@ export default function MissionBoard() {
         )}
       </AnimatePresence>
 
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
     </main>
   );
 }

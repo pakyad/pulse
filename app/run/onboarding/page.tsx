@@ -81,7 +81,7 @@ export default function RunnerOnboarding() {
           <p className="text-[14px] text-slate-400 font-medium leading-relaxed">
             Your Runner Protocol application is currently being verified by the Institutional Registry. This typically takes 24 academic hours.
           </p>
-          <button onClick={() => router.push('/run')} className="w-full h-14 bg-navy text-white rounded-2xl font-bold text-[14px] tracking-widest uppercase shadow-xl shadow-navy/10">
+          <button onClick={() => router.push('/run')} className="w-full h-14 bg-navy text-white rounded-2xl font-bold text-[14px] tracking-widest uppercase shadow-md shadow-navy/10">
             Return to Run Hub
           </button>
         </motion.div>
@@ -106,7 +106,7 @@ export default function RunnerOnboarding() {
       </nav>
 
       {/* ── CLEAN STACK CONTENT ── */}
-      <div className="flex-1 overflow-y-auto px-8 no-scrollbar pt-12 pb-40">
+      <div className="flex-1 overflow-y-auto px-8 scrollbar-hide pt-12 pb-40">
         <div className="space-y-[48px]">
           
           <AnimatePresence mode="wait">
@@ -125,7 +125,7 @@ export default function RunnerOnboarding() {
                       <button
                         key={item.id}
                         onClick={() => setFormData({ ...formData, vehicleType: item.id })}
-                        className={`py-6 rounded-2xl border transition-all flex flex-col items-center gap-3 ${formData.vehicleType === item.id ? 'bg-navy text-white border-navy shadow-xl shadow-navy/10' : 'bg-slate-50 border-transparent text-slate-400'}`}
+                        className={`py-6 rounded-2xl border transition-all flex flex-col items-center gap-3 ${formData.vehicleType === item.id ? 'bg-navy text-white border-navy shadow-md shadow-navy/10' : 'bg-slate-50 border-transparent text-slate-400'}`}
                       >
                         <item.icon size={20} />
                         <span className="text-[11px] font-bold uppercase tracking-widest">{item.label}</span>
@@ -222,7 +222,7 @@ export default function RunnerOnboarding() {
             onClick={() => setStep(2)}
             disabled={!formData.phone}
             className={`w-full h-16 rounded-2xl font-bold text-[14px] tracking-widest uppercase transition-all duration-300 ${
-              formData.phone ? 'bg-navy text-white shadow-xl shadow-navy/10' : 'bg-slate-50 text-slate-200'
+              formData.phone ? 'bg-navy text-white shadow-md shadow-navy/10' : 'bg-slate-50 text-slate-200'
             }`}
           >
             Continue Sequence
@@ -232,7 +232,7 @@ export default function RunnerOnboarding() {
             onClick={handleApply}
             disabled={isSubmitting || !isFormValid}
             className={`w-full h-16 rounded-2xl font-bold text-[14px] tracking-widest uppercase transition-all duration-300 ${
-              isFormValid ? 'bg-navy text-white shadow-xl shadow-navy/10' : 'bg-slate-50 text-slate-200'
+              isFormValid ? 'bg-navy text-white shadow-md shadow-navy/10' : 'bg-slate-50 text-slate-200'
             }`}
           >
             {isSubmitting ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Finalize Synchronization'}

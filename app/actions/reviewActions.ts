@@ -50,17 +50,19 @@ export async function submitReview(payload: {
       createdAt: new Date().toISOString()
     });
 
-    // Runner Review
-    const rReviewRef = reviewsRef.doc();
-    batch.set(rReviewRef, {
-      orderId: payload.orderId,
-      reviewerId: payload.buyerId,
-      targetId: payload.runnerId,
-      targetType: 'runner',
-      rating: payload.runnerRating,
-      comment: payload.comment,
-      createdAt: new Date().toISOString()
-    });
+    // Runner Review (only if runner exists)
+    if (payload.runnerId) {
+      const rReviewRef = reviewsRef.doc();
+      batch.set(rReviewRef, {
+        orderId: payload.orderId,
+        reviewerId: payload.buyerId,
+        targetId: payload.runnerId,
+        targetType: 'runner',
+        rating: payload.runnerRating,
+        comment: payload.comment,
+        createdAt: new Date().toISOString()
+      });
+    }
 
     // Update order status to reviewed
     batch.update(adminDb.collection("orders").doc(payload.orderId), {
@@ -86,8 +88,8 @@ export async function submitReview(payload: {
     };
 
     // Execute sequential updates for stability
-    await updateTargetRating(payload.vendorId, payload.vendorRating);
-    await updateTargetRating(payload.runnerId, payload.runnerRating);
+    if (payload.vendorId) await updateTargetRating(payload.vendorId, payload.vendorRating);
+    if (payload.runnerId) await updateTargetRating(payload.runnerId, payload.runnerRating);
 
     await batch.commit();
     

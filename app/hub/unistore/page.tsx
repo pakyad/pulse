@@ -122,7 +122,7 @@ export default function UniStorePage() {
       <div className="pt-28 px-5 space-y-8">
 
         {/* ── CATEGORY PILLS ── */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {CATEGORY_PILLS.map(cat => (
             <button
               key={cat}

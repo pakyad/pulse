@@ -125,7 +125,7 @@ export default function PerfectSignUp() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-8 left-6 right-6 z-2000 p-4 bg-red-600 text-white rounded-2xl shadow-2xl flex items-start gap-4"
+            className="fixed top-8 left-6 right-6 z-2000 p-4 bg-red-600 text-white rounded-2xl shadow-md flex items-start gap-4"
           >
             <AlertCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
@@ -234,7 +234,7 @@ export default function PerfectSignUp() {
                 <button 
                   onClick={handleSignUp}
                   disabled={loading}
-                  className="w-full h-[60px] bg-slate-900 text-white rounded-full font-black text-[13px] uppercase tracking-widest hover:bg-black transition-all mt-4 active:scale-[0.98] shadow-xl shadow-slate-900/10 flex items-center justify-center gap-3 disabled:opacity-50"
+                  className="w-full h-[60px] bg-white border border-slate-200 text-slate-900 shadow-sm rounded-full font-black text-[13px] uppercase tracking-widest hover:bg-slate-50 transition-all mt-4 active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -266,7 +266,7 @@ export default function PerfectSignUp() {
                 >
                   {/* Huge Visual Area - Top Half */}
                   <div className="flex-1 flex items-center justify-center mb-8 min-h-[280px]">
-                    <div className="w-full max-w-[280px] aspect-square bg-slate-50/80 rounded-[40px] flex items-center justify-center relative overflow-hidden">
+                    <div className="w-full max-w-[280px] aspect-square bg-slate-50/80 rounded-2xl flex items-center justify-center relative overflow-hidden">
                       {/* Subtle organic background decoration */}
                       <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-transparent to-slate-100/50" />
                       <motion.div 
@@ -342,7 +342,7 @@ export default function PerfectSignUp() {
                       router.push('/home');
                     }
                   }}
-                  className="w-full h-[54px] bg-[#F1F5F9] text-slate-900 rounded-xl font-bold text-[15px] hover:bg-[#E2E8F0] active:scale-[0.98] transition-all flex items-center justify-center"
+                  className="w-full h-[54px] bg-white border border-slate-200 shadow-sm text-slate-900 rounded-xl font-bold text-[15px] hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center"
                 >
                   {onboardStep < ONBOARDING_SLIDES.length - 1 ? 'Continue' : 'Enter Pulse'}
                 </button>

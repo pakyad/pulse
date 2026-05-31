@@ -186,14 +186,14 @@ export default function FacilityBookingPage() {
               {/* Duration Registry */}
               <div className="space-y-4">
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">How long do you need it?</p>
-                 <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                 <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
                    {['30m', '1h', '2h', '3h', '4h'].map((time) => (
                      <button 
                        key={time} 
                        onClick={() => setSelectedDuration(time)}
                        className={`shrink-0 w-20 h-20 rounded-2xl border-2 transition-all active:scale-[0.95] flex flex-col items-center justify-center gap-0.5 ${
                          selectedDuration === time 
-                           ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100' 
+                           ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-100' 
                            : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'
                        }`}
                      >
@@ -229,7 +229,7 @@ export default function FacilityBookingPage() {
                <button 
                  disabled={isBooking || bookingSuccess}
                  onClick={handleConfirmBooking}
-                 className={`w-full h-16 rounded-2xl flex items-center justify-center gap-4 font-bold text-base transition-all shadow-xl ${
+                 className={`w-full h-16 rounded-2xl flex items-center justify-center gap-4 font-bold text-base transition-all shadow-md ${
                    bookingSuccess 
                      ? 'bg-emerald-500 text-white shadow-emerald-100' 
                      : 'bg-blue-600 text-white shadow-blue-100 active:scale-[0.98]'

@@ -150,7 +150,7 @@ export default function CreateListingPage() {
             <p className="text-[11px] font-medium text-[#94a3b8]">Choose the category that fits your item.</p>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 -mx-6 px-6">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1 -mx-6 px-6">
             {(Object.keys(DOMAIN_LABELS) as DomainID[]).map((id) => {
               const isActive = selectedDomain === id;
               const Icon = DOMAIN_ICONS[id];
@@ -190,7 +190,7 @@ export default function CreateListingPage() {
                 <span className="text-[11px] font-bold text-[#94a3b8]">{images.length}/10</span>
               </div>
 
-              <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-1">
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="shrink-0 w-24 h-24 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center gap-1.5 hover:bg-slate-100 transition-all"
@@ -384,7 +384,7 @@ export default function CreateListingPage() {
         )}
       </div>
 
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
     </main>
   );
 }

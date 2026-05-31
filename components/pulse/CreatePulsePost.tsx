@@ -64,7 +64,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative z-10 w-full max-w-lg bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col"
+            className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-md overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="px-8 pt-8 pb-6 border-b border-slate-50 flex items-center justify-between">
@@ -122,12 +122,12 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                     value={body}
                     onChange={e => setBody(e.target.value)}
                     placeholder="Provide granular context for this update..."
-                    className="w-full h-40 p-6 bg-slate-50 rounded-3xl border-none text-[15px] font-medium text-[#000000] placeholder:text-slate-300 focus:ring-2 focus:ring-[#111111]/5 transition-all resize-none"
+                    className="w-full h-40 p-6 bg-slate-50 rounded-2xl border-none text-[15px] font-medium text-[#000000] placeholder:text-slate-300 focus:ring-2 focus:ring-[#111111]/5 transition-all resize-none"
                   />
                </div>
 
                {/* Image Attachment (Placeholder) */}
-               <div className="h-48 rounded-[32px] bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-3 group cursor-pointer hover:border-[#111111] transition-all">
+               <div className="h-48 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-3 group cursor-pointer hover:border-[#111111] transition-all">
                   <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-[#111111] group-hover:text-white transition-all">
                      <ImageIcon size={24} />
                   </div>
@@ -146,7 +146,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                <button 
                  disabled={submitting || !headline || !body}
                  onClick={handleSubmit}
-                 className="h-14 px-8 bg-[#111111] text-white rounded-2xl font-bold text-[14px] uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
+                 className="h-14 px-8 bg-[#111111] text-white rounded-2xl font-bold text-[14px] uppercase tracking-widest flex items-center gap-3 shadow-md shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
                >
                   {submitting ? (
                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />

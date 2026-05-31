@@ -74,7 +74,7 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden"
+          className="relative w-full max-w-md bg-white rounded-2xl shadow-md overflow-hidden"
         >
           {success ? (
             <div className="p-12 text-center space-y-4">
@@ -144,7 +144,7 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
               <button 
                 onClick={handleCreate}
                 disabled={loading}
-                className="w-full h-16 bg-slate-900 text-white rounded-3xl font-black text-[13px] uppercase tracking-widest shadow-xl shadow-slate-900/10 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-20"
+                className="w-full h-16 bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-widest shadow-md shadow-slate-900/10 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-20"
               >
                 {loading ? <Loader2 size={20} className="animate-spin" /> : 'Create Account'}
               </button>

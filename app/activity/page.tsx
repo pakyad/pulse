@@ -118,7 +118,7 @@ function MerchantInsights({ profile, orders, items }: any) {
   return (
     <div className="flex flex-col space-y-12 animate-in fade-in duration-500 pb-32">
       <section className="space-y-6">
-         <div className="p-6 bg-blue-600 rounded-[32px] text-white flex items-start gap-5 shadow-xl shadow-slate-900/10">
+         <div className="p-6 bg-blue-600 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
             <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-amber-400">
                <TrendingUp size={22} />
             </div>
@@ -135,14 +135,14 @@ function MerchantInsights({ profile, orders, items }: any) {
       </section>
 
       <div className="grid grid-cols-2 gap-4">
-         <div className="p-6 border border-slate-50 rounded-[32px] bg-white shadow-sm flex flex-col justify-between h-32">
+         <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
             <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">Total Earnings</p>
             <div>
                <p className="text-[20px] font-bold text-[#000000] tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
                <p className="text-[10px] text-emerald-500 font-black uppercase tracking-wider mt-1">+14% Growth</p>
             </div>
          </div>
-         <div className="p-6 border border-slate-50 rounded-[32px] bg-white shadow-sm flex flex-col justify-between h-32">
+         <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
             <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">Completion Rate</p>
             <div>
                <p className="text-[20px] font-bold text-[#000000] tracking-tighter">98.2%</p>
@@ -151,7 +151,7 @@ function MerchantInsights({ profile, orders, items }: any) {
          </div>
       </div>
 
-      <section className="space-y-8 p-8 bg-slate-50/30 rounded-[40px] border border-slate-50">
+      <section className="space-y-8 p-8 bg-slate-50/30 rounded-2xl border border-slate-50">
          <div className="px-1 space-y-1">
             <SkibidiHeading>Traffic Breakdown</SkibidiHeading>
             <SkibidiSubtext>Active buyers by faculty</SkibidiSubtext>
@@ -233,7 +233,7 @@ export default function ActivityPage() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white pb-32 font-sans antialiased text-[#000000] w-full max-w-2xl mx-auto">
+    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-[#000000] w-full max-w-2xl mx-auto">
       
       <section className="px-8 pt-12 pb-6 border-b-[0.5px] border-slate-50">
          <div className="flex items-center justify-between">
@@ -260,14 +260,14 @@ export default function ActivityPage() {
             <MerchantInsights profile={profile} orders={orders} />
          ) : (
             <>
-               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-8">
+               <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-8">
                   {['All', 'Alerts', 'Commerce', 'Campus'].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
                       className={`shrink-0 px-5 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all ${
                         activeTab === tab 
-                          ? 'bg-blue-600 text-white shadow-lg shadow-slate-900/10' 
+                          ? 'bg-blue-600 text-white shadow-md shadow-slate-900/10' 
                           : 'bg-slate-50 text-[#94a3b8] hover:bg-slate-100'
                       }`}
                     >
@@ -293,7 +293,7 @@ export default function ActivityPage() {
                     ))}
                   {(notifications.length > 0 ? notifications : DEMO_NOTIFICATIONS).filter(it => activeTab === 'All' || it.category === tabMap[activeTab]).length === 0 && (
                     <div className="py-32 flex flex-col items-center justify-center text-[#94a3b8] gap-4">
-                       <Inbox size={40} strokeWidth={1} className="opacity-20" />
+                       <Inbox size={40} strokeWidth={1} className="text-slate-300" />
                        <p className="text-[10px] font-black uppercase tracking-widest">Inbox Terminal Clear</p>
                     </div>
                   )}
@@ -302,7 +302,7 @@ export default function ActivityPage() {
          )}
       </section>
 
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
     </main>
   );
 }

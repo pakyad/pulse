@@ -96,7 +96,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
        <motion.div 
          initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-         className="relative w-full max-w-xl h-full bg-white shadow-2xl flex flex-col overflow-hidden"
+         className="relative w-full max-w-xl h-full bg-white shadow-md flex flex-col overflow-hidden"
        >
           {/* MATURE HEADER */}
           <div className="px-8 py-8 border-b border-slate-50 flex items-center justify-between bg-white/80 backdrop-blur-xl z-20">
@@ -255,7 +255,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                                <button
                                  type="submit"
                                  disabled={isSubmitting || (strategy === 'CONTEST' && !narrative)}
-                                 className={`w-full py-5 rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95 disabled:opacity-20 ${
+                                 className={`w-full py-5 rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-md transition-all active:scale-95 disabled:opacity-20 ${
                                     strategy === 'FULL' ? 'bg-red-500 text-white shadow-red-500/10' : 'bg-blue-600 text-white shadow-[#000000]/10'
                                  }`}
                                >

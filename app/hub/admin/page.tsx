@@ -87,7 +87,7 @@ export default function AdminHub() {
            
            <div className="space-y-3">
               {ACTIVE_SUBMISSIONS.map((sub) => (
-                <div key={sub.id} className="p-5 bg-white border border-slate-100 rounded-4xl flex items-center justify-between group cursor-pointer hover:shadow-xl hover:shadow-navy/5 transition-all">
+                <div key={sub.id} className="p-5 bg-white border border-slate-100 rounded-4xl flex items-center justify-between group cursor-pointer hover:shadow-md hover:shadow-navy/5 transition-all">
                    <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300">
                          <Clock size={18} />
@@ -120,7 +120,7 @@ export default function AdminHub() {
                   whileHover={{ y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedChannel(channel.id)}
-                  className="p-8 bg-white border border-slate-100 rounded-[3rem] text-left space-y-6 group hover:border-navy transition-all hover:shadow-2xl hover:shadow-navy/5"
+                  className="p-8 bg-white border border-slate-100 rounded-[3rem] text-left space-y-6 group hover:border-navy transition-all hover:shadow-md hover:shadow-navy/5"
                 >
                    <div className={`w-14 h-14 rounded-2xl ${channel.color} flex items-center justify-center shadow-sm`}>
                       <channel.icon size={28} strokeWidth={1.5} />
@@ -170,7 +170,7 @@ export default function AdminHub() {
                initial={{ y: '100%' }}
                animate={{ y: 0 }}
                exit={{ y: '100%' }}
-               className="w-full max-w-lg bg-white rounded-t-[3rem] md:rounded-[3rem] p-10 relative shadow-2xl"
+               className="w-full max-w-lg bg-white rounded-t-[3rem] md:rounded-[3rem] p-10 relative shadow-md"
              >
                 <button 
                   onClick={() => setSelectedChannel(null)}
@@ -325,7 +325,7 @@ export default function AdminHub() {
                          <button 
                            type="button"
                            onClick={() => setSelectedChannel(null)}
-                           className="w-full h-16 bg-navy text-white rounded-4xl font-bold tracking-widest hover:bg-navy/90 active:scale-95 transition-all shadow-xl shadow-navy/20 flex items-center justify-center gap-3"
+                           className="w-full h-16 bg-navy text-white rounded-4xl font-bold tracking-widest hover:bg-navy/90 active:scale-95 transition-all shadow-md shadow-navy/20 flex items-center justify-center gap-3"
                          >
                             <Plus size={20} />
                             Submit to Registry

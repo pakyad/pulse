@@ -79,7 +79,7 @@ export default function FoundHub() {
               <input 
                  type="text" 
                  placeholder="Search for an item..."
-                 className="w-full h-14 bg-white border border-slate-100 rounded-4xl pl-16 pr-6 text-[14px] font-medium outline-none focus:border-navy focus:shadow-2xl focus:shadow-navy/5 transition-all"
+                 className="w-full h-14 bg-white border border-slate-100 rounded-4xl pl-16 pr-6 text-[14px] font-medium outline-none focus:border-navy focus:shadow-md focus:shadow-navy/5 transition-all"
               />
            </div>
 
@@ -88,7 +88,7 @@ export default function FoundHub() {
                  <h3 className="text-[18px] font-bold text-amber-900 tracking-widest leading-none">Report an Item</h3>
                  <p className="text-[13px] text-amber-700/60 font-medium">Found something? Let others know.</p>
               </div>
-              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-amber-500 shadow-xl shadow-amber-500/10 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-amber-500 shadow-md shadow-amber-500/10 group-hover:scale-110 transition-transform">
                  <Camera size={24} />
               </div>
            </div>
@@ -141,7 +141,7 @@ export default function FoundHub() {
 
       {/* FLOATING ACTION PILL */}
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
-        <button className="bg-navy text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-2xl shadow-navy/40 hover:scale-105 active:scale-95 transition-all">
+        <button className="bg-navy text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-md shadow-navy/40 hover:scale-105 active:scale-95 transition-all">
           <Plus size={18} />
           <span className="text-[11px] font-black uppercase tracking-widest text-nowrap">Report found item</span>
         </button>

@@ -28,7 +28,7 @@ export default function AdminUserManagement() {
   const router = useRouter();
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<'ALL' | 'RUNNER' | 'MERCHANT' | 'STUDENT'>('ALL');
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'PENDING' | 'RUNNER' | 'MERCHANT' | 'STUDENT'>('ALL');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -71,9 +71,10 @@ export default function AdminUserManagement() {
   const filteredUsers = users.filter(u => {
     const matchesSearch = u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || u.email?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = activeFilter === 'ALL' || 
+                         (activeFilter === 'PENDING' && (u.runner_status === 'pending' || u.merchant_status === 'pending')) ||
                          (activeFilter === 'RUNNER' && u.is_verified_runner) ||
                          (activeFilter === 'MERCHANT' && u.is_seller) ||
-                         (activeFilter === 'STUDENT' && !u.is_verified_runner && !u.is_seller);
+                         (activeFilter === 'STUDENT' && !u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending');
     return matchesSearch && matchesFilter;
   });
 
@@ -90,15 +91,15 @@ export default function AdminUserManagement() {
 
            <div className="space-y-1">
              <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-[0.3em] mb-4 pl-1">Directory Filter</p>
-             {['ALL', 'STUDENT', 'RUNNER', 'MERCHANT'].map(f => (
+             {['ALL', 'PENDING', 'STUDENT', 'RUNNER', 'MERCHANT'].map(f => (
                <button 
                  key={f}
                  onClick={() => setActiveFilter(f as any)}
-                 className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${activeFilter === f ? 'bg-[#1C1C1E] text-white shadow-xl shadow-black/5' : 'text-[#8E8E93] hover:bg-[#F2F2F7]'}`}
+                 className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${activeFilter === f ? 'bg-[#1C1C1E] text-white shadow-md shadow-black/5' : 'text-[#8E8E93] hover:bg-[#F2F2F7]'}`}
                >
                   <span className="text-[13px] font-bold tracking-tight">{f} Registry</span>
                   <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg border ${activeFilter === f ? 'bg-white/10 border-white/20 text-white' : 'bg-slate-50 border-[#F2F2F7] text-[#8E8E93]'}`}>
-                     {users.filter(u => f === 'ALL' ? true : f === 'RUNNER' ? u.is_verified_runner : f === 'MERCHANT' ? u.is_seller : (!u.is_verified_runner && !u.is_seller)).length}
+                     {users.filter(u => f === 'ALL' ? true : f === 'PENDING' ? (u.runner_status === 'pending' || u.merchant_status === 'pending') : f === 'RUNNER' ? u.is_verified_runner : f === 'MERCHANT' ? u.is_seller : (!u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending')).length}
                   </span>
                </button>
              ))}
@@ -167,9 +168,11 @@ export default function AdminUserManagement() {
                            </td>
                            <td className="px-8 py-6">
                               <div className="flex gap-2">
+                                 {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-3 py-1.5 bg-amber-100 text-amber-600 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Clock size={12} /> Pending Runner</span>}
+                                 {u.merchant_status === 'pending' && !u.is_seller && <span className="px-3 py-1.5 bg-amber-100 text-amber-600 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Clock size={12} /> Pending Merchant</span>}
                                  {u.is_verified_runner && <span className="px-3 py-1.5 bg-[#1C1C1E] text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><ShieldCheck size={12} /> Runner</span>}
                                  {u.is_seller && <span className="px-3 py-1.5 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Briefcase size={12} /> Merchant</span>}
-                                 {!u.is_verified_runner && !u.is_seller && <span className="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest">Student</span>}
+                                 {!u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending' && <span className="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest">Student</span>}
                               </div>
                            </td>
                            <td className="px-8 py-6">

@@ -308,7 +308,7 @@ export default function AdminDashboard() {
         
         {/* Brand Header */}
         <div className="px-8 py-10 flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#1C1C1E] rounded-xl flex items-center justify-center shadow-lg shadow-black/10">
+          <div className="w-10 h-10 bg-[#1C1C1E] rounded-xl flex items-center justify-center shadow-md shadow-black/10">
              <span className="text-white font-black text-[20px]">P</span>
           </div>
           <div>
@@ -347,7 +347,7 @@ export default function AdminDashboard() {
                   />
                 ) : (
                   item.badge !== undefined && item.badge > 0 && (
-                    <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-red-500/20">{item.badge}</span>
+                    <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md shadow-red-500/20">{item.badge}</span>
                   )
                 )}
               </button>
@@ -416,23 +416,23 @@ export default function AdminDashboard() {
           {/* 1. STATS OVERVIEW */}
           {activeTab === 'overview' && (
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-               <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
+               <div className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Marketplace Volume</p>
                   <p className="text-[24px] font-bold text-slate-900">
                     RM {flaggedItems.reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </p>
                </div>
-               <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
+               <div className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Directives</p>
                   <p className="text-[24px] font-bold text-slate-900">{disputes.length + flaggedItems.length}</p>
                </div>
-               <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
+               <div className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Verified Nodes</p>
                   <p className="text-[24px] font-bold text-slate-900">
                     {users.filter(u => u.role === 'MERCHANT' || u.role === 'RUNNER').length}
                   </p>
                </div>
-               <div className="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm">
+               <div className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Infrastructure Health</p>
                   <p className={`text-[24px] font-bold ${disputes.length > 5 ? 'text-orange-500' : 'text-emerald-500'}`}>
                     {disputes.length > 5 ? 'High Load' : 'Stable'}
@@ -443,7 +443,7 @@ export default function AdminDashboard() {
 
           {/* 2. PRICE AUDIT TERMINAL */}
           {(activeTab === 'command' || activeTab === 'monitor') && (
-            <section className="bg-white rounded-[32px] border border-slate-100 p-10">
+            <section className="bg-white rounded-2xl border border-slate-100 p-10">
                <div className="mb-10">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Economic Oversight</p>
                   <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Price Audit Terminal</h2>
@@ -476,7 +476,7 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 gap-4">
                 {priceReviews.length === 0 ? (
                   <div className="py-32 flex flex-col items-center justify-center gap-4">
-                    <div className="w-16 h-16 bg-emerald-50 rounded-[24px] flex items-center justify-center text-emerald-400">
+                    <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-400">
                       <ShieldCheck size={28} />
                     </div>
                     <p className="text-[13px] font-bold text-slate-300 uppercase tracking-widest">All clear — no flagged listings</p>
@@ -491,7 +491,7 @@ export default function AdminDashboard() {
                         key={item.id}
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-[24px] border border-slate-100 p-8 flex items-start justify-between gap-8 shadow-sm"
+                        className="bg-white rounded-2xl border border-slate-100 p-8 flex items-start justify-between gap-8 shadow-sm"
                       >
                         {/* Left — item info */}
                         <div className="flex-1 space-y-5">
@@ -499,7 +499,7 @@ export default function AdminDashboard() {
                             <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
                               {item.images?.[0]
                                 ? <img src={item.images[0]} className="w-full h-full object-cover" alt="" />
-                                : <div className="w-full h-full flex items-center justify-center text-slate-200"><ShieldAlert size={20} /></div>
+                                : <div className="w-full h-full flex items-center justify-center text-slate-300"><ShieldAlert size={20} /></div>
                               }
                             </div>
                             <div>
@@ -605,7 +605,7 @@ export default function AdminDashboard() {
                         setSelectedDispute(dispute);
                         setIsDisputeDrawerOpen(true);
                       }}
-                      className="w-full bg-white rounded-[24px] border border-slate-100 p-8 text-left hover:shadow-xl hover:shadow-slate-200/50 transition-all group flex items-center justify-between"
+                      className="w-full bg-white rounded-2xl border border-slate-100 p-8 text-left hover:shadow-md hover:shadow-slate-200/50 transition-all group flex items-center justify-between"
                     >
                       <div className="flex items-center gap-8">
                         <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 group-hover:bg-red-500 group-hover:text-white transition-all">
@@ -666,7 +666,7 @@ export default function AdminDashboard() {
                      <button 
                        onClick={handleSeedClubs}
                        disabled={isSeeding}
-                       className="h-10 px-6 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2"
+                       className="h-10 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 active:scale-[0.98]"
                      >
                         {isSeeding ? <Loader2 className="animate-spin" size={14} /> : <Blocks size={14} />}
                         Seed Institutional Data
@@ -680,7 +680,7 @@ export default function AdminDashboard() {
                <div className="grid grid-cols-1 gap-4">
                   {appeals.length === 0 ? (
                     <div className="py-40 flex flex-col items-center gap-4 text-center">
-                       <div className="w-20 h-20 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-200"><Inbox size={40} /></div>
+                       <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300"><Inbox size={40} /></div>
                        <p className="text-[14px] font-bold text-slate-300 uppercase tracking-widest">No pending appeals in registry.</p>
                     </div>
                   ) : (
@@ -689,7 +689,7 @@ export default function AdminDashboard() {
                         key={appeal.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="p-8 bg-white rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between gap-10"
+                        className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between gap-10"
                       >
                          <div className="flex-1 space-y-6">
                             <div className="flex items-center gap-4">
@@ -699,7 +699,7 @@ export default function AdminDashboard() {
                                   <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Merchant: {appeal.sellerName}</p>
                                </div>
                             </div>
-                            <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 italic text-[14px] text-slate-600 leading-relaxed">
+                            <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 italic text-[14px] text-slate-600 leading-relaxed">
                                "{appeal.justification_text || 'No justification provided.'}"
                             </div>
                          </div>
@@ -719,7 +719,7 @@ export default function AdminDashboard() {
                                <button 
                                  onClick={() => handleAdjudicate(appeal, 'APPROVE')}
                                  disabled={isProcessing === appeal.id}
-                                 className="flex-1 h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10 disabled:opacity-20"
+                                 className="flex-1 h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md shadow-black/10 disabled:opacity-20"
                                >
                                   {isProcessing === appeal.id ? '...' : 'Approve'}
                                </button>
@@ -752,7 +752,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-4">
                     <button 
                       onClick={() => setIsAddMerchantOpen(true)}
-                      className="h-10 px-4 bg-slate-900 text-white rounded-xl text-[12px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-black transition-all active:scale-95 shadow-lg shadow-slate-900/10"
+                      className="h-10 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[12px] font-black uppercase tracking-widest flex items-center gap-2 transition-all active:scale-[0.98]"
                     >
                       <UserPlus size={16} />
                       Add Merchant
@@ -778,9 +778,9 @@ export default function AdminDashboard() {
                          {users
                            .filter(u => {
                              if (activeSubTab === 'ALL') return true;
-                             if (activeSubTab === 'RUNNER') return u.is_verified_runner;
-                             if (activeSubTab === 'MERCHANT') return u.is_seller;
-                             if (activeSubTab === 'STUDENT') return !u.is_verified_runner && !u.is_seller;
+                             if (activeSubTab === 'RUNNER') return u.is_verified_runner || u.runner_status === 'pending';
+                             if (activeSubTab === 'MERCHANT') return u.is_seller || u.merchant_status === 'pending';
+                             if (activeSubTab === 'STUDENT') return !u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending';
                              return true;
                            })
                            .map((u) => (
@@ -805,9 +805,13 @@ export default function AdminDashboard() {
                                </td>
                                <td className="px-10 py-4">
                                   <div className="flex gap-2">
+                                     {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Runner</span>}
+                                     {u.merchant_status === 'pending' && !u.is_seller && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Merchant</span>}
+                                     {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Runner</span>}
                                      {u.is_verified_runner && <span className="px-2.5 py-1 bg-[#1C1C1E] text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><ShieldCheck size={10} /> Runner</span>}
+                                     {u.merchant_status === 'pending' && !u.is_seller && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Merchant</span>}
                                      {u.is_seller && <span className="px-2.5 py-1 bg-blue-600 text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Briefcase size={10} /> Merchant</span>}
-                                     {!u.is_verified_runner && !u.is_seller && <span className="px-2.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-md text-[8px] font-black uppercase tracking-widest">Resident</span>}
+                                     {!u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending' && <span className="px-2.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-md text-[8px] font-black uppercase tracking-widest">Resident</span>}
                                   </div>
                                </td>
                                <td className="px-10 py-4">
@@ -818,7 +822,7 @@ export default function AdminDashboard() {
                                       {u.role === 'STUDENT' && !u.is_verified && (
                                          <button 
                                            onClick={(e) => { e.stopPropagation(); verifyUser(u.id); }}
-                                           className="h-8 px-4 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/10"
+                                           className="h-8 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-[0.98] transition-all"
                                          >
                                             Grant Credentials
                                          </button>
@@ -846,7 +850,7 @@ export default function AdminDashboard() {
                   </div>
                </div>
 
-               <div className="bg-white rounded-[40px] border border-slate-100 overflow-hidden shadow-sm">
+               <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                   <table className="w-full text-left border-collapse">
                      <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
@@ -889,7 +893,7 @@ export default function AdminDashboard() {
 
           {/* 6. SETTINGS (Guideline Management) */}
           {activeTab === 'settings' && (
-            <section className="bg-white rounded-[32px] border border-slate-100 p-10 space-y-12">
+            <section className="bg-white rounded-2xl border border-slate-100 p-10 space-y-12">
                <div className="flex justify-between items-center">
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Infrastructure Control</p>
@@ -897,7 +901,7 @@ export default function AdminDashboard() {
                   </div>
                   <button 
                     onClick={() => setIsPriceModalOpen(true)}
-                    className="h-11 px-6 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-black/10 hover:scale-105 transition-all"
+                    className="h-11 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[11px] font-black uppercase tracking-widest hover:scale-105 active:scale-[0.98] transition-all"
                   >
                     Establish New Limit
                   </button>
@@ -912,7 +916,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                        {Object.entries(guidelines).filter(([_, data]) => (data.governance_type || 'REGULATED') === 'REGULATED').map(([cat, data]) => (
-                         <div key={cat} className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-6">
+                         <div key={cat} className="p-8 bg-slate-50 rounded-2xl border border-slate-100 space-y-6">
                             <div className="flex justify-between items-start">
                                <div>
                                   <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Asset Category</p>
@@ -950,7 +954,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                        {Object.entries(guidelines).filter(([_, data]) => data.governance_type === 'PREMIUM').map(([cat, data]) => (
-                         <div key={cat} className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-6">
+                         <div key={cat} className="p-8 bg-slate-50 rounded-2xl border border-slate-100 space-y-6">
                             <div className="flex justify-between items-start">
                                <div>
                                   <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Asset Category</p>
@@ -1017,7 +1021,7 @@ export default function AdminDashboard() {
             <motion.div 
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 w-[540px] bg-white z-110 shadow-2xl flex flex-col"
+              className="fixed top-0 right-0 bottom-0 w-[540px] bg-white z-110 shadow-md flex flex-col"
             >
                <div className="p-10 flex items-center justify-between">
                   <div className="space-y-1">
@@ -1029,7 +1033,7 @@ export default function AdminDashboard() {
 
                <div className="flex-1 overflow-y-auto p-10 space-y-12">
                   <div className="flex flex-col items-center text-center space-y-4 py-8">
-                     <div className="w-32 h-32 rounded-[48px] overflow-hidden border-[0.5px] border-[#F2F2F7] shadow-2xl relative">
+                     <div className="w-32 h-32 rounded-[48px] overflow-hidden border-[0.5px] border-[#F2F2F7] shadow-md relative">
                         <img src={selectedUser.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${selectedUser.full_name}`} className="w-full h-full object-cover" alt="" />
                         <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                      </div>
@@ -1042,9 +1046,9 @@ export default function AdminDashboard() {
                   <div className="space-y-4">
                      <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] mb-6">Registry Authorization</p>
                      
-                     <div className="p-8 rounded-[32px] bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
+                     <div className="p-8 rounded-2xl bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
                         <div className="flex items-center gap-6">
-                           <div className="w-14 h-14 bg-black text-white rounded-[20px] flex items-center justify-center shadow-lg"><ShieldCheck size={28} /></div>
+                           <div className="w-14 h-14 bg-black text-white rounded-[20px] flex items-center justify-center shadow-md"><ShieldCheck size={28} /></div>
                            <div>
                               <p className="text-[17px] font-black text-black tracking-tight">Logistics Verification</p>
                               <p className="text-[13px] font-medium text-black/30">Verified Pulse Runner Node</p>
@@ -1056,14 +1060,14 @@ export default function AdminDashboard() {
                         >
                            <motion.div 
                              animate={{ x: selectedUser.is_verified_runner ? 30 : 6 }}
-                             className="absolute top-1.5 w-6 h-6 bg-white rounded-full shadow-lg"
+                             className="absolute top-1.5 w-6 h-6 bg-white rounded-full shadow-md"
                            />
                         </button>
                      </div>
 
-                     <div className="p-8 rounded-[32px] bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
+                     <div className="p-8 rounded-2xl bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
                         <div className="flex items-center gap-6">
-                           <div className="w-14 h-14 bg-blue-600 text-white rounded-[20px] flex items-center justify-center shadow-lg"><Briefcase size={28} /></div>
+                           <div className="w-14 h-14 bg-blue-600 text-white rounded-[20px] flex items-center justify-center shadow-md"><Briefcase size={28} /></div>
                            <div>
                               <p className="text-[17px] font-black text-black tracking-tight">Merchant Authority</p>
                               <p className="text-[13px] font-medium text-black/30">Verified Pulse Vendor Node</p>
@@ -1075,7 +1079,7 @@ export default function AdminDashboard() {
                         >
                            <motion.div 
                              animate={{ x: selectedUser.is_seller ? 30 : 6 }}
-                             className="absolute top-1.5 w-6 h-6 bg-white rounded-full shadow-lg"
+                             className="absolute top-1.5 w-6 h-6 bg-white rounded-full shadow-md"
                            />
                         </button>
                      </div>
@@ -1088,7 +1092,7 @@ export default function AdminDashboard() {
                         { label: 'Registry Date', value: '24 May 2024', icon: Clock },
                         { label: 'Trust Score', value: '98.2%', icon: CheckCircle2 },
                      ].map(item => (
-                        <div key={item.label} className="p-6 bg-white border-[0.5px] border-[#F2F2F7] rounded-[24px]">
+                        <div key={item.label} className="p-6 bg-white border-[0.5px] border-[#F2F2F7] rounded-2xl">
                            <p className="text-[9px] font-black text-black/20 uppercase tracking-[0.2em] mb-4">{item.label}</p>
                            <div className="flex items-center gap-3">
                               <item.icon size={16} className="text-black/20" />
@@ -1098,13 +1102,13 @@ export default function AdminDashboard() {
                      ))}
                   </div>
 
-                  <div className="p-8 bg-red-50/50 rounded-[32px] border-[0.5px] border-red-100/50 space-y-6">
+                  <div className="p-8 bg-red-50/50 rounded-2xl border-[0.5px] border-red-100/50 space-y-6">
                      <div className="flex items-center gap-4 text-red-600">
                         <AlertCircle size={24} />
                         <p className="text-[17px] font-black tracking-tight">Security Protocol</p>
                      </div>
                      <p className="text-[13px] text-red-800/40 font-medium leading-relaxed italic pr-4">"Suspending this node will immediately revoke all campus-wide logistics tokens and marketplace clearance."</p>
-                     <button className="w-full h-16 bg-red-600 text-white rounded-[22px] font-black text-[13px] uppercase tracking-widest shadow-xl shadow-red-200 active:scale-95 transition-all">
+                     <button className="w-full h-16 bg-red-600 text-white rounded-[22px] font-black text-[13px] uppercase tracking-widest shadow-md shadow-red-200 active:scale-95 transition-all">
                         Suspend Resident Node
                      </button>
                   </div>

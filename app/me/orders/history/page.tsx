@@ -96,7 +96,7 @@ export default function OrderHistoryPage() {
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-24">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -137,7 +137,7 @@ export default function OrderHistoryPage() {
           >
             {displayed.length === 0 ? (
               <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
-                <ShoppingBag size={40} strokeWidth={1} className="opacity-30" />
+                <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
                 <p className="text-[12px] font-bold uppercase tracking-widest opacity-40">No history yet</p>
               </div>
             ) : (

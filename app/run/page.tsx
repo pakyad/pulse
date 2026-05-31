@@ -142,7 +142,7 @@ export default function RunModule() {
           <div className="space-y-3">
             {UNIKL_CAFES.map(cafe => (
               <button key={cafe} onClick={() => { setF('source', cafe); setCurrentStep(1); }}
-                className={`w-full h-[72px] px-6 rounded-[22px] flex items-center justify-between border-2 transition-all active:scale-[0.98] ${form.source === cafe ? 'bg-blue-600 text-white border-blue-600 shadow-xl' : 'bg-slate-50 text-[#000000] border-transparent'}`}>
+                className={`w-full h-[72px] px-6 rounded-[22px] flex items-center justify-between border-2 transition-all active:scale-[0.98] ${form.source === cafe ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-slate-50 text-[#000000] border-transparent'}`}>
                 <span className="text-[15px] font-bold">{cafe}</span>
                 <ChevronRight size={18} className={form.source === cafe ? 'text-white/40' : 'text-slate-200'} />
               </button>
@@ -211,7 +211,7 @@ export default function RunModule() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-32">
+    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -233,7 +233,7 @@ export default function RunModule() {
               <Heading>Runner Dashboard</Heading>
               <Subtext>Manage your active missions and earnings</Subtext>
             </div>
-            <div className="bg-slate-50/50 p-6 rounded-[32px] border border-slate-100 flex items-center justify-between shadow-sm">
+            <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-5">
                 <div className={`w-1.5 h-12 rounded-full transition-all ${profile?.is_online ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-slate-200'}`} />
                 <div>
@@ -242,7 +242,7 @@ export default function RunModule() {
                 </div>
               </div>
               <button onClick={toggleStatus}
-                className={`h-11 px-5 rounded-2xl text-[12px] font-bold border transition-all flex items-center gap-2 ${profile?.is_online ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-white border-slate-200 text-slate-400'}`}>
+                className={`h-11 px-5 rounded-2xl text-[12px] font-bold border transition-all flex items-center gap-2 ${profile?.is_online ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-white border-slate-200 text-slate-400'}`}>
                 {profile?.is_online && <div className="w-2 h-2 rounded-full bg-white animate-pulse" />}
                 <span className="lowercase">{profile?.is_online ? 'online' : 'offline'}</span>
               </button>
@@ -273,7 +273,7 @@ export default function RunModule() {
           <div className="grid grid-cols-1 gap-3">
             {SERVICES.map(s => (
               <button key={s.id} onClick={() => { setActiveService(s); setCurrentStep(0); }}
-                className="w-full h-[96px] px-6 bg-slate-50/50 border border-slate-100 rounded-[28px] flex items-center justify-between group active:scale-[0.98] transition-all">
+                className="w-full h-[96px] px-6 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all">
                 <div className="flex items-center gap-5">
                   <div className={`w-14 h-14 rounded-2xl ${s.iconBg} flex items-center justify-center`}>
                     <s.icon className={s.accent} size={28} />
@@ -337,7 +337,7 @@ export default function RunModule() {
                 <p className="text-[20px] font-bold text-[#000000]">RM 4.50</p>
               </div>
               <button onClick={() => currentStep < 3 ? setCurrentStep(currentStep + 1) : handleFinalizeRequest()}
-                className="w-full h-16 bg-blue-600 text-white rounded-[24px] font-bold flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-slate-900/10">
+                className="w-full h-16 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-md shadow-slate-900/10">
                 {submitting ? <Loader2 className="animate-spin" size={22} /> : (currentStep === 3 ? 'Confirm Order' : 'Continue')}
                 {!submitting && <ArrowRight size={18} />}
               </button>

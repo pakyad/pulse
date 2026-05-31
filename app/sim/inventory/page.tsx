@@ -61,7 +61,7 @@ export default function InventorySimulation() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 font-sans antialiased">
-      <div className="max-w-md w-full bg-white rounded-[40px] shadow-2xl border border-slate-100 overflow-hidden">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
         
         {/* Header */}
         <div className="p-8 bg-blue-600 text-white">
@@ -91,7 +91,7 @@ export default function InventorySimulation() {
               <button 
                 onClick={startSimulation}
                 disabled={loading}
-                className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-slate-900/10"
+                className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md shadow-slate-900/10"
               >
                 Launch Hoodie Drop <ArrowRight size={18} />
               </button>
@@ -106,7 +106,7 @@ export default function InventorySimulation() {
                  <button 
                   onClick={() => simulatePurchase("Student A")}
                   disabled={loading}
-                  className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all"
+                  className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
                 >
                   Student A: Buy 1 <Package size={18} />
                 </button>
@@ -122,7 +122,7 @@ export default function InventorySimulation() {
                  <button 
                   onClick={() => simulatePurchase("Student B")}
                   disabled={loading}
-                  className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all"
+                  className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
                 >
                   Student B: Buy Last Unit <Lock size={18} />
                 </button>
@@ -131,7 +131,7 @@ export default function InventorySimulation() {
 
             {step === 3 && (
               <div className="space-y-6 text-center">
-                 <div className="w-16 h-16 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center mx-auto border border-red-100 mb-2">
+                 <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto border border-red-100 mb-2">
                     <ShieldCheck size={32} />
                  </div>
                  <div className="space-y-2">

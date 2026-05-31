@@ -9,10 +9,18 @@ const DEMO_ACCOUNTS = [
     {
         email: 'techsociety@s.unikl.edu.my',
         password: 'password123',
-        fullName: 'Tech Society',
+        fullName: 'MIIT Tech Club',
         role: 'CLUB',
         uid: 'tech_society_123',
-        data: { is_official: true, is_verified_merchant: true, seller_name: 'Tech Society', photo_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=150&auto=format&fit=crop' }
+        data: { is_official: true, is_verified_merchant: true, seller_name: 'MIIT Tech Club', photo_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=150&auto=format&fit=crop' }
+    },
+    {
+        email: 'sports@s.unikl.edu.my',
+        password: 'password123',
+        fullName: 'Sports Council',
+        role: 'CLUB',
+        uid: 'sports_council_123',
+        data: { is_official: true, is_verified_merchant: true, seller_name: 'Sports Council', photo_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=150&auto=format&fit=crop' }
     },
     {
         email: 'caferasa@s.unikl.edu.my',
@@ -194,6 +202,7 @@ const DEMO_CAMPAIGNS = [
     {
         id: 'camp_1',
         status: 'active',
+        seller_id: 'sports_council_123',
         club_name: 'Sports Council',
         title: 'Official Jersey Pre-Order 2026',
         tag: 'Merchandise',
@@ -204,6 +213,7 @@ const DEMO_CAMPAIGNS = [
     {
         id: 'camp_2',
         status: 'active',
+        seller_id: 'tech_society_123',
         club_name: 'MIIT Tech Club',
         title: 'Developer Summit Tickets',
         tag: 'Event',
@@ -242,7 +252,15 @@ export default function DevSeedPage() {
                 await deleteDoc(doc(db, "campaigns", docSnap.id));
                 deletedCamps++;
             }
-            log(`✅ Wiped ${deleted} dummy items & ${deletedCamps} campaigns.`);
+            
+            const ordersSnap = await getDocs(collection(db, "orders"));
+            let deletedOrders = 0;
+            for (const docSnap of ordersSnap.docs) {
+                await deleteDoc(doc(db, "orders", docSnap.id));
+                deletedOrders++;
+            }
+            
+            log(`✅ Wiped ${deleted} dummy items, ${deletedCamps} campaigns, & ${deletedOrders} orders.`);
 
             // 2. Provision Accounts
             log("👤 Provisioning 4 Demo Accounts...");
@@ -254,13 +272,19 @@ export default function DevSeedPage() {
                        const cred = await createUserWithEmailAndPassword(auth, account.email, account.password);
                        account.uid = cred.user.uid;
                     } catch(e:any) {
-                       // If already exists, we just update the Firestore doc
+                       // If already exists, log in to get the TRUE uid
+                       if (e.code === 'auth/email-already-in-use') {
+                           const { signInWithEmailAndPassword } = await import('firebase/auth');
+                           const cred = await signInWithEmailAndPassword(auth, account.email, account.password);
+                           account.uid = cred.user.uid;
+                       }
                     }
 
                     await setDoc(doc(db, "users", account.uid), {
                         uid: account.uid,
                         email: account.email,
                         full_name: account.fullName,
+                        role: account.role,
                         created_at: serverTimestamp(),
                         ...account.data
                     });
@@ -273,8 +297,11 @@ export default function DevSeedPage() {
             // 3. Insert 20 New Listings & Campaigns
             log("📦 Injecting 20 High-Quality Demo Listings...");
             for (const item of DEMO_LISTINGS) {
+                const matchedAccount = DEMO_ACCOUNTS.find(a => a.fullName === item.seller_name);
+                const actualUid = matchedAccount ? matchedAccount.uid : item.seller_id;
                 await setDoc(doc(db, "items", item.id), {
                     ...item,
+                    seller_id: actualUid,
                     status: 'active',
                     created_at: serverTimestamp(),
                     updated_at: serverTimestamp(),
@@ -283,9 +310,12 @@ export default function DevSeedPage() {
             
             log("🚀 Injecting Official Campaigns & Syncing to Marketplace...");
             for (const camp of DEMO_CAMPAIGNS) {
+                const matchedAccount = DEMO_ACCOUNTS.find(a => a.fullName === camp.club_name);
+                const actualUid = matchedAccount ? matchedAccount.uid : camp.seller_id;
                 // Insert into Campaigns for the Banner
                 await setDoc(doc(db, "campaigns", camp.id), {
                     ...camp,
+                    seller_id: actualUid,
                     created_at: serverTimestamp(),
                 });
                 
@@ -322,7 +352,7 @@ export default function DevSeedPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 p-12 font-sans flex flex-col items-center">
-            <div className="w-full max-w-2xl bg-white p-10 rounded-[32px] shadow-xl border border-slate-100">
+            <div className="w-full max-w-2xl bg-white p-10 rounded-2xl shadow-md border border-slate-100">
                 <h1 className="text-2xl font-black text-[#000000] mb-2 tracking-tight">Pulse Database Override</h1>
                 <p className="text-slate-500 mb-8 font-medium text-sm leading-relaxed">
                     This will wipe all existing dummy listings and inject 20 carefully planned, presentation-ready listings divided across 4 specific accounts (2 Merchants, 2 Students).
@@ -331,7 +361,7 @@ export default function DevSeedPage() {
                 <button 
                     onClick={wipeAndSeed}
                     disabled={loading}
-                    className="w-full py-4 bg-red-500 text-white rounded-2xl font-black text-[14px] uppercase tracking-widest disabled:opacity-50 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+                    className="w-full py-4 bg-red-500 text-white rounded-2xl font-black text-[14px] uppercase tracking-widest disabled:opacity-50 hover:bg-red-600 transition-colors shadow-md shadow-red-500/20"
                 >
                     {loading ? 'Overriding System...' : 'Execute Full Wipe & Seed'}
                 </button>

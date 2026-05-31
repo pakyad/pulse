@@ -49,7 +49,7 @@ export default function IncomingOrderAlert({ order, onAccept }: IncomingOrderAle
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
-      className="fixed bottom-24 left-6 right-6 z-100 bg-blue-600 rounded-[32px] shadow-2xl overflow-hidden border border-white/10"
+      className="fixed bottom-24 left-6 right-6 z-100 bg-blue-600 rounded-2xl shadow-md overflow-hidden border border-white/10"
     >
       {/* Timer Progress Bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-white/5">

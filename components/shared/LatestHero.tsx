@@ -58,7 +58,7 @@ const LatestHero = () => {
         </button>
       </div>
 
-      <div className="relative h-64 w-full rounded-[3rem] overflow-hidden bg-[#0A0F1E] shadow-2xl border border-white/5 isolate">
+      <div className="relative h-64 w-full rounded-[3rem] overflow-hidden bg-[#0A0F1E] shadow-md border border-white/5 isolate">
         <AnimatePresence mode="wait">
           <motion.div 
             key={activeSlide}
@@ -99,7 +99,7 @@ const LatestHero = () => {
                   initial={{ scale: 0.9, opacity: 0 }} 
                   animate={{ scale: 1, opacity: 1 }} 
                   transition={{ delay: 0.4 }} 
-                  className="bg-white text-[#0A0F1E] px-8 py-3.5 rounded-2xl text-[14px] font-bold shadow-xl active:scale-95 transition-transform"
+                  className="bg-white text-[#0A0F1E] px-8 py-3.5 rounded-2xl text-[14px] font-bold shadow-md active:scale-95 transition-transform"
                 >
                   {slides[activeSlide].cta}
                 </motion.button>

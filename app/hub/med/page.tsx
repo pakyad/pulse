@@ -64,7 +64,7 @@ export default function MedHub() {
         </section>
 
         {/* 3. CLINIC STATUS */}
-        <section className="bg-navy rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-navy/20 group">
+        <section className="bg-navy rounded-[3rem] p-10 text-white relative overflow-hidden shadow-md shadow-navy/20 group">
            <div className="relative z-10 space-y-8">
               <div className="flex justify-between items-start">
                  <div className="space-y-1">
@@ -112,7 +112,7 @@ export default function MedHub() {
                key={i}
                whileHover={{ y: -4, scale: 1.02 }}
                whileTap={{ scale: 0.98 }}
-               className="p-6 bg-slate-50 rounded-[2.5rem] flex flex-col items-start gap-6 text-left group border border-transparent hover:border-slate-100 hover:bg-white transition-all shadow-sm hover:shadow-xl hover:shadow-navy/5"
+               className="p-6 bg-slate-50 rounded-[2.5rem] flex flex-col items-start gap-6 text-left group border border-transparent hover:border-slate-100 hover:bg-white transition-all shadow-sm hover:shadow-md hover:shadow-navy/5"
              >
                 <div className={`w-12 h-12 rounded-2xl ${item.color} flex items-center justify-center shadow-sm`}>
                    <item.icon size={22} strokeWidth={2} />
@@ -127,7 +127,7 @@ export default function MedHub() {
 
         {/* 5. EMERGENCY SOS */}
         <section className="pb-10">
-           <button className="w-full bg-red-500 rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-2xl shadow-red-500/20 active:scale-95 transition-all">
+           <button className="w-full bg-red-500 rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-md shadow-red-500/20 active:scale-95 transition-all">
               <div className="flex items-center justify-between relative z-10">
                  <div className="flex items-center gap-6">
                     <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
@@ -149,7 +149,7 @@ export default function MedHub() {
 
       {/* FLOATING ACTION PILL */}
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
-        <button className="bg-navy text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-2xl shadow-navy/40 hover:scale-105 active:scale-95 transition-all">
+        <button className="bg-navy text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-md shadow-navy/40 hover:scale-105 active:scale-95 transition-all">
           <span className="text-[11px] font-black uppercase tracking-widest">Connect with Medic</span>
           <ArrowRight size={16} className="text-emerald-400" />
         </button>

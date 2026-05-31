@@ -187,7 +187,7 @@ export default function ChatRoomPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                >
-                  <div className={`max-w-[75%] rounded-[24px] px-5 py-3.5 text-[14px] leading-relaxed ${
+                  <div className={`max-w-[75%] rounded-2xl px-5 py-3.5 text-[14px] leading-relaxed ${
                      isMe 
                         ? 'bg-[#000000] text-white rounded-br-[8px]' 
                         : 'bg-slate-50 border border-slate-100 text-[#000000] rounded-bl-[8px]'
