@@ -206,7 +206,7 @@ export default function ItemDetailsPage() {
     <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
 
       {/* ── NAV (Dynamic Scroll-Adaptive) ── */}
-      <nav className={`fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between transition-all duration-[600ms] ease-out pointer-events-none ${isScrolled ? 'bg-white/95 backdrop-blur-xl border-b-[0.5px] border-slate-100' : 'bg-transparent'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between transition-all duration-500 ease-out pointer-events-none ${isScrolled ? 'bg-white/95 backdrop-blur-xl border-b-[0.5px] border-slate-100' : 'bg-transparent'}`}>
         <div className="pointer-events-auto">
           <button 
             onClick={() => {
@@ -216,25 +216,25 @@ export default function ItemDetailsPage() {
                 router.push('/marketplace');
               }
             }} 
-            className={`w-10 h-10 flex items-center justify-center transition-all duration-[600ms] ease-out active:scale-90 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}
+            className={`w-10 h-10 flex items-center justify-center transition-all duration-500 ease-out active:scale-90 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}
           >
-            <ChevronLeft size={isScrolled ? 20 : 28} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-[600ms] ease-out" />
+            <ChevronLeft size={isScrolled ? 20 : 28} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-500 ease-out" />
           </button>
         </div>
         <div className="flex items-center gap-2 pointer-events-auto">
           <button 
             onClick={() => router.push('/cart')}
-            className={`w-10 h-10 flex items-center justify-center transition-all duration-[600ms] ease-out active:scale-95 relative ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}
+            className={`w-10 h-10 flex items-center justify-center transition-all duration-500 ease-out active:scale-95 relative ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}
           >
-            <ShoppingCart size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-[600ms] ease-out" />
+            <ShoppingCart size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-500 ease-out" />
             {cartCount > 0 && (
-              <span className={`absolute -top-1 -right-1 w-4 h-4 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 transition-all duration-[600ms] ease-out ${isScrolled ? 'bg-red-500 border-white' : 'bg-red-500 border-transparent shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
+              <span className={`absolute -top-1 -right-1 w-4 h-4 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 transition-all duration-500 ease-out ${isScrolled ? 'bg-red-500 border-white' : 'bg-red-500 border-transparent shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
                 {cartCount}
               </span>
             )}
           </button>
-          <button className={`w-10 h-10 flex items-center justify-center transition-all duration-[600ms] ease-out active:scale-95 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
-            <Share2 size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-[600ms] ease-out" />
+          <button className={`w-10 h-10 flex items-center justify-center transition-all duration-500 ease-out active:scale-95 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
+            <Share2 size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-500 ease-out" />
           </button>
         </div>
       </nav>
