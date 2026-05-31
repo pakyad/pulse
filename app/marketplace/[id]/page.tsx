@@ -106,14 +106,7 @@ export default function ItemDetailsPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const { addToCart, cartCount } = useCart();
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -205,36 +198,25 @@ export default function ItemDetailsPage() {
   return (
     <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
 
-      {/* ── NAV (Dynamic Scroll-Adaptive) ── */}
-      <nav className={`fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between transition-all duration-500 ease-out pointer-events-none ${isScrolled ? 'bg-white/95 backdrop-blur-xl border-b-[0.5px] border-slate-100' : 'bg-transparent'}`}>
+      {/* ── NAV (matches platform pattern) ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-transparent pointer-events-none">
         <div className="pointer-events-auto">
-          <button 
-            onClick={() => {
-              if (window.history.length > 2) {
-                router.back();
-              } else {
-                router.push('/marketplace');
-              }
-            }} 
-            className={`w-10 h-10 flex items-center justify-center transition-all duration-500 ease-out active:scale-90 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}
-          >
-            <ChevronLeft size={isScrolled ? 20 : 28} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-500 ease-out" />
-          </button>
+          <BackButton fallback="/marketplace" variant="overlay" />
         </div>
         <div className="flex items-center gap-2 pointer-events-auto">
           <button 
             onClick={() => router.push('/cart')}
-            className={`w-10 h-10 flex items-center justify-center transition-all duration-500 ease-out active:scale-95 relative ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}
+            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center text-[#000000] shadow-sm active:scale-95 transition-all relative"
           >
-            <ShoppingCart size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-500 ease-out" />
+            <ShoppingCart size={16} />
             {cartCount > 0 && (
-              <span className={`absolute -top-1 -right-1 w-4 h-4 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 transition-all duration-500 ease-out ${isScrolled ? 'bg-red-500 border-white' : 'bg-red-500 border-transparent shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white">
                 {cartCount}
               </span>
             )}
           </button>
-          <button className={`w-10 h-10 flex items-center justify-center transition-all duration-500 ease-out active:scale-95 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
-            <Share2 size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-500 ease-out" />
+          <button className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center text-[#000000] shadow-sm active:scale-95 transition-all">
+            <Share2 size={16} />
           </button>
         </div>
       </nav>
