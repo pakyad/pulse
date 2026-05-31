@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Component, ErrorInfo } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth, storage } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
@@ -8,7 +8,7 @@ import {
   Camera, X, Loader2, 
   MapPin, Navigation, Check,
   ArrowUpRight, ShieldCheck,
-  ChevronLeft, Clock, Zap
+  ChevronLeft, Clock, Zap, AlertCircle
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
@@ -18,6 +18,25 @@ import dynamic from 'next/dynamic';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 const LiveMap = dynamic(() => import('@/components/runner/LiveMap'), { ssr: false });
+
+// ── ERROR BOUNDARY ──
+class MapErrorBoundary extends Component<{children: React.ReactNode}, {hasError: boolean}> {
+  constructor(props: any) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: any, info: any) { console.error("Map crashed:", error, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="absolute inset-0 bg-slate-50 flex items-center justify-center border-b border-slate-100 z-10">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <AlertCircle size={14} /> map disabled. follow text address.
+          </p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // ── HAVERSINE DISTANCE ──
 function haversineMetres(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -87,6 +106,9 @@ export default function RunnerTerminal() {
   const [filter, setFilter] = useState('ALL');
   const [runnerCoords, setRunnerCoords] = useState<{lat: number; lng: number} | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [locationError, setLocationError] = useState(false);
+  const [optionsDrawerOpen, setOptionsDrawerOpen] = useState(false);
+  const [reportStep, setReportStep] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -163,6 +185,7 @@ export default function RunnerTerminal() {
 
     const watchId = navigator.geolocation.watchPosition(
       async (position) => {
+        setLocationError(false);
         const { latitude, longitude } = position.coords;
         setRunnerCoords({ lat: latitude, lng: longitude });
         const now = Date.now();
@@ -178,7 +201,7 @@ export default function RunnerTerminal() {
           }
         }
       },
-      (err) => console.warn("Geolocation error:", err),
+      (err) => { console.warn("Geolocation error:", err); setLocationError(true); },
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
     );
 
@@ -249,6 +272,28 @@ export default function RunnerTerminal() {
     } catch (e: any) { console.error('[Delivery]', e); } finally { setIsProcessing(false); }
   };
 
+  const handleDropOrder = async () => {
+    if (!activeMission) return;
+    setIsProcessing(true);
+    try {
+      await updateDoc(doc(db, "orders", activeMission.id), {
+        runner_id: null, runner_name: null, status: 'PENDING_RUNNER', accepted_at: null
+      });
+      setOptionsDrawerOpen(false);
+    } catch (e) { console.error(e); } finally { setIsProcessing(false); }
+  };
+
+  const handleReportProblem = async (reason: string) => {
+    if (!activeMission) return;
+    setIsProcessing(true);
+    try {
+      await updateDoc(doc(db, "orders", activeMission.id), {
+        status: 'ISSUE_REPORTED', issue_reason: reason, issue_reported_by: 'runner', issue_reported_at: serverTimestamp()
+      });
+      setOptionsDrawerOpen(false); setReportStep(false);
+    } catch (e) { console.error(e); } finally { setIsProcessing(false); }
+  };
+
   if (loading) return null;
 
   // ── PRE-COMPUTE MISSION DATA (before JSX) ──
@@ -301,7 +346,9 @@ export default function RunnerTerminal() {
 
         {/* ── MAP VIEWPORT ── */}
         <section className={`transition-all duration-700 ease-in-out relative ${activeMission ? 'h-[45vh]' : 'h-[30vh]'} w-full pt-20`}>
-           <LiveMap hasActiveJob={!!activeMission} />
+           <MapErrorBoundary>
+             <LiveMap hasActiveJob={!!activeMission} />
+           </MapErrorBoundary>
            <div className="absolute inset-0 bg-linear-to-b from-white via-transparent to-white/20" />
         </section>
 
@@ -359,6 +406,11 @@ export default function RunnerTerminal() {
                     </div>
 
                     {/* ── TELEMETRY STRIP ── */}
+                    {locationError && (
+                      <div className="mx-8 mb-3 bg-slate-50 text-slate-600 px-4 py-2 rounded-xl text-[11px] font-bold text-center border border-slate-100 flex items-center justify-center gap-1.5">
+                        <AlertCircle size={12} /> turn on gps to track distance
+                      </div>
+                    )}
                     <div className="mx-8 mb-6 px-5 py-3 bg-slate-50 rounded-2xl border-[0.5px] border-slate-100 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <MapPin size={13} className="text-slate-400" />
@@ -442,7 +494,7 @@ export default function RunnerTerminal() {
                     </div>
 
                     {/* ── ACTION BUTTONS ── */}
-                    <div className="px-8 pb-8 flex gap-3">
+                    <div className="px-8 pb-3 flex gap-3">
                       <button
                         onClick={() => window.open(navUrl, '_blank')}
                         className="flex-1 h-14 bg-slate-50 text-[#000000] border border-slate-100 rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"
@@ -461,6 +513,13 @@ export default function RunnerTerminal() {
                         </button>
                       )}
                     </div>
+                    {/* OPTIONS BUTTON */}
+                    <button 
+                      onClick={() => { setOptionsDrawerOpen(true); setReportStep(false); }}
+                      className="w-full pb-6 pt-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest active:scale-95 transition-all text-center"
+                    >
+                      options
+                    </button>
                   </motion.div>
               ) : (
                  <motion.div key="searching" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="py-24 flex flex-col items-center justify-center text-center space-y-8">
@@ -508,6 +567,45 @@ export default function RunnerTerminal() {
            </AnimatePresence>
         </section>
       </motion.div>
+
+      {/* ── OPTIONS DRAWER ── */}
+      <AnimatePresence>{optionsDrawerOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-1000 bg-black/60 backdrop-blur-md flex items-end justify-center">
+            <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} className="bg-white w-full max-w-md rounded-t-[40px] p-8 pb-12 shadow-2xl relative">
+               <button onClick={() => setOptionsDrawerOpen(false)} className="absolute top-6 right-6 w-8 h-8 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center"><X size={16}/></button>
+               
+               {!reportStep ? (
+                 <div className="space-y-6 pt-2">
+                   <Heading className="text-[20px]">Options</Heading>
+                   <div className="space-y-3">
+                     {!isPickedUp && (
+                       <button onClick={handleDropOrder} disabled={isProcessing} className="w-full h-14 bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl font-bold text-[13px] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                         {isProcessing ? <Loader2 className="animate-spin" size={16} /> : 'Drop Order'}
+                       </button>
+                     )}
+                     <button onClick={() => setReportStep(true)} className="w-full h-14 bg-white text-slate-900 border border-slate-200 rounded-2xl font-bold text-[13px] shadow-sm active:scale-95 transition-all">
+                       Report Problem
+                     </button>
+                   </div>
+                 </div>
+               ) : (
+                 <div className="space-y-6 pt-2">
+                   <Heading className="text-[20px] flex items-center gap-2">
+                     <button onClick={() => setReportStep(false)} className="active:scale-90"><ChevronLeft size={20} className="text-slate-400" /></button>
+                     What's wrong?
+                   </Heading>
+                   <div className="space-y-3">
+                     {["item damaged", "buyer not here", "bike broken"].map((reason) => (
+                       <button key={reason} onClick={() => handleReportProblem(reason)} disabled={isProcessing} className="w-full h-14 bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl font-bold text-[13px] active:scale-95 transition-all lowercase disabled:opacity-50">
+                         {isProcessing ? <Loader2 className="animate-spin" size={16} /> : reason}
+                       </button>
+                     ))}
+                   </div>
+                 </div>
+               )}
+            </motion.div>
+          </motion.div>
+      )}</AnimatePresence>
 
       {/* ── PROOF MODAL ── */}
       <AnimatePresence>{proofMode && (

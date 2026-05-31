@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ChevronLeft, Loader2, CheckCircle2, AlertCircle, X
+  ChevronLeft, Loader2, AlertCircle, X,
+  Fingerprint, Store, Zap
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
@@ -17,6 +18,35 @@ export default function PerfectSignUp() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'form' | 'complete'>('form');
   const [error, setError] = useState<string | null>(null);
+  const [onboardStep, setOnboardStep] = useState(0);
+
+  // Secret Dev Bypass: Navigate to /auth/signup#test-complete to view UI without registering
+  useEffect(() => {
+    if (window.location.hash === '#test-complete') {
+      setStep('complete');
+    }
+  }, []);
+
+  const ONBOARDING_SLIDES = [
+    {
+      icon: Fingerprint,
+      headerTop: "Your campus,",
+      headerBottom: "fully connected.",
+      desc: "Your entire university in one place. Connect and interact using your verified student identity."
+    },
+    {
+      icon: Store,
+      headerTop: "Buy, sell, and",
+      headerBottom: "trade locally.",
+      desc: "Grab lunch from the cafe or trade used textbooks. A simple marketplace for everyday essentials."
+    },
+    {
+      icon: Zap,
+      headerTop: "Help peers,",
+      headerBottom: "earn cash.",
+      desc: "Turn your free time into pocket money. Pick up campus deliveries and assist others on the go."
+    }
+  ];
   
   // ── FORM STATE ──
   const [formData, setFormData] = useState({
@@ -204,15 +234,15 @@ export default function PerfectSignUp() {
                 <button 
                   onClick={handleSignUp}
                   disabled={loading}
-                  className="w-full h-[60px] bg-[#0A66C2] text-white rounded-full font-bold text-[16px] hover:bg-[#004182] transition-all mt-4 active:scale-[0.98] shadow-lg shadow-[#0A66C2]/10 flex items-center justify-center gap-3"
+                  className="w-full h-[60px] bg-slate-900 text-white rounded-full font-black text-[13px] uppercase tracking-widest hover:bg-black transition-all mt-4 active:scale-[0.98] shadow-xl shadow-slate-900/10 flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="animate-spin" size={24} />
-                      <span className="uppercase tracking-widest text-[13px] font-black">Syncing...</span>
+                      <Loader2 className="animate-spin" size={20} />
+                      <span>Syncing Identity...</span>
                     </>
                   ) : (
-                    'Sign up'
+                    'Register Identity'
                   )}
                 </button>
 
@@ -221,37 +251,118 @@ export default function PerfectSignUp() {
           ) : (
             <motion.div 
               key="complete"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex-1 flex flex-col items-center justify-center text-center -mt-20"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex-1 flex flex-col pt-4 pb-4"
             >
-              <div className="w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-emerald-500/20">
-                <CheckCircle2 size={40} strokeWidth={3} />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={onboardStep}
+                  initial={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
+                  animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, scale: 1.04, filter: 'blur(8px)' }}
+                  transition={{ type: "spring", bounce: 0, duration: 0.6 }}
+                  className="flex-1 flex flex-col"
+                >
+                  {/* Huge Visual Area - Top Half */}
+                  <div className="flex-1 flex items-center justify-center mb-8 min-h-[280px]">
+                    <div className="w-full max-w-[280px] aspect-square bg-slate-50/80 rounded-[40px] flex items-center justify-center relative overflow-hidden">
+                      {/* Subtle organic background decoration */}
+                      <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-transparent to-slate-100/50" />
+                      <motion.div 
+                        animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        className="absolute -right-8 -top-8 w-40 h-40 bg-white rounded-full blur-3xl opacity-60" 
+                      />
+                      <motion.div
+                        initial={{ scale: 0, rotate: -15 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+                      >
+                        <motion.div
+                          animate={{ y: [-4, 4, -4] }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          {(() => {
+                            const Icon = ONBOARDING_SLIDES[onboardStep].icon;
+                            return <Icon size={120} strokeWidth={1} className="text-slate-900 relative z-10 drop-shadow-sm" />;
+                          })()}
+                        </motion.div>
+                      </motion.div>
+                    </div>
+                  </div>
+                  
+                  {/* Typography - Left Aligned */}
+                  <div className="px-2">
+                    <motion.h2 
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, type: "spring", bounce: 0 }}
+                      className="text-[28px] font-bold tracking-tight text-slate-500 mb-4 leading-[1.1]"
+                    >
+                      {ONBOARDING_SLIDES[onboardStep].headerTop}
+                      <span className="text-slate-900 font-black block mt-1">
+                        {ONBOARDING_SLIDES[onboardStep].headerBottom}
+                      </span>
+                    </motion.h2>
+                    
+                    <motion.p 
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, type: "spring", bounce: 0 }}
+                      className="text-[15px] text-slate-500 font-medium leading-relaxed max-w-[300px]"
+                    >
+                      {ONBOARDING_SLIDES[onboardStep].desc}
+                    </motion.p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Navigation & Footer (Matches the screenshot layout) */}
+              <div className="w-full mt-10 px-2 flex flex-col gap-6">
+                
+                {/* Progress Dots */}
+                <div className="flex justify-center gap-2">
+                  {ONBOARDING_SLIDES.map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        i === onboardStep ? 'w-4 bg-slate-900' : 'w-2 bg-slate-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+                
+                {/* Action Button */}
+                <button 
+                  onClick={() => {
+                    if (onboardStep < ONBOARDING_SLIDES.length - 1) {
+                      setOnboardStep(prev => prev + 1);
+                    } else {
+                      router.push('/home');
+                    }
+                  }}
+                  className="w-full h-[54px] bg-[#F1F5F9] text-slate-900 rounded-xl font-bold text-[15px] hover:bg-[#E2E8F0] active:scale-[0.98] transition-all flex items-center justify-center"
+                >
+                  {onboardStep < ONBOARDING_SLIDES.length - 1 ? 'Continue' : 'Enter Pulse'}
+                </button>
               </div>
-              <h2 className="text-[24px] font-black tracking-tight mb-2">Sync Complete.</h2>
-              <p className="text-[14px] text-slate-400 font-medium px-8 leading-relaxed mb-10">
-                Your institutional identity is now active in the Pulse Central Registry.
-              </p>
-              <button 
-                onClick={() => router.push('/home')}
-                className="w-full h-[60px] bg-[#0A66C2] text-white rounded-full font-bold text-[16px] hover:bg-[#004182] transition-all active:scale-[0.98] uppercase tracking-widest"
-              >
-                Enter Pulse
-              </button>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Footer */}
-        <div className="mt-auto text-center pb-4 space-y-4">
-          <p className="text-[13px] text-slate-400">
-            Already have an account? <button onClick={() => router.push('/auth')} className="text-[#0A66C2] font-bold">Sign in</button>
-          </p>
-          <div className="h-px bg-slate-100 w-24 mx-auto" />
-          <p className="text-[11px] text-slate-300 font-medium px-10 italic">
-            Clubs or Verified Merchants: Institutional identities are provisioned solely through the Pulse Admin Terminal.
-          </p>
-        </div>
+        {step === 'form' && (
+          <div className="mt-auto text-center pb-4 space-y-4">
+            <p className="text-[13px] text-slate-400 font-medium">
+              Already registered? <button onClick={() => router.push('/auth')} className="text-slate-900 font-bold active:scale-95 transition-transform">Sign in to Terminal</button>
+            </p>
+            <div className="h-px bg-slate-100 w-24 mx-auto" />
+            <p className="text-[11px] text-slate-300 font-medium px-10 italic">
+              Clubs or Verified Merchants: Institutional identities are provisioned solely through the Pulse Admin Terminal.
+            </p>
+          </div>
+        )}
 
       </div>
     </main>
