@@ -141,6 +141,7 @@ export default function NavigationGate() {
     pathname?.startsWith('/cart') ||
     pathname?.startsWith('/marketplace/') ||
     pathname?.startsWith('/orders/') ||
+    pathname?.startsWith('/user') ||
     isChatRoom;
 
   // BottomNav Visibility (Dynamic Suppression)

@@ -6,7 +6,8 @@ import { db } from '@/lib/firebase';
 import { onSnapshot, doc, collection, query, where, getDoc } from 'firebase/firestore';
 import {
   ChevronLeft, ShieldCheck, Heart, MapPin, 
-  Package, Sparkles, CheckCircle2, Star
+  Package, Sparkles, CheckCircle2, Star,
+  Share2, ShieldAlert
 } from 'lucide-react';
 import HologramID from '@/components/shared/HologramID';
 
@@ -72,24 +73,45 @@ export default function PublicProfilePage() {
       <div className="pt-28 px-8 space-y-12">
          
          {/* ── PROFILE HEADER ── */}
-         <section className="flex items-center gap-6">
-            <div className="relative">
-               <div className="w-20 h-20 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm">
-                  <img src={profile?.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name}`} className="w-full h-full object-cover" alt="Profile" />
+         <section className="space-y-6">
+            <div className="flex items-center gap-6">
+               <div className="relative">
+                  <div className="w-20 h-20 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shadow-sm">
+                     <img src={profile?.photo_url || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name}`} className="w-full h-full object-cover" alt="Profile" />
+                  </div>
+                  {profile?.is_verified_merchant || profile?.role === 'CLUB' ? (
+                    <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-blue-500 shadow-md">
+                       <CheckCircle2 size={14} />
+                    </div>
+                  ) : (
+                    <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-[#94a3b8] shadow-md">
+                       <ShieldCheck size={14} />
+                    </div>
+                  )}
                </div>
-               {profile?.is_verified_merchant || profile?.role === 'CLUB' ? (
-                 <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-blue-500 shadow-md">
-                    <CheckCircle2 size={14} />
-                 </div>
-               ) : (
-                 <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-[#94a3b8] shadow-md">
-                    <ShieldCheck size={14} />
-                 </div>
-               )}
+               <div className="flex-1 min-w-0 space-y-0.5">
+                  <Heading className="truncate">{profile?.full_name || 'Pulse Member'}</Heading>
+                  <Subtext>Verified Pulse Account</Subtext>
+               </div>
             </div>
-            <div className="flex-1 min-w-0 space-y-0.5">
-               <Heading className="truncate">{profile?.full_name || 'Pulse Member'}</Heading>
-               <Subtext>Verified Pulse Account</Subtext>
+
+            {/* ── PROFILE ACTIONS ── */}
+            <div className="flex gap-3">
+               <button 
+                  onClick={() => {
+                     navigator.clipboard.writeText(window.location.href);
+                     alert("Profile link copied to clipboard!");
+                  }}
+                  className="flex-1 h-12 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+               >
+                  <Share2 size={16} /> Share Store
+               </button>
+               <button 
+                  onClick={() => alert("User reported to Campus Governance.")}
+                  className="w-12 h-12 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-100 active:scale-[0.98] transition-all shadow-sm"
+               >
+                  <ShieldAlert size={18} />
+               </button>
             </div>
          </section>
 
