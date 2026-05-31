@@ -1,6 +1,6 @@
 'use client'
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, ChevronLeft, LogOut, Bell, Settings, ShoppingCart, MessageSquare } from 'lucide-react';
+import { Search, ChevronLeft, LogOut, Bell, Settings, ShoppingBag, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
@@ -65,7 +65,7 @@ export default function Header() {
                 exit={{ opacity: 0, x: -10, width: 0 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={() => router.back()} 
-                className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center text-[#000000] shadow-sm active:scale-95 transition-all shrink-0 mr-1"
+                className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 hover:bg-slate-100 active:scale-90 transition-all shrink-0 mr-1"
               >
                 <ChevronLeft size={20} />
               </motion.button>
@@ -93,11 +93,11 @@ export default function Header() {
           <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="flex items-center gap-3 shrink-0">
             <button 
               onClick={() => router.push('/cart')}
-              className="transition-all relative p-2 text-[#000000] active:scale-95"
+              className="transition-all relative p-2 text-navy/40 hover:text-navy active:scale-90"
             >
-              <ShoppingCart size={22} />
+              <ShoppingBag size={22} />
               {cartCount > 0 && (
-                <div className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-[#FDFDFD]">
+                <div className="absolute top-1 right-1 bg-emerald-500 text-white text-[8px] font-black h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
                   {cartCount}
                 </div>
               )}
