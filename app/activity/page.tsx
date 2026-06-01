@@ -288,7 +288,15 @@ export default function ActivityPage() {
                         statusText={item.time_ago || 'Now'}
                         isUnread={!item.is_read}
                         icon={Bell}
-                        onClick={() => {}}
+                        onClick={() => {
+                          if (item.type === 'ORDER ALERT' || item.type === 'LOGISTICS UPDATE') {
+                            router.push('/me/orders/history');
+                          } else if (item.category === 'CAMPUS') {
+                            router.push('/hub/found');
+                          } else {
+                            router.push('/messages');
+                          }
+                        }}
                       />
                     ))}
                   {(notifications.length > 0 ? notifications : DEMO_NOTIFICATIONS).filter(it => activeTab === 'All' || it.category === tabMap[activeTab]).length === 0 && (

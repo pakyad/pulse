@@ -1,21 +1,22 @@
 'use client'
 import React from 'react';
-import { DomainID } from '@/lib/marketplace/domains';
+import { CategoryID } from '@/lib/marketplace/domains';
 
-interface DomainSelectorProps {
-  selectedDomain: DomainID | '';
-  onSelect: (domain: DomainID) => void;
+interface CategorySelectorProps {
+  selectedCategory: CategoryID | '';
+  onSelect: (category: CategoryID) => void;
 }
 
-const DOMAIN_LABELS: Record<DomainID, string> = {
+const CATEGORY_LABELS: Record<CategoryID, string> = {
   HUNGER: 'Food',
   ACADEMIC: 'Books',
   SERVICES: 'Services',
   HOSTEL: 'Hostel',
-  TECH: 'Tech'
+  TECH: 'Tech',
+  APPAREL: 'Apparel'
 };
 
-const DomainSelector: React.FC<DomainSelectorProps> = ({ selectedDomain, onSelect }) => {
+const CategorySelector: React.FC<CategorySelectorProps> = ({ selectedCategory, onSelect }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
@@ -23,8 +24,8 @@ const DomainSelector: React.FC<DomainSelectorProps> = ({ selectedDomain, onSelec
       </h2>
       
       <div className="flex gap-10 overflow-x-auto no-scrollbar pb-4 border-b border-slate-50">
-        {(Object.keys(DOMAIN_LABELS) as DomainID[]).map((id, index) => {
-          const isActive = selectedDomain === id;
+        {(Object.keys(CATEGORY_LABELS) as CategoryID[]).map((id, index) => {
+          const isActive = selectedCategory === id;
           return (
             <button
               key={id}
@@ -35,7 +36,7 @@ const DomainSelector: React.FC<DomainSelectorProps> = ({ selectedDomain, onSelec
                 0{index + 1}
               </span>
               <span className={`text-[14px] font-bold tracking-tight ${isActive ? 'text-slate-900' : 'text-slate-300'}`}>
-                {DOMAIN_LABELS[id]}
+                {CATEGORY_LABELS[id]}
               </span>
               
               {isActive && (
@@ -49,4 +50,4 @@ const DomainSelector: React.FC<DomainSelectorProps> = ({ selectedDomain, onSelec
   );
 };
 
-export default DomainSelector;
+export default CategorySelector;

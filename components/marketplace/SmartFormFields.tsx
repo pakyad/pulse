@@ -1,9 +1,9 @@
 'use client'
 import React from 'react';
-import { MARKETPLACE_DOMAINS, DomainID } from '@/lib/marketplace/domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/domains';
 
 interface SmartFormFieldsProps {
-  domainId: DomainID;
+  categoryId: CategoryID;
   metadata: Record<string, any>;
   onMetadataChange: (key: string, value: any) => void;
   subcategory: string;
@@ -11,13 +11,13 @@ interface SmartFormFieldsProps {
 }
 
 const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
-  domainId,
+  categoryId,
   metadata,
   onMetadataChange,
   subcategory,
   onSubcategoryChange,
 }) => {
-  const domain = MARKETPLACE_DOMAINS[domainId];
+  const category = MARKETPLACE_CATEGORIES[categoryId];
 
   return (
     <div className="space-y-6">
@@ -29,7 +29,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
           <p className="text-[11px] font-medium text-[#94a3b8]">Pick the most specific match.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {domain.subcategories.map((sub) => {
+          {category.subcategories.map((sub) => {
             const isActive = subcategory === sub.label;
             return (
               <button
@@ -48,8 +48,8 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
         </div>
       </div>
 
-      {/* ── Domain-specific fields ── */}
-      {domain.customFields.map((field) => (
+      {/* ── Category-specific fields ── */}
+      {category.customFields.map((field) => (
         <div key={field.id} className="space-y-3 pt-2 border-t border-slate-100">
           <div className="space-y-0.5">
             <p className="text-[14px] font-bold text-[#000000] tracking-tight">{field.label}</p>

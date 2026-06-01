@@ -45,7 +45,7 @@ export default function FoundHub() {
           <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Items</p>
           <h1 className="text-[18px] font-bold tracking-widest text-navy">Lost & Found</h1>
         </div>
-        <button className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy/40">
+        <button onClick={() => setActiveTab(prev => prev === 'FOUND' ? 'LOST' : 'FOUND')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy/40 active:scale-95 transition-transform">
           <Filter size={18} />
         </button>
       </section>
@@ -83,7 +83,7 @@ export default function FoundHub() {
               />
            </div>
 
-           <div className="bg-amber-50 rounded-[3rem] p-8 border border-amber-100/50 flex items-center justify-between group cursor-pointer hover:bg-amber-100/30 transition-all">
+           <div onClick={() => router.push('/post')} className="bg-amber-50 rounded-[3rem] p-8 border border-amber-100/50 flex items-center justify-between group cursor-pointer hover:bg-amber-100/30 active:scale-95 transition-all">
               <div className="space-y-1">
                  <h3 className="text-[18px] font-bold text-amber-900 tracking-widest leading-none">Report an Item</h3>
                  <p className="text-[13px] text-amber-700/60 font-medium">Found something? Let others know.</p>
@@ -115,7 +115,7 @@ export default function FoundHub() {
                     subtitle: item.location,
                     badge: item.status
                   } as any}
-                  onClick={() => {}}
+                  onClick={() => router.push('/marketplace')}
                 />
               ))}
            </div>
@@ -132,7 +132,7 @@ export default function FoundHub() {
                  To get your item back, you need to show your Student ID for verification.
               </p>
            </div>
-           <button className="text-[11px] font-bold text-navy uppercase tracking-widest underline underline-offset-8 decoration-slate-200">
+           <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-navy uppercase tracking-widest underline underline-offset-8 decoration-slate-200">
               View Policies
            </button>
         </section>
@@ -141,7 +141,7 @@ export default function FoundHub() {
 
       {/* FLOATING ACTION PILL */}
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
-        <button className="bg-navy text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-md shadow-navy/40 hover:scale-105 active:scale-95 transition-all">
+        <button onClick={() => router.push('/post')} className="bg-navy text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-md shadow-navy/40 hover:scale-105 active:scale-95 transition-all">
           <Plus size={18} />
           <span className="text-[11px] font-black uppercase tracking-widest text-nowrap">Report found item</span>
         </button>

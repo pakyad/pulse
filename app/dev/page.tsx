@@ -52,35 +52,35 @@ const DEMO_LISTINGS = [
     // --- TECH SOCIETY (Merchant/Club) ---
     {
         id: 'item_tech_1', seller_id: 'tech_society_123', seller_name: 'Tech Society',
-        title: 'Mechanical Keyboard K8', price: 120.00, stock_count: 5, domain: 'TECH', subcategory: 'Peripherals', governance_status: 'OPEN_MARKET',
+        title: 'Mechanical Keyboard K8', price: 120.00, stock_count: 5, category: 'TECH', subcategory: 'Peripherals', governance_status: 'OPEN_MARKET',
         image_url: 'https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=800&auto=format&fit=crop',
         description: 'Brand new 75% mechanical keyboard with brown switches. Perfect for coding.',
         metadata: { specs: 'Brown Switches, RGB', warranty: 'Seller Warranty' }
     },
     {
         id: 'item_tech_2', seller_id: 'tech_society_123', seller_name: 'Tech Society',
-        title: 'USB-C Hub (7 in 1)', price: 45.00, stock_count: 10, domain: 'TECH', subcategory: 'Cables & Accessories', governance_status: 'OPEN_MARKET',
+        title: 'USB-C Hub (7 in 1)', price: 45.00, stock_count: 10, category: 'TECH', subcategory: 'Cables & Accessories', governance_status: 'OPEN_MARKET',
         image_url: 'https://images.unsplash.com/photo-1616410011236-7a42121dd981?q=80&w=800&auto=format&fit=crop',
         description: 'Essential for MacBooks. HDMI, USB 3.0, SD Card reader.',
         metadata: { specs: '7 ports', warranty: 'None' }
     },
     {
         id: 'item_tech_3', seller_id: 'tech_society_123', seller_name: 'Tech Society',
-        title: 'Official IT Faculty Hoodie', price: 60.00, stock_count: 50, domain: 'APPAREL', subcategory: 'Official Merch', governance_status: 'OPEN_MARKET',
+        title: 'Official IT Faculty Hoodie', price: 60.00, stock_count: 50, category: 'APPAREL', subcategory: 'Official Merch', governance_status: 'OPEN_MARKET',
         image_url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop',
         description: 'The official 2026 IT Faculty hoodie. Pre-order now.',
         metadata: { size: 'Free Size', condition: 'Brand New' }
     },
     {
         id: 'item_tech_4', seller_id: 'tech_society_123', seller_name: 'Tech Society',
-        title: 'PC Formatting Service', price: 30.00, stock_count: 100, domain: 'SERVICES', subcategory: 'Tech Support', governance_status: 'COMPLIANT',
+        title: 'PC Formatting Service', price: 30.00, stock_count: 100, category: 'SERVICES', subcategory: 'Tech Support', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=800&auto=format&fit=crop',
         description: 'Fast Windows 11 installation and formatting. Data backup included.',
         metadata: { duration_type: 'Per Session', available_slots: 'Weekdays 5PM-8PM' }
     },
     {
         id: 'item_tech_5', seller_id: 'tech_society_123', seller_name: 'Tech Society',
-        title: '3D Printing Service', price: 15.00, stock_count: 100, domain: 'SERVICES', subcategory: 'Creative Work', governance_status: 'COMPLIANT',
+        title: '3D Printing Service', price: 15.00, stock_count: 100, category: 'SERVICES', subcategory: 'Creative Work', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop',
         description: 'Send us your STL file. Price is per 100g of PLA filament.',
         metadata: { duration_type: 'Per Project', available_slots: 'Anytime' }
@@ -89,35 +89,35 @@ const DEMO_LISTINGS = [
     // --- CAFE RASA (Merchant) ---
     {
         id: 'item_cafe_1', seller_id: 'cafe_rasa_123', seller_name: 'Cafe Rasa',
-        title: 'Nasi Lemak Ayam Berempah', price: 8.00, stock_count: 20, domain: 'HUNGER', subcategory: 'Campus Canteen', governance_status: 'COMPLIANT',
+        title: 'Nasi Lemak Ayam Berempah', price: 8.00, stock_count: 20, category: 'HUNGER', subcategory: 'Campus Canteen', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1626804475297-4160ebcecbfa?q=80&w=800&auto=format&fit=crop',
         description: 'Freshly packed. Best seller.',
         metadata: { active_until: 'Today 2:00 PM', pickup_location: 'Cafe Rasa Lobby' }
     },
     {
         id: 'item_cafe_2', seller_id: 'cafe_rasa_123', seller_name: 'Cafe Rasa',
-        title: 'Iced Caramel Latte', price: 7.00, stock_count: 30, domain: 'HUNGER', subcategory: 'Snacks & Drinks', governance_status: 'COMPLIANT',
+        title: 'Iced Caramel Latte', price: 7.00, stock_count: 30, category: 'HUNGER', subcategory: 'Snacks & Drinks', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?q=80&w=800&auto=format&fit=crop',
         description: 'Perfect for a hot day between classes.',
         metadata: { active_until: 'Today 5:00 PM', pickup_location: 'Cafe Rasa Counter' }
     },
     {
         id: 'item_cafe_3', seller_id: 'cafe_rasa_123', seller_name: 'Cafe Rasa',
-        title: 'Double Choc Muffin', price: 4.50, stock_count: 15, domain: 'HUNGER', subcategory: 'Snacks & Drinks', governance_status: 'COMPLIANT',
+        title: 'Double Choc Muffin', price: 4.50, stock_count: 15, category: 'HUNGER', subcategory: 'Snacks & Drinks', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?q=80&w=800&auto=format&fit=crop',
         description: 'Baked fresh every morning.',
         metadata: { active_until: 'Today 5:00 PM', pickup_location: 'Cafe Rasa Counter' }
     },
     {
         id: 'item_cafe_4', seller_id: 'cafe_rasa_123', seller_name: 'Cafe Rasa',
-        title: 'Student Combo Deal', price: 10.00, stock_count: 50, domain: 'HUNGER', subcategory: 'Campus Canteen', governance_status: 'COMPLIANT',
+        title: 'Student Combo Deal', price: 10.00, stock_count: 50, category: 'HUNGER', subcategory: 'Campus Canteen', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=800&auto=format&fit=crop',
         description: '1 Main Meal + 1 Drink + 1 Snack. Flash your ID upon collection.',
         metadata: { active_until: 'Today 5:00 PM', pickup_location: 'Cafe Rasa Counter' }
     },
     {
         id: 'item_cafe_5', seller_id: 'cafe_rasa_123', seller_name: 'Cafe Rasa',
-        title: 'Catering Pre-order (Event)', price: 25.00, stock_count: 100, domain: 'HUNGER', subcategory: 'Preorder Catering', governance_status: 'COMPLIANT',
+        title: 'Catering Pre-order (Event)', price: 25.00, stock_count: 100, category: 'HUNGER', subcategory: 'Preorder Catering', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=800&auto=format&fit=crop',
         description: 'Per pax price for club events. Minimum order 20 pax.',
         metadata: { active_until: 'Requires 2 Days Notice', pickup_location: 'Delivery to Hall' }
@@ -126,35 +126,35 @@ const DEMO_LISTINGS = [
     // --- AMIRUL (Student) ---
     {
         id: 'item_amirul_1', seller_id: 'student_amirul_123', seller_name: 'Amirul',
-        title: 'Engineering Math Textbook', price: 40.00, stock_count: 1, domain: 'ACADEMIC', subcategory: 'Textbooks', governance_status: 'COMPLIANT',
+        title: 'Engineering Math Textbook', price: 40.00, stock_count: 1, category: 'ACADEMIC', subcategory: 'Textbooks', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=800&auto=format&fit=crop',
         description: 'Used for 1 semester. Very good condition, no highlights.',
         metadata: { department: 'Engineering', year_semester: 'Year 1' }
     },
     {
         id: 'item_amirul_2', seller_id: 'student_amirul_123', seller_name: 'Amirul',
-        title: 'Used Rice Cooker', price: 35.00, stock_count: 1, domain: 'HOSTEL', subcategory: 'Appliances', governance_status: 'OPEN_MARKET',
+        title: 'Used Rice Cooker', price: 35.00, stock_count: 1, category: 'HOSTEL', subcategory: 'Appliances', governance_status: 'OPEN_MARKET',
         image_url: 'https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?q=80&w=800&auto=format&fit=crop',
         description: 'Moving out soon. Works perfectly. 1.8L capacity.',
         metadata: { pickup_difficulty: 'Easy (Fits in Car)' }
     },
     {
         id: 'item_amirul_3', seller_id: 'student_amirul_123', seller_name: 'Amirul',
-        title: 'Lab Coat (Size M)', price: 20.00, stock_count: 1, domain: 'ACADEMIC', subcategory: 'Lab Equipment', governance_status: 'COMPLIANT',
+        title: 'Lab Coat (Size M)', price: 20.00, stock_count: 1, category: 'ACADEMIC', subcategory: 'Lab Equipment', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800&auto=format&fit=crop',
         description: 'Washed and clean. Bought last year.',
         metadata: { department: 'Science', year_semester: 'All' }
     },
     {
         id: 'item_amirul_4', seller_id: 'student_amirul_123', seller_name: 'Amirul',
-        title: 'Standing Fan', price: 45.00, stock_count: 1, domain: 'HOSTEL', subcategory: 'Appliances', governance_status: 'OPEN_MARKET',
+        title: 'Standing Fan', price: 45.00, stock_count: 1, category: 'HOSTEL', subcategory: 'Appliances', governance_status: 'OPEN_MARKET',
         image_url: 'https://images.unsplash.com/photo-1616593452442-835467332766?q=80&w=800&auto=format&fit=crop',
         description: 'Essential for hostel life without aircon.',
         metadata: { pickup_difficulty: 'Moderate (Needs 2 People)' }
     },
     {
         id: 'item_amirul_5', seller_id: 'student_amirul_123', seller_name: 'Amirul',
-        title: 'Calculus Notes (A+ Graded)', price: 10.00, stock_count: 10, domain: 'ACADEMIC', subcategory: 'Digital Scripts', governance_status: 'COMPLIANT',
+        title: 'Calculus Notes (A+ Graded)', price: 10.00, stock_count: 10, category: 'ACADEMIC', subcategory: 'Digital Scripts', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=800&auto=format&fit=crop',
         description: 'PDF copy of my handwritten notes. I scored an A+.',
         metadata: { department: 'Engineering', year_semester: 'Year 1 Sem 2' }
@@ -163,35 +163,35 @@ const DEMO_LISTINGS = [
     // --- SARAH (Student) ---
     {
         id: 'item_sarah_1', seller_id: 'student_sarah_123', seller_name: 'Sarah',
-        title: 'Preloved Zara Denim Jacket', price: 40.00, stock_count: 1, domain: 'APPAREL', subcategory: 'Preloved Clothes', governance_status: 'OPEN_MARKET',
+        title: 'Preloved Zara Denim Jacket', price: 40.00, stock_count: 1, category: 'APPAREL', subcategory: 'Preloved Clothes', governance_status: 'OPEN_MARKET',
         image_url: 'https://images.unsplash.com/photo-1576871337622-98d48d1cf531?q=80&w=800&auto=format&fit=crop',
         description: 'Worn twice. Excellent condition.',
         metadata: { size: 'M', condition: 'Like New' }
     },
     {
         id: 'item_sarah_2', seller_id: 'student_sarah_123', seller_name: 'Sarah',
-        title: 'Graphic Design Service', price: 50.00, stock_count: 5, domain: 'SERVICES', subcategory: 'Creative Work', governance_status: 'COMPLIANT',
+        title: 'Graphic Design Service', price: 50.00, stock_count: 5, category: 'SERVICES', subcategory: 'Creative Work', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800&auto=format&fit=crop',
         description: 'I will design a professional poster or banner for your club event.',
         metadata: { duration_type: 'Per Project', available_slots: 'Weekends' }
     },
     {
         id: 'item_sarah_3', seller_id: 'student_sarah_123', seller_name: 'Sarah',
-        title: 'Programming Tutor (Python)', price: 30.00, stock_count: 5, domain: 'SERVICES', subcategory: 'Tutoring', governance_status: 'COMPLIANT',
+        title: 'Programming Tutor (Python)', price: 30.00, stock_count: 5, category: 'SERVICES', subcategory: 'Tutoring', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=800&auto=format&fit=crop',
         description: 'Struggling with assignments? I can help you understand the basics.',
         metadata: { duration_type: 'Per Hour', available_slots: 'Thursdays 8PM' }
     },
     {
         id: 'item_sarah_4', seller_id: 'student_sarah_123', seller_name: 'Sarah',
-        title: 'Storage Box Set (x3)', price: 15.00, stock_count: 1, domain: 'HOSTEL', subcategory: 'Storage', governance_status: 'OPEN_MARKET',
+        title: 'Storage Box Set (x3)', price: 15.00, stock_count: 1, category: 'HOSTEL', subcategory: 'Storage', governance_status: 'OPEN_MARKET',
         image_url: 'https://images.unsplash.com/photo-1595054117820-22c60c878fce?q=80&w=800&auto=format&fit=crop',
         description: 'Great for organizing your closet. 3 boxes included.',
         metadata: { pickup_difficulty: 'Easy (Fits in Car)' }
     },
     {
         id: 'item_sarah_5', seller_id: 'student_sarah_123', seller_name: 'Sarah',
-        title: 'Photography for Events', price: 100.00, stock_count: 2, domain: 'SERVICES', subcategory: 'Photography', governance_status: 'COMPLIANT',
+        title: 'Photography for Events', price: 100.00, stock_count: 2, category: 'SERVICES', subcategory: 'Photography', governance_status: 'COMPLIANT',
         image_url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop',
         description: 'Half day shooting for club events. Photos edited in Lightroom.',
         metadata: { duration_type: 'Per Session', available_slots: 'Weekends Only' }
@@ -327,7 +327,7 @@ export default function DevSeedPage() {
                     title: camp.title,
                     price: camp.id === 'camp_1' ? 60.00 : 25.00, // Dummy prices
                     stock_count: 50,
-                    domain: 'APPAREL',
+                    category: 'APPAREL',
                     subcategory: camp.tag,
                     governance_status: 'OPEN_MARKET',
                     image_url: camp.image_url,

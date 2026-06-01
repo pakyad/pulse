@@ -122,7 +122,7 @@ export default function DeployAsset() {
             <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
               <div className="space-y-2">
                 <h1 className="text-[32px] font-black tracking-tightest leading-none">Registry <br/>Data</h1>
-                <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Define the market value and domain.</p>
+                <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Define the market value and category.</p>
               </div>
 
               <div className="space-y-6">

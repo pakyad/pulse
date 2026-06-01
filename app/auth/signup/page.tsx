@@ -64,7 +64,7 @@ export default function PerfectSignUp() {
     // 1. INSTITUTIONAL DOMAIN VALIDATION (REGEX)
     const uniklRegex = /^[\w-\.]+@(s\.)?unikl\.edu\.my$/;
     if (!uniklRegex.test(email)) {
-      setError("Institutional Violation: Only UniKL email domains (@s.unikl.edu.my or @unikl.edu.my) are authorized.");
+      setError("Institutional Violation: Only UniKL email categories (@s.unikl.edu.my or @unikl.edu.my) are authorized.");
       return;
     }
 

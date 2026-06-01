@@ -4,39 +4,39 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, Plus, Trash2, Loader2,
-  UtensilsCrossed, BookOpen, Wrench, Home, Cpu,
+  UtensilsCrossed, BookOpen, Wrench, Home, Cpu, Shirt,
   TrendingUp
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
-
-
 import { db, auth, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { MARKETPLACE_DOMAINS, DomainID } from '@/lib/marketplace/domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/domains';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
 import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
 
 // ── DOMAIN ICONS (aligned with Marketplace page icon pattern) ──
-const DOMAIN_ICONS: Record<DomainID, React.ElementType> = {
+const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
   HUNGER: UtensilsCrossed,
   ACADEMIC: BookOpen,
   SERVICES: Wrench,
   HOSTEL: Home,
   TECH: Cpu,
+  APPAREL: Shirt,
 };
 
-const DOMAIN_LABELS: Record<DomainID, string> = {
+const CATEGORY_LABELS: Record<CategoryID, string> = {
   HUNGER: 'Food',
   ACADEMIC: 'Books',
   SERVICES: 'Services',
   HOSTEL: 'Hostel',
   TECH: 'Tech',
+  APPAREL: 'Apparel',
 };
 
 export default function CreateListingPage() {
   const router = useRouter();
-  const [selectedDomain, setSelectedDomain] = useState<DomainID | ''>('');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryID | ''>('');
   const [subcategory, setSubcategory] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
@@ -55,9 +55,9 @@ export default function CreateListingPage() {
   // ── MARKET INTELLIGENCE ENGINE (Trust-First, Advisory Only) ──
   const priceIntel: PriceIntelligence | null = useMemo(() => {
     const numericPrice = parseFloat(price);
-    if (!selectedDomain || !price || isNaN(numericPrice) || numericPrice <= 0) return null;
-    return analysePrice(numericPrice, selectedDomain as DomainID, subcategory);
-  }, [selectedDomain, subcategory, price]);
+    if (!selectedCategory || !price || isNaN(numericPrice) || numericPrice <= 0) return null;
+    return analysePrice(numericPrice, selectedCategory as CategoryID, subcategory);
+  }, [selectedCategory, subcategory, price]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     Array.from(e.target.files || []).forEach(file => {
@@ -68,7 +68,7 @@ export default function CreateListingPage() {
   };
 
   const handlePost = async () => {
-    if (!selectedDomain) return;
+    if (!selectedCategory) return;
     setIsPosting(true);
     setPostError(null);
     try {
@@ -93,7 +93,7 @@ export default function CreateListingPage() {
       await addDoc(collection(db, 'items'), {
         title,
         description,
-        domain: selectedDomain,
+        category: selectedCategory,
         subcategory,
         price: parseFloat(price),
         stock_count: stockCount,
@@ -151,13 +151,13 @@ export default function CreateListingPage() {
           </div>
 
           <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1 -mx-6 px-6">
-            {(Object.keys(DOMAIN_LABELS) as DomainID[]).map((id) => {
-              const isActive = selectedDomain === id;
-              const Icon = DOMAIN_ICONS[id];
+            {(Object.keys(CATEGORY_LABELS) as CategoryID[]).map((id) => {
+              const isActive = selectedCategory === id;
+              const Icon = CATEGORY_ICONS[id];
               return (
                 <button
                   key={id}
-                  onClick={() => { setSelectedDomain(id); setSubcategory(''); }}
+                  onClick={() => { setSelectedCategory(id); setSubcategory(''); }}
                   className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                     isActive
                       ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
@@ -165,14 +165,14 @@ export default function CreateListingPage() {
                   }`}
                 >
                   <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
-                  <span className="text-[12px] font-bold tracking-[-0.2px]">{DOMAIN_LABELS[id]}</span>
+                  <span className="text-[12px] font-bold tracking-[-0.2px]">{CATEGORY_LABELS[id]}</span>
                 </button>
               );
             })}
           </div>
         </section>
 
-        {selectedDomain && (
+        {selectedCategory && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -341,7 +341,7 @@ export default function CreateListingPage() {
               )}
             </section>
 
-            {/* ── SECTION: SMART DOMAIN FIELDS ── */}
+            {/* ── SECTION: SMART CATEGORY FIELDS ── */}
             <section className="pt-2 border-t border-slate-100">
               <div className="space-y-0.5 mb-6">
                 <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">More Details</h2>
@@ -350,7 +350,7 @@ export default function CreateListingPage() {
                 </p>
               </div>
               <SmartFormFields
-                domainId={selectedDomain as DomainID}
+                categoryId={selectedCategory as CategoryID}
                 subcategory={subcategory}
                 onSubcategoryChange={setSubcategory}
                 metadata={metadata}

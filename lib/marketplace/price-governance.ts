@@ -14,7 +14,7 @@ import {
   collection, addDoc, serverTimestamp,
   doc, updateDoc, increment, getDoc
 } from 'firebase/firestore';
-import { MARKETPLACE_DOMAINS, DomainID } from './domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from './domains';
 
 // ── TYPES ──────────────────────────────────────────────────────────────────────
 
@@ -34,12 +34,12 @@ export interface PriceIntelligence {
 // ── CORE ENGINE ────────────────────────────────────────────────────────────────
 
 /**
- * Analyses a price against the domain ceiling and returns intelligence.
+ * Analyses a price against the category ceiling and returns intelligence.
  * This is ADVISORY ONLY — it never blocks submission.
  */
 export function analysePrice(
   price: number,
-  domainId: DomainID | '',
+  categoryId: CategoryID | '',
   subcategory: string
 ): PriceIntelligence {
   const empty: PriceIntelligence = {
@@ -53,13 +53,13 @@ export function analysePrice(
     shouldAutoFlag: false,
   };
 
-  if (!domainId || !price || price <= 0) return empty;
+  if (!categoryId || !price || price <= 0) return empty;
 
-  const domain = MARKETPLACE_DOMAINS[domainId as DomainID];
-  if (!domain) return empty;
+  const category = MARKETPLACE_CATEGORIES[categoryId as CategoryID];
+  if (!category) return empty;
 
-  const subConfig = domain.subcategories.find((s: any) => s.label === subcategory);
-  const ceiling = subConfig?.ceiling || domain.ceiling;
+  const subConfig = category.subcategories.find((s: any) => s.label === subcategory);
+  const ceiling = subConfig?.ceiling || category.ceiling;
 
   if (!ceiling) return { ...empty, tier: 'COMPLIANT' };
 

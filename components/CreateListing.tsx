@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Plus, Trash2, Loader2,
-  UtensilsCrossed, BookOpen, Wrench, Home, Cpu,
+  UtensilsCrossed, BookOpen, Wrench, Home, Cpu, Shirt,
   ArrowUpRight, Zap, TrendingUp
 } from 'lucide-react';
 
 import { db, auth } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { MARKETPLACE_DOMAINS, DomainID } from '@/lib/marketplace/domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/domains';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
 import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
 
@@ -22,25 +22,27 @@ interface CreateListingProps {
   existingItem?: any;
 }
 
-const DOMAIN_ICONS: Record<DomainID, React.ElementType> = {
+const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
   HUNGER: UtensilsCrossed,
   ACADEMIC: BookOpen,
   SERVICES: Wrench,
   HOSTEL: Home,
   TECH: Cpu,
+  APPAREL: Shirt,
 };
 
-const DOMAIN_LABELS: Record<DomainID, string> = {
+const CATEGORY_LABELS: Record<CategoryID, string> = {
   HUNGER: 'Food',
   ACADEMIC: 'Books',
   SERVICES: 'Services',
   HOSTEL: 'Hostel',
   TECH: 'Tech',
+  APPAREL: 'Apparel',
 };
 
 export default function CreateListing({ userId, role, onClose, existingItem }: CreateListingProps) {
   const router = useRouter();
-  const [selectedDomain, setSelectedDomain] = useState<DomainID | ''>(existingItem?.domain || '');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryID | ''>(existingItem?.category || '');
   const [subcategory, setSubcategory] = useState(existingItem?.subcategory || '');
   const [images, setImages] = useState<string[]>(existingItem?.images || []);
   const [title, setTitle] = useState(existingItem?.title || '');
@@ -55,7 +57,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   // ── FORCE SYNC EXISTING ITEM DATA ──
   useEffect(() => {
     if (existingItem) {
-      setSelectedDomain(existingItem.domain || '');
+      setSelectedCategory(existingItem.category || '');
       setSubcategory(existingItem.subcategory || '');
       setImages(existingItem.images || []);
       setTitle(existingItem.title || '');
@@ -71,9 +73,9 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   // ── MARKET INTELLIGENCE ENGINE (Trust-First, Advisory Only) ──
   const priceIntel: PriceIntelligence | null = useMemo(() => {
     const numericPrice = parseFloat(price);
-    if (!selectedDomain || !price || isNaN(numericPrice) || numericPrice <= 0) return null;
-    return analysePrice(numericPrice, selectedDomain as DomainID, subcategory);
-  }, [selectedDomain, subcategory, price]);
+    if (!selectedCategory || !price || isNaN(numericPrice) || numericPrice <= 0) return null;
+    return analysePrice(numericPrice, selectedCategory as CategoryID, subcategory);
+  }, [selectedCategory, subcategory, price]);
 
   // 🏛️ Institutional Image Compressor: Prevents 1MB Firestore limit crashes
   const compressImage = (base64: string): Promise<string> => {
@@ -113,7 +115,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   };
 
   const handlePost = async () => {
-    if (!selectedDomain) return;
+    if (!selectedCategory) return;
     setIsPosting(true);
     try {
       const { updateDoc, doc } = await import('firebase/firestore');
@@ -127,7 +129,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       const data = {
         title,
         description,
-        domain: selectedDomain,
+        category: selectedCategory,
         subcategory,
         price: parseFloat(price),
         stock_count: stockCount,
@@ -226,13 +228,13 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
           </div>
 
           <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 -mx-6 px-6">
-            {(Object.keys(DOMAIN_LABELS) as DomainID[]).map((id) => {
-              const isActive = selectedDomain === id;
-              const Icon = DOMAIN_ICONS[id];
+            {(Object.keys(CATEGORY_LABELS) as CategoryID[]).map((id) => {
+              const isActive = selectedCategory === id;
+              const Icon = CATEGORY_ICONS[id];
               return (
                 <button
                   key={id}
-                  onClick={() => { setSelectedDomain(id); setSubcategory(''); }}
+                  onClick={() => { setSelectedCategory(id); setSubcategory(''); }}
                   className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                     isActive
                       ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
@@ -240,14 +242,14 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                   }`}
                 >
                   <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
-                  <span className="text-[12px] font-bold tracking-[-0.2px]">{DOMAIN_LABELS[id]}</span>
+                  <span className="text-[12px] font-bold tracking-[-0.2px]">{CATEGORY_LABELS[id]}</span>
                 </button>
               );
             })}
           </div>
         </section>
 
-        {selectedDomain && (
+        {selectedCategory && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -414,14 +416,14 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
               </div>
             </section>
 
-            {/* ── SECTION: SMART DOMAIN FIELDS ── */}
+            {/* ── SECTION: SMART CATEGORY FIELDS ── */}
             <section className="pt-6 border-t border-slate-100">
               <div className="space-y-0.5 mb-6">
                 <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{existingItem ? 'More Details' : 'More Details'}</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">{existingItem ? 'Update specific information for this item.' : 'Specific information about this type of listing.'}</p>
               </div>
               <SmartFormFields
-                domainId={selectedDomain as DomainID}
+                categoryId={selectedCategory as CategoryID}
                 subcategory={subcategory}
                 onSubcategoryChange={setSubcategory}
                 metadata={metadata}

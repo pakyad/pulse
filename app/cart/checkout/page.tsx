@@ -244,13 +244,13 @@ export default function CartCheckoutPage() {
                        <div className="grid grid-cols-2 gap-2">
                           <button 
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'SELF_COLLECT' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all ${pref.type === 'SELF_COLLECT' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'SELF_COLLECT' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Package size={14} /> Self-Collect
                           </button>
                           <button 
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'RUNNER' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all ${pref.type === 'RUNNER' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'RUNNER' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Truck size={14} /> Runner
                           </button>
@@ -265,7 +265,7 @@ export default function CartCheckoutPage() {
                                    <button 
                                       key={hub.id}
                                       onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, location: hub.id } }))}
-                                      className={`h-12 px-3 rounded-xl border text-left flex flex-col justify-center transition-all ${pref.location === hub.id ? 'bg-white border-slate-400 ring-1 ring-slate-400' : 'bg-white/50 border-slate-200 opacity-60'}`}
+                                      className={`h-12 px-3 rounded-xl border text-left flex flex-col justify-center transition-all active:scale-95 ${pref.location === hub.id ? 'bg-white border-slate-400 ring-1 ring-slate-400' : 'bg-white/50 border-slate-200 opacity-60'}`}
                                    >
                                       <p className="text-[11px] font-bold text-[#000000] truncate">{hub.label}</p>
                                       <p className="text-[9px] font-medium text-[#94a3b8]">RM {hub.zone === 'campus' ? '3.50' : '5.00'}</p>
@@ -335,7 +335,7 @@ export default function CartCheckoutPage() {
                    <button
                      key={bank.id}
                      onClick={() => setSelectedBank(bank.id)}
-                     className={`w-full h-16 px-5 rounded-2xl flex items-center justify-between border transition-all ${
+                     className={`w-full h-16 px-5 rounded-2xl flex items-center justify-between border transition-all active:scale-[0.98] ${
                        selectedBank === bank.id 
                        ? 'bg-white border-blue-600 shadow-md shadow-slate-900/5 ring-1 ring-[#000000]' 
                        : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-slate-200'

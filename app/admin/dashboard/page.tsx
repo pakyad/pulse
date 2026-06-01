@@ -515,7 +515,7 @@ export default function AdminDashboard() {
                                 </span>
                               </div>
                               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                                {item.domain} · {item.subcategory}
+                                {item.category} · {item.subcategory}
                               </p>
                               <p className="text-[12px] font-medium text-slate-400 mt-0.5">Seller: {item.seller_name || '—'}</p>
                               {!isSystemFlag && (

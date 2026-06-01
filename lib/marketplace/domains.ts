@@ -1,12 +1,12 @@
 /**
- * Pulse Marketplace: Domain Registry (v3.0)
+ * Pulse Marketplace: Category Registry (v3.0)
  * Logic: Student Life Cycle Model
  */
 
-export type DomainID = 'HUNGER' | 'ACADEMIC' | 'SERVICES' | 'HOSTEL' | 'TECH' | 'APPAREL';
+export type CategoryID = 'HUNGER' | 'ACADEMIC' | 'SERVICES' | 'HOSTEL' | 'TECH' | 'APPAREL';
 
-export interface DomainConfig {
-  id: DomainID;
+export interface CategoryConfig {
+  id: CategoryID;
   label: string;
   subtext: string;
   governance: 'REGULATED' | 'OPEN';
@@ -25,7 +25,7 @@ export interface DomainConfig {
   }[];
 }
 
-export const MARKETPLACE_DOMAINS: Record<DomainID, DomainConfig> = {
+export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
   HUNGER: {
     id: 'HUNGER',
     label: 'Hunger Economy',

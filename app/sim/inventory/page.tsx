@@ -25,7 +25,7 @@ export default function InventorySimulation() {
         seller_name: "Pulse Official",
         image_url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop",
         status: "active",
-        domain: "APPAREL",
+        category: "APPAREL",
         created_at: serverTimestamp()
       });
       addLog("ASSET CREATED: 2 Units in Stock.");

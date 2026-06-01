@@ -8,20 +8,20 @@ import {
   ArrowUpRight, Clock, MapPin, Layers, Shirt,
   UtensilsCrossed, BookOpen, Wrench, Home, Cpu, Star, ShoppingCart, CheckCircle2
 } from 'lucide-react';
-import { MARKETPLACE_DOMAINS, DomainID } from '@/lib/marketplace/domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/domains';
 import { useCart } from '@/lib/context/CartContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import ReportPriceButton from '@/components/shared/ReportPriceButton';
 import BackButton from '@/components/shared/BackButton';
 
-// ── DOMAIN REGISTRY RENDERER ──
+// ── CATEGORY REGISTRY RENDERER ──
 function DomainRegistry({ item }: { item: any }) {
-  const domain = MARKETPLACE_DOMAINS[item.domain as DomainID];
-  if (!domain || !item.metadata) return null;
+  const category = MARKETPLACE_CATEGORIES[item.category as CategoryID];
+  if (!category || !item.metadata) return null;
 
   const rows: { label: string; value: React.ReactNode }[] = [];
 
-  if (item.domain === 'HUNGER') {
+  if (item.category === 'HUNGER') {
     if (item.metadata.active_until) rows.push({
       label: 'Available Until',
       value: (
@@ -39,12 +39,12 @@ function DomainRegistry({ item }: { item: any }) {
       )
     });
   }
-  if (item.domain === 'ACADEMIC') {
+  if (item.category === 'ACADEMIC') {
     if (item.metadata.department) rows.push({ label: 'Faculty', value: item.metadata.department });
     if (item.metadata.year_semester) rows.push({ label: 'Year / Sem', value: item.metadata.year_semester });
     if (item.metadata.subject_code) rows.push({ label: 'Subject Code', value: item.metadata.subject_code });
   }
-  if (item.domain === 'SERVICES') {
+  if (item.category === 'SERVICES') {
     if (item.metadata.duration_type) rows.push({ label: 'Billing Basis', value: item.metadata.duration_type });
     if (item.metadata.available_slots) rows.push({
       label: 'Availability',
@@ -55,7 +55,7 @@ function DomainRegistry({ item }: { item: any }) {
       )
     });
   }
-  if (item.domain === 'HOSTEL') {
+  if (item.category === 'HOSTEL') {
     if (item.metadata.pickup_difficulty) {
       const isHeavy = item.metadata.pickup_difficulty.includes('Heavy');
       const isMod = item.metadata.pickup_difficulty.includes('Moderate');
@@ -69,7 +69,7 @@ function DomainRegistry({ item }: { item: any }) {
       });
     }
   }
-  if (item.domain === 'TECH') {
+  if (item.category === 'TECH') {
     if (item.metadata.specs) rows.push({ label: 'Specs', value: item.metadata.specs });
     if (item.metadata.warranty) rows.push({ label: 'Warranty', value: item.metadata.warranty });
     if (item.metadata.validity_period) rows.push({ label: 'Valid For', value: item.metadata.validity_period });
@@ -80,7 +80,7 @@ function DomainRegistry({ item }: { item: any }) {
   return (
     <section className="space-y-4">
       <div className="space-y-0.5">
-        <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{domain.label}</h2>
+        <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{category.label}</h2>
         <p className="text-[11px] font-medium text-[#94a3b8]">Details provided by seller</p>
       </div>
       <div className="bg-slate-50 border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden">
@@ -106,6 +106,7 @@ export default function ItemDetailsPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { addToCart, cartCount } = useCart();
 
@@ -192,13 +193,13 @@ export default function ItemDetailsPage() {
     </div>
   );
 
-  const domain = MARKETPLACE_DOMAINS[item.domain as DomainID];
+  const category = MARKETPLACE_CATEGORIES[item.category as CategoryID];
   const images: string[] = item.images?.length ? item.images : item.image_url ? [item.image_url] : [];
 
-  const DOMAIN_ICONS: Record<DomainID, React.ElementType> = {
+  const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
     HUNGER: UtensilsCrossed, ACADEMIC: BookOpen, SERVICES: Wrench, HOSTEL: Home, TECH: Cpu, APPAREL: Shirt
   };
-  const DomainIcon = domain ? DOMAIN_ICONS[item.domain as DomainID] : Layers;
+  const CategoryIcon = category ? CATEGORY_ICONS[item.category as CategoryID] : Layers;
 
   const isSoldOut = item.stock_count !== undefined && item.stock_count !== null && item.stock_count <= 0;
 
@@ -233,7 +234,15 @@ export default function ItemDetailsPage() {
               </span>
             )}
           </button>
-          <button className={`w-10 h-10 flex items-center justify-center transition-all duration-700 ease-out active:scale-95 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
+          <button 
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(window.location.href);
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+              } catch (e) {}
+            }}
+            className={`w-10 h-10 flex items-center justify-center transition-all duration-700 ease-out active:scale-95 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
             <Share2 size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-700 ease-out" />
           </button>
         </div>
@@ -255,6 +264,19 @@ export default function ItemDetailsPage() {
               <p className="text-[12px] font-bold">Added to cart</p>
             </div>
             <button onClick={() => router.push('/cart')} className="text-[11px] font-black uppercase tracking-widest text-emerald-400 mr-2">View Cart</button>
+          </motion.div>
+        )}
+        {isCopied && (
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className="fixed top-20 left-6 right-6 z-100 bg-slate-900 text-white px-4 py-3 rounded-full flex items-center justify-center shadow-md"
+          >
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-white" />
+              <p className="text-[12px] font-bold">Link copied to clipboard</p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -290,12 +312,12 @@ export default function ItemDetailsPage() {
           </div>
         )}
 
-        {/* Domain pill (bottom-left) */}
-        {domain && (
+        {/* Category pill (bottom-left) */}
+        {category && (
           <div className="absolute bottom-4 left-4">
             <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-md border border-slate-100 rounded-full text-[10px] font-bold text-[#000000] shadow-sm">
-              <DomainIcon size={11} strokeWidth={2} />
-              {domain.label}
+              <CategoryIcon size={11} strokeWidth={2} />
+              {category.label}
             </span>
           </div>
         )}
@@ -375,7 +397,7 @@ export default function ItemDetailsPage() {
           </div>
         </section>
 
-        {/* ── DOMAIN REGISTRY ── */}
+        {/* ── CATEGORY REGISTRY ── */}
         <DomainRegistry item={item} />
 
         {/* ── REVIEWS SECTION ── */}
@@ -385,7 +407,11 @@ export default function ItemDetailsPage() {
               <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Community Feedback</h2>
               <p className="text-[11px] font-medium text-[#94a3b8]">Verified institutional reviews</p>
             </div>
-            <button className="text-[12px] font-bold text-[#000000] opacity-40">View All</button>
+            <button 
+              onClick={() => router.push(`/user/${item.seller_id}/reviews`)}
+              className="text-[12px] font-bold text-[#000000] opacity-40 hover:opacity-100 transition-opacity active:scale-95">
+              View All
+            </button>
           </div>
           
           {/* Mock Review if none exist yet - for demo integrity */}
@@ -419,7 +445,7 @@ export default function ItemDetailsPage() {
         )}
 
         {/* ── HANDSHAKE NOTICE (Services only) ── */}
-        {item.domain === 'SERVICES' && (
+        {item.category === 'SERVICES' && (
           <section className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-4">
             <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm">
               <ShieldCheck size={16} className="text-[#000000]" />
@@ -466,7 +492,7 @@ export default function ItemDetailsPage() {
             onClick={() => router.push(`/marketplace/${id}/checkout`)}
             className="flex-1 h-[52px] bg-blue-600 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20"
           >
-            {isSoldOut ? 'Sold Out' : item.domain === 'SERVICES' ? 'Book Now' : 'Buy Now'}
+            {isSoldOut ? 'Sold Out' : item.category === 'SERVICES' ? 'Book Now' : 'Buy Now'}
             {!isSoldOut && <ArrowUpRight size={16} />}
           </button>
         </div>
