@@ -22,14 +22,14 @@ export default function RunnerDashboard({ profile, onBack }: { profile: any, onB
           {/* ── CARRIER HEADER ── */}
           <nav className="fixed top-0 left-0 right-0 z-50 px-8 pt-12 pb-6 flex items-center justify-between bg-white/95 backdrop-blur-xl border-b border-slate-50">
              <div className="flex items-center gap-4">
-                <button onClick={onBack} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all">
+                <button onClick={onBack} className="p-2 -ml-2 text-slate-300 active:scale-95 transition-all">
                    <ChevronLeft size={24} />
                 </button>
                 <h1 className="text-[17px] font-bold tracking-tight text-[#222222]">Runner Hub</h1>
              </div>
              <div className="flex items-center gap-4">
-                <button className="text-slate-300 active:scale-90 transition-all"><LayoutGrid size={20} /></button>
-                <button className="text-slate-300 active:scale-90 transition-all"><Bell size={20} /></button>
+                <button className="text-slate-300 active:scale-95 transition-all"><LayoutGrid size={20} /></button>
+                <button className="text-slate-300 active:scale-95 transition-all"><Bell size={20} /></button>
                 <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
              </div>
           </nav>

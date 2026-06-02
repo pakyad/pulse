@@ -65,7 +65,7 @@ export default function Header() {
                 exit={{ opacity: 0, x: -10, width: 0 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={() => router.back()} 
-                className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 hover:bg-slate-100 active:scale-90 transition-all shrink-0 mr-1"
+                className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 hover:bg-slate-100 active:scale-95 transition-all shrink-0 mr-1"
               >
                 <ChevronLeft size={20} />
               </motion.button>
@@ -93,7 +93,7 @@ export default function Header() {
           <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="flex items-center gap-3 shrink-0">
             <button 
               onClick={() => router.push('/cart')}
-              className="transition-all relative p-2 text-navy/40 hover:text-navy active:scale-90"
+              className="transition-all relative p-2 text-navy/40 hover:text-navy active:scale-95"
             >
               <ShoppingCart size={22} />
               {cartCount > 0 && (
@@ -105,7 +105,7 @@ export default function Header() {
 
             <button 
               onClick={() => router.push('/activity')}
-              className={`transition-all relative p-2 active:scale-90 ${pathname === '/activity' ? 'text-[#007AFF]' : 'text-navy/40 hover:text-navy'}`}
+              className={`transition-all relative p-2 active:scale-95 ${pathname === '/activity' ? 'text-[#007AFF]' : 'text-navy/40 hover:text-navy'}`}
             >
               <Bell size={22} strokeWidth={pathname === '/activity' ? 2.5 : 2} />
               {notificationCount > 0 && (

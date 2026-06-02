@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 
 interface SmartFormFieldsProps {
   categoryId: CategoryID;

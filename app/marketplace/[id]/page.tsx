@@ -8,11 +8,10 @@ import {
   ArrowUpRight, Clock, MapPin, Layers, Shirt,
   UtensilsCrossed, BookOpen, Wrench, Home, Cpu, Star, ShoppingCart, CheckCircle2
 } from 'lucide-react';
-import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import { useCart } from '@/lib/context/CartContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import ReportPriceButton from '@/components/shared/ReportPriceButton';
-import BackButton from '@/components/shared/BackButton';
 
 // ── CATEGORY REGISTRY RENDERER ──
 function DomainRegistry({ item }: { item: any }) {
@@ -177,8 +176,8 @@ export default function ItemDetailsPage() {
       }
       router.push(`/messages/${chatId}`);
     } catch (e) {
-      console.warn("Sync session strict rules enforced, falling back to demo proxy", e);
-      router.push('/messages/demo_1'); // Fallback for UI visualization
+      console.error('[Chat] Failed to create chat session:', e);
+      // Do not redirect to a demo fallback — surface the error in the UI
     }
   };
 
@@ -240,7 +239,9 @@ export default function ItemDetailsPage() {
                 await navigator.clipboard.writeText(window.location.href);
                 setIsCopied(true);
                 setTimeout(() => setIsCopied(false), 2000);
-              } catch (e) {}
+      } catch (e) {
+      console.error('[Share] Clipboard write failed:', e);
+    }
             }}
             className={`w-10 h-10 flex items-center justify-center transition-all duration-700 ease-out active:scale-95 ${isScrolled ? 'rounded-2xl bg-slate-50 text-[#94a3b8] border border-slate-50 hover:bg-slate-100' : 'text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
             <Share2 size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-700 ease-out" />

@@ -113,7 +113,7 @@ export default function MessagesPage() {
                  className={`w-full flex items-start gap-4 p-4 rounded-2xl transition-all text-left group relative ${isUnread ? 'bg-slate-50/50' : 'bg-transparent'}`}
               >
                  <div className="relative shrink-0 mt-0.5">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white border border-slate-100 group-active:scale-90 transition-transform">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white border border-slate-100 group-active:scale-95 transition-transform">
                        <img src={otherParticipant.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherParticipant.name}`} className="w-full h-full object-cover" alt=""/>
                     </div>
                     {chat.badge === 'commerce' && (

@@ -14,7 +14,7 @@ import {
   collection, addDoc, serverTimestamp,
   doc, updateDoc, increment, getDoc
 } from 'firebase/firestore';
-import { MARKETPLACE_CATEGORIES, CategoryID } from './domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from './categories';
 
 // ── TYPES ──────────────────────────────────────────────────────────────────────
 

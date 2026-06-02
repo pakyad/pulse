@@ -22,25 +22,7 @@ export default function ChatRoomPage() {
   
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // MOCK DATA FALLBACK (If navigating from the hardcoded Inbox demo)
   useEffect(() => {
-    if (chatId.startsWith('demo_')) {
-      setChatInfo({
-         id: chatId,
-         type: chatId === 'demo_2' ? 'RADAR' : 'MARKETPLACE',
-         otherName: chatId === 'demo_1' ? "Ahmad Faizal" : chatId === 'demo_2' ? "Sarah Lim" : "Ali Karim",
-         otherAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${chatId}`,
-         contextTitle: chatId === 'demo_1' ? "Nike Vintage Hoodie (L)" : chatId === 'demo_2' ? "Lost Matric Card" : "Calculus Textbook",
-      });
-      setMessages([
-         { id: '1', text: "Hello! Is this available?", senderId: "other", createdAt: new Date(Date.now() - 3600000) },
-         { id: '2', text: "Yes it is. When can you meet?", senderId: auth.currentUser?.uid || "me", createdAt: new Date(Date.now() - 1800000) },
-         { id: '3', text: "I can meet at 2PM.", senderId: "other", createdAt: new Date() },
-      ]);
-      setLoading(false);
-      return;
-    }
-
     const unsubAuth = auth.onAuthStateChanged(async (user) => {
       if (user) {
         // Fetch Chat Metadata
@@ -100,19 +82,6 @@ export default function ChatRoomPage() {
     setIsSubmitting(true);
     const textToSend = newMessage.trim();
     setNewMessage(""); // Optimistic UI clear
-
-    if (chatId.startsWith('demo_')) {
-       // Mock send
-       setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          text: textToSend,
-          senderId: user.uid,
-          createdAt: new Date()
-       }]);
-       setIsSubmitting(false);
-       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-       return;
-    }
 
     try {
       await addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -178,7 +147,7 @@ export default function ChatRoomPage() {
       {/* ── CHAT MESSAGES ── */}
       <section className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
          {messages.map((msg, i) => {
-            const isMe = msg.senderId === auth.currentUser?.uid || (chatId.startsWith('demo_') && msg.senderId === 'me');
+            const isMe = msg.senderId === auth.currentUser?.uid;
             
             return (
                <motion.div 

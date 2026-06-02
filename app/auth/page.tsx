@@ -99,7 +99,7 @@ export default function AuthPage() {
             <div className="flex items-center justify-between mb-8">
                <button 
                  onClick={() => router.push('/')} 
-                 className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all active:scale-90"
+                 className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all active:scale-95"
                >
                   <X size={20} className="text-black" />
                </button>
@@ -171,7 +171,7 @@ export default function AuthPage() {
             className="flex flex-col min-h-screen px-6 py-12 max-w-md mx-auto w-full"
           >
             <div className="flex items-center justify-between mb-12 relative">
-               <button onClick={() => setView('landing')} className="w-10 h-10 rounded-full bg-[#F2F8FF] flex items-center justify-center transition-all active:scale-90">
+               <button onClick={() => setView('landing')} className="w-10 h-10 rounded-full bg-[#F2F8FF] flex items-center justify-center transition-all active:scale-95">
                   <ChevronLeft size={20} className="text-black" strokeWidth={3} />
                </button>
                <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">Sign in</h1>

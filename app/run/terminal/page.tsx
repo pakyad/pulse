@@ -591,7 +591,7 @@ export default function RunnerTerminal() {
                ) : (
                  <div className="space-y-6 pt-2">
                    <Heading className="text-[20px] flex items-center gap-2">
-                     <button onClick={() => setReportStep(false)} className="active:scale-90"><ChevronLeft size={20} className="text-slate-400" /></button>
+                     <button onClick={() => setReportStep(false)} className="active:scale-95"><ChevronLeft size={20} className="text-slate-400" /></button>
                      What's wrong?
                    </Heading>
                    <div className="space-y-3">

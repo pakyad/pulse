@@ -175,7 +175,7 @@ function RunnerActivePageContent() {
            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Order ID: {order.id.slice(0,6).toUpperCase()}</span>
            <h2 className="text-[14px] font-black uppercase tracking-tightest mt-1">Order Status</h2>
         </div>
-        <button onClick={() => setShowCancelModal(true)} className="w-12 h-12 rounded-[1.5rem] bg-red-50 border border-red-100 flex items-center justify-center text-red-500 transition-all active:scale-90">
+        <button onClick={() => setShowCancelModal(true)} className="w-12 h-12 rounded-[1.5rem] bg-red-50 border border-red-100 flex items-center justify-center text-red-500 transition-all active:scale-95">
            <X size={20} />
         </button>
       </nav>

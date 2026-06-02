@@ -11,7 +11,7 @@ import BackButton from '@/components/shared/BackButton';
 import { db, auth, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/domains';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
 import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
 

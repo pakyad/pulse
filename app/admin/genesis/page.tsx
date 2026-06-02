@@ -63,9 +63,11 @@ export default function GenesisSetup() {
           <CheckCircle2 className="text-emerald-500 mb-4" size={48} />
           <p className="text-emerald-500 font-bold mb-8">{message}</p>
           <div className="bg-white/5 p-6 rounded-2xl border border-white/10 text-left w-full max-w-sm">
-            <p className="text-slate-400 text-xs uppercase font-bold tracking-widest mb-4">Credentials</p>
+            <p className="text-slate-400 text-xs uppercase font-bold tracking-widest mb-4">Account Created</p>
             <p className="text-white text-sm mb-2 font-mono">Email: admin@pulse.com</p>
-            <p className="text-white text-sm font-mono">Pass: pulse123</p>
+            <p className="text-slate-500 text-xs mt-3 leading-relaxed">
+              Password is set as configured. Do not share credentials via this screen. Refer to internal admin documentation.
+            </p>
           </div>
           <button 
             onClick={() => window.location.href = '/auth'}

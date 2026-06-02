@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { CategoryID } from '@/lib/marketplace/domains';
+import { CategoryID } from '@/lib/marketplace/categories';
 
 interface CategorySelectorProps {
   selectedCategory: CategoryID | '';

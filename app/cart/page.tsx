@@ -87,14 +87,14 @@ export default function CartPage() {
                          <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-lg px-2 py-1">
                             <button 
                               onClick={() => updateQty(item.productId, item.qty - 1)}
-                              className="w-6 h-6 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] active:scale-90 transition-transform"
+                              className="w-6 h-6 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] active:scale-95 transition-transform"
                             >
                               <Minus size={14} />
                             </button>
                             <span className="text-[13px] font-bold w-4 text-center">{item.qty}</span>
                             <button 
                               onClick={() => updateQty(item.productId, item.qty + 1)}
-                              className="w-6 h-6 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] active:scale-90 transition-transform"
+                              className="w-6 h-6 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] active:scale-95 transition-transform"
                             >
                               <Plus size={14} />
                             </button>
@@ -102,7 +102,7 @@ export default function CartPage() {
                          
                          <button 
                           onClick={() => removeFromCart(item.productId)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-red-300 hover:text-red-500 hover:bg-red-50 active:scale-90 transition-all"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-red-300 hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all"
                          >
                             <Trash2 size={16} />
                          </button>

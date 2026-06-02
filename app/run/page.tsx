@@ -88,6 +88,8 @@ export default function RunModule() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
   const [form, setForm] = useState<any>({
     // food
     source: '', items: '', schedule: '', meetPoint: '',
@@ -110,7 +112,13 @@ export default function RunModule() {
 
   const toggleStatus = async () => {
     if (!auth.currentUser) return;
-    await updateDoc(doc(db, 'users', auth.currentUser.uid), { is_online: !profile?.is_online, last_active: serverTimestamp() });
+    setStatusError(null);
+    try {
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), { is_online: !profile?.is_online, last_active: serverTimestamp() });
+    } catch {
+      setStatusError('Could not update status. Check your connection.');
+      setTimeout(() => setStatusError(null), 3000);
+    }
   };
 
   const handleFinalizeRequest = async () => {
@@ -129,8 +137,10 @@ export default function RunModule() {
         zone: 'ALL',
       });
       router.push(`/orders/success?id=${res.data.orderId}`);
-    } catch { alert('Failed to submit request.'); }
-    finally { setSubmitting(false); }
+    } catch {
+      setSubmitError('Could not submit request. Check your connection and try again.');
+      setTimeout(() => setSubmitError(null), 4000);
+    } finally { setSubmitting(false); }
   };
 
   // ── STEP CONTENT RENDERER ──
@@ -216,7 +226,7 @@ export default function RunModule() {
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-90 transition-all">
+          <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
              <ChevronLeft size={20} />
           </button>
           <p className="text-[14px] font-bold tracking-tight">Deliveries</p>
@@ -225,6 +235,14 @@ export default function RunModule() {
       </nav>
 
       <div className="pt-28 px-6 space-y-12">
+
+        {/* ── Error toasts ── */}
+        {statusError && (
+          <div className="fixed top-20 left-6 right-6 z-[200] bg-red-500 text-white px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md text-center">{statusError}</div>
+        )}
+        {submitError && (
+          <div className="fixed top-20 left-6 right-6 z-[200] bg-red-500 text-white px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md text-center">{submitError}</div>
+        )}
 
         {/* ── RUNNER DASHBOARD (verified runners only) ── */}
         {profile?.is_verified_runner && (

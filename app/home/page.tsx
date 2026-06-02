@@ -117,15 +117,23 @@ export default function PulseHome() {
          <AnimatePresence>
             {announcements.length > 0 && (
                <motion.section initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                  <FeaturedBanner slides={announcements.map(a => ({ 
-                    id: a.id, 
-                    tag: a.tag,
-                    headline: a.headline, 
-                    subline: a.subline || a.body, 
-                    imageUrl: a.imageUrl,
-                    bgColor: a.color || '#000000', 
-                    ctaPath: a.ctaPath || '/pulse' 
-                  }))} />
+                  <FeaturedBanner slides={announcements.map(a => {
+                    // Route the banner to a relevant destination based on announcement tag
+                    const tag = (a.tag || '').toUpperCase();
+                    const fallback = 
+                      tag === 'MARKETPLACE' || tag === 'COMMERCE' ? '/marketplace' :
+                      tag === 'EVENT' ? '/pulse' :
+                      '/pulse';
+                    return {
+                      id: a.id,
+                      tag: a.tag,
+                      headline: a.headline,
+                      subline: a.subline || a.body,
+                      imageUrl: a.imageUrl,
+                      bgColor: a.color || '#000000',
+                      ctaPath: a.ctaPath || fallback,
+                    };
+                  })} />
 
 
                </motion.section>
@@ -171,7 +179,7 @@ export default function PulseHome() {
                         <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">{post.time_ago || 'Recent'}</p>
                      </div>
                      <p className="text-[15px] text-slate-600 leading-relaxed font-medium">
-                        {post.content}
+                        {post.body || post.content}
                      </p>
                   </motion.div>
                )) : (

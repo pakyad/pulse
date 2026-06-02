@@ -20,8 +20,14 @@ export default function MobileRunnerDashboard() {
   const [analytics, setAnalytics] = useState({ deliveries: 0, earnings: 0 });
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+
+  const showToast = (type: 'success' | 'error', msg: string) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   useEffect(() => {
     let unsubJobs: (() => void) | null = null;
@@ -98,7 +104,7 @@ export default function MobileRunnerDashboard() {
       });
     } catch (e) {
       console.error("Job Acceptance Error:", e);
-      alert("Job synchronization failed. Another agent may have accepted.");
+      showToast('error', 'Job sync failed. Another runner may have accepted.');
     }
   };
 
@@ -113,7 +119,7 @@ export default function MobileRunnerDashboard() {
       }
       setIsCameraOpen(true);
     } catch (err) {
-      alert("Camera Access Denied.");
+      showToast('error', 'Camera access denied. Check your browser permissions.');
     }
   };
 
@@ -157,10 +163,10 @@ export default function MobileRunnerDashboard() {
       });
 
       stopCamera();
-      alert("Proof Uploaded. Mission Finalized.");
+      showToast('success', 'Proof uploaded. Mission finalized.');
     } catch (e) {
       console.error(e);
-      alert("Handshake failed. Please retry.");
+      showToast('error', 'Handshake failed. Please retry.');
     } finally {
       setIsUploading(false);
     }
@@ -177,6 +183,23 @@ export default function MobileRunnerDashboard() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans selection:bg-teal-50 text-[#1C1C1E]">
+
+      {/* ── In-UI Toast ── */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className={`fixed top-6 left-4 right-4 z-[300] px-5 py-4 rounded-2xl flex items-center gap-3 shadow-lg text-[13px] font-bold ${
+              toast.type === 'success' ? 'bg-teal-500 text-white' : 'bg-red-500 text-white'
+            }`}
+          >
+            {toast.type === 'success' ? <CheckCircle2 size={18} /> : <ShieldCheck size={18} />}
+            {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="bg-white sticky top-0 z-20 px-6 py-6 flex items-center justify-between border-b-[0.5px] border-[#F2F2F7]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white"><Truck size={18} /></div>
@@ -346,19 +369,19 @@ export default function MobileRunnerDashboard() {
          <div className="flex items-center justify-between max-w-sm mx-auto">
             <button 
               onClick={() => setActiveTab('RADAR')}
-              className={`flex flex-col items-center gap-1.5 transition-all active:scale-90 ${activeTab === 'RADAR' ? 'text-black' : 'text-slate-300'}`}
+              className={`flex flex-col items-center gap-1.5 transition-all active:scale-95 ${activeTab === 'RADAR' ? 'text-black' : 'text-slate-300'}`}
             >
               <Zap size={22} strokeWidth={activeTab === 'RADAR' ? 2.5 : 2} />
               <span className="text-[9px] font-black uppercase tracking-widest">Radar</span>
             </button>
             <button 
               onClick={() => setActiveTab('ANALYTICS')}
-              className={`flex flex-col items-center gap-1.5 transition-all active:scale-90 ${activeTab === 'ANALYTICS' ? 'text-black' : 'text-slate-300'}`}
+              className={`flex flex-col items-center gap-1.5 transition-all active:scale-95 ${activeTab === 'ANALYTICS' ? 'text-black' : 'text-slate-300'}`}
             >
               <Activity size={22} strokeWidth={activeTab === 'ANALYTICS' ? 2.5 : 2} />
               <span className="text-[9px] font-black uppercase tracking-widest">Analytics</span>
             </button>
-            <button className="flex flex-col items-center gap-1.5 transition-all active:scale-90 text-slate-300" onClick={() => router.push('/home')}>
+            <button className="flex flex-col items-center gap-1.5 transition-all active:scale-95 text-slate-300" onClick={() => router.push('/home')}>
               <ChevronRight size={22} />
               <span className="text-[9px] font-black uppercase tracking-widest">Exit</span>
             </button>

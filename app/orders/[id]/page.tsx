@@ -373,7 +373,7 @@ function StatusKinetics({ status }: { status: string }) {
                       y: [0, -2, 0, -2, 0],
                       rotate: [0, 3, 0, 3, 0]
                     }}
-                    transition={{ repeat: Infinity, duration: 0.275, ease: "easeInOut" }}
+                    transition={{ repeat: Infinity, duration: 0.5, ease: "easeInOut" }}
                   >
                     <rect x="58" y="38" width="14" height="12" rx="3.5" fill="#f59e0b" />
                     <line x1="65" y1="38" x2="65" y2="50" stroke="#d97706" strokeWidth="1.5" />
@@ -415,7 +415,7 @@ function StatusKinetics({ status }: { status: string }) {
                   }}
                   transition={{
                     repeat: Infinity,
-                    duration: 1.2,
+                    duration: 2.0,
                     ease: [0.175, 0.885, 0.32, 1.275]
                   }}
                 >
@@ -426,7 +426,7 @@ function StatusKinetics({ status }: { status: string }) {
                     ry="1.5"
                     fill="#e2e8f0"
                     animate={{ scale: [1, 0.5, 1], opacity: [0.8, 0.3, 0.8] }}
-                    transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                    transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
                   />
 
                   <rect x="42" y="30" width="16" height="30" rx="8" fill="#000000" />
@@ -445,7 +445,7 @@ function StatusKinetics({ status }: { status: string }) {
                         "M 45 60 L 45 80"
                       ]
                     }}
-                    transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                    transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
                   />
 
                   <motion.path
@@ -460,7 +460,7 @@ function StatusKinetics({ status }: { status: string }) {
                         "M 55 60 L 55 80"
                       ]
                     }}
-                    transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                    transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
                   />
 
                   <path d="M 42 36 L 30 20" stroke="#000000" strokeWidth="4" strokeLinecap="round" />
@@ -468,9 +468,6 @@ function StatusKinetics({ status }: { status: string }) {
                 </motion.g>
               </svg>
             </div>
-            <p className="text-[11px] font-black text-emerald-600 uppercase tracking-widest leading-none mt-2">
-              Delivered & Complete!
-            </p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -691,7 +688,7 @@ export default function LiveOrderPage() {
         
         {/* Logistics Data (Ultra-Minimalist & Transparent) */}
         <div className="absolute bottom-8 left-6 z-20 pointer-events-none">
-          <div className="bg-transparent space-y-4 w-[280px]">
+          <div className="space-y-4 w-[280px]">
              <div className="relative pl-5 space-y-4">
                {/* Crisp vertical alignment track line */}
                <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-slate-300 opacity-60" />
@@ -860,11 +857,11 @@ export default function LiveOrderPage() {
         {!isCancelled && !isPending && (
           <section className="space-y-4 pt-4 border-t border-slate-50">
             <div className="flex items-center gap-3">
-               <div className="w-1.5 h-1.5 rounded-full bg-[#6366f1] shadow-[0_0_8px_rgba(99,102,241,0.4)]" />
-               <h3 className="text-[11px] font-black text-[#6366f1] uppercase tracking-widest">Support & Resolution</h3>
+               <div className="w-1.5 h-1.5 rounded-full bg-[#000000]" />
+               <h3 className="text-[11px] font-black text-[#000000] uppercase tracking-widest">Support & Resolution</h3>
             </div>
             
-            <div className="p-6 bg-slate-50/50 border border-slate-100 rounded-2xl space-y-4">
+            <div className="p-6 bg-white border border-slate-100 rounded-2xl space-y-4">
                <div className="space-y-1">
                   <p className="text-[14px] font-bold text-[#000000]">Need help?</p>
                   <p className="text-[11px] text-[#94a3b8] leading-relaxed">

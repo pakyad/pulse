@@ -238,7 +238,7 @@ export default function ActivityPage() {
       <section className="px-8 pt-12 pb-6 border-b-[0.5px] border-slate-50">
          <div className="flex items-center justify-between">
             <div className="flex items-center gap-5">
-               <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-90 transition-all">
+               <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
                   <ArrowLeft size={20} />
                </button>
                <div className="space-y-0.5">
@@ -247,7 +247,7 @@ export default function ActivityPage() {
                </div>
             </div>
             <div className="flex items-center gap-3">
-               <button onClick={() => router.push('/messages')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] border border-slate-50 active:scale-90 transition-all shrink-0">
+               <button onClick={() => router.push('/messages')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] border border-slate-50 active:scale-95 transition-all shrink-0">
                   <MessageSquare size={18} />
                </button>
                <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />

@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { db } from '@/lib/firebase';
-import { onSnapshot, doc, collection, query, where, getDoc } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import { onSnapshot, doc, collection, query, where, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import {
-  ChevronLeft, ShieldCheck, Heart, MapPin, 
-  Package, Sparkles, CheckCircle2, Star,
-  Share2, ShieldAlert
+  ChevronLeft, ShieldCheck,
+  Package, CheckCircle2, Star,
+  Share2, ShieldAlert, AlertTriangle
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import HologramID from '@/components/shared/HologramID';
 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -29,6 +30,37 @@ export default function PublicProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [myListings, setMyListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', msg: string) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleShareProfile = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      showToast('success', 'Profile link copied to clipboard.');
+    } catch {
+      showToast('error', 'Could not copy link.');
+    }
+  };
+
+  const handleReportUser = async () => {
+    const reporter = auth.currentUser;
+    if (!reporter) { router.push('/auth'); return; }
+    try {
+      await addDoc(collection(db, 'reports'), {
+        reported_user_id: id,
+        reported_by: reporter.uid,
+        type: 'USER_REPORT',
+        created_at: serverTimestamp(),
+      });
+      showToast('success', 'Report submitted to Campus Governance.');
+    } catch {
+      showToast('error', 'Could not submit report. Try again.');
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -59,7 +91,24 @@ export default function PublicProfilePage() {
 
   return (
     <main className="min-h-screen bg-white text-[#000000] antialiased pb-40 font-sans">
-      
+
+      {/* ── In-UI Toast ── */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className={`fixed top-6 left-6 right-6 z-[300] px-5 py-4 rounded-2xl flex items-center gap-3 shadow-lg text-[13px] font-bold ${
+              toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+            }`}
+          >
+            {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+            {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
@@ -96,23 +145,20 @@ export default function PublicProfilePage() {
             </div>
 
             {/* ── PROFILE ACTIONS ── */}
-            <div className="flex gap-3">
-               <button 
-                  onClick={() => {
-                     navigator.clipboard.writeText(window.location.href);
-                     alert("Profile link copied to clipboard!");
-                  }}
-                  className="flex-1 h-12 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-               >
-                  <Share2 size={16} /> Share Store
-               </button>
-               <button 
-                  onClick={() => alert("User reported to Campus Governance.")}
-                  className="w-12 h-12 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-100 active:scale-[0.98] transition-all shadow-sm"
-               >
-                  <ShieldAlert size={18} />
-               </button>
-            </div>
+             <div className="flex gap-3">
+                <button 
+                   onClick={handleShareProfile}
+                   className="flex-1 h-12 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                   <Share2 size={16} /> Share Store
+                </button>
+                <button 
+                   onClick={handleReportUser}
+                   className="w-12 h-12 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-100 active:scale-[0.98] transition-all shadow-sm"
+                >
+                   <ShieldAlert size={18} />
+                </button>
+             </div>
          </section>
 
          {/* ── METRICS BAR ── */}

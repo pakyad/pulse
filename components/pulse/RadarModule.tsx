@@ -30,6 +30,11 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
     ? 'Contact the owner below to arrange return. They may offer a reward.'
     : 'Contact the reporter below to collect your item.';
 
+  const cleanContact = item.contact.replace(/\D/g, '');
+  const phone = cleanContact.startsWith('0') ? `6${cleanContact}` : cleanContact;
+  const messageText = encodeURIComponent(`Hi, I saw your ${item.type === 'LOST' ? 'lost' : 'found'} item post on Pulse: "${item.title}"`);
+  const msgLink = phone ? `https://wa.me/${phone}?text=${messageText}` : `https://wa.me/?text=${messageText}`;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -61,7 +66,7 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
 
         <div className="flex gap-3">
           <a
-            href={`https://wa.me/?text=Hi, I saw your ${item.type === 'LOST' ? 'lost' : 'found'} item post on Pulse: "${item.title}"`}
+            href={msgLink}
             target="_blank"
             rel="noreferrer"
             className="flex-1 h-12 bg-[#111111] text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"

@@ -28,16 +28,13 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
         <h2 className="text-[20px] font-bold text-[#000000] tracking-tight mb-1">
           {step === 4 ? 'Delivered' : step === 3 ? 'Runner is on the way' : step === 2 ? 'Preparing your order' : 'Finding a runner'}
         </h2>
-        <p className="text-[13px] font-medium text-[#94a3b8]">
-          {step === 4 ? 'Enjoy your order! Rate your experience below.' : 'Live update from the Pulse campus network.'}
-        </p>
       </div>
 
       {/* ── VIBRANT 4-STEP PROGRESS BAR ── */}
       <div className="flex items-center justify-between relative px-6">
-        <div className="absolute left-10 right-10 top-[11px] h-[1.5px] bg-slate-100 z-0"></div>
+        <div className="absolute left-10 right-10 top-[11px] h-[1px] bg-slate-100 z-0"></div>
         <motion.div 
-          className="absolute left-10 top-[11px] h-[1.5px] bg-amber-500 z-0 shadow-[0_0_8px_rgba(245,158,11,0.4)]" 
+          className="absolute left-10 top-[11px] h-[1px] bg-amber-500 z-0" 
           initial={{ width: 0 }}
           animate={{ width: `calc(${((step - 1) / 3) * 100}% - 4px)` }}
           transition={{ duration: 0.8, ease: "circOut" }}
@@ -51,10 +48,10 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
               <motion.div 
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition-all duration-500 border-2 ${
                    isPast ? 'bg-amber-500 border-amber-500 text-white' : 
-                   isCurrent ? 'bg-white border-amber-500 text-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.3)]' : 
+                   isCurrent ? 'bg-white border-amber-500 text-amber-500' : 
                    'bg-white border-slate-200 text-slate-300'
                 }`}
-                animate={isCurrent ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+                animate={isCurrent ? { scale: [1, 1.1, 1] } : { scale: 1 }}
                 transition={{ repeat: isCurrent ? Infinity : 0, duration: 2.5 }}
               >
                 {isPast ? <CheckCircle2 size={12} strokeWidth={3} /> : (
@@ -91,10 +88,10 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#000000] hover:bg-amber-500 hover:text-white transition-all active:scale-90 border border-slate-100">
+            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#000000] hover:bg-amber-500 hover:text-white transition-all active:scale-95 border border-slate-100">
               <Phone size={16} />
             </button>
-            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#000000] hover:bg-amber-500 hover:text-white transition-all active:scale-90 border border-slate-100">
+            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#000000] hover:bg-amber-500 hover:text-white transition-all active:scale-95 border border-slate-100">
               <MessageSquare size={16} />
             </button>
           </div>
@@ -119,7 +116,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
           </div>
           <div className="text-right">
              <p className="text-[15px] font-black text-[#000000]">RM {Number(order.price).toFixed(2)}</p>
-             <p className="text-[9px] font-bold text-amber-500 uppercase tracking-widest">Paid</p>
+             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Paid</p>
           </div>
         </div>
       </div>

@@ -32,14 +32,14 @@ const CAMPUS_HUBS: Record<string, any[]> = {
 };
 
 const FPX_BANKS = [
-  { id: 'maybank', label: 'Maybank2u', logo: 'https://seeklogo.com/images/M/maybank-logo-72F7E91D24-seeklogo.com.png' },
-  { id: 'cimb',    label: 'CIMB Clicks', logo: 'https://seeklogo.com/images/C/cimb-bank-logo-2782A7D2C0-seeklogo.com.png' },
-  { id: 'rhb',     label: 'RHB Now', logo: 'https://seeklogo.com/images/R/rhb-bank-logo-18E29A7264-seeklogo.com.png' },
-  { id: 'hlb',     label: 'Hong Leong Connect', logo: 'https://seeklogo.com/images/H/hong-leong-bank-logo-720C731776-seeklogo.com.png' },
-  { id: 'pbb',     label: 'Public Bank', logo: 'https://seeklogo.com/images/P/public-bank-logo-7704204D7F-seeklogo.com.png' },
-  { id: 'ambank',  label: 'AmOnline', logo: 'https://seeklogo.com/images/A/ambank-logo-A27E742A94-seeklogo.com.png' },
-  { id: 'bsn',     label: 'BSN', logo: 'https://seeklogo.com/images/B/bsn-logo-B1389D6613-seeklogo.com.png' },
-  { id: 'bank_islam', label: 'Bank Islam', logo: 'https://seeklogo.com/images/B/bank-islam-logo-6677F67E3F-seeklogo.com.png' },
+  { id: 'maybank',    label: 'Maybank2u',         logo: 'https://seeklogo.com/images/M/maybank-logo-72F7E91D24-seeklogo.com.png' },
+  { id: 'cimb',       label: 'CIMB Clicks',        logo: 'https://seeklogo.com/images/C/cimb-bank-logo-2782A7D2C0-seeklogo.com.png' },
+  { id: 'rhb',        label: 'RHB Now',            logo: 'https://seeklogo.com/images/R/rhb-bank-logo-18E29A7264-seeklogo.com.png' },
+  { id: 'hlb',        label: 'Hong Leong Connect', logo: 'https://seeklogo.com/images/H/hong-leong-bank-logo-720C731776-seeklogo.com.png' },
+  { id: 'pbb',        label: 'Public Bank',        logo: 'https://seeklogo.com/images/P/public-bank-logo-7704204D7F-seeklogo.com.png' },
+  { id: 'ambank',     label: 'AmOnline',           logo: 'https://seeklogo.com/images/A/ambank-logo-A27E742A94-seeklogo.com.png' },
+  { id: 'bsn',        label: 'BSN',                logo: 'https://seeklogo.com/images/B/bsn-logo-B1389D6613-seeklogo.com.png' },
+  { id: 'bank_islam', label: 'Bank Islam',         logo: 'https://seeklogo.com/images/B/bank-islam-logo-6677F67E3F-seeklogo.com.png' },
 ];
 
 type PayStatus = 'idle' | 'processing' | 'done';
@@ -48,13 +48,14 @@ export default function CartCheckoutPage() {
   const router  = useRouter();
   const { cart, cartTotal, clearCart } = useCart();
 
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep]               = useState<1 | 2>(1);
   const [preferences, setPreferences] = useState<Record<string, { type: 'RUNNER' | 'SELF_COLLECT', location: string, floor?: string, room?: string }>>({});
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [payStatus,    setPayStatus]    = useState<PayStatus>('idle');
   const [orderError,   setOrderError]   = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Initialize preferences
+  // Initialize delivery preference for each cart item
   useEffect(() => {
     if (cart.length > 0 && Object.keys(preferences).length === 0) {
       const initial: any = {};
@@ -65,15 +66,17 @@ export default function CartCheckoutPage() {
     }
   }, [cart]);
 
+  // If cart empties outside of a payment flow, show message then redirect
   useEffect(() => {
     if (cart.length === 0 && payStatus === 'idle') {
-      router.push('/marketplace');
+      setIsRedirecting(true);
+      const t = setTimeout(() => router.push('/marketplace'), 1500);
+      return () => clearTimeout(t);
     }
   }, [cart, router, payStatus]);
 
   const hubs = CAMPUS_HUBS['MIIT'];
-  
-  // Calculate total with individual fees
+
   const calculateTotal = () => {
     let runnerFees = 0;
     cart.forEach(item => {
@@ -86,7 +89,7 @@ export default function CartCheckoutPage() {
     return cartTotal + runnerFees;
   };
 
-  const total = calculateTotal();
+  const total           = calculateTotal();
   const canProceedStep1 = cart.length > 0 && Object.keys(preferences).length === cart.length;
   const canPay          = !!selectedBank && payStatus === 'idle';
 
@@ -96,8 +99,7 @@ export default function CartCheckoutPage() {
 
     try {
       const placeOrder = httpsCallable(functions, 'placeOrder');
-      
-      // Map cart items with their individual preferences for the backend
+
       const itemsWithPrefs = cart.map(item => {
         const pref = preferences[item.productId];
         const hub = hubs.find(h => h.id === pref.location) || hubs[0];
@@ -109,7 +111,7 @@ export default function CartCheckoutPage() {
           roomNumber: pref.room || null
         };
       });
-      
+
       const result = await placeOrder({
         cartItems: itemsWithPrefs,
         deliveryType: 'MULTI_DISPATCH',
@@ -125,10 +127,22 @@ export default function CartCheckoutPage() {
     } catch (e: any) {
       console.error('[Cart Checkout]', e);
       setPayStatus('idle');
-      // Show in-page error instead of alert()
       setOrderError(e.message || "Something went wrong. Please try again.");
     }
   };
+
+  // Empty cart redirect screen
+  if (isRedirecting) {
+    return (
+      <main className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 px-6">
+        <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+          <Package size={28} className="text-slate-300" />
+        </div>
+        <p className="text-[15px] font-bold text-[#000000] tracking-tight">Your bag is empty</p>
+        <p className="text-[12px] font-medium text-slate-400">Taking you back to the marketplace...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
@@ -179,7 +193,7 @@ export default function CartCheckoutPage() {
         )}
       </AnimatePresence>
 
-      {/* ── IN-UI ERROR TOAST (replaces alert()) ── */}
+      {/* ── IN-UI ERROR TOAST ── */}
       <AnimatePresence>
         {orderError && (
           <motion.div
@@ -242,13 +256,13 @@ export default function CartCheckoutPage() {
 
                        {/* Method Selection */}
                        <div className="grid grid-cols-2 gap-2">
-                          <button 
+                          <button
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'SELF_COLLECT' } }))}
                             className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'SELF_COLLECT' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Package size={14} /> Self-Collect
                           </button>
-                          <button 
+                          <button
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'RUNNER' } }))}
                             className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'RUNNER' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
@@ -262,7 +276,7 @@ export default function CartCheckoutPage() {
                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Meeting Point</p>
                              <div className="grid grid-cols-2 gap-2">
                                 {hubs.map(hub => (
-                                   <button 
+                                   <button
                                       key={hub.id}
                                       onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, location: hub.id } }))}
                                       className={`h-12 px-3 rounded-xl border text-left flex flex-col justify-center transition-all active:scale-95 ${pref.location === hub.id ? 'bg-white border-slate-400 ring-1 ring-slate-400' : 'bg-white/50 border-slate-200 opacity-60'}`}
@@ -275,7 +289,7 @@ export default function CartCheckoutPage() {
                           </div>
                        )}
 
-                       {/* 🏢 Indoor Details */}
+                       {/* Indoor Details */}
                        {pref.type === 'RUNNER' && (
                           <div className="pt-2 space-y-3 animate-in fade-in slide-in-from-top-2 duration-500">
                              <div className="flex items-center gap-2 px-1">
@@ -285,8 +299,8 @@ export default function CartCheckoutPage() {
                              <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
                                    <label className="text-[9px] font-black text-slate-300 uppercase tracking-tightest ml-1">Floor</label>
-                                   <input 
-                                      type="text" 
+                                   <input
+                                      type="text"
                                       placeholder="e.g. Lvl 4"
                                       value={pref.floor || ''}
                                       onChange={(e) => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, floor: e.target.value } }))}
@@ -295,8 +309,8 @@ export default function CartCheckoutPage() {
                                 </div>
                                 <div className="space-y-1.5">
                                    <label className="text-[9px] font-black text-slate-300 uppercase tracking-tightest ml-1">Room / Wing</label>
-                                   <input 
-                                      type="text" 
+                                   <input
+                                      type="text"
                                       placeholder="e.g. Lab 4.1"
                                       value={pref.room || ''}
                                       onChange={(e) => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, room: e.target.value } }))}
@@ -336,8 +350,8 @@ export default function CartCheckoutPage() {
                      key={bank.id}
                      onClick={() => setSelectedBank(bank.id)}
                      className={`w-full h-16 px-5 rounded-2xl flex items-center justify-between border transition-all active:scale-[0.98] ${
-                       selectedBank === bank.id 
-                       ? 'bg-white border-blue-600 shadow-md shadow-slate-900/5 ring-1 ring-[#000000]' 
+                       selectedBank === bank.id
+                       ? 'bg-white border-blue-600 shadow-md shadow-slate-900/5 ring-1 ring-[#000000]'
                        : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-slate-200'
                      }`}
                    >
@@ -349,7 +363,7 @@ export default function CartCheckoutPage() {
                            {bank.label}
                         </span>
                      </div>
-                     
+
                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                         selectedBank === bank.id ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'
                      }`}>

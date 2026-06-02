@@ -93,7 +93,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
           <nav className="px-8 pt-10 pb-6 flex items-center justify-between border-b border-[#F2F2F7]">
             <div className="flex items-center gap-4">
                {step > 1 && step < 5 && (
-                 <button onClick={back} className="p-2 -ml-2 text-slate-300 active:scale-90 transition-all">
+                 <button onClick={back} className="p-2 -ml-2 text-slate-300 active:scale-95 transition-all">
                     <ChevronLeft size={24} />
                  </button>
                )}

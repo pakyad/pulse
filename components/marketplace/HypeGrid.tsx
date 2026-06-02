@@ -36,7 +36,7 @@ export default function HypeGrid() {
             </button>
           </div>
 
-          {/* Product Image Placeholder */}
+          {/* Product image area */}
           <div className="aspect-square rounded-xl bg-linear-to-br from-navy/5 to-transparent border-[0.5px] border-navy/5 mb-4 flex items-center justify-center relative z-10">
              <ShoppingBag className="w-12 h-12 text-navy opacity-5" />
           </div>
