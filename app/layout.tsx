@@ -12,6 +12,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "PULSE | Campus Delivery & Market",
   description: "Easy campus delivery and marketplace.",
+  appleWebApp: {
+    capable: true,
+    title: "PULSE",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport = {
