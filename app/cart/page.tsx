@@ -45,13 +45,19 @@ export default function CartPage() {
               animate={{ opacity: 1, scale: 1 }}
               className="py-56 flex flex-col items-center justify-center text-center"
             >
-              <div className="w-24 h-24 flex items-center justify-center text-slate-200 mb-6">
-                <ShoppingCart size={48} strokeWidth={2} />
+              <div className="w-24 h-24 flex items-center justify-center bg-slate-50 text-slate-300 rounded-3xl mb-6 shadow-sm border border-slate-100">
+                <ShoppingBag size={32} strokeWidth={1.5} />
               </div>
               <h2 className="text-[17px] font-bold tracking-tight text-slate-900 mb-2">Your bag is empty</h2>
-              <p className="text-[13px] font-medium text-slate-400 max-w-[200px] leading-relaxed">
-                Nothing here yet. Browse the marketplace?
+              <p className="text-[13px] font-medium text-slate-400 max-w-[200px] leading-relaxed mb-6">
+                Nothing here yet.
               </p>
+              <button
+                onClick={() => router.push('/marketplace')}
+                className="px-6 py-3 bg-blue-600 text-white rounded-full font-bold text-[13px] tracking-tight active:scale-95 transition-transform shadow-md shadow-blue-600/20"
+              >
+                Browse Marketplace
+              </button>
             </motion.div>
           ) : (
             <div className="space-y-6">

@@ -6,10 +6,11 @@ import {
   Search, ChevronRight, Plus, ArrowLeft, 
   ShieldCheck, MessageSquare, Inbox, ShoppingBag, Radio
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
+import BackButton from '@/components/shared/BackButton';
 import { doc, onSnapshot, collection, query, where, orderBy, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
-import { useRouter } from 'next/navigation';
 
 const DEMO_CONVERSATIONS = [
   {
@@ -81,13 +82,13 @@ export default function MessagesPage() {
 
   return (
     <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900 w-full max-w-2xl mx-auto">
-      
-      <section className="px-6 pt-24 pb-4">
-        <div className="mb-6">
-           <h1 className="text-[28px] font-bold tracking-tight">Messages</h1>
-           <p className="text-[13px] font-medium text-[#94a3b8] mt-1">Active sync sessions</p>
-        </div>
+      {/* ── INTERNAL NAV ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
+         <BackButton fallback="/activity" />
+         <p className="text-[14px] font-bold tracking-tight">Messages</p>
+      </nav>
 
+      <section className="px-8 pt-28">
         <div className="relative group">
            <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
            <input 
@@ -98,7 +99,7 @@ export default function MessagesPage() {
         </div>
       </section>
 
-      <section className="px-6 mt-10 space-y-4">
+      <section className="px-8 mt-10 space-y-4">
          {(conversations.length > 0 ? conversations : DEMO_CONVERSATIONS).map((chat, i) => {
            const otherParticipant = chat.participants?.find((p: any) => p.id !== auth.currentUser?.uid) || chat.participants[0] || { name: 'Member', avatar: '' };
            const isUnread = chat.last_message_sender_id !== auth.currentUser?.uid && chat.unread_count > 0;
