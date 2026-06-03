@@ -77,7 +77,10 @@ export default function NavigationGate() {
           const isDevPage = pathname === '/dev';
 
           if (isDevPage) {
-            // Institutional bypass for development terminal
+            // /dev is restricted to ADMIN only
+            if (userData.role !== 'ADMIN') {
+              router.replace('/home');
+            }
             setChecking(false);
             return;
           }

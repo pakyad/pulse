@@ -1,14 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, 
-  ArrowDownWideNarrow, 
-  Banknote, 
-  ShieldCheck, 
-  Clock, 
-  ChevronRight,
-  RotateCcw
-} from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface MarketplaceFilterOverlayProps {
   isOpen: boolean;
@@ -26,11 +18,12 @@ export interface FilterState {
 export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onApply }: MarketplaceFilterOverlayProps) {
   const [tempFilters, setTempFilters] = useState<FilterState>(filters);
 
-  const sortOptions = [
-    { id: 'newest', label: 'Chronological', icon: Clock },
-    { id: 'price_asc', label: 'Value: Low to High', icon: Banknote },
-    { id: 'price_desc', label: 'Value: High to Low', icon: Banknote },
-  ];
+  // Sync temp filters with active filters when the overlay opens
+  useEffect(() => {
+    if (isOpen) {
+      setTempFilters(filters);
+    }
+  }, [isOpen, filters]);
 
   const handleReset = () => {
     setTempFilters({
@@ -50,7 +43,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-slate-900/10 backdrop-blur-md"
+            className="fixed inset-0 z-100 bg-slate-900/10 backdrop-blur-md"
           />
 
           {/* Filter Panel */}
@@ -58,128 +51,114 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 z-[101] w-full max-w-[320px] bg-white shadow-md flex flex-col border-l border-slate-100"
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed top-0 right-0 bottom-0 z-101 w-full max-w-[340px] bg-white flex flex-col shadow-2xl"
           >
-            {/* Header */}
-            <div className="px-6 pt-12 pb-6 border-b border-slate-50 flex items-center justify-between">
-              <div>
-                <h2 className="text-[20px] font-bold text-slate-900 tracking-tight">Registry Audit</h2>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Filter Parameters</p>
-              </div>
+            {/* Header (No text, just close button) */}
+            <div className="px-8 pt-10 pb-2 flex justify-end">
               <button 
                 onClick={onClose}
-                className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all active:scale-95"
+                className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-all active:scale-95"
               >
-                <X size={20} />
+                <X size={16} />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-10">
+            <div className="flex-1 overflow-y-auto no-scrollbar px-8 py-4 space-y-10">
               
               {/* Sort Section */}
-              <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                   <ArrowDownWideNarrow size={14} className="text-slate-900" />
-                   <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Sequence Protocol</h3>
-                </div>
-                <div className="space-y-2">
-                  {sortOptions.map((opt) => (
+              <section>
+                <h3 className="text-[12px] font-black text-slate-900 tracking-tight mb-4">Sort By</h3>
+                <div className="flex flex-wrap gap-2.5">
+                  {[
+                    { id: 'newest', label: 'Newest Arrivals' },
+                    { id: 'price_asc', label: 'Lowest Price' },
+                    { id: 'price_desc', label: 'Highest Price' }
+                  ].map((opt) => (
                     <button
                       key={opt.id}
                       onClick={() => setTempFilters({ ...tempFilters, sortBy: opt.id as any })}
-                      className={`w-full h-14 px-4 rounded-2xl flex items-center justify-between border transition-all ${
+                      className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
                         tempFilters.sortBy === opt.id 
-                          ? 'bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-900/10' 
-                          : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                          ? 'bg-white border-blue-600 text-blue-600 ring-1 ring-blue-600' 
+                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <opt.icon size={16} strokeWidth={tempFilters.sortBy === opt.id ? 2.5 : 1.5} />
-                        <span className="text-[13px] font-bold">{opt.label}</span>
-                      </div>
-                      {tempFilters.sortBy === opt.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                      {opt.label}
                     </button>
                   ))}
                 </div>
               </section>
 
-              {/* Price Range */}
-              <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                   <Banknote size={14} className="text-emerald-600" />
-                   <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Value Threshold</h3>
-                </div>
-                <div className="px-2 pt-2">
-                  <div className="flex justify-between mb-4">
-                    <span className="text-[13px] font-bold text-slate-900">RM 0</span>
-                    <span className="text-[13px] font-bold text-slate-900">RM {tempFilters.priceRange[1]}+</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="1000" 
-                    step="50"
-                    value={tempFilters.priceRange[1]}
-                    onChange={(e) => setTempFilters({ ...tempFilters, priceRange: [0, parseInt(e.target.value)] })}
-                    className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                  />
-                  <p className="text-[10px] font-medium text-slate-400 mt-3 italic">Limit search results to assets within this range.</p>
+              {/* Budget Section */}
+              <section>
+                <h3 className="text-[12px] font-black text-slate-900 tracking-tight mb-4">Budget</h3>
+                <div className="flex flex-wrap gap-2.5">
+                  {[
+                    { label: 'Any Budget', max: 1000 },
+                    { label: '< RM 50', max: 50 },
+                    { label: '< RM 150', max: 150 },
+                    { label: '< RM 300', max: 300 },
+                  ].map((tier) => (
+                    <button
+                      key={tier.max}
+                      onClick={() => setTempFilters({ ...tempFilters, priceRange: [0, tier.max] })}
+                      className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
+                        tempFilters.priceRange[1] === tier.max 
+                          ? 'bg-white border-blue-600 text-blue-600 ring-1 ring-blue-600' 
+                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                      }`}
+                    >
+                      {tier.label}
+                    </button>
+                  ))}
                 </div>
               </section>
 
               {/* Status Section */}
-              <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                   <ShieldCheck size={14} className="text-slate-900" />
-                   <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Trust Protocol</h3>
-                </div>
-                <button
-                  onClick={() => setTempFilters({ ...tempFilters, officialOnly: !tempFilters.officialOnly })}
-                  className={`w-full p-5 rounded-2xl border flex items-center justify-between transition-all ${
-                    tempFilters.officialOnly 
-                      ? 'bg-blue-50 border-blue-200 shadow-sm' 
-                      : 'bg-slate-50/50 border-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-4 text-left">
-                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${tempFilters.officialOnly ? 'bg-slate-900 text-white' : 'bg-white text-slate-300 border border-slate-100'}`}>
-                      <ShieldCheck size={20} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                      <p className={`text-[13px] font-bold ${tempFilters.officialOnly ? 'text-blue-900' : 'text-slate-900'}`}>Official Only</p>
-                      <p className="text-[10px] font-medium text-slate-400">Filter for verified club assets.</p>
-                    </div>
-                  </div>
-                  <div className={`w-10 h-5 rounded-full p-1 transition-all ${tempFilters.officialOnly ? 'bg-slate-900' : 'bg-slate-200'}`}>
-                    <motion.div 
-                      animate={{ x: tempFilters.officialOnly ? 20 : 0 }}
-                      className="w-3 h-3 bg-white rounded-full shadow-sm" 
-                    />
-                  </div>
-                </button>
+              <section>
+                 <h3 className="text-[12px] font-black text-slate-900 tracking-tight mb-4">Seller Type</h3>
+                 <div className="flex flex-wrap gap-2.5">
+                    <button
+                      onClick={() => setTempFilters({ ...tempFilters, officialOnly: false })}
+                      className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
+                        !tempFilters.officialOnly 
+                          ? 'bg-white border-blue-600 text-blue-600 ring-1 ring-blue-600' 
+                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                      }`}
+                    >
+                      All Sellers
+                    </button>
+                    <button
+                      onClick={() => setTempFilters({ ...tempFilters, officialOnly: true })}
+                      className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
+                        tempFilters.officialOnly 
+                          ? 'bg-white border-blue-600 text-blue-600 ring-1 ring-blue-600' 
+                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                      }`}
+                    >
+                      Official Only
+                    </button>
+                 </div>
               </section>
-
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-50 space-y-3">
+            <div className="px-8 pb-10 pt-6 bg-white space-y-4">
               <button 
                 onClick={() => {
                   onApply(tempFilters);
                   onClose();
                 }}
-                className="w-full h-14 bg-slate-900 text-white rounded-[20px] font-bold text-[14px] active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] active:scale-95 transition-all shadow-md shadow-blue-600/20 flex items-center justify-center"
               >
-                Sync Registry
-                <ChevronRight size={16} />
+                Apply Filters
               </button>
               <button 
                 onClick={handleReset}
-                className="w-full h-12 text-slate-400 font-bold text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:text-slate-900 transition-colors"
+                className="w-full h-10 text-slate-400 font-bold text-[12px] hover:text-slate-900 transition-colors flex items-center justify-center"
               >
-                <RotateCcw size={12} />
-                Reset Parameters
+                Reset Selection
               </button>
             </div>
           </motion.div>

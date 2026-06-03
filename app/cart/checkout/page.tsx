@@ -165,7 +165,7 @@ export default function CartCheckoutPage() {
                 </div>
                 <div className="w-44 h-1 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-slate-900 rounded-full"
+                    className="h-full bg-blue-600 rounded-full"
                     initial={{ width: '0%' }}
                     animate={{ width: '90%' }}
                     transition={{ duration: 3, ease: 'easeInOut' }}
@@ -258,13 +258,13 @@ export default function CartCheckoutPage() {
                        <div className="grid grid-cols-2 gap-2">
                           <button
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'SELF_COLLECT' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'SELF_COLLECT' ? 'bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'SELF_COLLECT' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Package size={14} /> Self-Collect
                           </button>
                           <button
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'RUNNER' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'RUNNER' ? 'bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'RUNNER' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Truck size={14} /> Runner
                           </button>
@@ -365,7 +365,7 @@ export default function CartCheckoutPage() {
                      </div>
 
                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedBank === bank.id ? 'bg-slate-900 border-slate-900' : 'bg-white border-slate-200'
+                        selectedBank === bank.id ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'
                      }`}>
                         {selectedBank === bank.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                      </div>
@@ -381,7 +381,7 @@ export default function CartCheckoutPage() {
         <button
           onClick={() => step === 1 ? setStep(2) : handlePay()}
           disabled={(step === 1 && !canProceedStep1) || (step === 2 && !canPay)}
-          className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-md shadow-slate-900/10"
+          className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-md shadow-blue-600/20"
         >
           {step === 1 ? 'Review Payment' : `Pay RM ${total.toFixed(2)}`}
           <ArrowRight size={18} />

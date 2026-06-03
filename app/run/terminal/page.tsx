@@ -109,6 +109,7 @@ export default function RunnerTerminal() {
   const [locationError, setLocationError] = useState(false);
   const [optionsDrawerOpen, setOptionsDrawerOpen] = useState(false);
   const [reportStep, setReportStep] = useState(false);
+  const [acceptToast, setAcceptToast] = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -245,7 +246,11 @@ export default function RunnerTerminal() {
         });
       });
       setIsPoolExpanded(false);
-    } catch (e: any) { console.error('[Accept]', e); } finally { setIsProcessing(false); }
+    } catch (e: any) {
+      console.error('[Accept]', e);
+      setAcceptToast('This job was just claimed by another runner.');
+      setTimeout(() => setAcceptToast(null), 3500);
+    } finally { setIsProcessing(false); }
   };
 
   const handleConfirmPickup = async () => {
@@ -318,8 +323,20 @@ export default function RunnerTerminal() {
 
   return (
     <main className="min-h-screen bg-white font-sans antialiased text-slate-900 selection:bg-slate-100 relative overflow-hidden">
-      
-      {/* ── BACKGROUND LAYER ── */}
+
+      {/* ── RACE CONDITION TOAST ── */}
+      <AnimatePresence>
+        {acceptToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-6 left-4 right-4 z-1000 px-5 py-4 bg-red-500 text-white rounded-2xl shadow-lg text-[13px] font-bold flex items-center gap-3"
+          >
+            <AlertCircle size={16} /> {acceptToast}
+          </motion.div>
+        )}
+      </AnimatePresence>
       <motion.div 
         animate={{ 
           scale: isPoolExpanded ? 0.94 : 1,

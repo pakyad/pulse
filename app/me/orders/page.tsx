@@ -98,7 +98,7 @@ export default function MyOrdersPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[slate-900] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-slate-900 rounded-full animate-spin" />
     </div>
   );
 
@@ -125,7 +125,7 @@ export default function MyOrdersPage() {
             key={t}
             onClick={() => setTab(t)}
             className="relative py-4 text-[13px] font-bold transition-colors"
-            style={{ color: tab === t ? 'slate-900' : '#94a3b8' }}
+            style={{ color: tab === t ? '#0f172a' : '#94a3b8' }}
           >
             {t}
             {tab === t && (

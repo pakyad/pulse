@@ -89,7 +89,7 @@ function OrderSuccessPageContent() {
 
         <div className="px-4 py-3.5 flex items-center justify-between">
           <span className="text-[13px] font-medium text-[#94a3b8]">Total Paid</span>
-          <span className="text-[14px] font-bold text-slate-900">RM{Number(order?.total_price || 0).toFixed(2)}</span>
+          <span className="text-[14px] font-bold text-slate-900">RM {Number(order?.total_price || 0).toFixed(2)}</span>
         </div>
 
         <div className="px-4 py-3.5 flex items-center justify-between">
@@ -143,7 +143,7 @@ export default function OrderSuccessPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[slate-900] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-[3px] border-slate-100 border-t-slate-900 rounded-full animate-spin" />
       </div>
     }>
       <OrderSuccessPageContent />

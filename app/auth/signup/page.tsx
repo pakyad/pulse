@@ -64,17 +64,17 @@ export default function PerfectSignUp() {
     // 1. INSTITUTIONAL DOMAIN VALIDATION (REGEX)
     const uniklRegex = /^[\w-\.]+@(s\.)?unikl\.edu\.my$/;
     if (!uniklRegex.test(email)) {
-      setError("Institutional Violation: Only UniKL email categories (@s.unikl.edu.my or @unikl.edu.my) are authorized.");
+      setError("Please use a valid UniKL email address (@s.unikl.edu.my).");
       return;
     }
 
     if (!fullName || !matricNo || !campus || !password) {
-      setError("Protocol Error: All identity fields are mandatory.");
+      setError("Please fill in all the required fields.");
       return;
     }
 
     if (password.length < 6) {
-      setError("Security Alert: Password must be at least 6 characters.");
+      setError("Password must be at least 6 characters long.");
       return;
     }
 
@@ -102,13 +102,13 @@ export default function PerfectSignUp() {
     } catch (err: any) {
       console.error("Auth Failure:", err);
       if (err.code === 'auth/email-already-in-use') {
-        setError("Identity Conflict: This email is already registered in the Pulse Registry.");
+        setError("This email is already registered. Please sign in instead.");
       } else if (err.code === 'auth/weak-password') {
-        setError("Security Alert: The provided password is too weak.");
+        setError("Your password is too weak. Please choose a stronger one.");
       } else if (err.code === 'auth/invalid-email') {
-        setError("Protocol Error: The email format is invalid.");
+        setError("The email format is invalid.");
       } else {
-        setError(`Registry Error: ${err.message || "An unknown authentication failure occurred."}`);
+        setError(`Error: ${err.message || "An unknown error occurred."}`);
       }
     } finally {
       setLoading(false);
@@ -129,7 +129,7 @@ export default function PerfectSignUp() {
           >
             <AlertCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
-              <p className="text-[13px] font-bold uppercase tracking-widest mb-1">Authorization Alert</p>
+              <p className="text-[13px] font-bold uppercase tracking-widest mb-1">Error</p>
               <p className="text-[12px] font-medium leading-relaxed">{error}</p>
             </div>
             <button onClick={() => setError(null)} className="p-1">
@@ -159,90 +159,75 @@ export default function PerfectSignUp() {
               exit={{ opacity: 0, y: -10 }}
               className="flex-1 flex flex-col justify-center -mt-10"
             >
-              <div className="space-y-5">
+              <div className="space-y-4">
                 
                 {/* Full Name */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-black/30 ml-4">Full Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter your full name"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                    className="w-full h-[54px] px-8 bg-[#F2F8FF] border-none rounded-full text-[14px] font-medium text-black outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all placeholder:text-slate-400/30"
-                  />
-                </div>
+                <input 
+                  type="text" 
+                  placeholder="Full name"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                  className="w-full h-[52px] px-6 bg-transparent border border-slate-200 rounded-full text-[14px] font-medium text-slate-900 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all placeholder:text-slate-400"
+                />
 
                 {/* Email Input */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-black/30 ml-4">University Email</label>
-                  <input 
-                    type="email" 
-                    placeholder="student@s.unikl.edu.my"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full h-[54px] px-8 bg-[#F2F8FF] border-none rounded-full text-[14px] font-medium text-black outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all placeholder:text-slate-400/30"
-                  />
-                </div>
+                <input 
+                  type="email" 
+                  placeholder="University email (@s.unikl.edu.my)"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full h-[52px] px-6 bg-transparent border border-slate-200 rounded-full text-[14px] font-medium text-slate-900 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all placeholder:text-slate-400"
+                />
 
                 {/* Matric & Major Row */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-black/30 ml-4">Matric No</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. 52213..."
-                      value={formData.matricNo}
-                      onChange={(e) => setFormData({...formData, matricNo: e.target.value})}
-                      className="w-full h-[54px] px-8 bg-[#F2F8FF] border-none rounded-full text-[14px] font-medium text-black outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all placeholder:text-slate-400/30"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-black/30 ml-4">Campus</label>
-                    <div className="relative">
-                      <select 
-                        value={formData.campus}
-                        onChange={(e) => setFormData({...formData, campus: e.target.value})}
-                        className="w-full h-[54px] px-8 bg-[#F2F8FF] border-none rounded-full text-[14px] font-medium text-black outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all appearance-none"
-                      >
-                        <option value="" disabled>Select</option>
-                        <option value="MIIT">MIIT</option>
-                        <option value="UBIS">UBIS</option>
-                        <option value="BMI">BMI</option>
-                        <option value="MSI">MSI</option>
-                      </select>
-                      <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-20">
-                         <ChevronLeft className="-rotate-90" size={16} />
-                      </div>
+                  <input 
+                    type="text" 
+                    placeholder="Matric number"
+                    value={formData.matricNo}
+                    onChange={(e) => setFormData({...formData, matricNo: e.target.value})}
+                    className="w-full h-[52px] px-6 bg-transparent border border-slate-200 rounded-full text-[14px] font-medium text-slate-900 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all placeholder:text-slate-400"
+                  />
+                  <div className="relative">
+                    <select 
+                      value={formData.campus}
+                      onChange={(e) => setFormData({...formData, campus: e.target.value})}
+                      className="w-full h-[52px] px-6 bg-transparent border border-slate-200 rounded-full text-[14px] font-medium text-slate-900 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all appearance-none"
+                    >
+                      <option value="" disabled>Select campus</option>
+                      <option value="MIIT">MIIT</option>
+                      <option value="UBIS">UBIS</option>
+                      <option value="BMI">BMI</option>
+                      <option value="MSI">MSI</option>
+                    </select>
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                       <ChevronLeft className="-rotate-90" size={16} />
                     </div>
                   </div>
                 </div>
 
                 {/* Password Input */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-black/30 ml-4">Password</label>
-                  <input 
-                    type="password" 
-                    placeholder="Create a password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full h-[54px] px-8 bg-[#F2F8FF] border-none rounded-full text-[14px] font-medium text-black outline-none focus:ring-2 focus:ring-[#0A66C2]/10 transition-all placeholder:text-slate-400/30"
-                  />
-                </div>
+                <input 
+                  type="password" 
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  className="w-full h-[52px] px-6 bg-transparent border border-slate-200 rounded-full text-[14px] font-medium text-slate-900 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all placeholder:text-slate-400"
+                />
 
                 {/* Primary Action */}
                 <button 
                   onClick={handleSignUp}
                   disabled={loading}
-                  className="w-full h-[60px] bg-white border border-slate-200 text-slate-900 shadow-sm rounded-full font-black text-[13px] uppercase tracking-widest hover:bg-slate-50 transition-all mt-4 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
+                  className="w-full h-[56px] bg-[#111111] text-white shadow-md rounded-full font-bold text-[14px] active:scale-95 transition-all mt-6 flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="animate-spin" size={20} />
-                      <span>Syncing Identity...</span>
+                      <span>Creating account...</span>
                     </>
                   ) : (
-                    'Register Identity'
+                    'Create an account'
                   )}
                 </button>
 
@@ -354,12 +339,12 @@ export default function PerfectSignUp() {
         {/* Footer */}
         {step === 'form' && (
           <div className="mt-auto text-center pb-4 space-y-4">
-            <p className="text-[13px] text-slate-400 font-medium">
-              Already registered? <button onClick={() => router.push('/auth')} className="text-slate-900 font-bold active:scale-95 transition-transform">Sign in to Terminal</button>
+            <p className="text-[14px] text-slate-500 font-medium">
+              Already registered? <button onClick={() => router.push('/auth')} className="text-slate-900 font-bold active:scale-95 transition-transform hover:underline">Sign in</button>
             </p>
             <div className="h-px bg-slate-100 w-24 mx-auto" />
-            <p className="text-[11px] text-slate-300 font-medium px-10 italic">
-              Clubs or Verified Merchants: Institutional identities are provisioned solely through the Pulse Admin Terminal.
+            <p className="text-[12px] text-slate-400 font-medium px-10">
+              Clubs or merchants: Please contact administration to register.
             </p>
           </div>
         )}

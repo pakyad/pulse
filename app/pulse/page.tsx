@@ -21,25 +21,25 @@ const DEMO_ANNOUNCEMENTS = [
     id: 'ann_demo_1', type: 'ADMIN', tag: 'ACADEMIC',
     headline: 'Final Exam Timetable Published — Check Your Portal',
     body: 'All final examination venues and timetables for Semester 2 2025/2026 have been finalized. Students are required to check the official Academic Portal for their specific room assignments. No changes will be accommodated after 48 hours of this notice.',
-    created_at: { toDate: () => new Date(Date.now() - 1000 * 60 * 90) },
+    created_at: { toDate: () => new Date('2026-06-03T09:00:00Z') },
   },
   {
     id: 'ann_demo_2', type: 'ADMIN', tag: 'SYSTEM',
     headline: 'Library Booking System — Scheduled Maintenance Tonight',
     body: 'The Library Management System will undergo scheduled maintenance from 1:00 AM to 4:00 AM on 31 May 2026. All active seat bookings will be preserved. The physical library remains open.',
-    created_at: { toDate: () => new Date(Date.now() - 1000 * 60 * 60 * 3) },
+    created_at: { toDate: () => new Date('2026-06-02T14:30:00Z') },
   },
   {
     id: 'ann_demo_3', type: 'OFFICIAL', tag: 'MARKETPLACE',
     headline: 'New Vendor Approved — BiteClub Now Serving Block A',
     body: 'Pulse Marketplace is pleased to announce that BiteClub has been officially approved as a verified campus vendor. Their menu will be available for runner deliveries across Block A, B, and the Library Complex starting Monday.',
-    created_at: { toDate: () => new Date(Date.now() - 1000 * 60 * 60 * 24) },
+    created_at: { toDate: () => new Date('2026-06-01T08:15:00Z') },
   },
   {
     id: 'ann_demo_4', type: 'OFFICIAL', tag: 'CAMPUS NOTICE',
     headline: 'Café Rasa Operating Hours Extended Until 9PM',
     body: 'In response to student feedback, Café Rasa will extend operations until 9:00 PM Monday through Friday effective immediately. Weekend hours remain unchanged.',
-    created_at: { toDate: () => new Date(Date.now() - 1000 * 60 * 60 * 48) },
+    created_at: { toDate: () => new Date('2026-05-30T11:45:00Z') },
   },
 ];
 
@@ -360,7 +360,7 @@ export default function PulsePage() {
                 <div className="h-[120px] relative bg-slate-100 overflow-hidden">
                   {ev.imageUrl
                     ? <img src={ev.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" alt={ev.title} />
-                    : <div className="w-full h-full bg-gradient-to-tr from-slate-200 to-slate-100" />
+                    : <div className="w-full h-full bg-linear-to-tr from-slate-200 to-slate-100" />
                   }
                   <div className="absolute top-3 left-3">
                     <span className="px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm text-[9px] font-black uppercase tracking-[0.15em] text-slate-900 shadow-sm">{ev.tag || 'Event'}</span>
@@ -403,7 +403,7 @@ export default function PulsePage() {
         {selectedEvent && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-md flex items-end justify-center p-4"
+            className="fixed inset-0 z-200 bg-black/50 backdrop-blur-md flex items-end justify-center p-4"
             onClick={() => setSelectedEvent(null)}
           >
             <motion.div
@@ -415,7 +415,7 @@ export default function PulsePage() {
               {selectedEvent.imageUrl && (
                 <div className="h-[160px] relative overflow-hidden">
                   <img src={selectedEvent.imageUrl} className="w-full h-full object-cover" alt={selectedEvent.title} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                   <span className="absolute bottom-4 left-4 px-2.5 py-1 rounded-md bg-white/90 text-[9px] font-black uppercase tracking-widest text-slate-900">
                     {selectedEvent.tag || 'Event'}
                   </span>

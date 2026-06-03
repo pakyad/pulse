@@ -106,7 +106,7 @@ function getPathPoint(progress: number) {
   }
 }
 
-function StatusKinetics({ status }: { status: string }) {
+function StatusKinetics({ status, orderType }: { status: string, orderType?: string }) {
   const s = status?.toUpperCase() || '';
   
   // Determine kinetic state
@@ -253,7 +253,7 @@ function StatusKinetics({ status }: { status: string }) {
               </svg>
             </div>
             <p className="text-[11px] font-black text-amber-600 uppercase tracking-widest leading-none mt-2 animate-pulse">
-              Merchant is preparing...
+              {orderType && orderType !== 'MARKETPLACE' ? 'Verifying Details...' : 'Merchant is preparing...'}
             </p>
           </motion.div>
         )}
@@ -683,7 +683,7 @@ export default function LiveOrderPage() {
             <BuyerLiveMap runnerLocation={order.runner_location} />
           </div>
         ) : (
-          <StatusKinetics status={status} />
+          <StatusKinetics status={status} orderType={order?.type} />
         )}
         
         {/* Logistics Data (Ultra-Minimalist & Transparent) */}
@@ -697,7 +697,7 @@ export default function LiveOrderPage() {
                <div className="relative">
                  <div className="absolute -left-[19.5px] top-[4px] w-2 h-2 rounded-full bg-amber-500" />
                  <div className="flex items-baseline gap-2">
-                   <span className="text-[12px] font-bold text-slate-900">{order.seller_name || 'Merchant'}</span>
+                   <span className="text-[12px] font-bold text-slate-900">{order?.seller_name || 'Pickup Point'}</span>
                    <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Pickup</span>
                  </div>
                  <p className="text-[10px] font-medium text-slate-400 mt-0.5 truncate">{order.pickup_location || 'Campus Shop'}</p>

@@ -48,7 +48,7 @@ function DomainRegistry({ item }: { item: any }) {
     if (item.metadata.available_slots) rows.push({
       label: 'Availability',
       value: (
-        <span className="px-3 py-1 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+        <span className="px-3 py-1 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
           {item.metadata.available_slots}
         </span>
       )
@@ -256,7 +256,7 @@ export default function ItemDetailsPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-20 left-6 right-6 z-100 bg-slate-900 text-white px-4 py-3 rounded-full flex items-center justify-between shadow-md"
+            className="fixed top-20 left-6 right-6 z-100 bg-blue-600 text-white px-4 py-3 rounded-full flex items-center justify-between shadow-md"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
@@ -272,7 +272,7 @@ export default function ItemDetailsPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-20 left-6 right-6 z-100 bg-slate-900 text-white px-4 py-3 rounded-full flex items-center justify-center shadow-md"
+            className="fixed top-20 left-6 right-6 z-100 bg-blue-600 text-white px-4 py-3 rounded-full flex items-center justify-center shadow-md"
           >
             <div className="flex items-center gap-2">
               <CheckCircle2 size={16} className="text-white" />
@@ -307,7 +307,7 @@ export default function ItemDetailsPage() {
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
-                className={`h-1 rounded-full transition-all ${i === activeImage ? 'w-6 bg-slate-900' : 'w-1.5 bg-slate-900/20'}`}
+                className={`h-1 rounded-full transition-all ${i === activeImage ? 'w-6 bg-blue-600' : 'w-1.5 bg-slate-900/20'}`}
               />
             ))}
           </div>
@@ -491,7 +491,7 @@ export default function ItemDetailsPage() {
           <button
             disabled={isSoldOut}
             onClick={() => router.push(`/marketplace/${id}/checkout`)}
-            className="flex-1 h-[52px] bg-slate-900 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20"
+            className="flex-1 h-[52px] bg-blue-600 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20 shadow-md shadow-blue-600/20"
           >
             {isSoldOut ? 'Sold Out' : item.category === 'SERVICES' ? 'Book Now' : 'Buy Now'}
             {!isSoldOut && <ArrowUpRight size={16} />}

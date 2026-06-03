@@ -2,13 +2,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db, functions } from '@/lib/firebase';
-import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
+import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
 import { ChevronLeft, X, Loader2, ChevronRight, ArrowRight } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
-import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[21px] font-bold text-slate-900 tracking-tight ${className}`}>{children}</h2>
@@ -59,22 +57,22 @@ const Field = ({ label, placeholder, value, onChange, multiline = false }: any) 
 const UNIKL_CAFES = ['Cafe Block A', 'Starbucks MIIT', 'West Wing Cafeteria'];
 
 const SERVICES = [
-  { id: 'food',     label: 'Food & Cravings',  icon: VoxelFood,      desc: 'Cafe Block A, Starbucks, West Wing', accent: 'text-amber-600',  iconBg: 'bg-amber-100',
+  { id: 'food',     label: 'Food & Cravings',  icon: VoxelFood,      desc: 'Cafe Block A, Starbucks, West Wing', accent: 'text-amber-600',  iconBg: 'bg-amber-100', fee: 4.50,
     steps: [{ title: 'Source',     desc: 'Choose your cafe or canteen' },
             { title: 'Order List', desc: 'Tell us what you want'       },
             { title: 'Schedule',   desc: 'When do you need it?'        },
             { title: 'Meet Point', desc: 'Where should we find you?'   }] },
-  { id: 'parcels',  label: 'Parcel & Mail',     icon: VoxelLogistics, desc: 'Shopee, Lazada, Mail',               accent: 'text-slate-600',  iconBg: 'bg-slate-100',
+  { id: 'parcels',  label: 'Parcel & Mail',     icon: VoxelLogistics, desc: 'Shopee, Lazada, Mail',               accent: 'text-slate-600',  iconBg: 'bg-slate-100', fee: 5.00,
     steps: [{ title: 'Item Type',  desc: 'What type of parcel is it?'  },
             { title: 'Size',       desc: 'How big is the package?'     },
             { title: 'Pickup',     desc: 'Where is the parcel now?'    },
             { title: 'Drop-off',   desc: 'Where should we deliver it?' }] },
-  { id: 'academic', label: 'Academic Print',    icon: VoxelBooks,     desc: 'UniStore, Library Hub',              accent: 'text-indigo-600', iconBg: 'bg-indigo-100',
+  { id: 'academic', label: 'Academic Print',    icon: VoxelBooks,     desc: 'UniStore, Library Hub',              accent: 'text-indigo-600', iconBg: 'bg-indigo-100', fee: 3.50,
     steps: [{ title: 'Hub',        desc: 'Which printing hub?'         },
             { title: 'Specs',      desc: 'Color and paper preferences' },
             { title: 'Document',   desc: 'Describe what to print'      },
             { title: 'Destination',desc: 'Where should we deliver it?' }] },
-  { id: 'errands',  label: 'Custom Tasks',      icon: VoxelErrands,   desc: 'Flexible errands & requests',        accent: 'text-purple-600', iconBg: 'bg-purple-100',
+  { id: 'errands',  label: 'Custom Tasks',      icon: VoxelErrands,   desc: 'Flexible errands & requests',        accent: 'text-purple-600', iconBg: 'bg-purple-100', fee: 6.00,
     steps: [{ title: 'Task Brief', desc: 'Describe your task in detail'},
             { title: 'Duration',   desc: 'How long might it take?'     },
             { title: 'Budget',     desc: 'Any petty cash needed?'      },
@@ -121,22 +119,52 @@ export default function RunModule() {
     }
   };
 
+  const canAdvanceStep = () => {
+    if (!activeService) return false;
+    const s = activeService.id;
+    if (s === 'food') {
+      if (currentStep === 0 && !form.source) return false;
+      if (currentStep === 1 && !form.items) return false;
+      if (currentStep === 2 && !form.schedule) return false;
+      if (currentStep === 3 && !form.meetPoint) return false;
+    }
+    if (s === 'parcels') {
+      if (currentStep === 0 && !form.parcelType) return false;
+      if (currentStep === 1 && !form.parcelSize) return false;
+      if (currentStep === 2 && !form.pickupNode) return false;
+      if (currentStep === 3 && !form.dropOff) return false;
+    }
+    if (s === 'academic') {
+      if (currentStep === 0 && !form.hub) return false;
+      if (currentStep === 1 && (!form.specs_color || !form.specs_side)) return false;
+      if (currentStep === 2 && !form.docDesc) return false;
+      if (currentStep === 3 && !form.destination) return false;
+    }
+    if (s === 'errands') {
+      if (currentStep === 0 && !form.errandBrief) return false;
+      if (currentStep === 1 && !form.errandDuration) return false;
+      if (currentStep === 2 && !form.errandBudget) return false;
+    }
+    return true;
+  };
+
   const handleFinalizeRequest = async () => {
     if (!auth.currentUser) return router.push('/auth');
     setSubmitting(true);
     try {
-      const fn = httpsCallable(functions, 'createRunDirective');
-      const res: any = await fn({
-        serviceId: activeService.id,
-        label: activeService.label,
-        source: form.source || form.hub || form.pickupNode || activeService.desc.split(',')[0],
-        dest: form.meetPoint || form.dropOff || form.destination || 'Campus',
-        fee: 4.50,
-        items: form.items || form.docDesc || form.errandBrief || 'Delivery Request',
+      const orderRef = await addDoc(collection(db, 'orders'), {
+        buyer_id: auth.currentUser.uid,
+        buyer_name: profile?.full_name || 'Student',
+        title: activeService.label,
         type: activeService.id.toUpperCase(),
-        zone: 'ALL',
+        pickup_location: form.source || form.hub || form.pickupNode || activeService.desc.split(',')[0],
+        drop_off_location: form.meetPoint || form.dropOff || form.destination || 'Campus',
+        total_price: activeService.fee || 4.50,
+        items_summary: form.items || form.docDesc || form.errandBrief || 'Delivery Request',
+        status: 'PENDING_RUNNER',
+        created_at: serverTimestamp()
       });
-      router.push(`/orders/success?id=${res.data.orderId}`);
+      router.push(`/orders/success?id=${orderRef.id}`);
     } catch {
       setSubmitError('Could not submit request. Check your connection and try again.');
       setTimeout(() => setSubmitError(null), 4000);
@@ -238,14 +266,15 @@ export default function RunModule() {
 
         {/* ── Error toasts ── */}
         {statusError && (
-          <div className="fixed top-20 left-6 right-6 z-[200] bg-red-500 text-white px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md text-center">{statusError}</div>
+          <div className="fixed top-20 left-6 right-6 z-200 bg-red-500 text-white px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md text-center">{statusError}</div>
         )}
         {submitError && (
-          <div className="fixed top-20 left-6 right-6 z-[200] bg-red-500 text-white px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md text-center">{submitError}</div>
+          <div className="fixed top-20 left-6 right-6 z-200 bg-red-500 text-white px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md text-center">{submitError}</div>
         )}
 
         {/* ── RUNNER DASHBOARD (verified runners only) ── */}
-        {profile?.is_verified_runner && (
+        {/* ── RUNNER DASHBOARD (verified runners only) ── */}
+        {profile?.is_verified_runner ? (
           <div className="space-y-6">
             <div className="px-1">
               <Heading>Runner Dashboard</Heading>
@@ -267,8 +296,9 @@ export default function RunModule() {
             </div>
             <div className="space-y-4 px-1">
               {[
-                { label: 'Available Jobs',  sub: 'browse active missions', path: '/run/missions' },
                 { label: 'Delivery Hub',    sub: 'open terminal tools',   path: '/run/terminal' },
+                { label: 'Active GPS Map',  sub: 'live delivery telemetry', path: '/run/active' },
+                { label: 'Mission History', sub: 'view completed tasks',  path: '/run/history' },
               ].map(item => (
                 <button key={item.path} onClick={() => router.push(item.path)} className="w-full flex items-center justify-between group py-2">
                   <div className="text-left">
@@ -280,6 +310,26 @@ export default function RunModule() {
               ))}
             </div>
           </div>
+        ) : profile?.runner_status === 'pending' ? (
+           <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex items-center justify-between">
+              <div>
+                <Heading className="text-amber-900">Application Pending</Heading>
+                <Subtext className="text-amber-700/80">Your runner request is under review</Subtext>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                <Loader2 size={20} className="animate-spin" />
+              </div>
+           </div>
+        ) : (
+           <button onClick={() => router.push('/run/onboarding')} className="w-full bg-slate-900 p-6 rounded-2xl flex items-center justify-between group active:scale-95 transition-all shadow-md shadow-slate-900/10">
+              <div className="text-left">
+                <Heading className="text-white">Become a Runner</Heading>
+                <Subtext className="text-slate-300">Earn up to RM 200/week completing missions</Subtext>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-slate-900 transition-colors">
+                <ArrowRight size={20} />
+              </div>
+           </button>
         )}
 
         {/* ── REQUEST DELIVERY ── */}
@@ -352,10 +402,11 @@ export default function RunModule() {
             <div className="px-6 pb-12 pt-4 bg-white border-t border-slate-50 space-y-4">
               <div className="flex items-center justify-between px-1">
                 <Subtext>Estimated Delivery Fee</Subtext>
-                <p className="text-[20px] font-bold text-slate-900">RM 4.50</p>
+                <p className="text-[20px] font-bold text-slate-900">RM {activeService.fee.toFixed(2)}</p>
               </div>
               <button onClick={() => currentStep < 3 ? setCurrentStep(currentStep + 1) : handleFinalizeRequest()}
-                className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md shadow-slate-900/10">
+                disabled={submitting || !canAdvanceStep()}
+                className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50 disabled:grayscale">
                 {submitting ? <Loader2 className="animate-spin" size={22} /> : (currentStep === 3 ? 'Confirm Order' : 'Continue')}
                 {!submitting && <ArrowRight size={18} />}
               </button>
@@ -364,7 +415,7 @@ export default function RunModule() {
         )}
       </AnimatePresence>
 
-      <RunnerEnrollmentSheet isOpen={isEnrollmentOpen} onClose={() => setIsEnrollmentOpen(false)} onComplete={() => {}} />
+
     </main>
   );
 }

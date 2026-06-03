@@ -31,7 +31,6 @@ export default function PulseHome() {
   const [profile, setProfile] = useState<any>(null);
   const [liveItems, setLiveItems] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [pulsePosts, setPulsePosts] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
@@ -71,14 +70,6 @@ export default function PulseHome() {
         e => console.warn("[Home] Announce Error:", e)
       );
       unsubs.push(uAnn);
-      
-      // 💬 Pulse Posts (Public)
-      const qPulse = query(collection(db, 'pulse_posts'), orderBy('created_at', 'desc'), limit(3));
-      const uPulse = onSnapshot(qPulse, 
-        s => setPulsePosts(s.docs.map(d => ({ id: d.id, ...d.data() }))),
-        e => console.warn("[Home] Pulse Error:", e)
-      );
-      unsubs.push(uPulse);
     });
     
     return () => { 
@@ -147,48 +138,6 @@ export default function PulseHome() {
                <Subtext>Quick access to student services and links</Subtext>
             </div>
             <ServiceGrid />
-         </section>
-
-         {/* ── CAMPUS ACTIVITY ── */}
-         <section className="space-y-8">
-            <div className="flex justify-between items-end px-1">
-               <div>
-                  <Heading>Campus Activity</Heading>
-                  <Subtext>See what students are sharing right now</Subtext>
-               </div>
-               <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5 active:scale-95 transition-all">
-                  See More <ArrowUpRight size={14} />
-               </button>
-            </div>
-
-            <div className="space-y-4">
-               {pulsePosts.length > 0 ? pulsePosts.map((post) => (
-                  <motion.div 
-                    key={post.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-slate-50/50 p-7 rounded-2xl border-[0.5px] border-slate-100 group hover:bg-white hover:border-slate-300 transition-all"
-                  >
-                     <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400">
-                              <Activity size={14} />
-                           </div>
-                           <p className="text-[11px] font-bold text-slate-900 truncate max-w-[120px]">{post.author_name || 'Verified Student'}</p>
-                        </div>
-                        <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-wider">{post.time_ago || 'Recent'}</p>
-                     </div>
-                     <p className="text-[15px] text-slate-600 leading-relaxed font-medium">
-                        {post.body || post.content}
-                     </p>
-                  </motion.div>
-               )) : (
-                  <div className="py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
-                     <Activity size={32} strokeWidth={1} className="opacity-30" />
-                     <p className="text-[11px] font-bold uppercase tracking-widest">No recent activity</p>
-                  </div>
-               )}
-            </div>
          </section>
 
          {/* ── MARKETPLACE PREVIEW ── */}

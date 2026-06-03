@@ -77,7 +77,7 @@ export default function BookingPassPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className={`fixed top-6 left-6 right-6 z-[300] px-5 py-4 rounded-2xl flex items-center gap-3 shadow-lg text-[13px] font-bold ${
+            className={`fixed top-6 left-6 right-6 z-300 px-5 py-4 rounded-2xl flex items-center gap-3 shadow-lg text-[13px] font-bold ${
               toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
             }`}
           >
