@@ -162,7 +162,11 @@ export default function RunnerTerminal() {
         unsubRadar = onSnapshot(qRadar, (snap) => {
           const allAwaiting = snap.docs
             .map(d => ({ id: d.id, ...d.data() }))
-            .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER' || o.delivery_type === 'runner' || o.deliveryType === 'runner');
+            .filter((o: any) => 
+               o.delivery_type?.toUpperCase() === 'RUNNER' || 
+               o.deliveryType?.toUpperCase() === 'RUNNER' || 
+               ['PARCELS', 'ERRANDS'].includes(o.type?.toUpperCase())
+            );
           setJobs(allAwaiting);
         });
       } else { router.push('/auth'); }
@@ -221,6 +225,12 @@ export default function RunnerTerminal() {
     timerRef.current = setInterval(tick, 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [activeMission?.id, activeMission?.accepted_at]);
+
+  useEffect(() => {
+    if (activeMission && ['PARCELS', 'ERRANDS'].includes(activeMission.type?.toUpperCase())) {
+      router.replace('/run/active');
+    }
+  }, [activeMission, router]);
 
   const toggleStatus = async () => {
     if (!auth.currentUser) return;

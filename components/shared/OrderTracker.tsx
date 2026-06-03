@@ -18,23 +18,33 @@ export function getTrackerStep(status: string) {
 
 export default function OrderTracker({ order }: OrderTrackerProps) {
   const step = getTrackerStep(order.status);
-  const labels = ['Ordered', 'Preparing', 'On The Way', 'Arrived'];
+  const isCustom = ['PARCELS', 'ERRANDS'].includes(order.type?.toUpperCase());
+  const labels = isCustom 
+    ? ['Requested', 'Runner Found', 'Delivering', 'Arrived']
+    : ['Ordered', 'Preparing', 'On The Way', 'Arrived'];
   const deliveryPhoto = order.delivery_proof_url;
+
+  const getHeaderText = () => {
+    if (step === 4) return 'Delivered';
+    if (step === 3) return isCustom ? 'Runner is heading to drop-off' : 'Runner is on the way';
+    if (step === 2) return isCustom ? 'Runner is heading to pickup' : 'Preparing your order';
+    return isCustom ? 'Finding a runner' : 'Waiting for merchant';
+  };
 
   return (
     <div className="space-y-10">
       {/* ── HEADER ── */}
       <div className="px-2">
         <h2 className="text-[20px] font-bold text-slate-900 tracking-tight mb-1">
-          {step === 4 ? 'Delivered' : step === 3 ? 'Runner is on the way' : step === 2 ? 'Preparing your order' : 'Finding a runner'}
+          {getHeaderText()}
         </h2>
       </div>
 
       {/* ── VIBRANT 4-STEP PROGRESS BAR ── */}
       <div className="flex items-center justify-between relative px-6">
-        <div className="absolute left-10 right-10 top-[11px] h-[1px] bg-slate-100 z-0"></div>
+        <div className="absolute left-10 right-10 top-[11px] h-px bg-slate-100 z-0"></div>
         <motion.div 
-          className="absolute left-10 top-[11px] h-[1px] bg-amber-500 z-0" 
+          className="absolute left-10 top-[11px] h-px bg-amber-500 z-0" 
           initial={{ width: 0 }}
           animate={{ width: `calc(${((step - 1) / 3) * 100}% - 4px)` }}
           transition={{ duration: 0.8, ease: "circOut" }}
@@ -111,11 +121,11 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-bold text-slate-900 truncate">{order.title}</p>
-            <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-tight">{order.seller_name || 'Merchant'}</p>
+            <p className="text-[14px] font-bold text-slate-900 truncate">{order.items_summary || order.title}</p>
+            <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-tight">{isCustom ? 'Peer-to-Peer Drop' : (order.seller_name || 'Merchant')}</p>
           </div>
           <div className="text-right">
-             <p className="text-[15px] font-black text-slate-900">RM {Number(order.price).toFixed(2)}</p>
+             <p className="text-[15px] font-black text-slate-900">RM {Number(order.total_price || order.price || 0).toFixed(2)}</p>
              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Paid</p>
           </div>
         </div>

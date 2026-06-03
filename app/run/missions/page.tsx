@@ -69,7 +69,11 @@ export default function MissionBoard() {
             unsubMissions = onSnapshot(q, (snap) => {
               const allMissions = snap.docs
                 .map(d => ({ id: d.id, ...d.data() }))
-                .filter((o: any) => o.delivery_type === 'RUNNER' || o.deliveryType === 'RUNNER' || o.delivery_type === 'runner' || o.deliveryType === 'runner')
+                .filter((o: any) => 
+                  o.delivery_type?.toUpperCase() === 'RUNNER' || 
+                  o.deliveryType?.toUpperCase() === 'RUNNER' || 
+                  ['PARCELS', 'ERRANDS'].includes(o.type?.toUpperCase())
+                )
                 .filter((o: any) => !o.runner_id)
                 .sort((a: any, b: any) => {
                    const timeA = a.created_at?.toMillis ? a.created_at.toMillis() : new Date(a.created_at).getTime();
@@ -226,12 +230,12 @@ export default function MissionBoard() {
                                      <Package size={22} />
                                   </div>
                                   <div>
-                                     <h3 className="text-[16px] font-bold text-slate-900 tracking-tight truncate max-w-[200px]">{mission.seller_name || 'Merchant'}</h3>
-                                     <p className="text-[12px] text-slate-400 font-medium lowercase">{mission.title || 'Item'} • #{mission.id.substring(0,8)}</p>
+                                     <h3 className="text-[16px] font-bold text-slate-900 tracking-tight truncate max-w-[200px]">{mission.seller_name || mission.buyer_name || 'Merchant'}</h3>
+                                     <p className="text-[12px] text-slate-400 font-medium lowercase">{mission.items_summary || mission.title || 'Item'} • #{mission.id.substring(0,8)}</p>
                                   </div>
                                </div>
                                <div className="text-right">
-                                  <p className="text-[18px] font-bold text-slate-900">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
+                                  <p className="text-[18px] font-bold text-slate-900">RM {(mission.total_price || mission.deliveryFee || 3.50).toFixed(2)}</p>
                                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Payout</p>
                                </div>
                             </div>
@@ -244,7 +248,7 @@ export default function MissionBoard() {
                                <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-3">
                                      <Clock size={14} className="text-slate-300" />
-                                     <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || 'merchant'}</p>
+                                     <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || mission.buyer_name || 'merchant'}</p>
                                   </div>
                                   <span className="text-[11px] font-bold text-slate-900 bg-slate-200/50 px-2.5 py-0.5 rounded-full lowercase tracking-tight">
                                      {formatTimeAgo(mission.created_at, now)}

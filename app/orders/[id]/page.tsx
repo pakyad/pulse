@@ -778,7 +778,7 @@ export default function LiveOrderPage() {
                     <p key={i} className="text-[13px] font-bold text-slate-900">{it.qty}x {it.title}</p>
                   ))
                 ) : (
-                  <p className="text-[13px] font-bold text-slate-900">1x {order.title || 'Pulse Order'}</p>
+                  <p className="text-[13px] font-bold text-slate-900">{order.items_summary || `1x ${order.title || 'Pulse Order'}`}</p>
                 )}
               </div>
             </div>
@@ -800,10 +800,12 @@ export default function LiveOrderPage() {
             {/* Price Breakdown */}
             <div className="px-4 py-3.5 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-medium text-[#94a3b8]">Subtotal</span>
-                <span className="text-[13px] font-bold text-slate-900">RM {Number(order.price || 0).toFixed(2)}</span>
+                <span className="text-[13px] font-medium text-[#94a3b8]">
+                  {['PARCELS', 'ERRANDS'].includes(order.type?.toUpperCase()) ? 'Service Fee' : 'Subtotal'}
+                </span>
+                <span className="text-[13px] font-bold text-slate-900">RM {Number(order.price || order.total_price || 0).toFixed(2)}</span>
               </div>
-              {order.delivery_type === 'RUNNER' && (
+              {order.delivery_type === 'RUNNER' && !['PARCELS', 'ERRANDS'].includes(order.type?.toUpperCase()) && (
                 <div className="flex items-center justify-between">
                   <span className="text-[13px] font-medium text-[#94a3b8]">Runner Fee</span>
                   <span className="text-[13px] font-bold text-slate-900">RM {Number((order.total || order.price) - order.price).toFixed(2)}</span>
@@ -814,7 +816,7 @@ export default function LiveOrderPage() {
             {/* Total Paid */}
             <div className="flex items-center justify-between px-4 py-3.5 bg-slate-100/50 rounded-b-xl">
               <span className="text-[13px] font-bold text-slate-900">Total Paid</span>
-              <span className="text-[15px] font-black text-slate-900">RM {Number(order.total || order.price).toFixed(2)}</span>
+              <span className="text-[15px] font-black text-slate-900">RM {Number(order.total || order.total_price || order.price).toFixed(2)}</span>
             </div>
           </div>
         </section>
