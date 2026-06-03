@@ -146,6 +146,8 @@ export default function NavigationGate() {
     pathname?.startsWith('/orders/') ||
     pathname?.startsWith('/user') ||
     pathname?.startsWith('/campus/earnings') ||
+    pathname?.startsWith('/hub/found') ||
+    pathname?.startsWith('/hub/unistore') ||
     isChatRoom;
 
   // BottomNav Visibility (Dynamic Suppression)
@@ -165,6 +167,8 @@ export default function NavigationGate() {
     !pathname?.startsWith('/admin') && 
     !pathname?.startsWith('/merchant') &&
     !pathname?.startsWith('/campus/earnings') &&
+    !pathname?.startsWith('/hub/found') &&
+    !pathname?.startsWith('/hub/unistore') &&
     !(role === 'CLUB' && (pathname === '/me' || pathname === '/activity' || pathname?.startsWith('/me/orders')));
 
   if (checking && !isAuthPage && !isRoot) return (

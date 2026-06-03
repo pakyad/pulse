@@ -19,15 +19,15 @@ const VoxelContainer = ({ children, color, shadow }: { children: React.ReactNode
   </div>
 );
 
-import { ShoppingBag, Package, Calendar, Receipt, Store, Wallet } from 'lucide-react';
+import { Search, Receipt, Calendar, ShieldCheck, MessageSquare, Ticket } from 'lucide-react';
 
 const services = [
-  { id: 1, label: 'Market',    icon: () => <ShoppingBag size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,     path: '/marketplace', color: 'bg-[#3B82F6]', shadow: 'bg-[#1E40AF]' },
-  { id: 2, label: 'Deliveries',icon: () => <Package size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,         path: '/run',         color: 'bg-[#F59E0B]', shadow: 'bg-[#92400E]' },
-  { id: 3, label: 'Events',    icon: () => <Calendar size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,        path: '/pulse',       color: 'bg-[#EC4899]', shadow: 'bg-[#9D174D]' },
-  { id: 4, label: 'My Orders', icon: () => <Receipt size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,         path: '/me/orders',   color: 'bg-[#10B981]', shadow: 'bg-[#065F46]' },
-  { id: 5, label: 'My Shop',   icon: () => <Store size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,           path: '/me',          color: 'bg-[#8B5CF6]', shadow: 'bg-[#4C1D95]' },
-  { id: 6, label: 'Wallet',    icon: () => <Wallet size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,          path: '/run/wallet',  color: 'bg-[#64748B]', shadow: 'bg-[#334155]' },
+  { id: 1, label: 'Lost & Found', icon: () => <Search size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,        path: '/hub/found',                   color: 'bg-[#F59E0B]', shadow: 'bg-[#92400E]' },
+  { id: 2, label: 'My Orders',    icon: () => <Receipt size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,       path: '/me/orders',                   color: 'bg-[#10B981]', shadow: 'bg-[#065F46]' },
+  { id: 3, label: 'Events',       icon: () => <Calendar size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,      path: '/pulse',                       color: 'bg-[#EC4899]', shadow: 'bg-[#9D174D]' },
+  { id: 4, label: 'UniStore',     icon: () => <ShieldCheck size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,   path: '/hub/unistore',                color: 'bg-[#3B82F6]', shadow: 'bg-[#1E40AF]' },
+  { id: 5, label: 'Inbox',        icon: () => <MessageSquare size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />, path: '/messages',                    color: 'bg-[#8B5CF6]', shadow: 'bg-[#4C1D95]' },
+  { id: 6, label: 'Campaigns',    icon: () => <Ticket size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,        path: '/campaigns',                   color: 'bg-[#F43F5E]', shadow: 'bg-[#BE123C]' },
 ];
 
 const ServiceGrid = () => {

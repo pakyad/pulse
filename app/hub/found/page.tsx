@@ -2,151 +2,99 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  MapPin, 
-  ChevronLeft, 
-  Plus, 
-  Filter, 
-  Package, 
-  Camera, 
-  CheckCircle2,
-  ShieldCheck
-} from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { Plus } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
+import { RadarCard, ReportRadarModal } from '@/components/pulse/RadarModule';
 
-import { useRouter } from 'next/navigation';
-import ProductCard from '@/components/shared/ProductCard';
-
-const FOUND_ITEMS = [
-  { id: 1, title: "Matric Card (MIIT)", location: "Level 4 Labs", time: "1h ago", img: "https://images.unsplash.com/photo-1611095773767-114b510d16f8?q=80&w=1000&auto=format&fit=crop", status: "VERIFIED" },
-  { id: 2, title: "Silver Hydro Flask", location: "Grand Hall", time: "3h ago", img: "https://images.unsplash.com/photo-1602143303410-7199d13f8ed3?q=80&w=1000&auto=format&fit=crop", status: "PENDING" },
-  { id: 3, title: "Mechanical Keyboard", location: "Library Hub", time: "5h ago", img: "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop", status: "VERIFIED" },
-  { id: 4, title: "Car Keys (Audi)", location: "Parking A1", time: "8h ago", img: "https://images.unsplash.com/photo-1549194382-346a858176b0?q=80&w=1000&auto=format&fit=crop", status: "SECURE" },
+const DEMO_RADAR = [
+  { id: 'radar_1', type: 'LOST',  title: 'Lost: MacBook Charger (USB-C)',       detail: 'Last seen at Level 3 Library, near the window seats. White charger with blue tape on cable.', reward: 'RM 10 reward', contact: 'DM @haziq_miit',            time: '2h ago' },
+  { id: 'radar_2', type: 'FOUND', title: 'Found: Student ID Card',               detail: 'Found at Café Rasa counter. Name on card: Ahmad Faris. Surrendered to the security guard on duty.', contact: 'Collect at Guard Post, Main Lobby', time: '4h ago' },
+  { id: 'radar_3', type: 'LOST',  title: 'Lost: Blue Casio Scientific Calculator', detail: 'Possibly left in Lab 214 after CFD class on Thursday. Has a "Amir" sticker on the back.', reward: 'RM 15 reward', contact: 'Call 011-2398XXXX', time: '1d ago' },
+  { id: 'radar_4', type: 'FOUND', title: 'Found: Airpods Pro (Gen 2) Case',      detail: 'Found in the male prayer room after Zohor. White AirPod Pro case, no pods inside.',            contact: 'DM @pulse_campus to claim',      time: '1d ago' },
 ];
 
 export default function FoundHub() {
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState('FOUND'); // FOUND | LOST
+  const [items, setItems] = useState<any[]>([]);
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    
+    // Listen to campus_radar database
+    const q = query(collection(db, 'campus_radar'), orderBy('created_at', 'desc'));
+    const unsub = onSnapshot(q, (snap) => {
+      const data = snap.docs.map(doc => {
+        const d = doc.data();
+        let timeStr = 'Just now';
+        if (d.created_at?.toDate) {
+          const diff = Math.floor((Date.now() - d.created_at.toDate().getTime()) / 1000);
+          if (diff < 3600) timeStr = `${Math.floor(diff / 60)}m ago`;
+          else if (diff < 86400) timeStr = `${Math.floor(diff / 3600)}h ago`;
+          else timeStr = `${Math.floor(diff / 86400)}d ago`;
+        }
+        return {
+          id: doc.id,
+          ...d,
+          time: timeStr
+        };
+      });
+      setItems(data);
+    });
+
+    return () => unsub();
   }, []);
 
   if (!mounted) return null;
 
+  const displayRadar = items.length > 0 ? items : DEMO_RADAR;
+
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pb-32 font-sans antialiased text-navy">
-      {/* 1. DYNAMIC HEADER */}
-      <section className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50 border-b border-slate-50">
-        <BackButton />
-        <div className="text-center">
-          <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">Items</p>
-          <h1 className="text-[18px] font-bold tracking-widest text-navy">Lost & Found</h1>
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
+      {/* ── NAV ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+        <div className="flex items-center gap-3">
+          <BackButton />
+          <p className="text-[14px] font-bold tracking-tight">Directory</p>
         </div>
-        <button onClick={() => setActiveTab(prev => prev === 'FOUND' ? 'LOST' : 'FOUND')} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy/40 active:scale-95 transition-transform">
-          <Filter size={18} />
-        </button>
-      </section>
+      </nav>
 
-      <div className="max-w-2xl mx-auto px-6 mt-8 space-y-12">
-        
-        {/* 2. REGISTRY SWITCHER */}
-        <div className="flex bg-slate-50 p-1.5 rounded-4xl border border-slate-100 relative">
-           <motion.div 
-             className="absolute inset-1.5 w-[calc(50%-6px)] bg-white rounded-[1.8rem] shadow-sm z-0"
-             animate={{ x: activeTab === 'FOUND' ? 0 : '100%' }}
-             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-           />
-           {['FOUND', 'LOST'].map((tab) => (
-             <button 
-               key={tab}
-               onClick={() => setActiveTab(tab)}
-               className={`flex-1 py-3 text-[11px] font-bold uppercase tracking-widest relative z-10 transition-colors ${activeTab === tab ? 'text-navy' : 'text-slate-300'}`}
-             >
-               {tab} Items
-             </button>
-           ))}
-        </div>
-
-        {/* 3. SEARCH & REPORT */}
-        <section className="space-y-4">
-           <div className="relative group">
-              <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-navy transition-colors">
-                 <Search size={20} />
-              </div>
-              <input 
-                 type="text" 
-                 placeholder="Search for an item..."
-                 className="w-full h-14 bg-white border border-slate-100 rounded-4xl pl-16 pr-6 text-[14px] font-medium outline-none focus:border-navy focus:shadow-md focus:shadow-navy/5 transition-all"
-              />
-           </div>
-
-           <div onClick={() => router.push('/post')} className="bg-amber-50 rounded-[3rem] p-8 border border-amber-100/50 flex items-center justify-between group cursor-pointer hover:bg-amber-100/30 active:scale-95 transition-all">
-              <div className="space-y-1">
-                 <h3 className="text-[18px] font-bold text-amber-900 tracking-widest leading-none">Report an Item</h3>
-                 <p className="text-[13px] text-amber-700/60 font-medium">Found something? Let others know.</p>
-              </div>
-              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-amber-500 shadow-md shadow-amber-500/10 group-hover:scale-110 transition-transform">
-                 <Camera size={24} />
-              </div>
-           </div>
-        </section>
-
-        {/* 4. ITEM LIST */}
+      <div className="pt-24 px-6 space-y-10">
+        {/* ── CAMPUS RADAR ── */}
         <section className="space-y-6">
-           <div className="flex justify-between items-center">
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">Recently Found</h3>
-              <div className="flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Live Update</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-[21px] font-bold text-slate-900 tracking-tight">Campus Radar</h2>
+              <p className="text-[13px] font-medium text-[#94a3b8] mt-0.5">Lost items · Found items · Peer alerts</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Live</span>
               </div>
-           </div>
+              <button
+                onClick={() => setIsReportOpen(true)}
+                className="w-8 h-8 rounded-xl bg-[#111111] flex items-center justify-center text-white active:scale-95 transition-all shadow-sm"
+              >
+                <Plus size={15} />
+              </button>
+            </div>
+          </div>
 
-           <div className="grid grid-cols-2 gap-x-3 gap-y-10">
-              {FOUND_ITEMS.map((item) => (
-                <ProductCard
-                  key={item.id}
-                  item={{
-                    ...item,
-                    image_url: item.img,
-                    time_ago: item.time,
-                    subtitle: item.location,
-                    badge: item.status
-                  } as any}
-                  onClick={() => router.push('/marketplace')}
-                />
-              ))}
-           </div>
+          {/* Stacking the cards vertically and forcing them to be full width */}
+          <div className="flex flex-col gap-4 [&>div]:w-full!">
+            {displayRadar.map((item: any) => <RadarCard key={item.id} item={item} />)}
+          </div>
         </section>
-
-        {/* 5. HOW TO CLAIM */}
-        <section className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-8 text-center space-y-4">
-           <div className="w-12 h-12 rounded-full bg-white mx-auto flex items-center justify-center text-navy shadow-sm">
-              <CheckCircle2 size={24} />
-           </div>
-           <div className="space-y-1">
-              <h3 className="text-[17px] font-bold text-navy tracking-tight">How to Claim</h3>
-              <p className="text-[13px] text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">
-                 To get your item back, you need to show your Student ID for verification.
-              </p>
-           </div>
-           <button onClick={() => router.push('/pulse')} className="text-[11px] font-bold text-navy uppercase tracking-widest underline underline-offset-8 decoration-slate-200">
-              View Policies
-           </button>
-        </section>
-
       </div>
 
-      {/* FLOATING ACTION PILL */}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
-        <button onClick={() => router.push('/post')} className="bg-navy text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-md shadow-navy/40 hover:scale-105 active:scale-95 transition-all">
-          <Plus size={18} />
-          <span className="text-[11px] font-black uppercase tracking-widest text-nowrap">Report found item</span>
-        </button>
-      </div>
-
+      <AnimatePresence>
+        {isReportOpen && (
+          <ReportRadarModal onClose={() => setIsReportOpen(false)} />
+        )}
+      </AnimatePresence>
     </main>
   );
 }
