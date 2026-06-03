@@ -11,7 +11,7 @@ import {
 import { auth, db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { completeDelivery } from '@/app/actions/deliveryActions';
-import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection, query, where } from 'firebase/firestore';
 import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import MapErrorBoundary from '@/components/shared/MapErrorBoundary';
 
@@ -476,26 +476,34 @@ function ActiveRunGate() {
   const [payoutAmount, setPayoutAmount] = useState(0);
 
   useEffect(() => {
+    let unsubActive: (() => void) | null = null;
     const unsubAuth = auth.onAuthStateChanged((user) => {
        if (!user) { router.push('/auth'); return; }
-       const unsubSnapshot = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
-          if (docSnap.exists()) {
-             const data = docSnap.data();
-             const activeMission = data.current_missions?.[0];
-             if (activeMission) {
-                setMission(activeMission);
-             } else if (mission) {
-                // Was active but now empty -> completed or cancelled
-             } else {
-                router.push('/run/terminal');
-             }
+       const qActive = query(
+          collection(db, "orders"), 
+          where("runner_id", "==", user.uid), 
+          where("status", "in", ["PREPARING", "READY_FOR_PICKUP", "IN_TRANSIT", "PICKED_UP", "RUNNER_DELIVERING", "ARRIVED_AT_DESTINATION"])
+       );
+       unsubActive = onSnapshot(qActive, (snap) => {
+          if (!snap.empty) {
+             setMission({ id: snap.docs[0].id, ...snap.docs[0].data() });
+          } else {
+             setMission(null);
           }
           setLoading(false);
        });
-       return () => unsubSnapshot();
     });
-    return () => unsubAuth();
+    return () => {
+       unsubAuth();
+       if (unsubActive) unsubActive();
+    };
   }, [router]);
+
+  useEffect(() => {
+     if (!loading && !mission && !showSuccess) {
+        router.push('/run/terminal');
+     }
+  }, [loading, mission, showSuccess, router]);
 
   const handleMissionComplete = async (payout: number) => {
      if (!auth.currentUser) return;

@@ -26,9 +26,16 @@ const vendorIcon = L.divIcon({
 function MapResizer() {
   const map = useMap();
   React.useEffect(() => {
-    setTimeout(() => {
-      map.invalidateSize();
+    let isMounted = true;
+    const timeoutId = setTimeout(() => {
+      if (isMounted && map && map.getContainer()) {
+        map.invalidateSize();
+      }
     }, 200);
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [map]);
   return null;
 }

@@ -36,10 +36,16 @@ function MapController({ runnerPos, dropoffPos }: any) {
   }, [map, runnerPos, dropoffPos]);
 
   React.useEffect(() => {
+    let isMounted = true;
     const timer = setTimeout(() => {
-      map.invalidateSize();
+      if (isMounted && map && map.getContainer()) {
+        map.invalidateSize();
+      }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [map]);
 
   return null;
