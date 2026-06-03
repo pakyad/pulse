@@ -126,7 +126,7 @@ export default function FacilityBookingPage() {
            </div>
 
            <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4">
+              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-slate-900 mb-4">
                  <Clock size={20} />
               </div>
               <div>
@@ -193,7 +193,7 @@ export default function FacilityBookingPage() {
                        onClick={() => setSelectedDuration(time)}
                        className={`shrink-0 w-20 h-20 rounded-2xl border-2 transition-all active:scale-[0.95] flex flex-col items-center justify-center gap-0.5 ${
                          selectedDuration === time 
-                           ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-100' 
+                           ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-blue-100' 
                            : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'
                        }`}
                      >
@@ -232,7 +232,7 @@ export default function FacilityBookingPage() {
                  className={`w-full h-16 rounded-2xl flex items-center justify-center gap-4 font-bold text-base transition-all shadow-md ${
                    bookingSuccess 
                      ? 'bg-emerald-500 text-white shadow-emerald-100' 
-                     : 'bg-blue-600 text-white shadow-blue-100 active:scale-[0.98]'
+                     : 'bg-slate-900 text-white shadow-blue-100 active:scale-95'
                  }`}
                >
                  {isBooking ? (

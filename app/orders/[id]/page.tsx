@@ -147,14 +147,14 @@ function StatusKinetics({ status }: { status: string }) {
                 />
 
                 <g>
-                  <rect x="42" y="30" width="16" height="30" rx="8" fill="#000000" />
-                  <circle cx="50" cy="20" r="7" fill="#000000" />
+                  <rect x="42" y="30" width="16" height="30" rx="8" fill="slate-900" />
+                  <circle cx="50" cy="20" r="7" fill="slate-900" />
                   <path d="M 43 16 L 57 16 L 62 19 L 43 19 Z" fill="#f59e0b" />
                   
-                  <path d="M 45 60 L 45 82" stroke="#000000" strokeWidth="4.5" strokeLinecap="round" />
+                  <path d="M 45 60 L 45 82" stroke="slate-900" strokeWidth="4.5" strokeLinecap="round" />
                   
                   <motion.path
-                    stroke="#000000"
+                    stroke="slate-900"
                     strokeWidth="4.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -172,8 +172,8 @@ function StatusKinetics({ status }: { status: string }) {
                     }}
                   />
 
-                  <path d="M 42 36 L 36 44 L 42 48" stroke="#000000" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M 58 36 L 64 42 L 54 44" stroke="#000000" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M 42 36 L 36 44 L 42 48" stroke="slate-900" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M 58 36 L 64 42 L 54 44" stroke="slate-900" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
 
                   <rect x="51" y="42" width="6" height="8" rx="1.5" fill="#f59e0b" />
                   <motion.circle
@@ -245,10 +245,10 @@ function StatusKinetics({ status }: { status: string }) {
                   animate={{ y: [0, 1.5, 0] }}
                   transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                 >
-                  <rect x="42" y="32" width="16" height="26" rx="8" fill="#000000" />
-                  <circle cx="50" cy="22" r="7" fill="#000000" />
+                  <rect x="42" y="32" width="16" height="26" rx="8" fill="slate-900" />
+                  <circle cx="50" cy="22" r="7" fill="slate-900" />
                   <path d="M 43 18 L 57 18 L 62 21 L 43 21 Z" fill="#f59e0b" />
-                  <path d="M 44 40 L 48 48 L 56 40" stroke="#000000" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M 44 40 L 48 48 L 56 40" stroke="slate-900" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
                 </motion.g>
               </svg>
             </div>
@@ -309,12 +309,12 @@ function StatusKinetics({ status }: { status: string }) {
                 >
                   <ellipse cx="50" cy="82" rx="12" ry="2" fill="#e2e8f0" />
 
-                  <rect x="42" y="32" width="16" height="28" rx="8" fill="#000000" />
-                  <circle cx="50" cy="22" r="7" fill="#000000" />
+                  <rect x="42" y="32" width="16" height="28" rx="8" fill="slate-900" />
+                  <circle cx="50" cy="22" r="7" fill="slate-900" />
                   <path d="M 43 18 L 57 18 L 62 21 L 43 21 Z" fill="#f59e0b" />
                   
                   <motion.path
-                    stroke="#000000"
+                    stroke="slate-900"
                     strokeWidth="4.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -334,7 +334,7 @@ function StatusKinetics({ status }: { status: string }) {
                   />
 
                   <motion.path
-                    stroke="#000000"
+                    stroke="slate-900"
                     strokeWidth="4.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -354,7 +354,7 @@ function StatusKinetics({ status }: { status: string }) {
                   />
 
                   <motion.path
-                    stroke="#000000"
+                    stroke="slate-900"
                     strokeWidth="4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -429,12 +429,12 @@ function StatusKinetics({ status }: { status: string }) {
                     transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
                   />
 
-                  <rect x="42" y="30" width="16" height="30" rx="8" fill="#000000" />
-                  <circle cx="50" cy="20" r="7" fill="#000000" />
+                  <rect x="42" y="30" width="16" height="30" rx="8" fill="slate-900" />
+                  <circle cx="50" cy="20" r="7" fill="slate-900" />
                   <path d="M 43 16 L 57 16 L 62 19 L 43 19 Z" fill="#f59e0b" />
                   
                   <motion.path
-                    stroke="#000000"
+                    stroke="slate-900"
                     strokeWidth="4.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -449,7 +449,7 @@ function StatusKinetics({ status }: { status: string }) {
                   />
 
                   <motion.path
-                    stroke="#000000"
+                    stroke="slate-900"
                     strokeWidth="4.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -463,8 +463,8 @@ function StatusKinetics({ status }: { status: string }) {
                     transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
                   />
 
-                  <path d="M 42 36 L 30 20" stroke="#000000" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M 58 36 L 70 20" stroke="#000000" strokeWidth="4" strokeLinecap="round" />
+                  <path d="M 42 36 L 30 20" stroke="slate-900" strokeWidth="4" strokeLinecap="round" />
+                  <path d="M 58 36 L 70 20" stroke="slate-900" strokeWidth="4" strokeLinecap="round" />
                 </motion.g>
               </svg>
             </div>
@@ -602,7 +602,7 @@ export default function LiveOrderPage() {
         <ShieldAlert size={32} />
       </div>
       <p className="text-[14px] font-bold text-[#94a3b8]">Order not found</p>
-      <button onClick={() => router.push('/me/orders')} className="h-12 px-8 bg-blue-600 text-white rounded-xl text-[13px] font-bold shadow-md shadow-slate-900/10 active:scale-95 transition-all">
+      <button onClick={() => router.push('/me/orders')} className="h-12 px-8 bg-slate-900 text-white rounded-xl text-[13px] font-bold shadow-md shadow-slate-900/10 active:scale-95 transition-all">
         Back to Orders
       </button>
     </div>
@@ -632,7 +632,7 @@ export default function LiveOrderPage() {
   const showBuyerMap = isMoving && !!order.runner_location;
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-36 relative">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-36 relative">
 
       {/* ── VIBRANT MAP HERO ── */}
       <div className="absolute top-0 left-0 right-0 h-[380px] z-0 overflow-hidden">
@@ -672,7 +672,7 @@ export default function LiveOrderPage() {
             <svg className="absolute inset-0 w-full h-full select-none pointer-events-none" viewBox="0 0 400 240">
               {progress > 0 && progress < 1 && (
                 <g>
-                  <circle cx={runnerPos.x} cy={runnerPos.y} r="7" fill="#000000" className="shadow-md" />
+                  <circle cx={runnerPos.x} cy={runnerPos.y} r="7" fill="slate-900" className="shadow-md" />
                   <circle cx={runnerPos.x} cy={runnerPos.y} r="2.5" fill="#ffffff" className={isClose ? 'animate-ping' : 'animate-pulse'} />
                 </g>
               )}
@@ -697,7 +697,7 @@ export default function LiveOrderPage() {
                <div className="relative">
                  <div className="absolute -left-[19.5px] top-[4px] w-2 h-2 rounded-full bg-amber-500" />
                  <div className="flex items-baseline gap-2">
-                   <span className="text-[12px] font-bold text-[#000000]">{order.seller_name || 'Merchant'}</span>
+                   <span className="text-[12px] font-bold text-slate-900">{order.seller_name || 'Merchant'}</span>
                    <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Pickup</span>
                  </div>
                  <p className="text-[10px] font-medium text-slate-400 mt-0.5 truncate">{order.pickup_location || 'Campus Shop'}</p>
@@ -707,7 +707,7 @@ export default function LiveOrderPage() {
                <div className="relative">
                  <div className="absolute -left-[19.5px] top-[4px] w-2 h-2 rounded-full bg-emerald-500" />
                  <div className="flex items-baseline gap-2">
-                   <span className="text-[12px] font-bold text-[#000000]">{order.buyer_name || 'You'}</span>
+                   <span className="text-[12px] font-bold text-slate-900">{order.buyer_name || 'You'}</span>
                    <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Meet</span>
                  </div>
                  <p className="text-[10px] font-medium text-slate-400 mt-0.5 truncate">
@@ -731,7 +731,7 @@ export default function LiveOrderPage() {
         <div className="flex items-center gap-3 pointer-events-auto">
           <BackButton />
           <div className="flex flex-col justify-center">
-            <p className="text-[13px] font-black text-[#000000] tracking-tight leading-tight">Order Details</p>
+            <p className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">Order Details</p>
             <p className="text-[10px] font-black text-amber-600 tracking-wider leading-none mt-0.5">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>
           </div>
         </div>
@@ -766,7 +766,7 @@ export default function LiveOrderPage() {
         {/* ── PAYMENT RECEIPT ── */}
         <section className="space-y-3">
           <div className="space-y-0.5">
-            <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Payment Receipt</h2>
+            <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Payment Receipt</h2>
           </div>
           <div className="bg-slate-50 border border-slate-100 rounded-xl divide-y divide-slate-100">
             {/* Item Summary */}
@@ -775,10 +775,10 @@ export default function LiveOrderPage() {
               <div className="text-right pl-4">
                 {order.items?.length > 0 ? (
                   order.items.map((it: any, i: number) => (
-                    <p key={i} className="text-[13px] font-bold text-[#000000]">{it.qty}x {it.title}</p>
+                    <p key={i} className="text-[13px] font-bold text-slate-900">{it.qty}x {it.title}</p>
                   ))
                 ) : (
-                  <p className="text-[13px] font-bold text-[#000000]">1x {order.title || 'Pulse Order'}</p>
+                  <p className="text-[13px] font-bold text-slate-900">1x {order.title || 'Pulse Order'}</p>
                 )}
               </div>
             </div>
@@ -786,11 +786,11 @@ export default function LiveOrderPage() {
             {/* Transaction Metadata */}
             <div className="flex items-center justify-between px-4 py-3.5">
               <span className="text-[13px] font-medium text-[#94a3b8]">Payment Method</span>
-              <span className="text-[13px] font-bold text-[#000000]">FPX Online Banking</span>
+              <span className="text-[13px] font-bold text-slate-900">FPX Online Banking</span>
             </div>
             <div className="flex items-center justify-between px-4 py-3.5">
               <span className="text-[13px] font-medium text-[#94a3b8]">Order Time</span>
-              <span className="text-[13px] font-bold text-[#000000]">
+              <span className="text-[13px] font-bold text-slate-900">
                 {order.created_at?.toDate 
                   ? order.created_at.toDate().toLocaleString('en-US', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
                   : new Date(order.created_at || Date.now()).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
@@ -801,20 +801,20 @@ export default function LiveOrderPage() {
             <div className="px-4 py-3.5 space-y-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-[13px] font-medium text-[#94a3b8]">Subtotal</span>
-                <span className="text-[13px] font-bold text-[#000000]">RM {Number(order.price || 0).toFixed(2)}</span>
+                <span className="text-[13px] font-bold text-slate-900">RM {Number(order.price || 0).toFixed(2)}</span>
               </div>
               {order.delivery_type === 'RUNNER' && (
                 <div className="flex items-center justify-between">
                   <span className="text-[13px] font-medium text-[#94a3b8]">Runner Fee</span>
-                  <span className="text-[13px] font-bold text-[#000000]">RM {Number((order.total || order.price) - order.price).toFixed(2)}</span>
+                  <span className="text-[13px] font-bold text-slate-900">RM {Number((order.total || order.price) - order.price).toFixed(2)}</span>
                 </div>
               )}
             </div>
 
             {/* Total Paid */}
             <div className="flex items-center justify-between px-4 py-3.5 bg-slate-100/50 rounded-b-xl">
-              <span className="text-[13px] font-bold text-[#000000]">Total Paid</span>
-              <span className="text-[15px] font-black text-[#000000]">RM {Number(order.total || order.price).toFixed(2)}</span>
+              <span className="text-[13px] font-bold text-slate-900">Total Paid</span>
+              <span className="text-[15px] font-black text-slate-900">RM {Number(order.total || order.price).toFixed(2)}</span>
             </div>
           </div>
         </section>
@@ -822,10 +822,10 @@ export default function LiveOrderPage() {
         {/* ── HANDSHAKE NOTICE ── */}
         <section className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
-            <Info size={14} className="text-[#000000]" />
+            <Info size={14} className="text-slate-900" />
           </div>
           <div className="space-y-0.5">
-            <p className="text-[12px] font-bold text-[#000000]">Help & Returns</p>
+            <p className="text-[12px] font-bold text-slate-900">Help & Returns</p>
             <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">
               If there is a problem, our team will check the delivery data. We process returns within 24 hours.
             </p>
@@ -838,7 +838,7 @@ export default function LiveOrderPage() {
             <button
               onClick={() => setShowCancelConfirm(true)}
               disabled={cancelling}
-              className="w-full h-12 border border-red-100 text-[13px] font-bold text-red-400 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-30"
+              className="w-full h-12 border border-red-100 text-[13px] font-bold text-red-400 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-30"
             >
               {cancelling ? (
                 <span className="w-4 h-4 border-2 border-red-200 border-t-red-400 rounded-full animate-spin" />
@@ -857,13 +857,13 @@ export default function LiveOrderPage() {
         {!isCancelled && !isPending && (
           <section className="space-y-4 pt-4 border-t border-slate-50">
             <div className="flex items-center gap-3">
-               <div className="w-1.5 h-1.5 rounded-full bg-[#000000]" />
-               <h3 className="text-[11px] font-black text-[#000000] uppercase tracking-widest">Support & Resolution</h3>
+               <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />
+               <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Support & Resolution</h3>
             </div>
             
             <div className="p-6 bg-white border border-slate-100 rounded-2xl space-y-4">
                <div className="space-y-1">
-                  <p className="text-[14px] font-bold text-[#000000]">Need help?</p>
+                  <p className="text-[14px] font-bold text-slate-900">Need help?</p>
                   <p className="text-[11px] text-[#94a3b8] leading-relaxed">
                      You can report any issues within 24 hours after your order arrives.
                   </p>
@@ -872,7 +872,7 @@ export default function LiveOrderPage() {
                <button
                  onClick={() => setIsReportOpen(true)}
                  disabled={!order.handshake?.seller_confirmed && !isDone}
-                 className="w-full h-14 bg-white border border-slate-100 text-[13px] font-bold text-[#000000] rounded-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-sm disabled:opacity-30"
+                 className="w-full h-14 bg-white border border-slate-100 text-[13px] font-bold text-slate-900 rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-sm disabled:opacity-30"
                >
                  <ShieldAlert size={18} className="text-red-500" />
                  Report Issue or Refund
@@ -886,7 +886,7 @@ export default function LiveOrderPage() {
           <section className="space-y-4 pt-2 border-t border-slate-100">
             <div className="flex items-center gap-2">
               <Star size={14} className="text-amber-400" fill="currentColor" />
-              <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Rate Your Experience</h2>
+              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Rate Your Experience</h2>
             </div>
             <PostDeliveryReview order={order} userId={userId} />
           </section>
@@ -899,7 +899,7 @@ export default function LiveOrderPage() {
         <div className="px-6 pb-20">
           <button 
             onClick={() => router.push('/marketplace')}
-            className="w-full h-14 bg-white border border-slate-100 text-[#94a3b8] rounded-2xl font-bold text-[12px] uppercase tracking-[0.2em] hover:text-[#000000] hover:border-blue-600 transition-all active:scale-95"
+            className="w-full h-14 bg-white border border-slate-100 text-[#94a3b8] rounded-2xl font-bold text-[12px] uppercase tracking-[0.2em] hover:text-slate-900 hover:border-slate-900 transition-all active:scale-95"
           >
             Return
           </button>
@@ -933,7 +933,7 @@ export default function LiveOrderPage() {
               </div>
               
               <div className="space-y-2">
-                <h1 className="text-[28px] font-black tracking-tight text-[#000000] leading-none">Delivered!</h1>
+                <h1 className="text-[28px] font-black tracking-tight text-slate-900 leading-none">Delivered!</h1>
                 <p className="text-[12px] text-slate-400 font-medium leading-relaxed">Your order is complete.<br/>Enjoy your item!</p>
               </div>
             </motion.div>
@@ -957,7 +957,7 @@ export default function LiveOrderPage() {
             >
               <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto" />
               <div className="space-y-1">
-                <h2 className="text-[17px] font-bold text-[#000000] tracking-tight">Cancel this order?</h2>
+                <h2 className="text-[17px] font-bold text-slate-900 tracking-tight">Cancel this order?</h2>
                 <p className="text-[12px] font-medium text-[#94a3b8] leading-relaxed">
                   This cannot be undone. Your payment will be reviewed for refund.
                 </p>
@@ -971,14 +971,14 @@ export default function LiveOrderPage() {
                 <button
                   onClick={handleCancelOrder}
                   disabled={cancelling}
-                  className="w-full h-12 bg-red-500 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="w-full h-12 bg-red-500 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
                 >
                   {cancelling ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Yes, Cancel Order'}
                 </button>
                 <button
                   onClick={() => setShowCancelConfirm(false)}
                   disabled={cancelling}
-                  className="w-full h-12 border border-slate-100 text-[#94a3b8] font-bold text-[13px] rounded-2xl active:scale-[0.98] transition-all"
+                  className="w-full h-12 border border-slate-100 text-[#94a3b8] font-bold text-[13px] rounded-2xl active:scale-95 transition-all"
                 >
                   Keep Order
                 </button>

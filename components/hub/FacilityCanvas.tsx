@@ -35,7 +35,7 @@ export default function FacilityCanvas({ slots, selectedSlotId, onSelectSlot }: 
               whileTap={{ scale: 0.98 }}
               className={`relative h-20 rounded-xl border flex flex-col items-center justify-center transition-all ${
                 isActive 
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-sm' 
+                  ? 'bg-slate-900 border-slate-900 text-white shadow-sm' 
                   : isAvailable 
                     ? 'bg-white border-slate-100 text-slate-600 hover:border-slate-300' 
                     : 'bg-slate-50 border-slate-50 text-slate-300 cursor-not-allowed'

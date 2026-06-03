@@ -128,7 +128,7 @@ export default function CreateListingPage() {
   const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting;
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
       {/* ── NAV (matches Marketplace page nav exactly) ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -146,7 +146,7 @@ export default function CreateListingPage() {
         {/* ── SECTION: CLASSIFICATION (matches Marketplace filter pill pattern) ── */}
         <section className="space-y-4">
           <div className="space-y-0.5">
-            <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">What are you listing?</h2>
+            <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">What are you listing?</h2>
             <p className="text-[11px] font-medium text-[#94a3b8]">Choose the category that fits your item.</p>
           </div>
 
@@ -160,7 +160,7 @@ export default function CreateListingPage() {
                   onClick={() => { setSelectedCategory(id); setSubcategory(''); }}
                   className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                     isActive
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                      ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
                       : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                   }`}
                 >
@@ -184,7 +184,7 @@ export default function CreateListingPage() {
             <section className="space-y-4 pt-2 border-t border-slate-100">
               <div className="flex justify-between items-center">
                 <div className="space-y-0.5">
-                  <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Photos</h2>
+                  <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Photos</h2>
                   <p className="text-[11px] font-medium text-[#94a3b8]">Add up to 10 images.</p>
                 </div>
                 <span className="text-[11px] font-bold text-[#94a3b8]">{images.length}/10</span>
@@ -204,7 +204,7 @@ export default function CreateListingPage() {
                     <img src={img} className="w-full h-full object-cover" />
                     <button
                       onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
-                      className="absolute inset-0 bg-blue-600/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
+                      className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -216,21 +216,21 @@ export default function CreateListingPage() {
             {/* ── SECTION: NAME ── */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Name</h2>
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Name</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Keep it short and clear.</p>
               </div>
               <input
                 placeholder="e.g. Calculus Textbook, Canon EOS..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-[#000000] placeholder:text-slate-200 focus:outline-none focus:border-blue-600 transition-colors"
+                className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-slate-900 placeholder:text-slate-200 focus:outline-none focus:border-slate-900 transition-colors"
               />
             </section>
 
             {/* ── SECTION: DETAILS ── */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Description</h2>
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Description</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Condition, reason for selling, any notes.</p>
               </div>
               <textarea
@@ -238,24 +238,24 @@ export default function CreateListingPage() {
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-medium text-[#000000] placeholder:text-slate-200 focus:outline-none focus:border-blue-600 transition-colors resize-none leading-relaxed"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-medium text-slate-900 placeholder:text-slate-200 focus:outline-none focus:border-slate-900 transition-colors resize-none leading-relaxed"
               />
             </section>
 
             {/* ── SECTION: PRICE ── */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Price</h2>
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Price</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Set your asking price in Ringgit.</p>
               </div>
-              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-blue-600 transition-colors">
+              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-slate-900 transition-colors">
                 <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">RM</span>
                 <input
                   type="number"
                   placeholder="0.00"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-[#000000] placeholder:text-slate-200 focus:outline-none"
+                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-slate-900 placeholder:text-slate-200 focus:outline-none"
                 />
               </div>
 
@@ -323,17 +323,17 @@ export default function CreateListingPage() {
             {/* ── SECTION: STOCK ── */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Stock</h2>
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Stock</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">How many do you have? Set to 0 to mark as sold out.</p>
               </div>
-              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-blue-600 transition-colors">
+              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-slate-900 transition-colors">
                 <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">Qty</span>
                 <input
                   type="number"
                   placeholder="e.g. 5"
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
-                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-[#000000] placeholder:text-slate-200 focus:outline-none"
+                  className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-slate-900 placeholder:text-slate-200 focus:outline-none"
                 />
               </div>
               {stock !== '' && parseInt(stock, 10) === 0 && (
@@ -344,7 +344,7 @@ export default function CreateListingPage() {
             {/* ── SECTION: SMART CATEGORY FIELDS ── */}
             <section className="pt-2 border-t border-slate-100">
               <div className="space-y-0.5 mb-6">
-                <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">More Details</h2>
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">More Details</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">
                   Specific information about this type of listing.
                 </p>
@@ -365,7 +365,7 @@ export default function CreateListingPage() {
                 onClick={handlePost}
                 className={`w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
                   canPost && !isUploading
-                    ? 'bg-blue-600 text-white active:scale-[0.98] shadow-sm'
+                    ? 'bg-slate-900 text-white active:scale-95 shadow-sm'
                     : 'bg-slate-50 text-slate-200 border border-slate-100'
                 }`}
               >

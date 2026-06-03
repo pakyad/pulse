@@ -55,7 +55,7 @@ export default function SwipeToReady({ orderId, onSuccess }: { orderId: string, 
 
   if (isDone) {
     return (
-      <div className="w-full h-11 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-[11px] tracking-widest uppercase shadow-sm shadow-slate-900/5 transition-all">
+      <div className="w-full h-11 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-[11px] tracking-widest uppercase shadow-sm shadow-slate-900/5 transition-all">
         <CheckCircle2 size={16} className="mr-2 text-emerald-400" /> Ready for Pickup
       </div>
     );
@@ -78,7 +78,7 @@ export default function SwipeToReady({ orderId, onSuccess }: { orderId: string, 
         animate={controls}
         onDragEnd={handleDragEnd}
         style={{ x }}
-        className="absolute left-1 top-1 bottom-1 w-10 bg-white rounded-lg shadow-sm border border-slate-100 flex items-center justify-center text-[#000000] z-10 cursor-grab active:cursor-grabbing hover:bg-slate-50 transition-colors"
+        className="absolute left-1 top-1 bottom-1 w-10 bg-white rounded-lg shadow-sm border border-slate-100 flex items-center justify-center text-slate-900 z-10 cursor-grab active:cursor-grabbing hover:bg-slate-50 transition-colors"
       >
         {isLoading ? <Loader2 size={16} className="animate-spin text-slate-400" /> : <ChevronRight size={16} strokeWidth={2.5} />}
       </motion.div>

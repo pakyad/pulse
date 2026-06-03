@@ -80,7 +80,7 @@ export default function MessagesPage() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-[#000000] w-full max-w-2xl mx-auto">
+    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900 w-full max-w-2xl mx-auto">
       
       <section className="px-6 pt-24 pb-4">
         <div className="mb-6">
@@ -89,7 +89,7 @@ export default function MessagesPage() {
         </div>
 
         <div className="relative group">
-           <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#000000] transition-colors" />
+           <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
            <input 
               type="text" 
               placeholder="Search conversations..."
@@ -117,7 +117,7 @@ export default function MessagesPage() {
                        <img src={otherParticipant.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherParticipant.name}`} className="w-full h-full object-cover" alt=""/>
                     </div>
                     {chat.badge === 'commerce' && (
-                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
+                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
                           <ShoppingBag size={11} strokeWidth={3} />
                        </div>
                     )}
@@ -127,14 +127,14 @@ export default function MessagesPage() {
                        </div>
                     )}
                     {chat.badge === 'message' && (
-                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
+                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
                           <MessageSquare size={11} strokeWidth={3} />
                        </div>
                     )}
                  </div>
 
                  <div className="flex-1 min-w-0 pt-0.5">
-                    <h3 className={`text-[15px] tracking-tight mb-0.5 truncate ${isUnread ? 'text-[#000000] font-bold' : 'text-slate-800 font-bold'}`}>
+                    <h3 className={`text-[15px] tracking-tight mb-0.5 truncate ${isUnread ? 'text-slate-900 font-bold' : 'text-slate-800 font-bold'}`}>
                        {otherParticipant.name}
                     </h3>
                     
@@ -142,17 +142,17 @@ export default function MessagesPage() {
                        {chat.metadata?.title || 'GENERAL CHAT'}
                     </p>
                     
-                    <p className={`text-[13px] leading-tight truncate pr-2 ${isUnread ? 'text-[#000000] font-bold' : 'text-[#94a3b8] font-medium'}`}>
+                    <p className={`text-[13px] leading-tight truncate pr-2 ${isUnread ? 'text-slate-900 font-bold' : 'text-[#94a3b8] font-medium'}`}>
                        {chat.last_message_text || 'No messages yet'}
                     </p>
                  </div>
 
                  <div className="shrink-0 flex flex-col items-end pt-1">
-                    <span className={`text-[11px] font-black mb-3 ${isUnread ? 'text-blue-500' : 'text-[#94a3b8]'}`}>
+                    <span className={`text-[11px] font-black mb-3 ${isUnread ? 'text-slate-900' : 'text-[#94a3b8]'}`}>
                        {chat.last_message_time || 'Just now'}
                     </span>
                     {isUnread && (
-                       <div className="w-2.5 h-2.5 bg-blue-500 rounded-full mr-1" />
+                       <div className="w-2.5 h-2.5 bg-slate-900 rounded-full mr-1" />
                     )}
                  </div>
               </motion.button>

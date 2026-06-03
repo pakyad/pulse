@@ -103,7 +103,7 @@ export default function MedHub() {
         {/* 4. MEDICAL SERVICES */}
         <section className="grid grid-cols-2 gap-4">
            {[
-             { label: 'Book Consult', sub: 'MIIT Clinic', icon: Calendar, color: 'bg-blue-50 text-blue-600' },
+             { label: 'Book Consult', sub: 'MIIT Clinic', icon: Calendar, color: 'bg-blue-50 text-slate-900' },
              { label: 'Pharmacy', sub: 'E-Prescription', icon: Pill, color: 'bg-emerald-50 text-emerald-600' },
              { label: 'Health Record', sub: 'Private & Secure', icon: Activity, color: 'bg-violet-50 text-violet-600' },
              { label: 'Find Clinic', sub: 'Campus Map', icon: MapPin, color: 'bg-amber-50 text-amber-600' },

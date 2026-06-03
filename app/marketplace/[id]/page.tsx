@@ -32,7 +32,7 @@ function DomainRegistry({ item }: { item: any }) {
     if (item.metadata.pickup_location) rows.push({
       label: 'Pickup Point',
       value: (
-        <span className="flex items-center gap-1.5 font-bold text-[13px] text-[#000000]">
+        <span className="flex items-center gap-1.5 font-bold text-[13px] text-slate-900">
           <MapPin size={12} className="text-[#94a3b8]" />{item.metadata.pickup_location}
         </span>
       )
@@ -48,7 +48,7 @@ function DomainRegistry({ item }: { item: any }) {
     if (item.metadata.available_slots) rows.push({
       label: 'Availability',
       value: (
-        <span className="px-3 py-1 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+        <span className="px-3 py-1 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
           {item.metadata.available_slots}
         </span>
       )
@@ -79,7 +79,7 @@ function DomainRegistry({ item }: { item: any }) {
   return (
     <section className="space-y-4">
       <div className="space-y-0.5">
-        <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">{category.label}</h2>
+        <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">{category.label}</h2>
         <p className="text-[11px] font-medium text-[#94a3b8]">Details provided by seller</p>
       </div>
       <div className="bg-slate-50 border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden">
@@ -87,7 +87,7 @@ function DomainRegistry({ item }: { item: any }) {
           <div key={i} className="flex items-center justify-between px-6 py-4 gap-4">
             <span className="text-[13px] font-medium text-[#94a3b8] shrink-0">{row.label}</span>
             {typeof row.value === 'string'
-              ? <span className="text-[13px] font-bold text-[#000000] text-right">{row.value}</span>
+              ? <span className="text-[13px] font-bold text-slate-900 text-right">{row.value}</span>
               : row.value}
           </div>
         ))}
@@ -183,7 +183,7 @@ export default function ItemDetailsPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#000000] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[slate-900] rounded-full animate-spin" />
     </div>
   );
   if (!item) return (
@@ -203,7 +203,7 @@ export default function ItemDetailsPage() {
   const isSoldOut = item.stock_count !== undefined && item.stock_count !== null && item.stock_count <= 0;
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
       {/* ── NAV (Dynamic Scroll-Adaptive) ── */}
       <nav className={`fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between transition-all duration-700 ease-out pointer-events-none ${isScrolled ? 'bg-white/95 backdrop-blur-xl border-b-[0.5px] border-slate-100' : 'bg-transparent'}`}>
@@ -256,7 +256,7 @@ export default function ItemDetailsPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-20 left-6 right-6 z-100 bg-blue-600 text-white px-4 py-3 rounded-full flex items-center justify-between shadow-md"
+            className="fixed top-20 left-6 right-6 z-100 bg-slate-900 text-white px-4 py-3 rounded-full flex items-center justify-between shadow-md"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
@@ -307,7 +307,7 @@ export default function ItemDetailsPage() {
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
-                className={`h-1 rounded-full transition-all ${i === activeImage ? 'w-6 bg-blue-600' : 'w-1.5 bg-blue-600/20'}`}
+                className={`h-1 rounded-full transition-all ${i === activeImage ? 'w-6 bg-slate-900' : 'w-1.5 bg-slate-900/20'}`}
               />
             ))}
           </div>
@@ -316,7 +316,7 @@ export default function ItemDetailsPage() {
         {/* Category pill (bottom-left) */}
         {category && (
           <div className="absolute bottom-4 left-4">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-md border border-slate-100 rounded-full text-[10px] font-bold text-[#000000] shadow-sm">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-md border border-slate-100 rounded-full text-[10px] font-bold text-slate-900 shadow-sm">
               <CategoryIcon size={11} strokeWidth={2} />
               {category.label}
             </span>
@@ -330,7 +330,7 @@ export default function ItemDetailsPage() {
         {/* ── IDENTITY ── */}
         <section className="space-y-4">
           <div className="flex items-start justify-between gap-4">
-            <h1 className="text-[22px] font-bold text-[#000000] leading-tight tracking-tight flex-1">
+            <h1 className="text-[22px] font-bold text-slate-900 leading-tight tracking-tight flex-1">
               {item.title}
             </h1>
             {isSoldOut ? (
@@ -350,7 +350,7 @@ export default function ItemDetailsPage() {
 
           <div className="flex items-baseline justify-between gap-3">
             <div className="flex items-baseline gap-3">
-              <span className="text-[28px] font-bold text-[#000000] tracking-tighter">
+              <span className="text-[28px] font-bold text-slate-900 tracking-tighter">
                 RM{Number(item.price).toFixed(2)}
               </span>
               {item.subcategory && (
@@ -375,14 +375,14 @@ export default function ItemDetailsPage() {
         <section className="py-4 border-y border-slate-100 space-y-3">
           <button 
              onClick={() => router.push(`/user/${item.seller_id}`)}
-             className="w-full flex items-center justify-between group active:scale-[0.98] transition-all text-left"
+             className="w-full flex items-center justify-between group active:scale-95 transition-all text-left"
           >
             <div className="flex items-center gap-3">
                <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
                   <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.seller_name || 'Pulse'}`} className="w-full h-full object-cover" />
                </div>
                <div>
-                  <p className="text-[13px] font-bold text-[#000000] group-hover:text-blue-600 transition-colors">{item.seller_name || 'Pulse Student'}</p>
+                  <p className="text-[13px] font-bold text-slate-900 group-hover:text-slate-900 transition-colors">{item.seller_name || 'Pulse Student'}</p>
                   <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500">
                      <Star size={12} fill="currentColor" />
                      <span>{seller?.averageRating || '5.0'}</span>
@@ -390,7 +390,7 @@ export default function ItemDetailsPage() {
                   </div>
                </div>
             </div>
-            <ChevronRight size={18} className="text-slate-200 group-hover:text-blue-600 transition-colors" />
+            <ChevronRight size={18} className="text-slate-200 group-hover:text-slate-900 transition-colors" />
           </button>
           {/* Subtle report link — non-intrusive, placed below seller info */}
           <div className="flex justify-end">
@@ -405,12 +405,12 @@ export default function ItemDetailsPage() {
         <section className="space-y-6 pt-2 border-t border-slate-100">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Community Feedback</h2>
+              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Community Feedback</h2>
               <p className="text-[11px] font-medium text-[#94a3b8]">Verified institutional reviews</p>
             </div>
             <button 
               onClick={() => router.push(`/user/${item.seller_id}/reviews`)}
-              className="text-[12px] font-bold text-[#000000] opacity-40 hover:opacity-100 transition-opacity active:scale-95">
+              className="text-[12px] font-bold text-slate-900 opacity-40 hover:opacity-100 transition-opacity active:scale-95">
               View All
             </button>
           </div>
@@ -421,13 +421,13 @@ export default function ItemDetailsPage() {
                 <div className="flex items-center justify-between">
                    <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-white border border-slate-100 flex items-center justify-center text-[10px] font-bold">AZ</div>
-                      <span className="text-[12px] font-bold text-[#000000]">amirul.z</span>
+                      <span className="text-[12px] font-bold text-slate-900">amirul.z</span>
                    </div>
                    <div className="flex items-center gap-0.5 text-amber-400">
                       {[1,2,3,4,5].map(s => <Star key={s} size={10} fill="currentColor" />)}
                    </div>
                 </div>
-                <p className="text-[13px] font-medium text-[#000000]/70 leading-relaxed italic">
+                <p className="text-[13px] font-medium text-slate-900/70 leading-relaxed italic">
                   "Item arrived in perfect condition. Seller was very responsive and the transaction was smooth."
                 </p>
              </div>
@@ -438,10 +438,10 @@ export default function ItemDetailsPage() {
         {item.description && (
           <section className="space-y-3 pt-2 border-t border-slate-100">
             <div className="space-y-0.5">
-              <h2 className="text-[14px] font-bold text-[#000000] tracking-tight">Description</h2>
+              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Description</h2>
               <p className="text-[11px] font-medium text-[#94a3b8]">From the seller</p>
             </div>
-            <p className="text-[14px] font-medium text-[#000000]/70 leading-relaxed">{item.description}</p>
+            <p className="text-[14px] font-medium text-slate-900/70 leading-relaxed">{item.description}</p>
           </section>
         )}
 
@@ -449,10 +449,10 @@ export default function ItemDetailsPage() {
         {item.category === 'SERVICES' && (
           <section className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-4">
             <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm">
-              <ShieldCheck size={16} className="text-[#000000]" />
+              <ShieldCheck size={16} className="text-slate-900" />
             </div>
             <div className="space-y-1">
-              <p className="text-[13px] font-bold text-[#000000]">Handshake Protected</p>
+              <p className="text-[13px] font-bold text-slate-900">Handshake Protected</p>
               <p className="text-[12px] font-medium text-[#94a3b8] leading-relaxed">
                 Payment is held securely until you confirm the service is done. Only you can close this transaction.
               </p>
@@ -464,7 +464,7 @@ export default function ItemDetailsPage() {
         <section className="space-y-3 pt-4">
           <button 
              onClick={handleMessageSeller}
-             className="w-full h-14 border border-slate-100 bg-white text-[#000000] hover:bg-slate-50 font-bold text-[13px] tracking-tight rounded-full active:scale-[0.98] transition-all shadow-sm">
+             className="w-full h-14 border border-slate-100 bg-white text-slate-900 hover:bg-slate-50 font-bold text-[13px] tracking-tight rounded-full active:scale-95 transition-all shadow-sm">
             Message Seller
           </button>
         </section>
@@ -483,7 +483,7 @@ export default function ItemDetailsPage() {
           <button
             disabled={isSoldOut}
             onClick={handleAddToCart}
-            className="h-[52px] px-6 border border-slate-100 bg-slate-50 text-[#000000] font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-30"
+            className="h-[52px] px-6 border border-slate-100 bg-slate-50 text-slate-900 font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-30"
           >
             <ShoppingCart size={16} />
             {isSoldOut ? 'Out of Stock' : 'Add to Cart'}
@@ -491,7 +491,7 @@ export default function ItemDetailsPage() {
           <button
             disabled={isSoldOut}
             onClick={() => router.push(`/marketplace/${id}/checkout`)}
-            className="flex-1 h-[52px] bg-blue-600 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20"
+            className="flex-1 h-[52px] bg-slate-900 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20"
           >
             {isSoldOut ? 'Sold Out' : item.category === 'SERVICES' ? 'Book Now' : 'Buy Now'}
             {!isSoldOut && <ArrowUpRight size={16} />}

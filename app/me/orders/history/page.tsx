@@ -47,10 +47,10 @@ function HistoryCard({ order, onClick }: { order: any; onClick: () => void }) {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-bold text-[#000000] truncate">{order.title}</p>
+          <p className="text-[14px] font-bold text-slate-900 truncate">{order.title}</p>
           <p className="text-[11px] font-medium text-[#94a3b8]">{order.seller_name || 'Pulse Student'}</p>
         </div>
-        <p className="text-[14px] font-bold text-[#000000] shrink-0">RM {Number(order.price).toFixed(2)}</p>
+        <p className="text-[14px] font-bold text-slate-900 shrink-0">RM {Number(order.price).toFixed(2)}</p>
       </div>
     </div>
   );
@@ -91,12 +91,12 @@ export default function OrderHistoryPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#000000] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[slate-900] rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -117,7 +117,7 @@ export default function OrderHistoryPage() {
               onClick={() => setFilter(f)}
               className={`h-[32px] px-4 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
                 filter === f
-                  ? 'bg-slate-50 border-slate-400 text-[#000000]'
+                  ? 'bg-slate-50 border-slate-400 text-slate-900'
                   : 'bg-slate-50/50 border-slate-900/10 text-[#94a3b8]'
               }`}
             >

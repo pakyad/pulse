@@ -49,7 +49,7 @@ const DEMO_NOTIFICATIONS = [
 
 // ── SKIBIDI TYPOGRAPHY COMPONENTS ──
 const SkibidiHeading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[17px] font-bold text-[#000000] tracking-tight ${className}`}>
+  <h2 className={`text-[17px] font-bold text-slate-900 tracking-tight ${className}`}>
     {children}
   </h2>
 );
@@ -73,18 +73,18 @@ function InboxItemCard({ type, title, subtitle, statusText, isUnread, onClick, a
                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
             </div>
          ) : (
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center border shadow-sm ${isUnread ? 'bg-white border-slate-200 text-[#000000]' : 'bg-slate-50 border-transparent text-slate-300'}`}>
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center border shadow-sm ${isUnread ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-50 border-transparent text-slate-300'}`}>
                {Icon ? <Icon size={20} /> : <Bell size={20} />}
             </div>
          )}
          {isUnread && (
-            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white" />
+            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-slate-900 rounded-full border-2 border-white" />
          )}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <span className={`text-[10px] font-black uppercase tracking-widest ${isUnread ? 'text-[#000000]' : 'text-[#94a3b8]'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-widest ${isUnread ? 'text-slate-900' : 'text-[#94a3b8]'}`}>
             {type}
           </span>
           <span className="text-[10px] font-bold text-[#94a3b8]">
@@ -92,7 +92,7 @@ function InboxItemCard({ type, title, subtitle, statusText, isUnread, onClick, a
           </span>
         </div>
         
-        <p className={`text-[15px] tracking-tight leading-snug ${subtitle ? 'mb-1' : ''} ${isUnread ? 'text-[#000000] font-bold' : 'text-slate-500 font-medium'}`}>
+        <p className={`text-[15px] tracking-tight leading-snug ${subtitle ? 'mb-1' : ''} ${isUnread ? 'text-slate-900 font-bold' : 'text-slate-500 font-medium'}`}>
           {title}
         </p>
 
@@ -103,7 +103,7 @@ function InboxItemCard({ type, title, subtitle, statusText, isUnread, onClick, a
         )}
 
         {extraAction && (
-           <div className="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-[#000000] bg-white shadow-sm">
+           <div className="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-900 bg-white shadow-sm">
               {extraAction}
            </div>
         )}
@@ -118,7 +118,7 @@ function MerchantInsights({ profile, orders, items }: any) {
   return (
     <div className="flex flex-col space-y-12 animate-in fade-in duration-500 pb-32">
       <section className="space-y-6">
-         <div className="p-6 bg-blue-600 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
+         <div className="p-6 bg-slate-900 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
             <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-amber-400">
                <TrendingUp size={22} />
             </div>
@@ -138,15 +138,15 @@ function MerchantInsights({ profile, orders, items }: any) {
          <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
             <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">Total Earnings</p>
             <div>
-               <p className="text-[20px] font-bold text-[#000000] tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
+               <p className="text-[20px] font-bold text-slate-900 tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
                <p className="text-[10px] text-emerald-500 font-black uppercase tracking-wider mt-1">+14% Growth</p>
             </div>
          </div>
          <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
             <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">Completion Rate</p>
             <div>
-               <p className="text-[20px] font-bold text-[#000000] tracking-tighter">98.2%</p>
-               <p className="text-[10px] text-blue-500 font-black uppercase tracking-wider mt-1">Institutional Standard</p>
+               <p className="text-[20px] font-bold text-slate-900 tracking-tighter">98.2%</p>
+               <p className="text-[10px] text-slate-900 font-black uppercase tracking-wider mt-1">Institutional Standard</p>
             </div>
          </div>
       </div>
@@ -158,14 +158,14 @@ function MerchantInsights({ profile, orders, items }: any) {
          </div>
          <div className="space-y-5">
             {[
-               { name: 'MIIT (Information Tech)', color: 'bg-blue-500', pct: '62%' },
+               { name: 'MIIT (Information Tech)', color: 'bg-slate-900', pct: '62%' },
                { name: 'Business School', color: 'bg-emerald-500', pct: '24%' },
                { name: 'Engineering', color: 'bg-rose-500', pct: '14%' }
             ].map(f => (
                <div key={f.name} className="flex items-center gap-4">
                   <div className={`w-1.5 h-1.5 rounded-full ${f.color}`} />
                   <p className="text-[13px] font-bold text-slate-500 flex-1">{f.name}</p>
-                  <p className="text-[13px] font-black text-[#000000]">{f.pct}</p>
+                  <p className="text-[13px] font-black text-slate-900">{f.pct}</p>
                </div>
             ))}
          </div>
@@ -233,7 +233,7 @@ export default function ActivityPage() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-[#000000] w-full max-w-2xl mx-auto">
+    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900 w-full max-w-2xl mx-auto">
       
       <section className="px-8 pt-12 pb-6 border-b-[0.5px] border-slate-50">
          <div className="flex items-center justify-between">
@@ -247,7 +247,7 @@ export default function ActivityPage() {
                </div>
             </div>
             <div className="flex items-center gap-3">
-               <button onClick={() => router.push('/messages')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-[#000000] border border-slate-50 active:scale-95 transition-all shrink-0">
+               <button onClick={() => router.push('/messages')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-slate-900 border border-slate-50 active:scale-95 transition-all shrink-0">
                   <MessageSquare size={18} />
                </button>
                <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
@@ -267,7 +267,7 @@ export default function ActivityPage() {
                       onClick={() => setActiveTab(tab)}
                       className={`shrink-0 px-5 py-2.5 rounded-[18px] text-[11px] font-black uppercase tracking-widest transition-all ${
                         activeTab === tab 
-                          ? 'bg-blue-600 text-white shadow-md shadow-slate-900/10' 
+                          ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10' 
                           : 'bg-slate-50 text-[#94a3b8] hover:bg-slate-100'
                       }`}
                     >

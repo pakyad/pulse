@@ -119,7 +119,7 @@ export default function AuthPage() {
             <div className="w-full space-y-4 pb-8">
                <button 
                  onClick={() => setView('login')}
-                 className="w-full py-4 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-900 rounded-[2rem] font-semibold text-[16px] active:scale-[0.98] transition-all"
+                 className="w-full py-4 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-900 rounded-[2rem] font-semibold text-[16px] active:scale-95 transition-all"
                >
                   Use email or username
                </button>
@@ -242,7 +242,7 @@ export default function AuthPage() {
                                setRegStep(2);
                             }, 800);
                          }}
-                         className="w-full h-16 bg-white border border-slate-100 rounded-2xl flex items-center justify-center gap-4 hover:bg-slate-50 transition-all active:scale-[0.98] shadow-sm"
+                         className="w-full h-16 bg-white border border-slate-100 rounded-2xl flex items-center justify-center gap-4 hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
                        >
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="20" height="20">
                              <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
@@ -294,7 +294,7 @@ export default function AuthPage() {
                   <button 
                      onClick={handleRegister}
                      disabled={loading || !regData.email || !regData.password}
-                     className="w-full h-16 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[15px] active:scale-[0.98] transition-all flex items-center justify-center disabled:opacity-20"
+                     className="w-full h-16 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[15px] active:scale-95 transition-all flex items-center justify-center disabled:opacity-20"
                   >
                      {loading ? <Loader2 className="animate-spin" size={20} /> : 'Finalize Synchronize'}
                   </button>

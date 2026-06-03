@@ -143,7 +143,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                         onClose();
                         router.push(`/marketplace/${item.id}`);
                       }}
-                      className="p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-4 hover:bg-slate-50 active:scale-[0.98] transition-all cursor-pointer shadow-sm shadow-slate-200/50"
+                      className="p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-4 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer shadow-sm shadow-slate-200/50"
                     >
                        <div className="w-16 h-16 rounded-2xl bg-slate-50 overflow-hidden shrink-0 border border-slate-100">
                           {item.image_url && <img src={item.image_url} alt="" className="w-full h-full object-cover" />}

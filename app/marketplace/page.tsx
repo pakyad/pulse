@@ -16,7 +16,7 @@ import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/Marke
 
 // ── TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[15px] font-bold text-[#000000] tracking-tight ${className}`}>{children}</h2>
+  <h2 className={`text-[15px] font-bold text-slate-900 tracking-tight ${className}`}>{children}</h2>
 );
 
 const Subtext = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
@@ -126,7 +126,7 @@ export default function MarketplacePage() {
   }, [items, activeCategory, filters, searchQuery]);
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -169,7 +169,7 @@ export default function MarketplacePage() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search items, sellers..."
-                  className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] font-medium text-[#000000] placeholder:text-slate-300 outline-none focus:border-slate-300 transition-all"
+                  className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-all"
                 />
                 {searchQuery && (
                   <button
@@ -193,7 +193,7 @@ export default function MarketplacePage() {
             <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <div className="px-1 flex justify-between items-center">
                 <div>
-                  <h3 className="text-[14px] font-bold text-[#000000] tracking-tight">Official Store</h3>
+                  <h3 className="text-[14px] font-bold text-slate-900 tracking-tight">Official Store</h3>
                   <p className="text-[10px] font-medium text-[#94a3b8]">Verified campus items</p>
                 </div>
                 <Store size={18} className="text-slate-200" />
@@ -261,7 +261,7 @@ export default function MarketplacePage() {
               onClick={() => setActiveCategory(null)}
               className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                 activeCategory === null
-                  ? 'bg-[#F8FAFC] border-slate-200 text-[#000000] shadow-sm'
+                  ? 'bg-[#F8FAFC] border-slate-200 text-slate-900 shadow-sm'
                   : 'bg-transparent border-transparent text-[#64748b] hover:bg-slate-50/50'
               }`}
             >
@@ -277,7 +277,7 @@ export default function MarketplacePage() {
                   onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
                   className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                     isActive
-                      ? 'bg-[#F8FAFC] border-slate-200 text-[#000000] shadow-sm'
+                      ? 'bg-[#F8FAFC] border-slate-200 text-slate-900 shadow-sm'
                       : 'bg-transparent border-transparent text-[#64748b] hover:bg-slate-50/50'
                   }`}
                 >
@@ -300,7 +300,7 @@ export default function MarketplacePage() {
               <div className="py-24 flex flex-col items-center justify-center text-[#94a3b8] gap-4 border-2 border-dashed border-slate-100 rounded-[16px]">
                 <Search size={40} strokeWidth={1} className="text-slate-300" />
                 <div className="text-center space-y-1">
-                  <p className="text-[12px] font-bold text-[#000000] tracking-tight">No results found</p>
+                  <p className="text-[12px] font-bold text-slate-900 tracking-tight">No results found</p>
                   <p className="text-[11px] font-medium text-slate-400">Try a different keyword or clear the filter</p>
                 </div>
               </div>

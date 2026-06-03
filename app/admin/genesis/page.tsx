@@ -36,7 +36,7 @@ export default function GenesisSetup() {
 
   return (
     <div className="h-screen w-full bg-[#111111] flex flex-col items-center justify-center font-sans p-6 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-8 border border-blue-500/20">
+      <div className="w-16 h-16 rounded-2xl bg-slate-900/10 flex items-center justify-center mb-8 border border-blue-500/20">
         <Shield className="text-[#007AFF]" size={32} />
       </div>
       
@@ -48,7 +48,7 @@ export default function GenesisSetup() {
       {status === 'idle' && (
         <button 
           onClick={createAdmin}
-          className="bg-[#007AFF] text-white font-bold px-10 py-4 rounded-2xl hover:bg-blue-600 transition-all active:scale-95 shadow-md shadow-blue-500/20"
+          className="bg-[#007AFF] text-white font-bold px-10 py-4 rounded-2xl hover:bg-slate-900 transition-all active:scale-95 shadow-md shadow-blue-500/20"
         >
           Create admin@pulse.com
         </button>

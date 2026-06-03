@@ -34,12 +34,12 @@ function OrderSuccessPageContent() {
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#000000] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[slate-900] rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased flex flex-col px-6 pt-20 pb-16">
+    <main className="min-h-screen bg-white text-slate-900 antialiased flex flex-col px-6 pt-20 pb-16">
 
       {/* ── TOP NAV EXIT ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl">
@@ -62,7 +62,7 @@ function OrderSuccessPageContent() {
         <div className="w-20 h-20 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center mb-6">
           <Check size={36} className="text-emerald-500" strokeWidth={2.5} />
         </div>
-        <h1 className="text-[24px] font-bold text-[#000000] tracking-tight leading-tight mb-1">Order Placed</h1>
+        <h1 className="text-[24px] font-bold text-slate-900 tracking-tight leading-tight mb-1">Order Placed</h1>
         <p className="text-[13px] font-medium text-[#94a3b8]">
           Your payment is being verified by the seller.
         </p>
@@ -77,19 +77,19 @@ function OrderSuccessPageContent() {
       >
         <div className="px-4 py-3.5 flex items-center justify-between">
           <span className="text-[13px] font-medium text-[#94a3b8]">Order ID</span>
-          <span className="text-[13px] font-bold text-[#000000]">#{orderId?.slice(0, 8).toUpperCase()}</span>
+          <span className="text-[13px] font-bold text-slate-900">#{orderId?.slice(0, 8).toUpperCase()}</span>
         </div>
 
         {order?.items_summary && (
           <div className="px-4 py-3.5 flex items-center justify-between gap-4">
             <span className="text-[13px] font-medium text-[#94a3b8] shrink-0">Item</span>
-            <span className="text-[13px] font-bold text-[#000000] text-right truncate">{order.items_summary}</span>
+            <span className="text-[13px] font-bold text-slate-900 text-right truncate">{order.items_summary}</span>
           </div>
         )}
 
         <div className="px-4 py-3.5 flex items-center justify-between">
           <span className="text-[13px] font-medium text-[#94a3b8]">Total Paid</span>
-          <span className="text-[14px] font-bold text-[#000000]">RM{Number(order?.total_price || 0).toFixed(2)}</span>
+          <span className="text-[14px] font-bold text-slate-900">RM{Number(order?.total_price || 0).toFixed(2)}</span>
         </div>
 
         <div className="px-4 py-3.5 flex items-center justify-between">
@@ -109,10 +109,10 @@ function OrderSuccessPageContent() {
         className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3 mb-10"
       >
         <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
-          <ShieldCheck size={14} className="text-[#000000]" />
+          <ShieldCheck size={14} className="text-slate-900" />
         </div>
         <div className="space-y-0.5">
-          <p className="text-[12px] font-bold text-[#000000]">What happens next?</p>
+          <p className="text-[12px] font-bold text-slate-900">What happens next?</p>
           <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">
             The seller will verify your receipt and confirm your order. You can track the delivery status live in My Orders.
           </p>
@@ -123,13 +123,13 @@ function OrderSuccessPageContent() {
       <div className="space-y-3 mt-auto">
         <button
           onClick={() => router.push('/me/orders')}
-          className="w-full h-12 bg-blue-600 text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+          className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           Track My Order <ArrowRight size={16} />
         </button>
         <button
           onClick={() => router.push('/marketplace')}
-          className="w-full h-12 border border-slate-100 text-[#94a3b8] font-bold text-[13px] tracking-tight rounded-xl active:scale-[0.98] transition-all"
+          className="w-full h-12 border border-slate-100 text-[#94a3b8] font-bold text-[13px] tracking-tight rounded-xl active:scale-95 transition-all"
         >
           Back to Marketplace
         </button>
@@ -143,7 +143,7 @@ export default function OrderSuccessPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#000000] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[slate-900] rounded-full animate-spin" />
       </div>
     }>
       <OrderSuccessPageContent />

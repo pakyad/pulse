@@ -17,10 +17,10 @@ export default function AdminDisputeGuide() {
         className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-all"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[#000000]">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900">
             <Icon size={16} />
           </div>
-          <span className="text-[13px] font-bold text-[#000000]">{title}</span>
+          <span className="text-[13px] font-bold text-slate-900">{title}</span>
         </div>
         <ChevronDown size={16} className={`text-slate-300 transition-transform ${openSection === id ? 'rotate-180' : ''}`} />
       </button>
@@ -73,9 +73,9 @@ export default function AdminDisputeGuide() {
       {/* ── SECTION 2: PROCESS GUIDE ── */}
       <DrakeAccordion id="process" title="How to Refund" icon={Info}>
         <div className="space-y-3">
-          <p>1. <span className="text-[#000000] font-bold">Check Photos</span>: Compare Merchant Handover photo vs Runner Delivery photo.</p>
-          <p>2. <span className="text-[#000000] font-bold">Choose the Loser</span>: The one at fault pays for the refund.</p>
-          <p>3. <span className="text-[#000000] font-bold">Apply Fine</span>: A RM1 service fee is charged to the person at fault.</p>
+          <p>1. <span className="text-slate-900 font-bold">Check Photos</span>: Compare Merchant Handover photo vs Runner Delivery photo.</p>
+          <p>2. <span className="text-slate-900 font-bold">Choose the Loser</span>: The one at fault pays for the refund.</p>
+          <p>3. <span className="text-slate-900 font-bold">Apply Fine</span>: A RM1 service fee is charged to the person at fault.</p>
         </div>
       </DrakeAccordion>
 
@@ -92,8 +92,8 @@ export default function AdminDisputeGuide() {
             <span className="text-[13px] font-bold text-red-500">Merchant</span>
           </div>
           <div className="px-5 py-4 flex items-center justify-between bg-white/50">
-            <span className="text-[12px] font-bold text-[#000000]">Admin Action</span>
-            <span className="text-[11px] font-black uppercase tracking-widest text-[#000000]">Close Case</span>
+            <span className="text-[12px] font-bold text-slate-900">Admin Action</span>
+            <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">Close Case</span>
           </div>
         </div>
       </div>

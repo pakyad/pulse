@@ -82,7 +82,7 @@ export default function EditProfilePage() {
           onClick={handleSave}
           disabled={saving}
           className={`text-[14px] font-bold transition-all active:scale-95 ${
-            saving ? 'text-slate-300' : 'text-blue-500'
+            saving ? 'text-slate-300' : 'text-slate-900'
           }`}
         >
           {saving ? 'Saving...' : 'Save'}
@@ -186,7 +186,7 @@ export default function EditProfilePage() {
                   >
                     <span className="text-[14px] font-medium text-navy">{opt}</span>
                     {(pickerType === 'faculty' ? faculty : yearOfStudy) === opt && (
-                      <Check size={16} className="text-blue-500" />
+                      <Check size={16} className="text-slate-900" />
                     )}
                   </button>
                 ))}
@@ -204,7 +204,7 @@ function SelectionRow({ label, value, onClick }: { label: string, value: string,
   return (
     <button 
       onClick={onClick}
-      className="w-full h-[44px] bg-[#F9F9FB] rounded-[12px] px-4 flex items-center justify-between active:scale-[0.98] transition-all"
+      className="w-full h-[44px] bg-[#F9F9FB] rounded-[12px] px-4 flex items-center justify-between active:scale-95 transition-all"
     >
       <span className="text-[13px] font-medium text-navy">{label}</span>
       <div className="flex items-center gap-1.5">

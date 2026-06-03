@@ -83,7 +83,7 @@ export default function PriceAudit({ items, guidelines, onReview, onOpenPolicy }
                   <div className="flex flex-col gap-1.5 items-start">
                     <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase tracking-widest">{item.category}</span>
                     {item.status === 'pending_exemption' && (
-                      <span className="text-[8px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-sm uppercase tracking-widest shadow-sm">Exemption</span>
+                      <span className="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded-sm uppercase tracking-widest shadow-sm">Exemption</span>
                     )}
                   </div>
                 </div>

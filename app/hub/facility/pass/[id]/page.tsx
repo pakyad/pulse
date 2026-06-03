@@ -186,14 +186,14 @@ export default function BookingPassPage() {
           <button
             onClick={handleOpenDoor}
             disabled={isOpening}
-            className="w-full h-16 bg-white text-navy rounded-2xl font-bold text-[14px] uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60"
+            className="w-full h-16 bg-white text-navy rounded-2xl font-bold text-[14px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-60"
           >
             {isOpening ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} className="fill-navy" />}
             {isOpening ? 'Opening...' : 'Open Lab Door'}
           </button>
           <button
             onClick={() => router.push('/pulse')}
-            className="w-full h-14 bg-white/5 border border-white/10 text-white/40 rounded-2xl font-bold text-[11px] uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+            className="w-full h-14 bg-white/5 border border-white/10 text-white/40 rounded-2xl font-bold text-[11px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3"
           >
             <XCircle size={16} />
             Cancel Reservation

@@ -10,9 +10,9 @@ const announcements = [
     title: "Official UniKL Announcement Mid-term Exam Schedule",
     category: "EDUCATION",
     date: "17 Apr 2026",
-    color: "bg-blue-500",
+    color: "bg-slate-900",
     gradient: "from-blue-50/50 to-white",
-    accent: "text-blue-600"
+    accent: "text-slate-900"
   },
   {
     id: 2,

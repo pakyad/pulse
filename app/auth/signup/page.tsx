@@ -234,7 +234,7 @@ export default function PerfectSignUp() {
                 <button 
                   onClick={handleSignUp}
                   disabled={loading}
-                  className="w-full h-[60px] bg-white border border-slate-200 text-slate-900 shadow-sm rounded-full font-black text-[13px] uppercase tracking-widest hover:bg-slate-50 transition-all mt-4 active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
+                  className="w-full h-[60px] bg-white border border-slate-200 text-slate-900 shadow-sm rounded-full font-black text-[13px] uppercase tracking-widest hover:bg-slate-50 transition-all mt-4 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -342,7 +342,7 @@ export default function PerfectSignUp() {
                       router.push('/home');
                     }
                   }}
-                  className="w-full h-[54px] bg-white border border-slate-200 shadow-sm text-slate-900 rounded-xl font-bold text-[15px] hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center"
+                  className="w-full h-[54px] bg-white border border-slate-200 shadow-sm text-slate-900 rounded-xl font-bold text-[15px] hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center"
                 >
                   {onboardStep < ONBOARDING_SLIDES.length - 1 ? 'Continue' : 'Enter Pulse'}
                 </button>

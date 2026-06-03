@@ -171,7 +171,7 @@ export default function AdminUserManagement() {
                                  {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-3 py-1.5 bg-amber-100 text-amber-600 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Clock size={12} /> Pending Runner</span>}
                                  {u.merchant_status === 'pending' && !u.is_seller && <span className="px-3 py-1.5 bg-amber-100 text-amber-600 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Clock size={12} /> Pending Merchant</span>}
                                  {u.is_verified_runner && <span className="px-3 py-1.5 bg-[#1C1C1E] text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><ShieldCheck size={12} /> Runner</span>}
-                                 {u.is_seller && <span className="px-3 py-1.5 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Briefcase size={12} /> Merchant</span>}
+                                 {u.is_seller && <span className="px-3 py-1.5 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2"><Briefcase size={12} /> Merchant</span>}
                                  {!u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending' && <span className="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest">Student</span>}
                               </div>
                            </td>
@@ -247,7 +247,7 @@ export default function AdminUserManagement() {
 
                      <div className="p-8 rounded-[32px] bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
                         <div className="flex items-center gap-6">
-                           <div className="w-14 h-14 bg-blue-600 text-white rounded-[20px] flex items-center justify-center shadow-lg"><Briefcase size={28} /></div>
+                           <div className="w-14 h-14 bg-slate-900 text-white rounded-[20px] flex items-center justify-center shadow-lg"><Briefcase size={28} /></div>
                            <div>
                               <p className="text-[17px] font-black text-black tracking-tight">Merchant Authority</p>
                               <p className="text-[13px] font-medium text-black/30">Verified Pulse Vendor Node</p>

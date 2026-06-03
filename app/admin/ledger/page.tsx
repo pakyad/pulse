@@ -204,9 +204,9 @@ export default function AdminLedgerPage() {
                   </div>
                </div>
 
-               <div className="p-8 bg-blue-500/10 rounded-[3.5rem] border border-blue-500/20 space-y-4">
+               <div className="p-8 bg-slate-900/10 rounded-[3.5rem] border border-blue-500/20 space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                    <div className="w-10 h-10 rounded-2xl bg-slate-900/20 flex items-center justify-center text-blue-400">
                        <History size={20} />
                     </div>
                     <p className="text-[13px] font-bold text-white">Recent Settlements</p>

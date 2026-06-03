@@ -353,7 +353,7 @@ export default function DevSeedPage() {
     return (
         <div className="min-h-screen bg-slate-50 p-12 font-sans flex flex-col items-center">
             <div className="w-full max-w-2xl bg-white p-10 rounded-2xl shadow-md border border-slate-100">
-                <h1 className="text-2xl font-black text-[#000000] mb-2 tracking-tight">Pulse Database Override</h1>
+                <h1 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Pulse Database Override</h1>
                 <p className="text-slate-500 mb-8 font-medium text-sm leading-relaxed">
                     This will wipe all existing dummy listings and inject 20 carefully planned, presentation-ready listings divided across 4 specific accounts (2 Merchants, 2 Students).
                 </p>
@@ -367,7 +367,7 @@ export default function DevSeedPage() {
                 </button>
 
                 {status.length > 0 && (
-                    <div className="mt-8 p-6 bg-blue-600 rounded-2xl border border-slate-800 text-emerald-400 font-mono text-xs space-y-2 overflow-y-auto max-h-60">
+                    <div className="mt-8 p-6 bg-slate-900 rounded-2xl border border-slate-800 text-emerald-400 font-mono text-xs space-y-2 overflow-y-auto max-h-60">
                         {status.map((s, i) => (
                             <p key={i}>{s}</p>
                         ))}

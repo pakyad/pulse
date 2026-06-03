@@ -11,7 +11,7 @@ interface CreatePulsePostProps {
 }
 
 const TAGS = [
-  { id: 'ADMIN', label: 'Administrative', color: 'bg-blue-50 text-blue-600' },
+  { id: 'ADMIN', label: 'Administrative', color: 'bg-blue-50 text-slate-900' },
   { id: 'EVENT', label: 'Campus Event', color: 'bg-emerald-50 text-emerald-600' },
   { id: 'CLUB', label: 'Club Update', color: 'bg-purple-50 text-purple-600' },
   { id: 'NEWS', label: 'General News', color: 'bg-slate-50 text-slate-500' },
@@ -76,11 +76,11 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                   <Sparkles size={20} />
                 </div>
                 <div>
-                  <h2 className="text-[18px] font-black text-[#000000] tracking-tight">Initiate Pulse</h2>
+                  <h2 className="text-[18px] font-black text-slate-900 tracking-tight">Initiate Pulse</h2>
                   <p className="text-[11px] text-slate-400 font-medium">Broadcast to the campus network</p>
                 </div>
               </div>
-              <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-[#000000]/20 hover:text-[#000000] transition-all">
+              <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-900/20 hover:text-slate-900 transition-all">
                 <X size={20} />
               </button>
             </div>
@@ -114,7 +114,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                   value={headline}
                   onChange={e => setHeadline(e.target.value)}
                   placeholder="Brief, high-impact title..."
-                  className="w-full h-14 px-6 bg-slate-50 rounded-2xl border-none text-[16px] font-bold text-[#000000] placeholder:text-slate-300 focus:ring-2 focus:ring-[#111111]/5 transition-all"
+                  className="w-full h-14 px-6 bg-slate-50 rounded-2xl border-none text-[16px] font-bold text-slate-900 placeholder:text-slate-300 focus:ring-2 focus:ring-[#111111]/5 transition-all"
                 />
               </div>
 
@@ -125,7 +125,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                   value={body}
                   onChange={e => setBody(e.target.value)}
                   placeholder="Provide granular context for this update..."
-                  className="w-full h-40 p-6 bg-slate-50 rounded-2xl border-none text-[15px] font-medium text-[#000000] placeholder:text-slate-300 focus:ring-2 focus:ring-[#111111]/5 transition-all resize-none"
+                  className="w-full h-40 p-6 bg-slate-50 rounded-2xl border-none text-[15px] font-medium text-slate-900 placeholder:text-slate-300 focus:ring-2 focus:ring-[#111111]/5 transition-all resize-none"
                 />
               </div>
 

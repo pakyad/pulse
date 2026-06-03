@@ -77,7 +77,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
                ) : null}
 
                {/* Neutral Mesh Template (Always present as fallback or background) */}
-               <div className="absolute inset-0 z-[-1] bg-blue-600 flex items-center justify-center">
+               <div className="absolute inset-0 z-[-1] bg-slate-900 flex items-center justify-center">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#334155_0%,transparent_50%),radial-gradient(circle_at_70%_70%,#111111_0%,transparent_50%)] opacity-60" />
                   
                   {/* Subtle Geometric Watermark for the Neutral Template */}

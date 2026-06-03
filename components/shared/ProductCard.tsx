@@ -58,7 +58,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
         
         {/* Title & Time */}
         <div className="flex items-start justify-between gap-2">
-          <h4 className="text-[13px] font-medium text-[#000000] leading-[1.3] tracking-tight line-clamp-2">
+          <h4 className="text-[13px] font-medium text-slate-900 leading-[1.3] tracking-tight line-clamp-2">
             {item.title}
           </h4>
           <span className="text-[11px] font-medium text-[#94a3b8] shrink-0 pt-0.5">
@@ -81,7 +81,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
             </p>
           </div>
           
-          <p className="text-[15px] font-bold text-[#000000] tracking-tight shrink-0 pl-2">
+          <p className="text-[15px] font-bold text-slate-900 tracking-tight shrink-0 pl-2">
             RM {formattedPrice}
           </p>
         </div>

@@ -64,7 +64,7 @@ export default function InventorySimulation() {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
         
         {/* Header */}
-        <div className="p-8 bg-blue-600 text-white">
+        <div className="p-8 bg-slate-900 text-white">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
               <Zap size={20} className="text-amber-400" />
@@ -91,7 +91,7 @@ export default function InventorySimulation() {
               <button 
                 onClick={startSimulation}
                 disabled={loading}
-                className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md shadow-slate-900/10"
+                className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md shadow-slate-900/10"
               >
                 Launch Hoodie Drop <ArrowRight size={18} />
               </button>
@@ -106,7 +106,7 @@ export default function InventorySimulation() {
                  <button 
                   onClick={() => simulatePurchase("Student A")}
                   disabled={loading}
-                  className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+                  className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all"
                 >
                   Student A: Buy 1 <Package size={18} />
                 </button>
@@ -122,7 +122,7 @@ export default function InventorySimulation() {
                  <button 
                   onClick={() => simulatePurchase("Student B")}
                   disabled={loading}
-                  className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+                  className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all"
                 >
                   Student B: Buy Last Unit <Lock size={18} />
                 </button>

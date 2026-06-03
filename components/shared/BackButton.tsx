@@ -15,7 +15,7 @@ export default function BackButton({ fallback = '/home', variant = 'default' }: 
     return (
       <button 
         onClick={() => router.back()} 
-        className="w-10 h-10 rounded-2xl bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center text-[#000000] shadow-sm active:scale-95 transition-all shrink-0"
+        className="w-10 h-10 rounded-2xl bg-white/90 backdrop-blur-xl border border-slate-100 flex items-center justify-center text-slate-900 shadow-sm active:scale-95 transition-all shrink-0"
       >
         <ChevronLeft size={20} />
       </button>

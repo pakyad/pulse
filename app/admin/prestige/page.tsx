@@ -129,7 +129,7 @@ export default function AdminPrestigePage() {
                        <div className="relative z-10 space-y-6">
                           <div className="flex justify-between items-start">
                              <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border
-                               ${camp.template_id === 'overture' ? 'bg-blue-500/10 text-blue-400 border-blue-400/20' : camp.template_id === 'spotlight' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-orange-500/10 text-orange-400 border-orange-400/20'}`}
+                               ${camp.template_id === 'overture' ? 'bg-slate-900/10 text-blue-400 border-blue-400/20' : camp.template_id === 'spotlight' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-orange-500/10 text-orange-400 border-orange-400/20'}`}
                              >
                                 {camp.template_id}
                              </div>
@@ -229,8 +229,8 @@ export default function AdminPrestigePage() {
                         </div>
                      </div>
 
-                     <div className="bg-blue-500/10 p-6 rounded-[2.5rem] border border-blue-500/20 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                     <div className="bg-slate-900/10 p-6 rounded-[2.5rem] border border-blue-500/20 flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-2xl bg-slate-900/20 flex items-center justify-center text-blue-400">
                            <TrendingUp size={20} />
                         </div>
                         <div>

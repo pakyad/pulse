@@ -50,7 +50,7 @@ export default function DesktopMerchant({
         <nav className="flex-1 px-4 py-2 space-y-1.5">
           <button 
             onClick={() => router.push('/merchant')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 bg-blue-50 text-blue-600 rounded-xl transition-colors group"
+            className="w-full flex items-center gap-3 px-3 py-2.5 bg-blue-50 text-slate-900 rounded-xl transition-colors group"
           >
             <LayoutGrid size={20} />
             <span className="text-[15px] font-bold tracking-[-0.24px]">Overview</span>
@@ -122,7 +122,7 @@ export default function DesktopMerchant({
 
              <button 
                onClick={() => setIsCreateOpen(true)}
-               className="h-10 px-6 bg-blue-600 text-white text-[13px] font-bold rounded-md hover:bg-blue-700 transition-all"
+               className="h-10 px-6 bg-slate-900 text-white text-[13px] font-bold rounded-md hover:bg-blue-700 transition-all"
              >
                 New Entry
              </button>
@@ -160,7 +160,7 @@ export default function DesktopMerchant({
                          <Info size={12} /> Track your active orders here.
                       </div>
                    </div>
-                   <span className="text-[12px] text-blue-600 font-bold">{recentOrders.filter((o: any) => o.status === 'PENDING_VENDOR').length} Required</span>
+                   <span className="text-[12px] text-slate-900 font-bold">{recentOrders.filter((o: any) => o.status === 'PENDING_VENDOR').length} Required</span>
                 </div>
                 
                 <div className="divide-y divide-slate-100">
@@ -179,7 +179,7 @@ export default function DesktopMerchant({
                            </div>
                            <button 
                              onClick={() => handleAcceptOrder(o.id)}
-                             className="h-9 px-5 bg-blue-600 text-white rounded-md text-[12px] font-bold hover:bg-blue-700"
+                             className="h-9 px-5 bg-slate-900 text-white rounded-md text-[12px] font-bold hover:bg-blue-700"
                            >
                               Accept
                            </button>
@@ -208,7 +208,7 @@ export default function DesktopMerchant({
                                <p className="text-[14px] font-bold text-slate-900">{o.title}</p>
                                <div className="flex items-center gap-2 mt-0.5">
                                  <VoxelStatus status={o.status} size={10} />
-                                 <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest leading-none">
+                                 <p className="text-[10px] text-slate-900 font-black uppercase tracking-widest leading-none">
                                    {o.status.replace(/_/g, ' ')}
                                  </p>
                                </div>
@@ -225,7 +225,7 @@ export default function DesktopMerchant({
                              </span>
                            )}
                            {o.status === 'AWAITING_RUNNER' && (
-                             <span className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded text-[11px] font-bold border border-blue-100">
+                             <span className="px-3 py-1.5 bg-blue-50 text-slate-900 rounded text-[11px] font-bold border border-blue-100">
                                Runner Called
                              </span>
                            )}
@@ -308,7 +308,7 @@ export default function DesktopMerchant({
                         <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300">
                           <Package size={14} />
                         </div>
-                        <span className="text-[13px] font-bold text-[#000000]">{item.title}</span>
+                        <span className="text-[13px] font-bold text-slate-900">{item.title}</span>
                       </div>
                       <div className="flex items-center gap-8">
                         <span className={`text-[13px] font-black ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
@@ -400,7 +400,7 @@ export default function DesktopMerchant({
                                 <button
                                    onClick={() => router.push(`/marketplace/${item.id}/edit`)}
                                    title="Edit listing"
-                                   className="h-10 w-10 rounded-[16px] bg-slate-50 border-[0.5px] border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#000000] hover:border-slate-300 transition-all"
+                                   className="h-10 w-10 rounded-[16px] bg-slate-50 border-[0.5px] border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"
                                 >
                                    <Pencil size={14} />
                                 </button>

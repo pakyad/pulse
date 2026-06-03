@@ -235,7 +235,7 @@ function PromoteHubContent() {
                           className="bg-white border border-slate-100 p-6 rounded-[2.5rem] flex items-center justify-between group hover:border-navy/10 transition-all shadow-sm"
                         >
                            <div className="flex items-center gap-6">
-                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${camp.status === 'active' ? 'bg-emerald-50 text-emerald-500' : camp.status === 'pending' ? 'bg-blue-50 text-blue-500' : 'bg-red-50 text-red-500'}`}>
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${camp.status === 'active' ? 'bg-emerald-50 text-emerald-500' : camp.status === 'pending' ? 'bg-blue-50 text-slate-900' : 'bg-red-50 text-red-500'}`}>
                                  {camp.status === 'active' ? <CheckCircle2 size={20} /> : camp.status === 'pending' ? <Clock size={20} /> : <XCircle size={20} />}
                               </div>
                               <div>
@@ -244,7 +244,7 @@ function PromoteHubContent() {
                                     <span className="text-[9px] font-bold uppercase text-slate-300 tracking-widest">{camp.template_id}</span>
                                     <span className="w-1 h-1 rounded-full bg-slate-100" />
                                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase
-                                      ${camp.status === 'active' ? 'bg-emerald-100 text-emerald-600' : camp.status === 'pending' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}
+                                      ${camp.status === 'active' ? 'bg-emerald-100 text-emerald-600' : camp.status === 'pending' ? 'bg-blue-100 text-slate-900' : 'bg-red-100 text-red-600'}`}
                                     >
                                        {camp.status}
                                     </span>

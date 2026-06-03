@@ -49,12 +49,12 @@ export default function IncomingOrderAlert({ order, onAccept }: IncomingOrderAle
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
-      className="fixed bottom-24 left-6 right-6 z-100 bg-blue-600 rounded-2xl shadow-md overflow-hidden border border-white/10"
+      className="fixed bottom-24 left-6 right-6 z-100 bg-slate-900 rounded-2xl shadow-md overflow-hidden border border-white/10"
     >
       {/* Timer Progress Bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-white/5">
         <motion.div 
-          className="h-full bg-blue-500"
+          className="h-full bg-slate-900"
           initial={{ width: "100%" }}
           animate={{ width: "0%" }}
           transition={{ duration: 10, ease: "linear" }}
@@ -77,7 +77,7 @@ export default function IncomingOrderAlert({ order, onAccept }: IncomingOrderAle
         <button
           onClick={handleAccept}
           disabled={isAccepting}
-          className="h-12 px-6 bg-white text-[#000000] rounded-2xl font-bold text-[13px] flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+          className="h-12 px-6 bg-white text-slate-900 rounded-2xl font-bold text-[13px] flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50"
         >
           {isAccepting ? (
             <Loader2 size={16} className="animate-spin" />

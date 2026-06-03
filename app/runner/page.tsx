@@ -250,13 +250,13 @@ export default function MobileRunnerDashboard() {
                   <div className="flex gap-4">
                     <button 
                       onClick={() => router.push(`/orders/${activeJob.id}`)}
-                      className="flex-1 h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                      className="flex-1 h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-3"
                     >
                         Logistics Map
                     </button>
                     <button 
                       onClick={startCamera}
-                      className="flex-1 h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                      className="flex-1 h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-sm hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-3"
                     >
                         <Camera size={18} /> Complete Job
                     </button>
@@ -299,7 +299,7 @@ export default function MobileRunnerDashboard() {
                        >
                           <div className="flex items-center gap-5">
                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm ${
-                               isFood ? 'bg-white text-amber-500' : isTech ? 'bg-white text-blue-500' : 'bg-white text-slate-400'
+                               isFood ? 'bg-white text-amber-500' : isTech ? 'bg-white text-slate-900' : 'bg-white text-slate-400'
                              }`}>
                                 {isFood ? <Truck size={24} /> : isTech ? <Package size={24} /> : <Zap size={24} />}
                              </div>
@@ -311,7 +311,7 @@ export default function MobileRunnerDashboard() {
                           <button 
                             onClick={() => handleAcceptJob(job.id)}
                             disabled={!isOnline}
-                            className={`h-12 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${isOnline ? 'hover:scale-[1.02] active:scale-[0.98] hover:bg-slate-50' : 'opacity-20 cursor-not-allowed'}`}
+                            className={`h-12 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${isOnline ? 'hover:scale-[1.02] active:scale-95 hover:bg-slate-50' : 'opacity-20 cursor-not-allowed'}`}
                           >
                              Initiate
                           </button>

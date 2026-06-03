@@ -38,7 +38,7 @@ export default function EKGModule({
     CRITICAL: 'text-red-600 bg-red-50 border-red-100',
     ONLINE: 'text-emerald-600 bg-emerald-50 border-emerald-100',
     STABLE: 'text-accent bg-accent/5 border-accent/10',
-    SECURE: 'text-blue-600 bg-blue-50 border-blue-100',
+    SECURE: 'text-slate-900 bg-blue-50 border-blue-100',
     WARNING: 'text-amber-600 bg-amber-50 border-amber-100',
   };
 

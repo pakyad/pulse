@@ -8,7 +8,7 @@ import { TrendingUp, ArrowLeft, Package, DollarSign, ListOrdered, HardDrive, Sho
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 const SkibidiHeading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[17px] font-bold text-[#000000] tracking-tight ${className}`}>
+  <h2 className={`text-[17px] font-bold text-slate-900 tracking-tight ${className}`}>
     {children}
   </h2>
 );
@@ -83,7 +83,7 @@ export default function MarketInsightsPage() {
   const isProMode = profile?.role === 'CLUB' || profile?.is_verified_merchant;
 
   return (
-    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-[#000000]">
+    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900">
       <section className="px-8 pt-28 pb-2">
          <div className="space-y-0.5">
             <SkibidiHeading>Market Insights</SkibidiHeading>
@@ -97,7 +97,7 @@ export default function MarketInsightsPage() {
           {/* TOP BANNER */}
           {isProMode ? (
              <section className="space-y-6">
-                <div className="p-6 bg-blue-600 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
+                <div className="p-6 bg-slate-900 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
                    <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-amber-400">
                       <TrendingUp size={22} />
                    </div>
@@ -134,28 +134,28 @@ export default function MarketInsightsPage() {
              <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Total Earnings' : 'Money Earned'}</p>
                 <div>
-                   <p className="text-[20px] font-bold text-[#000000] tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
+                   <p className="text-[20px] font-bold text-slate-900 tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
                 </div>
              </div>
              
              <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Sales Volume' : 'Items Sold'}</p>
                 <div>
-                   <p className="text-[20px] font-bold text-[#000000] tracking-tighter">{salesVolume}</p>
+                   <p className="text-[20px] font-bold text-slate-900 tracking-tighter">{salesVolume}</p>
                 </div>
              </div>
 
              <div className="p-6 border border-slate-50 rounded-2xl bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Inventory Value' : 'Closet Value'}</p>
                 <div>
-                   <p className="text-[20px] font-bold text-[#000000] tracking-tighter">RM {inventoryValue.toFixed(2)}</p>
+                   <p className="text-[20px] font-bold text-slate-900 tracking-tighter">RM {inventoryValue.toFixed(2)}</p>
                 </div>
              </div>
 
              <div className="p-6 border border-slate-50 rounded-2xl bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Total Units' : 'Items Left'}</p>
                 <div>
-                   <p className="text-[20px] font-bold text-[#000000] tracking-tighter">{totalUnitsAvailable}</p>
+                   <p className="text-[20px] font-bold text-slate-900 tracking-tighter">{totalUnitsAvailable}</p>
                 </div>
              </div>
           </div>
@@ -182,7 +182,7 @@ export default function MarketInsightsPage() {
                               <div className={`w-1.5 h-1.5 rounded-full ${f.color}`} />
                               <p className="text-[13px] font-bold text-slate-500 flex-1">{f.name}</p>
                               <div className="text-right">
-                                <p className="text-[13px] font-black text-[#000000]">{pct}%</p>
+                                <p className="text-[13px] font-black text-slate-900">{pct}%</p>
                                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{f.count} Items</p>
                               </div>
                            </div>
@@ -206,11 +206,11 @@ export default function MarketInsightsPage() {
                                   #{idx + 1}
                                </div>
                                <div>
-                                  <p className="text-[13px] font-bold text-[#000000] tracking-tight">{item.title}</p>
+                                  <p className="text-[13px] font-bold text-slate-900 tracking-tight">{item.title}</p>
                                   <p className="text-[10px] text-slate-400 font-medium">{item.stock_count || 0} Units Remaining</p>
                                </div>
                             </div>
-                            <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg">
+                            <div className="px-3 py-1 bg-blue-50 text-slate-900 rounded-lg">
                                <p className="text-[11px] font-black uppercase tracking-widest">{item.units_sold} Sold</p>
                             </div>
                          </div>
@@ -242,10 +242,10 @@ export default function MarketInsightsPage() {
                       {completedOrders.slice(0, 5).map(order => (
                          <div key={order.id} className="p-5 rounded-2xl border border-slate-50 bg-white shadow-sm flex items-center justify-between">
                             <div className="space-y-0.5">
-                               <p className="text-[13px] font-bold text-[#000000] tracking-tight truncate max-w-[200px]">{order.title}</p>
+                               <p className="text-[13px] font-bold text-slate-900 tracking-tight truncate max-w-[200px]">{order.title}</p>
                                <p className="text-[10px] text-slate-400 font-medium">To: {order.buyer_name || 'Anonymous Student'}</p>
                             </div>
-                            <p className="text-[14px] font-black text-[#000000]">RM {Number(order.price || order.total || 0).toFixed(2)}</p>
+                            <p className="text-[14px] font-black text-slate-900">RM {Number(order.price || order.total || 0).toFixed(2)}</p>
                          </div>
                       ))}
                       {completedOrders.length === 0 && (

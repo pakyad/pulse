@@ -56,7 +56,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
           <CheckCircle2 size={24} />
         </div>
         <div className="space-y-1">
-           <h4 className="text-[15px] font-bold text-[#000000]">Thank You</h4>
+           <h4 className="text-[15px] font-bold text-slate-900">Thank You</h4>
            <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed px-4">
              Your feedback helps keep the campus community safe and reliable.
            </p>
@@ -68,7 +68,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
   return (
     <div className="space-y-8 pb-12">
       <div className="px-2 space-y-1">
-        <h3 className="text-[17px] font-bold text-[#000000] tracking-tight">Feedback</h3>
+        <h3 className="text-[17px] font-bold text-slate-900 tracking-tight">Feedback</h3>
         <p className="text-[11px] font-medium text-[#94a3b8]">Help us improve the campus experience.</p>
       </div>
       
@@ -76,7 +76,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
       <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
         <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Product</p>
         <div className="space-y-4">
-           <h4 className="text-[14px] font-bold text-[#000000] truncate">{order.title || 'Item Review'}</h4>
+           <h4 className="text-[14px] font-bold text-slate-900 truncate">{order.title || 'Item Review'}</h4>
            <StarRating value={vendorRating} onChange={setVendorRating} />
         </div>
       </div>
@@ -86,7 +86,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
         <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
           <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Runner</p>
           <div className="space-y-4">
-             <h4 className="text-[14px] font-bold text-[#000000]">Delivery Runner</h4>
+             <h4 className="text-[14px] font-bold text-slate-900">Delivery Runner</h4>
              <StarRating value={runnerRating} onChange={setRunnerRating} />
           </div>
         </div>
@@ -97,7 +97,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
         <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Comments</p>
         <textarea 
           placeholder="Optional: How was the service?"
-          className="w-full h-24 text-[13px] font-medium text-[#000000] focus:outline-none placeholder:text-slate-200 resize-none leading-relaxed"
+          className="w-full h-24 text-[13px] font-medium text-slate-900 focus:outline-none placeholder:text-slate-200 resize-none leading-relaxed"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
         />
@@ -106,7 +106,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
       <button 
         onClick={handleSubmit}
         disabled={vendorRating === 0 || (isRunnerDelivery && runnerRating === 0) || isSubmitting}
-        className="w-full h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[12px] uppercase tracking-widest shadow-sm hover:bg-slate-50 disabled:opacity-20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+        className="w-full h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[12px] uppercase tracking-widest shadow-sm hover:bg-slate-50 disabled:opacity-20 transition-all flex items-center justify-center gap-3 active:scale-95"
       >
         {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <>Submit Feedback <Send size={16} className="rotate-45" /></>}
       </button>

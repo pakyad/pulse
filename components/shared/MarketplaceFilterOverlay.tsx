@@ -80,7 +80,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
               {/* Sort Section */}
               <section className="space-y-4">
                 <div className="flex items-center gap-2">
-                   <ArrowDownWideNarrow size={14} className="text-blue-600" />
+                   <ArrowDownWideNarrow size={14} className="text-slate-900" />
                    <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Sequence Protocol</h3>
                 </div>
                 <div className="space-y-2">
@@ -113,7 +113,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                 <div className="px-2 pt-2">
                   <div className="flex justify-between mb-4">
                     <span className="text-[13px] font-bold text-slate-900">RM 0</span>
-                    <span className="text-[13px] font-bold text-blue-600">RM {tempFilters.priceRange[1]}+</span>
+                    <span className="text-[13px] font-bold text-slate-900">RM {tempFilters.priceRange[1]}+</span>
                   </div>
                   <input 
                     type="range" 
@@ -131,7 +131,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
               {/* Status Section */}
               <section className="space-y-4">
                 <div className="flex items-center gap-2">
-                   <ShieldCheck size={14} className="text-blue-600" />
+                   <ShieldCheck size={14} className="text-slate-900" />
                    <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Trust Protocol</h3>
                 </div>
                 <button
@@ -143,7 +143,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                   }`}
                 >
                   <div className="flex items-center gap-4 text-left">
-                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${tempFilters.officialOnly ? 'bg-blue-600 text-white' : 'bg-white text-slate-300 border border-slate-100'}`}>
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${tempFilters.officialOnly ? 'bg-slate-900 text-white' : 'bg-white text-slate-300 border border-slate-100'}`}>
                       <ShieldCheck size={20} strokeWidth={2.5} />
                     </div>
                     <div>
@@ -151,7 +151,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                       <p className="text-[10px] font-medium text-slate-400">Filter for verified club assets.</p>
                     </div>
                   </div>
-                  <div className={`w-10 h-5 rounded-full p-1 transition-all ${tempFilters.officialOnly ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                  <div className={`w-10 h-5 rounded-full p-1 transition-all ${tempFilters.officialOnly ? 'bg-slate-900' : 'bg-slate-200'}`}>
                     <motion.div 
                       animate={{ x: tempFilters.officialOnly ? 20 : 0 }}
                       className="w-3 h-3 bg-white rounded-full shadow-sm" 
@@ -169,7 +169,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                   onApply(tempFilters);
                   onClose();
                 }}
-                className="w-full h-14 bg-blue-600 text-white rounded-[20px] font-bold text-[14px] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full h-14 bg-slate-900 text-white rounded-[20px] font-bold text-[14px] active:scale-95 transition-all flex items-center justify-center gap-2"
               >
                 Sync Registry
                 <ChevronRight size={16} />

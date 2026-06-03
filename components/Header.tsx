@@ -81,7 +81,7 @@ export default function Header() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => setIsSearchOpen(true)} 
-                  className="w-full h-11 bg-[#F5F5F5] rounded-xl flex items-center px-4 gap-3 transition-all active:scale-[0.98] absolute inset-0 border-none"
+                  className="w-full h-11 bg-[#F5F5F5] rounded-xl flex items-center px-4 gap-3 transition-all active:scale-95 absolute inset-0 border-none"
                 >
                   <Search size={20} className="text-slate-400" />
                   <span className="text-[14px] font-medium text-slate-400">What are you looking for?</span>

@@ -89,7 +89,7 @@ export default function SimplePolicyModal({ isOpen, onClose, onSave }: SimplePol
                 onClose();
               }
             }}
-            className="w-full h-14 bg-slate-900 text-white rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-black transition-all active:scale-[0.98]"
+            className="w-full h-14 bg-slate-900 text-white rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-black transition-all active:scale-95"
           >
             SAVE POLICY
           </button>

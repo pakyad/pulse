@@ -7,7 +7,7 @@ import { onSnapshot, doc, collection, query, where, getDoc } from 'firebase/fire
 import { ChevronLeft, Star, MessageSquare } from 'lucide-react';
 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[17px] font-bold text-[#000000] tracking-tight ${className}`}>
+  <h2 className={`text-[17px] font-bold text-slate-900 tracking-tight ${className}`}>
     {children}
   </h2>
 );
@@ -68,12 +68,12 @@ export default function ReviewsPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[#000000] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-[3px] border-slate-100 border-t-[slate-900] rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40 font-sans">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans">
       {/* ── GLOBAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
@@ -88,7 +88,7 @@ export default function ReviewsPage() {
          {/* ── SUMMARY HEADER ── */}
          <section className="flex flex-col items-center justify-center py-6 border-b border-slate-100">
             <div className="flex items-end gap-2 mb-2">
-               <p className="text-[48px] font-black tracking-tighter leading-none text-[#000000]">
+               <p className="text-[48px] font-black tracking-tighter leading-none text-slate-900">
                  {profile?.averageRating ? Number(profile.averageRating).toFixed(1) : '5.0'}
                </p>
                <div className="pb-2">
@@ -121,7 +121,7 @@ export default function ReviewsPage() {
                                  />
                               </div>
                               <div>
-                                 <p className="text-[13px] font-bold text-[#000000]">{review.reviewer?.full_name || 'Pulse Member'}</p>
+                                 <p className="text-[13px] font-bold text-slate-900">{review.reviewer?.full_name || 'Pulse Member'}</p>
                                  <p className="text-[10px] font-medium text-[#94a3b8]">
                                    {review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently'}
                                  </p>

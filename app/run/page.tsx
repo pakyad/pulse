@@ -11,7 +11,7 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[21px] font-bold text-[#000000] tracking-tight ${className}`}>{children}</h2>
+  <h2 className={`text-[21px] font-bold text-slate-900 tracking-tight ${className}`}>{children}</h2>
 );
 const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <p className={`text-[13px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>{children}</p>
@@ -36,7 +36,7 @@ const ChipRow = ({ options, value, onChange }: { options: string[]; value: strin
   <div className="flex flex-wrap gap-2">
     {options.map(opt => (
       <button key={opt} onClick={() => onChange(opt)}
-        className={`h-10 px-4 rounded-2xl text-[13px] font-bold border transition-all active:scale-95 ${value === opt ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-slate-50 text-[#94a3b8] border-slate-100'}`}>
+        className={`h-10 px-4 rounded-2xl text-[13px] font-bold border transition-all active:scale-95 ${value === opt ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-slate-50 text-[#94a3b8] border-slate-100'}`}>
         {opt}
       </button>
     ))}
@@ -49,9 +49,9 @@ const Field = ({ label, placeholder, value, onChange, multiline = false }: any) 
     <label className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest ml-1">{label}</label>
     {multiline
       ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={4}
-          className="w-full px-5 py-4 bg-slate-50/50 border border-slate-100 rounded-[20px] text-[14px] font-medium text-[#000000] outline-none focus:ring-2 focus:ring-slate-900/5 placeholder:text-slate-300 resize-none transition-all" />
+          className="w-full px-5 py-4 bg-slate-50/50 border border-slate-100 rounded-[20px] text-[14px] font-medium text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/5 placeholder:text-slate-300 resize-none transition-all" />
       : <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-          className="w-full h-14 px-5 bg-slate-50/50 border border-slate-100 rounded-2xl text-[14px] font-medium text-[#000000] outline-none focus:ring-2 focus:ring-slate-900/5 placeholder:text-slate-300 transition-all" />
+          className="w-full h-14 px-5 bg-slate-50/50 border border-slate-100 rounded-2xl text-[14px] font-medium text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/5 placeholder:text-slate-300 transition-all" />
     }
   </div>
 );
@@ -152,7 +152,7 @@ export default function RunModule() {
           <div className="space-y-3">
             {UNIKL_CAFES.map(cafe => (
               <button key={cafe} onClick={() => { setF('source', cafe); setCurrentStep(1); }}
-                className={`w-full h-[72px] px-6 rounded-[22px] flex items-center justify-between border-2 transition-all active:scale-[0.98] ${form.source === cafe ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-slate-50 text-[#000000] border-transparent'}`}>
+                className={`w-full h-[72px] px-6 rounded-[22px] flex items-center justify-between border-2 transition-all active:scale-95 ${form.source === cafe ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-slate-50 text-slate-900 border-transparent'}`}>
                 <span className="text-[15px] font-bold">{cafe}</span>
                 <ChevronRight size={18} className={form.source === cafe ? 'text-white/40' : 'text-slate-200'} />
               </button>
@@ -196,7 +196,7 @@ export default function RunModule() {
           <div className="space-y-2">
             <label className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest ml-1">Petty Cash (RM)</label>
             <input type="number" min="0" step="0.50" value={form.errandBudget} onChange={e => setF('errandBudget', e.target.value)} placeholder="0.00"
-              className="w-full h-14 px-5 bg-slate-50/50 border border-slate-100 rounded-2xl text-[20px] font-bold text-[#000000] outline-none focus:ring-2 focus:ring-slate-900/5 transition-all" />
+              className="w-full h-14 px-5 bg-slate-50/50 border border-slate-100 rounded-2xl text-[20px] font-bold text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/5 transition-all" />
             <p className="text-[11px] text-[#94a3b8] font-medium pl-1">Enter 0 if no cash is needed for the task.</p>
           </div>
         );
@@ -210,7 +210,7 @@ export default function RunModule() {
             ].map(r => (
               <div key={r.label} className="flex items-start justify-between gap-4 py-3 border-b border-slate-50">
                 <span className="text-[12px] font-bold text-[#94a3b8] shrink-0">{r.label}</span>
-                <span className="text-[13px] font-bold text-[#000000] text-right">{r.value}</span>
+                <span className="text-[13px] font-bold text-slate-900 text-right">{r.value}</span>
               </div>
             ))}
           </div>
@@ -221,7 +221,7 @@ export default function RunModule() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -255,7 +255,7 @@ export default function RunModule() {
               <div className="flex items-center gap-5">
                 <div className={`w-1.5 h-12 rounded-full transition-all ${profile?.is_online ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-slate-200'}`} />
                 <div>
-                  <p className="text-[28px] font-bold text-[#000000] tracking-tighter leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
+                  <p className="text-[28px] font-bold text-slate-900 tracking-tighter leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
                   <p className="text-[11px] text-[#94a3b8] font-bold mt-1 lowercase tracking-tight">today's earnings</p>
                 </div>
               </div>
@@ -272,10 +272,10 @@ export default function RunModule() {
               ].map(item => (
                 <button key={item.path} onClick={() => router.push(item.path)} className="w-full flex items-center justify-between group py-2">
                   <div className="text-left">
-                    <p className="text-[15px] font-bold text-slate-500 group-hover:text-[#000000] transition-colors tracking-tight">{item.label}</p>
+                    <p className="text-[15px] font-bold text-slate-500 group-hover:text-slate-900 transition-colors tracking-tight">{item.label}</p>
                     <p className="text-[11px] text-[#94a3b8] font-medium lowercase">{item.sub}</p>
                   </div>
-                  <ArrowRight size={16} className="text-slate-200 group-hover:text-[#000000] group-hover:translate-x-1 transition-all" />
+                  <ArrowRight size={16} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
                 </button>
               ))}
             </div>
@@ -291,13 +291,13 @@ export default function RunModule() {
           <div className="grid grid-cols-1 gap-3">
             {SERVICES.map(s => (
               <button key={s.id} onClick={() => { setActiveService(s); setCurrentStep(0); }}
-                className="w-full h-[96px] px-6 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all">
+                className="w-full h-[96px] px-6 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center justify-between group active:scale-95 transition-all">
                 <div className="flex items-center gap-5">
                   <div className={`w-14 h-14 rounded-2xl ${s.iconBg} flex items-center justify-center`}>
                     <s.icon className={s.accent} size={28} />
                   </div>
                   <div className="text-left">
-                    <h4 className="text-[16px] font-bold text-[#000000] tracking-tight">{s.label}</h4>
+                    <h4 className="text-[16px] font-bold text-slate-900 tracking-tight">{s.label}</h4>
                     <p className="text-[12px] text-[#94a3b8] font-medium mt-0.5">{s.desc}</p>
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export default function RunModule() {
             {/* Progress bar */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-slate-50">
               <motion.div initial={{ width: 0 }} animate={{ width: `${((currentStep + 1) / 4) * 100}%` }}
-                className="h-full bg-blue-600 rounded-r-full" />
+                className="h-full bg-slate-900 rounded-r-full" />
             </div>
 
             {/* Wizard nav */}
@@ -326,7 +326,7 @@ export default function RunModule() {
                 className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 active:scale-95 transition-all">
                 <ChevronLeft size={18} />
               </button>
-              <p className="text-[14px] font-bold text-[#000000] tracking-tight">{activeService.label}</p>
+              <p className="text-[14px] font-bold text-slate-900 tracking-tight">{activeService.label}</p>
               <button onClick={() => setActiveService(null)} className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 active:scale-95 transition-all">
                 <X size={18} />
               </button>
@@ -336,7 +336,7 @@ export default function RunModule() {
             <div className="flex-1 px-6 pt-8 pb-4 overflow-y-auto">
               <div className="space-y-2 mb-8">
                 <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">Step {currentStep + 1} of 4</p>
-                <h2 className="text-[28px] font-bold text-[#000000] tracking-tight leading-tight">{activeService.steps[currentStep].title}</h2>
+                <h2 className="text-[28px] font-bold text-slate-900 tracking-tight leading-tight">{activeService.steps[currentStep].title}</h2>
                 <Subtext>{activeService.steps[currentStep].desc}</Subtext>
               </div>
               <AnimatePresence mode="wait">
@@ -352,10 +352,10 @@ export default function RunModule() {
             <div className="px-6 pb-12 pt-4 bg-white border-t border-slate-50 space-y-4">
               <div className="flex items-center justify-between px-1">
                 <Subtext>Estimated Delivery Fee</Subtext>
-                <p className="text-[20px] font-bold text-[#000000]">RM 4.50</p>
+                <p className="text-[20px] font-bold text-slate-900">RM 4.50</p>
               </div>
               <button onClick={() => currentStep < 3 ? setCurrentStep(currentStep + 1) : handleFinalizeRequest()}
-                className="w-full h-16 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-md shadow-slate-900/10">
+                className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md shadow-slate-900/10">
                 {submitting ? <Loader2 className="animate-spin" size={22} /> : (currentStep === 3 ? 'Confirm Order' : 'Continue')}
                 {!submitting && <ArrowRight size={18} />}
               </button>

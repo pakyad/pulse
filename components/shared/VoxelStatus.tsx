@@ -33,7 +33,7 @@ export const VoxelPulse = ({ className = "text-emerald-500", size = 20 }: { clas
   </svg>
 );
 
-export const VoxelRadar = ({ className = "text-blue-500", size = 20 }: { className?: string, size?: number }) => (
+export const VoxelRadar = ({ className = "text-slate-900", size = 20 }: { className?: string, size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <rect x="10" y="10" width="4" height="4" fill="currentColor" rx="0.5" />
     <motion.rect 
@@ -72,14 +72,14 @@ export default function VoxelStatus({ status, size = 16 }: { status: string, siz
   switch (status.toUpperCase()) {
     case 'PENDING':
     case 'PENDING_VENDOR':
-      return <VoxelRadar className="text-blue-500" size={size} />;
+      return <VoxelRadar className="text-slate-900" size={size} />;
     case 'PREPARING':
     case 'AWAITING_RUNNER':
       return <VoxelBox className="text-amber-500" size={size} />;
     case 'IN_TRANSIT':
     case 'ON_THE_WAY':
     case 'ARRIVED':
-      return <VoxelPulse className="text-blue-600" size={size} />;
+      return <VoxelPulse className="text-slate-900" size={size} />;
     case 'DELIVERED':
     case 'COMPLETED':
       return <VoxelCheck className="text-emerald-500" size={size} />;

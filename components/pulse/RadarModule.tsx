@@ -52,13 +52,13 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
         onClick={e => e.stopPropagation()}
       >
         <div className="space-y-1">
-          <p className="text-[18px] font-bold text-[#000000] tracking-tight">{headline}</p>
+          <p className="text-[18px] font-bold text-slate-900 tracking-tight">{headline}</p>
           <p className="text-[13px] font-medium text-[#94a3b8]">{sub}</p>
         </div>
 
         <div className={`p-4 rounded-2xl space-y-2 ${isLost ? 'bg-red-50 border border-red-100' : 'bg-emerald-50 border border-emerald-100'}`}>
           <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Contact Info</p>
-          <p className="text-[15px] font-bold text-[#000000]">{item.contact}</p>
+          <p className="text-[15px] font-bold text-slate-900">{item.contact}</p>
           {item.reward && (
             <p className="text-[12px] font-semibold text-emerald-600">{item.reward}</p>
           )}
@@ -116,7 +116,7 @@ export function RadarCard({ item, onMarkResolved }: { item: RadarItem; onMarkRes
 
         {/* Content */}
         <div className="flex-1 space-y-1.5">
-          <p className="text-[14px] font-bold text-[#000000] leading-snug">{item.title}</p>
+          <p className="text-[14px] font-bold text-slate-900 leading-snug">{item.title}</p>
           <p className="text-[12px] font-medium text-[#64748b] leading-relaxed line-clamp-2">
             {item.detail}
           </p>
@@ -124,7 +124,7 @@ export function RadarCard({ item, onMarkResolved }: { item: RadarItem; onMarkRes
 
         {/* Footer info */}
         <div className="text-[11px] font-medium text-slate-500 pt-3 border-t border-slate-100/80">
-          {item.reward && <span className="block font-bold text-[#000000] mb-0.5">{item.reward}</span>}
+          {item.reward && <span className="block font-bold text-slate-900 mb-0.5">{item.reward}</span>}
           <span>{item.contact}</span>
         </div>
 
@@ -132,7 +132,7 @@ export function RadarCard({ item, onMarkResolved }: { item: RadarItem; onMarkRes
         {!item.resolved && (
           <button
             onClick={() => setShowContact(true)}
-            className="w-full h-10 rounded-xl bg-slate-50 border border-slate-200 text-[#000000] text-[12px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-slate-100"
+            className="w-full h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-[12px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-slate-100"
           >
             {isLost ? <Search size={14} className="text-slate-500" /> : <CheckCircle2 size={14} className="text-slate-500" />}
             {isLost ? 'I Have This' : 'This Is Mine'}
@@ -208,7 +208,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[18px] font-bold text-[#000000] tracking-tight">
+            <p className="text-[18px] font-bold text-slate-900 tracking-tight">
               {done ? 'Posted!' : step === 'pick' ? 'Campus Radar' : isLost ? 'Report Lost Item' : 'Report Found Item'}
             </p>
             <p className="text-[12px] font-medium text-[#94a3b8] mt-0.5">
@@ -240,14 +240,14 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
           <div className="space-y-3">
             <button
               onClick={() => { setType('LOST'); setStep('form'); }}
-              className="w-full p-5 rounded-2xl border border-red-100 bg-red-50/60 flex items-center justify-between group active:scale-[0.98] transition-all"
+              className="w-full p-5 rounded-2xl border border-red-100 bg-red-50/60 flex items-center justify-between group active:scale-95 transition-all"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
                   <AlertTriangle size={18} className="text-red-500" />
                 </div>
                 <div className="text-left">
-                  <p className="text-[14px] font-bold text-[#000000]">I Lost Something</p>
+                  <p className="text-[14px] font-bold text-slate-900">I Lost Something</p>
                   <p className="text-[11px] font-medium text-[#94a3b8]">Post a lost item alert</p>
                 </div>
               </div>
@@ -256,14 +256,14 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
 
             <button
               onClick={() => { setType('FOUND'); setStep('form'); }}
-              className="w-full p-5 rounded-2xl border border-emerald-100 bg-emerald-50/60 flex items-center justify-between group active:scale-[0.98] transition-all"
+              className="w-full p-5 rounded-2xl border border-emerald-100 bg-emerald-50/60 flex items-center justify-between group active:scale-95 transition-all"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
                   <CheckCircle2 size={18} className="text-emerald-500" />
                 </div>
                 <div className="text-left">
-                  <p className="text-[14px] font-bold text-[#000000]">I Found Something</p>
+                  <p className="text-[14px] font-bold text-slate-900">I Found Something</p>
                   <p className="text-[11px] font-medium text-[#94a3b8]">Help return a found item</p>
                 </div>
               </div>
@@ -284,7 +284,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder={isLost ? 'e.g. Blue Casio Calculator' : 'e.g. Student ID Card'}
-                className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-[#000000] placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
+                className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
               />
             </div>
 
@@ -298,7 +298,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
                 onChange={e => setDetail(e.target.value)}
                 placeholder={isLost ? 'e.g. Level 3 Library, near the window seats' : 'e.g. Surrendered to guard at Main Lobby'}
                 rows={2}
-                className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-[#000000] placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors resize-none"
               />
             </div>
 
@@ -309,7 +309,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
                 value={contact}
                 onChange={e => setContact(e.target.value)}
                 placeholder="e.g. DM @haziq_miit or 011-XXXXXXXX"
-                className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-[#000000] placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
+                className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
               />
             </div>
 
@@ -321,7 +321,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
                   value={reward}
                   onChange={e => setReward(e.target.value)}
                   placeholder="e.g. RM 10 reward"
-                  className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-[#000000] placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
+                  className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
                 />
               </div>
             )}

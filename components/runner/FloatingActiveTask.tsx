@@ -49,7 +49,7 @@ export default function FloatingActiveTask() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-50">
-      <Link href="/run/terminal" className="block w-full bg-gray-900 border border-gray-800 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] p-4 active:scale-[0.98] transition-transform">
+      <Link href="/run/terminal" className="block w-full bg-gray-900 border border-gray-800 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] p-4 active:scale-95 transition-transform">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             {/* Live Indicator (Institutional Emerald) */}

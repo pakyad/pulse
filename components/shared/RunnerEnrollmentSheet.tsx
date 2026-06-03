@@ -348,7 +348,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                <button 
                  onClick={step === 4 ? handleSubmit : next}
                  disabled={isSubmitting || (step === 4 && !form.agreedToTerms)}
-                 className={`w-full h-16 rounded-[22px] font-bold text-[15px] tracking-tight flex items-center justify-center gap-3 transition-all ${isSubmitting ? 'bg-slate-50 text-slate-200' : 'bg-navy text-white shadow-md shadow-navy/10 active:scale-[0.98]'}`}
+                 className={`w-full h-16 rounded-[22px] font-bold text-[15px] tracking-tight flex items-center justify-center gap-3 transition-all ${isSubmitting ? 'bg-slate-50 text-slate-200' : 'bg-navy text-white shadow-md shadow-navy/10 active:scale-95'}`}
                >
                   {isSubmitting ? <Loader2 className="animate-spin" /> : (
                     <>

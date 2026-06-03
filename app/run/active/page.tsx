@@ -269,7 +269,7 @@ function ActiveRunContent() {
                                    const target = step <= 2 ? PICKUP_COORD : DROPOFF_COORD;
                                    window.location.href = `https://waze.com/ul?ll=${target.lat},${target.lng}&navigate=yes`;
                                  }}
-                                 className="h-12 px-5 rounded-full bg-blue-50 text-blue-600 font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                                 className="h-12 px-5 rounded-full bg-blue-50 text-slate-900 font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-transform"
                                >
                                  <Navigation size={16} /> Waze
                                </button>

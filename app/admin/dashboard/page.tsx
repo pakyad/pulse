@@ -562,7 +562,7 @@ export default function AdminDashboard() {
                           <button
                             onClick={() => handlePriceReview(item.id, 'DISMISS')}
                             disabled={isProcessing === item.id}
-                            className="h-12 bg-blue-600 text-white rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-30"
+                            className="h-12 bg-slate-900 text-white rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-30"
                           >
                             {isProcessing === item.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
                             Clear Flag
@@ -666,7 +666,7 @@ export default function AdminDashboard() {
                      <button 
                        onClick={handleSeedClubs}
                        disabled={isSeeding}
-                       className="h-10 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 active:scale-[0.98]"
+                       className="h-10 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 active:scale-95"
                      >
                         {isSeeding ? <Loader2 className="animate-spin" size={14} /> : <Blocks size={14} />}
                         Seed Institutional Data
@@ -744,7 +744,7 @@ export default function AdminDashboard() {
             <section className="space-y-8">
                <div className="flex justify-between items-center px-2">
                   <div>
-                     <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Identity Management</p>
+                     <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em] mb-1">Identity Management</p>
                      <h2 className="text-[22px] font-black text-slate-900 tracking-tight">
                         {activeSubTab === 'ALL' ? 'User Registry' : `${activeSubTab.charAt(0) + activeSubTab.slice(1).toLowerCase()} Registry`}
                      </h2>
@@ -752,7 +752,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-4">
                     <button 
                       onClick={() => setIsAddMerchantOpen(true)}
-                      className="h-10 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[12px] font-black uppercase tracking-widest flex items-center gap-2 transition-all active:scale-[0.98]"
+                      className="h-10 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[12px] font-black uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95"
                     >
                       <UserPlus size={16} />
                       Add Merchant
@@ -810,7 +810,7 @@ export default function AdminDashboard() {
                                      {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Runner</span>}
                                      {u.is_verified_runner && <span className="px-2.5 py-1 bg-[#1C1C1E] text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><ShieldCheck size={10} /> Runner</span>}
                                      {u.merchant_status === 'pending' && !u.is_seller && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Merchant</span>}
-                                     {u.is_seller && <span className="px-2.5 py-1 bg-blue-600 text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Briefcase size={10} /> Merchant</span>}
+                                     {u.is_seller && <span className="px-2.5 py-1 bg-slate-900 text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Briefcase size={10} /> Merchant</span>}
                                      {!u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending' && <span className="px-2.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-md text-[8px] font-black uppercase tracking-widest">Resident</span>}
                                   </div>
                                </td>
@@ -822,7 +822,7 @@ export default function AdminDashboard() {
                                       {u.role === 'STUDENT' && !u.is_verified && (
                                          <button 
                                            onClick={(e) => { e.stopPropagation(); verifyUser(u.id); }}
-                                           className="h-8 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-[0.98] transition-all"
+                                           className="h-8 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
                                          >
                                             Grant Credentials
                                          </button>
@@ -901,7 +901,7 @@ export default function AdminDashboard() {
                   </div>
                   <button 
                     onClick={() => setIsPriceModalOpen(true)}
-                    className="h-11 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[11px] font-black uppercase tracking-widest hover:scale-105 active:scale-[0.98] transition-all"
+                    className="h-11 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[11px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
                   >
                     Establish New Limit
                   </button>
@@ -1067,7 +1067,7 @@ export default function AdminDashboard() {
 
                      <div className="p-8 rounded-2xl bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
                         <div className="flex items-center gap-6">
-                           <div className="w-14 h-14 bg-blue-600 text-white rounded-[20px] flex items-center justify-center shadow-md"><Briefcase size={28} /></div>
+                           <div className="w-14 h-14 bg-slate-900 text-white rounded-[20px] flex items-center justify-center shadow-md"><Briefcase size={28} /></div>
                            <div>
                               <p className="text-[17px] font-black text-black tracking-tight">Merchant Authority</p>
                               <p className="text-[13px] font-medium text-black/30">Verified Pulse Vendor Node</p>

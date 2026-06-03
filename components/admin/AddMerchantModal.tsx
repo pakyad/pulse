@@ -88,7 +88,7 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
             <div className="p-10 space-y-8">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-blue-50 text-slate-900 rounded-xl flex items-center justify-center">
                     <UserPlus size={20} />
                   </div>
                   <div>

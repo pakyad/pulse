@@ -24,7 +24,7 @@ export default function GlobalError({
         <AlertTriangle size={28} />
       </div>
 
-      <h1 className="text-[22px] font-bold text-[#000000] tracking-tight mb-2">
+      <h1 className="text-[22px] font-bold text-slate-900 tracking-tight mb-2">
         Something went wrong
       </h1>
       <p className="text-[13px] font-medium text-[#94a3b8] leading-relaxed max-w-xs mb-10">
@@ -34,7 +34,7 @@ export default function GlobalError({
       <div className="flex flex-col gap-3 w-full max-w-xs">
         <button
           onClick={() => reset()}
-          className="w-full h-14 bg-[#000000] text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all"
+          className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all"
         >
           <RefreshCcw size={16} />
           Try Again

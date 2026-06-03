@@ -106,7 +106,7 @@ export default function ChatRoomPage() {
   if (loading) return null;
 
   return (
-    <main className="h-screen flex flex-col bg-white font-sans antialiased text-[#000000] max-w-2xl mx-auto relative overflow-hidden">
+    <main className="h-screen flex flex-col bg-white font-sans antialiased text-slate-900 max-w-2xl mx-auto relative overflow-hidden">
       
       {/* ── STICKY HEADER ── */}
       <header className="shrink-0 bg-white border-b border-slate-50 px-6 pt-8 pb-4 z-50">
@@ -118,7 +118,7 @@ export default function ChatRoomPage() {
                   <img src={chatInfo?.otherAvatar} alt="Avatar" className="w-full h-full object-cover" />
                </div>
                <div className="flex-1 min-w-0">
-                  <h1 className="text-[15px] font-bold tracking-tight truncate text-[#000000]">
+                  <h1 className="text-[15px] font-bold tracking-tight truncate text-slate-900">
                      {chatInfo?.otherName}
                   </h1>
                   <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-500 uppercase tracking-widest mt-0.5">
@@ -133,7 +133,7 @@ export default function ChatRoomPage() {
       {/* ── CONTEXT BANNER (Item/Post Reference) ── */}
       <div className="shrink-0 bg-slate-50/50 px-6 py-3 border-b border-slate-100 flex items-center justify-between">
          <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 ${chatInfo?.type === 'MARKETPLACE' ? 'bg-blue-100 text-blue-600' : 'bg-rose-100 text-rose-600'}`}>
+            <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 ${chatInfo?.type === 'MARKETPLACE' ? 'bg-blue-100 text-slate-900' : 'bg-rose-100 text-rose-600'}`}>
                {chatInfo?.type === 'MARKETPLACE' ? <ShoppingBag size={14} /> : <Radio size={14} />}
             </div>
             <div className="min-w-0 flex-1">
@@ -158,8 +158,8 @@ export default function ChatRoomPage() {
                >
                   <div className={`max-w-[75%] rounded-2xl px-5 py-3.5 text-[14px] leading-relaxed ${
                      isMe 
-                        ? 'bg-[#000000] text-white rounded-br-[8px]' 
-                        : 'bg-slate-50 border border-slate-100 text-[#000000] rounded-bl-[8px]'
+                        ? 'bg-slate-900 text-white rounded-br-[8px]' 
+                        : 'bg-slate-50 border border-slate-100 text-slate-900 rounded-bl-[8px]'
                   }`}>
                      {msg.text}
                   </div>
@@ -185,7 +185,7 @@ export default function ChatRoomPage() {
             <button 
                type="submit" 
                disabled={!newMessage.trim() || isSubmitting}
-               className="absolute right-1 w-10 h-10 rounded-full bg-[#000000] flex items-center justify-center text-white active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100"
+               className="absolute right-1 w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100"
             >
                <Send size={16} className="ml-1" />
             </button>

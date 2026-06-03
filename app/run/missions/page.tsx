@@ -148,7 +148,7 @@ export default function MissionBoard() {
   if (loading) return null;
 
   return (
-    <main className="min-h-screen bg-white font-sans antialiased text-[#000000]">
+    <main className="min-h-screen bg-white font-sans antialiased text-slate-900">
 
       {/* \u2500\u2500 IN-UI ERROR TOAST \u2500\u2500 */}
       {showError && (
@@ -186,7 +186,7 @@ export default function MissionBoard() {
              </div>
              <button 
                onClick={() => router.push('/run/terminal')}
-               className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all lowercase"
+               className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-95 transition-all lowercase"
              >
                <span>return to active terminal</span>
                <ArrowRight size={16} />
@@ -231,7 +231,7 @@ export default function MissionBoard() {
                                   </div>
                                </div>
                                <div className="text-right">
-                                  <p className="text-[18px] font-bold text-[#000000]">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
+                                  <p className="text-[18px] font-bold text-slate-900">RM {(mission.deliveryFee || 3.50).toFixed(2)}</p>
                                   <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Payout</p>
                                </div>
                             </div>
@@ -246,7 +246,7 @@ export default function MissionBoard() {
                                      <Clock size={14} className="text-slate-300" />
                                      <p className="text-[13px] font-medium text-slate-400 italic lowercase">pickup at {mission.seller_name || 'merchant'}</p>
                                   </div>
-                                  <span className="text-[11px] font-bold text-[#000000] bg-slate-200/50 px-2.5 py-0.5 rounded-full lowercase tracking-tight">
+                                  <span className="text-[11px] font-bold text-slate-900 bg-slate-200/50 px-2.5 py-0.5 rounded-full lowercase tracking-tight">
                                      {formatTimeAgo(mission.created_at, now)}
                                   </span>
                                </div>
@@ -255,7 +255,7 @@ export default function MissionBoard() {
                             <button 
                               disabled={isProcessing}
                               onClick={() => handleClaim(mission.id)}
-                              className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-50"
+                              className="w-full h-14 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50"
                             >
                                {isProcessing ? <Activity className="animate-spin" size={18} /> : <Zap size={18} className="text-amber-400 fill-amber-400" />}
                                <span className="lowercase">claim mission</span>
@@ -300,7 +300,7 @@ export default function MissionBoard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-200 bg-blue-600 flex flex-col items-center justify-center text-white text-center p-10"
+            className="fixed inset-0 z-200 bg-slate-900 flex flex-col items-center justify-center text-white text-center p-10"
           >
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}

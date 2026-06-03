@@ -108,7 +108,7 @@ function ActiveOrderCard({ order }: { order: any }) {
     <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
       <button
         onClick={() => router.push(`/orders/${order.id}`)}
-        className="w-full text-left bg-[#111111] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-transform"
+        className="w-full text-left bg-[#111111] rounded-2xl p-5 flex items-center justify-between group active:scale-95 transition-transform"
       >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
@@ -146,7 +146,7 @@ function AnnouncementCard({ ann }: { ann: any }) {
             <span className="w-1 h-1 rounded-full bg-slate-200 shrink-0" />
             <span className="text-[10px] font-medium text-slate-300">{relativeTime(ann.created_at)}</span>
           </div>
-          <p className="text-[14px] font-bold text-[#000000] leading-snug tracking-tight">{ann.headline || ann.title}</p>
+          <p className="text-[14px] font-bold text-slate-900 leading-snug tracking-tight">{ann.headline || ann.title}</p>
           <AnimatePresence>
             {expanded && ann.body && (
               <motion.p
@@ -261,7 +261,7 @@ export default function PulsePage() {
     : DEMO_RADAR;
 
   return (
-    <main className="min-h-screen bg-white text-[#000000] antialiased pb-40">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
       {/* ── NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
@@ -293,7 +293,7 @@ export default function PulsePage() {
         {/* ── ANNOUNCEMENTS ── */}
         <section className="space-y-4">
           <div className="px-1">
-            <h2 className="text-[21px] font-bold text-[#000000] tracking-tight">Announcements</h2>
+            <h2 className="text-[21px] font-bold text-slate-900 tracking-tight">Announcements</h2>
             <p className="text-[13px] font-medium text-[#94a3b8] mt-0.5">Official notices from the university</p>
           </div>
           <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
@@ -323,7 +323,7 @@ export default function PulsePage() {
         <section className="space-y-4">
           <div className="px-1 flex items-center justify-between">
             <div>
-              <h2 className="text-[21px] font-bold text-[#000000] tracking-tight">Campus Radar</h2>
+              <h2 className="text-[21px] font-bold text-slate-900 tracking-tight">Campus Radar</h2>
               <p className="text-[13px] font-medium text-[#94a3b8] mt-0.5">Lost items · Found items · Peer alerts</p>
             </div>
             <div className="flex items-center gap-3">
@@ -347,7 +347,7 @@ export default function PulsePage() {
         {/* ── HAPPENING THIS WEEK ── */}
         <section className="space-y-4">
           <div className="px-1">
-            <h2 className="text-[21px] font-bold text-[#000000] tracking-tight">Happening This Week</h2>
+            <h2 className="text-[21px] font-bold text-slate-900 tracking-tight">Happening This Week</h2>
             <p className="text-[13px] font-medium text-[#94a3b8] mt-0.5">Campus events and activities</p>
           </div>
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6">
@@ -355,7 +355,7 @@ export default function PulsePage() {
               <div
                 key={ev.id}
                 onClick={() => setSelectedEvent(ev)}
-                className="shrink-0 w-[240px] bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-slate-200 transition-all group cursor-pointer active:scale-[0.98]"
+                className="shrink-0 w-[240px] bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-slate-200 transition-all group cursor-pointer active:scale-95"
               >
                 <div className="h-[120px] relative bg-slate-100 overflow-hidden">
                   {ev.imageUrl
@@ -363,11 +363,11 @@ export default function PulsePage() {
                     : <div className="w-full h-full bg-gradient-to-tr from-slate-200 to-slate-100" />
                   }
                   <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm text-[9px] font-black uppercase tracking-[0.15em] text-[#000000] shadow-sm">{ev.tag || 'Event'}</span>
+                    <span className="px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm text-[9px] font-black uppercase tracking-[0.15em] text-slate-900 shadow-sm">{ev.tag || 'Event'}</span>
                   </div>
                 </div>
                 <div className="p-4 space-y-3">
-                  <p className="text-[14px] font-bold text-[#000000] leading-snug line-clamp-2">{ev.title}</p>
+                  <p className="text-[14px] font-bold text-slate-900 leading-snug line-clamp-2">{ev.title}</p>
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 text-[11px] font-medium text-slate-500">
                       <Calendar size={12} className="shrink-0 text-slate-400" />
@@ -416,14 +416,14 @@ export default function PulsePage() {
                 <div className="h-[160px] relative overflow-hidden">
                   <img src={selectedEvent.imageUrl} className="w-full h-full object-cover" alt={selectedEvent.title} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <span className="absolute bottom-4 left-4 px-2.5 py-1 rounded-md bg-white/90 text-[9px] font-black uppercase tracking-widest text-[#000000]">
+                  <span className="absolute bottom-4 left-4 px-2.5 py-1 rounded-md bg-white/90 text-[9px] font-black uppercase tracking-widest text-slate-900">
                     {selectedEvent.tag || 'Event'}
                   </span>
                 </div>
               )}
               <div className="p-6 space-y-4">
                 <div>
-                  <p className="text-[18px] font-bold text-[#000000] tracking-tight leading-snug">{selectedEvent.title}</p>
+                  <p className="text-[18px] font-bold text-slate-900 tracking-tight leading-snug">{selectedEvent.title}</p>
                   <p className="text-[12px] font-medium text-[#94a3b8] mt-1">{selectedEvent.organiser}</p>
                 </div>
                 <div className="space-y-2">

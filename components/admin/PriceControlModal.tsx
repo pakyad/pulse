@@ -86,7 +86,7 @@ export default function PriceControlModal({ isOpen, onClose, onSave }: PriceCont
                   onClose();
                 }
               }}
-              className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-md shadow-slate-900/20 active:scale-[0.98]"
+              className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-md shadow-slate-900/20 active:scale-95"
             >
               Set Institutional Limit
             </button>
