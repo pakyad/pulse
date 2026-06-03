@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db, functions } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
-import { ChevronLeft, X, Loader2, ChevronRight, ArrowRight } from 'lucide-react';
+import { ChevronLeft, X, Loader2, ChevronRight, ArrowRight, Package, Map, History } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -29,50 +29,27 @@ const VoxelErrands = ({ className, size = 24 }: any) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}><rect x="8" y="4" width="8" height="8" fill="currentColor" rx="1" /><rect x="4" y="14" width="16" height="6" fill="currentColor" opacity="0.6" rx="1" /></svg>
 );
 
-// ── CHIP SELECTOR ──
-const ChipRow = ({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) => (
-  <div className="flex flex-wrap gap-2">
-    {options.map(opt => (
-      <button key={opt} onClick={() => onChange(opt)}
-        className={`h-10 px-4 rounded-2xl text-[13px] font-bold border transition-all active:scale-95 ${value === opt ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-slate-50 text-[#94a3b8] border-slate-100'}`}>
-        {opt}
-      </button>
-    ))}
-  </div>
-);
-
-// ── FIELD INPUT ──
-const Field = ({ label, placeholder, value, onChange, multiline = false }: any) => (
-  <div className="space-y-2">
-    <label className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest ml-1">{label}</label>
-    {multiline
-      ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={4}
-          className="w-full px-5 py-4 bg-slate-50/50 border border-slate-100 rounded-[20px] text-[14px] font-medium text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/5 placeholder:text-slate-300 resize-none transition-all" />
-      : <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-          className="w-full h-14 px-5 bg-slate-50/50 border border-slate-100 rounded-2xl text-[14px] font-medium text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/5 placeholder:text-slate-300 transition-all" />
-    }
-  </div>
-);
+// Components moved inside RunModule for theming
 
 const UNIKL_CAFES = ['Cafe Block A', 'Starbucks MIIT', 'West Wing Cafeteria'];
 
 const SERVICES = [
-  { id: 'food',     label: 'Food & Cravings',  icon: VoxelFood,      desc: 'Cafe Block A, Starbucks, West Wing', accent: 'text-amber-600',  iconBg: 'bg-amber-100', fee: 4.50,
+  { id: 'food',     label: 'Food & Cravings',  icon: VoxelFood,      desc: 'Cafe Block A, Starbucks, West Wing', accent: 'text-orange-950',  iconBg: 'bg-orange-50', circleBg: 'bg-orange-200/60', selectedStyle: 'bg-orange-50 border-orange-300 text-orange-950', btnStyle: 'bg-orange-950', fee: 4.50,
     steps: [{ title: 'Source',     desc: 'Choose your cafe or canteen' },
             { title: 'Order List', desc: 'Tell us what you want'       },
             { title: 'Schedule',   desc: 'When do you need it?'        },
             { title: 'Meet Point', desc: 'Where should we find you?'   }] },
-  { id: 'parcels',  label: 'Parcel & Mail',     icon: VoxelLogistics, desc: 'Shopee, Lazada, Mail',               accent: 'text-slate-600',  iconBg: 'bg-slate-100', fee: 5.00,
+  { id: 'parcels',  label: 'Parcel & Mail',     icon: VoxelLogistics, desc: 'Shopee, Lazada, Mail',               accent: 'text-cyan-950',  iconBg: 'bg-cyan-50', circleBg: 'bg-cyan-200/70', selectedStyle: 'bg-cyan-50 border-cyan-300 text-cyan-950', btnStyle: 'bg-cyan-950', fee: 5.00,
     steps: [{ title: 'Item Type',  desc: 'What type of parcel is it?'  },
             { title: 'Size',       desc: 'How big is the package?'     },
             { title: 'Pickup',     desc: 'Where is the parcel now?'    },
             { title: 'Drop-off',   desc: 'Where should we deliver it?' }] },
-  { id: 'academic', label: 'Academic Print',    icon: VoxelBooks,     desc: 'UniStore, Library Hub',              accent: 'text-indigo-600', iconBg: 'bg-indigo-100', fee: 3.50,
+  { id: 'academic', label: 'Academic Print',    icon: VoxelBooks,     desc: 'UniStore, Library Hub',              accent: 'text-violet-950', iconBg: 'bg-violet-50', circleBg: 'bg-violet-200/60', selectedStyle: 'bg-violet-50 border-violet-300 text-violet-950', btnStyle: 'bg-violet-950', fee: 3.50,
     steps: [{ title: 'Hub',        desc: 'Which printing hub?'         },
             { title: 'Specs',      desc: 'Color and paper preferences' },
             { title: 'Document',   desc: 'Describe what to print'      },
             { title: 'Destination',desc: 'Where should we deliver it?' }] },
-  { id: 'errands',  label: 'Custom Tasks',      icon: VoxelErrands,   desc: 'Flexible errands & requests',        accent: 'text-purple-600', iconBg: 'bg-purple-100', fee: 6.00,
+  { id: 'errands',  label: 'Custom Tasks',      icon: VoxelErrands,   desc: 'Flexible errands & requests',        accent: 'text-rose-950', iconBg: 'bg-rose-50', circleBg: 'bg-rose-200/60', selectedStyle: 'bg-rose-50 border-rose-300 text-rose-950', btnStyle: 'bg-rose-950', fee: 6.00,
     steps: [{ title: 'Task Brief', desc: 'Describe your task in detail'},
             { title: 'Duration',   desc: 'How long might it take?'     },
             { title: 'Budget',     desc: 'Any petty cash needed?'      },
@@ -88,6 +65,7 @@ export default function RunModule() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [customFee, setCustomFee] = useState<string>('');
   const [form, setForm] = useState<any>({
     // food
     source: '', items: '', schedule: '', meetPoint: '',
@@ -100,6 +78,37 @@ export default function RunModule() {
   });
 
   const setF = (key: string, val: string) => setForm((p: any) => ({ ...p, [key]: val }));
+
+  // ── THEMED CHIP SELECTOR ──
+  const ChipRow = ({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) => {
+    const activeClass = activeService?.selectedStyle ? `${activeService.selectedStyle} shadow-sm border-[1.5px]` : 'bg-slate-900 text-white shadow-md border-[1.5px] border-slate-900';
+    const inactiveClass = `bg-white text-slate-500 border-[1.5px] border-slate-100 hover:border-slate-200`;
+    return (
+      <div className="flex flex-wrap gap-2">
+        {options.map(opt => (
+          <button key={opt} onClick={() => onChange(opt)}
+            className={`h-11 px-5 rounded-2xl text-[13px] font-bold transition-all active:scale-95 ${value === opt ? activeClass : inactiveClass}`}>
+            {opt}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  // ── STANDARD FIELD INPUT ──
+  const Field = ({ label, placeholder, value, onChange, multiline = false }: any) => {
+    return (
+      <div className="space-y-2">
+        <label className="text-[10px] font-black uppercase tracking-widest ml-1 opacity-60 text-slate-400">{label}</label>
+        {multiline
+          ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={4}
+              className="w-full px-5 py-4 bg-white border-[1.5px] border-slate-100 rounded-[20px] text-[14px] font-medium text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/5 placeholder:text-slate-300 resize-none transition-all shadow-sm" />
+          : <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+              className="w-full h-14 px-5 bg-white border-[1.5px] border-slate-100 rounded-2xl text-[14px] font-medium text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/5 placeholder:text-slate-300 transition-all shadow-sm" />
+        }
+      </div>
+    );
+  };
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(user => {
@@ -159,7 +168,7 @@ export default function RunModule() {
         type: activeService.id.toUpperCase(),
         pickup_location: form.source || form.hub || form.pickupNode || activeService.desc.split(',')[0],
         drop_off_location: form.meetPoint || form.dropOff || form.destination || 'Campus',
-        total_price: activeService.fee || 4.50,
+        total_price: parseFloat(customFee) || activeService.fee || 4.50,
         items_summary: form.items || form.docDesc || form.errandBrief || 'Delivery Request',
         status: 'PENDING_RUNNER',
         created_at: serverTimestamp()
@@ -178,13 +187,18 @@ export default function RunModule() {
       case 'food':
         if (currentStep === 0) return (
           <div className="space-y-3">
-            {UNIKL_CAFES.map(cafe => (
-              <button key={cafe} onClick={() => { setF('source', cafe); setCurrentStep(1); }}
-                className={`w-full h-[72px] px-6 rounded-[22px] flex items-center justify-between border-2 transition-all active:scale-95 ${form.source === cafe ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-slate-50 text-slate-900 border-transparent'}`}>
-                <span className="text-[15px] font-bold">{cafe}</span>
-                <ChevronRight size={18} className={form.source === cafe ? 'text-white/40' : 'text-slate-200'} />
-              </button>
-            ))}
+            {UNIKL_CAFES.map(cafe => {
+              const isSelected = form.source === cafe;
+              const activeClass = activeService?.selectedStyle ? `${activeService.selectedStyle} shadow-sm border-[1.5px]` : 'bg-slate-900 text-white border-[1.5px] border-slate-900 shadow-md';
+              const inactiveClass = `bg-white text-slate-900 border-[1.5px] border-slate-100 hover:border-slate-200`;
+              return (
+                <button key={cafe} onClick={() => { setF('source', cafe); setCurrentStep(1); }}
+                  className={`w-full h-[72px] px-6 rounded-[22px] flex items-center justify-between transition-all active:scale-95 ${isSelected ? activeClass : inactiveClass}`}>
+                  <span className="text-[15px] font-bold">{cafe}</span>
+                  <ChevronRight size={18} className={isSelected ? 'opacity-40' : 'text-slate-300'} />
+                </button>
+              );
+            })}
           </div>
         );
         if (currentStep === 1) return <Field label="What do you want?" placeholder="e.g. Nasi Lemak + Teh Tarik, no sugar" value={form.items} onChange={(v: string) => setF('items', v)} multiline />;
@@ -294,20 +308,28 @@ export default function RunModule() {
                 <span className="lowercase">{profile?.is_online ? 'online' : 'offline'}</span>
               </button>
             </div>
-            <div className="space-y-4 px-1">
-              {[
-                { label: 'Delivery Hub',    sub: 'open terminal tools',   path: '/run/terminal' },
-                { label: 'Active GPS Map',  sub: 'live delivery telemetry', path: '/run/active' },
-                { label: 'Mission History', sub: 'view completed tasks',  path: '/run/history' },
-              ].map(item => (
-                <button key={item.path} onClick={() => router.push(item.path)} className="w-full flex items-center justify-between group py-2">
-                  <div className="text-left">
-                    <p className="text-[15px] font-bold text-slate-500 group-hover:text-slate-900 transition-colors tracking-tight">{item.label}</p>
-                    <p className="text-[11px] text-[#94a3b8] font-medium lowercase">{item.sub}</p>
-                  </div>
-                  <ArrowRight size={16} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
-                </button>
-              ))}
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              {/* Delivery Hub Card */}
+              <button 
+                onClick={() => router.push('/run/terminal')} 
+                className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all active:scale-95 shadow-sm ${profile?.is_online ? 'bg-cyan-50 text-cyan-950' : 'bg-slate-50 text-slate-700'}`}
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${profile?.is_online ? 'bg-cyan-200/70 text-cyan-950' : 'bg-slate-200 text-slate-500'}`}>
+                  <Package size={20} strokeWidth={2.5} />
+                </div>
+                <p className="text-[14px] font-bold tracking-tight">Delivery Hub</p>
+              </button>
+
+              {/* History Card */}
+              <button 
+                onClick={() => router.push('/run/history')} 
+                className="w-full flex flex-col items-start gap-4 p-5 rounded-[24px] bg-violet-50 transition-all active:scale-95 text-violet-950 shadow-sm"
+              >
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-violet-200/60 text-violet-950">
+                  <History size={20} strokeWidth={2.5} />
+                </div>
+                <p className="text-[14px] font-bold tracking-tight truncate">Mission History</p>
+              </button>
             </div>
           </div>
         ) : profile?.runner_status === 'pending' ? (
@@ -333,25 +355,23 @@ export default function RunModule() {
         )}
 
         {/* ── REQUEST DELIVERY ── */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="px-1">
             <Heading>Request Delivery</Heading>
             <Subtext>Get help with food, parcels, or custom tasks on campus</Subtext>
           </div>
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {SERVICES.map(s => (
-              <button key={s.id} onClick={() => { setActiveService(s); setCurrentStep(0); }}
-                className="w-full h-[96px] px-6 bg-slate-50/50 border border-slate-100 rounded-2xl flex items-center justify-between group active:scale-95 transition-all">
-                <div className="flex items-center gap-5">
-                  <div className={`w-14 h-14 rounded-2xl ${s.iconBg} flex items-center justify-center`}>
-                    <s.icon className={s.accent} size={28} />
-                  </div>
-                  <div className="text-left">
-                    <h4 className="text-[16px] font-bold text-slate-900 tracking-tight">{s.label}</h4>
-                    <p className="text-[12px] text-[#94a3b8] font-medium mt-0.5">{s.desc}</p>
-                  </div>
+              <button key={s.id} onClick={() => { setActiveService(s); setCurrentStep(0); setCustomFee(s.fee.toFixed(2)); }}
+                className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all active:scale-95 shadow-sm ${s.iconBg} ${s.accent}`}
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${s.circleBg}`}>
+                  <s.icon size={20} strokeWidth={2.5} />
                 </div>
-                <ChevronRight size={18} className="text-slate-200 group-hover:text-slate-400 transition-colors" />
+                <div className="text-left w-full">
+                  <p className="text-[14px] font-bold tracking-tight leading-tight">{s.label}</p>
+                  <p className="text-[11px] font-medium mt-1 line-clamp-2 leading-relaxed opacity-70">{s.desc}</p>
+                </div>
               </button>
             ))}
           </div>
@@ -362,32 +382,32 @@ export default function RunModule() {
       <AnimatePresence>
         {activeService && (
           <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-0 z-200 bg-white flex flex-col">
-
-            {/* Progress bar */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-slate-50">
-              <motion.div initial={{ width: 0 }} animate={{ width: `${((currentStep + 1) / 4) * 100}%` }}
-                className="h-full bg-slate-900 rounded-r-full" />
-            </div>
+            className="fixed inset-0 z-200 flex flex-col bg-slate-50">
 
             {/* Wizard nav */}
-            <nav className="px-6 pt-10 pb-5 flex items-center justify-between border-b border-slate-50">
-              <button onClick={() => currentStep > 0 ? setCurrentStep(s => s - 1) : setActiveService(null)}
-                className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 active:scale-95 transition-all">
-                <ChevronLeft size={18} />
-              </button>
-              <p className="text-[14px] font-bold text-slate-900 tracking-tight">{activeService.label}</p>
-              <button onClick={() => setActiveService(null)} className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 active:scale-95 transition-all">
-                <X size={18} />
-              </button>
+            <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6 flex items-center justify-between bg-slate-50/80 backdrop-blur-xl border-b-[0.5px] border-slate-200/50">
+               <div className="flex items-center gap-2">
+                 <button onClick={() => currentStep > 0 ? setCurrentStep(s => s - 1) : setActiveService(null)}
+                   className="w-10 h-10 flex items-center justify-start text-slate-400 hover:text-slate-900 active:scale-95 transition-all">
+                   <ChevronLeft size={24} />
+                 </button>
+                 <p className="text-[15px] font-bold tracking-tight text-slate-900">{activeService.label}</p>
+               </div>
+               <button onClick={() => setActiveService(null)} className="w-10 h-10 flex items-center justify-end text-slate-400 hover:text-slate-900 active:scale-95 transition-all">
+                 <X size={24} />
+               </button>
             </nav>
 
+            {/* Progress bar positioned right below the fixed nav */}
+            <div className="fixed top-[88px] left-0 right-0 h-1 bg-slate-200/50 z-50">
+              <motion.div initial={{ width: 0 }} animate={{ width: `${((currentStep + 1) / 4) * 100}%` }}
+                className="h-full rounded-r-full bg-blue-600" />
+            </div>
+
             {/* Step content */}
-            <div className="flex-1 px-6 pt-8 pb-4 overflow-y-auto">
-              <div className="space-y-2 mb-8">
-                <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">Step {currentStep + 1} of 4</p>
-                <h2 className="text-[28px] font-bold text-slate-900 tracking-tight leading-tight">{activeService.steps[currentStep].title}</h2>
-                <Subtext>{activeService.steps[currentStep].desc}</Subtext>
+            <div className="flex-1 px-8 pt-32 pb-4 overflow-y-auto">
+              <div className="space-y-1 mb-8">
+                <h2 className="text-[28px] font-bold tracking-tight leading-tight text-slate-900">{activeService.steps[currentStep].title}</h2>
               </div>
               <AnimatePresence mode="wait">
                 <motion.div key={`${activeService.id}-${currentStep}`}
@@ -399,14 +419,26 @@ export default function RunModule() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 pb-12 pt-4 bg-white border-t border-slate-50 space-y-4">
-              <div className="flex items-center justify-between px-1">
-                <Subtext>Estimated Delivery Fee</Subtext>
-                <p className="text-[20px] font-bold text-slate-900">RM {activeService.fee.toFixed(2)}</p>
+            <div className="px-8 pb-10 pt-6 bg-slate-50 border-t border-slate-200/50 space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Delivery Reward</p>
+                  <p className="text-[11px] font-medium text-slate-400 mt-1">Recommended: RM {activeService.fee.toFixed(2)}</p>
+                </div>
+                <div className="flex items-center gap-1 border-b-2 border-slate-200 focus-within:border-blue-600 transition-colors pb-1">
+                  <span className="text-[18px] font-bold text-slate-400">RM</span>
+                  <input 
+                    type="number"
+                    value={customFee}
+                    onChange={(e) => setCustomFee(e.target.value)}
+                    className="w-20 text-right text-[26px] font-black text-slate-900 bg-transparent outline-none"
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
               <button onClick={() => currentStep < 3 ? setCurrentStep(currentStep + 1) : handleFinalizeRequest()}
                 disabled={submitting || !canAdvanceStep()}
-                className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50 disabled:grayscale">
+                className="w-full h-16 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:grayscale">
                 {submitting ? <Loader2 className="animate-spin" size={22} /> : (currentStep === 3 ? 'Confirm Order' : 'Continue')}
                 {!submitting && <ArrowRight size={18} />}
               </button>

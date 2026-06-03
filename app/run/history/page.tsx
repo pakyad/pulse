@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, History, Search, MapPin, ChevronRight, Package, CheckCircle2 } from 'lucide-react';
+import { History, Search, MapPin, ChevronRight, Package, CheckCircle2 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
 import { auth, db } from '@/lib/firebase';
@@ -47,62 +47,60 @@ export default function RunnerHistoryPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-white font-sans antialiased text-navy max-w-md mx-auto border-x border-slate-50 shadow-sm">
+    <main className="min-h-screen bg-slate-50 font-sans antialiased text-slate-900 max-w-2xl mx-auto border-x border-slate-100 shadow-sm pb-40">
       
       {/* ── HEADER ── */}
-      <header className="px-6 pt-12 pb-6 sticky top-0 bg-white/80 backdrop-blur-xl z-50 border-b border-slate-50">
-        <div className="flex items-center justify-between mb-8">
-           <div className="flex items-center gap-3">
-              <BackButton fallback="/run" />
-              <h1 className="text-[17px] font-bold tracking-tight">Order History</h1>
-           </div>
-        </div>
+      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+         <BackButton fallback="/run" />
+         <p className="text-[14px] font-bold tracking-tight">Mission History</p>
+      </nav>
 
-        {/* Search Pill */}
+      {/* ── SEARCH BAR ── */}
+      <section className="px-8 pt-28 pb-4">
         <div className="relative group">
-           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-navy transition-colors" />
+           <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
            <input 
               type="text" 
               placeholder="Search by location or item..."
-              className="w-full h-11 bg-slate-50 border border-slate-100/50 rounded-2xl pl-12 pr-4 text-[13px] font-medium placeholder:text-slate-300 outline-none focus:bg-white focus:ring-4 focus:ring-navy/5 transition-all"
+              className="w-full h-12 bg-white border border-slate-100 rounded-2xl pl-12 pr-4 text-[14px] font-medium placeholder:text-[#94a3b8] outline-none focus:ring-4 focus:ring-slate-900/5 transition-all shadow-sm"
            />
         </div>
-      </header>
+      </section>
 
       {/* ── HISTORY LIST ── */}
-      <section className="px-6 py-6 space-y-4">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] mb-2 ml-1">Recent Activity</p>
+      <section className="px-8 mt-2 space-y-3">
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 ml-1">Completed Missions</p>
         
         {displayHistory.map((job) => (
           <motion.div 
             key={job.id}
             whileTap={{ scale: 0.98 }}
-            className="p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm relative overflow-hidden group"
+            className="p-5 bg-white border border-slate-100 rounded-3xl shadow-sm relative overflow-hidden group cursor-pointer"
           >
             <div className="flex justify-between items-start mb-4">
-               <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center">
-                     <CheckCircle2 size={18} />
+               <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center shrink-0">
+                     <CheckCircle2 size={24} />
                   </div>
                   <div>
-                     <h4 className="text-[14px] font-bold text-navy leading-none">{job.item}</h4>
-                     <p className="text-[11px] text-slate-400 font-medium mt-1">{job.date}</p>
+                     <h4 className="text-[15px] font-bold tracking-tight leading-tight">{job.item}</h4>
+                     <p className="text-[12px] text-slate-400 font-medium mt-0.5">{job.date}</p>
                   </div>
                </div>
-               <p className="text-[16px] font-black text-navy">+RM {job.price.toFixed(2)}</p>
+               <p className="text-[16px] font-black text-slate-900 tracking-tight">+RM {job.price.toFixed(2)}</p>
             </div>
 
-            <div className="flex items-center gap-2 text-[11px] font-medium text-slate-400 bg-slate-50 p-3 rounded-xl">
-               <span className="flex items-center gap-1.5 text-navy/70"><MapPin size={11}/> {job.from}</span>
-               <ChevronRight size={11} className="text-slate-300"/>
-               <span>{job.to}</span>
+            <div className="flex items-center gap-3 text-[12px] font-bold text-slate-500 bg-slate-50 p-4 rounded-2xl border border-slate-100/50">
+               <span className="flex items-center gap-2 text-slate-700 truncate"><MapPin size={14} className="text-slate-400"/> {job.from}</span>
+               <ChevronRight size={14} className="text-slate-300 shrink-0"/>
+               <span className="truncate">{job.to}</span>
             </div>
           </motion.div>
         ))}
 
-        <div className="text-center pt-8 opacity-20">
-           <History size={24} className="mx-auto mb-2" />
-           <p className="text-[9px] font-bold uppercase tracking-[0.4em]">End of Transcript</p>
+        <div className="text-center pt-16 opacity-30 flex flex-col items-center">
+           <History size={24} strokeWidth={1.5} className="mb-3 text-slate-400" />
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End of Log</p>
         </div>
       </section>
 
