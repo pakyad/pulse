@@ -12,6 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "PULSE | Campus Delivery & Market",
   description: "Easy campus delivery and marketplace.",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     title: "PULSE",

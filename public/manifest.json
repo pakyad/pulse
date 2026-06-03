@@ -1,0 +1,16 @@
+{
+  "name": "PULSE",
+  "short_name": "PULSE",
+  "description": "Campus Delivery & Marketplace",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/globe.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
