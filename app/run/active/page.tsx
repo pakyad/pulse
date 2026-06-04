@@ -6,7 +6,7 @@ import {
   ChevronLeft, Navigation, Phone, MessageSquare, CheckCircle2, 
   AlertTriangle, ShieldAlert, Package, Navigation2, Loader2,
   Clock, MapPin, ArrowRight, ShieldCheck, Star, Zap, X,
-  Camera, Upload, Info, Lock, Shield
+  Camera, Upload, Info, Lock, Shield, User, Store
 } from 'lucide-react';
 import { auth, db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -14,22 +14,23 @@ import { completeDelivery } from '@/app/actions/deliveryActions';
 import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection, query, where } from 'firebase/firestore';
 import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import MapErrorBoundary from '@/components/shared/MapErrorBoundary';
+import BackButton from '@/components/shared/BackButton';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
 const MAP_OPTIONS = {
   disableDefaultUI: true,
   styles: [
-    { "elementType": "geometry", "stylers": [{ "color": "#f5f5f5" }] },
+    { "elementType": "geometry", "stylers": [{ "color": "#f8fafc" }] },
     { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
-    { "elementType": "labels.text.fill", "stylers": [{ "color": "#616161" }] },
-    { "elementType": "labels.text.stroke", "stylers": [{ "color": "#f5f5f5" }] },
+    { "elementType": "labels.text.fill", "stylers": [{ "color": "#94a3b8" }] },
+    { "elementType": "labels.text.stroke", "stylers": [{ "color": "#ffffff" }] },
     { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#ffffff" }] },
-    { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#c9c9c9" }] }
+    { "featureType": "road.arterial", "elementType": "geometry.fill", "stylers": [{ "color": "#f1f5f9" }] },
+    { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#e2e8f0" }] }
   ]
 };
 
-const LIBRARIES_CENTER = { lat: 3.1718, lng: 101.7538 }; 
 const PICKUP_COORD = { lat: 3.1718, lng: 101.7538 }; 
 const DROPOFF_COORD = { lat: 3.1725, lng: 101.7545 }; 
 
@@ -77,95 +78,109 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] flex flex-col pt-12 pb-10 font-sans antialiased text-slate-900">
-      <nav className="px-6 pb-6 flex items-center justify-between border-b border-slate-100">
-         <button onClick={() => router.push('/run/terminal')} className="w-10 h-10 flex items-center justify-start text-slate-400 active:scale-95 transition-all">
-           <ChevronLeft size={24} />
-         </button>
-         <h1 className="text-[15px] font-bold text-slate-900">Active Mission</h1>
-         <div className="text-right">
-           <p className="text-[18px] font-black text-emerald-500">RM {(mission.total_price || mission.payout || 4.5).toFixed(2)}</p>
+    <div className="min-h-screen bg-white flex flex-col pt-6 pb-10 font-sans antialiased text-slate-900">
+      <nav className="px-6 pb-5 flex items-center justify-between border-b border-slate-100">
+         <div className="flex items-center gap-3">
+           <button onClick={() => router.push('/run/terminal')} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all">
+             <ChevronLeft size={20} />
+           </button>
+           <div>
+             <h1 className="text-[14px] font-bold text-slate-900">Custom Delivery</h1>
+             <p className="text-[11px] font-medium text-[#94a3b8]">{mission.id || 'Active Mission'}</p>
+           </div>
+         </div>
+         <div className="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 text-[11px] font-bold">
+           RM {(mission.total_price || mission.payout || 4.5).toFixed(2)}
          </div>
       </nav>
 
-      <div className="px-6 space-y-6 flex-1 pt-6">
-        {/* Mission Brief */}
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100">
-           <div className="flex items-start justify-between gap-4">
-             <div>
-               <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{mission.type || 'DELIVERY'}</p>
-               <h2 className="text-[20px] font-black text-slate-900 mt-1 leading-tight">{mission.items_summary || mission.title}</h2>
-               <p className="text-[13px] font-bold text-slate-500 mt-2">Requested by {mission.buyer_name}</p>
-             </div>
-             {mission.attached_file && (
-               <div className="w-16 h-16 rounded-2xl bg-slate-100 shrink-0 overflow-hidden shadow-inner">
-                 <img src={mission.attached_file} className="w-full h-full object-cover" alt="Item" />
-               </div>
-             )}
-           </div>
+      <div className="px-6 space-y-6 flex-1 pt-8">
+        
+        {/* Mission Brief (Checkout Vibe) */}
+        <div className="space-y-1">
+           <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{mission.type || 'PARCEL ERRAND'}</p>
+           <h2 className="text-[22px] font-black tracking-tight leading-none text-slate-900">
+              {mission.items_summary || mission.title || "Custom Errand"}
+           </h2>
+           <p className="text-[13px] font-medium text-[#94a3b8] mt-1">Requested by <span className="font-bold text-slate-900">{mission.buyer_name}</span></p>
         </div>
 
-        {/* Phase 1: Pickup */}
-        <div className={`rounded-[24px] p-6 border transition-all duration-500 ${step === 1 ? 'bg-white shadow-md border-slate-200' : 'bg-slate-50/50 border-transparent opacity-60'}`}>
-           <div className="flex items-center gap-3 mb-4">
-             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black ${step === 1 ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-500'}`}>1</div>
-             <p className="text-[14px] font-black uppercase tracking-widest text-slate-900">Secure the Item</p>
-           </div>
-           
-           <div className="space-y-4">
-             <div className="flex items-start gap-3 bg-[#FDFDFD] border border-slate-100 p-4 rounded-2xl">
-               <MapPin className="text-slate-400 shrink-0 mt-0.5" size={18} />
-               <div>
-                 <p className="text-[13px] font-bold text-slate-900 leading-relaxed">{mission.pickup_location}</p>
-               </div>
+        {mission.attached_file && (
+           <div className="w-full h-32 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden relative">
+             <img src={mission.attached_file} className="w-full h-full object-cover opacity-90" alt="Item Proof" />
+             <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-black text-slate-600 uppercase tracking-widest shadow-sm">
+                Item Photo
              </div>
-             
-             {step === 1 && (
-               <div className="grid grid-cols-[1fr_2fr] gap-3 pt-2">
-                 <a href={`tel:${getPhone(mission.pickup_location)}`} className="h-14 bg-slate-50 border border-slate-100 text-slate-600 rounded-2xl flex items-center justify-center font-bold active:scale-95 transition-all shadow-sm">
-                   <Phone size={18} />
-                 </a>
-                 <button onClick={handleConfirmPickup} disabled={isProcessing} className="h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-slate-900/20 disabled:opacity-50">
-                   {isProcessing ? <Loader2 size={18} className="animate-spin" /> : "Confirm Pickup"}
-                 </button>
-               </div>
-             )}
-             {step > 1 && (
-               <div className="flex items-center gap-2 text-emerald-500 font-bold text-[13px] pt-2">
-                 <CheckCircle2 size={18} strokeWidth={3} /> Item Secured
-               </div>
-             )}
            </div>
-        </div>
+        )}
 
-        {/* Phase 2: Drop-off */}
-        <div className={`rounded-[24px] p-6 border transition-all duration-500 ${step === 2 ? 'bg-white shadow-md border-emerald-100' : 'bg-slate-50/50 border-transparent opacity-60'}`}>
-           <div className="flex items-center gap-3 mb-4">
-             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black ${step === 2 ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-slate-200 text-slate-500'}`}>2</div>
-             <p className="text-[14px] font-black uppercase tracking-widest text-slate-900">Final Handover</p>
-           </div>
-           
-           <div className="space-y-4">
-             <div className="flex items-start gap-3 bg-[#FDFDFD] border border-slate-100 p-4 rounded-2xl">
-               <Navigation2 className="text-slate-400 shrink-0 mt-0.5" size={18} />
-               <div>
-                 <p className="text-[13px] font-bold text-slate-900 leading-relaxed">{mission.drop_off_location}</p>
-               </div>
-             </div>
-             
-             {step === 2 && (
-               <div className="grid grid-cols-[1fr_2fr] gap-3 pt-2">
-                 <a href={`tel:${getPhone(mission.drop_off_location)}`} className="h-14 bg-slate-50 border border-slate-100 text-slate-600 rounded-2xl flex items-center justify-center font-bold active:scale-95 transition-all shadow-sm">
-                   <Phone size={18} />
-                 </a>
-                 <button onClick={handleCompleteDelivery} disabled={isProcessing} className="h-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-emerald-500/30 disabled:opacity-50">
-                   {isProcessing ? <Loader2 size={18} className="animate-spin" /> : "Complete Delivery"}
-                 </button>
-               </div>
-             )}
-           </div>
-        </div>
+        <div className="space-y-4">
+           <h3 className="text-[14px] font-bold text-slate-900 tracking-tight">Delivery Checklist</h3>
 
+           {/* Phase 1: Pickup */}
+           <div className={`rounded-2xl p-5 border transition-all duration-300 ${step === 1 ? 'bg-slate-50 border-slate-200 shadow-sm' : 'bg-white border-slate-100 opacity-70'}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-black ${step === 1 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-slate-100 text-slate-400'}`}>1</div>
+                <p className="text-[13px] font-bold text-slate-900">Secure the Item</p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 bg-white border border-slate-100 p-3.5 rounded-xl">
+                  <User className="text-slate-400 shrink-0 mt-0.5" size={16} />
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Pickup Point</p>
+                    <p className="text-[13px] font-bold text-slate-900 leading-snug">{mission.pickup_location}</p>
+                  </div>
+                </div>
+                
+                {step === 1 && (
+                  <div className="grid grid-cols-[1fr_2.5fr] gap-3 pt-2">
+                    <a href={`tel:${getPhone(mission.pickup_location)}`} className="h-12 bg-white border border-slate-200 text-blue-600 rounded-xl flex items-center justify-center font-bold active:scale-95 transition-all shadow-sm">
+                      <Phone size={16} />
+                    </a>
+                    <button onClick={handleConfirmPickup} disabled={isProcessing} className="h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50">
+                      {isProcessing ? <Loader2 size={16} className="animate-spin" /> : "Confirm Pickup"}
+                    </button>
+                  </div>
+                )}
+                {step > 1 && (
+                  <div className="flex items-center gap-2 text-blue-600 font-bold text-[12px] pt-1">
+                    <CheckCircle2 size={16} strokeWidth={2.5} /> Item Secured successfully
+                  </div>
+                )}
+              </div>
+           </div>
+
+           {/* Phase 2: Drop-off */}
+           <div className={`rounded-2xl p-5 border transition-all duration-300 ${step === 2 ? 'bg-slate-50 border-slate-200 shadow-sm' : 'bg-white border-slate-100 opacity-50'}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-black ${step === 2 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-slate-100 text-slate-400'}`}>2</div>
+                <p className="text-[13px] font-bold text-slate-900">Final Handover</p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 bg-white border border-slate-100 p-3.5 rounded-xl">
+                  <MapPin className="text-slate-400 shrink-0 mt-0.5" size={16} />
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Drop-off Point</p>
+                    <p className="text-[13px] font-bold text-slate-900 leading-snug">{mission.drop_off_location}</p>
+                  </div>
+                </div>
+                
+                {step === 2 && (
+                  <div className="grid grid-cols-[1fr_2.5fr] gap-3 pt-2">
+                    <a href={`tel:${getPhone(mission.drop_off_location)}`} className="h-12 bg-white border border-slate-200 text-blue-600 rounded-xl flex items-center justify-center font-bold active:scale-95 transition-all shadow-sm">
+                      <Phone size={16} />
+                    </a>
+                    <button onClick={handleCompleteDelivery} disabled={isProcessing} className="h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50">
+                      {isProcessing ? <Loader2 size={16} className="animate-spin" /> : "Complete Delivery"}
+                    </button>
+                  </div>
+                )}
+              </div>
+           </div>
+
+        </div>
       </div>
     </div>
   );
@@ -175,7 +190,6 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    const router = useRouter();
    const [step, setStep] = useState<number>(initialMission.step || 1); 
    const [mission, setMission] = useState<any>(initialMission);
-   const [isVerifying, setIsVerifying] = useState(false);
    const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
    const [userCoords, setUserCoords] = useState<{lat: number, lng: number} | null>(null);
    const [distanceToTarget, setDistanceToTarget] = useState<number | null>(null);
@@ -263,7 +277,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
             const payout = mission.payout || 4.50;
             
             await addDoc(collection(db, 'users', auth.currentUser.uid, 'transactions'), {
-               item: mission.title, price: payout, date: new Date().toLocaleString(), timestamp: new Date()
+               item: mission.title || mission.items_summary, price: payout, date: new Date().toLocaleString(), timestamp: new Date()
             });
 
             await updateDoc(userRef, { 
@@ -291,63 +305,64 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    const isTooFar = step === 1 && distanceToTarget !== null && distanceToTarget > 30;
 
    return (
-      <div className="min-h-screen bg-[#FDFDFD] font-sans text-slate-900 antialiased overflow-hidden">
+      <div className="min-h-screen bg-white font-sans text-slate-900 antialiased overflow-hidden">
          <AnimatePresence>
             {step === 6 && (
                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-100 bg-white flex flex-col items-center justify-center px-8 text-center">
-                  <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-inner">
-                     <CheckCircle2 size={48} />
+                  <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
+                     <CheckCircle2 size={40} />
                   </div>
-                  <h1 className="text-[14px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-2">Drop-off Verified</h1>
-                  <p className="text-[48px] font-black text-slate-900 tracking-tighter leading-none mb-12">+RM {mission?.payout?.toFixed(2) || '4.50'}</p>
-                  <button onClick={() => router.push('/run')} className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold">Dismiss & Return</button>
+                  <h1 className="text-[14px] font-black uppercase tracking-[0.2em] text-blue-600 mb-2">Delivery Verified</h1>
+                  <p className="text-[42px] font-black text-slate-900 tracking-tighter leading-none mb-10">+RM {mission?.payout?.toFixed(2) || '4.50'}</p>
+                  <button onClick={() => router.push('/run')} className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold shadow-md shadow-blue-600/20 active:scale-95 transition-all">Dismiss & Return</button>
                </motion.div>
             )}
          </AnimatePresence>
 
-         <nav className="fixed top-0 left-0 right-0 z-50 px-6 pt-12 pb-4 flex items-center justify-between bg-white/90 backdrop-blur-xl border-b border-slate-50">
-            <button onClick={() => router.back()} className="p-2 -ml-2 bg-slate-50 rounded-full text-slate-400"><X size={20} /></button>
+         <nav className="fixed top-0 left-0 right-0 z-50 px-6 pt-8 pb-4 flex items-center justify-between bg-white/90 backdrop-blur-xl border-b border-slate-100">
+            <button onClick={() => router.back()} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all"><ChevronLeft size={20} /></button>
             <div className="flex flex-col items-center">
-               <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{mission?.id || 'PULSE-0000'}</p>
-                <h1 className="text-[15px] font-bold text-slate-900">
-                   {step === 5 ? "Proof of Delivery" : step === 4 ? "At Dropoff" : step === 3 ? "In Transit" : step === 2 ? "At Vendor" : "To Pickup"}
+                <h1 className="text-[14px] font-bold text-slate-900">
+                   {step === 5 ? "Proof of Delivery" : step === 4 ? "At Drop-off" : step === 3 ? "In Transit" : step === 2 ? "At Merchant" : "To Merchant"}
                 </h1>
+               <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{mission?.id || 'PULSE-0000'}</p>
             </div>
-            <button className="p-2 bg-red-50 text-red-500 rounded-full"><ShieldAlert size={20} /></button>
+            <button className="w-10 h-10 rounded-xl bg-red-50 text-red-500 border border-red-100 flex items-center justify-center"><ShieldAlert size={18} /></button>
          </nav>
 
-         <div className="absolute inset-0 z-0 pt-28">
+         <div className="absolute inset-0 z-0 pt-24 pb-48">
             <MapErrorBoundary>
                {isApiConfigured && isLoaded ? (
                   <GoogleMap mapContainerStyle={{ width: '100%', height: '100%' }} center={step <= 2 ? PICKUP_COORD : DROPOFF_COORD} zoom={17} options={MAP_OPTIONS as any}>
                      {directions && <DirectionsRenderer directions={directions} options={{ 
                         suppressMarkers: true,
-                        polylineOptions: { strokeColor: '#0f172a', strokeWeight: 3, strokeOpacity: 0.8 } 
+                        polylineOptions: { strokeColor: '#2563eb', strokeWeight: 4, strokeOpacity: 0.8 } 
                      }} />}
                      
-                     {step <= 2 && <Marker position={PICKUP_COORD} label={{ text: '1', color: '#fff', fontSize: '12px', fontWeight: 'bold' }} icon={{ path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: '#0f172a', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }} />}
-                     {step >= 3 && <Marker position={DROPOFF_COORD} label={{ text: '2', color: '#0f172a', fontSize: '12px', fontWeight: 'bold' }} icon={{ path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: '#fff', fillOpacity: 1, strokeColor: '#0f172a', strokeWeight: 2 }} />}
+                     {step <= 2 && <Marker position={PICKUP_COORD} label={{ text: '1', color: '#fff', fontSize: '11px', fontWeight: 'bold' }} icon={{ path: google.maps.SymbolPath.CIRCLE, scale: 12, fillColor: '#2563eb', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 }} />}
+                     {step >= 3 && <Marker position={DROPOFF_COORD} label={{ text: '2', color: '#2563eb', fontSize: '11px', fontWeight: 'bold' }} icon={{ path: google.maps.SymbolPath.CIRCLE, scale: 12, fillColor: '#fff', fillOpacity: 1, strokeColor: '#2563eb', strokeWeight: 2 }} />}
                   </GoogleMap>
                ) : (
-                  <div className="w-full h-full bg-[#FDFDFD] flex items-center justify-center opacity-10">
-                     <MapPin size={64} strokeWidth={1} />
+                  <div className="w-full h-full bg-slate-50 flex flex-col items-center justify-center opacity-40">
+                     <MapPin size={48} className="text-slate-300" />
+                     <p className="text-[12px] font-bold text-slate-400 mt-2">Map Unavailable</p>
                   </div>
                )}
             </MapErrorBoundary>
          </div>
 
-         <motion.div initial={{ y: 200 }} animate={{ y: 0 }} className="fixed bottom-0 left-0 right-0 z-40 px-5 pb-8">
-            <div className={`bg-white/95 backdrop-blur-2xl border border-white shadow-md rounded-[2.5rem] p-7 pt-8 transition-all duration-500 ${step === 4 ? 'bg-slate-900 text-white' : ''}`}>
+         <motion.div initial={{ y: 200 }} animate={{ y: 0 }} className="fixed bottom-0 left-0 right-0 z-40 px-5 pb-6">
+            <div className={`bg-white/95 backdrop-blur-xl border border-slate-100 shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.1)] rounded-[2rem] p-6 transition-all duration-500 ${step === 4 ? 'bg-slate-50' : ''}`}>
                 <AnimatePresence mode="wait">
                    {step <= 4 ? (
                       <motion.div key="mission" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                          <div className="flex justify-between items-start">
                             <div className="space-y-1">
-                               <h2 className="text-[24px] font-black tracking-tighter leading-none">{step <= 2 ? mission?.from : mission?.to}</h2>
-                               <div className="flex items-center gap-2 mt-1">
-                                  <p className="text-[13px] font-bold text-slate-400">{step <= 2 ? 'Pickup Point' : 'Dropoff Point'}</p>
+                               <h2 className="text-[20px] font-black tracking-tight leading-none text-slate-900">{step <= 2 ? mission?.from || 'Merchant Area' : mission?.to || 'Drop-off Zone'}</h2>
+                               <div className="flex items-center gap-2 mt-1.5">
+                                  <p className="text-[12px] font-medium text-[#94a3b8]">{step <= 2 ? 'Pickup Point' : 'Drop-off Point'}</p>
                                   {(step === 1 || step === 4) && distanceToTarget !== null && (
-                                     <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${distanceToTarget <= 30 ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}`}>
+                                     <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase shadow-sm ${distanceToTarget <= 30 ? 'bg-emerald-50 border border-emerald-100 text-emerald-600' : 'bg-amber-50 border border-amber-100 text-amber-600'}`}>
                                         {Math.round(distanceToTarget)}m
                                      </div>
                                   )}
@@ -359,21 +374,21 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                                    const target = step <= 2 ? PICKUP_COORD : DROPOFF_COORD;
                                    window.location.href = `https://waze.com/ul?ll=${target.lat},${target.lng}&navigate=yes`;
                                  }}
-                                 className="h-12 px-5 rounded-full bg-blue-50 text-slate-900 font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                                 className="h-10 px-4 rounded-xl bg-slate-50 border border-slate-100 text-blue-600 font-bold text-[12px] flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
                                >
-                                 <Navigation size={16} /> Waze
+                                 <Navigation size={14} /> Waze
                                </button>
-                               <button className="w-12 h-12 rounded-full bg-slate-100/10 flex items-center justify-center border border-slate-100"><Phone size={20} /></button>
+                               <button className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 text-slate-500 flex items-center justify-center active:scale-95 transition-transform"><Phone size={16} /></button>
                              </div>
                          </div>
 
                          {(step === 2 || step === 5) && (
-                            <div className="space-y-4">
-                               <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{step === 5 ? 'Drop-off Proof' : 'Evidence Capture'}</p>
+                            <div className="space-y-3">
+                               <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{step === 5 ? 'Drop-off Proof' : 'Item Capture'}</p>
                                {!(step === 5 ? podPreview : evidencePhoto) ? (
-                                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50 cursor-pointer">
-                                     <Camera className="w-8 h-8 text-slate-300 mb-2" />
-                                     <p className="text-[12px] font-bold text-slate-400">Capture {step === 5 ? 'Drop-off' : 'Order'} Photo</p>
+                                  <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors">
+                                     <Camera className="w-6 h-6 text-slate-400 mb-1" />
+                                     <p className="text-[11px] font-bold text-slate-500">Capture {step === 5 ? 'Drop-off' : 'Order'} Photo</p>
                                      <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
                                         const file = e.target.files?.[0];
                                         if (file) {
@@ -389,21 +404,21 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                                      }} />
                                   </label>
                                ) : (
-                                  <div className="relative w-full h-32 rounded-2xl overflow-hidden border border-white/20 shadow-md">
+                                  <div className="relative w-full h-24 rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
                                      <img src={(step === 5 ? podPreview : evidencePhoto) as string} className="w-full h-full object-cover" />
-                                     <button onClick={() => step === 5 ? setPodPreview(null) : setEvidencePhoto(null)} className="absolute top-2 right-2 p-1 bg-white/90 rounded-full"><X size={12} /></button>
+                                     <button onClick={() => step === 5 ? setPodPreview(null) : setEvidencePhoto(null)} className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm"><X size={12} /></button>
                                   </div>
                                )}
                             </div>
                          )}
 
-                         <div className={`bg-slate-50/5 rounded-2xl p-5 border ${step === 5 ? 'bg-slate-800 border-white/10 text-white' : 'bg-slate-50 border-slate-100'}`}>
-                            <p className={`text-[11px] font-black uppercase tracking-widest mb-3 ${step === 5 ? 'text-white/40' : 'text-slate-400'}`}>Order Bundle</p>
-                            <div className="space-y-3">
+                         <div className={`rounded-2xl p-4 border ${step === 5 ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-slate-100'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest mb-2.5 text-slate-400">Order Bundle</p>
+                            <div className="space-y-2">
                                {(mission?.items || []).map((item: any, i: number) => (
-                                  <div key={i} className="flex justify-between items-center text-[14px] font-bold">
-                                     <span>{item.qty}x {item.name}</span>
-                                     <span className="opacity-20">#{mission?.id?.split('-')?.[1] || '0000'}</span>
+                                  <div key={i} className="flex justify-between items-center text-[13px] font-bold text-slate-900">
+                                     <span>{item.qty}x {item.name || item.title}</span>
+                                     <span className="text-slate-300">#{mission?.id?.split('-')?.[1] || '0000'}</span>
                                   </div>
                                ))}
                             </div>
@@ -412,34 +427,34 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                          <button 
                            onClick={step === 5 ? handleCompleteDelivery : handleStepUpdate} 
                            disabled={isTooFar || (step === 2 && !evidencePhoto) || (step === 5 && !podPhoto) || isCompleting} 
-                           className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold shadow-md disabled:opacity-30 disabled:grayscale transition-all flex items-center justify-center gap-3"
+                           className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold shadow-md shadow-blue-600/20 disabled:opacity-30 disabled:shadow-none transition-all flex items-center justify-center gap-2 active:scale-95 text-[14px]"
                          >
-                            {isCompleting && <Loader2 size={20} className="animate-spin" />}
+                            {isCompleting && <Loader2 size={18} className="animate-spin" />}
                             {step === 1 ? "Arrived at Pickup" : 
                              step === 2 ? "Confirm Pickup" : 
-                             step === 3 ? "Arrived at Dropoff" : 
+                             step === 3 ? "Arrived at Drop-off" : 
                              step === 4 ? "Capture Proof" : "Confirm Completion"}
                          </button>
                       </motion.div>
                    ) : (
-                      <div className="py-8 text-center space-y-6">
-                         <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-inner">
-                            <Camera size={36} />
+                      <div className="py-6 text-center space-y-5">
+                         <div className="w-16 h-16 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+                            <Camera size={28} />
                          </div>
                          <div>
-                            <h2 className="text-[28px] font-black text-slate-900 tracking-tighter leading-none">Photo Proof</h2>
-                            <p className="text-[14px] font-bold text-slate-400 mt-2">Capture the item at the drop-off location</p>
+                            <h2 className="text-[20px] font-black text-slate-900 tracking-tight leading-none">Photo Proof</h2>
+                            <p className="text-[12px] font-medium text-[#94a3b8] mt-1.5">Capture the item at the drop-off location</p>
                          </div>
                          
                          {podPreview ? (
-                            <div className="relative w-full h-48 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-md">
+                            <div className="relative w-full h-40 rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
                                <img src={podPreview} className="w-full h-full object-cover" />
-                               <button onClick={() => setPodPreview(null)} className="absolute top-4 right-4 p-2 bg-white/90 rounded-full shadow-md"><X size={16} /></button>
+                               <button onClick={() => setPodPreview(null)} className="absolute top-3 right-3 p-2 bg-white/90 rounded-full shadow-md"><X size={14} /></button>
                             </div>
                          ) : (
-                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
-                               <Camera className="w-10 h-10 text-slate-300 mb-4" />
-                               <p className="text-[14px] font-black text-slate-400 uppercase tracking-widest">Open Camera</p>
+                            <label className="flex flex-col items-center justify-center w-full h-40 border border-dashed border-slate-300 rounded-2xl bg-slate-50 cursor-pointer hover:bg-slate-100/70 transition-all">
+                               <Camera className="w-8 h-8 text-slate-300 mb-3" />
+                               <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Open Camera</p>
                                <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
                                   const file = e.target.files?.[0];
                                   if (file) {
@@ -453,9 +468,9 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                          <button 
                             onClick={handleCompleteDelivery} 
                             disabled={!podPhoto || isCompleting} 
-                            className="w-full h-18 bg-slate-900 text-white rounded-[1.5rem] font-black text-[14px] uppercase tracking-widest flex items-center justify-center gap-3 shadow-md shadow-slate-900/20 disabled:opacity-20"
+                            className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 disabled:opacity-30 disabled:shadow-none active:scale-95 transition-all"
                          >
-                            {isCompleting && <Loader2 size={20} className="animate-spin" />}
+                            {isCompleting && <Loader2 size={18} className="animate-spin" />}
                             {isCompleting ? "Processing..." : "Complete Drop-off"}
                          </button>
                       </div>
@@ -523,17 +538,21 @@ function ActiveRunGate() {
      setShowSuccess(true);
   };
 
-  if (loading) return <div className="min-h-screen bg-[#FDFDFD]" />;
+  if (loading) return (
+     <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-10 h-10 border-[3px] border-slate-100 border-t-blue-600 rounded-full animate-spin" />
+     </div>
+  );
 
   if (showSuccess) {
     return (
        <div className="fixed inset-0 z-100 bg-white flex flex-col items-center justify-center px-8 text-center">
-          <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-inner">
-             <CheckCircle2 size={48} />
+          <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 border border-blue-100">
+             <CheckCircle2 size={40} />
           </div>
-          <h1 className="text-[14px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-2">Drop-off Verified</h1>
-          <p className="text-[48px] font-black text-slate-900 tracking-tighter leading-none mb-12">+RM {payoutAmount.toFixed(2)}</p>
-          <button onClick={() => router.push('/run/terminal')} className="w-full h-16 bg-slate-900 text-white rounded-2xl font-bold active:scale-95 transition-all">Dismiss & Return</button>
+          <h1 className="text-[13px] font-black uppercase tracking-[0.2em] text-blue-600 mb-2">Drop-off Verified</h1>
+          <p className="text-[42px] font-black text-slate-900 tracking-tighter leading-none mb-10">+RM {payoutAmount.toFixed(2)}</p>
+          <button onClick={() => router.push('/run/terminal')} className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold shadow-md shadow-blue-600/20 active:scale-95 transition-all">Dismiss & Return</button>
        </div>
     );
   }

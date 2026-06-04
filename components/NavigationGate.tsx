@@ -172,6 +172,7 @@ export default function NavigationGate() {
     !pathname?.startsWith('/hub/found') &&
     !pathname?.startsWith('/hub/unistore') &&
     !pathname?.startsWith('/campaigns') &&
+    !pathname?.startsWith('/run/missions') &&
     !(role === 'CLUB' && (pathname === '/me' || pathname === '/activity' || pathname?.startsWith('/me/orders')));
 
   if (checking && !isAuthPage && !isRoot) return (

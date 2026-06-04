@@ -403,7 +403,7 @@ export default function RunModule() {
             <div className="grid grid-cols-2 gap-3 mt-4">
               {/* Delivery Hub Card */}
               <button 
-                onClick={() => router.push('/run/terminal')} 
+                onClick={() => router.push('/run/missions')} 
                 className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all active:scale-95 shadow-sm ${profile?.is_online ? 'bg-cyan-50 text-cyan-950' : 'bg-slate-50 text-slate-700'}`}
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${profile?.is_online ? 'bg-cyan-200/70 text-cyan-950' : 'bg-slate-200 text-slate-500'}`}>

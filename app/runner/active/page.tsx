@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc, arrayRemove, increment } from 'firebase/firestore';
 import { 
-  ChevronLeft, MapPin, Package, ShieldCheck, Truck, Phone, X, 
+  MapPin, Package, Truck, Phone, X, 
   AlertTriangle, CheckCircle2, Navigation, ClipboardList, Info,
-  ExternalLink, ArrowRight
+  ExternalLink, ArrowRight, Store, User, ShieldCheck, Map
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
@@ -149,251 +149,201 @@ function RunnerActivePageContent() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-navy flex items-center justify-center p-8">
+    <div className="min-h-screen bg-white flex items-center justify-center p-8">
        <div className="flex flex-col items-center gap-6">
-          <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
-          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Loading Delivery Data</p>
+          <div className="w-10 h-10 border-[3px] border-slate-100 border-t-blue-600 rounded-full animate-spin" />
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Loading Delivery Data</p>
        </div>
     </div>
   );
 
   if (!order) { router.push('/run'); return null; }
 
-  const isONTHEWAY = order.status === 'ON_THE_WAY';
   const isCOMPLETED = order.status === 'COMPLETED';
+  const isCustomDelivery = order.type === 'CUSTOM' || !order.seller_id;
+  const items = order.items || (order.title ? [{ name: order.title, quantity: 1 }] : []);
   
-  // Simulation of items for the checklist
-  const items = order.items || [{ name: order.title, quantity: 1 }];
+  // Custom Deliveries vs Marketplace Deliveries display different instruction headers.
+  let instructionHeading = '';
+  if (order.status === 'AWAITING_MERCHANT_ACCEPT') instructionHeading = 'Waiting for Merchant';
+  else if (['PREPARING', 'READY_FOR_PICKUP'].includes(order.status)) instructionHeading = isCustomDelivery ? 'Head to Pickup Point' : 'Proceed to Merchant';
+  else if (['ARRIVED_AT_MERCHANT', 'ARRIVED_AT_PICKUP'].includes(order.status)) instructionHeading = isCustomDelivery ? 'Collect Package' : 'Verify Order Items';
+  else if (order.status === 'ON_THE_WAY') instructionHeading = 'Start Transit';
+  else if (['ARRIVED_AT_BUILDING', 'ARRIVED_AT_BUYER'].includes(order.status)) instructionHeading = 'Ready to Handover';
+  else if (isCOMPLETED) instructionHeading = 'Delivery Successful';
+  else instructionHeading = 'Awaiting Status';
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] text-navy font-sans antialiased flex flex-col">
+    <main className="min-h-screen bg-white text-slate-900 font-sans antialiased flex flex-col pb-36">
       
-      {/* ── Institutional Header ── */}
-      <nav className="px-8 pt-16 pb-8 flex items-center justify-between shrink-0 bg-white border-b border-slate-100">
-        <BackButton fallback="/run" />
-        <div className="flex flex-col items-center">
-           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">Order ID: {order.id.slice(0,6).toUpperCase()}</span>
-           <h2 className="text-[14px] font-black uppercase tracking-tightest mt-1">Order Status</h2>
+      {/* ── Navbar ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100 px-6 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/run" />
+          <div>
+            <p className="text-[14px] font-bold tracking-tight">Active Mission</p>
+            <p className="text-[11px] font-medium text-slate-400">Order ID: #{order.id.slice(0,6).toUpperCase()}</p>
+          </div>
         </div>
-        <button onClick={() => setShowCancelModal(true)} className="w-12 h-12 rounded-[1.5rem] bg-red-50 border border-red-100 flex items-center justify-center text-red-500 transition-all active:scale-95">
-           <X size={20} />
+        <button onClick={() => setShowCancelModal(true)} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-red-500 border border-slate-100 active:scale-95 transition-all">
+           <X size={18} />
         </button>
       </nav>
 
-      {/* ── Dashboard Content ── */}
-      <div className="flex-1 overflow-y-auto px-8 py-10 space-y-12 scrollbar-hide">
+      {/* ── Main Content ── */}
+      <div className="pt-28 px-6 space-y-8 flex-1">
          
-         {/* Instruction Block */}
-         <div className="space-y-2">
-            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Active Instruction</p>
-            <h1 className="text-[32px] font-black tracking-tightest leading-none uppercase">
-               {order.status === 'AWAITING_MERCHANT_ACCEPT' && "Waiting for Merchant"}
-               {['PREPARING', 'READY_FOR_PICKUP'].includes(order.status) && "Proceed to Merchant"}
-               {order.status === 'ARRIVED_AT_MERCHANT' && "Verify Items"}
-               {order.status === 'ON_THE_WAY' && "Start Transit"}
-               {order.status === 'ARRIVED_AT_BUYER' && "Ready to Handover"}
-               {isCOMPLETED && "Delivery Successful"}
+         <div className="space-y-1">
+            <h1 className="text-[28px] font-black tracking-tighter leading-tight text-slate-900">
+               {instructionHeading}
             </h1>
+            <p className="text-[13px] font-medium text-slate-400">
+               {isCustomDelivery ? 'P2P Custom Delivery' : 'Marketplace Fulfillment'}
+            </p>
          </div>
 
-         {/* Logistics Timeline */}
-         <div className="space-y-6 relative">
-            <div className="absolute left-6 top-8 bottom-8 w-px border-l-2 border-dashed border-slate-100" />
+         {/* ── Logistics Nodes (The Vibe: Cart Checkout) ── */}
+         <div className="space-y-4">
+            <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Logistics Route</h2>
             
-            {/* NODE 1: MERCHANT */}
-            <NodeItem 
-              active={['AWAITING_MERCHANT_ACCEPT', 'PREPARING', 'READY_FOR_PICKUP', 'ARRIVED_AT_MERCHANT'].includes(order.status)}
-              completed={['ON_THE_WAY', 'ARRIVED_AT_BUYER', 'COMPLETED'].includes(order.status)}
-              title="Merchant Point"
-              detail={order.seller_name}
-              icon={<Package size={20} />}
-              description="Pick up items and verify contents."
-            />
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 relative">
+               {/* Vertical connection line */}
+               <div className="absolute left-[39px] top-12 bottom-12 w-px border-l-2 border-dashed border-slate-200" />
+               
+               {/* Node 1: Origin */}
+               <div className="flex items-start gap-4 relative z-10 bg-slate-50 pb-6">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
+                     ['AWAITING_MERCHANT_ACCEPT', 'PREPARING', 'READY_FOR_PICKUP', 'ARRIVED_AT_MERCHANT', 'ARRIVED_AT_PICKUP'].includes(order.status)
+                     ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                     : 'bg-white text-slate-300 border-slate-200'
+                  }`}>
+                     {isCustomDelivery ? <User size={18} /> : <Store size={18} />}
+                  </div>
+                  <div className="flex-1 min-w-0 pt-0.5">
+                     <p className="text-[13px] font-bold text-slate-900 truncate">
+                        {isCustomDelivery ? (order.pickup_location || 'Pickup Point') : (order.seller_name || 'Merchant Point')}
+                     </p>
+                     <p className="text-[11px] font-medium text-slate-400 truncate mt-0.5">
+                        {isCustomDelivery ? 'Collect item directly from sender.' : 'Pick up and verify order contents.'}
+                     </p>
+                  </div>
+               </div>
 
-            {/* NODE 2: DESTINATION */}
-            <NodeItem 
-              active={['ON_THE_WAY', 'ARRIVED_AT_BUYER'].includes(order.status)}
-              completed={order.status === 'COMPLETED'}
-              title="Destination Node"
-              detail={order.drop_off_location}
-              icon={<MapPin size={20} />}
-              description={
-                <>
-                  Drop off at specified campus zone.
-                  {(order.floorLevel || order.roomNumber) && (
-                    <div className="mt-2 p-3 bg-navy/5 rounded-xl border border-navy/5">
-                      <p className="text-[10px] font-black text-navy uppercase tracking-widest leading-none mb-1">Floor & Room</p>
-                      <p className="text-[13px] font-bold text-navy">
-                        {order.floorLevel ? `Floor: ${order.floorLevel}` : ''}
-                        {order.floorLevel && order.roomNumber ? ' • ' : ''}
-                        {order.roomNumber ? `Room: ${order.roomNumber}` : ''}
-                      </p>
-                    </div>
-                  )}
-                </>
-              }
-            />
+               {/* Node 2: Destination */}
+               <div className="flex items-start gap-4 relative z-10 bg-slate-50 pt-2">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
+                     ['ON_THE_WAY', 'ARRIVED_AT_BUILDING', 'ARRIVED_AT_BUYER'].includes(order.status)
+                     ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                     : isCOMPLETED 
+                     ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
+                     : 'bg-white text-slate-300 border-slate-200'
+                  }`}>
+                     {isCOMPLETED ? <CheckCircle2 size={18} /> : <MapPin size={18} />}
+                  </div>
+                  <div className="flex-1 min-w-0 pt-0.5">
+                     <p className="text-[13px] font-bold text-slate-900 truncate">{order.drop_off_location || 'Destination'}</p>
+                     <p className="text-[11px] font-medium text-slate-400 truncate mt-0.5">
+                        {order.buyer_name ? `Deliver to ${order.buyer_name}` : 'Drop off to buyer'}
+                     </p>
+                     
+                     {/* Indoor Details */}
+                     {(order.floorLevel || order.roomNumber) && (
+                       <div className="mt-3 p-3 bg-white border border-slate-100 rounded-xl">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Indoor Drop-off</p>
+                          <p className="text-[12px] font-bold text-slate-900">
+                            {order.floorLevel ? `Lvl ${order.floorLevel}` : ''}
+                            {order.floorLevel && order.roomNumber ? ' • ' : ''}
+                            {order.roomNumber ? `Rm ${order.roomNumber}` : ''}
+                          </p>
+                       </div>
+                     )}
+                  </div>
+               </div>
+            </div>
          </div>
 
-         {/* Instructional Cards based on status */}
+         {/* ── Actionable Cards ── */}
          <AnimatePresence mode="wait">
-            {order.status === 'ARRIVED_AT_MERCHANT' && (
+            
+            {/* Marketplace Specific: Verification */}
+            {!isCustomDelivery && ['ARRIVED_AT_MERCHANT'].includes(order.status) && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-navy rounded-[2.5rem] p-8 text-white space-y-6 shadow-md shadow-navy/20"
+                className="bg-white border border-slate-200 rounded-2xl p-5 space-y-5 shadow-sm"
               >
                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                       <ClipboardList className="text-emerald-400" size={24} />
-                       <h4 className="text-[14px] font-black uppercase tracking-widest">Verify Items</h4>
+                    <div className="flex items-center gap-2">
+                       <ShieldCheck className="text-blue-600" size={20} />
+                       <h4 className="text-[13px] font-bold text-slate-900">Verify Order Items</h4>
                     </div>
-                    <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
                        {Object.values(checklist).filter(Boolean).length}/{items.length} Checked
                     </span>
                  </div>
                  
-                 <div className="space-y-3">
-                    {items.map((item: any, i: number) => (
-                      <button 
-                        key={i}
-                        onClick={() => setChecklist(prev => ({ ...prev, [i]: !prev[i] }))}
-                        className={`w-full p-5 rounded-2xl border flex items-center justify-between transition-all ${checklist[i] ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-white/60'}`}
-                      >
-                         <span className="font-bold text-[14px]">{item.quantity}x {item.name}</span>
-                         {checklist[i] ? <CheckCircle2 size={18} /> : <div className="w-5 h-5 rounded-full border-2 border-white/10" />}
-                      </button>
-                    ))}
+                 <div className="space-y-2">
+                    {items.map((item: any, i: number) => {
+                      const checked = checklist[i];
+                      return (
+                        <button 
+                          key={i}
+                          onClick={() => setChecklist(prev => ({ ...prev, [i]: !prev[i] }))}
+                          className={`w-full p-4 rounded-xl border flex items-center justify-between transition-all active:scale-95 ${checked ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600 text-blue-700' : 'bg-slate-50 border-slate-100 hover:border-slate-200 text-slate-700'}`}
+                        >
+                           <span className="font-bold text-[13px]">{item.quantity}x {item.name || item.title}</span>
+                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${checked ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-300'}`}>
+                             {checked && <CheckCircle2 size={12} strokeWidth={4} />}
+                           </div>
+                        </button>
+                      );
+                    })}
                  </div>
               </motion.div>
             )}
 
-            {order.status === 'ACCEPTED' && (
-               <motion.div 
-                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                 className="bg-white border border-slate-100 rounded-[2.5rem] p-8 space-y-6 shadow-sm"
-               >
-                  <div className="flex items-start gap-4">
-                     <div className="w-12 h-12 rounded-2xl bg-navy/5 flex items-center justify-center text-navy">
-                        <Info size={24} />
-                     </div>
-                     <div>
-                        <p className="text-[14px] font-black uppercase tracking-tightest">Meeting Details</p>
-                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed mt-1">
-                           The merchant is located at the <span className="text-navy font-bold">Main Cafeteria, Stall 04</span>. Please verify the order number upon arrival.
-                        </p>
-                     </div>
-                  </div>
-                  <div className="flex gap-3">
-                     <button className="flex-1 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center gap-2 font-black text-[11px] uppercase tracking-widest">
-                        <Phone size={14} /> Contact Vendor
-                     </button>
-                  </div>
-               </motion.div>
-            )}
-
+            {/* In-Transit Navigation Info */}
             {order.status === 'ON_THE_WAY' && (
                <motion.div 
                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                 className="bg-white border border-slate-100 rounded-[2.5rem] p-8 space-y-6 shadow-sm"
+                 className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5 space-y-5"
                >
                   <div className="flex items-start gap-4">
-                     <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
-                        <Navigation size={24} />
+                     <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-md shadow-blue-600/20">
+                        <Navigation size={18} />
                      </div>
                      <div>
-                        <p className="text-[14px] font-black uppercase tracking-tightest">Navigation Protocol</p>
-                        <p className="text-[12px] text-slate-400 font-medium leading-relaxed mt-1">
-                           Drop-off Zone: <span className="text-navy font-bold">{order.drop_off_location}</span>. <br/>
-                           Note: The buyer is waiting at the library entrance.
+                        <p className="text-[13px] font-bold text-blue-950">Navigation Protocol</p>
+                        <p className="text-[12px] text-blue-800/70 font-medium leading-relaxed mt-0.5">
+                           Deliver to: <span className="font-bold text-blue-900">{order.drop_off_location}</span>. <br/>
+                           Please keep your GPS active.
                         </p>
                      </div>
                   </div>
-                  <div className="flex gap-3">
-                     <button className="flex-1 h-14 rounded-2xl bg-navy text-white flex items-center justify-center gap-2 font-black text-[11px] uppercase tracking-widest">
-                        <Phone size={14} /> Contact Buyer
+                  <div className="flex gap-2">
+                     <button className="flex-1 h-12 rounded-xl bg-white border border-blue-100 text-blue-700 font-bold text-[12px] flex items-center justify-center gap-2 active:scale-95 shadow-sm transition-all">
+                        <Phone size={14} /> Call Buyer
                      </button>
-                     <button className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-                        <ExternalLink size={20} className="text-slate-400" />
+                     <button className="w-12 h-12 rounded-xl bg-white border border-blue-100 text-blue-600 flex items-center justify-center active:scale-95 shadow-sm transition-all">
+                        <Map size={18} />
                      </button>
                   </div>
                </motion.div>
             )}
-         </AnimatePresence>
-      </div>
 
-      {/* ── Sticky Action Terminal ── */}
-      <div className="px-8 pt-8 pb-12 bg-white border-t border-slate-100 shrink-0">
-         <AnimatePresence mode="wait">
-            {order.status === 'AWAITING_MERCHANT_ACCEPT' && (
-              <div className="w-full h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center gap-3 border border-slate-100">
-                <div className="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin" />
-                <span className="text-[11px] font-black uppercase tracking-widest text-navy/40">Waiting for Merchant to Accept</span>
-              </div>
-            )}
-
-            {order.status === 'PREPARING' && (
-              <ActionButton 
-                key="arrived_merchant"
-                label="Arrived at Merchant"
-                onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_MERCHANT' })}
-                color="navy"
-              />
-            )}
-
-            {order.status === 'READY_FOR_PICKUP' && (
-              <ActionButton 
-                key="arrived_merchant"
-                label="Arrived at Merchant"
-                onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_MERCHANT' })}
-                color="navy"
-              />
-            )}
-
-            {order.status === 'ARRIVED_AT_MERCHANT' && (
-               <ActionButton 
-                 key="pickup"
-                 label="Confirm Pickup"
-                 disabled={Object.values(checklist).filter(Boolean).length < items.length}
-                 onClick={handlePickup}
-                 color="emerald"
-               />
-            )}
-
-             {order.status === 'ON_THE_WAY' && (
-                <div className="space-y-3">
-                   <ActionButton 
-                    key="arrived_building"
-                    label="Arrived at Building"
-                    onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUILDING' })}
-                    color="navy"
-                  />
-                  <button 
-                    onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
-                    className="w-full h-12 bg-white border border-slate-100 text-slate-300 rounded-2xl font-bold text-[11px] uppercase tracking-widest"
-                  >
-                    Skip to Buyer Arrived
-                  </button>
-                </div>
-             )}
-
-             {order.status === 'ARRIVED_AT_BUILDING' && (
-                <ActionButton 
-                  key="arrived_buyer"
-                  label="Arrived at Drop-off"
-                  onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
-                  color="emerald"
-                />
-             )}
-
+            {/* Handshake Code Verification */}
             {order.status === 'ARRIVED_AT_BUYER' && !isCOMPLETED && (
                <motion.div 
                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                  className="space-y-4"
                >
-                  <div className="flex gap-3 mb-4">
+                  <div className="space-y-1 text-center pb-2">
+                     <p className="text-[14px] font-bold text-slate-900">Security Handshake</p>
+                     <p className="text-[11px] font-medium text-slate-400">Ask the buyer for their 4-digit code</p>
+                  </div>
+                  <div className="flex gap-2 mb-2">
                      {[0,1,2,3].map(i => (
-                       <div key={i} className="flex-1 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center">
-                          <span className="text-[24px] font-black text-navy">{verificationCode[i] || ''}</span>
+                       <div key={i} className="flex-1 h-16 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center shadow-inner">
+                          <span className="text-[24px] font-black text-slate-900">{verificationCode[i] || ''}</span>
                        </div>
                      ))}
                   </div>
@@ -403,17 +353,15 @@ function RunnerActivePageContent() {
                      autoFocus
                      value={verificationCode}
                      onChange={(e) => setVerificationCode(e.target.value.slice(0,4))}
-                     placeholder="INPUT 4-DIGIT CODE"
-                     className="w-full h-20 bg-slate-50 border border-slate-100 text-center rounded-[2rem] font-black text-[15px] uppercase tracking-[0.2em] outline-none focus:ring-4 focus:ring-navy/5 transition-all"
+                     placeholder="INPUT CODE"
+                     className="w-full h-16 bg-white border border-slate-200 text-center rounded-2xl font-black text-[14px] uppercase tracking-[0.2em] outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all placeholder:text-slate-300"
                   />
                   <button 
                    onClick={handleVerifyHandshake}
                    disabled={verificationCode.length !== 4 || isVerifying}
-                   className="w-full h-20 bg-navy text-white rounded-[2rem] font-black text-[15px] uppercase tracking-widest disabled:opacity-30 flex items-center justify-center gap-3"
+                   className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] disabled:opacity-30 disabled:shadow-none flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/20 active:scale-95"
                   >
-                    {isVerifying ? 'Checking...' : (
-                      <>Finish Delivery <ArrowRight size={20} /></>
-                    )}
+                    {isVerifying ? 'Checking...' : 'Complete Delivery'}
                   </button>
                </motion.div>
             )}
@@ -421,41 +369,111 @@ function RunnerActivePageContent() {
             {isCOMPLETED && (
                <motion.div
                  initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                 className="flex flex-col items-center gap-6"
+                 className="flex flex-col items-center gap-5 pt-4"
                >
-                  <div className="w-20 h-20 rounded-[2rem] bg-emerald-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-                     <CheckCircle2 size={40} />
+                  <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 shadow-sm">
+                     <CheckCircle2 size={32} />
                   </div>
-                  <div className="text-center">
-                     <h2 className="text-[24px] font-black uppercase tracking-tightest">Delivery Done</h2>
-                     <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2">RM 2.00 Earned</p>
+                  <div className="text-center space-y-1">
+                     <h2 className="text-[20px] font-black tracking-tight text-slate-900">Delivery Done</h2>
+                     <p className="text-[13px] font-bold text-emerald-600">RM 2.00 Earned</p>
                   </div>
-                  <button onClick={() => router.push('/run')} className="w-full h-16 bg-slate-50 text-navy rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest border border-slate-100">Return to Hub</button>
+                  <button onClick={() => router.push('/run')} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[13px] shadow-md shadow-slate-900/10 active:scale-95 transition-all mt-2">
+                     Return to Hub
+                  </button>
                </motion.div>
             )}
          </AnimatePresence>
       </div>
 
+      {/* ── Sticky Action Terminal ── */}
+      {!isCOMPLETED && order.status !== 'ARRIVED_AT_BUYER' && (
+        <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-6 py-4 pb-8">
+           <AnimatePresence mode="wait">
+              {order.status === 'AWAITING_MERCHANT_ACCEPT' && (
+                <div className="w-full h-14 bg-slate-50 rounded-2xl flex items-center justify-center gap-3 border border-slate-100">
+                  <div className="w-4 h-4 border-[2.5px] border-slate-200 border-t-slate-400 rounded-full animate-spin" />
+                  <span className="text-[12px] font-bold text-slate-400">Awaiting Merchant</span>
+                </div>
+              )}
+
+              {['PREPARING', 'READY_FOR_PICKUP'].includes(order.status) && (
+                <button 
+                  key="arrived_merchant"
+                  onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: isCustomDelivery ? 'ARRIVED_AT_PICKUP' : 'ARRIVED_AT_MERCHANT' })}
+                  className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 active:scale-95 transition-all"
+                >
+                  {isCustomDelivery ? 'Arrived at Pickup' : 'Arrived at Merchant'} <ArrowRight size={18} />
+                </button>
+              )}
+
+              {/* Both Custom and Marketplace arrive here before transit */}
+              {['ARRIVED_AT_MERCHANT', 'ARRIVED_AT_PICKUP'].includes(order.status) && (
+                 <button 
+                   key="pickup"
+                   disabled={!isCustomDelivery && Object.values(checklist).filter(Boolean).length < items.length}
+                   onClick={handlePickup}
+                   className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 disabled:opacity-30 disabled:shadow-none active:scale-95 transition-all"
+                 >
+                   Confirm Pickup <ArrowRight size={18} />
+                 </button>
+              )}
+
+               {order.status === 'ON_THE_WAY' && (
+                  <div className="space-y-3">
+                     <button 
+                      key="arrived_building"
+                      onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUILDING' })}
+                      className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 active:scale-95 transition-all"
+                    >
+                      Arrived at Building <ArrowRight size={18} />
+                    </button>
+                    <button 
+                      onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
+                      className="w-full h-12 bg-white border border-slate-200 text-slate-500 rounded-2xl font-bold text-[12px] flex items-center justify-center active:scale-95 transition-all"
+                    >
+                      Skip directly to Drop-off
+                    </button>
+                  </div>
+               )}
+
+               {order.status === 'ARRIVED_AT_BUILDING' && (
+                  <button 
+                    key="arrived_buyer"
+                    onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
+                    className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 active:scale-95 transition-all"
+                  >
+                    Arrived at Drop-off <ArrowRight size={18} />
+                  </button>
+               )}
+           </AnimatePresence>
+        </footer>
+      )}
+
       {/* ── Cancel Modal ── */}
       <AnimatePresence>
          {showCancelModal && (
-            <div className="fixed inset-0 z-500 bg-black/60 backdrop-blur-md flex items-center justify-center p-8">
+            <div className="fixed inset-0 z-100 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6">
                <motion.div 
-                 initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-                 className="bg-white border border-slate-100 rounded-[3rem] p-10 w-full max-w-sm space-y-8"
+                 initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+                 className="bg-white border border-slate-100 rounded-3xl p-8 w-full max-w-sm space-y-6 shadow-xl"
                >
-                  <div className="w-16 h-16 rounded-[1.5rem] bg-red-50 text-red-500 flex items-center justify-center mx-auto">
-                     <AlertTriangle size={32} />
+                  <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center mx-auto border border-red-100">
+                     <AlertTriangle size={24} />
                   </div>
-                  <div className="text-center space-y-2">
-                     <h3 className="text-[20px] font-black uppercase tracking-tightest">Cancel Delivery?</h3>
-                     <p className="text-[13px] text-slate-400 font-medium leading-relaxed">
-                        Cancelling this will reduce your <span className="text-red-500 font-bold">Hustle Score by 50</span>.
+                  <div className="text-center space-y-1.5">
+                     <h3 className="text-[18px] font-black tracking-tight text-slate-900">Cancel Delivery?</h3>
+                     <p className="text-[12px] text-slate-400 font-medium leading-relaxed">
+                        Cancelling this will reduce your Hustle Score by <span className="text-red-500 font-bold">50 points</span>. Are you sure?
                      </p>
                   </div>
-                  <div className="space-y-3 pt-2">
-                     <button onClick={handleCancelMission} className="w-full h-16 bg-red-500 text-white rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest">Yes, Cancel</button>
-                     <button onClick={() => setShowCancelModal(false)} className="w-full h-16 bg-slate-50 text-slate-400 rounded-[1.8rem] font-black text-[13px] uppercase tracking-widest">No, Keep Delivery</button>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                     <button onClick={() => setShowCancelModal(false)} className="w-full h-12 bg-slate-50 text-slate-500 rounded-xl font-bold text-[13px] border border-slate-100 active:scale-95 transition-all">
+                        Keep It
+                     </button>
+                     <button onClick={handleCancelMission} className="w-full h-12 bg-red-500 text-white rounded-xl font-bold text-[13px] shadow-md shadow-red-500/20 active:scale-95 transition-all">
+                        Yes, Cancel
+                     </button>
                   </div>
                </motion.div>
             </div>
@@ -468,47 +486,13 @@ function RunnerActivePageContent() {
 export default function RunnerActivePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-navy flex items-center justify-center p-8">
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
          <div className="flex flex-col items-center gap-6">
-            <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
-            <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Loading Delivery Data</p>
+            <div className="w-10 h-10 border-[3px] border-slate-100 border-t-blue-600 rounded-full animate-spin" />
          </div>
       </div>
     }>
       <RunnerActivePageContent />
     </Suspense>
-  );
-}
-
-// ── Shared UI Components ──
-
-function NodeItem({ active, completed, title, detail, icon, description }: any) {
-  return (
-    <div className="flex items-start gap-8">
-       <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center border transition-all duration-500 shrink-0 ${active ? 'bg-navy text-white border-navy shadow-md shadow-navy/20 scale-110' : completed ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-slate-50 text-slate-200 border-slate-100'}`}>
-          {completed ? <CheckCircle2 size={20} /> : icon}
-       </div>
-       <div className="pt-1">
-          <p className={`text-[11px] font-black uppercase tracking-widest ${active ? 'text-navy' : 'text-slate-300'}`}>{title}</p>
-          <p className={`text-[16px] font-black tracking-tightest uppercase truncate max-w-[200px] ${active ? 'text-navy' : 'text-slate-300'}`}>{detail}</p>
-          {active && <p className="text-[12px] text-slate-400 font-medium leading-relaxed mt-2">{description}</p>}
-       </div>
-    </div>
-  );
-}
-
-function ActionButton({ label, onClick, color, disabled }: any) {
-  const bg = color === 'navy' ? 'bg-navy shadow-navy/20' : 'bg-emerald-500 shadow-emerald-500/20';
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      disabled={disabled}
-      onClick={onClick}
-      className={`w-full h-20 ${bg} text-white rounded-[2rem] font-black text-[15px] uppercase tracking-widest shadow-md active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-30`}
-    >
-       {label} <ArrowRight size={20} />
-    </motion.button>
   );
 }
