@@ -281,7 +281,7 @@ export default function AdminDashboard() {
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutGrid },
     { id: 'command', label: 'Command Center', icon: Inbox },
-    { id: 'price_review', label: 'Price Review', icon: ShieldCheck, badge: priceReviews.length },
+    { id: 'price_review', label: 'Price Review Queue', icon: ShieldCheck, badge: priceReviews.length, href: '/admin/price-review' },
     { id: 'monitor', label: 'Price Monitor', icon: BarChart3 },
     { id: 'disputes', label: 'Dispute Mediation', icon: ShieldAlert, badge: disputes.length },
     { 
@@ -323,6 +323,7 @@ export default function AdminDashboard() {
             <div key={item.id} className="space-y-1">
               <button
                 onClick={() => {
+                  if ((item as any).href) { router.push((item as any).href); return; }
                   if (item.subItems) {
                     setIsUsersExpanded(!isUsersExpanded);
                     setActiveTab(item.id);

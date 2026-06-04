@@ -149,6 +149,7 @@ export async function submitPriceReport(
     const itemRef = doc(db, 'items', itemId);
     await updateDoc(itemRef, {
       price_flag_count: increment(1),
+      report_count: increment(1),
     });
 
     // 3. Check if threshold reached — if so, mark as flagged

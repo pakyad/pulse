@@ -112,8 +112,9 @@ export default function CreateListingPage() {
         governance_ceiling: priceIntel?.ceiling || null,
         is_price_flagged: isAutoFlagged,
         price_flag_count: isAutoFlagged ? 1 : 0,
+        report_count: 0,
         flag_source: isAutoFlagged ? 'SYSTEM' : null,
-        price_appeal: isAutoFlagged ? justification : '',
+        price_justification: justification.trim() || '',
         created_at: serverTimestamp(),
       });
       router.push('/marketplace');
