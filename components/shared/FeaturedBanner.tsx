@@ -105,7 +105,13 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
                
                {/* Square CTA Button */}
                <button
-                 onClick={() => router.push(slide.ctaPath)}
+                 onClick={() => {
+                   if (slide.ctaPath.startsWith('http')) {
+                     window.open(slide.ctaPath, '_blank');
+                   } else {
+                     router.push(slide.ctaPath);
+                   }
+                 }}
                  className="shrink-0 w-16 h-16 bg-white rounded-[22px] shadow-md shadow-black/20 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-50 border border-white/40"
                >
                  <ArrowUpRight size={28} className="text-black" strokeWidth={3} />

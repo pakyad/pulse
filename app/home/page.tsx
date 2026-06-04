@@ -66,7 +66,7 @@ export default function PulseHome() {
       }
 
       // 📰 Announcements (Public)
-      const qAnn = query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(3));
+      const qAnn = query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(4));
       const uAnn = onSnapshot(qAnn, 
         s => setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() }))),
         e => console.warn("[Home] Announce Error:", e)
