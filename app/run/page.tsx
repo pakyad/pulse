@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db, functions, storage } from '@/lib/firebase';
-import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc, query, where } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ChevronLeft, X, Loader2, ChevronRight, ArrowRight, Package, Map, History, Upload, Check } from 'lucide-react';
 
@@ -141,6 +141,7 @@ export default function RunModule() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [activeMission, setActiveMission] = useState(false);
   const [customFee, setCustomFee] = useState<string>('');
   const [form, setForm] = useState<any>({
     // parcels
@@ -155,15 +156,40 @@ export default function RunModule() {
   const setF = (key: string, val: string) => setForm((p: any) => ({ ...p, [key]: val }));
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged(user => {
-      if (user) onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
+    let unsubProfile: any;
+    let unsubMissions: any;
+    const unsubAuth = auth.onAuthStateChanged(user => {
+      if (user) {
+        unsubProfile = onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
+        const q = query(
+          collection(db, 'orders'), 
+          where('runner_id', '==', user.uid), 
+          where('status', 'in', [
+            'RUNNER_ON_THE_WAY', 'DELIVERING', 'RUNNER_DELIVERING', 
+            'PICKED_UP', 'ARRIVED_AT_PICKUP', 'ARRIVED_AT_MERCHANT', 
+            'ARRIVED_AT_BUILDING', 'ARRIVED_AT_BUYER', 'ACCEPTED'
+          ])
+        );
+        unsubMissions = onSnapshot(q, snap => setActiveMission(!snap.empty));
+      }
     });
-    return () => unsub();
+    return () => {
+      unsubAuth();
+      if (unsubProfile) unsubProfile();
+      if (unsubMissions) unsubMissions();
+    };
   }, []);
 
   const toggleStatus = async () => {
     if (!auth.currentUser) return;
     setStatusError(null);
+    
+    if (profile?.is_online && activeMission) {
+      setStatusError('You cannot go offline while you have an active mission.');
+      setTimeout(() => setStatusError(null), 3000);
+      return;
+    }
+
     try {
       await updateDoc(doc(db, 'users', auth.currentUser.uid), { is_online: !profile?.is_online, last_active: serverTimestamp() });
     } catch {
@@ -403,13 +429,16 @@ export default function RunModule() {
             <div className="grid grid-cols-2 gap-3 mt-4">
               {/* Delivery Hub Card */}
               <button 
-                onClick={() => router.push('/run/missions')} 
-                className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all active:scale-95 shadow-sm ${profile?.is_online ? 'bg-cyan-50 text-cyan-950' : 'bg-slate-50 text-slate-700'}`}
+                onClick={() => {
+                  if (profile?.is_online) router.push('/run/missions');
+                }} 
+                disabled={!profile?.is_online}
+                className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all shadow-sm ${profile?.is_online ? 'bg-cyan-50 text-cyan-950 active:scale-95' : 'bg-slate-50 text-slate-400 opacity-60 cursor-not-allowed'}`}
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${profile?.is_online ? 'bg-cyan-200/70 text-cyan-950' : 'bg-slate-200 text-slate-500'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${profile?.is_online ? 'bg-cyan-200/70 text-cyan-950' : 'bg-slate-200 text-slate-400'}`}>
                   <Package size={20} strokeWidth={2.5} />
                 </div>
-                <p className="text-[14px] font-bold tracking-tight">Delivery Hub</p>
+                <p className={`text-[14px] font-bold tracking-tight ${profile?.is_online ? '' : 'opacity-70'}`}>Delivery Hub</p>
               </button>
 
               {/* History Card */}

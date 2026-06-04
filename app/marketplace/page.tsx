@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ProductCard from '@/components/shared/ProductCard';
 import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/MarketplaceFilterOverlay';
+import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
+import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
 // ── TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
@@ -186,6 +188,10 @@ export default function MarketplacePage() {
       </nav>
 
       <div className="pt-28 px-4 space-y-12">
+
+        {/* ── ACTIVE ORDER BANNER ── */}
+        <ActiveOrderBanner />
+        <FloatingActiveTask />
 
         {/* ── OFFICIAL STORE BANNERS ── */}
         <AnimatePresence>

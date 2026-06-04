@@ -15,6 +15,8 @@ import {
 import HologramID from '@/components/shared/HologramID';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
+import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
+import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS (Concept: Skibidi) ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -86,6 +88,10 @@ export default function MePage() {
 
       <div className="pt-28 px-8 space-y-12">
          
+         {/* ── ACTIVE ORDER BANNER ── */}
+         <ActiveOrderBanner />
+         <FloatingActiveTask />
+
          {/* ── PROFILE HEADER (Concept: Skibidi) ── */}
          <section className="flex items-center gap-6">
             <button onClick={() => setIsIDOpen(true)} className="relative group">

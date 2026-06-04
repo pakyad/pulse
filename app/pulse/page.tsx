@@ -13,6 +13,8 @@ import {
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import { RadarCard, ReportRadarModal } from '@/components/pulse/RadarModule';
+import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
+import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
 // ─── DEMO DATA ───────────────────────────────────────────────────────────────
 
@@ -59,12 +61,6 @@ const DEMO_EVENTS = [
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-const ACTIVE_STATUSES = [
-  'PENDING', 'PENDING_VENDOR', 'PENDING_RUNNER', 'PREPARING',
-  'READY_FOR_PICKUP', 'AWAITING_RUNNER', 'PICKED_UP',
-  'IN_TRANSIT', 'ON_THE_WAY', 'ARRIVED_AT_DESTINATION',
-];
-
 function relativeTime(ts: any): string {
   if (!ts) return '';
   try {
@@ -77,17 +73,6 @@ function relativeTime(ts: any): string {
   } catch { return ''; }
 }
 
-function statusLabel(raw: string): string {
-  const MAP: Record<string, string> = {
-    PENDING: 'Waiting', PENDING_VENDOR: 'Waiting',
-    PENDING_RUNNER: 'Finding Runner', AWAITING_RUNNER: 'Finding Runner',
-    PREPARING: 'Preparing', READY_FOR_PICKUP: 'Ready for Pickup',
-    PICKED_UP: 'Picked Up', IN_TRANSIT: 'In Transit',
-    ON_THE_WAY: 'On the Way', ARRIVED_AT_DESTINATION: 'Almost There',
-  };
-  return MAP[(raw || '').toUpperCase()] ?? (raw || '').replace(/_/g, ' ');
-}
-
 function tagIcon(tag: string) {
   const t = (tag || '').toUpperCase();
   if (t === 'SYSTEM' || t === 'MAINTENANCE') return <Wrench size={11} />;
@@ -98,36 +83,6 @@ function tagIcon(tag: string) {
 }
 
 // ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
-
-function ActiveOrderCard({ order }: { order: any }) {
-  const router = useRouter();
-  const code = `#${(order.order_code || order.id?.slice(0, 6) || '------').toUpperCase()}`;
-  const isMoving = ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'ARRIVED_AT_DESTINATION']
-    .includes((order.status || '').toUpperCase());
-  return (
-    <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
-      <button
-        onClick={() => router.push(`/orders/${order.id}`)}
-        className="w-full text-left bg-[#111111] rounded-2xl p-5 flex items-center justify-between group active:scale-95 transition-transform"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
-            <Package size={17} className="text-white" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-[13px] font-bold text-white leading-none truncate max-w-[180px]">{order.title || 'Your Order'}</p>
-            <div className="flex items-center gap-2">
-              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isMoving ? 'bg-amber-400 animate-pulse' : 'bg-slate-500'}`} />
-              <span className="text-[11px] font-semibold text-white/50">{statusLabel(order.status)}</span>
-              <span className="text-[11px] text-white/20">{code}</span>
-            </div>
-          </div>
-        </div>
-        <ArrowRight size={16} className="text-white/30 group-hover:text-white/60 transition-colors shrink-0" />
-      </button>
-    </motion.div>
-  );
-}
 
 function AnnouncementCard({ ann }: { ann: any }) {
   const [expanded, setExpanded] = useState(false);
@@ -181,7 +136,6 @@ export default function PulsePage() {
   const [profile,        setProfile]        = useState<any>(null);
   const [isSearchOpen,   setIsSearchOpen]   = useState(false);
   const [announcements,  setAnnouncements]  = useState<any[]>([]);
-  const [activeOrder,    setActiveOrder]    = useState<any>(null);
   const [loadingAnn,     setLoadingAnn]     = useState(true);
   const [radarItems,     setRadarItems]     = useState<any[]>([]);
   const [isReportOpen,   setIsReportOpen]   = useState(false);
@@ -198,23 +152,6 @@ export default function PulsePage() {
       if (user) {
         const uProfile = onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()), e => console.error('[Pulse] Profile:', e));
         unsubs.push(uProfile);
-
-        const uOrder = onSnapshot(
-          query(collection(db, 'orders'), where('buyer_id', '==', user.uid), where('status', 'in', ACTIVE_STATUSES)),
-          snap => {
-            if (snap.empty) { setActiveOrder(null); return; }
-            const sorted = snap.docs
-              .map(d => ({ id: d.id, ...d.data() as any }))
-              .sort((a, b) => {
-                const ta = a.created_at?.toMillis?.() ?? new Date(a.created_at || 0).getTime();
-                const tb = b.created_at?.toMillis?.() ?? new Date(b.created_at || 0).getTime();
-                return tb - ta;
-              });
-            setActiveOrder(sorted[0] ?? null);
-          },
-          e => console.warn('[Pulse] ActiveOrder:', e)
-        );
-        unsubs.push(uOrder);
       }
 
       const uAnn = onSnapshot(
@@ -282,13 +219,8 @@ export default function PulsePage() {
       <div className="pt-24 px-6 space-y-10">
 
         {/* ── ACTIVE ORDER ── */}
-        <AnimatePresence>
-          {activeOrder && (
-            <motion.section key="active-order">
-              <ActiveOrderCard order={activeOrder} />
-            </motion.section>
-          )}
-        </AnimatePresence>
+        <ActiveOrderBanner />
+        <FloatingActiveTask />
 
         {/* ── ANNOUNCEMENTS ── */}
         <section className="space-y-4">

@@ -24,7 +24,10 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
     : ['Ordered', 'Preparing', 'On The Way', 'Arrived'];
   const deliveryPhoto = order.delivery_proof_url;
 
+  const isCancelled = order.status?.toUpperCase() === 'CANCELLED';
+
   const getHeaderText = () => {
+    if (isCancelled) return 'Order Cancelled';
     if (step === 4) return 'Delivered';
     if (step === 3) return isCustom ? 'Runner is heading to drop-off' : 'Runner is on the way';
     if (step === 2) return isCustom ? 'Runner is heading to pickup' : 'Preparing your order';
@@ -57,18 +60,19 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
             <div key={label} className="relative z-10 flex flex-col items-center gap-3">
               <motion.div 
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition-all duration-500 border-2 ${
+                   isCancelled ? 'bg-white border-slate-200 text-slate-300' :
                    isPast ? 'bg-amber-500 border-amber-500 text-white' : 
                    isCurrent ? 'bg-white border-amber-500 text-amber-500' : 
                    'bg-white border-slate-200 text-slate-300'
                 }`}
-                animate={isCurrent ? { scale: [1, 1.1, 1] } : { scale: 1 }}
-                transition={{ repeat: isCurrent ? Infinity : 0, duration: 2.5 }}
+                animate={isCurrent && !isCancelled ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+                transition={{ repeat: isCurrent && !isCancelled ? Infinity : 0, duration: 2.5 }}
               >
-                {isPast ? <CheckCircle2 size={12} strokeWidth={3} /> : (
-                   <span className={`font-black ${isCurrent ? 'text-amber-500' : ''}`}>{i + 1}</span>
+                {isPast && !isCancelled ? <CheckCircle2 size={12} strokeWidth={3} /> : (
+                   <span className={`font-black ${isCurrent && !isCancelled ? 'text-amber-500' : ''}`}>{i + 1}</span>
                 )}
               </motion.div>
-              <span className={`text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-colors duration-500 ${isPast || isCurrent ? 'text-slate-900' : 'text-slate-300'}`}>
+              <span className={`text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-colors duration-500 ${isCancelled ? 'text-slate-300' : (isPast || isCurrent ? 'text-slate-900' : 'text-slate-300')}`}>
                 {label}
               </span>
             </div>
@@ -108,28 +112,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
         </div>
       )}
 
-      {/* ── ITEM SUMMARY VIBRANCY ── */}
-      <div className="px-2">
-        <div className="flex items-center gap-4 bg-white border border-slate-50 rounded-2xl p-4 shadow-sm">
-          <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
-            {order.image_url || order.images?.[0] ? (
-              <img src={order.image_url || order.images?.[0]} className="w-full h-full object-cover" alt="" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-200">
-                <Package size={20} strokeWidth={1.5} />
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-bold text-slate-900 truncate">{order.items_summary || order.title}</p>
-            <p className="text-[11px] font-medium text-[#94a3b8] uppercase tracking-tight">{isCustom ? 'Peer-to-Peer Drop' : (order.seller_name || 'Merchant')}</p>
-          </div>
-          <div className="text-right">
-             <p className="text-[15px] font-black text-slate-900">RM {Number(order.total_price || order.price || 0).toFixed(2)}</p>
-             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Paid</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* ── DELIVERY PROOF ── */}
       {step === 4 && deliveryPhoto && (

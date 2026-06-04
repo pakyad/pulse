@@ -10,7 +10,6 @@ interface CategorySelectorProps {
 const CATEGORY_LABELS: Record<CategoryID, string> = {
   HUNGER: 'Food',
   ACADEMIC: 'Books',
-  SERVICES: 'Services',
   HOSTEL: 'Hostel',
   TECH: 'Tech',
   APPAREL: 'Apparel'

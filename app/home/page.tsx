@@ -13,6 +13,8 @@ import FeaturedBanner, { BannerSlide } from '@/components/shared/FeaturedBanner'
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, orderBy, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
+import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -104,6 +106,10 @@ export default function PulseHome() {
 
       <div className="pt-28 px-6 space-y-12">
          
+         {/* ── ACTIVE ORDER BANNER ── */}
+         <ActiveOrderBanner />
+         <FloatingActiveTask />
+
          {/* ── FEATURED BANNER (HIDDEN IF EMPTY) ── */}
          <AnimatePresence>
             {announcements.length > 0 && (

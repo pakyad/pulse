@@ -7,7 +7,6 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
-import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
 import { VETTED_ACCOUNTS } from '@/lib/utils/admin-seeding';
 import { seedSEClubItems } from '@/lib/utils/seed-se-club';
@@ -187,8 +186,7 @@ export default function NavigationGate() {
     <>
       {!hideHeader && <Header />}
       
-      {/* Global Runner Dynamic Island (Only for active logistics) */}
-      <FloatingActiveTask />
+      {/* Global Runner Dynamic Island removed to prevent overlaying issues */}
 
       {/* Dynamic Navigation lockdown */}
       {showBottomNav && <BottomNav />}

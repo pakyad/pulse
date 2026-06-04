@@ -14,6 +14,7 @@ import BackButton from '@/components/shared/BackButton';
 
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
 import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
+import { cancelOrder } from '@/app/actions/orderActions';
 import OrderTracker from '@/components/shared/OrderTracker';
 import { VoxelPulse, VoxelRadar, VoxelBox, VoxelCheck } from '@/components/shared/VoxelStatus';
 import dynamic from 'next/dynamic';
@@ -112,8 +113,10 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
   const s = status?.toUpperCase() || '';
   
   // Determine kinetic state
-  let state: 'WAITING' | 'PREPARING' | 'RUNNING' | 'DELIVERED' = 'RUNNING';
-  if (['PENDING', 'PENDING_RUNNER', 'PENDING_VENDOR', 'AWAITING_RUNNER'].includes(s)) {
+  let state: 'WAITING' | 'PREPARING' | 'RUNNING' | 'DELIVERED' | 'CANCELLED' = 'RUNNING';
+  if (s === 'CANCELLED') {
+    state = 'CANCELLED';
+  } else if (['PENDING', 'PENDING_RUNNER', 'PENDING_VENDOR', 'AWAITING_RUNNER'].includes(s)) {
     state = 'WAITING';
   } else if (['PREPARING', 'READY_FOR_PICKUP'].includes(s)) {
     state = 'PREPARING';
@@ -122,7 +125,7 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
   }
 
   return (
-    <div className="w-full h-[380px] bg-[#f8fafc] relative flex flex-col items-center justify-center pt-8 select-none overflow-hidden">
+    <div className={`w-full ${state === 'CANCELLED' ? 'h-[260px] pb-4' : 'h-[380px]'} bg-[#f8fafc] relative flex flex-col items-center justify-center pt-8 select-none overflow-hidden`}>
       <AnimatePresence mode="wait">
         {state === 'WAITING' && (
           <motion.div
@@ -199,6 +202,7 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
             <p className="text-[12px] font-medium text-[#94a3b8]">Enjoy your purchase</p>
           </motion.div>
         )}
+
       </AnimatePresence>
     </div>
   );
@@ -247,15 +251,14 @@ export default function LiveOrderPage() {
     setCancelling(true);
     setCancelError(null);
     try {
-      await updateDoc(doc(db, 'orders', id as string), {
-        status: 'CANCELLED',
-        cancelled_at: new Date().toISOString(),
-        cancelled_by: 'buyer',
-      });
+      const res = await cancelOrder(id as string, 'BUYER', userId);
+      if (!res.success) {
+        throw new Error(res.message);
+      }
       setShowCancelConfirm(false);
-    } catch (e) {
+    } catch (e: any) {
       console.error('[Cancel]', e);
-      setCancelError('Could not cancel. Please try again.');
+      setCancelError(e.message || 'Could not cancel. Please try again.');
     } finally {
       setCancelling(false);
     }
@@ -366,101 +369,62 @@ export default function LiveOrderPage() {
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-36 relative">
 
       {/* ── VIBRANT MAP HERO ── */}
-      <div className="absolute top-0 left-0 right-0 h-[380px] z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-b from-amber-500/10 to-white z-10 pointer-events-none" />
-        
-        {/* Google Maps Walking Directions HUD (Runner Only) */}
-        {isRunner && isMoving && (
-          <div className="absolute top-[96px] left-6 right-6 z-30 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
-            <div className="bg-[#0f9d58] text-white px-4 py-3.5 rounded-2xl shadow-md flex items-center gap-3.5 border border-[#0d8a4d]">
-              <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 shadow-sm animate-pulse">
-                <Navigation size={18} className="text-white fill-white -rotate-45" />
-              </div>
-              <div className="space-y-0.5 min-w-0 flex-1">
-                <div className="flex items-baseline gap-1.5 flex-wrap">
-                  <span className="text-[14px] font-black tracking-tight leading-none">Walk {distance}m</span>
-                  <span className="text-[11px] font-semibold text-white/80">• {durationMin} min{durationMin > 1 ? 's' : ''}</span>
+      {!isCancelled && (
+        <div className="absolute top-0 left-0 right-0 h-[380px] z-0 overflow-hidden">
+          <div className="absolute inset-0 bg-linear-to-b from-amber-500/10 to-white z-10 pointer-events-none" />
+          
+          {/* Google Maps Walking Directions HUD (Runner Only) */}
+          {isRunner && isMoving && (
+            <div className="absolute top-[96px] left-6 right-6 z-30 pointer-events-auto animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="bg-[#0f9d58] text-white px-4 py-3.5 rounded-2xl shadow-md flex items-center gap-3.5 border border-[#0d8a4d]">
+                <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 shadow-sm animate-pulse">
+                  <Navigation size={18} className="text-white fill-white -rotate-45" />
                 </div>
-                <p className="text-[10px] font-bold text-white/95 uppercase tracking-widest leading-none truncate">
-                  {isClose ? 'Arriving soon at drop-off' : 'Proceed toward meet location'}
-                </p>
+                <div className="space-y-0.5 min-w-0 flex-1">
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <span className="text-[14px] font-black tracking-tight leading-none">Walk {distance}m</span>
+                    <span className="text-[11px] font-semibold text-white/80">• {durationMin} min{durationMin > 1 ? 's' : ''}</span>
+                  </div>
+                  <p className="text-[10px] font-bold text-white/95 uppercase tracking-widest leading-none truncate">
+                    {isClose ? 'Arriving soon at drop-off' : 'Proceed toward meet location'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {isRunner ? (
-          /* Styled Walking Distance Static Google Map (Runner Only) */
-          <div className="w-full h-[380px] bg-[#f8fafc] relative">
-            <img 
-              src={mapSrc}
-              onError={() => setMapSrc('/map-bg.png')}
-              className="w-full h-full object-cover grayscale-[0.1] saturate-[1.2]"
-              alt="Live Route Map"
-            />
+          {isRunner ? (
+            /* Styled Walking Distance Static Google Map (Runner Only) */
+            <div className="w-full h-[380px] bg-[#f8fafc] relative">
+              <img 
+                src={mapSrc}
+                onError={() => setMapSrc('/map-bg.png')}
+                className="w-full h-full object-cover grayscale-[0.1] saturate-[1.2]"
+                alt="Live Route Map"
+              />
 
-            {/* Simulated Live SVG Telemetry Glider Overlay */}
-            <svg className="absolute inset-0 w-full h-full select-none pointer-events-none" viewBox="0 0 400 240">
-              {progress > 0 && progress < 1 && (
-                <g>
-                  <circle cx={runnerPos.x} cy={runnerPos.y} r="7" fill="slate-900" className="shadow-md" />
-                  <circle cx={runnerPos.x} cy={runnerPos.y} r="2.5" fill="#ffffff" className={isClose ? 'animate-ping' : 'animate-pulse'} />
-                </g>
-              )}
-            </svg>
-          </div>
-        ) : showBuyerMap ? (
-          <div className="w-full h-[380px] bg-[#f8fafc] relative overflow-hidden">
-            <BuyerLiveMap runnerLocation={order.runner_location} />
-          </div>
-        ) : (
-          <StatusKinetics status={status} orderType={order?.type} />
-        )}
-        
-        {/* Logistics Data (Ultra-Minimalist & Transparent) */}
-        <div className="absolute bottom-8 left-6 z-20 pointer-events-none">
-          <div className="space-y-4 w-[280px]">
-             <div className="relative pl-5 space-y-4">
-               {/* Crisp vertical alignment track line */}
-               <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-slate-300 opacity-60" />
-               
-               {/* Pickup Node */}
-               <div className="relative">
-                 <div className="absolute -left-[19.5px] top-[4px] w-2 h-2 rounded-full bg-amber-500" />
-                 <div className="flex items-baseline gap-2">
-                   <span className="text-[12px] font-bold text-slate-900">{order?.seller_name || 'Pickup Point'}</span>
-                   <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Pickup</span>
-                 </div>
-                 <p className="text-[10px] font-medium text-slate-400 mt-0.5 truncate">{order.pickup_location || 'Campus Shop'}</p>
-               </div>
-               
-               {/* Meet At Node */}
-               <div className="relative">
-                 <div className="absolute -left-[19.5px] top-[4px] w-2 h-2 rounded-full bg-emerald-500" />
-                 <div className="flex items-baseline gap-2">
-                   <span className="text-[12px] font-bold text-slate-900">{order.buyer_name || 'You'}</span>
-                   <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Meet</span>
-                 </div>
-                 <div className="mt-1 flex items-center gap-1.5 truncate">
-                   {dropOffNode ? (
-                     <>
-                       <span className={`text-[8px] font-bold px-1 py-0.5 rounded uppercase tracking-wider ${getLocationBadge(dropOffNode.zone)}`}>
-                         {dropOffNode.zone}
-                       </span>
-                       <span className="text-[11px] font-bold text-slate-900">{dropOffNode.label}</span>
-                     </>
-                   ) : (
-                     <span className="text-[11px] font-medium text-slate-400">{order.drop_off_location || 'Main Lobby'}</span>
-                   )}
-                 </div>
-               </div>
-             </div>
-          </div>
+              {/* Simulated Live SVG Telemetry Glider Overlay */}
+              <svg className="absolute inset-0 w-full h-full select-none pointer-events-none" viewBox="0 0 400 240">
+                {progress > 0 && progress < 1 && (
+                  <g>
+                    <circle cx={runnerPos.x} cy={runnerPos.y} r="7" fill="slate-900" className="shadow-md" />
+                    <circle cx={runnerPos.x} cy={runnerPos.y} r="2.5" fill="#ffffff" className={isClose ? 'animate-ping' : 'animate-pulse'} />
+                  </g>
+                )}
+              </svg>
+            </div>
+          ) : showBuyerMap ? (
+            <div className="w-full h-[380px] bg-[#f8fafc] relative overflow-hidden">
+              <BuyerLiveMap runnerLocation={order.runner_location} />
+            </div>
+          ) : (
+            <StatusKinetics status={status} orderType={order?.type} />
+          )}
         </div>
-      </div>
+      )}
 
       {/* ── FLOATING NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between pointer-events-none select-none">
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between pointer-events-none select-none bg-white/90 backdrop-blur-xl border-b border-slate-100/50">
         <div className="flex items-center gap-3 pointer-events-auto">
           <BackButton fallback="/me/orders" />
           <div className="flex flex-col justify-center">
@@ -474,7 +438,7 @@ export default function LiveOrderPage() {
       </nav>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="pt-[420px] px-6 space-y-10 relative z-10">
+      <div className={`${isCancelled ? 'pt-32' : 'pt-[420px]'} px-6 space-y-10 relative z-10`}>
 
         {/* Proximity Alert Banner (< 200m) */}
         {isClose && (
@@ -491,10 +455,27 @@ export default function LiveOrderPage() {
           </div>
         )}
 
+        {/* Cancellation Notice */}
+        {isCancelled && (
+          <div className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-start gap-3.5 shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-red-500 text-white flex items-center justify-center shrink-0">
+              <XCircle size={16} />
+            </div>
+            <div className="space-y-0.5 flex-1 min-w-0">
+              <p className="text-[12px] font-black text-red-950 uppercase tracking-widest leading-none mb-1">Order Cancelled</p>
+              <p className="text-[11px] font-medium text-red-700 leading-relaxed">
+                Your order has been cancelled. If you have made any payments, the money will be refunded to you shortly.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* ── PROGRESS VIBRANCY ── */}
-        <section className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-slate-50">
-          <OrderTracker order={order} />
-        </section>
+        {!isCancelled && (
+          <section className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-slate-50">
+            <OrderTracker order={order} />
+          </section>
+        )}
 
         {/* ── PAYMENT RECEIPT ── */}
         <section className="space-y-3">
@@ -502,17 +483,24 @@ export default function LiveOrderPage() {
             <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Payment Receipt</h2>
           </div>
           <div className="bg-slate-50 border border-slate-100 rounded-xl divide-y divide-slate-100">
-            {/* Item Summary */}
-            <div className="flex items-start justify-between px-4 py-3.5">
-              <span className="text-[13px] font-medium text-[#94a3b8] shrink-0">Items</span>
-              <div className="text-right pl-4">
+            {/* Item Summary with Visual */}
+            <div className="px-4 py-4 flex items-start gap-4">
+              <div className="w-14 h-14 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
+                {(order.items?.[0]?.image_url || order.image_url || order.item_image || order.images?.[0]) ? (
+                  <img src={order.items?.[0]?.image_url || order.image_url || order.item_image || order.images?.[0]} className="w-full h-full object-cover" alt="Item visual" />
+                ) : (
+                  <Package size={20} className="text-slate-300" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0 flex flex-col justify-center py-0.5 space-y-1">
                 {order.items?.length > 0 ? (
                   order.items.map((it: any, i: number) => (
-                    <p key={i} className="text-[13px] font-bold text-slate-900">{it.qty}x {it.title}</p>
+                    <p key={i} className="text-[13px] font-bold text-slate-900 truncate">{it.qty}x {it.title}</p>
                   ))
                 ) : (
-                  <p className="text-[13px] font-bold text-slate-900">{order.items_summary || `1x ${order.title || 'Pulse Order'}`}</p>
+                  <p className="text-[13px] font-bold text-slate-900 line-clamp-2">{order.items_summary || `1x ${order.title || 'Pulse Order'}`}</p>
                 )}
+                <p className="text-[11px] font-medium text-[#94a3b8]">Marketplace Item</p>
               </div>
             </div>
 
@@ -555,17 +543,19 @@ export default function LiveOrderPage() {
         </section>
 
         {/* ── HANDSHAKE NOTICE ── */}
-        <section className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
-            <Info size={14} className="text-slate-900" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-[12px] font-bold text-slate-900">Help & Returns</p>
-            <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">
-              If there is a problem, our team will check the delivery data. We process returns within 24 hours.
-            </p>
-          </div>
-        </section>
+        {!isCancelled && (
+          <section className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
+              <Info size={14} className="text-slate-900" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[12px] font-bold text-slate-900">Help & Returns</p>
+              <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">
+                If there is a problem, our team will check the delivery data. We process returns within 24 hours.
+              </p>
+            </div>
+          </section>
+        )}
 
         {/* ── CANCEL ORDER (Pending only) ── */}
         {isPending && (
