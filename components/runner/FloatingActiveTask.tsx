@@ -43,35 +43,43 @@ export default function FloatingActiveTask() {
     };
   }, []);
 
-  // Hide on auth pages, the terminal itself (where the full manifest is), and admin/merchant routes
+  // Hide on auth pages, the terminal itself (where the full manifest is), admin/merchant routes, and the active mission Delivery Hub
   if (!activeTask) return null;
-  if (pathname?.startsWith('/auth') || pathname === '/run/terminal' || pathname?.startsWith('/admin') || pathname?.startsWith('/merchant')) return null;
+  if (pathname?.startsWith('/auth') || pathname === '/run/terminal' || pathname === '/run/missions' || pathname?.startsWith('/admin') || pathname?.startsWith('/merchant')) return null;
+
+  const isErrand = activeTask.type?.toUpperCase() === 'ERRANDS';
+  const isParcel = activeTask.type?.toUpperCase() === 'PARCELS';
+  const tintBg = isErrand ? 'bg-rose-50' : (isParcel ? 'bg-cyan-50' : 'bg-slate-50');
+  const tintBorder = isErrand ? 'border-rose-200' : (isParcel ? 'border-cyan-200' : 'border-slate-200');
+  const tintText = isErrand ? 'text-rose-950' : (isParcel ? 'text-cyan-950' : 'text-slate-900');
+  const tintSub = isErrand ? 'text-rose-600/80' : (isParcel ? 'text-cyan-600/80' : 'text-slate-500');
+  const arrowBg = isErrand ? 'bg-rose-200/50 text-rose-700' : (isParcel ? 'bg-cyan-200/50 text-cyan-700' : 'bg-white text-slate-900 border border-slate-200 shadow-sm');
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50">
-      <Link href="/run/terminal" className="block w-full bg-gray-900 border border-gray-800 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] p-4 active:scale-95 transition-transform">
+    <div className="fixed top-24 left-4 right-4 z-80">
+      <Link href="/run/terminal" className={`block w-full ${tintBg} border ${tintBorder} rounded-[24px] shadow-sm p-4 active:scale-95 transition-transform`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            {/* Live Indicator (Institutional Emerald) */}
+            {/* Live Indicator */}
             <div className="relative flex items-center justify-center w-2.5 h-2.5">
               <div className="absolute inset-0 bg-emerald-500 rounded-full opacity-40 animate-ping"></div>
-              <div className="relative w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
+              <div className="relative w-2.5 h-2.5 bg-emerald-500 rounded-full"></div>
             </div>
             
             {/* Text Stack */}
             <div className="flex flex-col">
-              <span className="text-[15px] font-bold text-white leading-none mb-1.5">
+              <span className={`text-[15px] font-bold ${tintText} leading-none mb-1.5 tracking-tight`}>
                 {activeTask.status === 'PICKED_UP' ? 'Delivery in Progress' : 'Assigned Order'}
               </span>
-              <span className="text-[11px] font-medium text-gray-400 tracking-wide">
-                ID: {activeTask.id.substring(0, 8)} • {activeTask.items?.[0]?.name || 'Institutional Item'}
+              <span className={`text-[11px] font-bold ${tintSub} tracking-wide`}>
+                ID: {activeTask.id.substring(0, 8).toUpperCase()} • {activeTask.items?.[0]?.name || activeTask.title || 'Mission Item'}
               </span>
             </div>
           </div>
           
           {/* Action (Clean Circular Icon) */}
-          <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center shrink-0">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${arrowBg}`}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
           </div>
         </div>
       </Link>

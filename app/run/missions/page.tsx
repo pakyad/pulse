@@ -82,6 +82,87 @@ function formatTimeAgo(timestamp: any, nowMs: number) {
   }
 }
 
+const validateImage = (img: HTMLImageElement): boolean => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 50; 
+  canvas.height = 50;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return true;
+  ctx.drawImage(img, 0, 0, 50, 50);
+  const data = ctx.getImageData(0, 0, 50, 50).data;
+  
+  let rSum = 0, gSum = 0, bSum = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    rSum += data[i];
+    gSum += data[i+1];
+    bSum += data[i+2];
+  }
+  const count = data.length / 4;
+  const rAvg = rSum / count;
+  const gAvg = gSum / count;
+  const bAvg = bSum / count;
+  
+  let variance = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    variance += Math.pow(data[i] - rAvg, 2) + Math.pow(data[i+1] - gAvg, 2) + Math.pow(data[i+2] - bAvg, 2);
+  }
+  variance = variance / count;
+  
+  // Reject if too dark (brightness < 15) or too flat/blank (variance < 60)
+  const brightness = (rAvg * 0.299 + gAvg * 0.587 + bAvg * 0.114);
+  if (brightness < 15 || variance < 60) return false;
+  
+  return true;
+};
+
+// ── WATERMARK HELPER ──
+const addWatermark = async (file: File, orderId: string): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      // Smart Client-Side Check: Judge the picture right here
+      if (!validateImage(img)) {
+         return reject(new Error('PHOTO_REJECTED'));
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve(file);
+      
+      ctx.drawImage(img, 0, 0);
+      
+      // Add watermark background
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      const stripHeight = Math.max(100, img.height * 0.15);
+      ctx.fillRect(0, img.height - stripHeight, img.width, stripHeight);
+      
+      // Add text
+      ctx.fillStyle = '#ffffff';
+      const fontSize1 = Math.max(24, Math.floor(img.width * 0.04));
+      const fontSize2 = Math.max(18, Math.floor(img.width * 0.03));
+      
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-MY', { day: '2-digit', month: 'short', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' });
+      
+      ctx.font = `bold ${fontSize1}px sans-serif`;
+      ctx.fillText(`ID: #${orderId.substring(0,8).toUpperCase()}`, 30, img.height - (stripHeight / 2) - 10);
+      
+      ctx.font = `500 ${fontSize2}px sans-serif`;
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillText(`${dateStr} • ${timeStr}`, 30, img.height - (stripHeight / 2) + 25);
+      
+      canvas.toBlob((blob) => {
+        if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+        else resolve(file);
+      }, 'image/jpeg', 0.85);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+};
+
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[21px] font-bold text-slate-900 tracking-tight ${className}`}>{children}</h2>
@@ -332,6 +413,17 @@ export default function MissionControl() {
     : '';
   const navUrl = `https://maps.google.com/maps?q=${encodeURIComponent(navTarget + ', UniKL MIIT, Kuala Lumpur')}`;
 
+  const isErrand = activeMission?.type?.toUpperCase() === 'ERRANDS';
+  const isParcel = activeMission?.type?.toUpperCase() === 'PARCELS';
+  const tintBg = isErrand ? 'bg-rose-50' : (isParcel ? 'bg-cyan-50' : 'bg-slate-50');
+  const tintBorder = isErrand ? 'border-rose-200' : (isParcel ? 'border-cyan-200' : 'border-slate-200');
+  const tintText = isErrand ? 'text-rose-950' : (isParcel ? 'text-cyan-950' : 'text-slate-900');
+  const typeLabel = isErrand ? 'Peer-to-Peer Drop' : (isParcel ? 'Parcel Collection' : 'Marketplace Delivery');
+
+  const buttonPastel = isErrand 
+    ? 'bg-rose-100 text-rose-800 hover:bg-rose-200 border-rose-200' 
+    : (isParcel ? 'bg-cyan-100 text-cyan-800 hover:bg-cyan-200 border-cyan-200' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border-slate-200');
+
   return (
     <main className="min-h-screen bg-[#FDFDFD] font-sans antialiased text-slate-900 selection:bg-slate-100 relative overflow-hidden flex flex-col pb-32">
 
@@ -373,134 +465,102 @@ export default function MissionControl() {
                 key="active" 
                 initial={{ opacity: 0, y: 30 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                className="bg-white rounded-[24px] border border-slate-100 shadow-sm relative overflow-hidden"
+                className="bg-white rounded-t-[32px] shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col"
               >
-                {/* STATUS ACCENT LINE */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-slate-900/10" />
-
-                {/* ── CARD HEADER ── */}
-                <div className="px-6 pt-7 pb-4 flex items-start justify-between border-b border-slate-50">
+                {/* ── HEADER ── */}
+                <div className={`px-6 pt-7 pb-5 flex items-start justify-between border-b ${tintBorder} ${tintBg}`}>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Active Dispatch</p>
-                    <p className="text-[13px] font-bold text-slate-900 tracking-tight">#{activeMission.id.substring(0,8).toUpperCase()}</p>
+                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${tintText} opacity-70`}>{typeLabel}</p>
+                    <p className={`text-[18px] font-black tracking-tight ${tintText}`}>#{activeMission.id.substring(0,8).toUpperCase()}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
                     {/* TIMER */}
-                    <div className={`flex items-center gap-1 ${timerColor(elapsedSeconds)}`}>
-                      <Clock size={12} strokeWidth={2.5} />
-                      <span className="text-[12px] font-black tabular-nums tracking-widest">{fmtElapsed(elapsedSeconds)}</span>
-                    </div>
-                    {/* STATUS BADGE */}
-                    <div className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border bg-slate-50 text-slate-600 border-slate-100">
-                      {activeMission.status === 'PICKED_UP' ? 'Secured' : activeMission.status.replace(/_/g, ' ')}
+                    <div className={`flex items-center gap-1.5 px-3 py-1 bg-white rounded-full shadow-sm ${timerColor(elapsedSeconds)}`}>
+                       <Clock size={12} strokeWidth={2.5} />
+                       <span className="text-[12px] font-black tabular-nums tracking-widest">{fmtElapsed(elapsedSeconds)}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* ── TELEMETRY STRIP ── */}
                 {locationError && (
-                  <div className="mx-6 mt-4 mb-2 bg-slate-50 text-slate-600 px-4 py-2.5 rounded-xl text-[11px] font-bold text-center border border-slate-100 flex items-center justify-center gap-1.5">
-                    <AlertCircle size={14} /> Turn on GPS to track distance
+                  <div className="mx-6 mt-4 mb-2 bg-red-50 text-red-600 px-4 py-3 rounded-2xl text-[12px] font-bold text-center flex items-center justify-center gap-2">
+                    <AlertCircle size={16} /> Turn on GPS to track distance
                   </div>
                 )}
-                <div className="mx-6 mt-4 px-4 py-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MapPin size={14} className="text-[#94a3b8]" />
-                    <span className="text-[12px] font-bold text-slate-900">
-                      {displayDist !== null ? `~${fmtDist(displayDist)} away` : 'Locating...'}
-                    </span>
-                    <span className="text-[10px] text-[#94a3b8] font-medium">
-                      {isPickedUp ? 'to Drop-off' : 'to Pickup'}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => window.open(navUrl, '_blank')}
-                    className="flex items-center gap-1.5 text-[11px] font-black text-slate-900 uppercase tracking-widest hover:text-slate-700 active:scale-95 transition-all"
-                  >
-                    <Navigation size={12} /> Nav
-                  </button>
-                </div>
 
-                {/* ── ROUTE NODES ── */}
-                <div className="px-6 py-5 space-y-0">
-                  {/* PICKUP NODE */}
-                  <div className={`flex items-start gap-3 p-4 rounded-xl transition-all ${
-                    isPickedUp ? 'opacity-40' : 'bg-slate-50 border border-slate-100'
-                  }`}>
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 transition-all ${
-                      activeMission.status === 'READY_FOR_PICKUP' ? 'bg-slate-900 text-white border-slate-900 shadow-sm' :
-                      isPickedUp ? 'bg-slate-100 text-[#94a3b8] border-slate-200' :
-                      'bg-white text-[#94a3b8] border-slate-200'
-                    }`}>
-                      {isPickedUp ? <Check size={14} strokeWidth={3} /> : <Navigation size={14} />}
-                    </div>
-                    <div className="flex-1 min-w-0 pt-0.5">
-                      <p className="text-[12px] font-black text-slate-900 tracking-tight">{activeMission.seller_name || 'Merchant'}</p>
-                      {activeMission.pickup_location && (
-                        <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5 leading-snug">{activeMission.pickup_location}</p>
+                {/* ── TASK LIST (#1, #2) ── */}
+                <div className="px-6 py-6 space-y-4">
+                   <p className="text-[11px] font-black uppercase tracking-widest text-slate-300">Mission Tasks</p>
+                   
+                   {/* TASK 1: PICKUP */}
+                   <div className={`flex flex-col gap-3 p-5 rounded-[24px] transition-all border ${!isPickedUp ? `${tintBg} ${tintBorder} shadow-sm` : 'bg-slate-50 border-transparent opacity-60'}`}>
+                      <div className="flex justify-between items-start">
+                         <div className="flex gap-4">
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[14px] shrink-0 ${!isPickedUp ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-200 text-slate-400'}`}>
+                              {isPickedUp ? <Check size={14} strokeWidth={3} /> : '1'}
+                            </div>
+                            <div className="pt-0.5 pr-2">
+                               <p className="text-[15px] font-bold text-slate-900 leading-tight">Head to Pickup</p>
+                               <p className="text-[13px] font-medium text-slate-600 mt-1 leading-snug">{activeMission.pickup_location || activeMission.seller_name || 'Merchant'}</p>
+                            </div>
+                         </div>
+                         {!isPickedUp && (
+                           <button onClick={() => window.open(navUrl, '_blank')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-slate-900 shadow-sm active:scale-95 transition-all shrink-0">
+                              <Navigation size={16} />
+                           </button>
+                         )}
+                      </div>
+                      
+                      {!isPickedUp && (
+                         <div className="mt-2">
+                           {activeMission.status === 'PREPARING' ? (
+                             <div className="w-full h-12 bg-white/60 text-slate-500 rounded-[16px] font-bold text-[13px] flex items-center justify-center border border-white">
+                               Merchant is preparing...
+                             </div>
+                           ) : (
+                             <button onClick={() => setProofMode('PICKUP')} className={`w-full h-12 border rounded-[16px] font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm ${buttonPastel}`}>
+                               <Check size={16} strokeWidth={3} /> Confirm Pickup
+                             </button>
+                           )}
+                         </div>
                       )}
-                      <p className={`text-[11px] font-bold mt-1.5 ${
-                        activeMission.status === 'READY_FOR_PICKUP' ? 'text-slate-900' : 'text-[#94a3b8]'
-                      }`}>
-                        {isPickedUp ? 'Item collected' :
-                         activeMission.status === 'READY_FOR_PICKUP' ? 'Ready for collection' :
-                         `Collect: ${activeMission.title || 'package'}`}
-                      </p>
-                    </div>
-                  </div>
+                   </div>
 
-                  {/* CONNECTOR LINE */}
-                  <div className="ml-8 h-4 border-l-[1.5px] border-dashed border-slate-200" />
-
-                  {/* DROP-OFF NODE */}
-                  <div className={`flex items-start gap-3 p-4 rounded-xl transition-all ${
-                    isPickedUp ? 'bg-cyan-50/50 border border-cyan-100/50 shadow-sm' : 'opacity-40 border border-transparent'
-                  }`}>
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 transition-all ${
-                      isPickedUp ? 'bg-slate-900 shadow-sm' : 'bg-slate-300'
-                    }`}>
-                      <MapPin size={14} strokeWidth={2.5} />
-                    </div>
-                    <div className="flex-1 min-w-0 pt-0.5">
-                      <p className="text-[12px] font-black text-slate-900 tracking-tight">{activeMission.drop_off_location || 'Drop-off'}</p>
-                      {(activeMission.floorLevel || activeMission.roomNumber) && (
-                        <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">
-                          {activeMission.floorLevel ? `Lvl ${activeMission.floorLevel}` : ''}
-                          {activeMission.floorLevel && activeMission.roomNumber ? ' · ' : ''}
-                          {activeMission.roomNumber ? `Rm ${activeMission.roomNumber}` : ''}
-                        </p>
+                   {/* TASK 2: DELIVERY */}
+                   <div className={`flex flex-col gap-3 p-5 rounded-[24px] transition-all border ${isPickedUp ? `${tintBg} ${tintBorder} shadow-sm` : 'bg-white border-slate-100 opacity-40'}`}>
+                      <div className="flex justify-between items-start">
+                         <div className="flex gap-4">
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[14px] shrink-0 ${isPickedUp ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-50 text-slate-300 border border-slate-200'}`}>
+                              2
+                            </div>
+                            <div className="pt-0.5 pr-2">
+                               <p className="text-[15px] font-bold text-slate-900 leading-tight">Deliver to Buyer</p>
+                               <p className="text-[13px] font-medium text-slate-600 mt-1 leading-snug">{activeMission.drop_off_location || 'Drop-off Zone'}</p>
+                               <p className="text-[12px] font-bold text-slate-400 mt-2">Recipient: <span className="text-slate-900">{activeMission.customer_name || activeMission.buyer_name || 'Student'}</span></p>
+                            </div>
+                         </div>
+                         {isPickedUp && (
+                           <button onClick={() => window.open(navUrl, '_blank')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-slate-900 shadow-sm active:scale-95 transition-all shrink-0">
+                              <Navigation size={16} />
+                           </button>
+                         )}
+                      </div>
+                      
+                      {isPickedUp && (
+                         <div className="mt-2">
+                           <button onClick={() => setProofMode('DELIVERY')} className={`w-full h-12 border rounded-[16px] font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm ${buttonPastel}`}>
+                             <Zap size={16} strokeWidth={2.5} /> Complete Delivery
+                           </button>
+                         </div>
                       )}
-                      <p className="text-[11px] font-bold text-[#94a3b8] mt-1.5">
-                        Deliver to: <span className="text-slate-900">{activeMission.customer_name || activeMission.buyer_name || 'Student'}</span>
-                      </p>
-                    </div>
-                  </div>
+                   </div>
                 </div>
 
-                {/* ── ACTION BUTTONS ── */}
-                <div className="px-6 pb-4 flex gap-3">
-                  <button
-                    onClick={() => window.open(navUrl, '_blank')}
-                    className="flex-1 h-12 bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 focus:ring-4 focus:ring-slate-900/5 rounded-xl font-bold text-[12px] flex items-center justify-center gap-1.5 active:scale-95 transition-all outline-none"
-                  >
-                    <Navigation size={14} /> Navigate
-                  </button>
-                  {activeMission.status === 'PREPARING' ? (
-                    <button disabled className="flex-1 h-12 bg-slate-50 text-slate-400 border border-slate-100 rounded-xl font-bold text-[12px]">Preparing...</button>
-                  ) : activeMission.status === 'READY_FOR_PICKUP' ? (
-                    <button onClick={() => setProofMode('PICKUP')} className="flex-[1.5] h-12 bg-slate-900 text-white hover:bg-slate-800 focus:ring-4 focus:ring-slate-900/10 rounded-xl font-bold text-[12px] flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md outline-none">
-                      <Check size={14} strokeWidth={3} /> Confirm Pickup
-                    </button>
-                  ) : (
-                    <button onClick={() => setProofMode('DELIVERY')} className="flex-[1.5] h-12 bg-slate-900 text-white hover:bg-slate-800 focus:ring-4 focus:ring-slate-900/10 rounded-xl font-bold text-[12px] flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-md outline-none">
-                      <Zap size={14} strokeWidth={2.5} /> Deliver Item
-                    </button>
-                  )}
-                </div>
-                {/* OPTIONS BUTTON */}
+                {/* MORE OPTIONS */}
                 <button 
                   onClick={() => { setOptionsDrawerOpen(true); setReportStep(false); }}
-                  className="w-full pb-5 text-[10px] font-black text-slate-300 hover:text-slate-500 uppercase tracking-widest active:scale-95 transition-all text-center"
+                  className="w-full pb-6 pt-2 text-[11px] font-black text-slate-300 hover:text-slate-500 uppercase tracking-widest active:scale-95 transition-all text-center"
                 >
                   More Options
                 </button>
@@ -704,26 +764,56 @@ export default function MissionControl() {
 
       <AnimatePresence>{proofMode && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-1000 bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-            <motion.div initial={{ y: 50, scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 50, scale: 0.95 }} className="bg-white w-full max-w-sm rounded-[24px] p-8 space-y-8 shadow-xl border border-slate-100">
+            <motion.div initial={{ y: 50, scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 50, scale: 0.95 }} className="bg-white w-full max-w-sm rounded-[32px] p-8 space-y-8 shadow-xl border border-slate-100">
                <div className="text-center space-y-2">
-                 <div className="w-16 h-16 bg-slate-50 rounded-2xl mx-auto flex items-center justify-center text-slate-900 mb-4 border border-slate-100 shadow-sm"><Camera size={28} strokeWidth={2} /></div>
-                 <h3 className="text-[18px] font-black tracking-tight text-slate-900">{proofMode === 'PICKUP' ? 'Photo Proof of Pickup' : 'Photo Proof of Delivery'}</h3>
-                 <p className="text-[12px] font-medium text-[#94a3b8] px-4 leading-relaxed">{proofMode === 'PICKUP' ? 'Take a clear photo of the items at the pickup point.' : 'Take a clear photo of the items at the drop-off point.'}</p>
+                 <div className="w-16 h-16 bg-slate-50 rounded-[20px] mx-auto flex items-center justify-center text-slate-900 mb-4 border border-slate-100 shadow-sm"><Camera size={28} strokeWidth={2} /></div>
+                 <h3 className="text-[20px] font-black tracking-tight text-slate-900">{proofMode === 'PICKUP' ? 'Photo Proof of Pickup' : 'Photo Proof of Delivery'}</h3>
+                 <p className="text-[13px] font-medium text-[#94a3b8] px-4 leading-relaxed">{proofMode === 'PICKUP' ? 'Take a clear photo of the items at the pickup point.' : 'Take a clear photo of the items at the drop-off point.'}</p>
                </div>
                <div className="space-y-5">
-                 <input type="file" accept="image/*" capture="environment" id="pod-capture" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) { setPodPhoto(file); setPodPreview(URL.createObjectURL(file)); } }} />
+                 <input 
+                    type="file" 
+                    accept="image/*" 
+                    capture="environment" 
+                    id="pod-capture" 
+                    className="hidden" 
+                    onChange={async (e) => { 
+                       const file = e.target.files?.[0]; 
+                       if (file) { 
+                          setIsProcessing(true);
+                          try {
+                             const watermarkedFile = await addWatermark(file, activeMission?.id || 'TEST');
+                             setPodPhoto(watermarkedFile); 
+                             setPodPreview(URL.createObjectURL(watermarkedFile)); 
+                          } catch (err: any) {
+                             if (err.message === 'PHOTO_REJECTED') {
+                                setShowError("Photo rejected: Please take a clearer picture of the item.");
+                                setTimeout(() => setShowError(null), 4000);
+                             }
+                          }
+                          setIsProcessing(false);
+                       } 
+                    }} 
+                 />
                  {podPreview ? (
-                    <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 group shadow-sm">
+                    <div className="relative aspect-video rounded-[20px] overflow-hidden border border-slate-200 group shadow-sm">
                       <img src={podPreview} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <label htmlFor="pod-capture" className="bg-white/90 text-slate-900 px-4 py-2 rounded-xl text-[12px] font-bold cursor-pointer hover:bg-white shadow-sm">
+                           Retake Photo
+                        </label>
+                      </div>
                       <button onClick={() => { setPodPhoto(null); setPodPreview(null); }} className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-md text-slate-700 hover:text-red-500 rounded-full flex items-center justify-center shadow-sm transition-colors"><X size={16}/></button>
                     </div>
                  ) : (
-                    <label htmlFor="pod-capture" className="w-full h-[140px] border-2 border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50 focus-within:ring-4 focus-within:ring-slate-900/5 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all outline-none">
-                      <Camera size={24} className="text-[#94a3b8] group-hover:text-slate-700 transition-colors" />
-                      <span className="text-[13px] font-bold text-[#94a3b8] group-hover:text-slate-700 transition-colors">Tap to take photo</span>
+                    <label htmlFor="pod-capture" className="w-full h-[160px] border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 focus-within:ring-4 focus-within:ring-slate-900/5 rounded-[24px] flex flex-col items-center justify-center gap-3 cursor-pointer transition-all outline-none">
+                      <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center">
+                         <Camera size={20} className="text-slate-400" />
+                      </div>
+                      <span className="text-[13px] font-bold text-slate-500">Tap to take photo</span>
                     </label>
                  )}
-                 <button disabled={!podPhoto || isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className="w-full h-14 bg-slate-900 hover:bg-slate-800 focus:ring-4 focus:ring-slate-900/10 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 disabled:opacity-30 transition-all shadow-md active:scale-95 outline-none">
+                 <button disabled={!podPhoto || isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className={`w-full h-14 border rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-sm active:scale-95 outline-none ${activeMission ? (activeMission.type?.toUpperCase() === 'ERRANDS' ? 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200' : (activeMission.type?.toUpperCase() === 'PARCELS' ? 'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200' : 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200')) : 'bg-slate-900 text-white'}`}>
                    {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={18} strokeWidth={2.5} />}
                    {proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Complete Delivery'}
                  </button>
