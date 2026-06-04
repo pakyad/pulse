@@ -11,33 +11,15 @@ import BackButton from '@/components/shared/BackButton';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Campus Drop-Off Locations ──
-const CAMPUS_HUBS: Record<string, any[]> = {
-  'MIIT': [
-    { id: 'k',        label: 'Block K',    sub: 'Main Lobby',       zone: 'campus' },
-    { id: 'n',        label: 'Block N',    sub: 'Ground Floor',     zone: 'campus' },
-    { id: 'lib',      label: 'Library',    sub: 'Level 1 entrance', zone: 'campus' },
-    { id: 'hostel_a', label: 'Kolej MARA', sub: 'Outside campus',   zone: 'off_campus' },
-  ],
-  'UBIS': [
-    { id: 'ubis_l', label: 'UBIS Lobby', sub: 'Main Entrance', zone: 'campus' },
-    { id: 'ubis_c', label: 'UBIS Cafe',  sub: 'Level 1',       zone: 'campus' },
-  ],
-  'BMI': [
-    { id: 'bmi_m', label: 'BMI Main',   sub: 'Security Post', zone: 'campus' },
-    { id: 'bmi_h', label: 'BMI Hostel', sub: 'Block B',       zone: 'off_campus' },
-  ],
-};
+import { CAMPUS_NODES, LocationNode, getLocationBadge } from '@/lib/core/locations';
 
 const FPX_BANKS = [
-  { id: 'maybank', label: 'Maybank2u' },
-  { id: 'cimb',    label: 'CIMB Clicks' },
-  { id: 'rhb',     label: 'RHB Now' },
-  { id: 'hlb',     label: 'Hong Leong Connect' },
-  { id: 'pbb',     label: 'Public Bank' },
-  { id: 'ambank',  label: 'AmOnline' },
-  { id: 'bsn',     label: 'BSN' },
-  { id: 'affin',   label: 'Affin Online' },
+  { id: 'maybank', label: 'Maybank2u', short: 'MB', bg: 'bg-[#FFCC00]', text: 'text-black' },
+  { id: 'cimb',    label: 'CIMB Clicks', short: 'CB', bg: 'bg-[#7E1F2A]', text: 'text-white' },
+  { id: 'rhb',     label: 'RHB Now', short: 'RH', bg: 'bg-[#0067B1]', text: 'text-white' },
+  { id: 'hlb',     label: 'Hong Leong', short: 'HL', bg: 'bg-[#E3000F]', text: 'text-white' },
+  { id: 'pbb',     label: 'Public Bank', short: 'PB', bg: 'bg-[#E0121D]', text: 'text-white' },
+  { id: 'ambank',  label: 'AmOnline', short: 'AM', bg: 'bg-[#ED1A3B]', text: 'text-white' },
 ];
 
 type PayStatus = 'idle' | 'processing' | 'done';
@@ -53,9 +35,11 @@ export default function CheckoutPage() {
   // Step 1
   const [choice,   setChoice]   = useState<'SELF_COLLECT' | 'RUNNER' | null>(null);
   const [location, setLocation] = useState('');
+  const [roomNumber, setRoomNumber] = useState('');
   const [qty,      setQty]      = useState(1);
 
-  // Step 2 — FPX
+  // Step 2 — Payment
+  const [paymentMethod, setPaymentMethod] = useState<'FPX' | 'TNG'>('FPX');
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [payStatus,    setPayStatus]    = useState<PayStatus>('idle');
 
@@ -68,8 +52,7 @@ export default function CheckoutPage() {
         if (snap.exists()) {
           const data = snap.data();
           setItem({ id: snap.id, ...data });
-          const hubs = CAMPUS_HUBS[data.campus_id || 'MIIT'] || CAMPUS_HUBS['MIIT'];
-          setLocation(hubs[0].id);
+          setLocation(CAMPUS_NODES[0].token);
           // 🏛️ Pulse Reset: If item is sold out, we shouldn't even be here
           if (data.stock_count !== undefined && data.stock_count !== null && data.stock_count <= 0) {
             router.push(`/marketplace/${id}`);
@@ -86,18 +69,18 @@ export default function CheckoutPage() {
   }, [id, router]);
 
   // ── Derived ──
-  const hubs         = item ? (CAMPUS_HUBS[item.campus_id || 'MIIT'] || CAMPUS_HUBS['MIIT']) : [];
-  const selectedSpot = hubs.find((s: any) => s.id === location) || hubs[0];
-  const runnerFee    = selectedSpot?.zone === 'campus' ? 3.50 : 5.00;
+  const selectedNode = CAMPUS_NODES.find(n => n.token === location) || CAMPUS_NODES[0];
+  const isPremium    = selectedNode.tier === 'PREMIUM';
+  const runnerFee    = selectedNode.fee;
   const itemPrice    = Number(item?.price) || 0;
   const total        = (itemPrice * qty) + (choice === 'RUNNER' ? runnerFee : 0);
 
-  const canProceedStep1 = !!choice && (choice === 'SELF_COLLECT' || !!location);
-  const canPay          = !!selectedBank && payStatus === 'idle' && !errorState;
+  const canProceedStep1 = !!choice && (choice === 'SELF_COLLECT' || (!!location && (!isPremium || !!roomNumber)));
+  const canPay          = (paymentMethod === 'TNG' || (paymentMethod === 'FPX' && !!selectedBank)) && payStatus === 'idle' && !errorState;
 
-  // ── FPX Pay ──
+  // ── Pay ──
   const handlePay = async () => {
-    if (!auth.currentUser || !selectedBank) return;
+    if (!auth.currentUser || !canPay) return;
 
     // 🏛️ Pre-Payment Guard
     if (item.stock_count !== undefined && item.stock_count !== null && item.stock_count < qty) {
@@ -127,7 +110,9 @@ export default function CheckoutPage() {
 
         // Sub-order
         const subOrderRef = doc(collection(db, 'orders'));
-        const dropOffStr = choice === 'RUNNER' ? `${selectedSpot.label} — ${selectedSpot.sub}` : null;
+        const dropOffStr = choice === 'RUNNER' 
+          ? (isPremium ? `RAH-DOOR-${roomNumber}` : selectedNode.token) 
+          : (item.handover_node || 'MIIT-G-LOBBY');
         
         // 🏛️ Runner-First Protocol
         const initialStatus = choice === 'RUNNER' ? 'PENDING_RUNNER' : 'PENDING_VENDOR';
@@ -337,35 +322,66 @@ export default function CheckoutPage() {
 
               <div className="space-y-3">
                 {/* Self Collect */}
-                <button
-                  onClick={() => setChoice('SELF_COLLECT')}
-                  className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
-                    choice === 'SELF_COLLECT'
-                      ? 'bg-slate-50 border-slate-400'
-                      : 'bg-white border-slate-100 hover:border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-[#94a3b8]">
-                      <Package size={18} />
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setChoice(choice === 'SELF_COLLECT' ? null : 'SELF_COLLECT')}
+                    className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                      choice === 'SELF_COLLECT'
+                        ? 'bg-slate-50 border-slate-400'
+                        : 'bg-white border-slate-100 hover:border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-[#94a3b8]">
+                        <Package size={18} />
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-bold text-slate-900 tracking-tight">Self Collect</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet the seller on campus · Free</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[13px] font-bold text-slate-900 tracking-tight">Self Collect</p>
-                      <p className="text-[11px] font-medium text-[#94a3b8]">Meet the seller on campus · Free</p>
-                    </div>
-                  </div>
-                  {choice === 'SELF_COLLECT' && (
-                    <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                      <Check size={12} strokeWidth={3} className="text-slate-900" />
-                    </div>
-                  )}
-                </button>
+                    {choice === 'SELF_COLLECT' && (
+                      <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                        <Check size={12} strokeWidth={3} className="text-slate-900" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Self Collect Details */}
+                  <AnimatePresence>
+                    {choice === 'SELF_COLLECT' && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }} className="overflow-hidden"
+                      >
+                        <div className="pt-2 px-1">
+                           <p className="text-[11px] font-bold text-slate-900 mb-1">Meetup Location</p>
+                           <p className="text-[11px] font-medium text-[#94a3b8]">The seller has locked in this exact meetup point.</p>
+                           <div className="mt-2 p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center gap-2">
+                              {(() => {
+                                 const token = item?.handover_node || 'MIIT-G-LOBBY';
+                                 const node = CAMPUS_NODES.find(n => n.token === token);
+                                 return node ? (
+                                    <>
+                                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${getLocationBadge(node.zone)}`}>{node.zone}</span>
+                                      <span className="text-[13px] font-bold text-slate-900">{node.label}</span>
+                                    </>
+                                 ) : (
+                                    <span className="text-[13px] font-bold text-slate-900">{token}</span>
+                                 );
+                              })()}
+                           </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
                 {/* Pulse Runner */}
                 {item?.fulfillment_mode !== 'MEETUP_ONLY' && (
                   <div className="space-y-2">
                     <button
-                    onClick={() => setChoice('RUNNER')}
+                    onClick={() => setChoice(choice === 'RUNNER' ? null : 'RUNNER')}
                     className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
                       choice === 'RUNNER'
                         ? 'bg-slate-50 border-slate-400'
@@ -396,25 +412,49 @@ export default function CheckoutPage() {
                       >
                         <div className="space-y-2 pt-2">
                           <p className="text-[11px] font-medium text-[#94a3b8] px-1">Select your drop-off point</p>
-                          {hubs.map((hub: any) => (
-                            <button
-                              key={hub.id}
-                              onClick={() => setLocation(hub.id)}
-                              className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
-                                location === hub.id
-                                  ? 'bg-slate-50 border-slate-300'
-                                  : 'bg-white border-slate-100 hover:border-slate-200'
-                              }`}
-                            >
-                              <div>
-                                <p className="text-[13px] font-bold text-slate-900">{hub.label}</p>
-                                <p className="text-[11px] font-medium text-[#94a3b8]">{hub.sub}</p>
-                              </div>
-                              <div className="text-right shrink-0">
-                                <p className="text-[13px] font-bold text-slate-900">RM {hub.zone === 'campus' ? '3.50' : '5.00'}</p>
-                                <p className="text-[10px] font-medium text-[#94a3b8]">{hub.zone === 'campus' ? 'on campus' : 'off campus'}</p>
-                              </div>
-                            </button>
+                          {CAMPUS_NODES.map((node) => (
+                            <div key={node.token} className="space-y-2">
+                              <button
+                                onClick={() => { setLocation(node.token); setRoomNumber(''); }}
+                                className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                                  location === node.token
+                                    ? 'bg-slate-50 border-slate-300'
+                                    : 'bg-white border-slate-100 hover:border-slate-200'
+                                }`}
+                              >
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${getLocationBadge(node.zone)}`}>
+                                      {node.zone}
+                                    </span>
+                                    <p className="text-[13px] font-bold text-slate-900">{node.label}</p>
+                                  </div>
+                                  <p className="text-[11px] font-medium text-[#94a3b8]">{node.tier === 'PREMIUM' ? 'Requires resident access card' : 'Standard drop-off point'}</p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <p className="text-[13px] font-bold text-slate-900">RM {node.fee.toFixed(2)}</p>
+                                  <p className="text-[10px] font-medium text-[#94a3b8] uppercase tracking-widest">{node.tier}</p>
+                                </div>
+                              </button>
+                              
+                              {/* Premium Room Entry Box */}
+                              {location === node.token && node.tier === 'PREMIUM' && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                                  className="px-4 py-3 bg-indigo-50/50 border border-indigo-100 rounded-xl"
+                                >
+                                  <label className="text-[11px] font-bold text-indigo-900 mb-1 block">Room / Unit Number</label>
+                                  <input 
+                                    type="text"
+                                    placeholder="e.g. 1204"
+                                    value={roomNumber}
+                                    onChange={(e) => setRoomNumber(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ''))}
+                                    maxLength={8}
+                                    className="w-full h-10 px-3 rounded-lg border border-indigo-200 bg-white text-[13px] font-bold text-slate-900 focus:outline-none focus:border-indigo-400 placeholder:text-indigo-200"
+                                  />
+                                </motion.div>
+                              )}
+                            </div>
                           ))}
                         </div>
                       </motion.div>
@@ -454,8 +494,7 @@ export default function CheckoutPage() {
                 <p className="text-[11px] font-medium text-[#94a3b8]">Select your payment method below.</p>
               </div>
 
-              {/* ── FPX card ── */}
-              <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden">
+              <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden cursor-pointer" onClick={() => setPaymentMethod('FPX')}>
                 {/* Method header */}
                 <div className="flex items-center gap-4 px-4 py-4 border-b border-slate-100 bg-white">
                   <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
@@ -465,50 +504,65 @@ export default function CheckoutPage() {
                     <p className="text-[13px] font-bold text-slate-900">FPX Online Banking</p>
                     <p className="text-[11px] font-medium text-[#94a3b8]">Pay directly from your bank</p>
                   </div>
-                  {/* Radio — always selected */}
                   <div className="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0">
-                    <div className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+                    {paymentMethod === 'FPX' && <div className="w-2.5 h-2.5 rounded-full bg-slate-900" />}
                   </div>
                 </div>
 
-                {/* Bank list */}
-                <div className="divide-y divide-slate-100">
-                  {FPX_BANKS.map(bank => (
-                    <button
-                      key={bank.id}
-                      onClick={() => setSelectedBank(bank.id)}
-                      className={`w-full flex items-center justify-between px-4 py-3.5 transition-all active:scale-[0.99] ${
-                        selectedBank === bank.id ? 'bg-white' : 'hover:bg-white/70'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center text-[10px] font-black tracking-wider shrink-0 transition-all ${
-                          selectedBank === bank.id
-                            ? 'bg-slate-100 border-slate-200 text-slate-900'
-                            : 'bg-white border-slate-100 text-[#94a3b8]'
-                        }`}>
-                          {bank.label.slice(0, 2).toUpperCase()}
-                        </div>
-                        <span className={`text-[13px] font-bold transition-colors ${
-                          selectedBank === bank.id ? 'text-slate-900' : 'text-[#94a3b8]'
-                        }`}>
-                          {bank.label}
-                        </span>
+                {/* Bank Grid */}
+                <AnimatePresence>
+                  {paymentMethod === 'FPX' && (
+                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+                      <div className="p-3 grid grid-cols-2 gap-2.5 bg-slate-50 border-t border-slate-100">
+                        {FPX_BANKS.map(bank => (
+                          <button
+                            key={bank.id}
+                            onClick={(e) => { e.stopPropagation(); setSelectedBank(bank.id); }}
+                            className={`relative flex flex-col items-center justify-center p-3 rounded-xl border transition-all active:scale-95 ${
+                              selectedBank === bank.id 
+                                ? 'bg-white border-slate-900 shadow-[0_0_0_1px_#0f172a]' 
+                                : 'bg-white border-slate-100 shadow-sm hover:border-slate-200 hover:shadow-md'
+                            }`}
+                          >
+                            {/* Checkmark icon if selected */}
+                            {selectedBank === bank.id && (
+                              <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-sm">
+                                <Check size={10} strokeWidth={3} />
+                              </div>
+                            )}
+                            
+                            {/* Bank Logo / Icon */}
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-[12px] font-black tracking-widest mb-2 shadow-inner border border-black/5 ${bank.bg} ${bank.text}`}>
+                              {bank.short}
+                            </div>
+                            
+                            <span className={`text-[11px] font-bold text-center leading-tight ${
+                              selectedBank === bank.id ? 'text-slate-900' : 'text-slate-400'
+                            }`}>
+                              {bank.label}
+                            </span>
+                          </button>
+                        ))}
                       </div>
-                      {selectedBank === bank.id && (
-                        <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
-                          <Check size={11} strokeWidth={3} className="text-emerald-500" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              {/* Security note */}
-              <div className="flex items-center gap-1.5 justify-center">
-                <ShieldCheck size={11} className="text-slate-200" />
-                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Demo mode · No real charges</p>
+              {/* ── TNG eWallet card ── */}
+              <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden cursor-pointer" onClick={() => setPaymentMethod('TNG')}>
+                <div className="flex items-center gap-4 px-4 py-4 bg-white">
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                    <span className="text-blue-600 font-black text-[10px] tracking-wider">TNG</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[13px] font-bold text-slate-900">Touch 'n Go eWallet</p>
+                    <p className="text-[11px] font-medium text-[#94a3b8]">Seamless and instant</p>
+                  </div>
+                  <div className="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0">
+                    {paymentMethod === 'TNG' && <div className="w-2.5 h-2.5 rounded-full bg-slate-900" />}
+                  </div>
+                </div>
               </div>
 
             </motion.div>
@@ -532,7 +586,7 @@ export default function CheckoutPage() {
             disabled={!canPay}
             className="w-full h-12 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-95 disabled:opacity-20 transition-all"
           >
-            Pay RM {total.toFixed(2)} via FPX
+            Pay RM {total.toFixed(2)} via {paymentMethod}
           </button>
         )}
       </footer>

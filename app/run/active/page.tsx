@@ -15,6 +15,7 @@ import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection, query, where } 
 import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import MapErrorBoundary from '@/components/shared/MapErrorBoundary';
 import BackButton from '@/components/shared/BackButton';
+import { parseLocationToken, getLocationBadge } from '@/lib/core/locations';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -198,6 +199,11 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    const [podPreview, setPodPreview] = useState<string | null>(null);
    const [isCompleting, setIsCompleting] = useState(false);
 
+   // Parse locations
+   const pickupNode = mission?.pickup_location ? parseLocationToken(mission.pickup_location) : null;
+   const dropoffNode = mission?.drop_off_location ? parseLocationToken(mission.drop_off_location) : null;
+   const isPremiumDropoff = dropoffNode?.tier === 'PREMIUM';
+
    const { isLoaded, loadError } = useJsApiLoader({
      id: 'google-map-script',
      googleMapsApiKey: GOOGLE_MAPS_API_KEY
@@ -358,9 +364,16 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                       <motion.div key="mission" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                          <div className="flex justify-between items-start">
                             <div className="space-y-1">
-                               <h2 className="text-[20px] font-black tracking-tight leading-none text-slate-900">{step <= 2 ? mission?.from || 'Merchant Area' : mission?.to || 'Drop-off Zone'}</h2>
+                               <h2 className="text-[20px] font-black tracking-tight leading-none text-slate-900">
+                                 {step <= 2 ? (pickupNode?.label || mission?.from || 'Merchant Area') : (dropoffNode?.label || mission?.to || 'Drop-off Zone')}
+                               </h2>
                                <div className="flex items-center gap-2 mt-1.5">
                                   <p className="text-[12px] font-medium text-[#94a3b8]">{step <= 2 ? 'Pickup Point' : 'Drop-off Point'}</p>
+                                  {step > 2 && dropoffNode && (
+                                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest ${getLocationBadge(dropoffNode.zone)}`}>
+                                       {dropoffNode.zone}
+                                     </span>
+                                  )}
                                   {(step === 1 || step === 4) && distanceToTarget !== null && (
                                      <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase shadow-sm ${distanceToTarget <= 30 ? 'bg-emerald-50 border border-emerald-100 text-emerald-600' : 'bg-amber-50 border border-amber-100 text-amber-600'}`}>
                                         {Math.round(distanceToTarget)}m
@@ -381,6 +394,21 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                                <button className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 text-slate-500 flex items-center justify-center active:scale-95 transition-transform"><Phone size={16} /></button>
                              </div>
                          </div>
+
+                         {/* Premium Warning Banner */}
+                         {step > 2 && isPremiumDropoff && (
+                           <div className="bg-indigo-50 border border-indigo-100 p-3.5 rounded-xl flex items-start gap-3">
+                             <div className="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-indigo-500/20">
+                               <Lock size={16} />
+                             </div>
+                             <div className="space-y-0.5 pt-0.5">
+                               <p className="text-[12px] font-black text-indigo-950 uppercase tracking-widest leading-none">Direct-to-Door</p>
+                               <p className="text-[11px] font-semibold text-indigo-700 leading-snug">
+                                 Requires Resident Access Card coordination at Lift Core. Wait for the buyer at the lobby.
+                               </p>
+                             </div>
+                           </div>
+                         )}
 
                          {(step === 2 || step === 5) && (
                             <div className="space-y-3">

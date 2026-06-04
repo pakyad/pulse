@@ -17,6 +17,7 @@ import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 import OrderTracker from '@/components/shared/OrderTracker';
 import { VoxelPulse, VoxelRadar, VoxelBox, VoxelCheck } from '@/components/shared/VoxelStatus';
 import dynamic from 'next/dynamic';
+import { parseLocationToken, getLocationBadge } from '@/lib/core/locations';
 
 const BuyerLiveMap = dynamic(() => import('@/components/shared/BuyerLiveMap'), { ssr: false });
 
@@ -349,6 +350,8 @@ export default function LiveOrderPage() {
     ? getDistance(order.runner_location.latitude, order.runner_location.longitude, dropoffLat, dropoffLng)
     : null;
 
+  const dropOffNode = order.drop_off_location ? parseLocationToken(order.drop_off_location) : null;
+
   const distance = realDistance !== null 
     ? Math.max(0, Math.round(realDistance))
     : Math.max(0, Math.round(250 * (1 - progress)));
@@ -438,16 +441,18 @@ export default function LiveOrderPage() {
                    <span className="text-[12px] font-bold text-slate-900">{order.buyer_name || 'You'}</span>
                    <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Meet</span>
                  </div>
-                 <p className="text-[10px] font-medium text-slate-400 mt-0.5 truncate">
-                   {order.drop_off_location || 'Main Lobby'}
-                   {(order.floorLevel || order.roomNumber) && (
-                     <span className="ml-1 font-bold text-slate-600">
-                       ({order.floorLevel ? `Lvl ${order.floorLevel}` : ''}
-                       {order.floorLevel && order.roomNumber ? ', ' : ''}
-                       {order.roomNumber ? `Rm ${order.roomNumber}` : ''})
-                     </span>
+                 <div className="mt-1 flex items-center gap-1.5 truncate">
+                   {dropOffNode ? (
+                     <>
+                       <span className={`text-[8px] font-bold px-1 py-0.5 rounded uppercase tracking-wider ${getLocationBadge(dropOffNode.zone)}`}>
+                         {dropOffNode.zone}
+                       </span>
+                       <span className="text-[11px] font-bold text-slate-900">{dropOffNode.label}</span>
+                     </>
+                   ) : (
+                     <span className="text-[11px] font-medium text-slate-400">{order.drop_off_location || 'Main Lobby'}</span>
                    )}
-                 </p>
+                 </div>
                </div>
              </div>
           </div>

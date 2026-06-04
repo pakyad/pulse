@@ -14,6 +14,7 @@ import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
 import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
+import { CAMPUS_NODES, getLocationBadge } from '@/lib/core/locations';
 
 // ── DOMAIN ICONS (aligned with Marketplace page icon pattern) ──
 const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
@@ -44,6 +45,7 @@ export default function CreateListingPage() {
   const [stock, setStock] = useState('');
   const [justification, setJustification] = useState('');
   const [fulfillmentMode, setFulfillmentMode] = useState<'DELIVERY' | 'MEETUP_ONLY'>('DELIVERY');
+  const [handoverNode, setHandoverNode] = useState(CAMPUS_NODES[0].token);
 
   const [isPosting, setIsPosting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -88,13 +90,14 @@ export default function CreateListingPage() {
       // Trust-First: ALL listings go live. Auto-flag only egregious ones.
       const isAutoFlagged = priceIntel?.shouldAutoFlag === true;
       const stockCount = stock !== '' ? parseInt(stock, 10) : null;
+      const numPrice = parseFloat(price);
 
       await addDoc(collection(db, 'items'), {
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         category: selectedCategory,
         subcategory,
-        price: parseFloat(price),
+        price: numPrice,
         stock_count: stockCount,
         metadata,
         images: imageUrls,
@@ -102,6 +105,7 @@ export default function CreateListingPage() {
         seller_id: user.uid,
         seller_name: user.displayName || 'Pulse Student',
         fulfillment_mode: fulfillmentMode,
+        handover_node: handoverNode,
         // Always goes live — never blocked
         status: stockCount === 0 ? 'sold_out' : 'active',
         price_tier: priceIntel?.tier || 'COMPLIANT',
@@ -362,6 +366,27 @@ export default function CreateListingPage() {
                     <span className="text-[13px] font-bold mb-1">Strictly Meetup</span>
                     <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'MEETUP_ONLY' ? 'text-slate-300' : 'text-slate-400'}`}>You meet the buyer face-to-face</span>
                  </button>
+              </div>
+              
+              <div className="pt-2">
+                 <div className="space-y-1.5 mb-2">
+                    <label className="text-[12px] font-bold text-slate-900">Handover Node</label>
+                    <p className="text-[10px] font-medium text-slate-400 leading-tight">Where is this item located? Buyers will collect it here, or Runners will pick it up from here.</p>
+                 </div>
+                 <div className="bg-slate-50 border border-slate-100 rounded-xl p-1.5 flex flex-col max-h-[180px] overflow-y-auto no-scrollbar">
+                    {CAMPUS_NODES.map(node => (
+                       <button
+                          key={node.token}
+                          onClick={() => setHandoverNode(node.token)}
+                          className={`px-3 py-2.5 rounded-lg text-left flex items-center justify-between transition-all ${handoverNode === node.token ? 'bg-white shadow-sm border border-slate-200' : 'hover:bg-slate-100/50 border border-transparent'}`}
+                       >
+                          <div className="flex items-center gap-2">
+                             <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${getLocationBadge(node.zone)}`}>{node.zone}</span>
+                             <span className="text-[12px] font-bold text-slate-900">{node.label}</span>
+                          </div>
+                       </button>
+                    ))}
+                 </div>
               </div>
             </section>
 
