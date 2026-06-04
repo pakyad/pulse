@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { Plus } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { RadarCard, ReportRadarModal } from '@/components/pulse/RadarModule';
@@ -19,6 +19,7 @@ export default function FoundHub() {
   const [mounted, setMounted] = useState(false);
   const [items, setItems] = useState<any[]>([]);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'BOARD' | 'MY_POSTS'>('BOARD');
 
   useEffect(() => {
     setMounted(true);
@@ -49,7 +50,27 @@ export default function FoundHub() {
 
   if (!mounted) return null;
 
-  const displayRadar = items.length > 0 ? items : DEMO_RADAR;
+  const handleResolve = async (id: string) => {
+     try {
+        await updateDoc(doc(db, 'campus_radar', id), { resolved: true });
+     } catch(e) {
+        console.error('Failed to resolve', e);
+     }
+  };
+
+  const allData = items.length > 0 ? items : DEMO_RADAR;
+  const myUid = auth.currentUser?.uid || 'demo_user_1';
+  const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+
+  const campusBoard = allData.filter((i) => {
+     if (i.resolved) return false;
+     if (i.created_at?.toDate) {
+        if (Date.now() - i.created_at.toDate().getTime() > fourteenDaysMs) return false;
+     }
+     return true;
+  });
+
+  const myPosts = allData.filter((i) => i.reporter_uid === myUid);
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] text-slate-900 antialiased pb-40">
@@ -73,13 +94,41 @@ export default function FoundHub() {
         </div>
       </nav>
 
-      <div className="pt-24 px-6 space-y-10">
-        {/* ── CAMPUS RADAR ── */}
-        <section className="space-y-6">
+      <div className="pt-24 px-6 space-y-6">
+        {/* ── TABS ── */}
+        <div className="flex bg-slate-200/50 p-1 rounded-[14px]">
+           <button 
+              onClick={() => setActiveTab('BOARD')}
+              className={`flex-1 h-9 rounded-[10px] text-[13px] font-bold transition-all ${activeTab === 'BOARD' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+           >
+              Campus Board
+           </button>
+           <button 
+              onClick={() => setActiveTab('MY_POSTS')}
+              className={`flex-1 h-9 rounded-[10px] text-[13px] font-bold transition-all ${activeTab === 'MY_POSTS' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+           >
+              My Posts
+           </button>
+        </div>
 
-          {/* Stacking the cards vertically and forcing them to be full width */}
+        {/* ── LISTINGS ── */}
+        <section className="space-y-6">
           <div className="flex flex-col gap-4 [&>div]:w-full!">
-            {displayRadar.map((item: any) => <RadarCard key={item.id} item={item} />)}
+            {activeTab === 'BOARD' && (
+               campusBoard.length > 0 ? (
+                  campusBoard.map((item: any) => <RadarCard key={item.id} item={item} isMyPost={item.reporter_uid === myUid} onMarkResolved={handleResolve} />)
+               ) : (
+                  <div className="text-center py-20 text-slate-400 font-medium text-[13px]">No active posts in the last 14 days.</div>
+               )
+            )}
+            
+            {activeTab === 'MY_POSTS' && (
+               myPosts.length > 0 ? (
+                  myPosts.map((item: any) => <RadarCard key={item.id} item={item} isMyPost={true} onMarkResolved={handleResolve} />)
+               ) : (
+                  <div className="text-center py-20 text-slate-400 font-medium text-[13px]">You haven't posted anything yet.</div>
+               )
+            )}
           </div>
         </section>
       </div>

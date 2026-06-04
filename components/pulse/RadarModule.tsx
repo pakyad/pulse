@@ -125,7 +125,7 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
   );
 }
 
-export function RadarCard({ item, onMarkResolved }: { item: RadarItem; onMarkResolved?: (id: string) => void }) {
+export function RadarCard({ item, onMarkResolved, isMyPost }: { item: RadarItem; onMarkResolved?: (id: string) => void; isMyPost?: boolean }) {
   const [showContact, setShowContact] = useState(false);
   const isLost = item.type === 'LOST';
 
@@ -170,13 +170,23 @@ export function RadarCard({ item, onMarkResolved }: { item: RadarItem; onMarkRes
 
         {/* CTA Button - Sleek and professional */}
         {!item.resolved && (
-          <button
-            onClick={() => setShowContact(true)}
-            className="w-full h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-[12px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-slate-100"
-          >
-            {isLost ? <Search size={14} className="text-slate-500" /> : <CheckCircle2 size={14} className="text-slate-500" />}
-            {isLost ? 'I Have This' : 'This Is Mine'}
-          </button>
+          isMyPost ? (
+            <button
+              onClick={() => onMarkResolved?.(item.id)}
+              className="w-full h-10 rounded-xl bg-emerald-500 text-white text-[12px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-[0_3px_0_0_#059669] active:shadow-[0_0px_0_0_#059669] active:translate-y-[3px]"
+            >
+              <CheckCircle2 size={14} />
+              Mark as Resolved
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowContact(true)}
+              className="w-full h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-[12px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-slate-100"
+            >
+              {isLost ? <Search size={14} className="text-slate-500" /> : <CheckCircle2 size={14} className="text-slate-500" />}
+              {isLost ? 'I Have This' : 'This Is Mine'}
+            </button>
+          )
         )}
       </div>
 

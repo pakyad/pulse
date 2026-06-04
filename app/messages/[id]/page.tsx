@@ -114,7 +114,7 @@ export default function ChatRoomPage() {
             <BackButton />
             
             <div className="flex-1 min-w-0 flex items-center gap-3">
-               <div className="w-10 h-10 rounded-[14px] overflow-hidden bg-slate-100 shrink-0">
+               <div className="w-8 h-8 rounded-xl overflow-hidden bg-slate-100 shrink-0">
                   <img src={chatInfo?.otherAvatar} alt="Avatar" className="w-full h-full object-cover" />
                </div>
                <div className="flex-1 min-w-0">
