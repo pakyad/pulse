@@ -3,7 +3,7 @@
  * Logic: Student Life Cycle Model
  */
 
-export type CategoryID = 'HUNGER' | 'ACADEMIC' | 'SERVICES' | 'HOSTEL' | 'TECH' | 'APPAREL';
+export type CategoryID = 'HUNGER' | 'ACADEMIC' | 'HOSTEL' | 'TECH' | 'APPAREL';
 
 export interface CategoryConfig {
   id: CategoryID;
@@ -90,36 +90,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       }
     ]
   },
-  SERVICES: {
-    id: 'SERVICES',
-    label: 'Side-Quest Services',
-    subtext: 'Time, skills and labor',
-    governance: 'REGULATED',
-    ceiling: 150.00, // Trigger audit notice
-    subcategories: [
-      { label: 'Tutoring' },
-      { label: 'Creative Work' },
-      { label: 'Tech Support' },
-      { label: 'Campus Errands' },
-      { label: 'Photography' }
-    ],
-    customFields: [
-      {
-        id: 'duration_type',
-        label: 'Billing Unit',
-        type: 'select',
-        options: ['Per Hour', 'Per Session', 'Per Project'],
-        required: true
-      },
-      {
-        id: 'available_slots',
-        label: 'Availability',
-        type: 'calendar',
-        placeholder: 'Select your time slots',
-        required: true
-      }
-    ]
-  },
+
   HOSTEL: {
     id: 'HOSTEL',
     label: 'Hostel Trade',

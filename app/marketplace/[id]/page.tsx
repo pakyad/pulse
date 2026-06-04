@@ -43,17 +43,7 @@ function DomainRegistry({ item }: { item: any }) {
     if (item.metadata.year_semester) rows.push({ label: 'Year / Sem', value: item.metadata.year_semester });
     if (item.metadata.subject_code) rows.push({ label: 'Subject Code', value: item.metadata.subject_code });
   }
-  if (item.category === 'SERVICES') {
-    if (item.metadata.duration_type) rows.push({ label: 'Billing Basis', value: item.metadata.duration_type });
-    if (item.metadata.available_slots) rows.push({
-      label: 'Availability',
-      value: (
-        <span className="px-3 py-1 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
-          {item.metadata.available_slots}
-        </span>
-      )
-    });
-  }
+
   if (item.category === 'HOSTEL') {
     if (item.metadata.pickup_difficulty) {
       const isHeavy = item.metadata.pickup_difficulty.includes('Heavy');
@@ -72,6 +62,26 @@ function DomainRegistry({ item }: { item: any }) {
     if (item.metadata.specs) rows.push({ label: 'Specs', value: item.metadata.specs });
     if (item.metadata.warranty) rows.push({ label: 'Warranty', value: item.metadata.warranty });
     if (item.metadata.validity_period) rows.push({ label: 'Valid For', value: item.metadata.validity_period });
+  }
+
+  if (item.fulfillment_mode === 'MEETUP_ONLY') {
+    rows.push({
+      label: 'Fulfillment',
+      value: (
+        <span className="flex items-center gap-1.5 font-bold text-[13px] text-slate-900">
+          Strictly Meetup
+        </span>
+      )
+    });
+  } else if (item.fulfillment_mode === 'DELIVERY') {
+    rows.push({
+      label: 'Fulfillment',
+      value: (
+        <span className="flex items-center gap-1.5 font-bold text-[13px] text-slate-900">
+          Runner Delivery Available
+        </span>
+      )
+    });
   }
 
   if (rows.length === 0) return null;
@@ -196,7 +206,7 @@ export default function ItemDetailsPage() {
   const images: string[] = item.images?.length ? item.images : item.image_url ? [item.image_url] : [];
 
   const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
-    HUNGER: UtensilsCrossed, ACADEMIC: BookOpen, SERVICES: Wrench, HOSTEL: Home, TECH: Cpu, APPAREL: Shirt
+    HUNGER: UtensilsCrossed, ACADEMIC: BookOpen, HOSTEL: Home, TECH: Cpu, APPAREL: Shirt
   };
   const CategoryIcon = category ? CATEGORY_ICONS[item.category as CategoryID] : Layers;
 
@@ -445,20 +455,7 @@ export default function ItemDetailsPage() {
           </section>
         )}
 
-        {/* ── HANDSHAKE NOTICE (Services only) ── */}
-        {item.category === 'SERVICES' && (
-          <section className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm">
-              <ShieldCheck size={16} className="text-slate-900" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-[13px] font-bold text-slate-900">Handshake Protected</p>
-              <p className="text-[12px] font-medium text-[#94a3b8] leading-relaxed">
-                Payment is held securely until you confirm the service is done. Only you can close this transaction.
-              </p>
-            </div>
-          </section>
-        )}
+
 
         {/* ── SELLER CONTACT ACTION ── */}
         <section className="space-y-3 pt-4">
@@ -493,7 +490,7 @@ export default function ItemDetailsPage() {
             onClick={() => router.push(`/marketplace/${id}/checkout`)}
             className="flex-1 h-[52px] bg-blue-600 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20 shadow-md shadow-blue-600/20"
           >
-            {isSoldOut ? 'Sold Out' : item.category === 'SERVICES' ? 'Book Now' : 'Buy Now'}
+            {isSoldOut ? 'Sold Out' : 'Buy Now'}
             {!isSoldOut && <ArrowUpRight size={16} />}
           </button>
         </div>

@@ -19,7 +19,6 @@ import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governa
 const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
   HUNGER: UtensilsCrossed,
   ACADEMIC: BookOpen,
-  SERVICES: Wrench,
   HOSTEL: Home,
   TECH: Cpu,
   APPAREL: Shirt,
@@ -28,7 +27,6 @@ const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
 const CATEGORY_LABELS: Record<CategoryID, string> = {
   HUNGER: 'Food',
   ACADEMIC: 'Books',
-  SERVICES: 'Services',
   HOSTEL: 'Hostel',
   TECH: 'Tech',
   APPAREL: 'Apparel',
@@ -45,6 +43,7 @@ export default function CreateListingPage() {
   const [metadata, setMetadata] = useState<Record<string, any>>({});
   const [stock, setStock] = useState('');
   const [justification, setJustification] = useState('');
+  const [fulfillmentMode, setFulfillmentMode] = useState<'DELIVERY' | 'MEETUP_ONLY'>('DELIVERY');
 
   const [isPosting, setIsPosting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -102,6 +101,7 @@ export default function CreateListingPage() {
         image_url: imageUrls[0] || null,
         seller_id: user.uid,
         seller_name: user.displayName || 'Pulse Student',
+        fulfillment_mode: fulfillmentMode,
         // Always goes live — never blocked
         status: stockCount === 0 ? 'sold_out' : 'active',
         price_tier: priceIntel?.tier || 'COMPLIANT',
@@ -339,6 +339,30 @@ export default function CreateListingPage() {
               {stock !== '' && parseInt(stock, 10) === 0 && (
                 <p className="text-[11px] font-bold text-red-400">This listing will be marked as Sold Out immediately.</p>
               )}
+            </section>
+
+            {/* ── SECTION: DELIVERY PREFERENCE ── */}
+            <section className="space-y-4 pt-2 border-t border-slate-100">
+              <div className="space-y-0.5">
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Fulfillment Method</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">Can a campus runner deliver this, or do you prefer to meet the buyer yourself?</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                 <button 
+                   onClick={() => setFulfillmentMode('DELIVERY')}
+                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'DELIVERY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                 >
+                    <span className="text-[13px] font-bold mb-1">Runner Delivery</span>
+                    <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'DELIVERY' ? 'text-slate-300' : 'text-slate-400'}`}>Pulse runners will handle delivery</span>
+                 </button>
+                 <button 
+                   onClick={() => setFulfillmentMode('MEETUP_ONLY')}
+                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'MEETUP_ONLY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                 >
+                    <span className="text-[13px] font-bold mb-1">Strictly Meetup</span>
+                    <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'MEETUP_ONLY' ? 'text-slate-300' : 'text-slate-400'}`}>You meet the buyer face-to-face</span>
+                 </button>
+              </div>
             </section>
 
             {/* ── SECTION: SMART CATEGORY FIELDS ── */}

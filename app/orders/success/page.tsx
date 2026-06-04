@@ -64,7 +64,7 @@ function OrderSuccessPageContent() {
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl">
         <div />
         <button 
-          onClick={() => router.push('/marketplace')}
+          onClick={() => router.replace('/marketplace')}
           className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[#94a3b8] active:scale-95 transition-all"
         >
           <X size={20} />
@@ -141,13 +141,13 @@ function OrderSuccessPageContent() {
       {/* ── ACTIONS ── */}
       <div className="space-y-3 mt-auto">
         <button
-          onClick={() => trackingId ? router.push(`/orders/${trackingId}`) : router.push('/me/orders')}
+          onClick={() => trackingId ? router.replace(`/orders/${trackingId}`) : router.replace('/me/orders')}
           className="w-full h-12 bg-white border-[1.5px] border-slate-200 shadow-sm text-slate-900 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           Track My Order <ArrowRight size={16} />
         </button>
         <button
-          onClick={() => router.push('/marketplace')}
+          onClick={() => router.replace('/marketplace')}
           className="w-full h-12 border border-slate-100 text-[#94a3b8] font-bold text-[13px] tracking-tight rounded-xl active:scale-95 transition-all"
         >
           Back to Marketplace

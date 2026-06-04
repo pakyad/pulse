@@ -74,6 +74,9 @@ export default function CheckoutPage() {
           if (data.stock_count !== undefined && data.stock_count !== null && data.stock_count <= 0) {
             router.push(`/marketplace/${id}`);
           }
+          if (data.fulfillment_mode === 'MEETUP_ONLY') {
+            setChoice('SELF_COLLECT');
+          }
         }
       } finally {
         setPageLoading(false);
@@ -168,7 +171,7 @@ export default function CheckoutPage() {
 
       setPayStatus('done');
       await new Promise(r => setTimeout(r, 1600));
-      router.push(`/orders/success?id=${parentOrderId}`);
+      router.replace(`/orders/success?id=${parentOrderId}`);
     } catch (e: any) {
       console.error('[FPX Pay]', e);
       setPayStatus('idle');
@@ -359,8 +362,9 @@ export default function CheckoutPage() {
                 </button>
 
                 {/* Pulse Runner */}
-                <div className="space-y-2">
-                  <button
+                {item?.fulfillment_mode !== 'MEETUP_ONLY' && (
+                  <div className="space-y-2">
+                    <button
                     onClick={() => setChoice('RUNNER')}
                     className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
                       choice === 'RUNNER'
@@ -417,6 +421,7 @@ export default function CheckoutPage() {
                     )}
                   </AnimatePresence>
                 </div>
+                )}
               </div>
             </motion.div>
           )}

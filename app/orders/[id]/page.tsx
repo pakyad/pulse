@@ -457,12 +457,7 @@ export default function LiveOrderPage() {
       {/* ── FLOATING NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between pointer-events-none select-none">
         <div className="flex items-center gap-3 pointer-events-auto">
-          <button 
-            onClick={() => router.push('/me/orders')}
-            className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 hover:bg-slate-100 active:scale-95 transition-all shrink-0"
-          >
-            <ChevronLeft size={20} />
-          </button>
+          <BackButton fallback="/me/orders" />
           <div className="flex flex-col justify-center">
             <p className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">Order Details</p>
             <p className="text-[10px] font-black text-amber-600 tracking-wider leading-none mt-0.5">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>
