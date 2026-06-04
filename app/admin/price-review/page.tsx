@@ -8,10 +8,9 @@ import {
   doc, updateDoc, getDoc
 } from 'firebase/firestore';
 import {
-  ChevronLeft, ShieldCheck, ShieldAlert, ShieldX,
+  ChevronLeft, ShieldCheck, ShieldAlert,
   Flag, CheckCircle2, X, Loader2, ImageOff,
-  ChevronLeft as ChevronLeftImg, ChevronRight as ChevronRightImg,
-  AlertTriangle, Inbox, TrendingUp
+  AlertTriangle, TrendingUp
 } from 'lucide-react';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 
@@ -30,72 +29,65 @@ type ReviewItem = {
   report_count?: number;
   is_price_flagged: boolean;
   price_justification?: string;
-  price_appeal?: string;         // legacy field — same thing
+  price_appeal?: string;
   governance_ceiling?: number;
   flag_source?: string;
   status: string;
   created_at?: any;
 };
 
-// ── IMAGE GALLERY SUB-COMPONENT ────────────────────────────────────────────────
-function ImageGallery({ images }: { images: string[] }) {
-  const [active, setActive] = useState(0);
-  if (images.length === 0) {
-    return (
-      <div className="w-full h-[220px] bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-200">
-        <ImageOff size={32} strokeWidth={1} />
-      </div>
-    );
+// ── DUMMY DATA ─────────────────────────────────────────────────────────────────
+const DUMMY_DATA: ReviewItem[] = [
+  {
+    id: "dummy-1",
+    title: "Sony WH-1000XM4 Headphones (Brand New)",
+    price: 950,
+    category: "TECH",
+    subcategory: "Devices",
+    images: ["https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&q=80&w=400"],
+    seller_id: "seller-1",
+    seller_name: "Azfar Electronics",
+    price_flag_count: 5,
+    report_count: 5,
+    is_price_flagged: true,
+    price_justification: "Imported directly from official Sony distributor. Full warranty included. Regular price is RM 1,200.",
+    governance_ceiling: 500,
+    flag_source: "COMMUNITY",
+    status: "active"
+  },
+  {
+    id: "dummy-2",
+    title: "Calculus Early Transcendentals 9th Edition",
+    price: 150,
+    category: "ACADEMIC",
+    subcategory: "Textbooks",
+    images: ["https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400"],
+    seller_id: "seller-2",
+    seller_name: "Sarah Lee",
+    report_count: 0,
+    is_price_flagged: true,
+    price_justification: "This is a rare hardcover edition in pristine condition. Usually goes for RM200+.",
+    governance_ceiling: 80,
+    flag_source: "SYSTEM",
+    status: "active"
+  },
+  {
+    id: "dummy-3",
+    title: "Mini Fridge 50L (Used 1 Sem)",
+    price: 250,
+    category: "HOSTEL",
+    subcategory: "Appliances",
+    images: ["https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?auto=format&fit=crop&q=80&w=400"],
+    seller_id: "seller-3",
+    seller_name: "Ahmad Kamal",
+    report_count: 12,
+    is_price_flagged: true,
+    price_justification: "",
+    governance_ceiling: 150,
+    flag_source: "COMMUNITY",
+    status: "active"
   }
-  return (
-    <div className="space-y-3">
-      <div className="relative w-full h-[220px] rounded-2xl overflow-hidden bg-slate-100 group">
-        <img src={images[active]} alt="" className="w-full h-full object-cover transition-all duration-500" />
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={() => setActive(i => Math.max(0, i - 1))}
-              disabled={active === 0}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all disabled:opacity-20"
-            >
-              <ChevronLeftImg size={16} className="text-slate-700" />
-            </button>
-            <button
-              onClick={() => setActive(i => Math.min(images.length - 1, i + 1))}
-              disabled={active === images.length - 1}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-all disabled:opacity-20"
-            >
-              <ChevronRightImg size={16} className="text-slate-700" />
-            </button>
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActive(i)}
-                  className={`h-1 rounded-full transition-all ${i === active ? 'w-5 bg-white' : 'w-1.5 bg-white/50'}`}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-      {/* Thumbnail strip */}
-      {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-          {images.map((img, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              className={`shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all ${i === active ? 'border-[#2A5C50] scale-105' : 'border-transparent opacity-50 hover:opacity-80'}`}
-            >
-              <img src={img} className="w-full h-full object-cover" alt="" />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+];
 
 // ── REVIEW CARD ────────────────────────────────────────────────────────────────
 function ReviewCard({
@@ -126,151 +118,115 @@ function ReviewCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.25 }}
-      className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.04)] overflow-hidden"
+      className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
     >
-      {/* Top accent strip — pastel amber for community, pastel red for system */}
-      <div className={`h-1 w-full ${isSystemFlag ? 'bg-red-300' : 'bg-amber-300'}`} />
-
-      <div className="p-8 grid grid-cols-[260px_1fr_200px] gap-8 items-start">
-
-        {/* ── COL 1: PHOTOS ── */}
-        <div className="space-y-4">
-          <ImageGallery images={images} />
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 flex-wrap">
-              {category && (
-                <span className="px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                  {category.label}
-                </span>
-              )}
-              {item.subcategory && (
-                <span className="px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                  {item.subcategory}
-                </span>
-              )}
-            </div>
-            <h3 className="text-[17px] font-black text-slate-900 tracking-tight leading-snug">{item.title}</h3>
-            <p className="text-[11px] font-medium text-slate-400">by {item.seller_name || 'Unknown seller'}</p>
-          </div>
-        </div>
-
-        {/* ── COL 2: EVIDENCE PANEL ── */}
-        <div className="space-y-5">
-
-          {/* Flag source badge */}
-          <div className="flex items-center gap-3">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between bg-slate-50/50 gap-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest border ${
               isSystemFlag
-                ? 'bg-red-50 text-red-500 border-red-100'
+                ? 'bg-red-50 text-red-600 border-red-100'
                 : 'bg-amber-50 text-amber-600 border-amber-100'
             }`}>
-              {isSystemFlag ? <AlertTriangle size={11} /> : <Flag size={11} />}
-              {isSystemFlag ? 'Auto-Flagged by System' : 'Community Report'}
-            </span>
-            {reportCount > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-rose-500">
-                <Flag size={11} />
-                {reportCount} {reportCount === 1 ? 'Report' : 'Reports'}
-              </span>
-            )}
-          </div>
-
-          {/* Price comparison card — pastel amber */}
-          <div className="p-5 bg-amber-50/70 rounded-2xl border border-amber-100/80 space-y-4">
-            <p className="text-[9px] font-black text-amber-400 uppercase tracking-[0.2em]">Price Analysis</p>
-            <div className="flex items-end gap-8">
-              <div>
-                <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Listed Price</p>
-                <p className="text-[28px] font-black text-red-500 tracking-tighter">RM {Number(item.price).toFixed(2)}</p>
-              </div>
-              {ceiling && (
-                <>
-                  <div className="pb-1">
-                    <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Campus Ceiling</p>
-                    <p className="text-[22px] font-black text-slate-700 tracking-tighter">RM {Number(ceiling).toFixed(2)}</p>
-                  </div>
-                  {overPct > 0 && (
-                    <div className="pb-1 flex items-end gap-1.5">
-                      <TrendingUp size={16} className="text-red-400 mb-1.5" />
-                      <div>
-                        <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Over By</p>
-                        <p className="text-[22px] font-black text-red-400 tracking-tighter">+{overPct}%</p>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Visual bar */}
-            {ceiling && (
-              <div className="space-y-1.5">
-                <div className="h-2 bg-amber-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-red-400 rounded-full transition-all duration-700"
-                    style={{ width: `${Math.min(100, (item.price / (ceiling * 1.6)) * 100)}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-[9px] font-bold text-amber-400">
-                  <span>RM 0</span>
-                  <span>Ceiling: RM {ceiling}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Seller Justification card */}
-          {justification ? (
-            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Seller's Justification</p>
-              <div className="flex gap-2.5">
-                <div className="w-0.5 bg-[#2A5C50]/30 rounded-full shrink-0 mt-1" />
-                <p className="text-[13px] font-semibold text-slate-700 leading-relaxed italic">
-                  "{justification}"
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="p-5 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 space-y-1">
-              <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Seller's Justification</p>
-              <p className="text-[12px] font-medium text-slate-300 italic">No justification provided by seller.</p>
-            </div>
+              {isSystemFlag ? <AlertTriangle size={12} /> : <Flag size={12} />}
+              {isSystemFlag ? 'System Flagged' : 'Community Reported'}
+          </span>
+          {reportCount > 0 && (
+             <span className="text-[12px] font-semibold text-slate-500">
+               {reportCount} {reportCount === 1 ? 'Report' : 'Reports'}
+             </span>
           )}
         </div>
+        <p className="text-[11px] font-mono font-medium text-slate-400">ID: {item.id.substring(0, 8).toUpperCase()}</p>
+      </div>
 
-        {/* ── COL 3: ACTIONS ── */}
-        <div className="space-y-4 flex flex-col">
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2 text-center">
-            <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Admin Decision</p>
-            <p className="text-[11px] font-medium text-slate-400 leading-relaxed">
-              Approve to restore the listing. Reject to permanently remove it.
-            </p>
-          </div>
+      <div className="p-6 flex flex-col lg:flex-row gap-8 items-start">
+        {/* Left: Image & Info */}
+        <div className="w-full lg:w-[40%] space-y-5">
+           <div className="flex gap-5">
+             {/* Thumbnail */}
+             <div className="w-24 h-24 rounded-xl border border-slate-100 overflow-hidden shrink-0 bg-slate-50">
+               {images.length > 0 ? (
+                 <img src={images[0]} alt="" className="w-full h-full object-cover" />
+               ) : (
+                 <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageOff size={24} /></div>
+               )}
+             </div>
+             <div className="flex flex-col justify-center">
+                <h3 className="text-[16px] font-bold text-slate-900 tracking-tight leading-snug">{item.title}</h3>
+                <p className="text-[13px] font-medium text-slate-500 mt-1">by {item.seller_name}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-100 px-2.5 py-1 rounded-md">
+                    {category?.label || item.category}
+                  </span>
+                  {item.subcategory && (
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      • {item.subcategory}
+                    </span>
+                  )}
+                </div>
+             </div>
+           </div>
+           
+           {/* Justification */}
+           <div className="space-y-2">
+             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Seller's Justification</p>
+             {justification ? (
+               <div className="border-l-2 border-slate-200 pl-4 py-1">
+                 <p className="text-[13px] font-medium text-slate-600 italic leading-relaxed">"{justification}"</p>
+               </div>
+             ) : (
+               <p className="text-[13px] font-medium text-slate-400 italic">No justification provided.</p>
+             )}
+           </div>
+        </div>
 
-          {/* APPROVE */}
-          <button
+        {/* Center: Price Details */}
+        <div className="w-full lg:w-[30%] space-y-4">
+           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Price Analysis</p>
+           <div className="flex flex-col gap-4">
+             <div className="flex items-center justify-between">
+                <span className="text-[13px] font-medium text-slate-500">Listed Price</span>
+                <span className="text-[20px] font-black text-red-500">RM {Number(item.price).toFixed(2)}</span>
+             </div>
+             {ceiling && (
+               <>
+                 <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                    <span className="text-[13px] font-medium text-slate-500">Campus Ceiling</span>
+                    <span className="text-[15px] font-bold text-slate-900">RM {Number(ceiling).toFixed(2)}</span>
+                 </div>
+                 {overPct > 0 && (
+                   <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-medium text-slate-500">Exceeds By</span>
+                      <span className="text-[14px] font-bold text-red-500 flex items-center gap-1">
+                        <TrendingUp size={14} /> +{overPct}%
+                      </span>
+                   </div>
+                 )}
+               </>
+             )}
+           </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="w-full lg:w-[30%] flex flex-col gap-3">
+           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 lg:text-right hidden lg:block">Action</p>
+           <button
             onClick={() => onApprove(item.id)}
             disabled={isProcessing}
-            className="w-full h-14 bg-[#2A5C50] text-white rounded-2xl font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-2.5 hover:bg-[#234e45] active:scale-95 transition-all shadow-md shadow-[#2A5C50]/20 disabled:opacity-30"
-          >
+            className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[13px] flex items-center justify-center gap-2 hover:bg-black transition-all active:scale-[0.98] disabled:opacity-50"
+           >
             {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
             Approve Listing
-          </button>
-
-          {/* REJECT */}
-          <button
+           </button>
+           <button
             onClick={() => onReject(item.id)}
             disabled={isProcessing}
-            className="w-full h-14 bg-white text-red-500 border border-red-100 rounded-2xl font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-2.5 hover:bg-red-50 active:scale-95 transition-all disabled:opacity-30"
-          >
+            className="w-full h-12 bg-white text-red-600 border border-red-200 rounded-xl font-bold text-[13px] flex items-center justify-center gap-2 hover:bg-red-50 transition-all active:scale-[0.98] disabled:opacity-50"
+           >
             {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
-            Reject Fraudulent
-          </button>
-
-          {/* Item ID reference */}
-          <p className="text-[9px] font-mono text-slate-200 text-center tracking-widest pt-1">
-            #{item.id.substring(0, 12).toUpperCase()}
-          </p>
+            Reject & Remove
+           </button>
         </div>
       </div>
     </motion.div>
@@ -302,9 +258,15 @@ export default function PriceReviewPage() {
   useEffect(() => {
     const q = query(collection(db, 'items'), where('is_price_flagged', '==', true));
     const unsub = onSnapshot(q, (snap) => {
-      const flagged = snap.docs
+      let flagged = snap.docs
         .map(d => ({ id: d.id, ...d.data() } as ReviewItem))
         .sort((a, b) => (b.report_count ?? b.price_flag_count ?? 0) - (a.report_count ?? a.price_flag_count ?? 0));
+      
+      // Inject dummy data if empty
+      if (flagged.length === 0) {
+        flagged = DUMMY_DATA;
+      }
+      
       setItems(flagged);
       setLoading(false);
     }, () => setLoading(false));
@@ -318,6 +280,12 @@ export default function PriceReviewPage() {
 
   // APPROVE — sets status back to 'active', clears flag
   const handleApprove = async (itemId: string) => {
+    if (itemId.startsWith('dummy-')) {
+      setItems(prev => prev.filter(i => i.id !== itemId));
+      showToast('Dummy listing approved.', 'ok');
+      return;
+    }
+    
     setProcessing(itemId);
     try {
       await updateDoc(doc(db, 'items', itemId), {
@@ -340,6 +308,12 @@ export default function PriceReviewPage() {
 
   // REJECT — permanently removes listing from marketplace
   const handleReject = async (itemId: string) => {
+    if (itemId.startsWith('dummy-')) {
+      setItems(prev => prev.filter(i => i.id !== itemId));
+      showToast('Dummy listing rejected.', 'err');
+      return;
+    }
+    
     setProcessing(itemId);
     try {
       await updateDoc(doc(db, 'items', itemId), {
@@ -367,7 +341,7 @@ export default function PriceReviewPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className={`fixed top-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-3.5 rounded-full shadow-lg flex items-center gap-3 text-[13px] font-bold text-white ${
+            className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3.5 rounded-full shadow-lg flex items-center gap-3 text-[13px] font-bold text-white ${
               toast.type === 'ok' ? 'bg-[#2A5C50]' : 'bg-red-500'
             }`}
           >
@@ -378,52 +352,47 @@ export default function PriceReviewPage() {
       </AnimatePresence>
 
       {/* ── HEADER ── */}
-      <header className="bg-white border-b border-[#E5E5EA] px-10 py-6 flex items-center justify-between sticky top-0 z-50 backdrop-blur-xl">
-        <div className="flex items-center gap-5">
+      <header className="bg-white border-b border-slate-200 px-8 py-5 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => router.push('/admin/dashboard')}
-            className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all active:scale-95"
+            className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-all active:scale-95"
           >
             <ChevronLeft size={20} />
           </button>
           <div>
-            <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em] mb-0.5">Market Governance</p>
-            <h1 className="text-[22px] font-black text-[#1C1C1E] tracking-tight">Price Review Queue</h1>
+            <h1 className="text-[20px] font-black text-slate-900 tracking-tight">Price Review Queue</h1>
+            <p className="text-[12px] font-medium text-slate-500 mt-0.5">Market Governance</p>
           </div>
         </div>
-        <div className={`px-5 py-2.5 rounded-2xl flex items-center gap-2.5 ${
-          items.length > 0 ? 'bg-red-50 border border-red-100' : 'bg-emerald-50 border border-emerald-100'
+        <div className={`px-4 py-2 rounded-xl flex items-center gap-2 ${
+          items.length > 0 ? 'bg-red-50 border border-red-100 text-red-600' : 'bg-emerald-50 border border-emerald-100 text-emerald-600'
         }`}>
-          {items.length > 0
-            ? <ShieldAlert size={14} className="text-red-500" />
-            : <ShieldCheck size={14} className="text-emerald-500" />
-          }
-          <span className={`text-[11px] font-black uppercase tracking-widest ${
-            items.length > 0 ? 'text-red-500' : 'text-emerald-600'
-          }`}>
+          {items.length > 0 ? <ShieldAlert size={16} /> : <ShieldCheck size={16} />}
+          <span className="text-[12px] font-bold">
             {items.length > 0 ? `${items.length} Pending Review` : 'All Clear'}
           </span>
         </div>
       </header>
 
       {/* ── CONTENT ── */}
-      <main className="max-w-[1300px] mx-auto px-10 py-10 space-y-6">
+      <main className="max-w-5xl mx-auto px-6 py-10 space-y-6">
         {loading ? (
-          <div className="py-40 flex items-center justify-center">
-            <Loader2 size={28} className="animate-spin text-slate-200" />
+          <div className="py-32 flex items-center justify-center">
+            <Loader2 size={28} className="animate-spin text-slate-300" />
           </div>
         ) : items.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="py-40 flex flex-col items-center gap-5 text-center"
+            className="py-32 flex flex-col items-center gap-4 text-center"
           >
-            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center">
-              <ShieldCheck size={36} className="text-emerald-500" />
+            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center">
+              <ShieldCheck size={32} className="text-emerald-500" />
             </div>
             <div className="space-y-1">
-              <p className="text-[16px] font-black text-slate-900 tracking-tight">All listings are compliant</p>
-              <p className="text-[13px] font-medium text-slate-400">No flagged items require review right now.</p>
+              <p className="text-[16px] font-bold text-slate-900">All listings are compliant</p>
+              <p className="text-[13px] text-slate-500">No flagged items require review right now.</p>
             </div>
           </motion.div>
         ) : (
