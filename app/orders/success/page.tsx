@@ -2,9 +2,9 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { motion } from 'framer-motion';
-import { Check, ArrowRight, ShieldCheck, Package, X } from 'lucide-react';
+import { Check, ArrowRight, ShieldCheck, X } from 'lucide-react';
 
 function OrderSuccessPageContent() {
   const searchParams = useSearchParams();
@@ -12,6 +12,7 @@ function OrderSuccessPageContent() {
   const orderId = searchParams.get('id');
 
   const [order, setOrder] = useState<any>(null);
+  const [trackingId, setTrackingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +22,25 @@ function OrderSuccessPageContent() {
       if (!user) { router.push('/auth'); return; }
       try {
         const snap = await getDoc(doc(db, 'parent_orders', orderId));
-        if (snap.exists()) setOrder(snap.data());
+        if (snap.exists()) {
+          setOrder(snap.data());
+          // Map to underlying sub-order for live tracking
+          const q = query(collection(db, 'orders'), where('parent_id', '==', orderId));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            // If multiple sub-orders exist, we'll keep trackingId null to route to the ledger instead
+            if (querySnapshot.size === 1) {
+              setTrackingId(querySnapshot.docs[0].id);
+            }
+          }
+        } else {
+          // Fallback if ID was directly from orders
+          const orderSnap = await getDoc(doc(db, 'orders', orderId));
+          if (orderSnap.exists()) {
+            setOrder(orderSnap.data());
+            setTrackingId(orderId);
+          }
+        }
       } catch (e) {
         console.error('[Success Load]', e);
       } finally {
@@ -122,8 +141,8 @@ function OrderSuccessPageContent() {
       {/* ── ACTIONS ── */}
       <div className="space-y-3 mt-auto">
         <button
-          onClick={() => router.push('/me/orders')}
-          className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-95 transition-all"
+          onClick={() => trackingId ? router.push(`/orders/${trackingId}`) : router.push('/me/orders')}
+          className="w-full h-12 bg-white border-[1.5px] border-slate-200 shadow-sm text-slate-900 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           Track My Order <ArrowRight size={16} />
         </button>

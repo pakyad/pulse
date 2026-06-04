@@ -15,6 +15,7 @@ import BackButton from '@/components/shared/BackButton';
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
 import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 import OrderTracker from '@/components/shared/OrderTracker';
+import { VoxelPulse, VoxelRadar, VoxelBox, VoxelCheck } from '@/components/shared/VoxelStatus';
 import dynamic from 'next/dynamic';
 
 const BuyerLiveMap = dynamic(() => import('@/components/shared/BuyerLiveMap'), { ssr: false });
@@ -120,7 +121,7 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
   }
 
   return (
-    <div className="w-full h-[380px] bg-linear-to-b from-amber-500/5 via-[#f8fafc] to-white relative flex flex-col items-center justify-center pt-8 select-none overflow-hidden">
+    <div className="w-full h-[380px] bg-[#f8fafc] relative flex flex-col items-center justify-center pt-8 select-none overflow-hidden">
       <AnimatePresence mode="wait">
         {state === 'WAITING' && (
           <motion.div
@@ -128,69 +129,16 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.3 }}
             className="flex flex-col items-center justify-center"
           >
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-                <line x1="15" y1="82" x2="85" y2="82" stroke="#e2e8f0" strokeWidth="2.5" strokeLinecap="round" />
-                
-                <motion.circle
-                  cx="50"
-                  cy="50"
-                  r="24"
-                  stroke="#cbd5e1"
-                  strokeWidth="1"
-                  strokeDasharray="4 4"
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-                />
-
-                <g>
-                  <rect x="42" y="30" width="16" height="30" rx="8" fill="slate-900" />
-                  <circle cx="50" cy="20" r="7" fill="slate-900" />
-                  <path d="M 43 16 L 57 16 L 62 19 L 43 19 Z" fill="#f59e0b" />
-                  
-                  <path d="M 45 60 L 45 82" stroke="slate-900" strokeWidth="4.5" strokeLinecap="round" />
-                  
-                  <motion.path
-                    stroke="slate-900"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    animate={{
-                      d: [
-                        "M 55 60 L 58 72 L 55 82",
-                        "M 55 60 L 58 70 L 59 78",
-                        "M 55 60 L 58 72 L 55 82"
-                      ]
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 0.6,
-                      ease: "easeInOut"
-                    }}
-                  />
-
-                  <path d="M 42 36 L 36 44 L 42 48" stroke="slate-900" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M 58 36 L 64 42 L 54 44" stroke="slate-900" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-
-                  <rect x="51" y="42" width="6" height="8" rx="1.5" fill="#f59e0b" />
-                  <motion.circle
-                    cx="54"
-                    cy="46"
-                    r="4"
-                    stroke="#f59e0b"
-                    strokeWidth="1.5"
-                    animate={{ scale: [1, 2.5, 1], opacity: [0.8, 0, 0.8] }}
-                    transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
-                  />
-                </g>
-              </svg>
+            <div className="w-24 h-24 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
+               <VoxelRadar size={48} className="text-slate-900" />
             </div>
-            <p className="text-[11px] font-black text-amber-600 uppercase tracking-widest leading-none mt-2 animate-pulse">
+            <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none mb-1.5">
               Finding a courier...
             </p>
+            <p className="text-[12px] font-medium text-[#94a3b8]">Broadcasting to network</p>
           </motion.div>
         )}
 
@@ -200,61 +148,16 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.3 }}
             className="flex flex-col items-center justify-center"
           >
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-                <rect x="20" y="76" width="60" height="6" rx="2" fill="#cbd5e1" />
-
-                <motion.g
-                  animate={{ y: [0, -1, 0] }}
-                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                >
-                  <rect x="42" y="58" width="16" height="18" rx="3" fill="#f59e0b" />
-                  <line x1="50" y1="58" x2="50" y2="76" stroke="#d97706" strokeWidth="1.5" />
-                  <line x1="42" y1="67" x2="58" y2="67" stroke="#d97706" strokeWidth="1.5" />
-                </motion.g>
-
-                <motion.path
-                  d="M 45 52 Q 43 44 47 38"
-                  stroke="#f59e0b"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  animate={{ opacity: [0, 0.6, 0], y: [5, -15] }}
-                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                />
-                <motion.path
-                  d="M 50 50 Q 52 42 48 36"
-                  stroke="#f59e0b"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  animate={{ opacity: [0, 0.6, 0], y: [5, -15] }}
-                  transition={{ repeat: Infinity, duration: 2, delay: 0.6, ease: "easeInOut" }}
-                />
-                <motion.path
-                  d="M 55 52 Q 53 44 57 38"
-                  stroke="#f59e0b"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  animate={{ opacity: [0, 0.6, 0], y: [5, -15] }}
-                  transition={{ repeat: Infinity, duration: 2, delay: 1.2, ease: "easeInOut" }}
-                />
-
-                <motion.g
-                  animate={{ y: [0, 1.5, 0] }}
-                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                >
-                  <rect x="42" y="32" width="16" height="26" rx="8" fill="slate-900" />
-                  <circle cx="50" cy="22" r="7" fill="slate-900" />
-                  <path d="M 43 18 L 57 18 L 62 21 L 43 21 Z" fill="#f59e0b" />
-                  <path d="M 44 40 L 48 48 L 56 40" stroke="slate-900" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                </motion.g>
-              </svg>
+            <div className="w-24 h-24 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
+               <VoxelBox size={48} className="text-amber-500" />
             </div>
-            <p className="text-[11px] font-black text-amber-600 uppercase tracking-widest leading-none mt-2 animate-pulse">
+            <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none mb-1.5">
               {orderType && orderType !== 'MARKETPLACE' ? 'Verifying Details...' : 'Merchant is preparing...'}
             </p>
+            <p className="text-[12px] font-medium text-[#94a3b8]">Please wait patiently</p>
           </motion.div>
         )}
 
@@ -264,127 +167,16 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4 }}
-            className="flex flex-col items-center justify-center w-full"
+            transition={{ duration: 0.3 }}
+            className="flex flex-col items-center justify-center"
           >
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-                <motion.line
-                  x1="15"
-                  y1="82"
-                  x2="85"
-                  y2="82"
-                  stroke="#cbd5e1"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeDasharray="8 8"
-                  animate={{ strokeDashoffset: [0, 16] }}
-                  transition={{ repeat: Infinity, duration: 0.45, ease: "linear" }}
-                />
-
-                <motion.path
-                  d="M 80 30 L 90 30"
-                  stroke="#cbd5e1"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  animate={{ x: [0, -100], opacity: [0, 0.6, 0] }}
-                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-                />
-                <motion.path
-                  d="M 75 48 L 82 48"
-                  stroke="#cbd5e1"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  animate={{ x: [0, -100], opacity: [0, 0.6, 0] }}
-                  transition={{ repeat: Infinity, duration: 0.6, delay: 0.2, ease: "linear" }}
-                />
-                
-                <motion.g
-                  animate={{
-                    y: [0, -3, 0, -3, 0],
-                    rotate: [6, 8, 6, 8, 6]
-                  }}
-                  style={{ transformOrigin: "50px 60px" }}
-                  transition={{ repeat: Infinity, duration: 0.55, ease: "easeInOut" }}
-                >
-                  <ellipse cx="50" cy="82" rx="12" ry="2" fill="#e2e8f0" />
-
-                  <rect x="42" y="32" width="16" height="28" rx="8" fill="slate-900" />
-                  <circle cx="50" cy="22" r="7" fill="slate-900" />
-                  <path d="M 43 18 L 57 18 L 62 21 L 43 21 Z" fill="#f59e0b" />
-                  
-                  <motion.path
-                    stroke="slate-900"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    animate={{
-                      d: [
-                        "M 46 60 L 36 71 L 46 81",
-                        "M 46 60 L 43 72 L 44 82",
-                        "M 46 60 L 52 70 L 44 78",
-                        "M 46 60 L 42 68 L 38 76"
-                      ]
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 0.55,
-                      ease: "linear"
-                    }}
-                  />
-
-                  <motion.path
-                    stroke="slate-900"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    animate={{
-                      d: [
-                        "M 54 60 L 60 70 L 52 78",
-                        "M 54 60 L 50 68 L 46 76",
-                        "M 54 60 L 44 71 L 54 81",
-                        "M 54 60 L 51 72 L 52 82"
-                      ]
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 0.55,
-                      ease: "linear"
-                    }}
-                  />
-
-                  <motion.path
-                    stroke="slate-900"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    animate={{
-                      d: [
-                        "M 54 36 L 64 42 L 58 48",
-                        "M 54 36 L 62 44 L 56 46",
-                        "M 54 36 L 64 42 L 58 48"
-                      ]
-                    }}
-                    transition={{ repeat: Infinity, duration: 0.55, ease: "easeInOut" }}
-                  />
-                  
-                  <motion.g
-                    animate={{
-                      y: [0, -2, 0, -2, 0],
-                      rotate: [0, 3, 0, 3, 0]
-                    }}
-                    transition={{ repeat: Infinity, duration: 0.5, ease: "easeInOut" }}
-                  >
-                    <rect x="58" y="38" width="14" height="12" rx="3.5" fill="#f59e0b" />
-                    <line x1="65" y1="38" x2="65" y2="50" stroke="#d97706" strokeWidth="1.5" />
-                    <line x1="58" y1="44" x2="72" y2="44" stroke="#d97706" strokeWidth="1.5" />
-                  </motion.g>
-                </motion.g>
-              </svg>
+            <div className="w-24 h-24 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
+               <VoxelPulse size={48} className="text-slate-900" />
             </div>
-            <p className="text-[11px] font-black text-amber-600 uppercase tracking-widest leading-none mt-2 animate-pulse">
-              Courier is speeding your way
+            <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none mb-1.5">
+              Courier is on the way
             </p>
+            <p className="text-[12px] font-medium text-[#94a3b8]">Check map for live tracking</p>
           </motion.div>
         )}
 
@@ -394,80 +186,16 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.3 }}
             className="flex flex-col items-center justify-center"
           >
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-                <line x1="15" y1="82" x2="85" y2="82" stroke="#e2e8f0" strokeWidth="2.5" strokeLinecap="round" />
-
-                <motion.g
-                  animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }}
-                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                >
-                  <polygon points="28,25 30,30 35,30 31,33 33,38 28,35 23,38 25,33 21,30 26,30" fill="#f59e0b" />
-                  <polygon points="72,20 74,25 79,25 75,28 77,33 72,30 67,33 69,28 65,25 70,25" fill="#f59e0b" />
-                </motion.g>
-
-                <motion.g
-                  animate={{
-                    y: [0, -16, 0]
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 2.0,
-                    ease: [0.175, 0.885, 0.32, 1.275]
-                  }}
-                >
-                  <motion.ellipse
-                    cx="50"
-                    cy="82"
-                    rx="8"
-                    ry="1.5"
-                    fill="#e2e8f0"
-                    animate={{ scale: [1, 0.5, 1], opacity: [0.8, 0.3, 0.8] }}
-                    transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
-                  />
-
-                  <rect x="42" y="30" width="16" height="30" rx="8" fill="slate-900" />
-                  <circle cx="50" cy="20" r="7" fill="slate-900" />
-                  <path d="M 43 16 L 57 16 L 62 19 L 43 19 Z" fill="#f59e0b" />
-                  
-                  <motion.path
-                    stroke="slate-900"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    animate={{
-                      d: [
-                        "M 45 60 L 45 80",
-                        "M 45 60 L 40 70 L 43 76",
-                        "M 45 60 L 45 80"
-                      ]
-                    }}
-                    transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
-                  />
-
-                  <motion.path
-                    stroke="slate-900"
-                    strokeWidth="4.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    animate={{
-                      d: [
-                        "M 55 60 L 55 80",
-                        "M 55 60 L 60 70 L 57 76",
-                        "M 55 60 L 55 80"
-                      ]
-                    }}
-                    transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
-                  />
-
-                  <path d="M 42 36 L 30 20" stroke="slate-900" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M 58 36 L 70 20" stroke="slate-900" strokeWidth="4" strokeLinecap="round" />
-                </motion.g>
-              </svg>
+            <div className="w-24 h-24 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
+               <VoxelCheck size={48} className="text-emerald-500" />
             </div>
+            <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none mb-1.5">
+              Order Delivered
+            </p>
+            <p className="text-[12px] font-medium text-[#94a3b8]">Enjoy your purchase</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -729,7 +457,12 @@ export default function LiveOrderPage() {
       {/* ── FLOATING NAV ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between pointer-events-none select-none">
         <div className="flex items-center gap-3 pointer-events-auto">
-          <BackButton />
+          <button 
+            onClick={() => router.push('/me/orders')}
+            className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 hover:bg-slate-100 active:scale-95 transition-all shrink-0"
+          >
+            <ChevronLeft size={20} />
+          </button>
           <div className="flex flex-col justify-center">
             <p className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">Order Details</p>
             <p className="text-[10px] font-black text-amber-600 tracking-wider leading-none mt-0.5">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>
