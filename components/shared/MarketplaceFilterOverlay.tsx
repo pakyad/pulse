@@ -80,7 +80,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                       onClick={() => setTempFilters({ ...tempFilters, sortBy: opt.id as any })}
                       className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
                         tempFilters.sortBy === opt.id 
-                          ? 'bg-white border-blue-600 text-blue-600 ring-1 ring-blue-600' 
+                          ? 'bg-white border-[#2A5C50] text-[#2A5C50] ring-1 ring-[#2A5C50]' 
                           : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                       }`}
                     >
@@ -105,7 +105,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                       onClick={() => setTempFilters({ ...tempFilters, priceRange: [0, tier.max] })}
                       className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
                         tempFilters.priceRange[1] === tier.max 
-                          ? 'bg-white border-blue-600 text-blue-600 ring-1 ring-blue-600' 
+                          ? 'bg-white border-[#2A5C50] text-[#2A5C50] ring-1 ring-[#2A5C50]' 
                           : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                       }`}
                     >
@@ -123,7 +123,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                       onClick={() => setTempFilters({ ...tempFilters, officialOnly: false })}
                       className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
                         !tempFilters.officialOnly 
-                          ? 'bg-white border-blue-600 text-blue-600 ring-1 ring-blue-600' 
+                          ? 'bg-white border-[#2A5C50] text-[#2A5C50] ring-1 ring-[#2A5C50]' 
                           : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                       }`}
                     >
@@ -133,7 +133,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                       onClick={() => setTempFilters({ ...tempFilters, officialOnly: true })}
                       className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
                         tempFilters.officialOnly 
-                          ? 'bg-white border-blue-600 text-blue-600 ring-1 ring-blue-600' 
+                          ? 'bg-white border-[#2A5C50] text-[#2A5C50] ring-1 ring-[#2A5C50]' 
                           : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                       }`}
                     >
@@ -150,7 +150,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                   onApply(tempFilters);
                   onClose();
                 }}
-                className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] active:scale-95 transition-all shadow-md shadow-blue-600/20 flex items-center justify-center"
+                className="w-full h-14 bg-[#2A5C50] text-white rounded-2xl font-bold text-[14px] active:scale-95 transition-all shadow-md shadow-[#2A5C50]/20 flex items-center justify-center"
               >
                 Apply Filters
               </button>

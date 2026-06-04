@@ -156,8 +156,8 @@ export function RadarCard({ item, onMarkResolved, isMyPost }: { item: RadarItem;
 
         {/* Content */}
         <div className="flex-1 space-y-1.5">
-          <p className="text-[14px] font-bold text-slate-900 leading-snug">{item.title}</p>
-          <p className="text-[12px] font-medium text-[#64748b] leading-relaxed line-clamp-2">
+          <p className="text-[13px] font-bold text-slate-900 leading-snug">{item.title}</p>
+          <p className="text-[11px] font-medium text-[#64748b] leading-relaxed line-clamp-2">
             {item.detail}
           </p>
         </div>

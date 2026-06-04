@@ -8,7 +8,7 @@ import { collection, onSnapshot, doc, query, orderBy, where, limit } from 'fireb
 import {
   ChevronLeft, Search, ChevronRight, ArrowRight,
   Radio, Package, Megaphone, BookOpen, Wrench, Store, Zap, Plus,
-  Calendar, MapPin, Users
+  Calendar, MapPin, Users, CheckCircle2
 } from 'lucide-react';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -101,7 +101,7 @@ function AnnouncementCard({ ann }: { ann: any }) {
             <span className="w-1 h-1 rounded-full bg-slate-200 shrink-0" />
             <span className="text-[10px] font-medium text-slate-300">{relativeTime(ann.created_at)}</span>
           </div>
-          <p className="text-[14px] font-bold text-slate-900 leading-snug tracking-tight">{ann.headline || ann.title}</p>
+          <p className="text-[13px] font-bold text-slate-900 leading-snug tracking-tight">{ann.headline || ann.title}</p>
           <AnimatePresence>
             {expanded && ann.body && (
               <motion.p
@@ -110,7 +110,7 @@ function AnnouncementCard({ ann }: { ann: any }) {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-[12px] font-medium text-[#94a3b8] leading-relaxed overflow-hidden pt-1"
+                className="text-[11px] font-medium text-[#94a3b8] leading-relaxed overflow-hidden pt-1"
               >
                 {ann.body}
               </motion.p>
@@ -141,6 +141,7 @@ export default function PulsePage() {
   const [isReportOpen,   setIsReportOpen]   = useState(false);
   const [events,         setEvents]         = useState<any[]>([]);
   const [selectedEvent,  setSelectedEvent]  = useState<any | null>(null);
+  const [addedEventId,   setAddedEventId]   = useState<string | null>(null);
 
   useEffect(() => {
     const unsubs: (() => void)[] = [];
@@ -216,7 +217,7 @@ export default function PulsePage() {
         </div>
       </nav>
 
-      <div className="pt-24 px-6 space-y-10">
+      <div className="pt-24 px-4 space-y-10">
 
         {/* ── ACTIVE ORDER ── */}
         <ActiveOrderBanner />
@@ -225,21 +226,21 @@ export default function PulsePage() {
         {/* ── ANNOUNCEMENTS ── */}
         <section className="space-y-4">
           <div className="px-1">
-            <h2 className="text-[21px] font-bold text-slate-900 tracking-tight">Announcements</h2>
-            <p className="text-[13px] font-medium text-[#94a3b8] mt-0.5">Official notices from the university</p>
+            <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Announcements</h2>
+            <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">Official notices from the university</p>
           </div>
           <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
             {loadingAnn ? (
               <div className="divide-y divide-slate-100">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="px-6 py-5 space-y-2.5 animate-pulse">
+                  <div key={i} className="px-4 py-5 space-y-2.5 animate-pulse">
                     <div className="h-2.5 w-20 bg-slate-100 rounded-full" />
                     <div className="h-4 w-3/4 bg-slate-100 rounded-full" />
                   </div>
                 ))}
               </div>
             ) : displayAnnouncements.length > 0 ? (
-              <div className="px-6">
+              <div className="px-4">
                 {displayAnnouncements.map(ann => <AnnouncementCard key={ann.id} ann={ann} />)}
               </div>
             ) : (
@@ -255,8 +256,8 @@ export default function PulsePage() {
         <section className="space-y-4">
           <div className="px-1 flex items-center justify-between">
             <div>
-              <h2 className="text-[21px] font-bold text-slate-900 tracking-tight">Campus Radar</h2>
-              <p className="text-[13px] font-medium text-[#94a3b8] mt-0.5">Lost items · Found items · Peer alerts</p>
+              <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Campus Radar</h2>
+              <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">Lost items · Found items · Peer alerts</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
@@ -271,7 +272,7 @@ export default function PulsePage() {
               </button>
             </div>
           </div>
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-6 px-6">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
             {displayRadar.map((item: any) => <RadarCard key={item.id} item={item} />)}
           </div>
         </section>
@@ -279,10 +280,10 @@ export default function PulsePage() {
         {/* ── HAPPENING THIS WEEK ── */}
         <section className="space-y-4">
           <div className="px-1">
-            <h2 className="text-[21px] font-bold text-slate-900 tracking-tight">Happening This Week</h2>
-            <p className="text-[13px] font-medium text-[#94a3b8] mt-0.5">Campus events and activities</p>
+            <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Happening This Week</h2>
+            <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">Campus events and activities</p>
           </div>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-6 px-6">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
             {(events.length > 0 ? events : DEMO_EVENTS).map((ev: any) => (
               <div
                 key={ev.id}
@@ -369,15 +370,30 @@ export default function PulsePage() {
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <a
-                    href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(selectedEvent.title)}&location=${encodeURIComponent(selectedEvent.location)}`}
-                    target="_blank" rel="noreferrer"
-                    className="flex-1 h-12 bg-[#111111] text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"
-                  >
-                    Add to Calendar
-                  </a>
                   <button
-                    onClick={() => setSelectedEvent(null)}
+                    onClick={() => {
+                      if (addedEventId === selectedEvent.id) return;
+                      setAddedEventId(selectedEvent.id);
+                    }}
+                    className={`flex-1 h-12 rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all ${
+                      addedEventId === selectedEvent.id 
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
+                        : 'bg-[#2A5C50] text-white shadow-md shadow-[#2A5C50]/20'
+                    }`}
+                  >
+                    {addedEventId === selectedEvent.id ? (
+                      <>
+                        <CheckCircle2 size={16} /> Added to Calendar
+                      </>
+                    ) : (
+                      'Add to Calendar'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedEvent(null);
+                      setAddedEventId(null);
+                    }}
                     className="h-12 px-5 bg-slate-50 border border-slate-100 text-slate-400 rounded-2xl font-bold text-[13px] active:scale-95 transition-all"
                   >
                     Close

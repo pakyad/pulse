@@ -94,7 +94,7 @@ export default function FoundHub() {
         </div>
       </nav>
 
-      <div className="pt-24 px-6 space-y-6">
+      <div className="pt-24 px-4 space-y-6">
         {/* ── TABS ── */}
         <div className="flex bg-slate-200/50 p-1 rounded-[14px]">
            <button 

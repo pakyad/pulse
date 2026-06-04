@@ -33,16 +33,11 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
 
 const MENU_GROUPS = [
   {
-    label: 'My Commerce',
+    label: 'Account & Settings',
     items: [
-      { icon: ShoppingBag, label: 'Order History', path: '/me/orders' },
-      { icon: Store, label: 'Merchant Hub', path: '/merchant' },
-    ],
-  },
-  {
-    label: 'Account Settings',
-    items: [
-      { icon: BarChart3, label: 'Earnings Ledger', path: '/campus/earnings' },
+      { icon: ShoppingBag, label: 'Order History', path: '/me/orders', sub: 'View past purchases & deliveries' },
+      { icon: BarChart3, label: 'Earnings Ledger', path: '/campus/earnings', sub: 'Track your marketplace revenue' },
+      { icon: User, label: 'Edit Profile', path: '/me/edit', sub: 'Update your personal details' },
     ]
   }
 ];
@@ -76,7 +71,7 @@ export default function MePage() {
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans">
       
       {/* ── GLOBAL NAVIGATION ── */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
             <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
                <ChevronLeft size={20} />
@@ -86,7 +81,7 @@ export default function MePage() {
          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
       </nav>
 
-      <div className="pt-28 px-8 space-y-12">
+      <div className="pt-28 px-4 space-y-12">
          
          {/* ── ACTIVE ORDER BANNER ── */}
          <ActiveOrderBanner />
@@ -125,43 +120,37 @@ export default function MePage() {
             </div>
          </section>
 
-         {/* ── MENU GROUPS ── */}
-         {MENU_GROUPS.map((group, idx) => {
-            const filteredItems = group.items.filter(item => {
-               if (item.label === 'Merchant Hub') {
-                  return !isStudent;
-               }
-               return true;
-            });
-
-            if (filteredItems.length === 0) return null;
-
-            return (
-               <section key={idx} className="space-y-8">
-                  <div className="px-1 space-y-1">
-                     <Heading>{group.label}</Heading>
-                     <Subtext>Manage your account and preferences</Subtext>
-                  </div>
-                  <div className="space-y-4">
-                     {filteredItems.map((item, i) => (
-                        <div key={i} className="space-y-4">
-                           <button 
-                              onClick={() => router.push(item.path)}
-                              className="w-full flex items-center justify-between group py-2"
-                           >
-                              <div className="text-left">
-                                 <p className="text-[15px] font-bold text-slate-500 group-hover:text-slate-900 tracking-tight transition-colors">{item.label}</p>
-                                 <p className="text-[11px] text-[#94a3b8] font-medium">View your {item.label.toLowerCase()}</p>
-                                 </div>
-                                 <ChevronRight size={16} className="text-slate-200 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
-                              </button>
-                              {i < filteredItems.length - 1 && <div className="h-[0.5px] bg-slate-50" />}
+         {/* ── DIRECTORY / SETTINGS ── */}
+         {MENU_GROUPS.map((group, idx) => (
+            <section key={idx} className="space-y-8">
+               <div className="px-1 space-y-1">
+                  <Heading>{group.label}</Heading>
+                  <Subtext>Manage your account and preferences</Subtext>
+               </div>
+               <div className="space-y-4">
+                  {group.items.map((item, i) => (
+                     <div key={i} className="space-y-4">
+                        <button 
+                           onClick={() => router.push(item.path)}
+                           className="w-full flex items-center justify-between group py-2"
+                        >
+                           <div className="text-left flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#2A5C50] group-hover:text-white transition-all shadow-sm">
+                                 <item.icon size={18} />
+                              </div>
+                              <div>
+                                 <p className="text-[15px] font-bold text-slate-700 group-hover:text-slate-900 tracking-tight transition-colors">{item.label}</p>
+                                 <p className="text-[11px] text-[#94a3b8] font-medium">{item.sub}</p>
+                              </div>
                            </div>
-                        ))}
+                           <ChevronRight size={16} className="text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                        </button>
+                        {i < group.items.length - 1 && <div className="h-[0.5px] bg-slate-100 ml-14" />}
                      </div>
-                  </section>
-               );
-            })}
+                  ))}
+               </div>
+            </section>
+         ))}
 
          {/* ── LISTINGS SECTION (Horizontal Visuals) ── */}
          {isStudent && (
@@ -171,7 +160,7 @@ export default function MePage() {
                   <Subtext>Operational assets in the marketplace</Subtext>
                </div>
 
-               <div className="flex gap-5 overflow-x-auto scrollbar-hide -mx-8 px-8 pb-4">
+               <div className="flex gap-5 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-4">
                   {/* ADD LISTING CARD */}
                   <button 
                      onClick={() => router.push('/marketplace/create')}
