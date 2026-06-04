@@ -15,33 +15,33 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 const DEMO_CONVERSATIONS = [
   {
     id: 'demo_msg1',
-    participants: [{ id: 'other1', name: 'Ahmad Faizal', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmad' }],
+    participants: [{ id: 'other1', name: 'Ahmad Faizal', avatar: '' }],
     last_message_sender_id: 'other1',
     unread_count: 1,
     last_message_time: '2m ago',
     last_message_text: 'Is this still available? I can meet at 2PM.',
     metadata: { title: 'NIKE VINTAGE HOODIE (L)' },
-    badge: 'commerce'
+    type: 'MARKETPLACE'
   },
   {
     id: 'demo_msg2',
-    participants: [{ id: 'other2', name: 'Sarah Lim', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah' }],
+    participants: [{ id: 'other2', name: 'Sarah Lim', avatar: '' }],
     last_message_sender_id: 'me',
     unread_count: 0,
     last_message_time: '1h ago',
     last_message_text: 'Yes, I handed your matric card to the library counter.',
     metadata: { title: 'LOST MATRIC CARD' },
-    badge: 'radar'
+    type: 'RADAR'
   },
   {
     id: 'demo_msg3',
-    participants: [{ id: 'other3', name: 'Ali Karim', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ali' }],
+    participants: [{ id: 'other3', name: 'Ali Karim', avatar: '' }],
     last_message_sender_id: 'me',
     unread_count: 0,
     last_message_time: 'Yesterday',
     last_message_text: 'Thanks for the notes, appreciate it!',
     metadata: { title: 'CALCULUS TEXTBOOK' },
-    badge: 'message'
+    type: 'MESSAGE'
   }
 ];
 
@@ -56,16 +56,54 @@ export default function MessagesPage() {
       if (user) {
         onSnapshot(doc(db, 'users', user.uid), (snap) => setProfile(snap.data()));
         
-        // 💬 Real Conversations Only
+        // 💬 Real Chats Only
         const q = query(
-          collection(db, 'conversations'),
-          where('participant_ids', 'array-contains', user.uid),
-          orderBy('last_message_at', 'desc'),
-          limit(30)
+          collection(db, 'chats'),
+          where('members', 'array-contains', user.uid)
         );
         
-        onSnapshot(q, (s) => {
-          setConversations(s.docs.map(d => ({ id: d.id, ...d.data() })));
+        onSnapshot(q, async (s) => {
+          const rawChats = s.docs.map(d => ({ id: d.id, ...d.data() }));
+          
+          // Fetch profiles dynamically for the OTHER participant
+          const enrichedChats = await Promise.all(rawChats.map(async (chat: any) => {
+             const otherId = chat.members?.find((m: string) => m !== user.uid);
+             let realName = chat.participant_names?.[otherId] || 'Pulse Student';
+             let realAvatar = '';
+             
+             if (otherId) {
+                // We ALWAYS fetch live profile data to ensure avatars exist
+                try {
+                   const { getDoc, doc } = await import('firebase/firestore');
+                   const uSnap = await getDoc(doc(db, 'users', otherId));
+                   if (uSnap.exists()) {
+                      const uData = uSnap.data();
+                      realName = uData.full_name || uData.name || uData.club_name || realName;
+                      realAvatar = uData.photo_url || '';
+                   }
+                } catch (e) {
+                   console.error("Profile fetch error", e);
+                }
+             }
+             
+             return {
+                ...chat,
+                otherParticipant: {
+                   id: otherId,
+                   name: realName,
+                   avatar: realAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${realName}`
+                }
+             };
+          }));
+          
+          // Sort locally by updatedAt to avoid Firebase composite index errors
+          enrichedChats.sort((a, b) => {
+             const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : (a.updatedAt || 0);
+             const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : (b.updatedAt || 0);
+             return timeB - timeA;
+          });
+          
+          setConversations(enrichedChats);
           setLoading(false);
         }, (err) => {
           console.error(err);
@@ -83,12 +121,12 @@ export default function MessagesPage() {
   return (
     <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900 w-full max-w-2xl mx-auto">
       {/* ── INTERNAL NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <BackButton fallback="/activity" />
          <p className="text-[14px] font-bold tracking-tight">Messages</p>
       </nav>
 
-      <section className="px-8 pt-28">
+      <section className="px-6 pt-28">
         <div className="relative group">
            <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
            <input 
@@ -99,9 +137,9 @@ export default function MessagesPage() {
         </div>
       </section>
 
-      <section className="px-8 mt-10 space-y-4">
+      <section className="px-6 mt-10 space-y-4">
          {(conversations.length > 0 ? conversations : DEMO_CONVERSATIONS).map((chat, i) => {
-           const otherParticipant = chat.participants?.find((p: any) => p.id !== auth.currentUser?.uid) || chat.participants[0] || { name: 'Member', avatar: '' };
+           const otherParticipant = chat.otherParticipant || chat.participants?.[0] || { name: 'Pulse User', avatar: '' };
            const isUnread = chat.last_message_sender_id !== auth.currentUser?.uid && chat.unread_count > 0;
            
            return (
@@ -111,25 +149,25 @@ export default function MessagesPage() {
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ delay: i * 0.02 }}
                  onClick={() => router.push(`/messages/${chat.id}`)}
-                 className={`w-full flex items-start gap-4 p-4 rounded-2xl transition-all text-left group relative ${isUnread ? 'bg-slate-50/50' : 'bg-transparent'}`}
+                 className={`w-full flex items-start gap-3 p-3 rounded-2xl transition-all text-left group relative ${isUnread ? 'bg-slate-50/50' : 'bg-transparent'}`}
               >
                  <div className="relative shrink-0 mt-0.5">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white border border-slate-100 group-active:scale-95 transition-transform">
-                       <img src={otherParticipant.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherParticipant.name}`} className="w-full h-full object-cover" alt=""/>
+                    <div className="w-12 h-12 rounded-[14px] overflow-hidden bg-white border border-slate-100 group-active:scale-95 transition-transform">
+                       <img src={otherParticipant.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherParticipant.name}`} className="w-full h-full object-cover" alt=""/>
                     </div>
-                    {chat.badge === 'commerce' && (
-                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
-                          <ShoppingBag size={11} strokeWidth={3} />
+                    {chat.type === 'MARKETPLACE' && (
+                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
+                          <ShoppingBag size={10} strokeWidth={3} />
                        </div>
                     )}
-                    {chat.badge === 'radar' && (
-                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-rose-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
-                          <Radio size={11} strokeWidth={3} />
+                    {chat.type === 'RADAR' && (
+                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-rose-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
+                          <Radio size={10} strokeWidth={3} />
                        </div>
                     )}
-                    {chat.badge === 'message' && (
-                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
-                          <MessageSquare size={11} strokeWidth={3} />
+                    {chat.type === 'MESSAGE' && (
+                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
+                          <MessageSquare size={10} strokeWidth={3} />
                        </div>
                     )}
                  </div>
@@ -140,11 +178,11 @@ export default function MessagesPage() {
                     </h3>
                     
                     <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-1 truncate">
-                       {chat.metadata?.title || 'GENERAL CHAT'}
+                       {chat.context_title || chat.metadata?.title || 'GENERAL CHAT'}
                     </p>
                     
                     <p className={`text-[13px] leading-tight truncate pr-2 ${isUnread ? 'text-slate-900 font-bold' : 'text-[#94a3b8] font-medium'}`}>
-                       {chat.last_message_text || 'No messages yet'}
+                       {chat.lastMessage || chat.last_message_text || 'No messages yet'}
                     </p>
                  </div>
 
@@ -166,11 +204,6 @@ export default function MessagesPage() {
            </div>
          )}
       </section>
-
-      <div className="flex justify-center items-center gap-2 mt-16 py-4 opacity-20">
-         <ShieldCheck size={14} />
-         <p className="text-[9px] font-bold uppercase tracking-[0.4em]">Pulse Verified Protocol</p>
-      </div>
 
     </main>
   );

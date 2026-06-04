@@ -55,7 +55,14 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0 flex flex-col justify-end p-9"
+            onClick={() => {
+              if (slide.ctaPath.startsWith('http')) {
+                window.open(slide.ctaPath, '_blank');
+              } else {
+                router.push(slide.ctaPath);
+              }
+            }}
+            className="absolute inset-0 flex flex-col justify-end p-9 cursor-pointer active:scale-[0.98] transition-transform"
           >
             {/* Background Layer (Image or Neutral Template) */}
             <div className="absolute inset-0 z-0 overflow-hidden">
@@ -103,19 +110,6 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
                  {slide.subline && <p className="text-white/80 text-[11px] font-bold leading-relaxed uppercase tracking-wide max-w-[85%] drop-shadow-sm">{slide.subline}</p>}
                </div>
                
-               {/* Square CTA Button */}
-               <button
-                 onClick={() => {
-                   if (slide.ctaPath.startsWith('http')) {
-                     window.open(slide.ctaPath, '_blank');
-                   } else {
-                     router.push(slide.ctaPath);
-                   }
-                 }}
-                 className="shrink-0 w-16 h-16 bg-white rounded-[22px] shadow-md shadow-black/20 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-50 border border-white/40"
-               >
-                 <ArrowUpRight size={28} className="text-black" strokeWidth={3} />
-               </button>
             </div>
 
           </motion.div>

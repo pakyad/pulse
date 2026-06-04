@@ -34,10 +34,10 @@ export default function ChatRoomPage() {
            let otherName = data.participant_names?.[otherId];
            let otherAvatar = data.participant_avatars?.[otherId];
 
-           if (!otherName && otherId) {
+           if (!otherAvatar && otherId) {
              const userSnap = await getDoc(doc(db, 'users', otherId));
              if (userSnap.exists()) {
-               otherName = userSnap.data().full_name || userSnap.data().name || userSnap.data().club_name;
+               otherName = userSnap.data().full_name || userSnap.data().name || userSnap.data().club_name || otherName;
                otherAvatar = userSnap.data().photo_url;
              }
            }
@@ -45,7 +45,7 @@ export default function ChatRoomPage() {
            setChatInfo({
               ...data,
               otherName: otherName || 'Pulse User',
-              otherAvatar: otherAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherId}`,
+              otherAvatar: otherAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherName || 'Pulse User'}`,
               contextTitle: data.context_title || 'Item Inquiry'
            });
            
@@ -121,10 +121,6 @@ export default function ChatRoomPage() {
                   <h1 className="text-[15px] font-bold tracking-tight truncate text-slate-900">
                      {chatInfo?.otherName}
                   </h1>
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-500 uppercase tracking-widest mt-0.5">
-                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                     Online
-                  </div>
                </div>
             </div>
          </div>
@@ -158,7 +154,7 @@ export default function ChatRoomPage() {
                >
                   <div className={`max-w-[75%] rounded-2xl px-5 py-3.5 text-[14px] leading-relaxed ${
                      isMe 
-                        ? 'bg-slate-900 text-white rounded-br-[8px]' 
+                        ? 'bg-[#1B3C35] text-white rounded-br-[8px] shadow-sm shadow-[#1B3C35]/20' 
                         : 'bg-slate-50 border border-slate-100 text-slate-900 rounded-bl-[8px]'
                   }`}>
                      {msg.text}
@@ -171,7 +167,7 @@ export default function ChatRoomPage() {
 
       {/* ── INPUT BAR ── */}
       <div className="shrink-0 bg-white border-t border-slate-50 p-4 pb-8">
-         <form onSubmit={handleSend} className="relative flex items-center gap-3">
+         <form onSubmit={handleSend} className="flex items-center gap-3">
             <button type="button" className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 active:scale-95 transition-transform shrink-0">
                <ImageIcon size={20} />
             </button>
@@ -180,14 +176,14 @@ export default function ChatRoomPage() {
                value={newMessage}
                onChange={(e) => setNewMessage(e.target.value)}
                placeholder="Type a message..."
-               className="flex-1 h-12 bg-slate-50 rounded-full pl-5 pr-14 text-[14px] font-medium outline-none placeholder:text-slate-400 focus:bg-slate-100/50 transition-colors"
+               className="flex-1 h-12 bg-slate-50 border border-slate-100 rounded-full px-6 text-[14px] font-medium outline-none placeholder:text-[#94a3b8] focus:bg-white focus:ring-4 focus:ring-slate-100/50 transition-all shadow-inner shadow-slate-100/50"
             />
             <button 
                type="submit" 
                disabled={!newMessage.trim() || isSubmitting}
-               className="absolute right-1 w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100"
+               className="w-12 h-12 shrink-0 rounded-2xl bg-[#1B3C35] border-2 border-black/5 flex items-center justify-center text-white shadow-[0_3px_0_0_#0a1815] active:shadow-[0_0px_0_0_#0a1815] active:translate-y-[3px] transition-all disabled:opacity-40 disabled:pointer-events-none group"
             >
-               <Send size={16} className="ml-1" />
+               <Send size={18} className="mr-0.5 drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)] group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
             </button>
          </form>
       </div>

@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, updateDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import {
   AlertTriangle, CheckCircle2, X, ChevronRight,
-  Search, Plus, Phone, MessageCircle
+  Search, Plus, Phone, MessageCircle, ShieldCheck
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // ─── RADAR CARD ───────────────────────────────────────────────────────────────
 
@@ -21,19 +22,60 @@ interface RadarItem {
   time: string;
   resolved?: boolean;
   fromFirestore?: boolean;
+  reporter_uid?: string;
+  reporter_name?: string;
 }
 
 function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void }) {
+  const router = useRouter();
+  const [startingChat, setStartingChat] = useState(false);
   const isLost = item.type === 'LOST';
   const headline = isLost ? 'You Found This Item?' : 'Is This Your Item?';
   const sub = isLost
-    ? 'Contact the owner below to arrange return. They may offer a reward.'
-    : 'Contact the reporter below to collect your item.';
+    ? 'Message the owner directly to arrange a return.'
+    : 'Message the reporter directly to collect your item.';
 
-  const cleanContact = item.contact.replace(/\D/g, '');
-  const phone = cleanContact.startsWith('0') ? `6${cleanContact}` : cleanContact;
-  const messageText = encodeURIComponent(`Hi, I saw your ${item.type === 'LOST' ? 'lost' : 'found'} item post on Pulse: "${item.title}"`);
-  const msgLink = phone ? `https://wa.me/${phone}?text=${messageText}` : `https://wa.me/?text=${messageText}`;
+  const handleMessage = async () => {
+    if (!auth.currentUser) {
+      router.push('/auth');
+      return;
+    }
+    
+    const targetUid = item.reporter_uid || 'legacy_user_001';
+    const targetName = item.reporter_name || 'Pulse Student';
+
+    if (auth.currentUser.uid === targetUid) {
+      alert("You cannot message yourself.");
+      return;
+    }
+
+    setStartingChat(true);
+    const chatId = `chat_${auth.currentUser.uid}_${targetUid}_${item.id}`;
+    
+    try {
+      const chatRef = doc(db, 'chats', chatId);
+      const snap = await getDoc(chatRef);
+      if (!snap.exists()) {
+        await setDoc(chatRef, {
+           members: [auth.currentUser.uid, targetUid],
+           participant_names: {
+              [auth.currentUser.uid]: auth.currentUser.displayName || "Pulse Student",
+              [targetUid]: targetName
+           },
+           type: 'RADAR',
+           context_title: item.title,
+           context_id: item.id,
+           lastMessage: "Conversation started regarding Campus Radar post.",
+           updatedAt: serverTimestamp(),
+           unread_count: 0
+        });
+      }
+      router.push(`/messages/${chatId}`);
+    } catch (e) {
+      console.error('[Chat] Error:', e);
+      setStartingChat(false);
+    }
+  };
 
   return (
     <motion.div
@@ -48,7 +90,7 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="bg-white w-full max-w-sm rounded-2xl p-8 space-y-6"
+        className="bg-white w-full max-w-sm rounded-2xl p-8 space-y-6 shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="space-y-1">
@@ -56,23 +98,21 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
           <p className="text-[13px] font-medium text-[#94a3b8]">{sub}</p>
         </div>
 
-        <div className={`p-4 rounded-2xl space-y-2 ${isLost ? 'bg-red-50 border border-red-100' : 'bg-emerald-50 border border-emerald-100'}`}>
-          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Contact Info</p>
-          <p className="text-[15px] font-bold text-slate-900">{item.contact}</p>
-          {item.reward && (
-            <p className="text-[12px] font-semibold text-emerald-600">{item.reward}</p>
-          )}
-        </div>
+        {item.reward && isLost && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <p className="text-[12px] font-bold text-emerald-600">{item.reward}</p>
+          </div>
+        )}
 
         <div className="flex gap-3">
-          <a
-            href={msgLink}
-            target="_blank"
-            rel="noreferrer"
-            className="flex-1 h-12 bg-[#111111] text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all"
+          <button
+            onClick={handleMessage}
+            disabled={startingChat}
+            className="flex-1 h-12 bg-blue-600 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50"
           >
-            <MessageCircle size={16} /> Message
-          </a>
+            <MessageCircle size={16} /> {startingChat ? 'Connecting...' : 'Message'}
+          </button>
           <button
             onClick={onClose}
             className="h-12 px-5 bg-slate-50 border border-slate-100 text-slate-400 rounded-2xl font-bold text-[13px] active:scale-95 transition-all"
