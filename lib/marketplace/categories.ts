@@ -21,6 +21,7 @@ export interface SubcategoryConfig {
   fixedCeiling?: number;
   titleHint: string;
   serpQuerySuffix?: string;
+  studentMarket?: boolean;
 }
 
 export interface CategoryConfig {
@@ -108,6 +109,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Textbooks',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 200.00,
         titleHint: 'e.g. Thomas Calculus 14th Edition, Sadiku Fundamentals',
         serpQuerySuffix: 'textbook Malaysia',
@@ -115,6 +117,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Scientific Calculator',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 120.00,
         titleHint: 'e.g. Casio fx-570ES PLUS, Casio fx-991EX ClassWiz',
         serpQuerySuffix: 'calculator Malaysia buy',
@@ -122,6 +125,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Lab Coat & Safety',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 80.00,
         titleHint: 'e.g. Lab Coat White Size M, Safety Goggles Clear Lens',
         serpQuerySuffix: 'Malaysia buy',
@@ -129,6 +133,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Drawing & Art Tools',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 150.00,
         titleHint: 'e.g. Casio fx-570ES Scientific Calculator, Vernier Caliper',
         serpQuerySuffix: 'Malaysia buy',
@@ -136,6 +141,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Stationery Bundles',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 60.00,
         titleHint: 'e.g. Stabilo Boss Highlighter Set 6pc, Pilot G2 Pen Pack',
         serpQuerySuffix: 'Malaysia',
@@ -196,6 +202,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Fan & Cooling',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 200.00,
         titleHint: 'e.g. Pensonic 16" Stand Fan PF-1601, KDK Table Fan M30KS',
         serpQuerySuffix: 'Malaysia buy',
@@ -203,6 +210,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Kitchen Appliance',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 300.00,
         titleHint: 'e.g. Khind Rice Cooker 1.0L RC108M, Pensonic Kettle 1.7L',
         serpQuerySuffix: 'Malaysia buy',
@@ -210,12 +218,14 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Furniture',
         comparable: false,
+        studentMarket: true,
         fixedCeiling: 400.00,
         titleHint: 'e.g. Study Table with Drawer, Foldable Bed Frame Single',
       },
       {
         label: 'Storage',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 150.00,
         titleHint: 'e.g. IKEA SAMLA Box 22L, 3-Tier Stackable Drawer Cabinet',
         serpQuerySuffix: 'Malaysia',
@@ -223,12 +233,14 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Room Misc',
         comparable: false,
+        studentMarket: true,
         fixedCeiling: 80.00,
         titleHint: 'e.g. RGB LED Strip 5m, Laundry Basket, Shoe Rack 3-Tier',
       },
       {
         label: 'Bedding & Linen',
         comparable: false,
+        studentMarket: true,
         fixedCeiling: 100.00,
         titleHint: 'e.g. Single Bed Pillow Set, Bolster with Cotton Cover',
       },
@@ -334,6 +346,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Lab Coat',
         comparable: true,
+        studentMarket: true,
         fixedCeiling: 80.00,
         titleHint: 'e.g. Lab Coat White Size M, Disposable Lab Coat Large',
         serpQuerySuffix: 'lab coat Malaysia buy',
@@ -341,12 +354,14 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       {
         label: 'Club / Faculty Shirt',
         comparable: false,
+        studentMarket: true,
         fixedCeiling: 60.00,
         titleHint: 'e.g. UniKL Football Club Jersey 2024, CS Society Shirt M',
       },
       {
         label: 'Campus Merch',
         comparable: false,
+        studentMarket: true,
         fixedCeiling: 100.00,
         titleHint: 'e.g. UniKL MIIT Hoodie 2024, Pulse Campus Tee XL',
       },

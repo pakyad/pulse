@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, limit } from 'firebase/firestore';
@@ -9,7 +9,8 @@ import {
   Search, LayoutGrid, ShieldCheck, HeartPulse,
   ArrowUpRight, Filter, Store, X
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ProductCard from '@/components/shared/ProductCard';
 import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/MarketplaceFilterOverlay';
@@ -35,7 +36,7 @@ const CATEGORIES = [
   { id: 'services', label: 'Services', filter: 'Services', icon: HeartPulse  },
 ];
 
-export default function MarketplacePage() {
+function MarketplacePage() {
   const [items,          setItems]          = useState<any[]>([]);
   const [campaigns,      setCampaigns]      = useState<any[]>([]);
   const [profile,        setProfile]        = useState<any>(null);
@@ -49,6 +50,8 @@ export default function MarketplacePage() {
     officialOnly: false,
   });
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlFilter = searchParams.get('filter');
 
   useEffect(() => {
     let unsubs: (() => void)[] = [];
@@ -96,6 +99,17 @@ export default function MarketplacePage() {
     // Category
     if (activeCategory) {
       result = result.filter(i => i.category?.toLowerCase() === activeCategory.toLowerCase());
+    }
+
+    // Student Market Filter
+    if (urlFilter === 'student_market') {
+      result = result.filter(i => {
+        if (!i.category || !i.subcategory) return false;
+        const catConfig = MARKETPLACE_CATEGORIES[i.category as CategoryID];
+        if (!catConfig) return false;
+        const subConfig = catConfig.subcategories.find(s => s.label === i.subcategory);
+        return subConfig?.studentMarket === true;
+      });
     }
 
     // Price
@@ -248,6 +262,8 @@ export default function MarketplacePage() {
               <Subtext>
                 {searchQuery.trim()
                   ? `${filteredItems.length} results for "${searchQuery}"`
+                  : urlFilter === 'student_market'
+                  ? `${filteredItems.length} student-essential items across campus`
                   : `${filteredItems.length} active listings across campus`}
               </Subtext>
             </div>
@@ -329,5 +345,13 @@ export default function MarketplacePage() {
       />
 
     </main>
+  );
+}
+
+export default function MarketplacePageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <MarketplacePage />
+    </Suspense>
   );
 }

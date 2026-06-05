@@ -19,7 +19,7 @@ const VoxelContainer = ({ children, color, shadow }: { children: React.ReactNode
   </div>
 );
 
-import { Search, Receipt, Calendar, ShieldCheck, MessageSquare, Ticket } from 'lucide-react';
+import { Search, Receipt, Calendar, ShieldCheck, MessageSquare, Ticket, ShoppingBag } from 'lucide-react';
 
 const services = [
   { id: 1, label: 'Lost & Found', icon: () => <Search size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,        path: '/hub/found',                   color: 'bg-[#F59E0B]', shadow: 'bg-[#92400E]' },
@@ -28,6 +28,7 @@ const services = [
   { id: 4, label: 'UniStore',     icon: () => <ShieldCheck size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,   path: '/hub/unistore',                color: 'bg-[#3B82F6]', shadow: 'bg-[#1E40AF]' },
   { id: 5, label: 'Inbox',        icon: () => <MessageSquare size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />, path: '/messages',                    color: 'bg-[#8B5CF6]', shadow: 'bg-[#4C1D95]' },
   { id: 6, label: 'Campaigns',    icon: () => <Ticket size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,        path: '/campaigns',                   color: 'bg-[#F43F5E]', shadow: 'bg-[#BE123C]' },
+  { id: 7, label: 'Student Market', icon: () => <ShoppingBag size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,   path: '/marketplace?filter=student_market', color: 'bg-[#06B6D4]', shadow: 'bg-[#164E63]' },
 ];
 
 const ServiceGrid = () => {
