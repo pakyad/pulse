@@ -25,8 +25,13 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
 
 
       {/* ── Category-specific fields ── */}
-      {category.customFields.map((field) => (
-        <div key={field.id} className="space-y-3 pt-2 border-t border-slate-100">
+      {category.customFields.map((field) => {
+        if (field.applicableSubcategories && !field.applicableSubcategories.includes(subcategory)) {
+          return null;
+        }
+        
+        return (
+          <div key={field.id} className="space-y-3 pt-2 border-t border-slate-100">
           <div className="space-y-0.5">
             <p className="text-[14px] font-bold text-slate-900 tracking-tight">{field.label}</p>
             {field.placeholder && (
@@ -127,7 +132,8 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
           )}
 
         </div>
-      ))}
+      );
+      })}
 
     </div>
   );

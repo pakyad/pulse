@@ -209,7 +209,7 @@ function MarketplacePage() {
 
         {/* ── OFFICIAL STORE BANNERS ── */}
         <AnimatePresence>
-          {campaigns.length > 0 && (
+          {campaigns.length > 0 && urlFilter !== 'student_market' && (
             <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <div className="px-1 flex justify-between items-center">
                 <div>
@@ -258,7 +258,7 @@ function MarketplacePage() {
         <section className="space-y-8">
           <div className="px-1 flex justify-between items-end">
             <div className="space-y-1">
-              <Heading>Discover Items</Heading>
+              <Heading>{urlFilter === 'student_market' ? 'Student Market' : 'Discover Items'}</Heading>
               <Subtext>
                 {searchQuery.trim()
                   ? `${filteredItems.length} results for "${searchQuery}"`
@@ -331,6 +331,19 @@ function MarketplacePage() {
             <div className="py-24 flex flex-col items-center justify-center text-[#94a3b8] gap-4 border-2 border-dashed border-slate-100 rounded-[16px]">
               <Box size={48} strokeWidth={1} className="text-slate-300" />
               <p className="text-[11px] font-bold uppercase tracking-widest">No listings found</p>
+            </div>
+          )}
+
+          {/* ── STUDENT MARKET EXIT ── */}
+          {urlFilter === 'student_market' && (
+            <div className="pt-8 pb-12 flex flex-col items-center justify-center gap-2">
+              <p className="text-[11px] font-medium text-slate-400">Looking for more?</p>
+              <button
+                onClick={() => router.push('/marketplace')}
+                className="h-9 px-5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center text-[11px] font-bold text-slate-500 tracking-wide active:scale-95 transition-all hover:bg-slate-100"
+              >
+                Browse Marketplace
+              </button>
             </div>
           )}
         </section>

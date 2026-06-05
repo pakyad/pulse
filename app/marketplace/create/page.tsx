@@ -26,7 +26,7 @@ const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
 
 const CATEGORY_LABELS: Record<CategoryID, string> = {
   HUNGER: 'Food',
-  ACADEMIC: 'Books',
+  ACADEMIC: 'Academic',
   HOSTEL: 'Hostel',
   TECH: 'Tech',
   APPAREL: 'Apparel',
@@ -98,13 +98,14 @@ export default function CreateListingPage() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (title.trim().length >= 10 && selectedCategory && subcategory) {
       debounceRef.current = setTimeout(() => {
-        triggerPriceCheck(title, selectedCategory as string, subcategory);
+        const fullTitle = metadata.brand ? `${metadata.brand} ${title.trim()}` : title.trim();
+        triggerPriceCheck(fullTitle, selectedCategory as string, subcategory);
       }, 900);
     } else if (!subcategory || title.trim().length < 10) {
       setMarketCheck(null);
     }
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [title, selectedCategory, subcategory, triggerPriceCheck]);
+  }, [title, selectedCategory, subcategory, triggerPriceCheck, metadata.brand]);
 
   // Derive the dynamic title hint from the selected subcategory config
   const selectedSubcategoryConfig = useMemo(() => {
@@ -277,6 +278,25 @@ export default function CreateListingPage() {
                 })}
               </div>
             </section>
+
+            {/* ── SECTION: SMART CATEGORY FIELDS ── */}
+            {subcategory && MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.customFields?.some(f => !f.applicableSubcategories || f.applicableSubcategories.includes(subcategory)) && (
+              <section className="pt-2 border-t border-slate-100">
+                <div className="space-y-0.5 mb-6">
+                  <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">More Details</h2>
+                  <p className="text-[11px] font-medium text-[#94a3b8]">
+                    Specific information about this type of listing.
+                  </p>
+                </div>
+                <SmartFormFields
+                  categoryId={selectedCategory as CategoryID}
+                  subcategory={subcategory}
+                  onSubcategoryChange={setSubcategory}
+                  metadata={metadata}
+                  onMetadataChange={(k, v) => setMetadata(prev => ({ ...prev, [k]: v }))}
+                />
+              </section>
+            )}
 
             {/* ── SECTION: IMAGES ── */}
             <section className="space-y-4 pt-2 border-t border-slate-100">
@@ -584,22 +604,7 @@ export default function CreateListingPage() {
               </div>
             </section>
 
-            {/* ── SECTION: SMART CATEGORY FIELDS ── */}
-            <section className="pt-2 border-t border-slate-100">
-              <div className="space-y-0.5 mb-6">
-                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">More Details</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">
-                  Specific information about this type of listing.
-                </p>
-              </div>
-              <SmartFormFields
-                categoryId={selectedCategory as CategoryID}
-                subcategory={subcategory}
-                onSubcategoryChange={setSubcategory}
-                metadata={metadata}
-                onMetadataChange={(k, v) => setMetadata(prev => ({ ...prev, [k]: v }))}
-              />
-            </section>
+
 
             {/* ── POST BUTTON ── */}
             <div className="pt-4">

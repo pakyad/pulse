@@ -454,24 +454,28 @@ export default function RunModule() {
             </div>
           </div>
         ) : profile?.runner_status === 'pending' ? (
-           <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex items-center justify-between">
-              <div>
-                <Heading className="text-amber-900">Application Pending</Heading>
-                <Subtext className="text-amber-700/80">Your runner request is under review</Subtext>
+           <div className="relative overflow-hidden w-full bg-linear-to-br from-amber-100 to-orange-50 p-6 rounded-[24px] border border-amber-200/50 flex items-center justify-between shadow-sm">
+              <div className="relative z-10 text-left">
+                <Heading className="text-amber-950">Application Pending</Heading>
+                <Subtext className="text-amber-800/80 mt-1">Your runner profile is under review.</Subtext>
               </div>
-              <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+              <div className="relative z-10 w-11 h-11 rounded-full bg-white/60 backdrop-blur-md text-amber-700 flex items-center justify-center shadow-sm">
                 <Loader2 size={20} className="animate-spin" />
               </div>
+              {/* Decorative background blob */}
+              <div className="absolute -right-6 -top-6 w-32 h-32 bg-amber-200/50 rounded-full blur-2xl" />
            </div>
         ) : (
-           <button onClick={() => router.push('/run/onboarding')} className="w-full bg-slate-900 p-6 rounded-2xl flex items-center justify-between group active:scale-95 transition-all shadow-md shadow-slate-900/10">
-              <div className="text-left">
-                <Heading className="text-white">Become a Runner</Heading>
-                <Subtext className="text-slate-300">Earn up to RM 200/week completing missions</Subtext>
+           <button onClick={() => router.push('/run/onboarding')} className="relative overflow-hidden w-full bg-linear-to-br from-indigo-100 to-violet-50 p-6 rounded-[24px] flex items-center justify-between group active:scale-95 transition-all shadow-sm border border-indigo-200/50">
+              <div className="relative z-10 text-left">
+                <Heading className="text-indigo-950">Earn Now!</Heading>
+                <Subtext className="text-indigo-800/80 mt-1">Earn up to RM 200/week on campus</Subtext>
               </div>
-              <div className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center group-hover:bg-white group-hover:text-slate-900 transition-colors">
+              <div className="relative z-10 w-11 h-11 rounded-full bg-white/60 backdrop-blur-md text-indigo-700 flex items-center justify-center group-hover:bg-white group-hover:scale-105 transition-all shadow-sm">
                 <ArrowRight size={20} />
               </div>
+              {/* Decorative background blob */}
+              <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-indigo-200/50 rounded-full blur-2xl group-hover:bg-indigo-300/50 transition-colors" />
            </button>
         )}
 

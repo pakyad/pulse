@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { ShieldCheck } from 'lucide-react';
+import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 
 interface ProductCardProps {
   item: {
@@ -15,6 +17,8 @@ interface ProductCardProps {
     is_official?: boolean;
     status?: string;
     stock_count?: number;
+    category?: string;
+    subcategory?: string;
   };
   onClick?: () => void;
 }
@@ -27,6 +31,18 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
   
   // Format price safely
   const formattedPrice = item.price !== undefined ? Number(item.price).toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0';
+
+  // Check if item is under price governance
+  let isGoverned = false;
+  if (item.category && item.subcategory) {
+    const catConfig = MARKETPLACE_CATEGORIES[item.category as CategoryID];
+    if (catConfig) {
+      const subConfig = catConfig.subcategories.find(s => s.label === item.subcategory);
+      if (subConfig && subConfig.studentMarket) {
+        isGoverned = true;
+      }
+    }
+  }
 
   return (
     <motion.div
@@ -44,8 +60,14 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
           alt={item.title}
         />
         
+        {isGoverned && !isSold && (
+          <div className="absolute top-2 left-2 w-7 h-7 bg-teal-100 rounded-[8px] flex items-center justify-center z-10 shadow-sm border border-teal-200/50">
+            <ShieldCheck size={14} className="text-teal-600" strokeWidth={2.5} />
+          </div>
+        )}
+
         {isSold && (
-          <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/25 flex items-center justify-center z-20">
             <p className="text-[10px] font-black text-white uppercase tracking-[0.15em] bg-black/50 px-4 py-1.5 rounded-full backdrop-blur-md">
               {item.status === 'SOLD' ? 'Sold' : 'Out of Stock'}
             </p>
