@@ -25,6 +25,8 @@ export default function DeployAsset() {
   const [stock, setStock] = useState('10');
   const [category, setCategory] = useState('Food & Drinks');
   const [loading, setLoading] = useState(false);
+  const [analyzingPrice, setAnalyzingPrice] = useState(false);
+  const [priceIntelligence, setPriceIntelligence] = useState<any>(null);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((u) => {
@@ -33,6 +35,36 @@ export default function DeployAsset() {
     });
     return () => unsub();
   }, [router]);
+
+  // Debounced Price Intelligence
+  useEffect(() => {
+    if (step !== 2 || title.trim().length < 3) return;
+    
+    setAnalyzingPrice(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/price-intelligence', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, category })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setPriceIntelligence(data.data);
+          // If current price is higher than maxAllowed, auto-correct down
+          if (price && Number(price) > data.data.maxAllowed) {
+            setPrice(data.data.maxAllowed.toString());
+          }
+        }
+      } catch (err) {
+        console.error("Price intelligence failed", err);
+      } finally {
+        setAnalyzingPrice(false);
+      }
+    }, 800);
+    
+    return () => clearTimeout(timeoutId);
+  }, [title, category, step, price]);
 
   const handleDeploy = async () => {
     if (!auth.currentUser || !image) return;
@@ -134,7 +166,49 @@ export default function DeployAsset() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Price (RM)</label>
-                    <input value={price} onChange={e => setPrice(e.target.value)} type="number" placeholder="45.00" className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[20px] font-black text-navy outline-none focus:border-navy shadow-sm" />
+                    <div className="relative">
+                      <input 
+                        value={price} 
+                        onChange={e => {
+                          let val = e.target.value;
+                          if (priceIntelligence && Number(val) > priceIntelligence.maxAllowed) {
+                            val = priceIntelligence.maxAllowed.toString();
+                          }
+                          setPrice(val);
+                        }} 
+                        type="number" 
+                        placeholder="45.00" 
+                        className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[20px] font-black text-navy outline-none focus:border-navy shadow-sm" 
+                      />
+                      {analyzingPrice && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-slate-300">
+                          <Loader2 size={16} className="animate-spin" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <AnimatePresence>
+                      {priceIntelligence && !analyzingPrice && (
+                        <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}>
+                          <div className="p-3 bg-cyan-50/50 border border-cyan-100 rounded-xl space-y-2">
+                            <p className="text-[10px] font-bold text-cyan-800 uppercase tracking-widest flex items-center gap-1.5">
+                              <Zap size={12} className="fill-cyan-500 text-cyan-500" /> Market Intelligence
+                            </p>
+                            <div className="flex justify-between items-center text-[10px] font-bold text-cyan-900/60">
+                              <span>Live Median: RM {priceIntelligence.baseline.toFixed(2)}</span>
+                              <span>Ceiling: RM {priceIntelligence.maxAllowed.toFixed(2)}</span>
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => setPrice(priceIntelligence.maxAllowed.toString())}
+                              className="w-full h-8 mt-1 bg-cyan-100 hover:bg-cyan-200 text-cyan-900 rounded-lg text-[11px] font-bold transition-colors active:scale-95 flex items-center justify-center"
+                            >
+                              Apply Fair Rate: RM {priceIntelligence.maxAllowed.toFixed(2)}
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Quantity</label>
