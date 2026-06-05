@@ -67,8 +67,8 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
         )}
 
         {isSold && (
-          <div className="absolute inset-0 bg-black/25 flex items-center justify-center z-20">
-            <p className="text-[10px] font-black text-white uppercase tracking-[0.15em] bg-black/50 px-4 py-1.5 rounded-full backdrop-blur-md">
+          <div className="absolute inset-0 bg-slate-900/25 flex items-center justify-center z-20">
+            <p className="text-[10px] font-semibold text-white uppercase tracking-[0.15em] bg-slate-900/50 px-4 py-1.5 rounded-full backdrop-blur-md">
               {item.status === 'SOLD' ? 'Sold' : 'Out of Stock'}
             </p>
           </div>

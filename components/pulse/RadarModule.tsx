@@ -82,7 +82,7 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-200 bg-black/50 backdrop-blur-md flex items-end justify-center p-4"
+      className="fixed inset-0 z-200 bg-slate-900/50 backdrop-blur-md flex items-end justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -109,7 +109,7 @@ function ContactModal({ item, onClose }: { item: RadarItem; onClose: () => void 
           <button
             onClick={handleMessage}
             disabled={startingChat}
-            className="flex-1 h-12 bg-blue-600 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50"
+            className="flex-1 h-12 bg-slate-900 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50"
           >
             <MessageCircle size={16} /> {startingChat ? 'Connecting...' : 'Message'}
           </button>
@@ -131,59 +131,63 @@ export function RadarCard({ item, onMarkResolved, isMyPost }: { item: RadarItem;
 
   return (
     <>
-      <div className={`shrink-0 w-[240px] rounded-2xl p-5 space-y-4 border flex flex-col transition-all ${
+      <div className={`shrink-0 w-[240px] rounded-[24px] p-5 flex flex-col transition-all ${
         item.resolved
-          ? 'bg-slate-50/50 border-slate-100 opacity-60'
-          : 'bg-white border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-slate-200'
+          ? 'bg-slate-50/50 opacity-60'
+          : 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-100/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)]'
       }`}>
         {/* Header: Subtle Type badge + time */}
-        <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-[0.15em] ${
+        <div className="flex items-center justify-between mb-3">
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold capitalize ${
             item.resolved 
-              ? 'bg-slate-100 text-slate-400' 
+              ? 'bg-slate-100/50 text-slate-500' 
               : isLost 
-                ? 'bg-slate-100 text-slate-600' 
-                : 'bg-slate-100 text-slate-600'
+                ? 'bg-rose-50 text-rose-600' 
+                : 'bg-emerald-50 text-emerald-600'
           }`}>
             {item.resolved
-              ? <CheckCircle2 size={10} />
-              : isLost ? <AlertTriangle size={10} /> : <CheckCircle2 size={10} />
+              ? <CheckCircle2 size={12} />
+              : isLost ? <AlertTriangle size={12} /> : <CheckCircle2 size={12} />
             }
-            {item.resolved ? 'RESOLVED' : item.type}
+            {item.resolved ? 'Resolved' : item.type.toLowerCase()}
           </div>
-          <span className="text-[10px] font-medium text-slate-400">{item.time}</span>
+          <span className="text-[11px] font-medium text-slate-400">{item.time}</span>
         </div>
 
         {/* Content */}
-        <div className="flex-1 space-y-1.5">
-          <p className="text-[13px] font-bold text-slate-900 leading-snug">{item.title}</p>
-          <p className="text-[11px] font-medium text-[#64748b] leading-relaxed line-clamp-2">
+        <div className="flex-1 space-y-2 mb-4">
+          <p className="text-[14px] font-bold text-slate-800 leading-snug tracking-tight">
+            {item.title.replace(/^(Lost|Found):\s*/i, '')}
+          </p>
+          <p className="text-[12px] font-medium text-slate-500 leading-relaxed line-clamp-3">
             {item.detail}
           </p>
         </div>
 
         {/* Footer info */}
-        <div className="text-[11px] font-medium text-slate-500 pt-3 border-t border-slate-100/80">
-          {item.reward && <span className="block font-bold text-slate-900 mb-0.5">{item.reward}</span>}
+        <div className="text-[11px] font-medium text-slate-500 pt-3 border-t border-slate-100/80 mb-4">
+          {item.reward && <span className="block font-bold text-slate-800 mb-0.5">{item.reward}</span>}
           <span>{item.contact}</span>
         </div>
 
-        {/* CTA Button - Sleek and professional */}
+        {/* CTA Button - Soft UI Style */}
         {!item.resolved && (
           isMyPost ? (
             <button
               onClick={() => onMarkResolved?.(item.id)}
-              className="w-full h-10 rounded-xl bg-emerald-500 text-white text-[12px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-[0_3px_0_0_#059669] active:shadow-[0_0px_0_0_#059669] active:translate-y-[3px]"
+              className="w-full h-10 rounded-xl bg-emerald-50 text-emerald-700 text-[12px] font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-emerald-100"
             >
-              <CheckCircle2 size={14} />
+              <CheckCircle2 size={16} />
               Mark as Resolved
             </button>
           ) : (
             <button
               onClick={() => setShowContact(true)}
-              className="w-full h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-[12px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-slate-100"
+              className={`w-full h-10 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all ${
+                isLost ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+              }`}
             >
-              {isLost ? <Search size={14} className="text-slate-500" /> : <CheckCircle2 size={14} className="text-slate-500" />}
+              {isLost ? <Search size={14} /> : <CheckCircle2 size={14} />}
               {isLost ? 'I Have This' : 'This Is Mine'}
             </button>
           )
@@ -244,7 +248,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-200 bg-black/50 backdrop-blur-md flex items-end justify-center p-4"
+      className="fixed inset-0 z-200 bg-slate-900/50 backdrop-blur-md flex items-end justify-center p-4"
       onClick={onClose}
     >
       <motion.div
@@ -252,7 +256,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 80, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="bg-white w-full max-w-sm rounded-2xl p-8 space-y-6"
+        className="bg-white w-full max-w-sm rounded-[24px] p-8 space-y-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -261,11 +265,11 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
             <p className="text-[18px] font-bold text-slate-900 tracking-tight">
               {done ? 'Posted!' : step === 'pick' ? 'Campus Radar' : isLost ? 'Report Lost Item' : 'Report Found Item'}
             </p>
-            <p className="text-[12px] font-medium text-[#94a3b8] mt-0.5">
+            <p className="text-[13px] font-medium text-slate-500 mt-0.5">
               {done ? 'Your post is now live on Pulse.' : step === 'pick' ? 'What do you want to report?' : 'Fill in the details below'}
             </p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 active:scale-95">
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 active:scale-95 hover:bg-slate-100 transition-all">
             <X size={16} />
           </button>
         </div>
@@ -276,10 +280,10 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
             <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
               <CheckCircle2 size={28} className="text-emerald-500" />
             </div>
-            <p className="text-[13px] font-medium text-[#94a3b8] text-center">
+            <p className="text-[13px] font-medium text-slate-500 text-center">
               Other students can now see your report and contact you directly.
             </p>
-            <button onClick={onClose} className="w-full h-12 bg-[#111111] text-white rounded-2xl font-bold text-[13px] active:scale-95 transition-all">
+            <button onClick={onClose} className="w-full h-12 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-[16px] font-bold text-[13px] active:scale-95 transition-all hover:bg-indigo-100 shadow-sm">
               Done
             </button>
           </div>
@@ -290,34 +294,34 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
           <div className="space-y-3">
             <button
               onClick={() => { setType('LOST'); setStep('form'); }}
-              className="w-full p-5 rounded-2xl border border-red-100 bg-red-50/60 flex items-center justify-between group active:scale-95 transition-all"
+              className="w-full p-5 rounded-[20px] border border-rose-100/50 bg-rose-50/50 flex items-center justify-between group active:scale-95 transition-all hover:bg-rose-50"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-                  <AlertTriangle size={18} className="text-red-500" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-[16px] bg-rose-100/80 flex items-center justify-center">
+                  <AlertTriangle size={20} className="text-rose-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-[14px] font-bold text-slate-900">I Lost Something</p>
-                  <p className="text-[11px] font-medium text-[#94a3b8]">Post a lost item alert</p>
+                  <p className="text-[15px] font-bold text-slate-900">I Lost Something</p>
+                  <p className="text-[12px] font-medium text-slate-500">Post a lost item alert</p>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-slate-300" />
+              <ChevronRight size={18} className="text-slate-300" />
             </button>
 
             <button
               onClick={() => { setType('FOUND'); setStep('form'); }}
-              className="w-full p-5 rounded-2xl border border-emerald-100 bg-emerald-50/60 flex items-center justify-between group active:scale-95 transition-all"
+              className="w-full p-5 rounded-[20px] border border-emerald-100/50 bg-emerald-50/50 flex items-center justify-between group active:scale-95 transition-all hover:bg-emerald-50"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <CheckCircle2 size={18} className="text-emerald-500" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-[16px] bg-emerald-100/80 flex items-center justify-center">
+                  <CheckCircle2 size={20} className="text-emerald-600" />
                 </div>
                 <div className="text-left">
-                  <p className="text-[14px] font-bold text-slate-900">I Found Something</p>
-                  <p className="text-[11px] font-medium text-[#94a3b8]">Help return a found item</p>
+                  <p className="text-[15px] font-bold text-slate-900">I Found Something</p>
+                  <p className="text-[12px] font-medium text-slate-500">Help return a found item</p>
                 </div>
               </div>
-              <ChevronRight size={16} className="text-slate-300" />
+              <ChevronRight size={18} className="text-slate-300" />
             </button>
           </div>
         )}
@@ -326,21 +330,21 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
         {!done && step === 'form' && (
           <div className="space-y-4">
             {/* Item name */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <div className="space-y-2">
+              <label className="text-[12px] font-semibold text-slate-800">
                 {isLost ? 'What did you lose?' : 'What did you find?'}
               </label>
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder={isLost ? 'e.g. Blue Casio Calculator' : 'e.g. Student ID Card'}
-                className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
+                className="w-full h-12 px-4 rounded-[16px] border border-slate-100 bg-slate-50 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-300 transition-colors"
               />
             </div>
 
             {/* Location / detail */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <div className="space-y-2">
+              <label className="text-[12px] font-semibold text-slate-800">
                 {isLost ? 'Where did you last see it?' : 'Where did you find it?'}
               </label>
               <textarea
@@ -348,46 +352,46 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
                 onChange={e => setDetail(e.target.value)}
                 placeholder={isLost ? 'e.g. Level 3 Library, near the window seats' : 'e.g. Surrendered to guard at Main Lobby'}
                 rows={2}
-                className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-[16px] border border-slate-100 bg-slate-50 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-300 transition-colors resize-none"
               />
             </div>
 
             {/* Contact */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Your contact</label>
+            <div className="space-y-2">
+              <label className="text-[12px] font-semibold text-slate-800">Your contact</label>
               <input
                 value={contact}
                 onChange={e => setContact(e.target.value)}
                 placeholder="e.g. DM @haziq_miit or 011-XXXXXXXX"
-                className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
+                className="w-full h-12 px-4 rounded-[16px] border border-slate-100 bg-slate-50 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-300 transition-colors"
               />
             </div>
 
             {/* Reward (lost only) */}
             {isLost && (
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reward (optional)</label>
+              <div className="space-y-2">
+                <label className="text-[12px] font-semibold text-slate-800">Reward (optional)</label>
                 <input
                   value={reward}
                   onChange={e => setReward(e.target.value)}
                   placeholder="e.g. RM 10 reward"
-                  className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50 text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-colors"
+                  className="w-full h-12 px-4 rounded-[16px] border border-slate-100 bg-slate-50 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-300 transition-colors"
                 />
               </div>
             )}
 
-            <div className="flex gap-3 pt-1">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setStep('pick')}
-                className="h-12 px-5 bg-slate-50 border border-slate-100 text-slate-400 rounded-2xl font-bold text-[13px] active:scale-95 transition-all"
+                className="h-12 px-5 bg-white border border-slate-200 text-slate-600 rounded-[16px] font-bold text-[13px] active:scale-95 transition-all hover:bg-slate-50 shadow-sm"
               >
                 Back
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!canSubmit || submitting}
-                className={`flex-1 h-12 rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-30 ${
-                  isLost ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'
+                className={`flex-1 h-12 rounded-[16px] font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-30 shadow-sm ${
+                  isLost ? 'bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100'
                 }`}
               >
                 {submitting ? 'Posting...' : 'Post to Pulse'}

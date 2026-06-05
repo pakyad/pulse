@@ -40,7 +40,7 @@ export default function AdminDisputeGuide() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-1 h-1 rounded-full bg-red-500" />
-        <h3 className="text-[11px] font-black text-[#94a3b8] uppercase tracking-widest">Admin Decision Kit</h3>
+        <h3 className="text-[11px] font-semibold text-[#94a3b8] ">Admin Decision Kit</h3>
       </div>
 
       {/* ── SECTION 1: BLAME LOGIC ── */}
@@ -81,7 +81,7 @@ export default function AdminDisputeGuide() {
 
       {/* ── SECTION 3: DECISION SUMMARY (RECEIPT STYLE) ── */}
       <div className="space-y-3">
-        <p className="text-[11px] font-black text-[#94a3b8] uppercase tracking-widest pl-1">Final Verdict Preview</p>
+        <p className="text-[11px] font-semibold text-[#94a3b8]  pl-1">Final Verdict Preview</p>
         <div className="bg-slate-50 border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden">
           <div className="px-5 py-4 flex items-center justify-between">
             <span className="text-[12px] font-medium text-[#94a3b8]">Refund to Student</span>
@@ -93,12 +93,12 @@ export default function AdminDisputeGuide() {
           </div>
           <div className="px-5 py-4 flex items-center justify-between bg-white/50">
             <span className="text-[12px] font-bold text-slate-900">Admin Action</span>
-            <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">Close Case</span>
+            <span className="text-[11px] font-semibold text-slate-900">Close Case</span>
           </div>
         </div>
       </div>
       
-      <button className="w-full py-4 bg-red-500 text-white rounded-xl text-[12px] font-bold uppercase tracking-widest shadow-md shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+      <button className="w-full py-4 bg-red-500 text-white rounded-xl text-[12px] font-bold  shadow-md shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
         <AlertTriangle size={16} /> Execute Verdict
       </button>
     </div>

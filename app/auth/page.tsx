@@ -86,7 +86,7 @@ export default function AuthPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white font-sans text-black overflow-x-hidden antialiased relative">
+    <main className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden antialiased relative">
       
       <AnimatePresence mode="wait">
         {view === 'landing' && (
@@ -101,7 +101,7 @@ export default function AuthPage() {
                  onClick={() => router.push('/')} 
                  className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center transition-all active:scale-95"
                >
-                  <X size={20} className="text-black" />
+                  <X size={20} className="text-slate-900" />
                </button>
                <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">Sign in</h1>
                <div className="w-10" />
@@ -131,7 +131,7 @@ export default function AuthPage() {
                </div>
 
                <button 
-                 className="w-full py-4 bg-black text-white rounded-[2rem] font-semibold text-[16px] flex items-center justify-center gap-3 transition-all"
+                 className="w-full py-4 bg-slate-900 text-white rounded-[2rem] font-semibold text-[16px] flex items-center justify-center gap-3 transition-all"
                >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="22" height="22">
                      <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
@@ -143,7 +143,7 @@ export default function AuthPage() {
                </button>
 
                <button 
-                 className="w-full py-4 bg-white border border-gray-300 text-black rounded-[2rem] font-semibold text-[16px] flex items-center justify-center gap-3 transition-all active:bg-gray-50"
+                 className="w-full py-4 bg-white border border-gray-300 text-slate-900 rounded-[2rem] font-semibold text-[16px] flex items-center justify-center gap-3 transition-all active:bg-gray-50"
                >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22">
                      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
@@ -172,7 +172,7 @@ export default function AuthPage() {
           >
             <div className="flex items-center justify-between mb-12 relative">
                <button onClick={() => setView('landing')} className="w-10 h-10 rounded-full bg-[#F2F8FF] flex items-center justify-center transition-all active:scale-95">
-                  <ChevronLeft size={20} className="text-black" strokeWidth={3} />
+                  <ChevronLeft size={20} className="text-slate-900" strokeWidth={3} />
                </button>
                <h1 className="text-[17px] font-bold absolute left-1/2 -translate-x-1/2">Sign in</h1>
                <div className="w-10" />
@@ -182,7 +182,7 @@ export default function AuthPage() {
                {error && <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-[14px] font-medium border border-red-100">{error}</div>}
                
                <div className="space-y-2">
-                  <label className="text-[14px] font-semibold text-black ml-4">Email or username</label>
+                  <label className="text-[14px] font-semibold text-slate-900 ml-4">Email or username</label>
                   <input 
                     type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                     placeholder="iyad.mohmad@s.unikl.edu.my"
@@ -191,7 +191,7 @@ export default function AuthPage() {
                </div>
 
                <div className="space-y-2">
-                  <label className="text-[14px] font-semibold text-black ml-4">Password</label>
+                  <label className="text-[14px] font-semibold text-slate-900 ml-4">Password</label>
                   <input 
                     type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
@@ -216,12 +216,12 @@ export default function AuthPage() {
             className="flex flex-col min-h-screen px-8 py-12 max-w-md mx-auto w-full"
           >
             <div className="flex items-center justify-between mb-16">
-               <button onClick={() => regStep > 1 ? setRegStep(s => s - 1) : setView('landing')} className="p-2 -ml-2 text-slate-300 hover:text-black transition-colors">
+               <button onClick={() => regStep > 1 ? setRegStep(s => s - 1) : setView('landing')} className="p-2 -ml-2 text-slate-300 hover:text-slate-900 transition-colors">
                   <ChevronLeft size={28} />
                </button>
                <div className="flex gap-1">
                   {[1, 2].map(i => (
-                    <div key={i} className={`h-1 rounded-full transition-all duration-500 ${regStep === i ? 'w-8 bg-black' : 'w-2 bg-slate-100'}`} />
+                    <div key={i} className={`h-1 rounded-full transition-all duration-500 ${regStep === i ? 'w-8 bg-slate-900' : 'w-2 bg-slate-100'}`} />
                   ))}
                </div>
             </div>
@@ -230,7 +230,7 @@ export default function AuthPage() {
                <AnimatePresence mode="wait">
                   {regStep === 1 && (
                     <motion.div key="st1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-12">
-                       <h2 className="text-[36px] font-black tracking-tightest leading-[1.1] text-navy">
+                       <h2 className="text-[36px] font-semibold tracking-tightest leading-[1.1] text-navy">
                          Institutional <br/>Identity.
                        </h2>
                        
@@ -262,13 +262,13 @@ export default function AuthPage() {
 
                   {regStep === 2 && (
                     <motion.div key="st2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-12">
-                       <h2 className="text-[36px] font-black tracking-tightest leading-[1.1] text-navy">
+                       <h2 className="text-[36px] font-semibold tracking-tightest leading-[1.1] text-navy">
                          Secure <br/>Access.
                        </h2>
 
                        <div className="space-y-8">
                           <div className="space-y-1 border-b border-slate-100 pb-2">
-                             <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest">ID</label>
+                             <label className="text-[10px] font-semibold text-slate-300 ">ID</label>
                              <input 
                                type="email" value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} 
                                placeholder="student@s.unikl.edu.my"
@@ -276,7 +276,7 @@ export default function AuthPage() {
                              />
                           </div>
                           <div className="space-y-1 border-b border-slate-100 pb-2">
-                             <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Key</label>
+                             <label className="text-[10px] font-semibold text-slate-300 ">Key</label>
                              <input 
                                type="password" value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} 
                                placeholder="Set your password"

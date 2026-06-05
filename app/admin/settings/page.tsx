@@ -30,8 +30,8 @@ export default function SettingsPage() {
     <div className="space-y-8 max-w-2xl">
       {/* Header */}
       <div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Configuration</p>
-        <h1 className="text-[24px] font-black text-slate-900 tracking-tight">Settings</h1>
+        <p className="text-[10px] font-semibold text-slate-400  mb-1">Configuration</p>
+        <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Settings</h1>
       </div>
 
       {/* Price Limits */}
@@ -45,7 +45,7 @@ export default function SettingsPage() {
 
         {/* Type */}
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Limit Type</label>
+          <label className="text-[10px] font-bold text-slate-400  block mb-2">Limit Type</label>
           <div className="flex p-1 bg-slate-50 rounded-xl border border-slate-100 gap-1">
             {(['REGULATED', 'PREMIUM'] as const).map(t => (
               <button key={t} onClick={() => setType(t)}
@@ -60,7 +60,7 @@ export default function SettingsPage() {
 
         {/* Category */}
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Category</label>
+          <label className="text-[10px] font-bold text-slate-400  block mb-2">Category</label>
           <select value={category} onChange={e => setCategory(e.target.value as CategoryID)}
             className="w-full h-11 bg-slate-50 border border-slate-100 rounded-xl px-4 text-[13px] font-semibold text-slate-900 outline-none focus:border-slate-300 transition-all">
             {Object.values(MARKETPLACE_CATEGORIES).map(cat => (
@@ -71,7 +71,7 @@ export default function SettingsPage() {
 
         {/* Price */}
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
+          <label className="text-[10px] font-bold text-slate-400  block mb-2">
             Price Ceiling (RM) · Campus default: RM {CAMPUS_DEFAULTS[category] ?? '—'}
           </label>
           <input type="number" value={price} onChange={e => setPrice(e.target.value)}
@@ -81,8 +81,8 @@ export default function SettingsPage() {
 
         {/* Save */}
         <button onClick={handleSave} disabled={!price || saving}
-          className={`w-full h-12 rounded-xl font-bold text-[12px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40 ${
-            done ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white hover:bg-black'
+          className={`w-full h-12 rounded-xl font-bold text-[12px]  transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40 ${
+            done ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white hover:bg-slate-900'
           }`}>
           {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
           {done ? 'Saved!' : 'Save Limit'}
@@ -92,7 +92,7 @@ export default function SettingsPage() {
       {/* Campus Defaults Reference */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Campus Default Ceilings</p>
+          <p className="text-[11px] font-bold text-slate-400 ">Campus Default Ceilings</p>
           <p className="text-[11px] text-slate-400 mt-0.5">Used when no custom limit is saved for a category</p>
         </div>
         {Object.entries(CAMPUS_DEFAULTS).map(([cat, val]) => {
@@ -103,7 +103,7 @@ export default function SettingsPage() {
                 <p className="text-[13px] font-bold text-slate-900">{config?.label || cat}</p>
                 <p className="text-[10px] font-medium text-slate-400">{config?.subtext}</p>
               </div>
-              <p className="text-[14px] font-black text-slate-500">RM {val.toFixed(2)}</p>
+              <p className="text-[14px] font-semibold text-slate-500">RM {val.toFixed(2)}</p>
             </div>
           );
         })}

@@ -46,7 +46,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
 
   return (
     <div className="relative">
-      <div className={`relative ${height} rounded-[2.5rem] overflow-hidden shadow-md shadow-black/10 group`}>
+      <div className={`relative ${height} rounded-[2.5rem] overflow-hidden shadow-md shadow-slate-900/10 group`}>
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={index}
@@ -102,11 +102,11 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
             <div className="relative z-10 flex items-end justify-between w-full">
                <div className="flex-1 pr-6">
                  {slide.tag && (
-                    <span className="inline-block px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest mb-3 border border-white/20 shadow-sm">
+                    <span className="inline-block px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold mb-3 border border-white/20 shadow-sm">
                       {slide.tag}
                     </span>
                  )}
-                 <h2 className="text-white text-[28px] font-black leading-[1.1] tracking-tighter mb-2 drop-shadow-md">{slide.headline}</h2>
+                 <h2 className="text-white text-[28px] font-semibold leading-[1.1] tracking-tighter mb-2 drop-shadow-md">{slide.headline}</h2>
                  {slide.subline && <p className="text-white/80 text-[11px] font-bold leading-relaxed uppercase tracking-wide max-w-[85%] drop-shadow-sm">{slide.subline}</p>}
                </div>
                
@@ -124,7 +124,7 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
               key={i}
               onClick={() => goTo(i)}
               className={`transition-all duration-300 rounded-full ${
-                i === index ? 'w-6 h-1.5 bg-black' : 'w-1.5 h-1.5 bg-gray-200'
+                i === index ? 'w-6 h-1.5 bg-slate-900' : 'w-1.5 h-1.5 bg-gray-200'
               }`}
             />
           ))}

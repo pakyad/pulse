@@ -77,7 +77,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
         <div className="absolute inset-0 backface-hidden hologram-card rounded-2xl p-8 flex flex-col items-center justify-center rotate-y-180">
           <div className="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
              <div className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" />
-             <p className="text-[9px] text-navy/40 tracking-[0.2em] font-black uppercase">Dynamic Security Active</p>
+             <p className="text-[9px] text-navy/40 tracking-[0.2em] font-semibold uppercase">Dynamic Security Active</p>
           </div>
           
           <div className="relative mt-4">
@@ -110,7 +110,7 @@ export default function HologramID({ name, role, matricNo, qrValue, claimToken, 
           </div>
           
           <div className="mt-8 pt-6 border-t border-navy/10 w-full text-center">
-             <p className="font-mono text-[10px] font-black text-navy tracking-widest opacity-40">
+             <p className="font-mono text-[10px] font-semibold text-navy tracking-widest opacity-40">
                 {claimToken ? `${claimToken.slice(0,8)}...${securityPulse}` : 'ID_SECURE_AUTH'}
              </p>
           </div>

@@ -99,7 +99,7 @@ export default function AdminLedgerPage() {
             <div className="h-10 w-px bg-white/10" />
             <div className="p-6 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-8">
                <div className="text-center">
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Pulse Fee (10%)</p>
+                  <p className="text-[10px] font-bold text-white/40  mb-1">Pulse Fee (10%)</p>
                   <p className="text-[20px] font-bold text-emerald-500">RM 48.50</p>
                </div>
             </div>
@@ -111,7 +111,7 @@ export default function AdminLedgerPage() {
          {/* PENDING LEDGER */}
          <div className="lg:col-span-8 space-y-8">
             <div className="flex justify-between items-end mb-6">
-               <h3 className="text-[14px] font-bold text-white/20 uppercase tracking-[0.2em]">Pending Reconciliations</h3>
+               <h3 className="text-[14px] font-bold text-white/20 ">Pending Reconciliations</h3>
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
 
@@ -120,7 +120,7 @@ export default function AdminLedgerPage() {
                   <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/10 mb-6">
                      <CheckCircle2 size={40} />
                   </div>
-                  <p className="text-[13px] font-bold text-white/20 uppercase tracking-[0.2em]">Ledger Pulse Clean</p>
+                  <p className="text-[13px] font-bold text-white/20 ">Ledger Pulse Clean</p>
                </div>
             ) : (
                <div className="space-y-4">
@@ -138,25 +138,25 @@ export default function AdminLedgerPage() {
                              </div>
                              <div>
                                 <h4 className="text-[18px] font-bold tracking-tight">{req.merchant_name}</h4>
-                                <p className="text-[11px] font-bold text-white/20 uppercase tracking-widest">Institutional Provider</p>
+                                <p className="text-[11px] font-bold text-white/20 ">Institutional Provider</p>
                              </div>
                           </div>
-                          <div className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold uppercase tracking-widest border border-emerald-500/20">
+                          <div className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold  border border-emerald-500/20">
                              Awaiting Auth
                           </div>
                        </div>
 
                        <div className="grid grid-cols-3 gap-8 mb-8 p-6 bg-white/5 rounded-2xl">
                           <div>
-                             <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">Gross Revenue</p>
+                             <p className="text-[9px] font-bold text-white/20  mb-1">Gross Revenue</p>
                              <p className="text-[16px] font-bold tracking-widest text-white">RM {req.total_revenue.toFixed(2)}</p>
                           </div>
                           <div>
-                             <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">Pulse Fee (10%)</p>
+                             <p className="text-[9px] font-bold text-white/20  mb-1">Pulse Fee (10%)</p>
                              <p className="text-[16px] font-bold tracking-widest text-red-400">- RM {req.pulse_fee.toFixed(2)}</p>
                           </div>
                           <div>
-                             <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">Net Payout</p>
+                             <p className="text-[9px] font-bold text-white/20  mb-1">Net Payout</p>
                              <p className="text-[20px] font-bold tracking-tighter text-emerald-500">RM {req.net_payout.toFixed(2)}</p>
                           </div>
                        </div>
@@ -164,7 +164,7 @@ export default function AdminLedgerPage() {
                        <div className="flex gap-3">
                           <button 
                             onClick={() => handleAuthorizePayout(req)}
-                            className="flex-1 h-14 bg-white text-navy rounded-full font-bold text-[13px] uppercase tracking-widest active:scale-95 transition-all shadow-md shadow-white/5"
+                            className="flex-1 h-14 bg-white text-navy rounded-full font-bold text-[13px]  active:scale-95 transition-all shadow-md shadow-white/5"
                           >
                              Authorize Fund Transfer
                           </button>
@@ -180,7 +180,7 @@ export default function AdminLedgerPage() {
 
          {/* TREASURY SUMMARY */}
          <div className="lg:col-span-4 space-y-8">
-            <h3 className="text-[14px] font-bold text-white/20 uppercase tracking-[0.2em]">Fiscal Oversight</h3>
+            <h3 className="text-[14px] font-bold text-white/20 ">Fiscal Oversight</h3>
             
             <div className="space-y-4">
                <div className="bg-white/5 border border-white/5 p-8 rounded-[3.5rem] space-y-6">
@@ -189,7 +189,7 @@ export default function AdminLedgerPage() {
                        <Wallet size={20} />
                     </div>
                     <div>
-                       <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Platform Vault</p>
+                       <p className="text-[10px] font-bold text-white/40 ">Platform Vault</p>
                        <p className="text-[16px] font-bold">RM 12,480.00</p>
                     </div>
                   </div>
@@ -199,7 +199,7 @@ export default function AdminLedgerPage() {
                      <div className="h-px bg-white/5" />
                      <div className="flex justify-between items-center">
                         <p className="text-[12px] font-bold text-white/40">Fiscal Health</p>
-                        <p className="text-[12px] font-black text-emerald-500">OPTIMAL</p>
+                        <p className="text-[12px] font-semibold text-emerald-500">OPTIMAL</p>
                      </div>
                   </div>
                </div>
@@ -217,7 +217,7 @@ export default function AdminLedgerPage() {
                         <div key={i} className="flex justify-between items-center">
                            <div>
                               <p className="text-[11px] font-bold text-white">{h.merchant_name}</p>
-                              <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Authorized</p>
+                              <p className="text-[9px] font-bold text-white/40 ">Authorized</p>
                            </div>
                            <p className="text-[13px] font-bold text-emerald-500">RM {h.net_payout?.toFixed(2)}</p>
                         </div>

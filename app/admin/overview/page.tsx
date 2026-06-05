@@ -58,8 +58,8 @@ export default function OverviewPage() {
     <div className="space-y-8 max-w-6xl">
       {/* Header */}
       <div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Dashboard</p>
-        <h1 className="text-[24px] font-black text-slate-900 tracking-tight">Overview</h1>
+        <p className="text-[10px] font-semibold text-slate-400  mb-1">Dashboard</p>
+        <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Overview</h1>
       </div>
 
       {/* Stats Grid */}
@@ -67,7 +67,7 @@ export default function OverviewPage() {
         {cards.map((card) => (
           <div key={card.label} className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{card.label}</p>
+              <p className="text-[10px] font-bold text-slate-400 ">{card.label}</p>
               <div className="w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center">
                 <card.icon size={16} className="text-slate-400" />
               </div>
@@ -75,7 +75,7 @@ export default function OverviewPage() {
             {loading ? (
               <div className="h-8 w-16 bg-slate-100 rounded-lg animate-pulse" />
             ) : (
-              <p className={`text-[32px] font-black leading-none ${card.color}`}>{card.value}</p>
+              <p className={`text-[32px] font-semibold leading-none ${card.color}`}>{card.value}</p>
             )}
           </div>
         ))}
@@ -88,7 +88,7 @@ export default function OverviewPage() {
           : 'bg-emerald-50 border-emerald-100'
       }`}>
         <div>
-          <p className={`text-[11px] font-black uppercase tracking-widest mb-1 ${
+          <p className={`text-[11px] font-semibold mb-1 ${
             stats.activeDisputes > 3 || stats.flaggedItems > 5 ? 'text-amber-600' : 'text-emerald-600'
           }`}>
             {stats.activeDisputes > 3 || stats.flaggedItems > 5 ? 'Attention Needed' : 'All Systems Normal'}

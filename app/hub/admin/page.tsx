@@ -68,7 +68,7 @@ export default function AdminHub() {
       <section className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50 border-b border-slate-50">
         <BackButton />
         <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">MIIT Registry</p>
+          <p className="text-[10px] font-bold text-slate-400  mb-1">MIIT Registry</p>
           <h1 className="text-[18px] font-bold tracking-widest text-navy">Administrative Desk</h1>
         </div>
         <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center text-white">
@@ -82,7 +82,7 @@ export default function AdminHub() {
         <section className="space-y-4">
            <div className="flex justify-between items-end">
               <h3 className="text-[17px] font-bold text-navy tracking-tight">Active Submissions</h3>
-              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Total: {ACTIVE_SUBMISSIONS.length}</span>
+              <span className="text-[10px] font-bold text-slate-300 ">Total: {ACTIVE_SUBMISSIONS.length}</span>
            </div>
            
            <div className="space-y-3">
@@ -94,11 +94,11 @@ export default function AdminHub() {
                       </div>
                       <div>
                          <h4 className="text-[14px] font-bold text-navy">{sub.title}</h4>
-                         <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{sub.id} • {sub.date}</p>
+                         <p className="text-[10px] font-bold text-slate-300 ">{sub.id} • {sub.date}</p>
                       </div>
                    </div>
                    <div className="flex items-center gap-3">
-                      <span className={`text-[9px] font-bold uppercase tracking-widest ${sub.color}`}>{sub.status}</span>
+                      <span className={`text-[9px] font-bold  ${sub.color}`}>{sub.status}</span>
                       <ArrowRight size={14} className="text-slate-200 group-hover:text-navy group-hover:translate-x-1 transition-all" />
                    </div>
                 </div>
@@ -131,7 +131,7 @@ export default function AdminHub() {
                    </div>
                    <div className="flex flex-wrap gap-2 pt-2">
                       {channel.fields.map((f, i) => (
-                        <span key={i} className="text-[8px] font-bold text-slate-300 border border-slate-100 px-2 py-0.5 rounded-md uppercase tracking-widest">{f}</span>
+                        <span key={i} className="text-[8px] font-bold text-slate-300 border border-slate-100 px-2 py-0.5 rounded-md ">{f}</span>
                       ))}
                    </div>
                 </motion.button>
@@ -150,7 +150,7 @@ export default function AdminHub() {
                  Submissions are processed within 3 working days. Ensure all attached documents are original copies.
               </p>
            </div>
-           <button className="text-[11px] font-bold text-navy uppercase tracking-widest underline underline-offset-8 decoration-slate-200">
+           <button className="text-[11px] font-bold text-navy  underline underline-offset-8 decoration-slate-200">
               View Submission Guidelines
            </button>
         </section>
@@ -211,15 +211,15 @@ export default function AdminHub() {
                               <div className="flex-1">
                                  <div className="flex items-center gap-2">
                                     <h4 className="text-[14px] font-bold text-navy">Iyad Mohmad</h4>
-                                    <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-widest border border-emerald-100">Verified ID</span>
+                                    <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md  border border-emerald-100">Verified ID</span>
                                  </div>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Matric: 52216121092 • Bachelor (SE)</p>
+                                 <p className="text-[10px] font-bold text-slate-400 ">Matric: 52216121092 • Bachelor (SE)</p>
                               </div>
                            </div>
 
                            <div className="space-y-4">
                               <div className="space-y-2">
-                                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Select Subject</label>
+                                 <label className="text-[11px] font-bold text-slate-400 ">Select Subject</label>
                                  <select className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-[14px] font-medium outline-none focus:border-navy transition-all">
                                     <option value="">Choose your subject...</option>
                                     <option>SE102 - Mobile App Dev (Dr. Felix)</option>
@@ -231,14 +231,14 @@ export default function AdminHub() {
 
                               <div className="grid grid-cols-2 gap-4">
                                  <div className="space-y-2">
-                                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Date of Absence</label>
+                                    <label className="text-[11px] font-bold text-slate-400 ">Date of Absence</label>
                                     <input 
                                        type="date" 
                                        className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-[14px] font-medium outline-none focus:border-navy transition-all"
                                     />
                                  </div>
                                  <div className="space-y-2">
-                                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Class Time</label>
+                                    <label className="text-[11px] font-bold text-slate-400 ">Class Time</label>
                                     <input 
                                        type="time" 
                                        className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-[14px] font-medium outline-none focus:border-navy transition-all"
@@ -248,10 +248,10 @@ export default function AdminHub() {
                            </div>
                            
                            <div className="space-y-2">
-                              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Upload MC Document</label>
+                              <label className="text-[11px] font-bold text-slate-400 ">Upload MC Document</label>
                               <div className="w-full h-32 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-300 hover:bg-slate-50 hover:border-navy transition-all cursor-pointer">
                                  <Plus size={24} />
-                                 <p className="text-[11px] font-bold uppercase tracking-widest mt-2">Select Image/PDF</p>
+                                 <p className="text-[11px] font-bold  mt-2">Select Image/PDF</p>
                               </div>
                            </div>
                         </div>
@@ -264,13 +264,13 @@ export default function AdminHub() {
                               </div>
                               <div className="flex-1">
                                  <h4 className="text-[14px] font-bold text-navy">Iyad Mohmad</h4>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Exam Appeal Desk</p>
+                                 <p className="text-[10px] font-bold text-slate-400 ">Exam Appeal Desk</p>
                               </div>
                            </div>
 
                            <div className="space-y-4">
                               <div className="space-y-2">
-                                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Course to Appeal</label>
+                                 <label className="text-[11px] font-bold text-slate-400 ">Course to Appeal</label>
                                  <select className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-[14px] font-medium outline-none focus:border-navy transition-all">
                                     <option value="">Select your course...</option>
                                     <option>SE102 - Mobile Application Development</option>
@@ -280,7 +280,7 @@ export default function AdminHub() {
                               </div>
 
                               <div className="space-y-2">
-                                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Appeal Type</label>
+                                 <label className="text-[11px] font-bold text-slate-400 ">Appeal Type</label>
                                  <select className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-[14px] font-medium outline-none focus:border-navy transition-all">
                                     <option value="">Select type...</option>
                                     <option>Remarking (Re-check grade)</option>
@@ -291,7 +291,7 @@ export default function AdminHub() {
                               </div>
 
                               <div className="space-y-2">
-                                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Justification</label>
+                                 <label className="text-[11px] font-bold text-slate-400 ">Justification</label>
                                  <textarea 
                                     placeholder="Explain your reason for this appeal..."
                                     className="w-full h-32 bg-slate-50 border border-slate-100 rounded-2xl p-6 text-[14px] font-medium outline-none focus:border-navy transition-all resize-none"
@@ -300,10 +300,10 @@ export default function AdminHub() {
                            </div>
 
                            <div className="space-y-2">
-                              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Supporting Evidence</label>
+                              <label className="text-[11px] font-bold text-slate-400 ">Supporting Evidence</label>
                               <div className="w-full h-24 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-300 hover:bg-slate-50 hover:border-navy transition-all cursor-pointer">
                                  <Plus size={20} />
-                                 <p className="text-[10px] font-bold uppercase tracking-widest mt-1">Upload Support Letter</p>
+                                 <p className="text-[10px] font-bold  mt-1">Upload Support Letter</p>
                               </div>
                            </div>
                         </div>
@@ -311,7 +311,7 @@ export default function AdminHub() {
                         /* GENERAL FLOW FOR OTHER CHANNELS */
                         CHANNELS.find(c => c.id === selectedChannel)?.fields.map((field, i) => (
                           <div key={i} className="space-y-2">
-                             <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{field}</label>
+                             <label className="text-[11px] font-bold text-slate-400 ">{field}</label>
                              <input 
                                 type="text" 
                                 placeholder={`Enter ${field.toLowerCase()}...`}

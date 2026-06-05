@@ -8,7 +8,7 @@ export default function NotFound() {
 
   return (
     <main className="min-h-screen bg-white font-sans antialiased flex flex-col items-center justify-center px-8 text-center">
-      <p className="text-[80px] font-black text-slate-50 leading-none tracking-tighter mb-2 select-none">
+      <p className="text-[80px] font-semibold text-slate-50 leading-none tracking-tighter mb-2 select-none">
         404
       </p>
 
@@ -22,14 +22,14 @@ export default function NotFound() {
       <div className="flex flex-col gap-3 w-full max-w-xs">
         <button
           onClick={() => router.push('/home')}
-          className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all"
+          className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[13px]  flex items-center justify-center gap-3 active:scale-95 transition-all"
         >
           <Home size={16} />
           Go Home
         </button>
         <button
           onClick={() => router.back()}
-          className="w-full h-14 bg-slate-50 text-slate-900 border border-slate-100 rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all"
+          className="w-full h-14 bg-slate-50 text-slate-900 border border-slate-100 rounded-2xl font-bold text-[13px]  flex items-center justify-center gap-3 active:scale-95 transition-all"
         >
           <ArrowLeft size={16} />
           Go Back

@@ -71,7 +71,7 @@ function StatusPill({ status }: { status: string }) {
         isCancelled ? 'bg-red-500' : 
         'bg-amber-500 animate-pulse'
       }`} />
-      <span className="text-[11px] font-black uppercase tracking-widest">{s.replace(/_/g, ' ')}</span>
+      <span className="text-[11px] font-semibold">{s.replace(/_/g, ' ')}</span>
     </div>
   );
 }
@@ -382,10 +382,10 @@ export default function LiveOrderPage() {
                 </div>
                 <div className="space-y-0.5 min-w-0 flex-1">
                   <div className="flex items-baseline gap-1.5 flex-wrap">
-                    <span className="text-[14px] font-black tracking-tight leading-none">Walk {distance}m</span>
+                    <span className="text-[14px] font-semibold tracking-tight leading-none">Walk {distance}m</span>
                     <span className="text-[11px] font-semibold text-white/80">• {durationMin} min{durationMin > 1 ? 's' : ''}</span>
                   </div>
-                  <p className="text-[10px] font-bold text-white/95 uppercase tracking-widest leading-none truncate">
+                  <p className="text-[10px] font-bold text-white/95  leading-none truncate">
                     {isClose ? 'Arriving soon at drop-off' : 'Proceed toward meet location'}
                   </p>
                 </div>
@@ -428,8 +428,8 @@ export default function LiveOrderPage() {
         <div className="flex items-center gap-3 pointer-events-auto">
           <BackButton fallback="/me/orders" />
           <div className="flex flex-col justify-center">
-            <p className="text-[13px] font-black text-slate-900 tracking-tight leading-tight">Order Details</p>
-            <p className="text-[10px] font-black text-amber-600 tracking-wider leading-none mt-0.5">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>
+            <p className="text-[13px] font-semibold text-slate-900 tracking-tight leading-tight">Order Details</p>
+            <p className="text-[10px] font-semibold text-amber-600 tracking-wider leading-none mt-0.5">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>
           </div>
         </div>
         <div className="pointer-events-auto">
@@ -447,7 +447,7 @@ export default function LiveOrderPage() {
               <MapPin size={16} />
             </div>
             <div className="space-y-0.5 flex-1 min-w-0">
-              <p className="text-[12px] font-black text-emerald-950 uppercase tracking-widest leading-none mb-1">Nearby Alert</p>
+              <p className="text-[12px] font-semibold text-emerald-950  leading-none mb-1">Nearby Alert</p>
               <p className="text-[11px] font-semibold text-emerald-700 leading-tight">
                 Runner is under {distance}m away! Meet at drop-off point now.
               </p>
@@ -462,7 +462,7 @@ export default function LiveOrderPage() {
               <XCircle size={16} />
             </div>
             <div className="space-y-0.5 flex-1 min-w-0">
-              <p className="text-[12px] font-black text-red-950 uppercase tracking-widest leading-none mb-1">Order Cancelled</p>
+              <p className="text-[12px] font-semibold text-red-950  leading-none mb-1">Order Cancelled</p>
               <p className="text-[11px] font-medium text-red-700 leading-relaxed">
                 Your order has been cancelled. If you have made any payments, the money will be refunded to you shortly.
               </p>
@@ -537,7 +537,7 @@ export default function LiveOrderPage() {
             {/* Total Paid */}
             <div className="flex items-center justify-between px-4 py-3.5 bg-slate-100/50 rounded-b-xl">
               <span className="text-[13px] font-bold text-slate-900">Total Paid</span>
-              <span className="text-[15px] font-black text-slate-900">RM {Number(order.total || order.total_price || order.price).toFixed(2)}</span>
+              <span className="text-[15px] font-semibold text-slate-900">RM {Number(order.total || order.total_price || order.price).toFixed(2)}</span>
             </div>
           </div>
         </section>
@@ -583,7 +583,7 @@ export default function LiveOrderPage() {
           <section className="space-y-4 pt-4 border-t border-slate-50">
             <div className="flex items-center gap-3">
                <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />
-               <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Support & Resolution</h3>
+               <h3 className="text-[11px] font-semibold text-slate-900 ">Support & Resolution</h3>
             </div>
             
             <div className="p-6 bg-white border border-slate-100 rounded-2xl space-y-4">
@@ -624,7 +624,7 @@ export default function LiveOrderPage() {
         <div className="px-6 pb-20">
           <button 
             onClick={() => router.push('/marketplace')}
-            className="w-full h-14 bg-white border border-slate-100 text-[#94a3b8] rounded-2xl font-bold text-[12px] uppercase tracking-[0.2em] hover:text-slate-900 hover:border-slate-900 transition-all active:scale-95"
+            className="w-full h-14 bg-white border border-slate-100 text-[#94a3b8] rounded-2xl font-bold text-[12px]  hover:text-slate-900 hover:border-slate-900 transition-all active:scale-95"
           >
             Return
           </button>
@@ -658,7 +658,7 @@ export default function LiveOrderPage() {
               </div>
               
               <div className="space-y-2">
-                <h1 className="text-[28px] font-black tracking-tight text-slate-900 leading-none">Delivered!</h1>
+                <h1 className="text-[28px] font-semibold tracking-tight text-slate-900 leading-none">Delivered!</h1>
                 <p className="text-[12px] text-slate-400 font-medium leading-relaxed">Your order is complete.<br/>Enjoy your item!</p>
               </div>
             </motion.div>
@@ -673,7 +673,7 @@ export default function LiveOrderPage() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => !cancelling && setShowCancelConfirm(false)}
-              className="fixed inset-0 z-400 bg-black/30 backdrop-blur-md"
+              className="fixed inset-0 z-400 bg-slate-900/30 backdrop-blur-md"
             />
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}

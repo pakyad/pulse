@@ -28,7 +28,7 @@ class MapErrorBoundary extends Component<{children: React.ReactNode}, {hasError:
     if (this.state.hasError) {
       return (
         <div className="absolute inset-0 bg-slate-50 flex items-center justify-center border-b border-slate-100 z-10">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+          <p className="text-[11px] font-bold text-slate-400  flex items-center gap-2">
             <AlertCircle size={14} /> map disabled. follow text address.
           </p>
         </div>
@@ -470,14 +470,14 @@ export default function MissionControl() {
                 {/* ── HEADER ── */}
                 <div className={`px-6 pt-7 pb-5 flex items-start justify-between border-b ${tintBorder} ${tintBg}`}>
                   <div>
-                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${tintText} opacity-70`}>{typeLabel}</p>
-                    <p className={`text-[18px] font-black tracking-tight ${tintText}`}>#{activeMission.id.substring(0,8).toUpperCase()}</p>
+                    <p className={`text-[10px] font-semibold  mb-1 ${tintText} opacity-70`}>{typeLabel}</p>
+                    <p className={`text-[18px] font-semibold tracking-tight ${tintText}`}>#{activeMission.id.substring(0,8).toUpperCase()}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
                     {/* TIMER */}
                     <div className={`flex items-center gap-1.5 px-3 py-1 bg-white rounded-full shadow-sm ${timerColor(elapsedSeconds)}`}>
                        <Clock size={12} strokeWidth={2.5} />
-                       <span className="text-[12px] font-black tabular-nums tracking-widest">{fmtElapsed(elapsedSeconds)}</span>
+                       <span className="text-[12px] font-semibold tabular-nums tracking-widest">{fmtElapsed(elapsedSeconds)}</span>
                     </div>
                   </div>
                 </div>
@@ -491,13 +491,13 @@ export default function MissionControl() {
 
                 {/* ── TASK LIST (#1, #2) ── */}
                 <div className="px-6 py-6 space-y-4">
-                   <p className="text-[11px] font-black uppercase tracking-widest text-slate-300">Mission Tasks</p>
+                   <p className="text-[11px] font-semibold text-slate-300">Mission Tasks</p>
                    
                    {/* TASK 1: PICKUP */}
                    <div className={`flex flex-col gap-3 p-5 rounded-[24px] transition-all border ${!isPickedUp ? `${tintBg} ${tintBorder} shadow-sm` : 'bg-slate-50 border-transparent opacity-60'}`}>
                       <div className="flex justify-between items-start">
                          <div className="flex gap-4">
-                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[14px] shrink-0 ${!isPickedUp ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-200 text-slate-400'}`}>
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-semibold text-[14px] shrink-0 ${!isPickedUp ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-200 text-slate-400'}`}>
                               {isPickedUp ? <Check size={14} strokeWidth={3} /> : '1'}
                             </div>
                             <div className="pt-0.5 pr-2">
@@ -531,7 +531,7 @@ export default function MissionControl() {
                    <div className={`flex flex-col gap-3 p-5 rounded-[24px] transition-all border ${isPickedUp ? `${tintBg} ${tintBorder} shadow-sm` : 'bg-white border-slate-100 opacity-40'}`}>
                       <div className="flex justify-between items-start">
                          <div className="flex gap-4">
-                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[14px] shrink-0 ${isPickedUp ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-50 text-slate-300 border border-slate-200'}`}>
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-semibold text-[14px] shrink-0 ${isPickedUp ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-50 text-slate-300 border border-slate-200'}`}>
                               2
                             </div>
                             <div className="pt-0.5 pr-2">
@@ -560,7 +560,7 @@ export default function MissionControl() {
                 {/* MORE OPTIONS */}
                 <button 
                   onClick={() => { setOptionsDrawerOpen(true); setReportStep(false); }}
-                  className="w-full pb-6 pt-2 text-[11px] font-black text-slate-300 hover:text-slate-500 uppercase tracking-widest active:scale-95 transition-all text-center"
+                  className="w-full pb-6 pt-2 text-[11px] font-semibold text-slate-300 hover:text-slate-500  active:scale-95 transition-all text-center"
                 >
                   More Options
                 </button>
@@ -636,13 +636,13 @@ export default function MissionControl() {
                                      {isErrand ? <Map size={18} /> : (isParcel ? <Package size={18} /> : <Zap size={18} />)}
                                   </div>
                                   <div className="pr-2">
-                                     <p className="text-[10px] font-black uppercase tracking-widest text-[#94a3b8] mb-0.5">{typeLabel}</p>
+                                     <p className="text-[10px] font-semibold text-[#94a3b8] mb-0.5">{typeLabel}</p>
                                      <h3 className="text-[15px] font-bold text-slate-900 tracking-tight line-clamp-1">{requestDetails}</h3>
                                   </div>
                                </div>
                                <div className="text-right shrink-0">
-                                  <p className="text-[18px] font-black text-slate-900 tracking-tighter">RM {(mission.total_price || mission.deliveryFee || 3.50).toFixed(2)}</p>
-                                  <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest mt-0.5">Payout</p>
+                                  <p className="text-[18px] font-semibold text-slate-900 tracking-tighter">RM {(mission.total_price || mission.deliveryFee || 3.50).toFixed(2)}</p>
+                                  <p className="text-[9px] font-semibold text-[#94a3b8]  mt-0.5">Payout</p>
                                </div>
                             </div>
 
@@ -655,7 +655,7 @@ export default function MissionControl() {
                                   <div className="flex items-start gap-4">
                                      <div className="w-3 h-3 rounded-full bg-slate-200 border-2 border-white shrink-0 mt-1 relative z-10" />
                                      <div className="flex-1">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[#94a3b8]">Pickup From</p>
+                                        <p className="text-[10px] font-semibold text-[#94a3b8]">Pickup From</p>
                                         <p className="text-[13px] font-medium text-slate-900 leading-snug line-clamp-2">{mission.pickup_location || mission.seller_name || 'Merchant'}</p>
                                         {!isMarketplace && clientName && <p className="text-[11px] font-medium text-slate-400 mt-0.5">Contact: {clientName}</p>}
                                      </div>
@@ -664,7 +664,7 @@ export default function MissionControl() {
                                   <div className="flex items-start gap-4">
                                      <div className="w-3 h-3 rounded-full bg-slate-900 border-2 border-white shrink-0 mt-1 relative z-10 shadow-sm" />
                                      <div className="flex-1">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[#94a3b8]">Deliver To</p>
+                                        <p className="text-[10px] font-semibold text-[#94a3b8]">Deliver To</p>
                                         <p className="text-[13px] font-medium text-slate-900 leading-snug line-clamp-2">{mission.drop_off_location || 'Campus Center'}</p>
                                         {isMarketplace && clientName && <p className="text-[11px] font-medium text-slate-400 mt-0.5">Buyer: {clientName}</p>}
                                      </div>
@@ -731,7 +731,7 @@ export default function MissionControl() {
                
                {!reportStep ? (
                  <div className="space-y-5 pt-2">
-                   <h3 className="text-[18px] font-black tracking-tight text-slate-900">Options</h3>
+                   <h3 className="text-[18px] font-semibold tracking-tight text-slate-900">Options</h3>
                    <div className="space-y-3">
                      {!isPickedUp && (
                        <button onClick={handleDropOrder} disabled={isProcessing} className="w-full h-14 bg-white text-slate-900 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 focus:ring-4 focus:ring-slate-900/5 rounded-xl font-bold text-[13px] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 outline-none shadow-sm">
@@ -745,7 +745,7 @@ export default function MissionControl() {
                  </div>
                ) : (
                  <div className="space-y-5 pt-2">
-                   <h3 className="text-[18px] font-black tracking-tight text-slate-900 flex items-center gap-2">
+                   <h3 className="text-[18px] font-semibold tracking-tight text-slate-900 flex items-center gap-2">
                      <button onClick={() => setReportStep(false)} className="active:scale-95 p-1 -ml-1 rounded-lg hover:bg-slate-50 transition-colors"><ChevronLeft size={20} className="text-[#94a3b8]" /></button>
                      What's wrong?
                    </h3>
@@ -767,7 +767,7 @@ export default function MissionControl() {
             <motion.div initial={{ y: 50, scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 50, scale: 0.95 }} className="bg-white w-full max-w-sm rounded-[32px] p-8 space-y-8 shadow-xl border border-slate-100">
                <div className="text-center space-y-2">
                  <div className="w-16 h-16 bg-slate-50 rounded-[20px] mx-auto flex items-center justify-center text-slate-900 mb-4 border border-slate-100 shadow-sm"><Camera size={28} strokeWidth={2} /></div>
-                 <h3 className="text-[20px] font-black tracking-tight text-slate-900">{proofMode === 'PICKUP' ? 'Photo Proof of Pickup' : 'Photo Proof of Delivery'}</h3>
+                 <h3 className="text-[20px] font-semibold tracking-tight text-slate-900">{proofMode === 'PICKUP' ? 'Photo Proof of Pickup' : 'Photo Proof of Delivery'}</h3>
                  <p className="text-[13px] font-medium text-[#94a3b8] px-4 leading-relaxed">{proofMode === 'PICKUP' ? 'Take a clear photo of the items at the pickup point.' : 'Take a clear photo of the items at the drop-off point.'}</p>
                </div>
                <div className="space-y-5">
@@ -798,7 +798,7 @@ export default function MissionControl() {
                  {podPreview ? (
                     <div className="relative aspect-video rounded-[20px] overflow-hidden border border-slate-200 group shadow-sm">
                       <img src={podPreview} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <label htmlFor="pod-capture" className="bg-white/90 text-slate-900 px-4 py-2 rounded-xl text-[12px] font-bold cursor-pointer hover:bg-white shadow-sm">
                            Retake Photo
                         </label>
@@ -817,7 +817,7 @@ export default function MissionControl() {
                    {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={18} strokeWidth={2.5} />}
                    {proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Complete Delivery'}
                  </button>
-                 <button onClick={() => setProofMode(null)} className="w-full text-[11px] font-black text-[#94a3b8] hover:text-slate-600 uppercase tracking-widest py-1 transition-colors outline-none">Cancel</button>
+                 <button onClick={() => setProofMode(null)} className="w-full text-[11px] font-semibold text-[#94a3b8] hover:text-slate-600  py-1 transition-colors outline-none">Cancel</button>
                </div>
             </motion.div>
           </motion.div>
@@ -835,7 +835,7 @@ export default function MissionControl() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", damping: 15, stiffness: 200 }}
-              className="w-32 h-32 bg-slate-800 rounded-[40px] flex items-center justify-center mb-10 shadow-md shadow-slate-900/40 border border-slate-700"
+              className="w-32 h-32 bg-slate-800 rounded-[40px] flex items-center justify-center mb-10 shadow-md shadow-slate-900/10 border border-slate-700"
             >
               <motion.div
                 initial={{ pathLength: 0 }}
@@ -852,7 +852,7 @@ export default function MissionControl() {
               transition={{ delay: 0.3 }}
               className="space-y-4"
             >
-              <h2 className="text-[28px] font-black tracking-tight text-white">Mission Secured</h2>
+              <h2 className="text-[28px] font-semibold tracking-tight text-white">Mission Secured</h2>
               <p className="text-[14px] text-slate-400 font-medium tracking-wide max-w-xs mx-auto">
                 Locking coordinates. Loading map interface...
               </p>

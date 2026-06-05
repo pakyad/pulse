@@ -29,7 +29,7 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-12"
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 md:p-12"
           onClick={onClose}
         >
           {/* Close Button */}
@@ -62,12 +62,12 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
               ) : (
                 <div className="flex flex-col items-center gap-4 text-white/40">
                     <Camera size={48} strokeWidth={1} />
-                    <p className="text-[13px] font-bold uppercase tracking-widest">No Visual Evidence Captured</p>
+                    <p className="text-[13px] font-bold ">No Visual Evidence Captured</p>
                 </div>
               )}
               
               {order.proofOfDeliveryUrl && !isZoomed && (
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 flex items-center gap-2 text-white font-bold">
                     <ZoomIn size={18} /> Inspect Asset
                   </div>
@@ -84,8 +84,8 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
             >
               <div className="space-y-8">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#8E8E93] mb-2">Logistics Audit</p>
-                  <h3 className="text-[24px] font-black text-[#1C1C1E] tracking-tight">Delivery Proof</h3>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#8E8E93] mb-2">Logistics Audit</p>
+                  <h3 className="text-[24px] font-semibold text-[#1C1C1E] tracking-tight">Delivery Proof</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -96,7 +96,7 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
                       </div>
                       <span className="text-[13px] font-bold text-[#8E8E93]">Status</span>
                     </div>
-                    <span className="text-[14px] font-black text-[#34C759] uppercase tracking-widest">{order.status}</span>
+                    <span className="text-[14px] font-semibold text-[#34C759] ">{order.status}</span>
                   </div>
 
                   <div className="p-5 rounded-2xl bg-[#F2F2F7] border border-[#E5E5EA] space-y-4">
@@ -105,7 +105,7 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
                         <Clock size={16} />
                         <span className="text-[12px] font-bold">Fulfillment Time</span>
                       </div>
-                      <span className="text-[12px] font-black text-[#1C1C1E]">
+                      <span className="text-[12px] font-semibold text-[#1C1C1E]">
                         {order.updated_at ? new Date(order.updated_at).toLocaleString() : 'Processing...'}
                       </span>
                     </div>
@@ -114,14 +114,14 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
                         <Package size={16} />
                         <span className="text-[12px] font-bold">Order Registry</span>
                       </div>
-                      <span className="text-[12px] font-black text-[#1C1C1E]">#{order.id.slice(0, 8).toUpperCase()}</span>
+                      <span className="text-[12px] font-semibold text-[#1C1C1E]">#{order.id.slice(0, 8).toUpperCase()}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 text-[#8E8E93]">
                         <MapPin size={16} />
                         <span className="text-[12px] font-bold">Destination</span>
                       </div>
-                      <span className="text-[12px] font-black text-[#1C1C1E] truncate max-w-[120px]">{order.delivery_address || 'Campus Drop-off'}</span>
+                      <span className="text-[12px] font-semibold text-[#1C1C1E] truncate max-w-[120px]">{order.delivery_address || 'Campus Drop-off'}</span>
                     </div>
                   </div>
                 </div>
@@ -147,7 +147,7 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
                 )}
                 <button 
                   onClick={onClose}
-                  className="w-full h-16 rounded-2xl bg-black text-white font-black text-[15px] uppercase tracking-widest active:scale-95 transition-transform"
+                  className="w-full h-16 rounded-2xl bg-slate-900 text-white font-semibold text-[15px]  active:scale-95 transition-transform"
                 >
                   Dismiss Audit
                 </button>

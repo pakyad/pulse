@@ -22,7 +22,7 @@ const GovernanceBanner: React.FC<GovernanceBannerProps> = ({ status, message }) 
           <h2 className={`text-[14px] font-bold tracking-tight ${isBlocked ? 'text-red-600' : 'text-amber-600'}`}>
             {isBlocked ? 'Institutional Block' : 'Governance Advisory'}
           </h2>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+          <p className="text-[10px] font-semibold text-slate-300">
             Administrative Registry
           </p>
         </div>
@@ -35,7 +35,7 @@ const GovernanceBanner: React.FC<GovernanceBannerProps> = ({ status, message }) 
       </div>
 
       {isBlocked && (
-        <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
+        <p className="mt-4 text-[10px] font-semibold text-slate-400  text-center">
           Listing requires administrative appeal
         </p>
       )}

@@ -21,14 +21,14 @@ function UserDrawer({ user, onClose, onToggle, onSuspend }: {
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onClose} className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" />
+        onClick={onClose} className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm" />
       <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
         className="fixed top-0 right-0 bottom-0 w-[500px] bg-white z-50 shadow-2xl flex flex-col">
 
         {/* Header */}
         <div className="p-8 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-[20px] font-black text-slate-900 tracking-tight">User Profile</h2>
+          <h2 className="text-[20px] font-semibold text-slate-900 tracking-tight">User Profile</h2>
           <button onClick={onClose} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
             <X size={18} />
           </button>
@@ -43,15 +43,15 @@ function UserDrawer({ user, onClose, onToggle, onSuspend }: {
                 className="w-full h-full object-cover" alt="" />
             </div>
             <div>
-              <h3 className="text-[22px] font-black text-slate-900 tracking-tight">{user.full_name}</h3>
+              <h3 className="text-[22px] font-semibold text-slate-900 tracking-tight">{user.full_name}</h3>
               <p className="text-[13px] text-slate-400 font-medium mt-0.5">{user.email}</p>
-              {user.matric_no && <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest mt-1">{user.matric_no}</p>}
+              {user.matric_no && <p className="text-[11px] font-bold text-slate-300  mt-1">{user.matric_no}</p>}
             </div>
           </div>
 
           {/* Permissions */}
           <div className="space-y-3">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Permissions</p>
+            <p className="text-[10px] font-semibold text-slate-400 ">Permissions</p>
 
             <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -98,7 +98,7 @@ function UserDrawer({ user, onClose, onToggle, onSuspend }: {
               Suspending this user immediately blocks all marketplace and delivery access.
             </p>
             <button onClick={() => onSuspend(user.id, user.is_suspended ?? false)}
-              className={`w-full h-12 rounded-xl font-bold text-[12px] uppercase tracking-widest transition-all active:scale-[0.98] ${
+              className={`w-full h-12 rounded-xl font-bold text-[12px]  transition-all active:scale-[0.98] ${
                 user.is_suspended
                   ? 'bg-emerald-500 text-white hover:bg-emerald-600'
                   : 'bg-red-600 text-white hover:bg-red-700'
@@ -173,11 +173,11 @@ export default function UsersPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">People</p>
-          <h1 className="text-[24px] font-black text-slate-900 tracking-tight">Users</h1>
+          <p className="text-[10px] font-semibold text-slate-400  mb-1">People</p>
+          <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Users</h1>
         </div>
         <button onClick={() => setAddMerchantOpen(true)}
-          className="h-10 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[12px] font-bold uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95">
+          className="h-10 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[12px] font-bold  flex items-center gap-2 transition-all active:scale-95">
           <UserPlus size={15} /> Add Merchant
         </button>
       </div>
@@ -208,10 +208,10 @@ export default function UsersPage() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50/50 border-b border-slate-100">
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Name</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Role</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Email</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Action</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Name</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Role</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Email</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400  text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -240,10 +240,10 @@ export default function UsersPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex gap-1.5 flex-wrap">
-                    {u.is_seller && <span className="px-2 py-1 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest rounded-md">Merchant</span>}
-                    {u.is_verified_runner && <span className="px-2 py-1 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded-md">Runner</span>}
-                    {u.is_suspended && <span className="px-2 py-1 bg-red-100 text-red-500 text-[9px] font-black uppercase tracking-widest rounded-md">Suspended</span>}
-                    {!u.is_seller && !u.is_verified_runner && !u.is_suspended && <span className="px-2 py-1 bg-slate-50 text-slate-400 border border-slate-100 text-[9px] font-black uppercase tracking-widest rounded-md">Student</span>}
+                    {u.is_seller && <span className="px-2 py-1 bg-slate-900 text-white text-[9px] font-semibold rounded-md">Merchant</span>}
+                    {u.is_verified_runner && <span className="px-2 py-1 bg-emerald-500 text-white text-[9px] font-semibold rounded-md">Runner</span>}
+                    {u.is_suspended && <span className="px-2 py-1 bg-red-100 text-red-500 text-[9px] font-semibold rounded-md">Suspended</span>}
+                    {!u.is_seller && !u.is_verified_runner && !u.is_suspended && <span className="px-2 py-1 bg-slate-50 text-slate-400 border border-slate-100 text-[9px] font-semibold rounded-md">Student</span>}
                   </div>
                 </td>
                 <td className="px-6 py-4">

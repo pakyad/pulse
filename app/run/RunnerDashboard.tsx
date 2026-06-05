@@ -37,7 +37,7 @@ export default function RunnerDashboard({ profile, onBack }: { profile: any, onB
           <div className="pt-32 px-8 space-y-12">
              <div className="grid grid-cols-2 gap-3">
                 <div className="bg-[#0A0F1E] rounded-2xl p-6 flex flex-col justify-between shadow-md shadow-navy/10 min-h-[160px]">
-                   <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Total Balance</p>
+                   <p className="text-[10px] font-bold  text-white/30">Total Balance</p>
                    <div>
                       <p className="text-[24px] font-bold text-white tracking-tight">RM {(profile?.balance || 45.00).toFixed(2)}</p>
                       <button className="text-[11px] font-bold text-white/50 mt-2 flex items-center gap-1">Manage Wallet <ChevronRight size={12}/></button>
@@ -46,7 +46,7 @@ export default function RunnerDashboard({ profile, onBack }: { profile: any, onB
                 <div className="bg-white border border-slate-100 rounded-2xl p-6 flex flex-col justify-between min-h-[160px]">
                    <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Rating</p>
+                      <p className="text-[10px] font-bold  text-slate-300">Rating</p>
                    </div>
                    <div>
                       <p className="text-[24px] font-bold text-[#222222] tracking-tight">4.98%</p>

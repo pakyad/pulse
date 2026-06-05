@@ -54,7 +54,7 @@ export default function CartPage() {
               </p>
               <button
                 onClick={() => router.push('/marketplace')}
-                className="px-6 py-3 bg-blue-600 text-white rounded-full font-bold text-[13px] tracking-tight active:scale-95 transition-transform shadow-md shadow-blue-600/20"
+                className="px-6 py-3 bg-slate-900 text-white rounded-full font-bold text-[13px] tracking-tight active:scale-95 transition-transform shadow-md shadow-slate-900/10"
               >
                 Browse Marketplace
               </button>
@@ -131,7 +131,7 @@ export default function CartPage() {
                   </div>
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-[15px] font-bold text-slate-900">Order Total</span>
-                    <span className="text-[20px] font-black text-slate-900">RM {cartTotal.toFixed(2)}</span>
+                    <span className="text-[20px] font-semibold text-slate-900">RM {cartTotal.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -152,7 +152,7 @@ export default function CartPage() {
         <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
           <button
             onClick={handleCheckout}
-            className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-blue-600/20"
+            className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-slate-900/10"
           >
             Checkout All <ArrowRight size={18} />
           </button>

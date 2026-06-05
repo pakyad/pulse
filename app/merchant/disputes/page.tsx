@@ -95,13 +95,13 @@ export default function MerchantDisputes() {
          {/* ── SHARP STATS ── */}
          <section className="grid grid-cols-2 gap-4">
             <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-4">
-               <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest leading-none">Solved</p>
+               <p className="text-[10px] font-semibold text-[#94a3b8]  leading-none">Solved</p>
                <div className="space-y-0.5">
                   <p className="text-[22px] font-bold tracking-tighter leading-none">{resolvedDisputes.length}</p>
                </div>
             </div>
             <div className="p-6 bg-slate-900 rounded-2xl text-white space-y-4 shadow-sm">
-               <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none">To Fix</p>
+               <p className="text-[10px] font-semibold text-white/40  leading-none">To Fix</p>
                <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
                      <p className="text-[22px] font-bold tracking-tighter leading-none">{pendingDisputes.length}</p>
@@ -144,7 +144,7 @@ export default function MerchantDisputes() {
             {currentList.length === 0 ? (
                <div className="py-24 text-center flex flex-col items-center justify-center space-y-4 opacity-40">
                   <CheckCircle2 size={32} className="text-[#94a3b8]" />
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8]">All Clear</p>
+                  <p className="text-[11px] font-bold  text-[#94a3b8]">All Clear</p>
                </div>
             ) : (
                <div className="space-y-4">
@@ -169,7 +169,7 @@ export default function MerchantDisputes() {
                               <div className="space-y-1.5 mt-0.5">
                                  <div className="flex items-center gap-2">
                                     <h4 className="text-[15px] font-bold tracking-tight">{dispute.reporter_name}</h4>
-                                    <span className="text-[9px] font-bold text-[#94a3b8] uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">#{dispute.order_code}</span>
+                                    <span className="text-[9px] font-bold text-[#94a3b8]  bg-slate-50 px-2 py-0.5 rounded border border-slate-100">#{dispute.order_code}</span>
                                  </div>
                                  <p className="text-[13px] font-medium text-[#64748b] leading-relaxed line-clamp-2">
                                     {dispute.reason}: {dispute.narrative}
@@ -180,12 +180,12 @@ export default function MerchantDisputes() {
                         </div>
                         
                         <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                           <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">
+                           <span className="text-[10px] font-bold text-[#94a3b8] ">
                               {dispute.created_at?.toDate ? dispute.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : 'Pending'}
                            </span>
                            <div className="flex items-center gap-1.5">
                               <div className={`w-1 h-1 rounded-full ${dispute.status === 'MERCHANT_RESPONDED' ? 'bg-slate-900' : 'bg-red-500 animate-pulse'}`} />
-                              <span className={`text-[9px] font-black uppercase tracking-widest ${dispute.status === 'MERCHANT_RESPONDED' ? 'text-slate-900' : 'text-red-500'}`}>
+                              <span className={`text-[9px] font-semibold ${dispute.status === 'MERCHANT_RESPONDED' ? 'text-slate-900' : 'text-red-500'}`}>
                                  {dispute.status === 'MERCHANT_RESPONDED' ? 'Under Review' : 'To Fix'}
                               </span>
                            </div>

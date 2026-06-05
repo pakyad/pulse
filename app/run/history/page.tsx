@@ -69,7 +69,7 @@ export default function RunnerHistoryPage() {
 
       {/* ── HISTORY LIST ── */}
       <section className="px-8 mt-2 space-y-3">
-        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4 ml-1">Completed Missions</p>
+        <p className="text-[11px] font-bold text-slate-400  mb-4 ml-1">Completed Missions</p>
         
         {displayHistory.map((job) => (
           <motion.div 
@@ -87,7 +87,7 @@ export default function RunnerHistoryPage() {
                      <p className="text-[12px] text-slate-400 font-medium mt-0.5">{job.date}</p>
                   </div>
                </div>
-               <p className="text-[16px] font-black text-slate-900 tracking-tight">+RM {job.price.toFixed(2)}</p>
+               <p className="text-[16px] font-semibold text-slate-900 tracking-tight">+RM {job.price.toFixed(2)}</p>
             </div>
 
             <div className="flex items-center gap-3 text-[12px] font-bold text-slate-500 bg-slate-50 p-4 rounded-2xl border border-slate-100/50">
@@ -100,7 +100,7 @@ export default function RunnerHistoryPage() {
 
         <div className="text-center pt-16 opacity-30 flex flex-col items-center">
            <History size={24} strokeWidth={1.5} className="mb-3 text-slate-400" />
-           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End of Log</p>
+           <p className="text-[10px] font-semibold text-slate-400 ">End of Log</p>
         </div>
       </section>
 

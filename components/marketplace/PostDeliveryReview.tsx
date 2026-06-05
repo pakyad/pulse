@@ -74,7 +74,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
       
       {/* Product Review */}
       <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
-        <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Product</p>
+        <p className="text-[9px] font-semibold text-[#94a3b8]  px-1">Product</p>
         <div className="space-y-4">
            <h4 className="text-[14px] font-bold text-slate-900 truncate">{order.title || 'Item Review'}</h4>
            <StarRating value={vendorRating} onChange={setVendorRating} />
@@ -84,7 +84,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
       {/* Runner Review */}
       {isRunnerDelivery && (
         <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
-          <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Runner</p>
+          <p className="text-[9px] font-semibold text-[#94a3b8]  px-1">Runner</p>
           <div className="space-y-4">
              <h4 className="text-[14px] font-bold text-slate-900">Delivery Runner</h4>
              <StarRating value={runnerRating} onChange={setRunnerRating} />
@@ -94,7 +94,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
 
       {/* Comments */}
       <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
-        <p className="text-[9px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Comments</p>
+        <p className="text-[9px] font-semibold text-[#94a3b8]  px-1">Comments</p>
         <textarea 
           placeholder="Optional: How was the service?"
           className="w-full h-24 text-[13px] font-medium text-slate-900 focus:outline-none placeholder:text-slate-200 resize-none leading-relaxed"
@@ -106,7 +106,7 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
       <button 
         onClick={handleSubmit}
         disabled={vendorRating === 0 || (isRunnerDelivery && runnerRating === 0) || isSubmitting}
-        className="w-full h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[12px] uppercase tracking-widest shadow-sm hover:bg-slate-50 disabled:opacity-20 transition-all flex items-center justify-center gap-3 active:scale-95"
+        className="w-full h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl font-bold text-[12px]  shadow-sm hover:bg-slate-50 disabled:opacity-20 transition-all flex items-center justify-center gap-3 active:scale-95"
       >
         {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <>Submit Feedback <Send size={16} className="rotate-45" /></>}
       </button>

@@ -43,8 +43,8 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
                 <ShieldAlert size={20} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Ticket Resolve</p>
-                <h3 className="text-[15px] font-black text-slate-900 tracking-tight uppercase">#{dispute.id.substring(0,8)}</h3>
+                <p className="text-[10px] font-semibold text-slate-400  leading-none mb-1">Ticket Resolve</p>
+                <h3 className="text-[15px] font-semibold text-slate-900 tracking-tight uppercase">#{dispute.id.substring(0,8)}</h3>
               </div>
             </div>
             <button 
@@ -59,12 +59,12 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
             {/* Status & Category */}
             <div className="grid grid-cols-2 gap-4">
               <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Severity</p>
-                <p className="text-[13px] font-bold text-red-500 uppercase tracking-widest">High Impact</p>
+                <p className="text-[9px] font-semibold text-slate-400  mb-1">Severity</p>
+                <p className="text-[13px] font-bold text-red-500 ">High Impact</p>
               </div>
               <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Category</p>
-                <p className="text-[13px] font-bold text-slate-900 uppercase tracking-widest">Logistic Failure</p>
+                <p className="text-[9px] font-semibold text-slate-400  mb-1">Category</p>
+                <p className="text-[13px] font-bold text-slate-900 ">Logistic Failure</p>
               </div>
             </div>
 
@@ -82,12 +82,12 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
                        <MapPin size={24} />
                     </div>
                     <div className="flex-1">
-                       <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${
+                       <p className={`text-[10px] font-semibold mb-1 ${
                          dispute.handshake.verification_type === 'IN_PERSON_SAFE' ? 'text-emerald-600' : 'text-amber-600'
                        }`}>
                           {dispute.handshake.verification_type === 'IN_PERSON_SAFE' ? 'Trust Level: Absolute' : 'Trust Level: Suspicious'}
                        </p>
-                       <h4 className="text-[15px] font-black text-slate-900 tracking-tight">
+                       <h4 className="text-[15px] font-semibold text-slate-900 tracking-tight">
                           {dispute.handshake.verification_type === 'IN_PERSON_SAFE' ? 'Safe/In-Person Handshake' : 'Remote Handshake Detected'}
                        </h4>
                        <p className="text-[12px] font-medium text-slate-400 mt-1">
@@ -102,7 +102,7 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
 
             {/* Evidence Section */}
             <section>
-              <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <h4 className="text-[11px] font-semibold text-slate-900  mb-4 flex items-center gap-2">
                 <Image size={14} className="text-slate-400" /> Audit Evidence
               </h4>
               <div className="aspect-video bg-slate-100 rounded-2xl border-[0.5px] border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-3 group relative overflow-hidden">
@@ -119,29 +119,29 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
 
             {/* Identities */}
             <section className="space-y-4">
-              <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <h4 className="text-[11px] font-semibold text-slate-900  mb-4 flex items-center gap-2">
                 <User size={14} className="text-slate-400" /> Identities Involved
               </h4>
               <div className="p-6 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black text-[14px]">
+                  <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-semibold text-[14px]">
                     {dispute.reporter_name?.[0]}
                   </div>
                   <div>
-                    <p className="text-[13px] font-black text-slate-900 tracking-tight">{dispute.reporter_name}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reporter (Buyer)</p>
+                    <p className="text-[13px] font-semibold text-slate-900 tracking-tight">{dispute.reporter_name}</p>
+                    <p className="text-[10px] font-bold text-slate-400 ">Reporter (Buyer)</p>
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-slate-200" />
               </div>
               <div className="p-6 bg-white border border-slate-100 rounded-2xl flex items-center justify-between shadow-sm opacity-50">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-black text-[14px]">
+                  <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-semibold text-[14px]">
                     V
                   </div>
                   <div>
-                    <p className="text-[13px] font-black text-slate-900 tracking-tight">Verified Merchant</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Vendor Node</p>
+                    <p className="text-[13px] font-semibold text-slate-900 tracking-tight">Verified Merchant</p>
+                    <p className="text-[10px] font-bold text-slate-400 ">Vendor Node</p>
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-slate-200" />
@@ -150,7 +150,7 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
 
             {/* Description */}
             <section>
-              <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-4">Conflict Narrative</h4>
+              <h4 className="text-[11px] font-semibold text-slate-900  mb-4">Conflict Narrative</h4>
               <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
                 <p className="text-[14px] text-slate-600 font-medium leading-relaxed italic">
                   "{dispute.reason || 'The buyer reports a handoff failure. No specific narrative captured.'}"
@@ -163,13 +163,13 @@ export default function DisputeResolutionDrawer({ isOpen, onClose, dispute, onRe
           <div className="p-8 border-t border-slate-100 bg-white sticky bottom-0 grid grid-cols-2 gap-4">
             <button 
               onClick={() => onResolve(dispute.id, 'REFUND')}
-              className="h-[64px] bg-slate-100 text-slate-900 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-3 active:scale-95"
+              className="h-[64px] bg-slate-100 text-slate-900 rounded-2xl font-semibold text-[11px]  hover:bg-slate-200 transition-all flex items-center justify-center gap-3 active:scale-95"
             >
               <XCircle size={18} /> Refund Buyer
             </button>
             <button 
               onClick={() => onResolve(dispute.id, 'RELEASE')}
-              className="h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95 shadow-md shadow-slate-900/20"
+              className="h-[64px] bg-slate-900 text-white rounded-2xl font-semibold text-[11px]  hover:bg-slate-900 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-md shadow-slate-900/10"
             >
               <CheckCircle size={18} /> Release Funds
             </button>

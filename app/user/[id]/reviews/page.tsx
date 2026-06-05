@@ -88,14 +88,14 @@ export default function ReviewsPage() {
          {/* ── SUMMARY HEADER ── */}
          <section className="flex flex-col items-center justify-center py-6 border-b border-slate-100">
             <div className="flex items-end gap-2 mb-2">
-               <p className="text-[48px] font-black tracking-tighter leading-none text-slate-900">
+               <p className="text-[48px] font-semibold tracking-tighter leading-none text-slate-900">
                  {profile?.averageRating ? Number(profile.averageRating).toFixed(1) : '5.0'}
                </p>
                <div className="pb-2">
                  <Star size={24} fill="currentColor" className="text-amber-500" />
                </div>
             </div>
-            <p className="text-[12px] font-bold text-[#94a3b8] uppercase tracking-widest">
+            <p className="text-[12px] font-bold text-[#94a3b8] ">
                {profile?.totalReviews || reviews.length} Ratings
             </p>
          </section>

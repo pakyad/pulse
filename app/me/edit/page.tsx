@@ -122,7 +122,7 @@ export default function EditProfilePage() {
                 className="w-full bg-transparent border-b border-[#E5E5EA] focus:border-navy py-2 text-[14px] font-medium outline-none transition-colors resize-none h-10 overflow-hidden"
                 rows={1}
               />
-              <span className="absolute bottom-[-18px] right-0 text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+              <span className="absolute bottom-[-18px] right-0 text-[9px] font-bold text-slate-300 ">
                 {bio.length}/150
               </span>
             </div>
@@ -160,7 +160,7 @@ export default function EditProfilePage() {
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setPickerType(null)}
-              className="absolute inset-0 bg-black/5" 
+              className="absolute inset-0 bg-slate-900/5" 
             />
             <motion.div 
               initial={{ y: "100%" }} 

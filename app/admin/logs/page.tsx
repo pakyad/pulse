@@ -33,18 +33,18 @@ export default function LogsPage() {
     <div className="space-y-8 max-w-6xl">
       {/* Header */}
       <div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Audit Trail</p>
-        <h1 className="text-[24px] font-black text-slate-900 tracking-tight">Activity Logs</h1>
+        <p className="text-[10px] font-semibold text-slate-400  mb-1">Audit Trail</p>
+        <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Activity Logs</h1>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50/50 border-b border-slate-100">
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Action</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Item ID</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Details</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Time</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Action</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Item ID</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Details</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400  text-right">Time</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -59,7 +59,7 @@ export default function LogsPage() {
             ) : logs.map(log => (
               <tr key={log.id} className="hover:bg-slate-50/30 transition-colors">
                 <td className="px-6 py-4">
-                  <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${
+                  <span className={`px-2.5 py-1 rounded-md text-[9px] font-semibold ${
                     TYPE_STYLES[log.type] || 'bg-slate-100 text-slate-400'
                   }`}>
                     {log.type || 'UNKNOWN'}
@@ -74,7 +74,7 @@ export default function LogsPage() {
                   <p className="text-[13px] font-medium text-slate-600">{log.details || '—'}</p>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">
+                  <span className="text-[11px] font-bold text-slate-300 ">
                     {log.timestamp?.toMillis
                       ? new Date(log.timestamp.toMillis()).toLocaleString()
                       : 'Just now'}

@@ -91,7 +91,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                 </button>
                 <div className="space-y-0.5">
                   <h2 className="text-[26px] font-bold text-slate-900 tracking-tight leading-none">Search</h2>
-                  <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest leading-none">Institutional Directory</p>
+                  <p className="text-[12px] font-bold text-slate-400  leading-none">Institutional Directory</p>
                 </div>
               </div>
               <button 
@@ -127,10 +127,10 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-4"
                 >
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Search Results</h3>
+                  <h3 className="text-[11px] font-bold  text-slate-400 mb-6">Search Results</h3>
                   {filteredResults.length === 0 ? (
                     <div className="py-12 text-center bg-slate-50 rounded-4xl border border-dashed border-slate-200">
-                       <p className="text-[14px] font-bold text-slate-400 uppercase tracking-widest">No matching assets found</p>
+                       <p className="text-[14px] font-bold text-slate-400 ">No matching assets found</p>
                     </div>
                   ) : filteredResults.map((item, i) => (
                     <motion.div 
@@ -151,7 +151,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                        <div className="flex-1">
                           <p className="text-[15px] font-bold text-slate-900 tracking-tight leading-none mb-1">{item.title}</p>
                           <div className="flex items-center gap-2">
-                             <span className="text-[10px] font-black text-slate-400 uppercase">RM {item.price}</span>
+                             <span className="text-[10px] font-semibold text-slate-400 uppercase">RM {item.price}</span>
                              <span className="w-1 h-1 bg-slate-200 rounded-full" />
                              <span className="text-[10px] font-bold text-slate-400">{item.seller_name}</span>
                           </div>
@@ -172,8 +172,8 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
                   {recent.length > 0 && (
                     <section className="space-y-2">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recent Searches</h4>
-                        <button onClick={clearRecent} className="text-[10px] font-bold text-slate-300 hover:text-slate-500 transition-colors uppercase tracking-widest">Clear</button>
+                        <h4 className="text-[10px] font-semibold text-slate-400">Recent Searches</h4>
+                        <button onClick={clearRecent} className="text-[10px] font-bold text-slate-300 hover:text-slate-500 transition-colors ">Clear</button>
                       </div>
                       <div className="flex flex-col divide-y divide-slate-50">
                         {recent.map((term, i) => (
@@ -192,7 +192,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
 
                   {/* Suggestion Tags */}
                   <section className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Popular Searches</h4>
+                    <h4 className="text-[10px] font-semibold text-slate-400">Popular Searches</h4>
                     <div className="flex flex-wrap gap-2">
                       {['Books', 'Food', 'Charger', 'Notes', 'Jacket'].map((tag, i) => (
                         <button

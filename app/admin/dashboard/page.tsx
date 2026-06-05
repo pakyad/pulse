@@ -308,12 +308,12 @@ export default function AdminDashboard() {
         
         {/* Brand Header */}
         <div className="px-8 py-10 flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#1C1C1E] rounded-xl flex items-center justify-center shadow-md shadow-black/10">
-             <span className="text-white font-black text-[20px]">P</span>
+          <div className="w-10 h-10 bg-[#1C1C1E] rounded-xl flex items-center justify-center shadow-md shadow-slate-900/10">
+             <span className="text-white font-semibold text-[20px]">P</span>
           </div>
           <div>
-            <h1 className="text-[20px] font-black text-[#1C1C1E] tracking-tighter leading-none">Pulse</h1>
-            <p className="text-[9px] font-black bg-emerald-500 text-white px-2 py-[2px] rounded-md uppercase tracking-[0.2em] mt-1 inline-block">Institutional</p>
+            <h1 className="text-[20px] font-semibold text-[#1C1C1E] tracking-tighter leading-none">Pulse</h1>
+            <p className="text-[9px] font-semibold bg-emerald-500 text-white px-2 py-[2px] rounded-md  mt-1 inline-block">Institutional</p>
           </div>
         </div>
 
@@ -348,7 +348,7 @@ export default function AdminDashboard() {
                   />
                 ) : (
                   item.badge !== undefined && item.badge > 0 && (
-                    <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md shadow-red-500/20">{item.badge}</span>
+                    <span className="bg-red-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md shadow-red-500/20">{item.badge}</span>
                   )
                 )}
               </button>
@@ -363,7 +363,7 @@ export default function AdminDashboard() {
                         setActiveTab(item.id);
                         setActiveSubTab(sub.id);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                      className={`w-full text-left px-3 py-2 rounded-xl text-[11px] font-semibold transition-all ${
                         activeTab === item.id && activeSubTab === sub.id
                           ? 'text-emerald-600 bg-emerald-50'
                           : 'text-[#AEAEB2] hover:text-[#1C1C1E] hover:bg-[#F9F9FB]'
@@ -405,7 +405,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-4">
              <div className="flex flex-col items-end">
-                <p className="text-[10px] font-black text-[#AEAEB2] uppercase tracking-widest">Admin Registry</p>
+                <p className="text-[10px] font-semibold text-[#AEAEB2] ">Admin Registry</p>
                 <p className="text-[13px] font-bold text-[#1C1C1E]">Iyad Mohmad</p>
              </div>
              <div className="w-10 h-10 bg-slate-900 rounded-2xl border border-slate-100 shadow-sm" />
@@ -418,23 +418,23 @@ export default function AdminDashboard() {
           {activeTab === 'overview' && (
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                <div className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Marketplace Volume</p>
+                  <p className="text-[10px] font-bold text-slate-400  mb-1">Total Marketplace Volume</p>
                   <p className="text-[24px] font-bold text-slate-900">
                     RM {flaggedItems.reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </p>
                </div>
                <div className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Directives</p>
+                  <p className="text-[10px] font-bold text-slate-400  mb-1">Active Directives</p>
                   <p className="text-[24px] font-bold text-slate-900">{disputes.length + flaggedItems.length}</p>
                </div>
                <div className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Verified Nodes</p>
+                  <p className="text-[10px] font-bold text-slate-400  mb-1">Verified Nodes</p>
                   <p className="text-[24px] font-bold text-slate-900">
                     {users.filter(u => u.role === 'MERCHANT' || u.role === 'RUNNER').length}
                   </p>
                </div>
                <div className="p-8 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Infrastructure Health</p>
+                  <p className="text-[10px] font-bold text-slate-400  mb-1">Infrastructure Health</p>
                   <p className={`text-[24px] font-bold ${disputes.length > 5 ? 'text-orange-500' : 'text-emerald-500'}`}>
                     {disputes.length > 5 ? 'High Load' : 'Stable'}
                   </p>
@@ -446,8 +446,8 @@ export default function AdminDashboard() {
           {activeTab === 'command' && (
             <section className="bg-white rounded-2xl border border-slate-100 p-10">
                <div className="mb-10">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Economic Oversight</p>
-                  <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Price Audit Terminal</h2>
+                  <p className="text-[10px] font-semibold text-slate-400  mb-1">Economic Oversight</p>
+                  <h2 className="text-[22px] font-semibold text-slate-900 tracking-tight">Price Audit Terminal</h2>
                </div>
 
                <PriceAudit 
@@ -465,11 +465,11 @@ export default function AdminDashboard() {
             <section className="space-y-6">
                <div className="flex justify-between items-center px-2">
                   <div>
-                     <p className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] mb-1">Conflict Resolution</p>
-                     <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Active Disputes Queue</h2>
+                     <p className="text-[10px] font-semibold text-red-500  mb-1">Conflict Resolution</p>
+                     <h2 className="text-[22px] font-semibold text-slate-900 tracking-tight">Active Disputes Queue</h2>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{disputes.length} Open Tickets</span>
+                    <span className="text-[11px] font-bold text-slate-400 ">{disputes.length} Open Tickets</span>
                   </div>
                </div>
                
@@ -489,16 +489,16 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                           <div className="flex items-center gap-3 mb-1">
-                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">#{dispute.id.substring(0,8).toUpperCase()}</span>
+                            <span className="text-[10px] font-semibold text-slate-300 ">#{dispute.id.substring(0,8).toUpperCase()}</span>
                             <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                            <span className="text-[11px] font-black text-red-500 uppercase">Awaiting Directive</span>
+                            <span className="text-[11px] font-semibold text-red-500 uppercase">Awaiting Directive</span>
                           </div>
-                          <h3 className="text-[17px] font-black text-slate-900 tracking-tight">{dispute.reason}</h3>
+                          <h3 className="text-[17px] font-semibold text-slate-900 tracking-tight">{dispute.reason}</h3>
                         </div>
                       </div>
                       <div className="flex items-center gap-6">
                         <div className="text-right">
-                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Reporter</p>
+                          <p className="text-[10px] font-semibold text-slate-300  mb-0.5">Reporter</p>
                           <p className="text-[13px] font-bold text-slate-900">{dispute.reporter_name}</p>
                         </div>
                         <ChevronRight size={20} className="text-slate-200 group-hover:text-slate-900 transition-colors" />
@@ -507,7 +507,7 @@ export default function AdminDashboard() {
                   )) : (
                     <div className="py-32 flex flex-col items-center justify-center text-center">
                       <Inbox size={48} strokeWidth={1} className="text-slate-200 mb-6" />
-                      <p className="text-[13px] text-slate-400 font-bold uppercase tracking-widest mb-2">Queue Empty</p>
+                      <p className="text-[13px] text-slate-400 font-bold  mb-2">Queue Empty</p>
                       <p className="text-[11px] text-slate-300 font-medium mb-8">No reported conflicts requiring administrative directive.</p>
                       <button 
                         onClick={() => {
@@ -519,7 +519,7 @@ export default function AdminDashboard() {
                             });
                           });
                         }}
-                        className="h-10 px-6 bg-slate-50 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-100 hover:bg-slate-100 hover:text-slate-900 transition-all"
+                        className="h-10 px-6 bg-slate-50 text-slate-400 rounded-xl text-[10px] font-semibold border border-slate-100 hover:bg-slate-100 hover:text-slate-900 transition-all"
                       >
                         Seed Test Disputes
                       </button>
@@ -534,21 +534,21 @@ export default function AdminDashboard() {
             <section className="space-y-10">
                <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                     <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1">Economic Adjudication</p>
-                     <h2 className="text-[28px] font-black tracking-tight uppercase">Price Appeals Registry</h2>
+                     <p className="text-[10px] font-semibold text-emerald-500  mb-1">Economic Adjudication</p>
+                     <h2 className="text-[28px] font-semibold tracking-tight uppercase">Price Appeals Registry</h2>
                      <p className="text-[14px] font-medium text-slate-400">Review justification for category ceiling exemptions.</p>
                   </div>
                   <div className="flex items-center gap-4">
                      <button 
                        onClick={handleSeedClubs}
                        disabled={isSeeding}
-                       className="h-10 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 active:scale-95"
+                       className="h-10 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[10px] font-semibold transition-all flex items-center gap-2 active:scale-95"
                      >
                         {isSeeding ? <Loader2 className="animate-spin" size={14} /> : <Blocks size={14} />}
                         Seed Institutional Data
                      </button>
                      <div className="px-5 py-2 bg-slate-50 border border-slate-100 rounded-2xl">
-                        <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">{appeals.length} Pending Directives</span>
+                        <span className="text-[11px] font-semibold text-slate-900 ">{appeals.length} Pending Directives</span>
                      </div>
                   </div>
                </div>
@@ -557,7 +557,7 @@ export default function AdminDashboard() {
                   {appeals.length === 0 ? (
                     <div className="py-40 flex flex-col items-center gap-4 text-center">
                        <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300"><Inbox size={40} /></div>
-                       <p className="text-[14px] font-bold text-slate-300 uppercase tracking-widest">No pending appeals in registry.</p>
+                       <p className="text-[14px] font-bold text-slate-300 ">No pending appeals in registry.</p>
                     </div>
                   ) : (
                     appeals.map((appeal) => (
@@ -571,8 +571,8 @@ export default function AdminDashboard() {
                             <div className="flex items-center gap-4">
                                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400"><ShieldAlert size={24} /></div>
                                <div>
-                                  <p className="text-[16px] font-black text-slate-900">{appeal.itemTitle}</p>
-                                  <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Merchant: {appeal.sellerName}</p>
+                                  <p className="text-[16px] font-semibold text-slate-900">{appeal.itemTitle}</p>
+                                  <p className="text-[12px] font-bold text-slate-400 ">Merchant: {appeal.sellerName}</p>
                                </div>
                             </div>
                             <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 italic text-[14px] text-slate-600 leading-relaxed">
@@ -583,11 +583,11 @@ export default function AdminDashboard() {
                          <div className="w-[300px] space-y-3">
                             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
                                <div className="flex justify-between items-center mb-1">
-                                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Proposed Price</span>
-                                  <span className="text-[16px] font-black text-slate-900">RM {appeal.price}</span>
+                                  <span className="text-[10px] font-semibold text-slate-300 ">Proposed Price</span>
+                                  <span className="text-[16px] font-semibold text-slate-900">RM {appeal.price}</span>
                                </div>
                                <div className="flex justify-between items-center">
-                                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Category</span>
+                                  <span className="text-[10px] font-semibold text-slate-300 ">Category</span>
                                   <span className="text-[12px] font-bold text-slate-900">{appeal.category}</span>
                                </div>
                             </div>
@@ -595,14 +595,14 @@ export default function AdminDashboard() {
                                <button 
                                  onClick={() => handleAdjudicate(appeal, 'APPROVE')}
                                  disabled={isProcessing === appeal.id}
-                                 className="flex-1 h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md shadow-black/10 disabled:opacity-20"
+                                 className="flex-1 h-14 bg-slate-900 text-white rounded-2xl font-semibold text-[11px]  hover:scale-105 active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-20"
                                >
                                   {isProcessing === appeal.id ? '...' : 'Approve'}
                                </button>
                                <button 
                                  onClick={() => handleAdjudicate(appeal, 'REJECT')}
                                  disabled={isProcessing === appeal.id}
-                                 className="flex-1 h-14 bg-white text-red-600 border border-red-100 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-red-50 active:scale-95 transition-all disabled:opacity-20"
+                                 className="flex-1 h-14 bg-white text-red-600 border border-red-100 rounded-2xl font-semibold text-[11px]  hover:bg-red-50 active:scale-95 transition-all disabled:opacity-20"
                                >
                                   {isProcessing === appeal.id ? '...' : 'Reject'}
                                </button>
@@ -620,15 +620,15 @@ export default function AdminDashboard() {
             <section className="space-y-8">
                <div className="flex justify-between items-center px-2">
                   <div>
-                     <p className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em] mb-1">Identity Management</p>
-                     <h2 className="text-[22px] font-black text-slate-900 tracking-tight">
+                     <p className="text-[10px] font-semibold text-slate-900  mb-1">Identity Management</p>
+                     <h2 className="text-[22px] font-semibold text-slate-900 tracking-tight">
                         {activeSubTab === 'ALL' ? 'User Registry' : `${activeSubTab.charAt(0) + activeSubTab.slice(1).toLowerCase()} Registry`}
                      </h2>
                   </div>
                   <div className="flex items-center gap-4">
                     <button 
                       onClick={() => setIsAddMerchantOpen(true)}
-                      className="h-10 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[12px] font-black uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95"
+                      className="h-10 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[12px] font-semibold flex items-center gap-2 transition-all active:scale-95"
                     >
                       <UserPlus size={16} />
                       Add Merchant
@@ -644,10 +644,10 @@ export default function AdminDashboard() {
                    <table className="w-full text-left border-collapse">
                       <thead>
                          <tr className="bg-[#FDFDFD] border-b-[0.5px] border-[#F2F2F7]">
-                            <th className="px-10 py-5 text-[9px] font-black text-black/20 uppercase tracking-[0.3em]">Identity Node</th>
-                            <th className="px-10 py-5 text-[9px] font-black text-black/20 uppercase tracking-[0.3em]">Clearance</th>
-                            <th className="px-10 py-5 text-[9px] font-black text-black/20 uppercase tracking-[0.3em]">Tenure</th>
-                            <th className="px-10 py-5 text-[9px] font-black text-black/20 uppercase tracking-[0.3em] text-right">Directive</th>
+                            <th className="px-10 py-5 text-[9px] font-semibold text-slate-900/20 uppercase tracking-[0.3em]">Identity Node</th>
+                            <th className="px-10 py-5 text-[9px] font-semibold text-slate-900/20 uppercase tracking-[0.3em]">Clearance</th>
+                            <th className="px-10 py-5 text-[9px] font-semibold text-slate-900/20 uppercase tracking-[0.3em]">Tenure</th>
+                            <th className="px-10 py-5 text-[9px] font-semibold text-slate-900/20 uppercase tracking-[0.3em] text-right">Directive</th>
                          </tr>
                       </thead>
                       <tbody className="divide-y-[0.5px] divide-[#F2F2F7]">
@@ -668,42 +668,42 @@ export default function AdminDashboard() {
                                      </div>
                                      <div>
                                          <div className="flex items-center gap-2 mb-1">
-                                            <p className="text-[14px] font-black text-[#1C1C1E] tracking-tight leading-none">{u.full_name}</p>
+                                            <p className="text-[14px] font-semibold text-[#1C1C1E] tracking-tight leading-none">{u.full_name}</p>
                                             {u.role === 'STUDENT' && (
-                                               <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${u.is_verified ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                               <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-semibold ${u.is_verified ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
                                                   {u.is_verified ? 'VERIFIED' : 'PENDING'}
                                                </span>
                                             )}
                                          </div>
-                                         <p className="text-[10px] font-bold text-black/20 uppercase tracking-widest">{u.matric_no || 'UniKL IDENTITY'}</p>
+                                         <p className="text-[10px] font-bold text-slate-900/20 ">{u.matric_no || 'UniKL IDENTITY'}</p>
                                      </div>
                                   </div>
                                </td>
                                <td className="px-10 py-4">
                                   <div className="flex gap-2">
-                                     {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Runner</span>}
-                                     {u.merchant_status === 'pending' && !u.is_seller && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Merchant</span>}
-                                     {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Runner</span>}
-                                     {u.is_verified_runner && <span className="px-2.5 py-1 bg-[#1C1C1E] text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><ShieldCheck size={10} /> Runner</span>}
-                                     {u.merchant_status === 'pending' && !u.is_seller && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Clock size={10} /> Pending Merchant</span>}
-                                     {u.is_seller && <span className="px-2.5 py-1 bg-slate-900 text-white rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><Briefcase size={10} /> Merchant</span>}
-                                     {!u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending' && <span className="px-2.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-md text-[8px] font-black uppercase tracking-widest">Resident</span>}
+                                     {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-semibold flex items-center gap-1.5"><Clock size={10} /> Pending Runner</span>}
+                                     {u.merchant_status === 'pending' && !u.is_seller && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-semibold flex items-center gap-1.5"><Clock size={10} /> Pending Merchant</span>}
+                                     {u.runner_status === 'pending' && !u.is_verified_runner && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-semibold flex items-center gap-1.5"><Clock size={10} /> Pending Runner</span>}
+                                     {u.is_verified_runner && <span className="px-2.5 py-1 bg-[#1C1C1E] text-white rounded-md text-[8px] font-semibold flex items-center gap-1.5"><ShieldCheck size={10} /> Runner</span>}
+                                     {u.merchant_status === 'pending' && !u.is_seller && <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded-md text-[8px] font-semibold flex items-center gap-1.5"><Clock size={10} /> Pending Merchant</span>}
+                                     {u.is_seller && <span className="px-2.5 py-1 bg-slate-900 text-white rounded-md text-[8px] font-semibold flex items-center gap-1.5"><Briefcase size={10} /> Merchant</span>}
+                                     {!u.is_verified_runner && !u.is_seller && u.runner_status !== 'pending' && u.merchant_status !== 'pending' && <span className="px-2.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-md text-[8px] font-semibold">Resident</span>}
                                   </div>
                                </td>
                                <td className="px-10 py-4">
-                                  <span className="text-[12px] font-bold text-black/30 tracking-tight">Class of 2026</span>
+                                  <span className="text-[12px] font-bold text-slate-900/30 tracking-tight">Class of 2026</span>
                                </td>
                                <td className="px-10 py-4 text-right">
                                    <div className="flex items-center justify-end gap-3">
                                       {u.role === 'STUDENT' && !u.is_verified && (
                                          <button 
                                            onClick={(e) => { e.stopPropagation(); verifyUser(u.id); }}
-                                           className="h-8 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
+                                           className="h-8 px-4 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-lg text-[9px] font-semibold hover:scale-105 active:scale-95 transition-all"
                                          >
                                             Grant Credentials
                                          </button>
                                       )}
-                                      <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-black/10 group-hover:bg-[#1C1C1E] group-hover:text-white transition-all duration-300">
+                                      <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-900/10 group-hover:bg-[#1C1C1E] group-hover:text-white transition-all duration-300">
                                          <ChevronRight size={14} strokeWidth={3} />
                                       </button>
                                    </div>
@@ -721,8 +721,8 @@ export default function AdminDashboard() {
             <section className="space-y-10">
                <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">System Audit Trail</p>
-                     <h2 className="text-[28px] font-black tracking-tight uppercase text-slate-900">Governance Ledger</h2>
+                     <p className="text-[10px] font-semibold text-slate-400  mb-1">System Audit Trail</p>
+                     <h2 className="text-[28px] font-semibold tracking-tight uppercase text-slate-900">Governance Ledger</h2>
                   </div>
                </div>
 
@@ -730,17 +730,17 @@ export default function AdminDashboard() {
                   <table className="w-full text-left border-collapse">
                      <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                           <th className="px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Directive Type</th>
-                           <th className="px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Target ID</th>
-                           <th className="px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Event Data</th>
-                           <th className="px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Timestamp</th>
+                           <th className="px-10 py-5 text-[9px] font-semibold text-slate-400 ">Directive Type</th>
+                           <th className="px-10 py-5 text-[9px] font-semibold text-slate-400 ">Target ID</th>
+                           <th className="px-10 py-5 text-[9px] font-semibold text-slate-400 ">Event Data</th>
+                           <th className="px-10 py-5 text-[9px] font-semibold text-slate-400  text-right">Timestamp</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
                         {governanceLogs.map((log) => (
                           <tr key={log.id} className="hover:bg-slate-50/30 transition-colors">
                              <td className="px-10 py-5">
-                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${
+                                <span className={`px-2.5 py-1 rounded-md text-[9px] font-semibold ${
                                   log.type === 'PRICE_BLOCK' ? 'bg-red-50 text-red-500' :
                                   log.type === 'ADJUDICATION' ? 'bg-emerald-50 text-emerald-500' :
                                   'bg-slate-100 text-slate-400'
@@ -755,7 +755,7 @@ export default function AdminDashboard() {
                                 <p className="text-[13px] font-medium text-slate-600">{log.details}</p>
                              </td>
                              <td className="px-10 py-5 text-right">
-                                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">
+                                <span className="text-[11px] font-bold text-slate-300 ">
                                    {log.timestamp?.toMillis ? new Date(log.timestamp.toMillis()).toLocaleString() : 'Just Now'}
                                 </span>
                              </td>
@@ -772,12 +772,12 @@ export default function AdminDashboard() {
             <section className="bg-white rounded-2xl border border-slate-100 p-10 space-y-12">
                <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Infrastructure Control</p>
-                    <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Economic Guidelines</h2>
+                    <p className="text-[10px] font-semibold text-slate-400  mb-1">Infrastructure Control</p>
+                    <h2 className="text-[22px] font-semibold text-slate-900 tracking-tight">Economic Guidelines</h2>
                   </div>
                   <button 
                     onClick={() => setIsPriceModalOpen(true)}
-                    className="h-11 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[11px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
+                    className="h-11 px-6 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl text-[11px] font-semibold hover:scale-105 active:scale-95 transition-all"
                   >
                     Establish New Limit
                   </button>
@@ -788,15 +788,15 @@ export default function AdminDashboard() {
                   <div className="space-y-6">
                     <div className="flex items-center gap-3 px-2">
                        <div className="w-2 h-6 bg-red-500 rounded-full" />
-                       <h3 className="text-[14px] font-black text-slate-400 uppercase tracking-widest">Institutional Necessities (Regulated)</h3>
+                       <h3 className="text-[14px] font-semibold text-slate-400 ">Institutional Necessities (Regulated)</h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                        {Object.entries(guidelines).filter(([_, data]) => (data.governance_type || 'REGULATED') === 'REGULATED').map(([cat, data]) => (
                          <div key={cat} className="p-8 bg-slate-50 rounded-2xl border border-slate-100 space-y-6">
                             <div className="flex justify-between items-start">
                                <div>
-                                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Asset Category</p>
-                                  <p className="text-[17px] font-black text-slate-900 tracking-tight">{data.category}</p>
+                                  <p className="text-[10px] font-semibold text-slate-300  mb-1">Asset Category</p>
+                                  <p className="text-[17px] font-semibold text-slate-900 tracking-tight">{data.category}</p>
                                </div>
                                <div className="w-10 h-10 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-red-400">
                                   <ShieldAlert size={18} />
@@ -804,15 +804,15 @@ export default function AdminDashboard() {
                             </div>
                             <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
                                <div>
-                                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Hard Ceiling</p>
-                                  <p className="text-[22px] font-black text-slate-900">RM {(data.max_price || data.maxBasePrice || 0).toFixed(2)}</p>
+                                  <p className="text-[10px] font-semibold text-slate-300  mb-0.5">Hard Ceiling</p>
+                                  <p className="text-[22px] font-semibold text-slate-900">RM {(data.max_price || data.maxBasePrice || 0).toFixed(2)}</p>
                                </div>
                                <button 
                                  onClick={() => {
                                    const newPrice = prompt(`Update ceiling for ${data.category}:`, String(data.max_price || data.maxBasePrice));
                                    if (newPrice) saveGuideline(data.category, Number(newPrice), 'REGULATED');
                                  }}
-                                 className="text-[11px] font-black text-red-500 uppercase tracking-widest underline underline-offset-4"
+                                 className="text-[11px] font-semibold text-red-500  underline underline-offset-4"
                                >
                                   Adjust
                                </button>
@@ -826,15 +826,15 @@ export default function AdminDashboard() {
                   <div className="space-y-6">
                     <div className="flex items-center gap-3 px-2">
                        <div className="w-2 h-6 bg-amber-500 rounded-full" />
-                       <h3 className="text-[14px] font-black text-slate-400 uppercase tracking-widest">Premium Market Assets (Flexible)</h3>
+                       <h3 className="text-[14px] font-semibold text-slate-400 ">Premium Market Assets (Flexible)</h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                        {Object.entries(guidelines).filter(([_, data]) => data.governance_type === 'PREMIUM').map(([cat, data]) => (
                          <div key={cat} className="p-8 bg-slate-50 rounded-2xl border border-slate-100 space-y-6">
                             <div className="flex justify-between items-start">
                                <div>
-                                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Asset Category</p>
-                                  <p className="text-[17px] font-black text-slate-900 tracking-tight">{data.category}</p>
+                                  <p className="text-[10px] font-semibold text-slate-300  mb-1">Asset Category</p>
+                                  <p className="text-[17px] font-semibold text-slate-900 tracking-tight">{data.category}</p>
                                </div>
                                <div className="w-10 h-10 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-amber-400">
                                   <Sparkles size={18} />
@@ -842,15 +842,15 @@ export default function AdminDashboard() {
                             </div>
                             <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
                                <div>
-                                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Advisory Limit</p>
-                                  <p className="text-[22px] font-black text-slate-900">RM {(data.max_price || 0).toFixed(2)}</p>
+                                  <p className="text-[10px] font-semibold text-slate-300  mb-0.5">Advisory Limit</p>
+                                  <p className="text-[22px] font-semibold text-slate-900">RM {(data.max_price || 0).toFixed(2)}</p>
                                </div>
                                <button 
                                  onClick={() => {
                                    const newPrice = prompt(`Update advisory limit for ${data.category}:`, String(data.max_price));
                                    if (newPrice) saveGuideline(data.category, Number(newPrice), 'PREMIUM');
                                  }}
-                                 className="text-[11px] font-black text-amber-600 uppercase tracking-widest underline underline-offset-4"
+                                 className="text-[11px] font-semibold text-amber-600  underline underline-offset-4"
                                >
                                   Adjust
                                </button>
@@ -893,7 +893,7 @@ export default function AdminDashboard() {
       <AnimatePresence>
         {selectedUser && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)} className="fixed inset-0 z-100 bg-black/20 backdrop-blur-md" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)} className="fixed inset-0 z-100 bg-slate-900/20 backdrop-blur-md" />
             <motion.div 
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
@@ -901,10 +901,10 @@ export default function AdminDashboard() {
             >
                <div className="p-10 flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.4em]">Audit Terminal</p>
-                    <h2 className="text-[24px] font-black text-black uppercase tracking-tighter">Identity Review</h2>
+                    <p className="text-[10px] font-semibold text-slate-900/20 uppercase tracking-[0.4em]">Audit Terminal</p>
+                    <h2 className="text-[24px] font-semibold text-slate-900 uppercase tracking-tighter">Identity Review</h2>
                   </div>
-                  <button onClick={() => setSelectedUser(null)} className="w-12 h-12 rounded-full bg-[#F5F5F5] flex items-center justify-center text-black/20 hover:text-black transition-colors"><X size={24} /></button>
+                  <button onClick={() => setSelectedUser(null)} className="w-12 h-12 rounded-full bg-[#F5F5F5] flex items-center justify-center text-slate-900/20 hover:text-slate-900 transition-colors"><X size={24} /></button>
                </div>
 
                <div className="flex-1 overflow-y-auto p-10 space-y-12">
@@ -914,25 +914,25 @@ export default function AdminDashboard() {
                         <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                      </div>
                      <div>
-                        <h3 className="text-[28px] font-black text-black tracking-tighter leading-none">{selectedUser.full_name}</h3>
-                        <p className="text-[14px] font-bold text-black/30 mt-2">{selectedUser.email}</p>
+                        <h3 className="text-[28px] font-semibold text-slate-900 tracking-tighter leading-none">{selectedUser.full_name}</h3>
+                        <p className="text-[14px] font-bold text-slate-900/30 mt-2">{selectedUser.email}</p>
                      </div>
                   </div>
 
                   <div className="space-y-4">
-                     <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] mb-6">Registry Authorization</p>
+                     <p className="text-[10px] font-semibold text-slate-900/30 uppercase tracking-[0.3em] mb-6">Registry Authorization</p>
                      
                      <div className="p-8 rounded-2xl bg-[#FDFDFD] border-[0.5px] border-[#F2F2F7] flex items-center justify-between group hover:border-black/5 transition-all">
                         <div className="flex items-center gap-6">
-                           <div className="w-14 h-14 bg-black text-white rounded-[20px] flex items-center justify-center shadow-md"><ShieldCheck size={28} /></div>
+                           <div className="w-14 h-14 bg-slate-900 text-white rounded-[20px] flex items-center justify-center shadow-md"><ShieldCheck size={28} /></div>
                            <div>
-                              <p className="text-[17px] font-black text-black tracking-tight">Logistics Verification</p>
-                              <p className="text-[13px] font-medium text-black/30">Verified Pulse Runner Node</p>
+                              <p className="text-[17px] font-semibold text-slate-900 tracking-tight">Logistics Verification</p>
+                              <p className="text-[13px] font-medium text-slate-900/30">Verified Pulse Runner Node</p>
                            </div>
                         </div>
                         <button 
                           onClick={() => toggleVerification(selectedUser.id, selectedUser.is_verified_runner, 'is_verified_runner')}
-                          className={`w-16 h-9 rounded-full relative transition-all duration-500 ${selectedUser.is_verified_runner ? 'bg-[#00927C]' : 'bg-black/10'}`}
+                          className={`w-16 h-9 rounded-full relative transition-all duration-500 ${selectedUser.is_verified_runner ? 'bg-[#00927C]' : 'bg-slate-900/10'}`}
                         >
                            <motion.div 
                              animate={{ x: selectedUser.is_verified_runner ? 30 : 6 }}
@@ -945,13 +945,13 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-6">
                            <div className="w-14 h-14 bg-slate-900 text-white rounded-[20px] flex items-center justify-center shadow-md"><Briefcase size={28} /></div>
                            <div>
-                              <p className="text-[17px] font-black text-black tracking-tight">Merchant Authority</p>
-                              <p className="text-[13px] font-medium text-black/30">Verified Pulse Vendor Node</p>
+                              <p className="text-[17px] font-semibold text-slate-900 tracking-tight">Merchant Authority</p>
+                              <p className="text-[13px] font-medium text-slate-900/30">Verified Pulse Vendor Node</p>
                            </div>
                         </div>
                         <button 
                           onClick={() => toggleVerification(selectedUser.id, selectedUser.is_seller, 'is_seller')}
-                          className={`w-16 h-9 rounded-full relative transition-all duration-500 ${selectedUser.is_seller ? 'bg-[#007AFF]' : 'bg-black/10'}`}
+                          className={`w-16 h-9 rounded-full relative transition-all duration-500 ${selectedUser.is_seller ? 'bg-[#007AFF]' : 'bg-slate-900/10'}`}
                         >
                            <motion.div 
                              animate={{ x: selectedUser.is_seller ? 30 : 6 }}
@@ -969,10 +969,10 @@ export default function AdminDashboard() {
                         { label: 'Trust Score', value: '98.2%', icon: CheckCircle2 },
                      ].map(item => (
                         <div key={item.label} className="p-6 bg-white border-[0.5px] border-[#F2F2F7] rounded-2xl">
-                           <p className="text-[9px] font-black text-black/20 uppercase tracking-[0.2em] mb-4">{item.label}</p>
+                           <p className="text-[9px] font-semibold text-slate-900/20  mb-4">{item.label}</p>
                            <div className="flex items-center gap-3">
-                              <item.icon size={16} className="text-black/20" />
-                              <span className="text-[15px] font-bold text-black truncate">{item.value}</span>
+                              <item.icon size={16} className="text-slate-900/20" />
+                              <span className="text-[15px] font-bold text-slate-900 truncate">{item.value}</span>
                            </div>
                         </div>
                      ))}
@@ -981,10 +981,10 @@ export default function AdminDashboard() {
                   <div className="p-8 bg-red-50/50 rounded-2xl border-[0.5px] border-red-100/50 space-y-6">
                      <div className="flex items-center gap-4 text-red-600">
                         <AlertCircle size={24} />
-                        <p className="text-[17px] font-black tracking-tight">Security Protocol</p>
+                        <p className="text-[17px] font-semibold tracking-tight">Security Protocol</p>
                      </div>
                      <p className="text-[13px] text-red-800/40 font-medium leading-relaxed italic pr-4">"Suspending this node will immediately revoke all campus-wide logistics tokens and marketplace clearance."</p>
-                     <button className="w-full h-16 bg-red-600 text-white rounded-[22px] font-black text-[13px] uppercase tracking-widest shadow-md shadow-red-200 active:scale-95 transition-all">
+                     <button className="w-full h-16 bg-red-600 text-white rounded-[22px] font-semibold text-[13px]  shadow-md shadow-red-200 active:scale-95 transition-all">
                         Suspend Resident Node
                      </button>
                   </div>

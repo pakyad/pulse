@@ -18,9 +18,9 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 w-full z-50 px-6 py-6 flex justify-between items-center bg-pearl/70 backdrop-blur-xl border-b border-navy/5">
       <Link href="/" className="flex items-center gap-2 group">
         <div className="w-8 h-8 bg-navy rounded-lg flex items-center justify-center transition-transform group-hover:rotate-12">
-            <span className="text-white font-black text-sm">P</span>
+            <span className="text-white font-semibold text-sm">P</span>
         </div>
-        <h1 className="text-xl font-black text-navy  ">Codep Pulse</h1>
+        <h1 className="text-xl font-semibold text-navy  ">Codep Pulse</h1>
       </Link>
       
       <div className="flex items-center gap-2 md:gap-6">

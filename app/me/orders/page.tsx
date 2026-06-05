@@ -177,7 +177,7 @@ export default function MyOrdersPage() {
             {displayed.length === 0 ? (
               <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
                 <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
-                <p className="text-[12px] font-bold uppercase tracking-widest opacity-40">
+                <p className="text-[12px] font-bold  opacity-40">
                   {tab === 'Active' ? 'No active orders' : 'No history yet'}
                 </p>
               </div>

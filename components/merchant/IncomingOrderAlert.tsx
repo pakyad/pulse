@@ -68,7 +68,7 @@ export default function IncomingOrderAlert({ order, onAccept }: IncomingOrderAle
           </div>
           <div>
             <p className="text-[14px] font-bold text-white tracking-tight leading-none mb-1">Incoming Order</p>
-            <p className="text-[11px] font-medium text-white/40 uppercase tracking-widest">
+            <p className="text-[11px] font-medium text-white/40 ">
               Auto-Accept in {timeLeft}s
             </p>
           </div>

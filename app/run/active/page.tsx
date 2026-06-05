@@ -99,8 +99,8 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
         
         {/* Mission Brief (Checkout Vibe) */}
         <div className="space-y-1">
-           <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{mission.type || 'PARCEL ERRAND'}</p>
-           <h2 className="text-[22px] font-black tracking-tight leading-none text-slate-900">
+           <p className="text-[11px] font-semibold text-slate-400 ">{mission.type || 'PARCEL ERRAND'}</p>
+           <h2 className="text-[22px] font-semibold tracking-tight leading-none text-slate-900">
               {mission.items_summary || mission.title || "Custom Errand"}
            </h2>
            <p className="text-[13px] font-medium text-[#94a3b8] mt-1">Requested by <span className="font-bold text-slate-900">{mission.buyer_name}</span></p>
@@ -109,7 +109,7 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
         {mission.attached_file && (
            <div className="w-full h-32 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden relative">
              <img src={mission.attached_file} className="w-full h-full object-cover opacity-90" alt="Item Proof" />
-             <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-black text-slate-600 uppercase tracking-widest shadow-sm">
+             <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-semibold text-slate-600  shadow-sm">
                 Item Photo
              </div>
            </div>
@@ -121,7 +121,7 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
            {/* Phase 1: Pickup */}
            <div className={`rounded-2xl p-5 border transition-all duration-300 ${step === 1 ? 'bg-slate-50 border-slate-200 shadow-sm' : 'bg-white border-slate-100 opacity-70'}`}>
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-black ${step === 1 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-slate-100 text-slate-400'}`}>1</div>
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-semibold ${step === 1 ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'bg-slate-100 text-slate-400'}`}>1</div>
                 <p className="text-[13px] font-bold text-slate-900">Secure the Item</p>
               </div>
               
@@ -129,7 +129,7 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
                 <div className="flex items-start gap-3 bg-white border border-slate-100 p-3.5 rounded-xl">
                   <User className="text-slate-400 shrink-0 mt-0.5" size={16} />
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Pickup Point</p>
+                    <p className="text-[10px] font-semibold text-slate-400  mb-0.5">Pickup Point</p>
                     <p className="text-[13px] font-bold text-slate-900 leading-snug">{mission.pickup_location}</p>
                   </div>
                 </div>
@@ -139,7 +139,7 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
                     <a href={`tel:${getPhone(mission.pickup_location)}`} className="h-12 bg-white border border-slate-200 text-blue-600 rounded-xl flex items-center justify-center font-bold active:scale-95 transition-all shadow-sm">
                       <Phone size={16} />
                     </a>
-                    <button onClick={handleConfirmPickup} disabled={isProcessing} className="h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50">
+                    <button onClick={handleConfirmPickup} disabled={isProcessing} className="h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50">
                       {isProcessing ? <Loader2 size={16} className="animate-spin" /> : "Confirm Pickup"}
                     </button>
                   </div>
@@ -155,7 +155,7 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
            {/* Phase 2: Drop-off */}
            <div className={`rounded-2xl p-5 border transition-all duration-300 ${step === 2 ? 'bg-slate-50 border-slate-200 shadow-sm' : 'bg-white border-slate-100 opacity-50'}`}>
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-black ${step === 2 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-slate-100 text-slate-400'}`}>2</div>
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-semibold ${step === 2 ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'bg-slate-100 text-slate-400'}`}>2</div>
                 <p className="text-[13px] font-bold text-slate-900">Final Handover</p>
               </div>
               
@@ -163,7 +163,7 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
                 <div className="flex items-start gap-3 bg-white border border-slate-100 p-3.5 rounded-xl">
                   <MapPin className="text-slate-400 shrink-0 mt-0.5" size={16} />
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Drop-off Point</p>
+                    <p className="text-[10px] font-semibold text-slate-400  mb-0.5">Drop-off Point</p>
                     <p className="text-[13px] font-bold text-slate-900 leading-snug">{mission.drop_off_location}</p>
                   </div>
                 </div>
@@ -173,7 +173,7 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
                     <a href={`tel:${getPhone(mission.drop_off_location)}`} className="h-12 bg-white border border-slate-200 text-blue-600 rounded-xl flex items-center justify-center font-bold active:scale-95 transition-all shadow-sm">
                       <Phone size={16} />
                     </a>
-                    <button onClick={handleCompleteDelivery} disabled={isProcessing} className="h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50">
+                    <button onClick={handleCompleteDelivery} disabled={isProcessing} className="h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50">
                       {isProcessing ? <Loader2 size={16} className="animate-spin" /> : "Complete Delivery"}
                     </button>
                   </div>
@@ -318,9 +318,9 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                   <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
                      <CheckCircle2 size={40} />
                   </div>
-                  <h1 className="text-[14px] font-black uppercase tracking-[0.2em] text-blue-600 mb-2">Delivery Verified</h1>
-                  <p className="text-[42px] font-black text-slate-900 tracking-tighter leading-none mb-10">+RM {mission?.payout?.toFixed(2) || '4.50'}</p>
-                  <button onClick={() => router.push('/run')} className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold shadow-md shadow-blue-600/20 active:scale-95 transition-all">Dismiss & Return</button>
+                  <h1 className="text-[14px] font-semibold  text-blue-600 mb-2">Delivery Verified</h1>
+                  <p className="text-[42px] font-semibold text-slate-900 tracking-tighter leading-none mb-10">+RM {mission?.payout?.toFixed(2) || '4.50'}</p>
+                  <button onClick={() => router.push('/run')} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md shadow-slate-900/10 active:scale-95 transition-all">Dismiss & Return</button>
                </motion.div>
             )}
          </AnimatePresence>
@@ -364,18 +364,18 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                       <motion.div key="mission" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                          <div className="flex justify-between items-start">
                             <div className="space-y-1">
-                               <h2 className="text-[20px] font-black tracking-tight leading-none text-slate-900">
+                               <h2 className="text-[20px] font-semibold tracking-tight leading-none text-slate-900">
                                  {step <= 2 ? (pickupNode?.label || mission?.from || 'Merchant Area') : (dropoffNode?.label || mission?.to || 'Drop-off Zone')}
                                </h2>
                                <div className="flex items-center gap-2 mt-1.5">
                                   <p className="text-[12px] font-medium text-[#94a3b8]">{step <= 2 ? 'Pickup Point' : 'Drop-off Point'}</p>
                                   {step > 2 && dropoffNode && (
-                                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest ${getLocationBadge(dropoffNode.zone)}`}>
+                                     <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold  ${getLocationBadge(dropoffNode.zone)}`}>
                                        {dropoffNode.zone}
                                      </span>
                                   )}
                                   {(step === 1 || step === 4) && distanceToTarget !== null && (
-                                     <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase shadow-sm ${distanceToTarget <= 30 ? 'bg-emerald-50 border border-emerald-100 text-emerald-600' : 'bg-amber-50 border border-amber-100 text-amber-600'}`}>
+                                     <div className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase shadow-sm ${distanceToTarget <= 30 ? 'bg-emerald-50 border border-emerald-100 text-emerald-600' : 'bg-amber-50 border border-amber-100 text-amber-600'}`}>
                                         {Math.round(distanceToTarget)}m
                                      </div>
                                   )}
@@ -402,7 +402,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                                <Lock size={16} />
                              </div>
                              <div className="space-y-0.5 pt-0.5">
-                               <p className="text-[12px] font-black text-indigo-950 uppercase tracking-widest leading-none">Direct-to-Door</p>
+                               <p className="text-[12px] font-semibold text-indigo-950  leading-none">Direct-to-Door</p>
                                <p className="text-[11px] font-semibold text-indigo-700 leading-snug">
                                  Requires Resident Access Card coordination at Lift Core. Wait for the buyer at the lobby.
                                </p>
@@ -412,7 +412,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
 
                          {(step === 2 || step === 5) && (
                             <div className="space-y-3">
-                               <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{step === 5 ? 'Drop-off Proof' : 'Item Capture'}</p>
+                               <p className="text-[11px] font-semibold text-slate-400 ">{step === 5 ? 'Drop-off Proof' : 'Item Capture'}</p>
                                {!(step === 5 ? podPreview : evidencePhoto) ? (
                                   <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors">
                                      <Camera className="w-6 h-6 text-slate-400 mb-1" />
@@ -441,7 +441,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                          )}
 
                          <div className={`rounded-2xl p-4 border ${step === 5 ? 'bg-slate-50 border-slate-200' : 'bg-slate-50/50 border-slate-100'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest mb-2.5 text-slate-400">Order Bundle</p>
+                            <p className="text-[10px] font-semibold mb-2.5 text-slate-400">Order Bundle</p>
                             <div className="space-y-2">
                                {(mission?.items || []).map((item: any, i: number) => (
                                   <div key={i} className="flex justify-between items-center text-[13px] font-bold text-slate-900">
@@ -455,7 +455,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                          <button 
                            onClick={step === 5 ? handleCompleteDelivery : handleStepUpdate} 
                            disabled={isTooFar || (step === 2 && !evidencePhoto) || (step === 5 && !podPhoto) || isCompleting} 
-                           className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold shadow-md shadow-blue-600/20 disabled:opacity-30 disabled:shadow-none transition-all flex items-center justify-center gap-2 active:scale-95 text-[14px]"
+                           className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md shadow-slate-900/10 disabled:opacity-30 disabled:shadow-none transition-all flex items-center justify-center gap-2 active:scale-95 text-[14px]"
                          >
                             {isCompleting && <Loader2 size={18} className="animate-spin" />}
                             {step === 1 ? "Arrived at Pickup" : 
@@ -470,7 +470,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                             <Camera size={28} />
                          </div>
                          <div>
-                            <h2 className="text-[20px] font-black text-slate-900 tracking-tight leading-none">Photo Proof</h2>
+                            <h2 className="text-[20px] font-semibold text-slate-900 tracking-tight leading-none">Photo Proof</h2>
                             <p className="text-[12px] font-medium text-[#94a3b8] mt-1.5">Capture the item at the drop-off location</p>
                          </div>
                          
@@ -482,7 +482,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                          ) : (
                             <label className="flex flex-col items-center justify-center w-full h-40 border border-dashed border-slate-300 rounded-2xl bg-slate-50 cursor-pointer hover:bg-slate-100/70 transition-all">
                                <Camera className="w-8 h-8 text-slate-300 mb-3" />
-                               <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Open Camera</p>
+                               <p className="text-[12px] font-semibold text-slate-400 ">Open Camera</p>
                                <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
                                   const file = e.target.files?.[0];
                                   if (file) {
@@ -496,7 +496,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                          <button 
                             onClick={handleCompleteDelivery} 
                             disabled={!podPhoto || isCompleting} 
-                            className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 disabled:opacity-30 disabled:shadow-none active:scale-95 transition-all"
+                            className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 disabled:opacity-30 disabled:shadow-none active:scale-95 transition-all"
                          >
                             {isCompleting && <Loader2 size={18} className="animate-spin" />}
                             {isCompleting ? "Processing..." : "Complete Drop-off"}
@@ -578,9 +578,9 @@ function ActiveRunGate() {
           <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 border border-blue-100">
              <CheckCircle2 size={40} />
           </div>
-          <h1 className="text-[13px] font-black uppercase tracking-[0.2em] text-blue-600 mb-2">Drop-off Verified</h1>
-          <p className="text-[42px] font-black text-slate-900 tracking-tighter leading-none mb-10">+RM {payoutAmount.toFixed(2)}</p>
-          <button onClick={() => router.push('/run/terminal')} className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold shadow-md shadow-blue-600/20 active:scale-95 transition-all">Dismiss & Return</button>
+          <h1 className="text-[13px] font-semibold  text-blue-600 mb-2">Drop-off Verified</h1>
+          <p className="text-[42px] font-semibold text-slate-900 tracking-tighter leading-none mb-10">+RM {payoutAmount.toFixed(2)}</p>
+          <button onClick={() => router.push('/run/terminal')} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md shadow-slate-900/10 active:scale-95 transition-all">Dismiss & Return</button>
        </div>
     );
   }

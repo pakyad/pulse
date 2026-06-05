@@ -129,7 +129,7 @@ export default function PerfectSignUp() {
           >
             <AlertCircle className="shrink-0 mt-0.5" size={20} />
             <div className="flex-1">
-              <p className="text-[13px] font-bold uppercase tracking-widest mb-1">Error</p>
+              <p className="text-[13px] font-bold  mb-1">Error</p>
               <p className="text-[12px] font-medium leading-relaxed">{error}</p>
             </div>
             <button onClick={() => setError(null)} className="p-1">
@@ -219,7 +219,7 @@ export default function PerfectSignUp() {
                 <button 
                   onClick={handleSignUp}
                   disabled={loading}
-                  className="w-full h-[56px] bg-[#111111] text-white shadow-md rounded-full font-bold text-[14px] active:scale-95 transition-all mt-6 flex items-center justify-center gap-3 disabled:opacity-50"
+                  className="w-full h-[56px] bg-slate-900 text-white shadow-md rounded-full font-bold text-[14px] active:scale-95 transition-all mt-6 flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -286,7 +286,7 @@ export default function PerfectSignUp() {
                       className="text-[28px] font-bold tracking-tight text-slate-500 mb-4 leading-[1.1]"
                     >
                       {ONBOARDING_SLIDES[onboardStep].headerTop}
-                      <span className="text-slate-900 font-black block mt-1">
+                      <span className="text-slate-900 font-semibold block mt-1">
                         {ONBOARDING_SLIDES[onboardStep].headerBottom}
                       </span>
                     </motion.h2>

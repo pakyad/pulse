@@ -60,7 +60,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-[#111111]/20 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-900/20 backdrop-blur-md"
           />
 
           <motion.div
@@ -72,11 +72,11 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
             {/* Header */}
             <div className="px-8 pt-8 pb-6 border-b border-slate-50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#111111] rounded-2xl flex items-center justify-center text-white">
+                <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center text-white">
                   <Sparkles size={20} />
                 </div>
                 <div>
-                  <h2 className="text-[18px] font-black text-slate-900 tracking-tight">Initiate Pulse</h2>
+                  <h2 className="text-[18px] font-semibold text-slate-900 tracking-tight">Initiate Pulse</h2>
                   <p className="text-[11px] text-slate-400 font-medium">Broadcast to the campus network</p>
                 </div>
               </div>
@@ -89,7 +89,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
             <div className="p-8 space-y-8 overflow-y-auto no-scrollbar max-h-[60vh]">
               {/* Tag Selector */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] px-1">Classification</label>
+                <label className="text-[10px] font-semibold text-slate-300  px-1">Classification</label>
                 <div className="flex flex-wrap gap-2">
                   {TAGS.map(tag => (
                     <button
@@ -97,7 +97,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                       onClick={() => setSelectedTag(tag.id)}
                       className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all border ${
                         selectedTag === tag.id
-                          ? 'bg-[#111111] text-white border-[#111111]'
+                          ? 'bg-slate-900 text-white border-[#111111]'
                           : 'bg-white text-slate-400 border-slate-100'
                       }`}
                     >
@@ -109,7 +109,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
 
               {/* Headline Input */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] px-1">Headline</label>
+                <label className="text-[10px] font-semibold text-slate-300  px-1">Headline</label>
                 <input
                   value={headline}
                   onChange={e => setHeadline(e.target.value)}
@@ -120,7 +120,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
 
               {/* Body Input */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] px-1">Detail Payload</label>
+                <label className="text-[10px] font-semibold text-slate-300  px-1">Detail Payload</label>
                 <textarea
                   value={body}
                   onChange={e => setBody(e.target.value)}
@@ -131,10 +131,10 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
 
               {/* Image attachment drop zone */}
               <div className="h-48 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-3 group cursor-pointer hover:border-[#111111] transition-all">
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-[#111111] group-hover:text-white transition-all">
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-slate-900 group-hover:text-white transition-all">
                   <ImageIcon size={24} />
                 </div>
-                <p className="text-[11px] font-bold uppercase tracking-widest">Attach Media Assets</p>
+                <p className="text-[11px] font-bold ">Attach Media Assets</p>
               </div>
             </div>
 
@@ -156,7 +156,7 @@ export default function CreatePulsePost({ isOpen, onClose }: CreatePulsePostProp
                 <button
                   disabled={submitting || !headline || !body}
                   onClick={handleSubmit}
-                  className="h-14 px-8 bg-[#111111] text-white rounded-2xl font-bold text-[14px] uppercase tracking-widest flex items-center gap-3 shadow-md shadow-slate-900/20 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
+                  className="h-14 px-8 bg-slate-900 text-white rounded-2xl font-bold text-[14px]  flex items-center gap-3 shadow-md shadow-slate-900/10 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
                 >
                   {submitting ? (
                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />

@@ -34,7 +34,7 @@ export default function FacilityModule({
         <div className="space-y-1">
            <h4 className="text-[15px] font-bold text-white tracking-widest uppercase group-hover:text-accent transition-colors">{name}</h4>
            <div className="flex items-center gap-2">
-              <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">{area}</p>
+              <p className="text-[10px] font-semibold text-white/30 ">{area}</p>
               {isOnline && <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />}
            </div>
         </div>
@@ -42,8 +42,8 @@ export default function FacilityModule({
       
       <div className="flex items-center gap-8">
          <div className="text-right">
-            <p className={`font-mono-data text-[13px] font-black tracking-tighter uppercase ${isOnline ? 'text-accent' : 'text-red-400'}`}>{status}</p>
-            <p className="text-[9px] font-black text-white/10 uppercase tracking-widest mt-1">Telemetry Active</p>
+            <p className={`font-mono-data text-[13px] font-semibold tracking-tighter uppercase ${isOnline ? 'text-accent' : 'text-red-400'}`}>{status}</p>
+            <p className="text-[9px] font-semibold text-white/10  mt-1">Telemetry Active</p>
          </div>
 
          <div className="w-8 h-8 rounded-xl border border-white/5 flex items-center justify-center text-white/10 group-hover:text-accent group-hover:border-accent group-hover:bg-accent/5 transition-all">

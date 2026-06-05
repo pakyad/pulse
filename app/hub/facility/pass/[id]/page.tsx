@@ -91,7 +91,7 @@ export default function BookingPassPage() {
       <nav className="px-6 pt-12 pb-6 flex items-center justify-between z-10">
         <BackButton fallback="/pulse" />
         <div className="text-center">
-          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">Institutional Pass</p>
+          <p className="text-[10px] font-semibold text-white/40  mb-1">Institutional Pass</p>
           <h1 className="text-[14px] font-bold tracking-widest text-white uppercase">Reservation Registry</h1>
         </div>
         <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40">
@@ -105,13 +105,13 @@ export default function BookingPassPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-md shadow-black/40 flex flex-col"
+          className="w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-md shadow-slate-900/10 flex flex-col"
         >
           {/* Top Section: Facility Context */}
           <div className="bg-neutral-50 px-8 py-8 border-b border-neutral-100 flex justify-between items-start">
             <div>
-              <span className="text-[10px] font-black text-navy/30 uppercase tracking-[0.2em] mb-1.5 block">Facility Node</span>
-              <h2 className="text-[20px] font-black text-navy tracking-tight">{booking?.facilityName || 'Global Hub'}</h2>
+              <span className="text-[10px] font-semibold text-navy/30  mb-1.5 block">Facility Node</span>
+              <h2 className="text-[20px] font-semibold text-navy tracking-tight">{booking?.facilityName || 'Global Hub'}</h2>
               <p className="text-[12px] text-slate-400 font-medium flex items-center gap-1.5 mt-1">
                 <MapPin size={12} /> Level 3 · MIIT Node
               </p>
@@ -148,21 +148,21 @@ export default function BookingPassPage() {
               </div>
             </div>
             <div className="mt-8 text-center">
-              <p className="text-[11px] font-black text-navy/20 uppercase tracking-[0.3em]">Scan at Access Node</p>
+              <p className="text-[11px] font-semibold text-navy/20 uppercase tracking-[0.3em]">Scan at Access Node</p>
             </div>
           </div>
 
           {/* Bottom Section: Reservation Meta */}
           <div className="bg-navy p-8 grid grid-cols-2 gap-y-6">
             <div>
-              <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Access Point</p>
+              <p className="text-[9px] font-semibold text-white/30  mb-1">Access Point</p>
               <div className="flex items-center gap-2 text-white">
                 <Monitor size={14} className="text-white/40" />
                 <span className="text-[15px] font-bold">POD {booking?.slotId || '--'}</span>
               </div>
             </div>
             <div>
-              <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Duration</p>
+              <p className="text-[9px] font-semibold text-white/30  mb-1">Duration</p>
               <div className="flex items-center gap-2 text-white">
                 <Clock size={14} className="text-white/40" />
                 <span className="text-[15px] font-bold">{booking?.duration || '1h'} Session</span>
@@ -186,14 +186,14 @@ export default function BookingPassPage() {
           <button
             onClick={handleOpenDoor}
             disabled={isOpening}
-            className="w-full h-16 bg-white text-navy rounded-2xl font-bold text-[14px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-60"
+            className="w-full h-16 bg-white text-navy rounded-2xl font-bold text-[14px]  active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-60"
           >
             {isOpening ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} className="fill-navy" />}
             {isOpening ? 'Opening...' : 'Open Lab Door'}
           </button>
           <button
             onClick={() => router.push('/pulse')}
-            className="w-full h-14 bg-white/5 border border-white/10 text-white/40 rounded-2xl font-bold text-[11px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-3"
+            className="w-full h-14 bg-white/5 border border-white/10 text-white/40 rounded-2xl font-bold text-[11px]  active:scale-95 transition-all flex items-center justify-center gap-3"
           >
             <XCircle size={16} />
             Cancel Reservation

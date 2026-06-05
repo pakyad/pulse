@@ -35,7 +35,7 @@ export default function ServicesHub() {
       <section className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50 border-b border-slate-50">
         <BackButton />
         <div className="text-center">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Campus Hub</p>
+          <p className="text-[10px] font-bold text-slate-400  mb-1">Campus Hub</p>
           <h1 className="text-[18px] font-bold tracking-widest text-navy">Services</h1>
         </div>
         <button className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-navy/40">
@@ -54,7 +54,7 @@ export default function ServicesHub() {
               </div>
               <button 
                 onClick={() => router.push('/hub/admin')}
-                className="text-[11px] font-bold text-navy uppercase tracking-widest flex items-center gap-2"
+                className="text-[11px] font-bold text-navy  flex items-center gap-2"
               >
                  <History size={14} /> My Submissions
               </button>
@@ -81,7 +81,7 @@ export default function ServicesHub() {
               </div>
               <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                 <span className="text-[9px] font-bold uppercase tracking-widest">Live Map</span>
+                 <span className="text-[9px] font-bold ">Live Map</span>
               </div>
            </div>
 
@@ -98,7 +98,7 @@ export default function ServicesHub() {
 
               <div className="absolute bottom-5 left-5 right-5 flex gap-2">
                  <div className="flex-1 bg-white/90 backdrop-blur-md p-3.5 rounded-2xl shadow-md">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Current Stop</p>
+                    <p className="text-[9px] font-bold text-slate-400  mb-0.5">Current Stop</p>
                     <p className="text-[13px] font-bold text-navy">Main Gate</p>
                  </div>
                  <div className="w-12 h-12 bg-white shadow-md rounded-2xl flex items-center justify-center text-navy hover:bg-slate-50 cursor-pointer">

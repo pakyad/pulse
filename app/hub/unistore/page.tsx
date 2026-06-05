@@ -75,9 +75,9 @@ export default function UniStoreHub() {
         {/* Hero Content */}
         <div className="absolute bottom-10 left-8 right-8 z-10 flex flex-col items-start space-y-2">
            <div className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/20 rounded-md">
-             <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none drop-shadow-sm">Official Merchandise</p>
+             <p className="text-[10px] font-semibold text-white  leading-none drop-shadow-sm">Official Merchandise</p>
            </div>
-           <h1 className="text-[32px] font-black text-white tracking-tight leading-none mt-2 drop-shadow-md">
+           <h1 className="text-[32px] font-semibold text-white tracking-tight leading-none mt-2 drop-shadow-md">
              UniStore Hub
            </h1>
            <p className="text-[13px] font-medium text-white/90 mt-1 max-w-[250px] leading-relaxed drop-shadow-sm">
@@ -121,7 +121,7 @@ export default function UniStoreHub() {
         ) : (
           <div className="py-20 flex flex-col items-center justify-center text-slate-300 gap-4 border border-dashed border-slate-200 rounded-3xl bg-white">
             <Package size={40} strokeWidth={1} />
-            <p className="text-[13px] font-bold uppercase tracking-widest">No official stock available</p>
+            <p className="text-[13px] font-bold ">No official stock available</p>
           </div>
         )}
       </div>

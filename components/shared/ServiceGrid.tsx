@@ -64,7 +64,7 @@ const ServiceGrid = () => {
             </VoxelContainer>
             
             <div className="text-center">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.12em] group-hover:text-slate-900 transition-colors duration-300">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] group-hover:text-slate-900 transition-colors duration-300">
                 {service.label}
               </span>
             </div>

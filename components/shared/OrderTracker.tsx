@@ -69,10 +69,10 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
                 transition={{ repeat: isCurrent && !isCancelled ? Infinity : 0, duration: 2.5 }}
               >
                 {isPast && !isCancelled ? <CheckCircle2 size={12} strokeWidth={3} /> : (
-                   <span className={`font-black ${isCurrent && !isCancelled ? 'text-amber-500' : ''}`}>{i + 1}</span>
+                   <span className={`font-semibold ${isCurrent && !isCancelled ? 'text-amber-500' : ''}`}>{i + 1}</span>
                 )}
               </motion.div>
-              <span className={`text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-colors duration-500 ${isCancelled ? 'text-slate-300' : (isPast || isCurrent ? 'text-slate-900' : 'text-slate-300')}`}>
+              <span className={`text-[10px] font-semibold absolute -bottom-6 w-max transition-colors duration-500 ${isCancelled ? 'text-slate-300' : (isPast || isCurrent ? 'text-slate-900' : 'text-slate-300')}`}>
                 {label}
               </span>
             </div>
@@ -92,7 +92,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
             <div className="space-y-0.5">
               <p className="text-[15px] font-bold text-slate-900">{order.runner_name || 'Pulse Runner'}</p>
               <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-1 text-[11px] font-black text-amber-500">
+                <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-500">
                   <Star size={12} fill="currentColor" />
                   <span>4.9</span>
                 </div>
@@ -117,7 +117,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
       {/* ── DELIVERY PROOF ── */}
       {step === 4 && deliveryPhoto && (
         <div className="px-2">
-          <button className="w-full py-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-3 text-[12px] font-black text-emerald-600 uppercase tracking-widest hover:bg-emerald-100 transition-all active:scale-95">
+          <button className="w-full py-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-3 text-[12px] font-semibold text-emerald-600  hover:bg-emerald-100 transition-all active:scale-95">
             <CheckCircle2 size={16} />
             View Delivery Photo
           </button>

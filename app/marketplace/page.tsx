@@ -48,6 +48,8 @@ function MarketplacePage() {
     sortBy: 'newest',
     priceRange: [0, 1000],
     officialOnly: false,
+    condition: 'any',
+    fulfillment: 'any'
   });
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -118,6 +120,24 @@ function MarketplacePage() {
     // Official only
     if (filters.officialOnly) {
       result = result.filter(i => i.is_official === true);
+    }
+
+    // Condition
+    if (filters.condition !== 'any') {
+      if (filters.condition === 'new') {
+        result = result.filter(i => i.condition === 'Brand New' || i.condition === 'New');
+      } else if (filters.condition === 'used') {
+        result = result.filter(i => i.condition && i.condition.toLowerCase().includes('used'));
+      }
+    }
+
+    // Fulfillment
+    if (filters.fulfillment !== 'any') {
+      if (filters.fulfillment === 'meetup') {
+        result = result.filter(i => i.delivery_options?.includes('meetup') || i.delivery_options?.includes('Meetup'));
+      } else if (filters.fulfillment === 'runner') {
+        result = result.filter(i => i.delivery_options?.includes('runner') || i.delivery_options?.includes('Pulse Runner'));
+      }
     }
 
     // Sort
@@ -225,23 +245,23 @@ function MarketplacePage() {
                     key={camp.id}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => router.push(`/marketplace/${camp.id}`)}
-                    className="shrink-0 w-[320px] h-[180px] snap-center rounded-2xl overflow-hidden relative cursor-pointer group shadow-md border border-slate-100 bg-[#111111]"
+                    className="shrink-0 w-[320px] h-[180px] snap-center rounded-2xl overflow-hidden relative cursor-pointer group shadow-md border border-slate-100 bg-slate-900"
                   >
                     {camp.image_url && (
                       <img src={camp.image_url} alt={camp.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     )}
                     <div className="absolute inset-0 bg-linear-to-b from-black/30 via-transparent to-black/80" />
                     {camp.urgency && (
-                      <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-md border border-white/20 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                      <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-md border border-white/20 text-white px-3 py-1 rounded-full text-[10px] font-bold  shadow-sm">
                         {camp.urgency}
                       </div>
                     )}
                     <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-2">
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/80 drop-shadow-sm block mb-1">
+                        <span className="text-[10px] font-bold  text-white/80 drop-shadow-sm block mb-1">
                           {camp.tag} • {camp.club_name}
                         </span>
-                        <h4 className="text-[20px] font-black text-white leading-tight tracking-tight drop-shadow-md">{camp.title}</h4>
+                        <h4 className="text-[20px] font-semibold text-white leading-tight tracking-tight drop-shadow-md">{camp.title}</h4>
                       </div>
                       <div className="flex items-center gap-1.5 text-[12px] font-bold text-white group-hover:text-emerald-300 transition-colors mt-1">
                         {camp.cta || 'Explore Official Collection'} <ArrowUpRight size={14} strokeWidth={2.5} />
@@ -269,10 +289,10 @@ function MarketplacePage() {
             </div>
             <button
               onClick={() => setIsFilterOpen(true)}
-              className="h-8 px-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 active:scale-95 transition-all hover:bg-slate-100/50"
+              className="h-9 px-4 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-full border border-slate-100 flex items-center gap-2 active:scale-95 transition-all hover:bg-slate-50"
             >
-              <Filter size={12} className="text-slate-400" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filter</span>
+              <Filter size={14} className="text-slate-500" />
+              <span className="text-[13px] font-semibold text-slate-600">Filter</span>
             </button>
           </div>
 
@@ -281,14 +301,14 @@ function MarketplacePage() {
             {/* "All Items" chip — explicitly active when nothing else is selected */}
             <button
               onClick={() => setActiveCategory(null)}
-              className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
+              className={`h-[36px] px-5 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border ${
                 activeCategory === null
-                  ? 'bg-[#F8FAFC] border-slate-200 text-slate-900 shadow-sm'
-                  : 'bg-transparent border-transparent text-[#64748b] hover:bg-slate-50/50'
+                  ? 'bg-slate-900 border-transparent text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
+                  : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 shadow-sm'
               }`}
             >
-              <LayoutGrid size={14} strokeWidth={activeCategory === null ? 2.5 : 1.5} />
-              <span className="text-[12px] font-bold tracking-[-0.2px]">All Items</span>
+              <LayoutGrid size={16} strokeWidth={activeCategory === null ? 2.5 : 2} />
+              <span className="text-[13px] font-semibold tracking-normal">All Items</span>
             </button>
 
             {CATEGORIES.map(cat => {
@@ -297,14 +317,14 @@ function MarketplacePage() {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                  className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
+                  className={`h-[36px] px-5 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border ${
                     isActive
-                      ? 'bg-[#F8FAFC] border-slate-200 text-slate-900 shadow-sm'
-                      : 'bg-transparent border-transparent text-[#64748b] hover:bg-slate-50/50'
+                      ? 'bg-slate-900 border-transparent text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
+                      : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 shadow-sm'
                   }`}
                 >
-                  <cat.icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
-                  <span className="text-[12px] font-bold tracking-[-0.2px]">{cat.label}</span>
+                  <cat.icon size={16} strokeWidth={isActive ? 2.5 : 2} />
+                  <span className="text-[13px] font-semibold tracking-normal">{cat.label}</span>
                 </button>
               );
             })}
@@ -330,7 +350,7 @@ function MarketplacePage() {
           ) : (
             <div className="py-24 flex flex-col items-center justify-center text-[#94a3b8] gap-4 border-2 border-dashed border-slate-100 rounded-[16px]">
               <Box size={48} strokeWidth={1} className="text-slate-300" />
-              <p className="text-[11px] font-bold uppercase tracking-widest">No listings found</p>
+              <p className="text-[11px] font-bold ">No listings found</p>
             </div>
           )}
 

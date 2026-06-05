@@ -99,14 +99,14 @@ export default function LeaderboardPage() {
                               <div className="flex items-center gap-2 mt-0.5">
                                  <p className="text-[12px] font-medium text-[#94a3b8]">{club.hustle_score || 0} HP</p>
                                  <div className="w-1 h-1 rounded-full bg-slate-200" />
-                                 <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">{club.performance_tier || 'NOVICE'}</p>
+                                 <p className="text-[10px] font-bold text-amber-500 ">{club.performance_tier || 'NOVICE'}</p>
                               </div>
                            </div>
                         </div>
 
                         <div className="flex items-center gap-4">
                            <div className="hidden sm:flex flex-col items-end">
-                              <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Level</p>
+                              <p className="text-[10px] font-bold text-[#94a3b8] ">Level</p>
                               <p className="text-[14px] font-bold text-slate-900">{Math.floor((club.hustle_score || 0) / 100) + 1}</p>
                            </div>
                            <ChevronRight size={18} className="text-slate-200" />
@@ -119,7 +119,7 @@ export default function LeaderboardPage() {
             {clubs.length === 0 && (
                <div className="py-20 bg-slate-50/50 rounded-2xl border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
                   <Activity size={32} strokeWidth={1} className="opacity-30" />
-                  <p className="text-[12px] font-bold uppercase tracking-widest">No rankings available yet</p>
+                  <p className="text-[12px] font-bold ">No rankings available yet</p>
                </div>
             )}
          </section>
@@ -128,7 +128,7 @@ export default function LeaderboardPage() {
             <div className="p-8 bg-slate-50/50 rounded-2xl border border-slate-100">
                <div className="flex items-center gap-3 mb-2">
                   <ShieldCheck size={16} className="text-slate-400" />
-                  <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">Fair Play</p>
+                  <p className="text-[11px] font-bold text-slate-900 ">Fair Play</p>
                </div>
                <p className="text-[12px] text-[#94a3b8] font-medium leading-relaxed">
                   Rankings are updated in real-time based on verified deliveries and student interactions within the Pulse app.

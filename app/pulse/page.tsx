@@ -75,14 +75,21 @@ function relativeTime(ts: any): string {
 
 function tagIcon(tag: string) {
   const t = (tag || '').toUpperCase();
-  if (t === 'SYSTEM' || t === 'MAINTENANCE') return <Wrench size={11} />;
-  if (t === 'MARKETPLACE' || t === 'COMMERCE') return <Store size={11} />;
-  if (t === 'ACADEMIC') return <BookOpen size={11} />;
-  if (t === 'URGENT') return <Zap size={11} />;
-  return <Megaphone size={11} />;
+  if (t === 'SYSTEM' || t === 'MAINTENANCE') return <Wrench size={12} />;
+  if (t === 'MARKETPLACE' || t === 'COMMERCE') return <Store size={12} />;
+  if (t === 'ACADEMIC') return <BookOpen size={12} />;
+  if (t === 'URGENT') return <Zap size={12} />;
+  return <Megaphone size={12} />;
 }
 
-// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
+function getTagColor(tag: string) {
+  const t = (tag || '').toUpperCase();
+  if (t === 'SYSTEM' || t === 'MAINTENANCE') return 'bg-amber-50 text-amber-600 border border-amber-100/50';
+  if (t === 'MARKETPLACE' || t === 'COMMERCE') return 'bg-emerald-50 text-emerald-600 border border-emerald-100/50';
+  if (t === 'ACADEMIC') return 'bg-blue-50 text-blue-600 border border-blue-100/50';
+  if (t === 'URGENT') return 'bg-rose-50 text-rose-600 border border-rose-100/50';
+  return 'bg-indigo-50 text-indigo-600 border border-indigo-100/50';
+}
 
 function AnnouncementCard({ ann }: { ann: any }) {
   const [expanded, setExpanded] = useState(false);
@@ -90,18 +97,17 @@ function AnnouncementCard({ ann }: { ann: any }) {
   return (
     <button
       onClick={() => setExpanded(e => !e)}
-      className="w-full text-left py-5 border-b border-slate-100 last:border-0 group active:opacity-60 transition-opacity"
+      className="w-full text-left py-3.5 border-b border-slate-100/80 last:border-0 group active:scale-[0.99] transition-all"
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0 space-y-1.5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-[0.16em]">
-              {tagIcon(tag)}{tag}
+            <span className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold capitalize ${getTagColor(tag)}`}>
+              {tagIcon(tag)} {tag.toLowerCase()}
             </span>
-            <span className="w-1 h-1 rounded-full bg-slate-200 shrink-0" />
-            <span className="text-[10px] font-medium text-slate-300">{relativeTime(ann.created_at)}</span>
+            <span className="text-[11px] font-medium text-slate-400">{relativeTime(ann.created_at)}</span>
           </div>
-          <p className="text-[13px] font-bold text-slate-900 leading-snug tracking-tight">{ann.headline || ann.title}</p>
+          <p className="text-[14px] font-bold text-slate-800 leading-snug tracking-tight pr-2">{ann.headline || ann.title}</p>
           <AnimatePresence>
             {expanded && ann.body && (
               <motion.p
@@ -110,7 +116,7 @@ function AnnouncementCard({ ann }: { ann: any }) {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-[11px] font-medium text-[#94a3b8] leading-relaxed overflow-hidden pt-1"
+                className="text-[12px] font-medium text-slate-500 leading-relaxed overflow-hidden pt-1 pr-2"
               >
                 {ann.body}
               </motion.p>
@@ -120,9 +126,9 @@ function AnnouncementCard({ ann }: { ann: any }) {
         <motion.div
           animate={{ rotate: expanded ? 90 : 0 }}
           transition={{ duration: 0.18 }}
-          className="shrink-0 mt-1 text-slate-200 group-hover:text-slate-400 transition-colors"
+          className="shrink-0 w-7 h-7 mt-0.5 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600 transition-colors shadow-sm"
         >
-          <ChevronRight size={15} />
+          <ChevronRight size={14} />
         </motion.div>
       </div>
     </button>
@@ -227,20 +233,20 @@ export default function PulsePage() {
         <section className="space-y-4">
           <div className="px-1">
             <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Announcements</h2>
-            <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">Official notices from the university</p>
+            <p className="text-[12px] font-medium text-slate-500 mt-0.5">Official notices from the university</p>
           </div>
-          <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
+          <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-slate-100/50 overflow-hidden">
             {loadingAnn ? (
               <div className="divide-y divide-slate-100">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="px-4 py-5 space-y-2.5 animate-pulse">
-                    <div className="h-2.5 w-20 bg-slate-100 rounded-full" />
+                  <div key={i} className="px-5 py-4 space-y-3 animate-pulse">
+                    <div className="h-5 w-24 bg-slate-100 rounded-full" />
                     <div className="h-4 w-3/4 bg-slate-100 rounded-full" />
                   </div>
                 ))}
               </div>
             ) : displayAnnouncements.length > 0 ? (
-              <div className="px-4">
+              <div className="px-5">
                 {displayAnnouncements.map(ann => <AnnouncementCard key={ann.id} ann={ann} />)}
               </div>
             ) : (
@@ -257,16 +263,12 @@ export default function PulsePage() {
           <div className="px-1 flex items-center justify-between">
             <div>
               <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Campus Radar</h2>
-              <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">Lost items · Found items · Peer alerts</p>
+              <p className="text-[12px] font-medium text-slate-500 mt-0.5">Lost items · Found items · Peer alerts</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Live</span>
-              </div>
               <button
                 onClick={() => setIsReportOpen(true)}
-                className="w-8 h-8 rounded-xl bg-[#111111] flex items-center justify-center text-white active:scale-95 transition-all"
+                className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 hover:bg-indigo-100 active:scale-95 transition-all shadow-sm"
               >
                 <Plus size={15} />
               </button>
@@ -281,14 +283,14 @@ export default function PulsePage() {
         <section className="space-y-4">
           <div className="px-1">
             <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Happening This Week</h2>
-            <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">Campus events and activities</p>
+            <p className="text-[12px] font-medium text-slate-500 mt-0.5">Campus events and activities</p>
           </div>
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
             {(events.length > 0 ? events : DEMO_EVENTS).map((ev: any) => (
               <div
                 key={ev.id}
                 onClick={() => setSelectedEvent(ev)}
-                className="shrink-0 w-[240px] bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:border-slate-200 transition-all group cursor-pointer active:scale-95"
+                className="shrink-0 w-[240px] bg-white border border-slate-100/50 rounded-[20px] overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-md transition-all group cursor-pointer active:scale-[0.98]"
               >
                 <div className="h-[120px] relative bg-slate-100 overflow-hidden">
                   {ev.imageUrl
@@ -296,11 +298,11 @@ export default function PulsePage() {
                     : <div className="w-full h-full bg-linear-to-tr from-slate-200 to-slate-100" />
                   }
                   <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm text-[9px] font-black uppercase tracking-[0.15em] text-slate-900 shadow-sm">{ev.tag || 'Event'}</span>
+                    <span className="px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-sm text-[10px] font-bold text-slate-900 shadow-sm">{ev.tag || 'Event'}</span>
                   </div>
                 </div>
                 <div className="p-4 space-y-3">
-                  <p className="text-[14px] font-bold text-slate-900 leading-snug line-clamp-2">{ev.title}</p>
+                  <p className="text-[13px] font-bold text-slate-800 leading-snug line-clamp-2">{ev.title}</p>
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 text-[11px] font-medium text-slate-500">
                       <Calendar size={12} className="shrink-0 text-slate-400" />
@@ -336,7 +338,7 @@ export default function PulsePage() {
         {selectedEvent && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-200 bg-black/50 backdrop-blur-md flex items-end justify-center p-4"
+            className="fixed inset-0 z-200 bg-slate-900/50 backdrop-blur-md flex items-end justify-center p-4"
             onClick={() => setSelectedEvent(null)}
           >
             <motion.div
@@ -349,7 +351,7 @@ export default function PulsePage() {
                 <div className="h-[160px] relative overflow-hidden">
                   <img src={selectedEvent.imageUrl} className="w-full h-full object-cover" alt={selectedEvent.title} />
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-                  <span className="absolute bottom-4 left-4 px-2.5 py-1 rounded-md bg-white/90 text-[9px] font-black uppercase tracking-widest text-slate-900">
+                  <span className="absolute bottom-4 left-4 px-2.5 py-1 rounded-md bg-white/90 text-[9px] font-semibold text-slate-900">
                     {selectedEvent.tag || 'Event'}
                   </span>
                 </div>
@@ -378,7 +380,7 @@ export default function PulsePage() {
                     className={`flex-1 h-12 rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all ${
                       addedEventId === selectedEvent.id 
                         ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
-                        : 'bg-[#2A5C50] text-white shadow-md shadow-[#2A5C50]/20'
+                        : 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
                     }`}
                   >
                     {addedEventId === selectedEvent.id ? (

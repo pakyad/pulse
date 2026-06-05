@@ -177,7 +177,7 @@ export default function MessagesPage() {
                        {otherParticipant.name}
                     </h3>
                     
-                    <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-1 truncate">
+                    <p className="text-[10px] font-semibold text-[#94a3b8]  mb-1 truncate">
                        {chat.context_title || chat.metadata?.title || 'GENERAL CHAT'}
                     </p>
                     
@@ -187,7 +187,7 @@ export default function MessagesPage() {
                  </div>
 
                  <div className="shrink-0 flex flex-col items-end pt-1">
-                    <span className={`text-[11px] font-black mb-3 ${isUnread ? 'text-slate-900' : 'text-[#94a3b8]'}`}>
+                    <span className={`text-[11px] font-semibold mb-3 ${isUnread ? 'text-slate-900' : 'text-[#94a3b8]'}`}>
                        {chat.last_message_time || 'Just now'}
                     </span>
                     {isUnread && (
@@ -200,7 +200,7 @@ export default function MessagesPage() {
          {(conversations.length > 0 ? conversations : DEMO_CONVERSATIONS).length === 0 && (
            <div className="py-32 flex flex-col items-center justify-center text-[#94a3b8] gap-4">
               <MessageSquare size={40} strokeWidth={1} className="text-slate-300" />
-              <p className="text-[12px] font-bold uppercase tracking-widest">No conversations yet</p>
+              <p className="text-[12px] font-bold ">No conversations yet</p>
            </div>
          )}
       </section>

@@ -127,7 +127,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                      
                      <div className="space-y-6">
                         <div className="space-y-2">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Student ID Number</label>
+                           <label className="text-[10px] font-semibold text-slate-400  px-1">Student ID Number</label>
                            <input 
                              type="text" 
                              value={form.studentId} 
@@ -137,7 +137,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                            />
                         </div>
                         <div className="space-y-2">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Faculty Node</label>
+                           <label className="text-[10px] font-semibold text-slate-400  px-1">Faculty Node</label>
                            <div className="grid grid-cols-1 gap-2">
                               {FACULTIES.map(f => (
                                 <button 
@@ -151,7 +151,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                            </div>
                         </div>
                         <div className="space-y-4">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Student ID Card</label>
+                           <label className="text-[10px] font-semibold text-slate-400  px-1">Student ID Card</label>
                            <div className="h-48 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-slate-300 gap-3 group hover:border-navy/10 transition-colors cursor-pointer">
                               <Camera size={24} className="group-hover:text-navy transition-colors" />
                               <p className="text-[12px] font-bold uppercase tracking-wider">Tap to Capture ID</p>
@@ -193,7 +193,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                              <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-4">
                                 <ShieldCheck className="text-amber-600 shrink-0" size={20} />
                                 <div>
-                                   <p className="text-[12px] font-bold text-amber-900 uppercase tracking-widest">License Required</p>
+                                   <p className="text-[12px] font-bold text-amber-900 ">License Required</p>
                                    <p className="text-[13px] text-amber-800/60 font-medium mt-1">Class B2/D is mandatory for motorized logistics.</p>
                                 </div>
                              </div>
@@ -208,7 +208,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                         )}
 
                         <div className="space-y-4">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Equipment Inventory</label>
+                           <label className="text-[10px] font-semibold text-slate-400  px-1">Equipment Inventory</label>
                            <div className="grid grid-cols-1 gap-2">
                               {["Thermal Delivery Bag", "Pulse Secure Folder", "External Powerbank", "Rain Gear"].map(item => (
                                 <button 
@@ -236,7 +236,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
 
                      <div className="space-y-8">
                         <div className="space-y-4">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Preferred Hotspots</label>
+                           <label className="text-[10px] font-semibold text-slate-400  px-1">Preferred Hotspots</label>
                            <div className="flex flex-wrap gap-2">
                               {HOTSPOTS.map(h => (
                                 <button 
@@ -251,7 +251,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                         </div>
 
                         <div className="space-y-2">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Class-Free Windows</label>
+                           <label className="text-[10px] font-semibold text-slate-400  px-1">Class-Free Windows</label>
                            <input 
                              type="text" 
                              value={form.breakTimes} 
@@ -262,7 +262,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                         </div>
 
                         <div className="space-y-6">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Emergency Handshake</label>
+                           <label className="text-[10px] font-semibold text-slate-400  px-1">Emergency Handshake</label>
                            <div className="grid grid-cols-1 gap-3">
                               <input 
                                 type="text" 
@@ -296,7 +296,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
                         <div className="p-8 bg-slate-50 rounded-2xl border border-slate-100 space-y-6">
                            <div className="flex items-center gap-3">
                               <ShieldCheck className="text-navy" size={24} />
-                              <h4 className="text-[15px] font-bold text-navy uppercase tracking-widest">Protocol Agreement</h4>
+                              <h4 className="text-[15px] font-bold text-navy ">Protocol Agreement</h4>
                            </div>
                            <div className="space-y-4 text-[13px] text-slate-500 font-medium leading-relaxed">
                               <p>1. I will adhere to the UniKL Student Code of Conduct at all times.</p>

@@ -112,7 +112,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
              {step === 2 && (
                 <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
                    <div className="w-1.5 h-1.5 rounded-full bg-slate-900 animate-pulse" />
-                   <span className="text-[9px] font-black uppercase tracking-widest text-slate-900">{strategy}</span>
+                   <span className="text-[9px] font-semibold text-slate-900">{strategy}</span>
                 </div>
              )}
           </div>
@@ -124,9 +124,9 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                 <div className="bg-slate-50/50 border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden">
                    <div className="px-6 py-4 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                         <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">Student Claim</span>
+                         <span className="text-[11px] font-bold text-[#94a3b8] ">Student Claim</span>
                       </div>
-                      <span className="text-[10px] font-black text-red-500 uppercase tracking-widest bg-white px-2 py-0.5 rounded border border-red-50">{dispute.reason}</span>
+                      <span className="text-[10px] font-semibold text-red-500  bg-white px-2 py-0.5 rounded border border-red-50">{dispute.reason}</span>
                    </div>
                    <div className="px-6 py-5 bg-white">
                       <p className="text-[14px] font-medium text-slate-900 leading-relaxed italic">"{dispute.narrative}"</p>
@@ -193,7 +193,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
 
                       {isResponded ? (
                          <div className="p-6 bg-blue-50/30 border border-blue-100 rounded-2xl space-y-4">
-                            <div className="flex items-center gap-2 text-slate-900 font-bold text-[11px] uppercase tracking-widest">
+                            <div className="flex items-center gap-2 text-slate-900 font-bold text-[11px] ">
                                <CheckCircle2 size={14} /> Submitted for Review
                             </div>
                             <p className="text-[14px] font-medium text-slate-900">{dispute.merchant_response}</p>
@@ -203,7 +203,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                             {strategy === 'CONTEST' && (
                                <div className="space-y-6">
                                   <div className="space-y-2">
-                                     <label className="text-[11px] font-black text-[#94a3b8] uppercase tracking-widest">Defense Narrative</label>
+                                     <label className="text-[11px] font-semibold text-[#94a3b8] ">Defense Narrative</label>
                                      <textarea 
                                        value={narrative} onChange={(e) => setNarrative(e.target.value)} required
                                        placeholder="Provide specific details (e.g., 'Left at the guardhouse as per student's request')."
@@ -211,12 +211,12 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                                      />
                                   </div>
                                   <div className="space-y-2">
-                                     <label className="text-[11px] font-black text-[#94a3b8] uppercase tracking-widest">Photo Evidence</label>
+                                     <label className="text-[11px] font-semibold text-[#94a3b8] ">Photo Evidence</label>
                                      <label className="group w-full h-24 border-2 border-dashed border-slate-100 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-all relative overflow-hidden bg-white">
                                         <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                                         {previewUrl && <img src={previewUrl} className="absolute inset-0 w-full h-full object-cover opacity-10" alt="" />}
                                         <ImageIcon size={18} className="text-slate-300 group-hover:text-slate-900" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{image ? image.name : 'Upload Delivery Proof'}</span>
+                                        <span className="text-[10px] font-bold text-slate-400 ">{image ? image.name : 'Upload Delivery Proof'}</span>
                                      </label>
                                   </div>
                                </div>
@@ -255,8 +255,8 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                                <button
                                  type="submit"
                                  disabled={isSubmitting || (strategy === 'CONTEST' && !narrative)}
-                                 className={`w-full py-5 rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-md transition-all active:scale-95 disabled:opacity-20 ${
-                                    strategy === 'FULL' ? 'bg-red-500 text-white shadow-red-500/10' : 'bg-slate-900 text-white shadow-[slate-900]/10'
+                                 className={`w-full py-5 rounded-xl font-bold text-[13px]  flex items-center justify-center gap-3 shadow-md transition-all active:scale-95 disabled:opacity-20 ${
+                                    strategy === 'FULL' ? 'bg-red-500 text-white shadow-red-500/10' : 'bg-slate-900 text-white shadow-slate-900/10'
                                  }`}
                                >
                                   {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : (
@@ -271,7 +271,7 @@ export default function DisputeThread({ dispute, onClose }: DisputeThreadProps) 
                                <button 
                                  type="button" 
                                  onClick={() => setStep(1)}
-                                 className="w-full py-4 text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest hover:text-slate-900 transition-colors"
+                                 className="w-full py-4 text-[11px] font-bold text-[#94a3b8]  hover:text-slate-900 transition-colors"
                                >
                                   Change Strategy
                                </button>

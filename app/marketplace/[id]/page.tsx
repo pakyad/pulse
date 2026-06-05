@@ -198,7 +198,7 @@ export default function ItemDetailsPage() {
   );
   if (!item) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8]">Not Found</p>
+      <p className="text-[11px] font-bold  text-[#94a3b8]">Not Found</p>
     </div>
   );
 
@@ -238,7 +238,7 @@ export default function ItemDetailsPage() {
           >
             <ShoppingCart size={isScrolled ? 18 : 22} strokeWidth={isScrolled ? 2 : 2.5} className="transition-all duration-700 ease-out" />
             {cartCount > 0 && (
-              <span className={`absolute -top-1 -right-1 w-4 h-4 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 transition-all duration-700 ease-out ${isScrolled ? 'bg-red-500 border-white' : 'bg-red-500 border-transparent shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
+              <span className={`absolute -top-1 -right-1 w-4 h-4 text-white text-[9px] font-semibold rounded-full flex items-center justify-center border-2 transition-all duration-700 ease-out ${isScrolled ? 'bg-red-500 border-white' : 'bg-red-500 border-transparent shadow-[0_1px_4px_rgba(0,0,0,0.6)]'}`}>
                 {cartCount}
               </span>
             )}
@@ -266,7 +266,7 @@ export default function ItemDetailsPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-20 left-6 right-6 z-100 bg-blue-600 text-white px-4 py-3 rounded-full flex items-center justify-between shadow-md"
+            className="fixed top-20 left-6 right-6 z-100 bg-slate-900 text-white px-4 py-3 rounded-full flex items-center justify-between shadow-md"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
@@ -274,7 +274,7 @@ export default function ItemDetailsPage() {
               </div>
               <p className="text-[12px] font-bold">Added to cart</p>
             </div>
-            <button onClick={() => router.push('/cart')} className="text-[11px] font-black uppercase tracking-widest text-emerald-400 mr-2">View Cart</button>
+            <button onClick={() => router.push('/cart')} className="text-[11px] font-semibold text-emerald-400 mr-2">View Cart</button>
           </motion.div>
         )}
         {isCopied && (
@@ -282,7 +282,7 @@ export default function ItemDetailsPage() {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
-            className="fixed top-20 left-6 right-6 z-100 bg-blue-600 text-white px-4 py-3 rounded-full flex items-center justify-center shadow-md"
+            className="fixed top-20 left-6 right-6 z-100 bg-slate-900 text-white px-4 py-3 rounded-full flex items-center justify-center shadow-md"
           >
             <div className="flex items-center gap-2">
               <CheckCircle2 size={16} className="text-white" />
@@ -303,9 +303,9 @@ export default function ItemDetailsPage() {
         )}
 
         {isSoldOut && (
-          <div className="absolute inset-0 bg-black/10 flex items-center justify-center z-20">
+          <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center z-20">
              <div className="px-6 py-2 bg-white/90 backdrop-blur-xl rounded-full border border-white shadow-md">
-                <p className="text-[12px] font-black text-red-500 uppercase tracking-[0.2em]">Restocking Soon</p>
+                <p className="text-[12px] font-semibold text-red-500 ">Restocking Soon</p>
              </div>
           </div>
         )}
@@ -317,7 +317,7 @@ export default function ItemDetailsPage() {
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
-                className={`h-1 rounded-full transition-all ${i === activeImage ? 'w-6 bg-blue-600' : 'w-1.5 bg-slate-900/20'}`}
+                className={`h-1 rounded-full transition-all ${i === activeImage ? 'w-6 bg-slate-900' : 'w-1.5 bg-slate-900/20'}`}
               />
             ))}
           </div>
@@ -344,19 +344,19 @@ export default function ItemDetailsPage() {
               {item.title}
             </h1>
             {isSoldOut ? (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 uppercase tracking-widest">
+              <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 ">
                 <ShieldAlert size={12} /> Out of Stock
               </span>
             ) : item.status === 'HELD_FOR_REVISION' || item.status === 'FLAGGED_FOR_REVIEW' ? (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500 shrink-0 pt-1 uppercase tracking-widest">
+              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500 shrink-0 pt-1 ">
                 <ShieldAlert size={12} /> Action Required
               </span>
             ) : item.status === 'REJECTED_FRAUDULENT' ? (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 uppercase tracking-widest">
+              <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 ">
                 <ShieldAlert size={12} /> Suspended
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 shrink-0 pt-1 uppercase tracking-widest">
+              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 shrink-0 pt-1 ">
                 <ShieldCheck size={12} /> Verified
               </span>
             )}
@@ -518,7 +518,7 @@ export default function ItemDetailsPage() {
               <button
                 disabled={isSoldOut}
                 onClick={() => router.push(`/marketplace/${id}/checkout`)}
-                className="flex-1 h-[52px] bg-blue-600 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20 shadow-md shadow-blue-600/20"
+                className="flex-1 h-[52px] bg-slate-900 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20 shadow-md shadow-slate-900/10"
               >
                 {isSoldOut ? 'Sold Out' : 'Buy Now'}
                 {!isSoldOut && <ArrowUpRight size={16} />}

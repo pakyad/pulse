@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CAMPUS_NODES, LocationNode, getLocationBadge } from '@/lib/core/locations';
 
 const FPX_BANKS = [
-  { id: 'maybank', label: 'Maybank2u', short: 'MB', bg: 'bg-[#FFCC00]', text: 'text-black' },
+  { id: 'maybank', label: 'Maybank2u', short: 'MB', bg: 'bg-[#FFCC00]', text: 'text-slate-900' },
   { id: 'cimb',    label: 'CIMB Clicks', short: 'CB', bg: 'bg-[#7E1F2A]', text: 'text-white' },
   { id: 'rhb',     label: 'RHB Now', short: 'RH', bg: 'bg-[#0067B1]', text: 'text-white' },
   { id: 'hlb',     label: 'Hong Leong', short: 'HL', bg: 'bg-[#E3000F]', text: 'text-white' },
@@ -178,7 +178,7 @@ export default function CheckoutPage() {
   );
   if (!item) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8]">Item not found</p>
+      <p className="text-[11px] font-bold  text-[#94a3b8]">Item not found</p>
     </div>
   );
 
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
             {payStatus === 'processing' ? (
               <>
                 <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center">
-                  <span className="text-slate-900 font-black text-[13px] tracking-widest">FPX</span>
+                  <span className="text-slate-900 font-semibold text-[13px] tracking-widest">FPX</span>
                 </div>
                 <div className="space-y-1 text-center">
                   <p className="text-[15px] font-bold text-slate-900 tracking-tight">Connecting to bank...</p>
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
                     transition={{ duration: 2.2, ease: 'easeInOut' }}
                   />
                 </div>
-                <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Do not close this page</p>
+                <p className="text-[10px] font-medium text-slate-300 ">Do not close this page</p>
               </>
             ) : (
               <>
@@ -254,7 +254,7 @@ export default function CheckoutPage() {
                   <p className="text-[16px] font-bold text-slate-900 tracking-tight">Payment Successful</p>
                   <p className="text-[12px] font-medium text-[#94a3b8]">RM {total.toFixed(2)} via FPX</p>
                 </div>
-                <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Placing your order...</p>
+                <p className="text-[10px] font-medium text-slate-300 ">Placing your order...</p>
               </>
             )}
           </motion.div>
@@ -434,7 +434,7 @@ export default function CheckoutPage() {
                                 </div>
                                 <div className="text-right shrink-0">
                                   <p className="text-[13px] font-bold text-slate-900">RM {node.fee.toFixed(2)}</p>
-                                  <p className="text-[10px] font-medium text-[#94a3b8] uppercase tracking-widest">{node.tier}</p>
+                                  <p className="text-[10px] font-medium text-[#94a3b8] ">{node.tier}</p>
                                 </div>
                               </button>
                               
@@ -483,7 +483,7 @@ export default function CheckoutPage() {
                   </p>
                   <p className="text-[22px] font-bold text-slate-900 tracking-tight leading-none">RM {total.toFixed(2)}</p>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-bold text-slate-300 uppercase tracking-widest">
+                <div className="flex items-center gap-1 text-[10px] font-bold text-slate-300 ">
                   <ShieldCheck size={11} />
                   Secured
                 </div>
@@ -499,7 +499,7 @@ export default function CheckoutPage() {
                 {/* Method header */}
                 <div className="flex items-center gap-4 px-4 py-4 border-b border-slate-100 bg-white">
                   <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                    <span className="text-slate-900 font-black text-[11px] tracking-widest">FPX</span>
+                    <span className="text-slate-900 font-semibold text-[11px] tracking-widest">FPX</span>
                   </div>
                   <div className="flex-1">
                     <p className="text-[13px] font-bold text-slate-900">FPX Online Banking</p>
@@ -533,7 +533,7 @@ export default function CheckoutPage() {
                             )}
                             
                             {/* Bank Logo / Icon */}
-                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-[12px] font-black tracking-widest mb-2 shadow-inner border border-black/5 ${bank.bg} ${bank.text}`}>
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-[12px] font-semibold tracking-widest mb-2 shadow-inner border border-black/5 ${bank.bg} ${bank.text}`}>
                               {bank.short}
                             </div>
                             
@@ -554,7 +554,7 @@ export default function CheckoutPage() {
               <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden cursor-pointer" onClick={() => setPaymentMethod('TNG')}>
                 <div className="flex items-center gap-4 px-4 py-4 bg-white">
                   <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                    <span className="text-blue-600 font-black text-[10px] tracking-wider">TNG</span>
+                    <span className="text-blue-600 font-semibold text-[10px] tracking-wider">TNG</span>
                   </div>
                   <div className="flex-1">
                     <p className="text-[13px] font-bold text-slate-900">Touch 'n Go eWallet</p>

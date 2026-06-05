@@ -152,7 +152,7 @@ function RunnerActivePageContent() {
     <div className="min-h-screen bg-white flex items-center justify-center p-8">
        <div className="flex flex-col items-center gap-6">
           <div className="w-10 h-10 border-[3px] border-slate-100 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Loading Delivery Data</p>
+          <p className="text-[11px] font-bold text-slate-400 ">Loading Delivery Data</p>
        </div>
     </div>
   );
@@ -194,7 +194,7 @@ function RunnerActivePageContent() {
       <div className="pt-28 px-6 space-y-8 flex-1">
          
          <div className="space-y-1">
-            <h1 className="text-[28px] font-black tracking-tighter leading-tight text-slate-900">
+            <h1 className="text-[28px] font-semibold tracking-tighter leading-tight text-slate-900">
                {instructionHeading}
             </h1>
             <p className="text-[13px] font-medium text-slate-400">
@@ -214,7 +214,7 @@ function RunnerActivePageContent() {
                <div className="flex items-start gap-4 relative z-10 bg-slate-50 pb-6">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
                      ['AWAITING_MERCHANT_ACCEPT', 'PREPARING', 'READY_FOR_PICKUP', 'ARRIVED_AT_MERCHANT', 'ARRIVED_AT_PICKUP'].includes(order.status)
-                     ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                     ? 'bg-slate-900 text-white border-blue-600 shadow-md shadow-slate-900/10'
                      : 'bg-white text-slate-300 border-slate-200'
                   }`}>
                      {isCustomDelivery ? <User size={18} /> : <Store size={18} />}
@@ -233,7 +233,7 @@ function RunnerActivePageContent() {
                <div className="flex items-start gap-4 relative z-10 bg-slate-50 pt-2">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
                      ['ON_THE_WAY', 'ARRIVED_AT_BUILDING', 'ARRIVED_AT_BUYER'].includes(order.status)
-                     ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                     ? 'bg-slate-900 text-white border-blue-600 shadow-md shadow-slate-900/10'
                      : isCOMPLETED 
                      ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
                      : 'bg-white text-slate-300 border-slate-200'
@@ -249,7 +249,7 @@ function RunnerActivePageContent() {
                      {/* Indoor Details */}
                      {(order.floorLevel || order.roomNumber) && (
                        <div className="mt-3 p-3 bg-white border border-slate-100 rounded-xl">
-                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Indoor Drop-off</p>
+                          <p className="text-[9px] font-semibold text-slate-400  leading-none mb-1.5">Indoor Drop-off</p>
                           <p className="text-[12px] font-bold text-slate-900">
                             {order.floorLevel ? `Lvl ${order.floorLevel}` : ''}
                             {order.floorLevel && order.roomNumber ? ' • ' : ''}
@@ -291,7 +291,7 @@ function RunnerActivePageContent() {
                           className={`w-full p-4 rounded-xl border flex items-center justify-between transition-all active:scale-95 ${checked ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600 text-blue-700' : 'bg-slate-50 border-slate-100 hover:border-slate-200 text-slate-700'}`}
                         >
                            <span className="font-bold text-[13px]">{item.quantity}x {item.name || item.title}</span>
-                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${checked ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-300'}`}>
+                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${checked ? 'bg-slate-900 border-blue-600 text-white' : 'bg-white border-slate-300'}`}>
                              {checked && <CheckCircle2 size={12} strokeWidth={4} />}
                            </div>
                         </button>
@@ -308,7 +308,7 @@ function RunnerActivePageContent() {
                  className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5 space-y-5"
                >
                   <div className="flex items-start gap-4">
-                     <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-md shadow-blue-600/20">
+                     <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shrink-0 shadow-md shadow-slate-900/10">
                         <Navigation size={18} />
                      </div>
                      <div>
@@ -343,7 +343,7 @@ function RunnerActivePageContent() {
                   <div className="flex gap-2 mb-2">
                      {[0,1,2,3].map(i => (
                        <div key={i} className="flex-1 h-16 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center shadow-inner">
-                          <span className="text-[24px] font-black text-slate-900">{verificationCode[i] || ''}</span>
+                          <span className="text-[24px] font-semibold text-slate-900">{verificationCode[i] || ''}</span>
                        </div>
                      ))}
                   </div>
@@ -354,12 +354,12 @@ function RunnerActivePageContent() {
                      value={verificationCode}
                      onChange={(e) => setVerificationCode(e.target.value.slice(0,4))}
                      placeholder="INPUT CODE"
-                     className="w-full h-16 bg-white border border-slate-200 text-center rounded-2xl font-black text-[14px] uppercase tracking-[0.2em] outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all placeholder:text-slate-300"
+                     className="w-full h-16 bg-white border border-slate-200 text-center rounded-2xl font-semibold text-[14px]  outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all placeholder:text-slate-300"
                   />
                   <button 
                    onClick={handleVerifyHandshake}
                    disabled={verificationCode.length !== 4 || isVerifying}
-                   className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] disabled:opacity-30 disabled:shadow-none flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/20 active:scale-95"
+                   className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] disabled:opacity-30 disabled:shadow-none flex items-center justify-center gap-2 transition-all shadow-md shadow-slate-900/10 active:scale-95"
                   >
                     {isVerifying ? 'Checking...' : 'Complete Delivery'}
                   </button>
@@ -375,7 +375,7 @@ function RunnerActivePageContent() {
                      <CheckCircle2 size={32} />
                   </div>
                   <div className="text-center space-y-1">
-                     <h2 className="text-[20px] font-black tracking-tight text-slate-900">Delivery Done</h2>
+                     <h2 className="text-[20px] font-semibold tracking-tight text-slate-900">Delivery Done</h2>
                      <p className="text-[13px] font-bold text-emerald-600">RM 2.00 Earned</p>
                   </div>
                   <button onClick={() => router.push('/run')} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[13px] shadow-md shadow-slate-900/10 active:scale-95 transition-all mt-2">
@@ -401,7 +401,7 @@ function RunnerActivePageContent() {
                 <button 
                   key="arrived_merchant"
                   onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: isCustomDelivery ? 'ARRIVED_AT_PICKUP' : 'ARRIVED_AT_MERCHANT' })}
-                  className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 active:scale-95 transition-all"
+                  className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 active:scale-95 transition-all"
                 >
                   {isCustomDelivery ? 'Arrived at Pickup' : 'Arrived at Merchant'} <ArrowRight size={18} />
                 </button>
@@ -413,7 +413,7 @@ function RunnerActivePageContent() {
                    key="pickup"
                    disabled={!isCustomDelivery && Object.values(checklist).filter(Boolean).length < items.length}
                    onClick={handlePickup}
-                   className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 disabled:opacity-30 disabled:shadow-none active:scale-95 transition-all"
+                   className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 disabled:opacity-30 disabled:shadow-none active:scale-95 transition-all"
                  >
                    Confirm Pickup <ArrowRight size={18} />
                  </button>
@@ -424,7 +424,7 @@ function RunnerActivePageContent() {
                      <button 
                       key="arrived_building"
                       onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUILDING' })}
-                      className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 active:scale-95 transition-all"
+                      className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 active:scale-95 transition-all"
                     >
                       Arrived at Building <ArrowRight size={18} />
                     </button>
@@ -441,7 +441,7 @@ function RunnerActivePageContent() {
                   <button 
                     key="arrived_buyer"
                     onClick={() => updateDoc(doc(db, 'orders', orderId!), { status: 'ARRIVED_AT_BUYER' })}
-                    className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 active:scale-95 transition-all"
+                    className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 active:scale-95 transition-all"
                   >
                     Arrived at Drop-off <ArrowRight size={18} />
                   </button>
@@ -453,7 +453,7 @@ function RunnerActivePageContent() {
       {/* ── Cancel Modal ── */}
       <AnimatePresence>
          {showCancelModal && (
-            <div className="fixed inset-0 z-100 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-100 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-6">
                <motion.div 
                  initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
                  className="bg-white border border-slate-100 rounded-3xl p-8 w-full max-w-sm space-y-6 shadow-xl"
@@ -462,7 +462,7 @@ function RunnerActivePageContent() {
                      <AlertTriangle size={24} />
                   </div>
                   <div className="text-center space-y-1.5">
-                     <h3 className="text-[18px] font-black tracking-tight text-slate-900">Cancel Delivery?</h3>
+                     <h3 className="text-[18px] font-semibold tracking-tight text-slate-900">Cancel Delivery?</h3>
                      <p className="text-[12px] text-slate-400 font-medium leading-relaxed">
                         Cancelling this will reduce your Hustle Score by <span className="text-red-500 font-bold">50 points</span>. Are you sure?
                      </p>

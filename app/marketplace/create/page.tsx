@@ -233,7 +233,7 @@ export default function CreateListingPage() {
                   onClick={() => { setSelectedCategory(id); setSubcategory(''); }}
                   className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                     isActive
-                      ? 'bg-[#2A5C50] border-[#2A5C50] text-white shadow-sm'
+                      ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
                       : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                   }`}
                 >
@@ -268,7 +268,7 @@ export default function CreateListingPage() {
                       onClick={() => setSubcategory(sub.label)}
                       className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
                         isActive
-                          ? 'bg-[#2A5C50] border-[#2A5C50] text-white shadow-sm'
+                          ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
                           : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                       }`}
                     >
@@ -314,7 +314,7 @@ export default function CreateListingPage() {
                   className="shrink-0 w-24 h-24 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center gap-1.5 hover:bg-slate-100 transition-all"
                 >
                   <Plus size={18} className="text-[#94a3b8]" />
-                  <span className="text-[9px] font-bold text-[#94a3b8] uppercase tracking-widest">Add</span>
+                  <span className="text-[9px] font-bold text-[#94a3b8] ">Add</span>
                 </button>
                 <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
                 {images.map((img, i) => (
@@ -346,7 +346,7 @@ export default function CreateListingPage() {
                 className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-slate-900 transition-colors"
               />
               {title.trim().length > 0 && title.trim().length < 10 && (
-                <p className="text-[10px] font-bold text-[#2A5C50]">
+                <p className="text-[10px] font-bold text-slate-900">
                   Be more specific.
                 </p>
               )}
@@ -379,7 +379,7 @@ export default function CreateListingPage() {
                 {marketLoading && (
                   <div className="flex items-center gap-1.5">
                     <Loader2 size={12} className="animate-spin text-slate-300" />
-                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Checking market...</span>
+                    <span className="text-[10px] font-bold text-slate-300 ">Checking market...</span>
                   </div>
                 )}
               </div>
@@ -468,7 +468,7 @@ export default function CreateListingPage() {
                             }
                           </p>
                         </div>
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${
+                        <span className={`text-[9px] font-semibold px-2 py-1 rounded-md ${
                           marketCheck.source === 'SERP_LIVE'
                             ? 'bg-blue-50 text-blue-500'
                             : marketCheck.source === 'FIRESTORE_CACHE'
@@ -488,14 +488,14 @@ export default function CreateListingPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] font-medium text-slate-400">Max Campus Price (−10%)</span>
-                          <span className={`text-[13px] font-black ${isBlocked ? 'text-red-500' : 'text-slate-900'}`}>
+                          <span className={`text-[13px] font-semibold ${isBlocked ? 'text-red-500' : 'text-slate-900'}`}>
                             RM {marketCheck.max_campus_price.toFixed(2)}
                           </span>
                         </div>
                         {hasPriceInput ? (
                           <div className="flex items-center justify-between border-t border-slate-100/80 pt-2 mt-1">
                             <span className="text-[11px] font-medium text-slate-400">Your Price</span>
-                            <span className={`text-[13px] font-black ${isBlocked ? 'text-red-500' : 'text-emerald-600'}`}>
+                            <span className={`text-[13px] font-semibold ${isBlocked ? 'text-red-500' : 'text-emerald-600'}`}>
                               RM {numericPrice.toFixed(2)}
                             </span>
                           </div>
@@ -568,14 +568,14 @@ export default function CreateListingPage() {
               <div className="grid grid-cols-2 gap-3">
                  <button 
                    onClick={() => setFulfillmentMode('DELIVERY')}
-                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'DELIVERY' ? 'bg-[#2A5C50] border-[#2A5C50] text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'DELIVERY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                  >
                     <span className="text-[13px] font-bold mb-1">Runner Delivery</span>
                     <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'DELIVERY' ? 'text-white/80' : 'text-slate-400'}`}>Pulse runners will handle delivery</span>
                  </button>
                  <button 
                    onClick={() => setFulfillmentMode('MEETUP_ONLY')}
-                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'MEETUP_ONLY' ? 'bg-[#2A5C50] border-[#2A5C50] text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'MEETUP_ONLY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                  >
                     <span className="text-[13px] font-bold mb-1">Strictly Meetup</span>
                     <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'MEETUP_ONLY' ? 'text-white/80' : 'text-slate-400'}`}>You meet the buyer face-to-face</span>

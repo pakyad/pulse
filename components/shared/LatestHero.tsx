@@ -53,7 +53,7 @@ const LatestHero = () => {
     <section className="px-4">
       <div className="flex justify-between items-center px-4 mb-6">
         <h2 className="text-xl font-bold text-navy tracking-tight">Latest</h2>
-        <button className="p-2 hover:bg-black/5 rounded-full transition-colors">
+        <button className="p-2 hover:bg-slate-900/5 rounded-full transition-colors">
           <ChevronRight size={20} className="text-navy" />
         </button>
       </div>

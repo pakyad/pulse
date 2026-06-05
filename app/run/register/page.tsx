@@ -101,7 +101,7 @@ function RunnerRegistrationContent() {
 
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Full Legal Name</p>
+                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Full Legal Name</p>
                   <div className="relative">
                     <User size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                     <input 
@@ -115,7 +115,7 @@ function RunnerRegistrationContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Matric Identification</p>
+                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Matric Identification</p>
                   <div className="relative">
                     <CreditCard size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                     <input 
@@ -129,10 +129,10 @@ function RunnerRegistrationContent() {
                 </div>
 
                 <div className="space-y-6 pt-4 border-t border-slate-50">
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-navy/30 ml-1">Emergency Protocols</p>
+                  <p className="text-[11px] font-semibold  text-navy/30 ml-1">Emergency Protocols</p>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300 ml-1">Next of Kin</p>
+                      <p className="text-[10px] font-bold  text-slate-300 ml-1">Next of Kin</p>
                       <input 
                         type="text" 
                         placeholder="Name"
@@ -142,7 +142,7 @@ function RunnerRegistrationContent() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300 ml-1">Emergency Phone</p>
+                      <p className="text-[10px] font-bold  text-slate-300 ml-1">Emergency Phone</p>
                       <input 
                         type="text" 
                         placeholder="01x-xxx"
@@ -181,7 +181,7 @@ function RunnerRegistrationContent() {
               </p>
 
               <div className="space-y-2">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Select Institution</p>
+                <p className="text-[11px] font-bold  text-slate-300 ml-1">Select Institution</p>
                 <div className="relative">
                   <select 
                     value={formData.campus}
@@ -208,7 +208,7 @@ function RunnerRegistrationContent() {
 
               {formData.campus === 'City Campus' && (
                 <div className="mt-8 space-y-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Operational Zones</p>
+                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Operational Zones</p>
                   <div className="flex flex-wrap gap-2">
                     {['MIIT Branch', 'UBIS Branch', 'MIDI Branch'].map(zone => (
                       <button
@@ -261,7 +261,7 @@ function RunnerRegistrationContent() {
               </p>
 
               <div className="space-y-4">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Transport Mode</p>
+                <p className="text-[11px] font-bold  text-slate-300 ml-1">Transport Mode</p>
                 <div className="grid grid-cols-1 gap-3">
                   {['Walking', 'Bicycle / Scooter', 'Motorcycle', 'Car'].map((mode) => (
                     <button
@@ -283,7 +283,7 @@ function RunnerRegistrationContent() {
 
               {(formData.transport === 'Motorcycle' || formData.transport === 'Car') && (
                 <div className="mt-8 space-y-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Identity Evidence</p>
+                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Identity Evidence</p>
                   <div className="bg-slate-50 border-2 border-dashed border-slate-100 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-slate-100/50 transition-all">
                     <ShieldCheck size={28} className="text-slate-300" />
                     <p className="text-xs font-bold text-slate-400">Upload Driving License</p>
@@ -319,7 +319,7 @@ function RunnerRegistrationContent() {
 
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Bank Name</p>
+                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Bank Name</p>
                   <div className="relative">
                     <Building size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                     <select 
@@ -337,7 +337,7 @@ function RunnerRegistrationContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-300 ml-1">Account Number</p>
+                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Account Number</p>
                   <div className="relative">
                     <CheckCircle2 size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
                     <input 

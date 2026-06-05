@@ -69,7 +69,7 @@ export default function InventorySimulation() {
             <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
               <Zap size={20} className="text-amber-400" />
             </div>
-            <h1 className="text-[18px] font-black uppercase tracking-widest">Inventory Sim</h1>
+            <h1 className="text-[18px] font-semibold">Inventory Sim</h1>
           </div>
           <p className="text-slate-400 text-[12px] font-medium leading-relaxed">
             Testing Institutional Guard & Atomic Stock decrement logic for Pulse Marketplace.
@@ -147,7 +147,7 @@ export default function InventorySimulation() {
                     </a>
                     <button 
                       onClick={() => window.location.reload()}
-                      className="text-[11px] font-black uppercase tracking-widest text-slate-300 hover:text-slate-500 transition-all pt-2"
+                      className="text-[11px] font-semibold text-slate-300 hover:text-slate-500 transition-all pt-2"
                     >
                       Reset Sim
                     </button>
@@ -158,7 +158,7 @@ export default function InventorySimulation() {
 
           {/* Log Window */}
           <div className="space-y-3">
-             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">System Terminal</p>
+             <p className="text-[10px] font-semibold text-slate-300  px-1">System Terminal</p>
              <div className="h-40 bg-slate-50 rounded-2xl p-4 overflow-y-auto border border-slate-100 font-mono text-[10px] space-y-2 text-slate-400">
                 {log.length === 0 && <p className="opacity-40 italic">Waiting for simulation trigger...</p>}
                 {log.map((l, i) => (

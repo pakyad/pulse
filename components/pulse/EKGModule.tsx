@@ -54,7 +54,7 @@ export default function EKGModule({
       <div className="flex justify-between items-start relative z-10">
          <div className={`px-3 py-1 rounded-full border ${statusColors[status] || 'text-slate-400 bg-slate-50 border-slate-100'} flex items-center gap-2`}>
             <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-            <span className="text-[10px] font-black tracking-widest uppercase">
+            <span className="text-[10px] font-semibold tracking-widest uppercase">
               {status}
             </span>
          </div>
@@ -64,10 +64,10 @@ export default function EKGModule({
       </div>
 
       <div className="space-y-2 relative z-10">
-        <p className="text-[10px] font-black text-slate-300 tracking-[0.3em] uppercase">
+        <p className="text-[10px] font-semibold text-slate-300 tracking-[0.3em] uppercase">
           {title}
         </p>
-        <p className="text-4xl font-black tracking-tighter italic text-navy">
+        <p className="text-4xl font-semibold tracking-tighter italic text-navy">
           {val}
         </p>
       </div>

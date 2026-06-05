@@ -23,14 +23,14 @@ function ConfirmModal({ onConfirm, onCancel, isProcessing }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onCancel} className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+        onClick={onCancel} className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm" />
       <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}
         className="relative bg-white rounded-2xl shadow-2xl border border-slate-100 p-8 max-w-sm w-full space-y-5">
         <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mx-auto">
           <Trash2 size={22} className="text-red-500" />
         </div>
         <div className="text-center">
-          <h3 className="text-[18px] font-black text-slate-900">Permanently Delete?</h3>
+          <h3 className="text-[18px] font-semibold text-slate-900">Permanently Delete?</h3>
           <p className="text-[13px] text-slate-400 mt-2 leading-relaxed">
             This removes the item from Firestore entirely. The vault record is kept for audit purposes. This cannot be undone.
           </p>
@@ -114,7 +114,7 @@ export default function VaultPage() {
     <div className="space-y-8 max-w-6xl">
       <AnimatePresence>{toast && (
         <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}
-          className={`fixed top-6 left-1/2 -translate-x-1/2 z-100 px-6 py-3 rounded-full shadow-lg text-white text-[13px] font-bold flex items-center gap-2 ${toast.type === 'ok' ? 'bg-[#2A5C50]' : 'bg-red-500'}`}>
+          className={`fixed top-6 left-1/2 -translate-x-1/2 z-100 px-6 py-3 rounded-full shadow-lg text-white text-[13px] font-bold flex items-center gap-2 ${toast.type === 'ok' ? 'bg-slate-900' : 'bg-red-500'}`}>
           {toast.type === 'ok' ? <CheckCircle size={16} /> : <X size={16} />} {toast.msg}
         </motion.div>
       )}</AnimatePresence>
@@ -132,14 +132,14 @@ export default function VaultPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Audit Archive</p>
-          <h1 className="text-[24px] font-black text-slate-900 tracking-tight">Governance Vault</h1>
+          <p className="text-[10px] font-semibold text-slate-400  mb-1">Audit Archive</p>
+          <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Governance Vault</h1>
           <p className="text-[13px] font-medium text-slate-400 mt-1">
             Every removed listing. Restore false flags or permanently erase.
           </p>
         </div>
         <div className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl">
-          <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{entries.length} records</span>
+          <span className="text-[11px] font-semibold text-slate-500 ">{entries.length} records</span>
         </div>
       </div>
 
@@ -160,11 +160,11 @@ export default function VaultPage() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50/50 border-b border-slate-100">
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Item</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Action</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Reason</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Removed</th>
-              <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Controls</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Item</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Action</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Reason</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Removed</th>
+              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400  text-right">Controls</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -198,7 +198,7 @@ export default function VaultPage() {
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${style.bg} ${style.text}`}>
+                    <span className={`px-2.5 py-1 rounded-md text-[9px] font-semibold ${style.bg} ${style.text}`}>
                       {style.label}
                     </span>
                   </td>
@@ -206,7 +206,7 @@ export default function VaultPage() {
                     <p className="text-[12px] font-medium text-slate-500 max-w-[200px] truncate">{entry.vault_reason || '—'}</p>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">
+                    <span className="text-[11px] font-bold text-slate-300 ">
                       {entry.vault_timestamp?.toDate?.().toLocaleDateString() || 'Recently'}
                     </span>
                   </td>
@@ -216,7 +216,7 @@ export default function VaultPage() {
                         <button
                           onClick={() => handleRestore(entry)}
                           disabled={processing === entry.vaultId}
-                          className="h-8 px-3 bg-white border border-slate-200 text-slate-700 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100 transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-40">
+                          className="h-8 px-3 bg-white border border-slate-200 text-slate-700 rounded-lg text-[10px] font-bold  hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-100 transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-40">
                           {processing === entry.vaultId ? <Loader2 size={11} className="animate-spin" /> : <RotateCcw size={11} />}
                           Restore
                         </button>
@@ -224,7 +224,7 @@ export default function VaultPage() {
                       <button
                         onClick={() => setConfirmId({ vaultId: entry.vaultId, item_id: entry.item_id })}
                         disabled={processing === entry.vaultId}
-                        className="h-8 px-3 bg-white border border-slate-200 text-slate-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-40">
+                        className="h-8 px-3 bg-white border border-slate-200 text-slate-400 rounded-lg text-[10px] font-bold  hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-40">
                         <Trash2 size={11} /> Delete
                       </button>
                     </div>

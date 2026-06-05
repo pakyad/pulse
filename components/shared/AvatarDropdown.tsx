@@ -71,7 +71,7 @@ export default function AvatarDropdown({ photoUrl, userName, className = "" }: A
             <div className="p-3">
               {menuItems.map((section, idx) => (
                 <div key={section.group} className={idx > 0 ? 'mt-4 pt-3 border-t border-slate-50' : ''}>
-                  <p className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <p className="px-3 py-1.5 text-[10px] font-bold text-slate-400 ">
                     {section.group}
                   </p>
                   <div className="space-y-1">

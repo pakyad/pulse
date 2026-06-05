@@ -69,7 +69,7 @@ export default function AppealsPage() {
         {toast && (
           <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}
             className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg flex items-center gap-3 text-[13px] font-bold text-white ${
-              toast.type === 'ok' ? 'bg-[#2A5C50]' : 'bg-red-500'
+              toast.type === 'ok' ? 'bg-slate-900' : 'bg-red-500'
             }`}>
             {toast.type === 'ok' ? <CheckCircle size={16} /> : <X size={16} />}
             {toast.msg}
@@ -80,14 +80,14 @@ export default function AppealsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Seller Requests</p>
-          <h1 className="text-[24px] font-black text-slate-900 tracking-tight">Price Appeals</h1>
+          <p className="text-[10px] font-semibold text-slate-400  mb-1">Seller Requests</p>
+          <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Price Appeals</h1>
           <p className="text-[13px] font-medium text-slate-400 mt-1">
             Sellers requesting an exemption above the campus price limit.
           </p>
         </div>
         <div className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl">
-          <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{appeals.length} pending</span>
+          <span className="text-[11px] font-semibold text-slate-500 ">{appeals.length} pending</span>
         </div>
       </div>
 
@@ -121,14 +121,14 @@ export default function AppealsPage() {
                   </div>
                   <div>
                     <p className="text-[15px] font-bold text-slate-900">{appeal.itemTitle || 'Unnamed Item'}</p>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                    <p className="text-[11px] font-bold text-slate-400  mt-0.5">
                       Seller: {appeal.sellerName || '—'}
                     </p>
                   </div>
                 </div>
 
                 <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Seller's Reason</p>
+                  <p className="text-[9px] font-bold text-slate-400 ">Seller's Reason</p>
                   <p className="text-[13px] font-medium text-slate-600 italic leading-relaxed">
                     "{appeal.justification_text || 'No reason provided.'}"
                   </p>
@@ -139,23 +139,23 @@ export default function AppealsPage() {
               <div className="w-full lg:w-[280px] space-y-4">
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Asking Price</span>
-                    <span className="text-[16px] font-black text-slate-900">RM {Number(appeal.price || 0).toFixed(2)}</span>
+                    <span className="text-[10px] font-bold text-slate-400 ">Asking Price</span>
+                    <span className="text-[16px] font-semibold text-slate-900">RM {Number(appeal.price || 0).toFixed(2)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</span>
+                    <span className="text-[10px] font-bold text-slate-400 ">Category</span>
                     <span className="text-[12px] font-bold text-slate-900">{appeal.category || '—'}</span>
                   </div>
                 </div>
 
                 <div className="flex gap-3">
                   <button onClick={() => handleAdjudicate(appeal, 'APPROVE')} disabled={processing === appeal.id}
-                    className="flex-1 h-12 bg-slate-900 text-white rounded-xl font-bold text-[12px] uppercase tracking-widest hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40">
+                    className="flex-1 h-12 bg-slate-900 text-white rounded-xl font-bold text-[12px]  hover:bg-slate-900 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40">
                     {processing === appeal.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                     Approve
                   </button>
                   <button onClick={() => handleAdjudicate(appeal, 'REJECT')} disabled={processing === appeal.id}
-                    className="flex-1 h-12 bg-white text-red-600 border border-red-100 rounded-xl font-bold text-[12px] uppercase tracking-widest hover:bg-red-50 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40">
+                    className="flex-1 h-12 bg-white text-red-600 border border-red-100 rounded-xl font-bold text-[12px]  hover:bg-red-50 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40">
                     {processing === appeal.id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
                     Reject
                   </button>

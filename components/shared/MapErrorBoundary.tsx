@@ -29,7 +29,7 @@ export default class MapErrorBoundary extends Component<Props, State> {
       return (
         <div className="w-full h-full bg-[#FDFDFD] flex flex-col items-center justify-center opacity-50">
           <AlertTriangle size={32} strokeWidth={1.5} className="text-slate-400 mb-2" />
-          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Map Unavailable</p>
+          <p className="text-[11px] font-semibold text-slate-400">Map Unavailable</p>
         </div>
       );
     }

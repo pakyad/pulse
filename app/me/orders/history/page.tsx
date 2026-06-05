@@ -30,7 +30,7 @@ function HistoryCard({ order, onClick }: { order: any; onClick: () => void }) {
       className="bg-white border border-slate-100 rounded-xl p-4 space-y-3 cursor-pointer active:scale-[0.99] transition-all hover:bg-slate-50/50"
     >
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-widest">
+        <p className="text-[11px] font-bold text-[#94a3b8] ">
           {dateStr} · #{order.order_code || order.id.slice(0, 6).toUpperCase()}
         </p>
         <StatusBadge status={order.status} />
@@ -138,7 +138,7 @@ export default function OrderHistoryPage() {
             {displayed.length === 0 ? (
               <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
                 <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
-                <p className="text-[12px] font-bold uppercase tracking-widest opacity-40">No history yet</p>
+                <p className="text-[12px] font-bold  opacity-40">No history yet</p>
               </div>
             ) : (
               displayed.map(order => (

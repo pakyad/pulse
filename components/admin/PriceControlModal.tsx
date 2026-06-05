@@ -37,7 +37,7 @@ export default function PriceControlModal({ isOpen, onClose, onSave }: PriceCont
         >
           <div className="p-10">
             <div className="flex justify-between items-start mb-8">
-              <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-md shadow-slate-900/20">
+              <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-md shadow-slate-900/10">
                 <ShieldCheck size={28} />
               </div>
               <button 
@@ -49,13 +49,13 @@ export default function PriceControlModal({ isOpen, onClose, onSave }: PriceCont
             </div>
 
             <div className="mb-10">
-              <h2 className="text-[26px] font-black text-slate-900 tracking-tight mb-2">Price Governance</h2>
+              <h2 className="text-[26px] font-semibold text-slate-900 tracking-tight mb-2">Price Governance</h2>
               <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Establish institutional limits for marketplace categories to prevent inflation and ensure fair campus commerce.</p>
             </div>
 
             <div className="space-y-6 mb-10">
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Target Category</label>
+                <label className="text-[10px] font-semibold text-slate-400  block mb-2">Target Category</label>
                 <input 
                   type="text" 
                   value={category}
@@ -65,9 +65,9 @@ export default function PriceControlModal({ isOpen, onClose, onSave }: PriceCont
                 />
               </div>
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Max Base Price (RM)</label>
+                <label className="text-[10px] font-semibold text-slate-400  block mb-2">Max Base Price (RM)</label>
                 <div className="relative">
-                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 font-black">RM</span>
+                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 font-semibold">RM</span>
                   <input 
                     type="number" 
                     value={price}
@@ -86,7 +86,7 @@ export default function PriceControlModal({ isOpen, onClose, onSave }: PriceCont
                   onClose();
                 }
               }}
-              className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-md shadow-slate-900/20 active:scale-95"
+              className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-semibold text-[13px]  hover:bg-slate-900 transition-all flex items-center justify-center gap-3 shadow-md shadow-slate-900/10 active:scale-95"
             >
               Set Institutional Limit
             </button>

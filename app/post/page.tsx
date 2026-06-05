@@ -122,7 +122,7 @@ export default function DeployAsset() {
           {step === 1 && (
             <motion.div key="s1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
               <div className="space-y-2">
-                <h1 className="text-[32px] font-black tracking-tightest leading-none">Capture <br/>Asset</h1>
+                <h1 className="text-[32px] font-semibold tracking-tightest leading-none">Capture <br/>Asset</h1>
                 <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Optical clarity drives higher handshake frequency.</p>
               </div>
 
@@ -136,10 +136,10 @@ export default function DeployAsset() {
                   </>
                 ) : (
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-20 h-20 bg-white rounded-[2.5rem] flex items-center justify-center shadow-md shadow-black/5 text-slate-200">
+                    <div className="w-20 h-20 bg-white rounded-[2.5rem] flex items-center justify-center shadow-md shadow-slate-900/10 text-slate-200">
                       <ImageIcon size={32} />
                     </div>
-                    <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Select Visual Asset</p>
+                    <p className="text-[11px] font-semibold text-slate-300 ">Select Visual Asset</p>
                   </div>
                 )}
                 <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) { setImage(f); setPreview(URL.createObjectURL(f)); } }} className="absolute inset-0 opacity-0 cursor-pointer" />
@@ -151,7 +151,7 @@ export default function DeployAsset() {
           {step === 2 && (
             <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
               <div className="space-y-2">
-                <h1 className="text-[32px] font-black tracking-tightest leading-none">Registry <br/>Data</h1>
+                <h1 className="text-[32px] font-semibold tracking-tightest leading-none">Registry <br/>Data</h1>
                 <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Define the market value and category.</p>
               </div>
 
@@ -160,7 +160,7 @@ export default function DeployAsset() {
                 {/* 1. Category & Subcategory Funnel */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Domain</label>
+                    <label className="text-[10px] font-semibold text-slate-300  ml-1">Domain</label>
                     <div className="flex flex-wrap gap-2">
                       {(Object.keys(MARKETPLACE_CATEGORIES) as CategoryID[]).map(catId => (
                         <button 
@@ -178,7 +178,7 @@ export default function DeployAsset() {
                   <AnimatePresence>
                     {category && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-2 overflow-hidden pt-2">
-                        <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Type</label>
+                        <label className="text-[10px] font-semibold text-slate-300  ml-1">Type</label>
                         <div className="flex flex-wrap gap-2">
                           {MARKETPLACE_CATEGORIES[category].subcategories.map(sub => (
                             <button 
@@ -200,7 +200,7 @@ export default function DeployAsset() {
                   {subcategory && category && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pt-4 border-t border-slate-100">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">
+                        <label className="text-[10px] font-semibold text-slate-300  ml-1">
                           {MARKETPLACE_CATEGORIES[category].subcategories.find(s => s.label === subcategory)?.titleHint.includes('Brand') ? 'Brand & Model' : 'Asset Identity'}
                         </label>
                         <input 
@@ -214,7 +214,7 @@ export default function DeployAsset() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <div className="flex justify-between items-center ml-1">
-                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Price (RM)</label>
+                            <label className="text-[10px] font-semibold text-slate-300 ">Price (RM)</label>
                             {priceIntelligence && !analyzingPrice && (
                               <span className="text-[10px] font-medium text-slate-400">
                                 Limit: RM {priceIntelligence.maxAllowed.toFixed(2)}
@@ -227,7 +227,7 @@ export default function DeployAsset() {
                               onChange={e => setPrice(e.target.value)} 
                               type="number" 
                               placeholder="45.00" 
-                              className={`w-full h-16 bg-white border ${isOverpriced ? 'border-red-300 focus:border-red-400' : 'border-slate-100 focus:border-navy'} rounded-2xl px-6 text-[20px] font-black text-navy outline-none shadow-sm transition-colors`} 
+                              className={`w-full h-16 bg-white border ${isOverpriced ? 'border-red-300 focus:border-red-400' : 'border-slate-100 focus:border-navy'} rounded-2xl px-6 text-[20px] font-semibold text-navy outline-none shadow-sm transition-colors`} 
                             />
                             {analyzingPrice && (
                               <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-slate-300">
@@ -256,8 +256,8 @@ export default function DeployAsset() {
                           </AnimatePresence>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Quantity</label>
-                          <input value={stock} onChange={e => setStock(e.target.value)} type="number" placeholder="20" className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[20px] font-black text-navy outline-none focus:border-navy shadow-sm" />
+                          <label className="text-[10px] font-semibold text-slate-300  ml-1">Quantity</label>
+                          <input value={stock} onChange={e => setStock(e.target.value)} type="number" placeholder="20" className="w-full h-16 bg-white border border-slate-100 rounded-2xl px-6 text-[20px] font-semibold text-navy outline-none focus:border-navy shadow-sm" />
                         </div>
                       </div>
                     </motion.div>
@@ -271,7 +271,7 @@ export default function DeployAsset() {
           {step === 3 && (
             <motion.div key="s3" initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} className="space-y-8">
               <div className="space-y-2">
-                <h1 className="text-[32px] font-black tracking-tightest leading-none">Review</h1>
+                <h1 className="text-[32px] font-semibold tracking-tightest leading-none">Review</h1>
                 <p className="text-[14px] text-slate-400 font-medium leading-relaxed">Check everything before posting.</p>
               </div>
 
@@ -283,10 +283,10 @@ export default function DeployAsset() {
                   </div>
                   <div className="p-8">
                     <div className="flex gap-2 mb-3">
-                      <span className="px-2 py-1 bg-navy/5 text-navy text-[9px] font-black uppercase tracking-widest rounded-md">{subcategory}</span>
+                      <span className="px-2 py-1 bg-navy/5 text-navy text-[9px] font-semibold rounded-md">{subcategory}</span>
                     </div>
                     <h3 className="text-[24px] font-bold text-navy leading-tight">{title || 'Item Unnamed'}</h3>
-                    <p className="text-[28px] font-black text-navy mt-4">RM {Number(price||0).toFixed(0)}</p>
+                    <p className="text-[28px] font-semibold text-navy mt-4">RM {Number(price||0).toFixed(0)}</p>
                   </div>
                 </div>
               </div>

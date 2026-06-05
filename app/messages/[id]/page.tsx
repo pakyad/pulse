@@ -133,7 +133,7 @@ export default function ChatRoomPage() {
                {chatInfo?.type === 'MARKETPLACE' ? <ShoppingBag size={14} /> : <Radio size={14} />}
             </div>
             <div className="min-w-0 flex-1">
-               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Discussing</p>
+               <p className="text-[9px] font-semibold text-slate-400">Discussing</p>
                <p className="text-[13px] font-bold text-slate-700 truncate">{chatInfo?.contextTitle}</p>
             </div>
          </div>
@@ -154,7 +154,7 @@ export default function ChatRoomPage() {
                >
                   <div className={`max-w-[75%] rounded-2xl px-5 py-3.5 text-[14px] leading-relaxed ${
                      isMe 
-                        ? 'bg-[#2A5C50] text-white rounded-br-[8px] shadow-sm shadow-[#2A5C50]/20' 
+                        ? 'bg-slate-900 text-white rounded-br-[8px] shadow-sm shadow-slate-900/10' 
                         : 'bg-slate-50 border border-slate-100 text-slate-900 rounded-bl-[8px]'
                   }`}>
                      {msg.text}
@@ -181,7 +181,7 @@ export default function ChatRoomPage() {
             <button 
                type="submit" 
                disabled={!newMessage.trim() || isSubmitting}
-               className="w-12 h-12 shrink-0 rounded-2xl bg-[#2A5C50] border-2 border-black/5 flex items-center justify-center text-white shadow-[0_3px_0_0_#193831] active:shadow-[0_0px_0_0_#193831] active:translate-y-[3px] transition-all disabled:opacity-40 disabled:pointer-events-none group"
+               className="w-12 h-12 shrink-0 rounded-2xl bg-slate-900 border-2 border-black/5 flex items-center justify-center text-white shadow-[0_3px_0_0_#193831] active:shadow-[0_0px_0_0_#193831] active:translate-y-[3px] transition-all disabled:opacity-40 disabled:pointer-events-none group"
             >
                <Send size={18} className="mr-0.5 drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)] group-hover:scale-110 transition-transform duration-300" strokeWidth={2.5} />
             </button>

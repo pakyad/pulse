@@ -31,7 +31,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-1000 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-12"
+          className="fixed inset-0 z-1000 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 md:p-12"
           onClick={onClose}
         >
           {/* Close Button */}
@@ -62,7 +62,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
               />
               
               {!isZoomed && (
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 flex items-center gap-2 text-white font-bold">
                     <ZoomIn size={18} /> Click to Inspect
                   </div>
@@ -79,8 +79,8 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
             >
               <div className="space-y-8">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Audit Protocol</p>
-                  <h3 className="text-[24px] font-black text-navy tracking-tight">Payment Verification</h3>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400 mb-2">Audit Protocol</p>
+                  <h3 className="text-[24px] font-semibold text-navy tracking-tight">Payment Verification</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -91,7 +91,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
                       </div>
                       <span className="text-[13px] font-bold text-navy/60">Amount Found</span>
                     </div>
-                    <span className="text-[18px] font-black text-navy">RM {amount.toFixed(2)}</span>
+                    <span className="text-[18px] font-semibold text-navy">RM {amount.toFixed(2)}</span>
                   </div>
 
                   <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-4">
@@ -100,7 +100,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
                         <Clock size={16} />
                         <span className="text-[12px] font-bold">Registry Time</span>
                       </div>
-                      <span className="text-[12px] font-black text-navy">
+                      <span className="text-[12px] font-semibold text-navy">
                         {timestamp ? new Date(timestamp).toLocaleString() : 'N/A'}
                       </span>
                     </div>
@@ -109,7 +109,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
                         <Package size={16} />
                         <span className="text-[12px] font-bold">Transaction ID</span>
                       </div>
-                      <span className="text-[12px] font-black text-navy">#{orderId.slice(0, 8)}</span>
+                      <span className="text-[12px] font-semibold text-navy">#{orderId.slice(0, 8)}</span>
                     </div>
                   </div>
                 </div>
@@ -132,7 +132,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
                 </a>
                 <button 
                   onClick={onClose}
-                  className="w-full h-16 rounded-2xl bg-black text-white font-black text-[15px] uppercase tracking-widest"
+                  className="w-full h-16 rounded-2xl bg-slate-900 text-white font-semibold text-[15px] "
                 >
                   Confirm Audit
                 </button>

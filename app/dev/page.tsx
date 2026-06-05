@@ -353,7 +353,7 @@ export default function DevSeedPage() {
     return (
         <div className="min-h-screen bg-slate-50 p-12 font-sans flex flex-col items-center">
             <div className="w-full max-w-2xl bg-white p-10 rounded-2xl shadow-md border border-slate-100">
-                <h1 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Pulse Database Override</h1>
+                <h1 className="text-2xl font-semibold text-slate-900 mb-2 tracking-tight">Pulse Database Override</h1>
                 <p className="text-slate-500 mb-8 font-medium text-sm leading-relaxed">
                     This will wipe all existing dummy listings and inject 20 carefully planned, presentation-ready listings divided across 4 specific accounts (2 Merchants, 2 Students).
                 </p>
@@ -361,7 +361,7 @@ export default function DevSeedPage() {
                 <button 
                     onClick={wipeAndSeed}
                     disabled={loading}
-                    className="w-full py-4 bg-red-500 text-white rounded-2xl font-black text-[14px] uppercase tracking-widest disabled:opacity-50 hover:bg-red-600 transition-colors shadow-md shadow-red-500/20"
+                    className="w-full py-4 bg-red-500 text-white rounded-2xl font-semibold text-[14px]  disabled:opacity-50 hover:bg-red-600 transition-colors shadow-md shadow-red-500/20"
                 >
                     {loading ? 'Overriding System...' : 'Execute Full Wipe & Seed'}
                 </button>
@@ -376,7 +376,7 @@ export default function DevSeedPage() {
 
                 {!loading && status.includes("🎉 OVERRIDE COMPLETE. System is ready for presentation.") && (
                     <div className="mt-8 p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
-                        <p className="font-black text-emerald-800 mb-4 text-[14px] uppercase tracking-widest">Demo Accounts (Password: password123)</p>
+                        <p className="font-semibold text-emerald-800 mb-4 text-[14px] ">Demo Accounts (Password: password123)</p>
                         <ul className="space-y-3 text-sm text-emerald-700 font-medium">
                             <li className="flex justify-between items-center bg-white px-4 py-2 rounded-xl border border-emerald-100"><span className="font-bold">Tech Society (Club)</span> <span>techsociety@s.unikl.edu.my</span></li>
                             <li className="flex justify-between items-center bg-white px-4 py-2 rounded-xl border border-emerald-100"><span className="font-bold">Cafe Rasa (Merchant)</span> <span>caferasa@s.unikl.edu.my</span></li>

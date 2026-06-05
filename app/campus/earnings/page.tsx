@@ -126,10 +126,10 @@ export default function EarningsLedgerPage() {
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="w-full bg-white border border-slate-100 rounded-3xl p-8 shadow-sm"
           >
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Lifetime Earned</p>
+            <p className="text-[10px] font-semibold text-slate-400  mb-1">Lifetime Earned</p>
             <div className="flex items-baseline gap-1.5 text-slate-900">
                <span className="text-[18px] font-bold tracking-tight">RM</span>
-               <span className="text-[40px] font-black tracking-tighter leading-none">{earnings.totalEarned.toFixed(2)}</span>
+               <span className="text-[40px] font-semibold tracking-tighter leading-none">{earnings.totalEarned.toFixed(2)}</span>
             </div>
           </motion.section>
 
@@ -143,8 +143,8 @@ export default function EarningsLedgerPage() {
                   <Bike size={16} />
                </div>
                <div>
-                 <p className="text-[20px] font-black tracking-tight">{earnings.deliveriesCompleted}</p>
-                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Deliveries</p>
+                 <p className="text-[20px] font-semibold tracking-tight">{earnings.deliveriesCompleted}</p>
+                 <p className="text-[10px] font-bold  text-slate-400">Deliveries</p>
                </div>
             </div>
             <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-3">
@@ -152,8 +152,8 @@ export default function EarningsLedgerPage() {
                   <Package size={16} />
                </div>
                <div>
-                 <p className="text-[20px] font-black tracking-tight">{earnings.salesCompleted}</p>
-                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sales</p>
+                 <p className="text-[20px] font-semibold tracking-tight">{earnings.salesCompleted}</p>
+                 <p className="text-[10px] font-bold  text-slate-400">Sales</p>
                </div>
             </div>
           </motion.section>
@@ -191,7 +191,7 @@ export default function EarningsLedgerPage() {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-[14px] font-black text-emerald-600 tracking-tight">
+                      <p className="text-[14px] font-semibold text-emerald-600 tracking-tight">
                         +RM {activity.amount.toFixed(2)}
                       </p>
                     </div>

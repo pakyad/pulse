@@ -65,7 +65,7 @@ function InboxItemCard({ type, title, subtitle, statusText, isUnread, onClick, a
             )}
          </div>
          {isUnread && (
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
                <div className="w-2 h-2 bg-white rounded-full" />
             </div>
          )}
@@ -85,7 +85,7 @@ function InboxItemCard({ type, title, subtitle, statusText, isUnread, onClick, a
          </p>
          
          <div className="flex items-center mt-2 gap-2">
-           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+           <span className="text-[10px] font-bold  text-slate-400">
              {type}
            </span>
          </div>
@@ -113,16 +113,16 @@ function MerchantInsights({ profile, orders }: any) {
 
       <div className="grid grid-cols-2 gap-4">
          <div className="p-5 border border-slate-100 rounded-3xl bg-slate-50 shadow-sm flex flex-col justify-between h-32">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Total Earnings</p>
+            <p className="text-[11px] font-bold text-slate-400  mb-2">Total Earnings</p>
             <div>
-               <p className="text-[22px] font-black text-slate-900 tracking-tight">RM {totalRevenue.toFixed(2)}</p>
+               <p className="text-[22px] font-semibold text-slate-900 tracking-tight">RM {totalRevenue.toFixed(2)}</p>
                <p className="text-[11px] text-emerald-500 font-bold uppercase tracking-wider mt-1">+14% Growth</p>
             </div>
          </div>
          <div className="p-5 border border-slate-100 rounded-3xl bg-slate-50 shadow-sm flex flex-col justify-between h-32">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Completion</p>
+            <p className="text-[11px] font-bold text-slate-400  mb-2">Completion</p>
             <div>
-               <p className="text-[22px] font-black text-slate-900 tracking-tight">98.2%</p>
+               <p className="text-[22px] font-semibold text-slate-900 tracking-tight">98.2%</p>
                <p className="text-[11px] text-slate-900 font-bold uppercase tracking-wider mt-1">Standard</p>
             </div>
          </div>

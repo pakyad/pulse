@@ -51,7 +51,7 @@ export default function EditListingPage() {
 
   if (!item) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Asset not found</p>
+      <p className="text-[11px] font-bold  text-slate-400">Asset not found</p>
     </div>
   );
 

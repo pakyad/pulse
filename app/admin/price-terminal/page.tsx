@@ -64,7 +64,7 @@ function PolicyModal({ onClose, onSave }: { onClose: () => void; onSave: (cat: s
 
         {/* Category */}
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Category</label>
+          <label className="text-[10px] font-bold text-slate-400  block mb-2">Category</label>
           <select value={category} onChange={e => setCategory(e.target.value as CategoryID)}
             className="w-full h-11 bg-slate-50 border border-slate-100 rounded-xl px-4 text-[13px] font-semibold text-slate-900 outline-none focus:border-slate-300 transition-all">
             {Object.values(MARKETPLACE_CATEGORIES).map(cat => (
@@ -75,7 +75,7 @@ function PolicyModal({ onClose, onSave }: { onClose: () => void; onSave: (cat: s
 
         {/* Price */}
         <div>
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
+          <label className="text-[10px] font-bold text-slate-400  block mb-2">
             Price Ceiling (RM) — Current default: RM {CAMPUS_DEFAULTS[category] ?? '–'}
           </label>
           <input type="number" value={price} onChange={e => setPrice(e.target.value)}
@@ -84,7 +84,7 @@ function PolicyModal({ onClose, onSave }: { onClose: () => void; onSave: (cat: s
         </div>
 
         <button onClick={handle} disabled={!price || saving}
-          className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[12px] uppercase tracking-widest hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40">
+          className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[12px]  hover:bg-slate-900 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40">
           {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
           Save Limit
         </button>
@@ -150,11 +150,11 @@ export default function PriceTerminalPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Economic Oversight</p>
-          <h1 className="text-[24px] font-black text-slate-900 tracking-tight">Price Audit</h1>
+          <p className="text-[10px] font-semibold text-slate-400  mb-1">Economic Oversight</p>
+          <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Price Audit</h1>
         </div>
         <button onClick={() => setShowModal(true)}
-          className="h-10 px-5 bg-slate-900 text-white rounded-xl font-bold text-[12px] uppercase tracking-widest hover:bg-black transition-all active:scale-95 flex items-center gap-2">
+          className="h-10 px-5 bg-slate-900 text-white rounded-xl font-bold text-[12px]  hover:bg-slate-900 transition-all active:scale-95 flex items-center gap-2">
           <Plus size={15} /> Set Limit
         </button>
       </div>
@@ -162,18 +162,18 @@ export default function PriceTerminalPage() {
       {/* Stats row */}
       <div className="flex gap-8 p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Flagged Items</p>
-          <p className="text-[32px] font-black text-slate-900 leading-none">{flagged.length}</p>
+          <p className="text-[10px] font-bold text-slate-400  mb-1">Flagged Items</p>
+          <p className="text-[32px] font-semibold text-slate-900 leading-none">{flagged.length}</p>
         </div>
         <div className="w-px bg-slate-100" />
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Limits</p>
-          <p className="text-[32px] font-black text-slate-900 leading-none">{activeGuidelines.length}</p>
+          <p className="text-[10px] font-bold text-slate-400  mb-1">Active Limits</p>
+          <p className="text-[32px] font-semibold text-slate-900 leading-none">{activeGuidelines.length}</p>
         </div>
         <div className="w-px bg-slate-100" />
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Campus Defaults</p>
-          <p className="text-[32px] font-black text-slate-900 leading-none">{Object.keys(CAMPUS_DEFAULTS).length}</p>
+          <p className="text-[10px] font-bold text-slate-400  mb-1">Campus Defaults</p>
+          <p className="text-[32px] font-semibold text-slate-900 leading-none">{Object.keys(CAMPUS_DEFAULTS).length}</p>
         </div>
       </div>
 
@@ -181,18 +181,18 @@ export default function PriceTerminalPage() {
       {activeGuidelines.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Saved Limits</p>
+            <p className="text-[11px] font-bold text-slate-400 ">Saved Limits</p>
           </div>
           <div className="divide-y divide-slate-50">
             {activeGuidelines.map((g: any) => (
               <div key={g.id} className="px-6 py-4 flex items-center justify-between">
                 <div>
                   <p className="text-[14px] font-bold text-slate-900">{g.category}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                  <p className="text-[10px] font-bold text-slate-400  mt-0.5">
                     {g.governance_type === 'PREMIUM' ? 'Soft Limit' : 'Hard Limit'}
                   </p>
                 </div>
-                <p className="text-[18px] font-black text-slate-900">RM {Number(g.max_price).toFixed(2)}</p>
+                <p className="text-[18px] font-semibold text-slate-900">RM {Number(g.max_price).toFixed(2)}</p>
               </div>
             ))}
           </div>
@@ -202,9 +202,9 @@ export default function PriceTerminalPage() {
       {/* Flagged Items Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Flagged Items</p>
+          <p className="text-[11px] font-bold text-slate-400 ">Flagged Items</p>
           {flagged.length > 0 && (
-            <span className="text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-100 px-3 py-1 rounded-full">
+            <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-100 px-3 py-1 rounded-full">
               {flagged.length} need review
             </span>
           )}
@@ -212,10 +212,10 @@ export default function PriceTerminalPage() {
 
         {/* Column headers */}
         <div className="grid grid-cols-12 px-6 py-3 bg-slate-50/50 border-b border-slate-100">
-          <div className="col-span-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Item & Seller</div>
-          <div className="col-span-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Category</div>
-          <div className="col-span-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Listed Price</div>
-          <div className="col-span-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Ceiling</div>
+          <div className="col-span-5 text-[9px] font-semibold text-slate-400 ">Item & Seller</div>
+          <div className="col-span-2 text-[9px] font-semibold text-slate-400 ">Category</div>
+          <div className="col-span-2 text-[9px] font-semibold text-slate-400 ">Listed Price</div>
+          <div className="col-span-2 text-[9px] font-semibold text-slate-400 ">Ceiling</div>
           <div className="col-span-1" />
         </div>
 
@@ -224,7 +224,7 @@ export default function PriceTerminalPage() {
             <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-400">
               <CheckCircle size={22} />
             </div>
-            <p className="text-[12px] font-bold text-slate-300 uppercase tracking-widest">All items are within limits</p>
+            <p className="text-[12px] font-bold text-slate-300 ">All items are within limits</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-50">
@@ -239,26 +239,26 @@ export default function PriceTerminalPage() {
                     <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight mt-0.5">{item.seller_name || '—'}</p>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md uppercase tracking-widest">
+                    <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md ">
                       {item.category}
                     </span>
                   </div>
                   <div className="col-span-2">
-                    <p className="text-[14px] font-black text-red-500">RM {Number(item.price).toFixed(2)}</p>
-                    {isSpike && <p className="text-[8px] font-black text-orange-500 uppercase tracking-widest mt-0.5">Price spike</p>}
+                    <p className="text-[14px] font-semibold text-red-500">RM {Number(item.price).toFixed(2)}</p>
+                    {isSpike && <p className="text-[8px] font-semibold text-orange-500  mt-0.5">Price spike</p>}
                   </div>
                   <div className="col-span-2">
                     <p className="text-[14px] font-bold text-slate-500">
                       RM {ceiling > 0 ? Number(ceiling).toFixed(2) : `${CAMPUS_DEFAULTS[item.category] ?? '–'}`}
                     </p>
                     {!guide && (
-                      <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">Default</p>
+                      <p className="text-[8px] font-bold text-slate-300  mt-0.5">Default</p>
                     )}
                   </div>
                   <div className="col-span-1 flex justify-end">
                     <button
                       onClick={() => router.push(`/admin/price-review`)}
-                      className="h-8 px-3 bg-slate-900 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all active:scale-95">
+                      className="h-8 px-3 bg-slate-900 text-white rounded-lg text-[10px] font-bold  hover:bg-slate-900 transition-all active:scale-95">
                       Review
                     </button>
                   </div>

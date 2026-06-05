@@ -23,7 +23,7 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
         <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6">
           <Check size={24} className="text-emerald-500" />
         </div>
-        <h3 className="text-[17px] font-black text-slate-900 uppercase tracking-widest">Registry Stable</h3>
+        <h3 className="text-[17px] font-semibold text-slate-900 ">Registry Stable</h3>
         <p className="text-[13px] text-slate-400 mt-2 font-medium">All campus listings are within institutional limits.</p>
       </div>
     );
@@ -58,19 +58,19 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
               {/* Header */}
               <div className="flex justify-between items-start mb-8">
                 <div className="space-y-2">
-                  <h3 className="text-[20px] font-black text-slate-900 tracking-tight leading-none pr-12">
+                  <h3 className="text-[20px] font-semibold text-slate-900 tracking-tight leading-none pr-12">
                     {item.title}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black bg-red-50 text-red-600 px-3 py-1 rounded-lg uppercase tracking-widest border border-red-100 flex items-center gap-2 shadow-sm shadow-red-500/10">
+                    <span className="text-[10px] font-semibold bg-red-50 text-red-600 px-3 py-1 rounded-lg  border border-red-100 flex items-center gap-2 shadow-sm shadow-red-500/10">
                       <AlertCircle size={12} strokeWidth={3} /> Price Violation
                     </span>
                   </div>
                 </div>
                 
                 <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1">Market Price</p>
-                  <p className="text-[26px] font-black text-slate-900 tracking-tighter">RM {Number(item.price).toFixed(2)}</p>
+                  <p className="text-[10px] font-semibold text-slate-300  mb-1">Market Price</p>
+                  <p className="text-[26px] font-semibold text-slate-900 tracking-tighter">RM {Number(item.price).toFixed(2)}</p>
                 </div>
               </div>
 
@@ -78,13 +78,13 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
               <div className="grid grid-cols-2 gap-10 mb-8 border-y border-slate-50 py-8">
                 <div className="space-y-6">
                   <div>
-                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] block mb-2">Vendor Node</label>
+                    <label className="text-[10px] font-semibold text-slate-300 uppercase tracking-[0.3em] block mb-2">Vendor Node</label>
                     <div className="flex items-center gap-3 text-[14px] font-bold text-slate-700">
                       <User size={16} className="text-slate-300" /> {item.seller_name || 'Verified Vendor'}
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] block mb-2">Classification</label>
+                    <label className="text-[10px] font-semibold text-slate-300 uppercase tracking-[0.3em] block mb-2">Classification</label>
                     <div className="flex items-center gap-3 text-[14px] font-bold text-slate-700">
                       <Tag size={16} className="text-slate-300" /> {item.category}
                     </div>
@@ -93,13 +93,13 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
 
                 <div className="space-y-6">
                   <div>
-                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] block mb-2">Institutional Limit</label>
-                    <div className="flex items-center gap-3 text-[14px] font-black text-emerald-500">
+                    <label className="text-[10px] font-semibold text-slate-300 uppercase tracking-[0.3em] block mb-2">Institutional Limit</label>
+                    <div className="flex items-center gap-3 text-[14px] font-semibold text-emerald-500">
                       <DollarSign size={16} strokeWidth={2.5} /> RM {suggestedLimit.toFixed(2)}
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] block mb-2">Audit Timestamp</label>
+                    <label className="text-[10px] font-semibold text-slate-300 uppercase tracking-[0.3em] block mb-2">Audit Timestamp</label>
                     <div className="flex items-center gap-3 text-[14px] font-bold text-slate-700">
                       <Clock size={16} className="text-slate-300" /> {item.created_at ? new Date(item.created_at.toMillis()).toLocaleDateString() : 'N/A'}
                     </div>
@@ -111,7 +111,7 @@ export default function AdminProductApprovals({ items, guidelines }: AdminProduc
               <button 
                 disabled={processingId === item.id}
                 onClick={() => handleSuspend(item.id)}
-                className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] hover:bg-black transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-md shadow-black/10 active:scale-95"
+                className="w-full h-[64px] bg-slate-900 text-white rounded-2xl font-semibold text-[13px]  hover:bg-slate-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-md shadow-slate-900/10 active:scale-95"
               >
                 {processingId === item.id ? <Loader2 className="animate-spin" size={20} /> : <ShieldAlert size={20} />}
                 SUSPEND ASSET IMMEDIATELY

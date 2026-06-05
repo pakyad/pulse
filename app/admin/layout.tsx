@@ -6,7 +6,7 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import {
   LayoutGrid, Inbox, ShieldCheck, ShieldAlert, Users,
-  MessageSquare, ScrollText, Settings, LogOut, Archive
+  MessageSquare, ScrollText, Settings, LogOut, Archive, UserCheck
 } from 'lucide-react';
 
 // ── NAV CONFIG ─────────────────────────────────────────────────────────────────
@@ -15,6 +15,7 @@ const NAV = [
   { href: '/admin/price-terminal', label: 'Price Audit',        icon: Inbox        },
   { href: '/admin/price-review',   label: 'Price Review',       icon: ShieldCheck,   badgeKey: 'priceReview' },
   { href: '/admin/disputes',       label: 'Disputes',           icon: ShieldAlert,   badgeKey: 'disputes' },
+  { href: '/admin/runners',        label: 'Runner Apps',        icon: UserCheck,     badgeKey: 'runnerApps' },
   { href: '/admin/users',          label: 'Users',              icon: Users        },
   { href: '/admin/appeals',        label: 'Price Appeals',      icon: MessageSquare, badgeKey: 'appeals' },
   { href: '/admin/vault',          label: 'Governance Vault',   icon: Archive      },
@@ -58,8 +59,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       query(collection(db, 'appeals'), where('status', '==', 'PENDING')),
       (s) => setBadges(b => ({ ...b, appeals: s.size }))
     );
+    const unsubRunners = onSnapshot(
+      query(collection(db, 'users'), where('runner_status', '==', 'pending')),
+      (s) => setBadges(b => ({ ...b, runnerApps: s.size }))
+    );
 
-    return () => { unsubPriceReview(); unsubDisputes(); unsubAppeals(); };
+    return () => { unsubPriceReview(); unsubDisputes(); unsubAppeals(); unsubRunners(); };
   }, [ready]);
 
   if (!ready) return (
@@ -76,12 +81,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Brand */}
         <div className="px-6 py-8 flex items-center gap-3 border-b border-[#F2F2F7]">
-          <div className="w-9 h-9 bg-[#1C1C1E] rounded-xl flex items-center justify-center shadow-md shadow-black/10">
-            <span className="text-white font-black text-[18px]">P</span>
+          <div className="w-9 h-9 bg-[#1C1C1E] rounded-xl flex items-center justify-center shadow-md shadow-slate-900/10">
+            <span className="text-white font-semibold text-[18px]">P</span>
           </div>
           <div>
-            <h1 className="text-[18px] font-black text-[#1C1C1E] tracking-tighter leading-none">Pulse</h1>
-            <p className="text-[8px] font-black bg-emerald-500 text-white px-2 py-[2px] rounded-md uppercase tracking-[0.2em] mt-1 inline-block">Admin</p>
+            <h1 className="text-[18px] font-semibold text-[#1C1C1E] tracking-tighter leading-none">Pulse</h1>
+            <p className="text-[8px] font-semibold bg-emerald-500 text-white px-2 py-[2px] rounded-md  mt-1 inline-block">Admin</p>
           </div>
         </div>
 
@@ -107,7 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </span>
                 </div>
                 {badge > 0 && (
-                  <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                  <span className="bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                     {badge}
                   </span>
                 )}
@@ -143,7 +148,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end">
-              <p className="text-[9px] font-black text-[#AEAEB2] uppercase tracking-widest">Admin</p>
+              <p className="text-[9px] font-semibold text-[#AEAEB2] ">Admin</p>
               <p className="text-[12px] font-bold text-[#1C1C1E]">{auth.currentUser?.displayName || 'Admin'}</p>
             </div>
             <div className="w-9 h-9 bg-slate-900 rounded-xl border border-slate-100 shadow-sm" />

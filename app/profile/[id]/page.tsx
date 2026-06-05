@@ -76,10 +76,10 @@ export default function PublicProfile() {
         <Package size={32} strokeWidth={1.5} />
       </div>
       <div>
-        <h2 className="text-[22px] font-black text-navy tracking-tight">Profile not found</h2>
+        <h2 className="text-[22px] font-semibold text-navy tracking-tight">Profile not found</h2>
         <p className="text-[14px] text-slate-400 font-medium mt-2">This account may no longer exist.</p>
       </div>
-      <button onClick={() => router.back()} className="px-8 py-4 bg-navy text-white rounded-2xl font-black text-[12px] uppercase tracking-widest">
+      <button onClick={() => router.back()} className="px-8 py-4 bg-navy text-white rounded-2xl font-semibold text-[12px] ">
         Go back
       </button>
     </div>
@@ -100,7 +100,7 @@ export default function PublicProfile() {
           {isOwn && (
             <button
               onClick={() => router.push('/me')}
-              className="px-5 py-2.5 bg-white/90 backdrop-blur-xl rounded-2xl shadow-md text-[11px] font-black uppercase tracking-widest text-navy border border-white/60 active:scale-95 transition-all"
+              className="px-5 py-2.5 bg-white/90 backdrop-blur-xl rounded-2xl shadow-md text-[11px] font-semibold text-navy border border-white/60 active:scale-95 transition-all"
             >
               Edit Profile
             </button>
@@ -128,7 +128,7 @@ export default function PublicProfile() {
           {/* Name + Meta */}
           <div className="flex-1 min-w-0 pt-1">
             <div className="flex items-center gap-2 mb-1.5">
-              <h1 className="text-[24px] font-black text-navy tracking-widest leading-tight truncate">
+              <h1 className="text-[24px] font-semibold text-navy tracking-widest leading-tight truncate">
                 {displayName}
               </h1>
               {isClub && (
@@ -141,11 +141,11 @@ export default function PublicProfile() {
             {/* Role badge */}
             <div className="flex items-center gap-2 flex-wrap">
               {isClub ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent/10 border border-accent/20 rounded-full text-[10px] font-black text-accent uppercase tracking-widest">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent/10 border border-accent/20 rounded-full text-[10px] font-semibold text-accent ">
                   <Store size={10} /> Official Club
                 </span>
               ) : isSeller ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-navy/5 border border-navy/10 rounded-full text-[10px] font-black text-navy uppercase tracking-widest">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-navy/5 border border-navy/10 rounded-full text-[10px] font-semibold text-navy ">
                   <Package size={10} /> Verified Seller
                 </span>
               ) : null}
@@ -180,8 +180,8 @@ export default function PublicProfile() {
               { label: 'Sold', value: profile.total_sold || '—' },
             ].map(stat => (
               <div key={stat.label} className="bg-white border border-slate-100 rounded-4xl p-5 text-center shadow-sm">
-                <p className="text-[22px] font-black text-navy tabular-nums leading-none">{stat.value}</p>
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">{stat.label}</p>
+                <p className="text-[22px] font-semibold text-navy tabular-nums leading-none">{stat.value}</p>
+                <p className="text-[10px] font-semibold text-slate-300  mt-1">{stat.label}</p>
               </div>
             ))}
           </motion.div>
@@ -200,8 +200,8 @@ export default function PublicProfile() {
               { label: 'Joined', value: profile.created_at ? new Date(profile.created_at?.seconds * 1000 || profile.created_at).getFullYear() : '—' },
             ].map(stat => (
               <div key={stat.label} className="bg-white border border-slate-100 rounded-4xl p-5 text-center shadow-sm">
-                <p className="text-[22px] font-black text-navy tabular-nums leading-none">{stat.value}</p>
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1">{stat.label}</p>
+                <p className="text-[22px] font-semibold text-navy tabular-nums leading-none">{stat.value}</p>
+                <p className="text-[10px] font-semibold text-slate-300  mt-1">{stat.label}</p>
               </div>
             ))}
           </motion.div>
@@ -214,10 +214,10 @@ export default function PublicProfile() {
       {/* 2. LISTINGS GRID */}
       <section className="px-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[18px] font-black text-navy tracking-tight">
+          <h2 className="text-[18px] font-semibold text-navy tracking-tight">
             {isClub ? 'Club Store' : 'Listings'}
           </h2>
-          <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">
+          <span className="text-[11px] font-semibold text-slate-300 ">
             {listings.length} {listings.length === 1 ? 'item' : 'items'}
           </span>
         </div>

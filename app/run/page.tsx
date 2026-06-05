@@ -67,7 +67,7 @@ const ChipRow = ({ options, value, onChange, activeService }: { options: string[
 const Field = ({ label, placeholder, value, onChange, multiline = false }: any) => {
   return (
     <div className="space-y-2">
-      <label className="text-[10px] font-black uppercase tracking-widest ml-1 opacity-60 text-slate-400">{label}</label>
+      <label className="text-[10px] font-semibold ml-1 opacity-60 text-slate-400">{label}</label>
       {multiline
         ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={4}
             className="w-full px-5 py-4 bg-white border-[1.5px] border-slate-100 rounded-[24px] text-[14px] font-medium text-slate-900 outline-none focus:border-slate-300 focus:ring-4 focus:ring-slate-900/5 placeholder:text-slate-300 resize-none transition-all shadow-sm" />
@@ -82,7 +82,7 @@ const Field = ({ label, placeholder, value, onChange, multiline = false }: any) 
 const ImageDropzone = ({ fileName, onFileSelected }: { fileName: string, onFileSelected: (f: File) => void }) => {
   return (
     <div className="space-y-2">
-      <label className="text-[10px] font-black uppercase tracking-widest ml-1 opacity-60 text-slate-400">Parcel Photo (Optional)</label>
+      <label className="text-[10px] font-semibold ml-1 opacity-60 text-slate-400">Parcel Photo (Optional)</label>
       <div className="w-full relative group">
         <input type="file" accept="image/*" onChange={(e) => {
           if(e.target.files?.[0]) onFileSelected(e.target.files[0]);
@@ -112,7 +112,7 @@ const ImageDropzone = ({ fileName, onFileSelected }: { fileName: string, onFileS
 const DetailedAddressField = ({ title, value, onChange, nameLabel = "Who to meet", phoneLabel = "Their Phone Number" }: { title: string, value: any, onChange: (v: any) => void, nameLabel?: string, phoneLabel?: string }) => {
   return (
     <div className="space-y-4 bg-white border border-slate-100 rounded-[24px] p-5 shadow-sm">
-      <p className="text-[11px] font-black uppercase tracking-widest text-[#94a3b8]">{title}</p>
+      <p className="text-[11px] font-semibold text-[#94a3b8]">{title}</p>
       
       <div className="space-y-3">
         <div className="flex gap-3">
@@ -306,7 +306,7 @@ export default function RunModule() {
         if (currentStep === 0) return (
           <div className="space-y-6">
             <div className="space-y-2">
-              <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">Parcel Size</p>
+              <p className="text-[10px] font-semibold text-[#94a3b8] ">Parcel Size</p>
               <ChipRow activeService={activeService} options={['Small (Fits in bag)', 'Medium (Shoebox)', 'Large (Bulky)']} value={form.parcelSize} onChange={v => setF('parcelSize', v)} />
             </div>
             <Field label="Verification Info" placeholder="e.g. Tracking number or Name on parcel" value={form.parcelVerification} onChange={(v: string) => setF('parcelVerification', v)} />
@@ -323,7 +323,7 @@ export default function RunModule() {
         if (currentStep === 2) return <DetailedAddressField title="Delivery Address" value={form.dropOffAddress} onChange={(v: any) => setF('dropOffAddress', v)} />;
         if (currentStep === 3) return (
           <div className="space-y-4">
-            <p className="text-[11px] font-black text-[#94a3b8] uppercase tracking-widest">Your Request Summary</p>
+            <p className="text-[11px] font-semibold text-[#94a3b8] ">Your Request Summary</p>
             {[
               { label: 'Parcel Size', value: form.parcelSize || '—' },
               { label: 'Verify With', value: form.parcelVerification || '—' },
@@ -345,7 +345,7 @@ export default function RunModule() {
           <div className="space-y-6">
             <Field label="What is the item?" placeholder="e.g. Laptop charger, Room Keys" value={form.errandBrief} onChange={(v: string) => setF('errandBrief', v)} multiline />
             <div className="space-y-2">
-              <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">Item Size</p>
+              <p className="text-[10px] font-semibold text-[#94a3b8] ">Item Size</p>
               <ChipRow activeService={activeService} options={['Pocket Size (Keys, Wallet)', 'Bag Size (Books, Laptop)', 'Carry-On (Guitar, Poster)']} value={form.errandSize} onChange={v => setF('errandSize', v)} />
             </div>
             <ImageDropzone 
@@ -361,7 +361,7 @@ export default function RunModule() {
         if (currentStep === 2) return <DetailedAddressField title="Drop-off Location" value={form.errandDropoff} onChange={(v: any) => setF('errandDropoff', v)} />;
         if (currentStep === 3) return (
           <div className="space-y-4">
-            <p className="text-[11px] font-black text-[#94a3b8] uppercase tracking-widest">Your Request Summary</p>
+            <p className="text-[11px] font-semibold text-[#94a3b8] ">Your Request Summary</p>
             {[
               { label: 'Item', value: form.errandBrief ? `${form.errandBrief} (${form.errandSize})` : '—' },
               { label: 'Photo', value: form.errandImageName ? 'Attached' : 'None' },
@@ -549,7 +549,7 @@ export default function RunModule() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Runner Bounty</p>
+                      <p className="text-[12px] font-bold text-slate-400 ">Runner Bounty</p>
                       <p className="text-[11px] font-medium text-slate-400 mt-1">Set your delivery tip</p>
                     </div>
                     <div className="flex items-center gap-1 border-b-2 border-slate-200 focus-within:border-slate-900 transition-colors pb-1">
@@ -558,7 +558,7 @@ export default function RunModule() {
                         type="number"
                         value={customFee}
                         onChange={(e) => setCustomFee(e.target.value)}
-                        className="w-20 text-right text-[26px] font-black text-slate-900 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-20 text-right text-[26px] font-semibold text-slate-900 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         placeholder="0.00"
                       />
                     </div>
@@ -577,7 +577,7 @@ export default function RunModule() {
                           </button>
                         </div>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {rec.notes.map(n => <span key={n} className="text-[9px] font-black text-slate-500 uppercase tracking-wider bg-slate-200/50 px-2 py-1 rounded-md">{n}</span>)}
+                          {rec.notes.map(n => <span key={n} className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-200/50 px-2 py-1 rounded-md">{n}</span>)}
                         </div>
                       </div>
                     )

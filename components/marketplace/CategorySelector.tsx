@@ -18,7 +18,7 @@ const CATEGORY_LABELS: Record<CategoryID, string> = {
 const CategorySelector: React.FC<CategorySelectorProps> = ({ selectedCategory, onSelect }) => {
   return (
     <div className="space-y-6">
-      <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+      <h2 className="text-[10px] font-semibold  text-slate-300">
         Classification Index
       </h2>
       
@@ -31,7 +31,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ selectedCategory, o
               onClick={() => onSelect(id)}
               className="group relative shrink-0 flex flex-col items-start gap-1 transition-all"
             >
-              <span className={`text-[9px] font-black tracking-widest leading-none ${isActive ? 'text-slate-900' : 'text-slate-200'}`}>
+              <span className={`text-[9px] font-semibold tracking-widest leading-none ${isActive ? 'text-slate-900' : 'text-slate-200'}`}>
                 0{index + 1}
               </span>
               <span className={`text-[14px] font-bold tracking-tight ${isActive ? 'text-slate-900' : 'text-slate-300'}`}>

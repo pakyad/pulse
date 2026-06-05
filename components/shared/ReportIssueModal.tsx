@@ -81,7 +81,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                       <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500 border border-red-100"><ShieldAlert size={20} /></div>
                       <div className="space-y-0.5">
                          <h2 className="text-[15px] font-bold text-slate-900">{step === 1 ? 'Report Issue' : 'Provide Evidence'}</h2>
-                         <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">Case Registration</p>
+                         <p className="text-[10px] font-semibold text-[#94a3b8] ">Case Registration</p>
                       </div>
                    </div>
                    <button type="button" onClick={step === 1 ? onClose : () => setStep(1)} className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-slate-900"><X size={16} /></button>
@@ -91,7 +91,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                    
                    {/* ── CASE FACT SHEET ── */}
                    <div className="space-y-3">
-                      <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Case Identity</p>
+                      <p className="text-[10px] font-semibold text-[#94a3b8]  px-1">Case Identity</p>
                       <div className="bg-slate-50/50 border border-slate-100 rounded-xl divide-y divide-slate-100 overflow-hidden">
                          <div className="px-5 py-3 flex items-start justify-between">
                             <span className="text-[11px] font-medium text-[#94a3b8]">Items</span>
@@ -103,7 +103,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                          </div>
                          <div className="px-5 py-3 flex items-center justify-between">
                             <span className="text-[11px] font-medium text-[#94a3b8]">Refund Value</span>
-                            <span className="text-[11px] font-black text-slate-900">RM {order?.total?.toFixed(2)}</span>
+                            <span className="text-[11px] font-semibold text-slate-900">RM {order?.total?.toFixed(2)}</span>
                          </div>
                       </div>
                    </div>
@@ -111,7 +111,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                    <AnimatePresence mode="wait">
                       {step === 1 ? (
                          <motion.div key="s1" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-4">
-                            <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest px-1">What is the problem?</p>
+                            <p className="text-[10px] font-semibold text-[#94a3b8]  px-1">What is the problem?</p>
                             <div className="space-y-3">
                                {STRATEGIES.map(s => (
                                   <button 
@@ -134,7 +134,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                       ) : (
                          <motion.div key="s2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-8">
                             <div className="space-y-3">
-                               <label className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Describe clearly</label>
+                               <label className="text-[10px] font-semibold text-[#94a3b8]  px-1">Describe clearly</label>
                                <textarea 
                                  value={narrative} onChange={(e) => setNarrative(e.target.value)}
                                  placeholder={reason === 'Damaged Asset' ? 'Tell us exactly where the damage is...' : 'Tell us what happened...'} 
@@ -144,7 +144,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                             </div>
 
                             <div className="space-y-3">
-                               <label className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest px-1">Evidence (Recommended)</label>
+                               <label className="text-[10px] font-semibold text-[#94a3b8]  px-1">Evidence (Recommended)</label>
                                <label className="w-full h-14 border-2 border-dashed border-slate-100 rounded-xl flex items-center justify-center gap-3 cursor-pointer hover:bg-slate-50 transition-all bg-white relative overflow-hidden">
                                   <input type="file" className="hidden" accept="image/*" onChange={(e) => setImage(e.target.files?.[0] || null)} />
                                   {image ? (
@@ -159,7 +159,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                             </div>
 
                             <div className="p-4 bg-blue-50/30 border border-blue-100 rounded-xl space-y-2">
-                               <div className="flex items-center gap-2 text-slate-900 font-bold text-[10px] uppercase tracking-widest">
+                               <div className="flex items-center gap-2 text-slate-900 font-bold text-[10px] ">
                                   <Scale size={12} /> Expected Outcome
                                </div>
                                <p className="text-[11px] text-slate-900 font-medium">Full Refund of RM {order?.total?.toFixed(2)} to Original Payment Method if verified.</p>
@@ -168,7 +168,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
                             <button
                               type="submit"
                               disabled={isSubmitting || !narrative}
-                              className="w-full h-14 bg-slate-900 text-white rounded-xl font-bold text-[13px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-md shadow-[slate-900]/10 active:scale-95 transition-all disabled:opacity-20"
+                              className="w-full h-14 bg-slate-900 text-white rounded-xl font-bold text-[13px]  flex items-center justify-center gap-3 shadow-md shadow-slate-900/10 active:scale-95 transition-all disabled:opacity-20"
                             >
                               {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <>Submit Case <Send size={16} className="rotate-45" /></>}
                             </button>

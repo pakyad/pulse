@@ -183,7 +183,7 @@ export default function PulseHome() {
             ) : (
                <div className="py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-3">
                   <Box size={32} strokeWidth={1} className="opacity-30" />
-                  <p className="text-[12px] font-bold uppercase tracking-widest">No listings found</p>
+                  <p className="text-[12px] font-bold ">No listings found</p>
                </div>
             )}
          </section>

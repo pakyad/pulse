@@ -132,28 +132,28 @@ export default function MarketInsightsPage() {
           {/* METRICS GRID (2x2) */}
           <div className="grid grid-cols-2 gap-4">
              <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
-                <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Total Earnings' : 'Money Earned'}</p>
+                <p className="text-[10px] font-semibold text-[#94a3b8]  mb-2">{isProMode ? 'Total Earnings' : 'Money Earned'}</p>
                 <div>
                    <p className="text-[20px] font-bold text-slate-900 tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
                 </div>
              </div>
              
              <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
-                <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Sales Volume' : 'Items Sold'}</p>
+                <p className="text-[10px] font-semibold text-[#94a3b8]  mb-2">{isProMode ? 'Sales Volume' : 'Items Sold'}</p>
                 <div>
                    <p className="text-[20px] font-bold text-slate-900 tracking-tighter">{salesVolume}</p>
                 </div>
              </div>
 
              <div className="p-6 border border-slate-50 rounded-2xl bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
-                <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Inventory Value' : 'Closet Value'}</p>
+                <p className="text-[10px] font-semibold text-[#94a3b8]  mb-2">{isProMode ? 'Inventory Value' : 'Closet Value'}</p>
                 <div>
                    <p className="text-[20px] font-bold text-slate-900 tracking-tighter">RM {inventoryValue.toFixed(2)}</p>
                 </div>
              </div>
 
              <div className="p-6 border border-slate-50 rounded-2xl bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
-                <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest mb-2">{isProMode ? 'Total Units' : 'Items Left'}</p>
+                <p className="text-[10px] font-semibold text-[#94a3b8]  mb-2">{isProMode ? 'Total Units' : 'Items Left'}</p>
                 <div>
                    <p className="text-[20px] font-bold text-slate-900 tracking-tighter">{totalUnitsAvailable}</p>
                 </div>
@@ -182,8 +182,8 @@ export default function MarketInsightsPage() {
                               <div className={`w-1.5 h-1.5 rounded-full ${f.color}`} />
                               <p className="text-[13px] font-bold text-slate-500 flex-1">{f.name}</p>
                               <div className="text-right">
-                                <p className="text-[13px] font-black text-slate-900">{pct}%</p>
-                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{f.count} Items</p>
+                                <p className="text-[13px] font-semibold text-slate-900">{pct}%</p>
+                                <p className="text-[9px] text-slate-400 font-bold ">{f.count} Items</p>
                               </div>
                            </div>
                          );
@@ -202,7 +202,7 @@ export default function MarketInsightsPage() {
                       {itemSales.slice(0, 3).map((item, idx) => (
                          <div key={item.id} className="p-4 rounded-2xl border border-slate-50 bg-white shadow-sm flex items-center justify-between hover:border-slate-200 transition-colors">
                             <div className="flex items-center gap-4">
-                               <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center font-black text-slate-300 text-[11px]">
+                               <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center font-semibold text-slate-300 text-[11px]">
                                   #{idx + 1}
                                </div>
                                <div>
@@ -211,14 +211,14 @@ export default function MarketInsightsPage() {
                                </div>
                             </div>
                             <div className="px-3 py-1 bg-blue-50 text-slate-900 rounded-lg">
-                               <p className="text-[11px] font-black uppercase tracking-widest">{item.units_sold} Sold</p>
+                               <p className="text-[11px] font-semibold">{item.units_sold} Sold</p>
                             </div>
                          </div>
                       ))}
                       {itemSales.length === 0 && (
                          <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-2xl">
                             <ShoppingBag size={24} className="opacity-20" />
-                            <p className="text-[11px] font-bold uppercase tracking-widest">No Sales Data Yet</p>
+                            <p className="text-[11px] font-bold ">No Sales Data Yet</p>
                          </div>
                       )}
                    </div>
@@ -245,13 +245,13 @@ export default function MarketInsightsPage() {
                                <p className="text-[13px] font-bold text-slate-900 tracking-tight truncate max-w-[200px]">{order.title}</p>
                                <p className="text-[10px] text-slate-400 font-medium">To: {order.buyer_name || 'Anonymous Student'}</p>
                             </div>
-                            <p className="text-[14px] font-black text-slate-900">RM {Number(order.price || order.total || 0).toFixed(2)}</p>
+                            <p className="text-[14px] font-semibold text-slate-900">RM {Number(order.price || order.total || 0).toFixed(2)}</p>
                          </div>
                       ))}
                       {completedOrders.length === 0 && (
                          <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
                             <Shirt size={24} className="opacity-20" />
-                            <p className="text-[11px] font-bold uppercase tracking-widest">No Items Sold Yet</p>
+                            <p className="text-[11px] font-bold ">No Items Sold Yet</p>
                          </div>
                       )}
                    </div>

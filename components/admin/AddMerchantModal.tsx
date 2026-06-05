@@ -81,7 +81,7 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
               <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle2 size={32} />
               </div>
-              <h3 className="text-[20px] font-black">Merchant Added</h3>
+              <h3 className="text-[20px] font-semibold">Merchant Added</h3>
               <p className="text-[14px] text-slate-400">The account is now live in the registry.</p>
             </div>
           ) : (
@@ -92,8 +92,8 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
                     <UserPlus size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Provisioning</p>
-                    <h2 className="text-[18px] font-black">Add Merchant</h2>
+                    <p className="text-[10px] font-semibold text-slate-400 ">Provisioning</p>
+                    <h2 className="text-[18px] font-semibold">Add Merchant</h2>
                   </div>
                 </div>
                 <button onClick={onClose} className="text-slate-300 hover:text-slate-900 transition-colors">
@@ -104,7 +104,7 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
               <div className="space-y-5">
                 {/* Step 1: Name */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-4">Merchant Name</label>
+                  <label className="text-[10px] font-semibold text-slate-300  ml-4">Merchant Name</label>
                   <input 
                     type="text"
                     placeholder="e.g. SE Club"
@@ -116,7 +116,7 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
 
                 {/* Step 2: Email */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-4">External Email</label>
+                  <label className="text-[10px] font-semibold text-slate-300  ml-4">External Email</label>
                   <input 
                     type="email"
                     placeholder="seclub@merchant.com"
@@ -128,7 +128,7 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
 
                 {/* Step 3: Password */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-4">Initial Password</label>
+                  <label className="text-[10px] font-semibold text-slate-300  ml-4">Initial Password</label>
                   <input 
                     type="password"
                     placeholder="Create a password"
@@ -144,7 +144,7 @@ export default function AddMerchantModal({ isOpen, onClose }: { isOpen: boolean,
               <button 
                 onClick={handleCreate}
                 disabled={loading}
-                className="w-full h-16 bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-widest shadow-md shadow-slate-900/10 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-20"
+                className="w-full h-16 bg-slate-900 text-white rounded-2xl font-semibold text-[13px]  shadow-md shadow-slate-900/10 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-20"
               >
                 {loading ? <Loader2 size={20} className="animate-spin" /> : 'Create Account'}
               </button>

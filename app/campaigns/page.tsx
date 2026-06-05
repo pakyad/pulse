@@ -27,7 +27,7 @@ export default function CampaignsPage() {
       merchant: 'UniStore Official',
       validUntil: 'Valid until July 15',
       code: 'UNIKL5',
-      color: 'bg-blue-600',
+      color: 'bg-slate-900',
       textColor: 'text-blue-600',
       bgLight: 'bg-blue-50',
       icon: <Gift size={24} className="text-white" />
@@ -70,8 +70,8 @@ export default function CampaignsPage() {
           <div className="absolute inset-0 bg-linear-to-r from-rose-500 to-orange-500 opacity-90" />
           
           <div className="absolute inset-0 p-6 flex flex-col justify-center z-10">
-            <span className="text-[10px] font-black text-white/80 uppercase tracking-widest mb-1">Student Perks</span>
-            <h2 className="text-2xl font-black text-white tracking-tight leading-none mb-2">Claim Your<br/>Discounts</h2>
+            <span className="text-[10px] font-semibold text-white/80  mb-1">Student Perks</span>
+            <h2 className="text-2xl font-semibold text-white tracking-tight leading-none mb-2">Claim Your<br/>Discounts</h2>
           </div>
           
           <div className="absolute -right-6 -bottom-6 opacity-20 rotate-12">
@@ -107,7 +107,7 @@ export default function CampaignsPage() {
                 <div className="absolute left-0 top-2 bottom-2 w-px border-l-2 border-dashed border-slate-200" />
                 
                 <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 pl-2">{camp.merchant}</p>
-                <h4 className="text-[16px] font-black text-slate-900 leading-tight mb-2 pl-2">{camp.title}</h4>
+                <h4 className="text-[16px] font-semibold text-slate-900 leading-tight mb-2 pl-2">{camp.title}</h4>
                 
                 <div className="flex items-center gap-1.5 pl-2">
                   <Clock size={12} className="text-slate-400" />

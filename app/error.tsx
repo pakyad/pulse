@@ -34,14 +34,14 @@ export default function GlobalError({
       <div className="flex flex-col gap-3 w-full max-w-xs">
         <button
           onClick={() => reset()}
-          className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all"
+          className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[13px]  flex items-center justify-center gap-3 active:scale-95 transition-all"
         >
           <RefreshCcw size={16} />
           Try Again
         </button>
         <button
           onClick={() => router.push('/home')}
-          className="w-full h-14 bg-slate-50 text-slate-900 border border-slate-100 rounded-2xl font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all"
+          className="w-full h-14 bg-slate-50 text-slate-900 border border-slate-100 rounded-2xl font-bold text-[13px]  flex items-center justify-center gap-3 active:scale-95 transition-all"
         >
           <Home size={16} />
           Go Home
@@ -49,7 +49,7 @@ export default function GlobalError({
       </div>
 
       {error.digest && (
-        <p className="mt-8 text-[10px] font-mono text-slate-200 uppercase tracking-widest">
+        <p className="mt-8 text-[10px] font-mono text-slate-200 ">
           ref: {error.digest}
         </p>
       )}

@@ -36,9 +36,9 @@ interface RegistryListProps {
 
 const CATEGORY_MAP = {
   registry_mc: { label: 'Medical Registry', icon: Stethoscope, color: 'text-[#00927C]', dbType: 'MC' },
-  registry_appeal: { label: 'Appeal Registry', icon: AlertCircle, color: 'text-black', dbType: 'APPEAL' },
-  registry_finance: { label: 'Finance Registry', icon: CreditCard, color: 'text-black', dbType: 'FINANCE' },
-  registry_letters: { label: 'Official Registry', icon: FileText, color: 'text-black', dbType: 'REQUEST' },
+  registry_appeal: { label: 'Appeal Registry', icon: AlertCircle, color: 'text-slate-900', dbType: 'APPEAL' },
+  registry_finance: { label: 'Finance Registry', icon: CreditCard, color: 'text-slate-900', dbType: 'FINANCE' },
+  registry_letters: { label: 'Official Registry', icon: FileText, color: 'text-slate-900', dbType: 'REQUEST' },
 };
 
 export default function RegistryList({ type }: RegistryListProps) {
@@ -100,24 +100,24 @@ export default function RegistryList({ type }: RegistryListProps) {
       {/* List Header (Institutional) */}
       <div className="flex justify-between items-end mb-12">
         <div className="flex items-center gap-5">
-          <div className="w-14 h-14 rounded-[16px] bg-black/5 flex items-center justify-center text-black/40">
+          <div className="w-14 h-14 rounded-[16px] bg-slate-900/5 flex items-center justify-center text-slate-900/40">
             <config.icon size={24} strokeWidth={2} className={config.color} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-1">Documentation Engine</p>
-            <h3 className="text-[20px] font-black text-black uppercase tracking-tighter leading-none">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-900/20 mb-1">Documentation Engine</p>
+            <h3 className="text-[20px] font-semibold text-slate-900 uppercase tracking-tighter leading-none">
               {config.label}
             </h3>
           </div>
         </div>
         
         <div className="flex items-center gap-4">
-           <button className="h-12 px-6 bg-white text-black/40 rounded-[16px] border-[0.5px] border-[#F2F2F7] flex items-center gap-3 text-[10px] font-black uppercase tracking-widest hover:text-black transition-all">
+           <button className="h-12 px-6 bg-white text-slate-900/40 rounded-[16px] border-[0.5px] border-[#F2F2F7] flex items-center gap-3 text-[10px] font-semibold hover:text-slate-900 transition-all">
               <Filter size={14} /> Filter Node
            </button>
            <div className="h-12 px-5 bg-white rounded-[16px] border-[0.5px] border-[#F2F2F7] flex items-center gap-3">
-              <Search size={16} className="text-black/10" />
-              <input type="text" placeholder="Trace ID..." className="bg-transparent border-none outline-none text-[11px] font-black uppercase tracking-widest text-black/40 w-40 placeholder:text-black/10" />
+              <Search size={16} className="text-slate-900/10" />
+              <input type="text" placeholder="Trace ID..." className="bg-transparent border-none outline-none text-[11px] font-semibold text-slate-900/40 w-40 placeholder:text-slate-900/10" />
            </div>
         </div>
       </div>
@@ -143,27 +143,27 @@ export default function RegistryList({ type }: RegistryListProps) {
                 </div>
                 <div className="space-y-6 flex-1">
                    <div>
-                      <h4 className="text-black font-black text-[18px] uppercase tracking-tight mb-2 leading-none">{item.student_name}</h4>
-                      <div className="flex items-center gap-4 text-black/30">
-                         <p className="text-[11px] font-black uppercase tracking-[0.2em]">{item.student_id}</p>
-                         <div className="w-1 h-1 rounded-full bg-black/5" />
+                      <h4 className="text-slate-900 font-semibold text-[18px] uppercase tracking-tight mb-2 leading-none">{item.student_name}</h4>
+                      <div className="flex items-center gap-4 text-slate-900/30">
+                         <p className="text-[11px] font-semibold ">{item.student_id}</p>
+                         <div className="w-1 h-1 rounded-full bg-slate-900/5" />
                          <div className="flex items-center gap-2">
-                            <Clock size={12} className="text-black/20" />
-                            <p className="text-[11px] font-black uppercase tracking-[0.15em]">{item.submitted_at}</p>
+                            <Clock size={12} className="text-slate-900/20" />
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.15em]">{item.submitted_at}</p>
                          </div>
                       </div>
                    </div>
 
                    <div className="flex flex-wrap gap-3">
                       {Object.entries(item.metadata).map(([key, val]) => (
-                        <div key={key} className="px-4 py-2 bg-black/[0.02] rounded-[10px] border-[0.5px] border-[#F2F2F7] flex items-center gap-3">
-                           <span className="text-[9px] font-black text-black/20 uppercase tracking-widest">{key}:</span>
-                           <span className="text-[11px] font-black text-black uppercase tracking-tight">{val}</span>
+                        <div key={key} className="px-4 py-2 bg-slate-900/[0.02] rounded-[10px] border-[0.5px] border-[#F2F2F7] flex items-center gap-3">
+                           <span className="text-[9px] font-semibold text-slate-900/20 ">{key}:</span>
+                           <span className="text-[11px] font-semibold text-slate-900 uppercase tracking-tight">{val}</span>
                         </div>
                       ))}
-                      <button className="h-9 px-4 bg-black text-white rounded-[10px] flex items-center gap-3 hover:bg-black/90 transition-all">
+                      <button className="h-9 px-4 bg-slate-900 text-white rounded-[10px] flex items-center gap-3 hover:bg-slate-900/90 transition-all">
                          <ExternalLink size={12} className="text-white/40" />
-                         <span className="text-[9px] font-black uppercase tracking-[0.2em]">View Registry Data</span>
+                         <span className="text-[9px] font-semibold ">View Registry Data</span>
                       </button>
                    </div>
                 </div>
@@ -172,14 +172,14 @@ export default function RegistryList({ type }: RegistryListProps) {
               <div className="flex items-center gap-3 mt-10 md:mt-0 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                 <button 
                   onClick={() => handleAction(item.id, 'APPROVED')}
-                  className="h-14 px-10 rounded-[16px] bg-black text-white font-black text-[11px] hover:bg-[#00927C] hover:shadow-md hover:shadow-[#00927C]/20 transition-all active:scale-95 flex items-center gap-3 uppercase tracking-widest"
+                  className="h-14 px-10 rounded-[16px] bg-slate-900 text-white font-semibold text-[11px] hover:bg-[#00927C] hover:shadow-md hover:shadow-[#00927C]/20 transition-all active:scale-95 flex items-center gap-3 "
                 >
                   <Check size={18} strokeWidth={3} />
                   Authorize
                 </button>
                 <button 
                   onClick={() => handleAction(item.id, 'REJECTED')}
-                  className="h-14 w-14 rounded-[16px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-center text-black/20 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
+                  className="h-14 w-14 rounded-[16px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-center text-slate-900/20 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
                 >
                   <X size={20} />
                 </button>

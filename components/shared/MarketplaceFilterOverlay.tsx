@@ -13,6 +13,8 @@ export interface FilterState {
   sortBy: 'newest' | 'price_asc' | 'price_desc';
   priceRange: [number, number];
   officialOnly: boolean;
+  condition: 'any' | 'new' | 'used';
+  fulfillment: 'any' | 'meetup' | 'runner';
 }
 
 export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onApply }: MarketplaceFilterOverlayProps) {
@@ -29,7 +31,9 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
     setTempFilters({
       sortBy: 'newest',
       priceRange: [0, 1000],
-      officialOnly: false
+      officialOnly: false,
+      condition: 'any',
+      fulfillment: 'any'
     });
   };
 
@@ -52,13 +56,13 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed top-0 right-0 bottom-0 z-101 w-full max-w-[340px] bg-white flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 bottom-0 z-101 w-full max-w-[340px] bg-white flex flex-col shadow-[0_0_40px_rgba(0,0,0,0.12)] rounded-l-[24px]"
           >
             {/* Header (No text, just close button) */}
             <div className="px-8 pt-10 pb-2 flex justify-end">
               <button 
                 onClick={onClose}
-                className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-all active:scale-95"
+                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all active:scale-95 shadow-sm"
               >
                 <X size={16} />
               </button>
@@ -68,7 +72,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
               
               {/* Sort Section */}
               <section>
-                <h3 className="text-[12px] font-black text-slate-900 tracking-tight mb-4">Sort By</h3>
+                <h3 className="text-[13px] font-semibold text-slate-800 mb-3">Sort By</h3>
                 <div className="flex flex-wrap gap-2.5">
                   {[
                     { id: 'newest', label: 'Newest Arrivals' },
@@ -78,10 +82,10 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                     <button
                       key={opt.id}
                       onClick={() => setTempFilters({ ...tempFilters, sortBy: opt.id as any })}
-                      className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
+                      className={`px-5 py-2.5 rounded-[16px] text-[13px] font-semibold transition-all active:scale-95 border ${
                         tempFilters.sortBy === opt.id 
-                          ? 'bg-white border-[#2A5C50] text-[#2A5C50] ring-1 ring-[#2A5C50]' 
-                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                          ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' 
+                          : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
                       }`}
                     >
                       {opt.label}
@@ -92,7 +96,7 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
 
               {/* Budget Section */}
               <section>
-                <h3 className="text-[12px] font-black text-slate-900 tracking-tight mb-4">Budget</h3>
+                <h3 className="text-[13px] font-semibold text-slate-800 mb-3">Budget</h3>
                 <div className="flex flex-wrap gap-2.5">
                   {[
                     { label: 'Any Budget', max: 1000 },
@@ -103,10 +107,10 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                     <button
                       key={tier.max}
                       onClick={() => setTempFilters({ ...tempFilters, priceRange: [0, tier.max] })}
-                      className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
+                      className={`px-5 py-2.5 rounded-[16px] text-[13px] font-semibold transition-all active:scale-95 border ${
                         tempFilters.priceRange[1] === tier.max 
-                          ? 'bg-white border-[#2A5C50] text-[#2A5C50] ring-1 ring-[#2A5C50]' 
-                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                          ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' 
+                          : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
                       }`}
                     >
                       {tier.label}
@@ -117,28 +121,76 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
 
               {/* Status Section */}
               <section>
-                 <h3 className="text-[12px] font-black text-slate-900 tracking-tight mb-4">Seller Type</h3>
+                 <h3 className="text-[13px] font-semibold text-slate-800 mb-3">Seller Type</h3>
                  <div className="flex flex-wrap gap-2.5">
                     <button
                       onClick={() => setTempFilters({ ...tempFilters, officialOnly: false })}
-                      className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
+                      className={`px-5 py-2.5 rounded-[16px] text-[13px] font-semibold transition-all active:scale-95 border ${
                         !tempFilters.officialOnly 
-                          ? 'bg-white border-[#2A5C50] text-[#2A5C50] ring-1 ring-[#2A5C50]' 
-                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                          ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' 
+                          : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
                       }`}
                     >
                       All Sellers
                     </button>
                     <button
                       onClick={() => setTempFilters({ ...tempFilters, officialOnly: true })}
-                      className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all active:scale-95 border ${
+                      className={`px-5 py-2.5 rounded-[16px] text-[13px] font-semibold transition-all active:scale-95 border ${
                         tempFilters.officialOnly 
-                          ? 'bg-white border-[#2A5C50] text-[#2A5C50] ring-1 ring-[#2A5C50]' 
-                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                          ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' 
+                          : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
                       }`}
                     >
                       Official Only
                     </button>
+                 </div>
+              </section>
+
+              {/* Condition Section */}
+              <section>
+                 <h3 className="text-[13px] font-semibold text-slate-800 mb-3">Item Condition</h3>
+                 <div className="flex flex-wrap gap-2.5">
+                   {[
+                     { id: 'any', label: 'Any Condition' },
+                     { id: 'new', label: 'Brand New' },
+                     { id: 'used', label: 'Pre-loved' }
+                   ].map((opt) => (
+                     <button
+                       key={opt.id}
+                       onClick={() => setTempFilters({ ...tempFilters, condition: opt.id as any })}
+                       className={`px-5 py-2.5 rounded-[16px] text-[13px] font-semibold transition-all active:scale-95 border ${
+                         tempFilters.condition === opt.id 
+                           ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' 
+                           : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
+                       }`}
+                     >
+                       {opt.label}
+                     </button>
+                   ))}
+                 </div>
+              </section>
+
+              {/* Fulfillment Section */}
+              <section>
+                 <h3 className="text-[13px] font-semibold text-slate-800 mb-3">Fulfillment</h3>
+                 <div className="flex flex-wrap gap-2.5">
+                   {[
+                     { id: 'any', label: 'Any Method' },
+                     { id: 'meetup', label: 'Meetup / COD' },
+                     { id: 'runner', label: 'Pulse Runner' }
+                   ].map((opt) => (
+                     <button
+                       key={opt.id}
+                       onClick={() => setTempFilters({ ...tempFilters, fulfillment: opt.id as any })}
+                       className={`px-5 py-2.5 rounded-[16px] text-[13px] font-semibold transition-all active:scale-95 border ${
+                         tempFilters.fulfillment === opt.id 
+                           ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' 
+                           : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50'
+                       }`}
+                     >
+                       {opt.label}
+                     </button>
+                   ))}
                  </div>
               </section>
             </div>
@@ -150,13 +202,13 @@ export default function MarketplaceFilterOverlay({ isOpen, onClose, filters, onA
                   onApply(tempFilters);
                   onClose();
                 }}
-                className="w-full h-14 bg-[#2A5C50] text-white rounded-2xl font-bold text-[14px] active:scale-95 transition-all shadow-md shadow-[#2A5C50]/20 flex items-center justify-center"
+                className="w-full h-14 bg-slate-900 text-white rounded-[16px] font-bold text-[14px] active:scale-95 transition-all shadow-md flex items-center justify-center"
               >
                 Apply Filters
               </button>
               <button 
                 onClick={handleReset}
-                className="w-full h-10 text-slate-400 font-bold text-[12px] hover:text-slate-900 transition-colors flex items-center justify-center"
+                className="w-full h-10 text-slate-500 font-semibold text-[13px] hover:text-slate-800 transition-colors flex items-center justify-center"
               >
                 Reset Selection
               </button>

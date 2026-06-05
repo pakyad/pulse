@@ -58,7 +58,7 @@ function RevisionDrawer({ item, ceiling, onClose, onSubmit, isProcessing }: {
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onClose} className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" />
+        onClick={onClose} className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm" />
       <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
         className="fixed top-0 right-0 bottom-0 w-[480px] bg-white z-50 shadow-2xl flex flex-col">
@@ -67,7 +67,7 @@ function RevisionDrawer({ item, ceiling, onClose, onSubmit, isProcessing }: {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <PauseCircle size={18} className="text-amber-500" />
-              <h2 className="text-[18px] font-black text-slate-900">Hold for Revision</h2>
+              <h2 className="text-[18px] font-semibold text-slate-900">Hold for Revision</h2>
             </div>
             <p className="text-[12px] text-slate-400">Item will be hidden until seller revises it</p>
           </div>
@@ -92,7 +92,7 @@ function RevisionDrawer({ item, ceiling, onClose, onSubmit, isProcessing }: {
 
           {/* Reason selector */}
           <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Reason</label>
+            <label className="text-[10px] font-semibold text-slate-400  block mb-2">Reason</label>
             <div className="space-y-2">
               {REVISION_REASONS.map(r => (
                 <button key={r.key} onClick={() => setReason(r.key)}
@@ -110,7 +110,7 @@ function RevisionDrawer({ item, ceiling, onClose, onSubmit, isProcessing }: {
 
           {/* Auto-generated message preview */}
           <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Notification Preview</label>
+            <label className="text-[10px] font-semibold text-slate-400  block mb-2">Notification Preview</label>
             <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
               <p className="text-[13px] font-medium text-amber-900 leading-relaxed">{baseMessage}</p>
             </div>
@@ -118,7 +118,7 @@ function RevisionDrawer({ item, ceiling, onClose, onSubmit, isProcessing }: {
 
           {/* Optional custom note */}
           <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+            <label className="text-[10px] font-semibold text-slate-400  block mb-2">
               Additional Note <span className="text-slate-300 normal-case font-normal">(optional)</span>
             </label>
             <textarea
@@ -202,14 +202,14 @@ function ReviewCard({ item, onAction }: { item: any; onAction: (type: string, it
       {/* Header strip */}
       <div className="px-6 py-3 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between rounded-t-2xl">
         <div className="flex items-center gap-3">
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold  ${
             item.flag_source === 'SYSTEM' ? 'bg-rose-50/80 text-rose-500 border border-rose-100/50' : 'bg-amber-50/80 text-amber-600 border border-amber-100/50'
           }`}>
             {item.flag_source === 'SYSTEM' ? <AlertTriangle size={12} strokeWidth={2.5} /> : <Flag size={12} strokeWidth={2.5} />}
             {item.flag_source === 'SYSTEM' ? 'System Flagged' : `${item.report_count ?? 0} Community Reports`}
           </span>
           {strikes > 0 && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-slate-100/80 text-slate-500 border border-slate-200/50">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold  bg-slate-100/80 text-slate-500 border border-slate-200/50">
               <AlertCircle size={12} strokeWidth={2.5} /> Strike {strikes}/3
             </span>
           )}
@@ -234,7 +234,7 @@ function ReviewCard({ item, onAction }: { item: any; onAction: (type: string, it
             <p className="text-[12px] text-slate-400 font-medium mt-0.5">by {item.seller_name}</p>
           </div>
           <div className="flex gap-2">
-            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md uppercase tracking-widest">
+            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md ">
               {catConfig?.label || item.category}
             </span>
             {item.subcategory && <span className="text-[9px] font-medium text-slate-400 py-1">· {item.subcategory}</span>}
@@ -248,14 +248,14 @@ function ReviewCard({ item, onAction }: { item: any; onAction: (type: string, it
 
         {/* Price */}
         <div className="col-span-2 space-y-2">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Listed</p>
-          <p className="text-[22px] font-black text-red-500 leading-none">RM {Number(item.price).toFixed(2)}</p>
+          <p className="text-[10px] font-semibold text-slate-400 ">Listed</p>
+          <p className="text-[22px] font-semibold text-red-500 leading-none">RM {Number(item.price).toFixed(2)}</p>
           {ceiling > 0 && (
             <>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Ceiling</p>
+              <p className="text-[10px] font-semibold text-slate-400  mt-2">Ceiling</p>
               <p className="text-[15px] font-bold text-slate-700">RM {Number(ceiling).toFixed(2)}</p>
               {overPct > 0 && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-black text-red-500">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-500">
                   <TrendingUp size={12} /> +{overPct}% over
                 </span>
               )}
@@ -266,7 +266,7 @@ function ReviewCard({ item, onAction }: { item: any; onAction: (type: string, it
         {/* Actions */}
         <div className="col-span-3 space-y-2">
           <button onClick={() => onAction('approve', item)}
-            className="w-full h-11 bg-slate-900 text-white rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-black transition-all active:scale-[0.98]">
+            className="w-full h-11 bg-slate-900 text-white rounded-xl font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-slate-900 transition-all active:scale-[0.98]">
             <CheckCircle2 size={15} /> Approve
           </button>
           <ActionMenu item={item} ceiling={ceiling} onAction={(type) => onAction(type, item)} />
@@ -281,7 +281,7 @@ function Toast({ msg, type }: { msg: string; type: 'ok' | 'err' | 'warn' }) {
   return (
     <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}
       className={`fixed top-6 left-1/2 -translate-x-1/2 z-100 px-6 py-3 rounded-full shadow-lg text-white text-[13px] font-bold flex items-center gap-2 ${
-        type === 'ok' ? 'bg-[#2A5C50]' : type === 'warn' ? 'bg-orange-500' : 'bg-red-500'
+        type === 'ok' ? 'bg-slate-900' : type === 'warn' ? 'bg-orange-500' : 'bg-red-500'
       }`}>
       {type === 'ok' ? <CheckCircle2 size={16} /> : type === 'warn' ? <AlertCircle size={16} /> : <X size={16} />}
       {msg}
@@ -393,8 +393,8 @@ export default function PriceReviewPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Market Governance</p>
-          <h1 className="text-[24px] font-black text-slate-900 tracking-tight">Price Review</h1>
+          <p className="text-[10px] font-semibold text-slate-400  mb-1">Market Governance</p>
+          <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Price Review</h1>
           <p className="text-[13px] font-medium text-slate-400 mt-1">
             Use Governance Actions for granular control over each flagged listing.
           </p>

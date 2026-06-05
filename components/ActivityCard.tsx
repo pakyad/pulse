@@ -35,7 +35,7 @@ export default function ActivityCard({ id, title, price, type, status, location 
         <div className="space-y-1">
           <h3 className="text-xs font-bold text-navy truncate tracking-tight">{title}</h3>
           <div className="flex justify-between items-baseline">
-            <p className="text-[11px] font-black text-orange  ">RM {price.toFixed(2)}</p>
+            <p className="text-[11px] font-semibold text-orange  ">RM {price.toFixed(2)}</p>
             {location && <p className="text-[9px] text-navy/30 font-mono ">{location}</p>}
           </div>
         </div>

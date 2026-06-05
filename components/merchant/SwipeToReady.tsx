@@ -55,7 +55,7 @@ export default function SwipeToReady({ orderId, onSuccess }: { orderId: string, 
 
   if (isDone) {
     return (
-      <div className="w-full h-11 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-[11px] tracking-widest uppercase shadow-sm shadow-slate-900/5 transition-all">
+      <div className="w-full h-11 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-[11px] tracking-widest uppercase shadow-sm shadow-slate-900/10 transition-all">
         <CheckCircle2 size={16} className="mr-2 text-emerald-400" /> Ready for Pickup
       </div>
     );
@@ -66,7 +66,7 @@ export default function SwipeToReady({ orderId, onSuccess }: { orderId: string, 
       ref={containerRef}
       className="relative w-full h-11 bg-slate-50 border-[0.5px] border-slate-200 rounded-xl overflow-hidden flex items-center justify-center touch-none select-none"
     >
-      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest pointer-events-none z-0 ml-4">
+      <span className="text-[10px] font-semibold text-slate-400  pointer-events-none z-0 ml-4">
         Swipe to ready
       </span>
       

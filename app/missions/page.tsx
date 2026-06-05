@@ -103,7 +103,7 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
                <div className="w-1 h-1 rounded-full bg-slate-200" />
                <div className="flex items-center gap-1">
                   <Zap size={10} className="text-amber-500 fill-amber-500" />
-                  <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Urgent</span>
+                  <span className="text-[10px] font-bold text-amber-500 ">Urgent</span>
                </div>
             </div>
           </div>
@@ -117,7 +117,7 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
              <MapPin size={18} />
           </div>
           <div className="flex-1">
-             <p className="text-[9px] font-bold text-[#94a3b8] uppercase tracking-widest">Pickup Point</p>
+             <p className="text-[9px] font-bold text-[#94a3b8] ">Pickup Point</p>
              <p className="text-[14px] font-bold text-slate-900 truncate">{order.seller_name || 'Merchant point'}</p>
           </div>
         </div>
@@ -127,7 +127,7 @@ function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id:
              <MapPin size={18} />
           </div>
           <div className="flex-1">
-             <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Drop-off Point</p>
+             <p className="text-[9px] font-bold text-white/30 ">Drop-off Point</p>
              <p className="text-[14px] font-bold text-slate-900 truncate">{order.drop_off_location}</p>
           </div>
         </div>
@@ -266,10 +266,10 @@ export default function MissionBoard() {
          <Heading className="text-[32px] leading-tight">Job Board</Heading>
          <div className="flex items-center gap-3 mt-4">
             <div className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-xl">
-               <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{orders.length} Available</span>
+               <span className="text-[10px] font-bold text-slate-900 ">{orders.length} Available</span>
             </div>
             <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 ${activeMissionsCount >= 2 ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-slate-50 border-slate-100 text-[#94a3b8]'}`}>
-               <span className="text-[10px] font-bold uppercase tracking-widest">Limit: {activeMissionsCount}/2</span>
+               <span className="text-[10px] font-bold ">Limit: {activeMissionsCount}/2</span>
                {activeMissionsCount >= 2 && <AlertCircle size={12} />}
             </div>
          </div>
@@ -279,7 +279,7 @@ export default function MissionBoard() {
         {loading ? (
           <div className="py-20 flex flex-col items-center gap-4 text-[#94a3b8]">
              <div className="w-10 h-10 border-4 border-slate-100 border-t-[slate-900] rounded-full animate-spin" />
-             <p className="text-[11px] font-bold uppercase tracking-widest">Searching for jobs...</p>
+             <p className="text-[11px] font-bold ">Searching for jobs...</p>
           </div>
         ) : orders.length > 0 ? (
           orders.map((order) => (
@@ -293,7 +293,7 @@ export default function MissionBoard() {
         ) : (
           <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center">
              <Radio className="text-slate-100 mb-4" size={48} />
-             <p className="text-[14px] font-bold text-[#94a3b8] uppercase tracking-widest">No active jobs found</p>
+             <p className="text-[14px] font-bold text-[#94a3b8] ">No active jobs found</p>
           </div>
         )}
       </section>

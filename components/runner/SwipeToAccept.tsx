@@ -79,7 +79,7 @@ export default function SwipeToAccept({
         className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 pointer-events-none"
         style={{ opacity: isSuccess ? 1 : Math.max(0, 1 - (dragX / 100)) }}
       >
-        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isSuccess ? 'text-white' : 'text-neutral-400'}`}>
+        <span className={`text-[10px] font-semibold  ${isSuccess ? 'text-white' : 'text-neutral-400'}`}>
           {loading ? (
              <div className="w-5 h-5 border-[2px] border-white border-t-transparent rounded-full animate-spin"></div>
           ) : isSuccess ? successText : defaultText}

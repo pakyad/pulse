@@ -40,7 +40,7 @@ export default function BooksHub() {
       <section className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50">
         <BackButton />
         <div className="text-center">
-          <p className="text-[10px] font-black text-violet-500 uppercase tracking-[0.4em] mb-1">Knowledge Sync</p>
+          <p className="text-[10px] font-semibold text-violet-500 uppercase tracking-[0.4em] mb-1">Knowledge Sync</p>
           <h1 className="text-[20px] font-bold tracking-widest text-navy">Campus Library Hub</h1>
         </div>
         <div className="w-12 h-12 rounded-full bg-violet-50 flex items-center justify-center text-violet-500">
@@ -68,7 +68,7 @@ export default function BooksHub() {
               <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-110 transition-transform">
                  <QrCode size={48} />
               </div>
-              <p className="text-[10px] font-black tracking-widest uppercase opacity-60">Digital Pass</p>
+              <p className="text-[10px] font-semibold tracking-widest uppercase opacity-60">Digital Pass</p>
               <h3 className="text-[18px] font-bold leading-tight">Instant Library <br />Checkout</h3>
            </button>
            
@@ -77,7 +77,7 @@ export default function BooksHub() {
                  <Globe size={20} />
               </div>
               <div>
-                 <p className="text-[10px] font-black tracking-widest uppercase text-slate-300">Repository</p>
+                 <p className="text-[10px] font-semibold tracking-widest uppercase text-slate-300">Repository</p>
                  <h3 className="text-[18px] font-bold leading-tight">Research <br />Database</h3>
               </div>
            </button>
@@ -87,7 +87,7 @@ export default function BooksHub() {
         <section className="space-y-6">
            <div className="flex justify-between items-end">
               <h3 className="text-[18px] font-bold text-navy tracking-tight">Active Syncs</h3>
-              <button className="text-[11px] font-bold text-violet-500 uppercase tracking-widest">History</button>
+              <button className="text-[11px] font-bold text-violet-500 ">History</button>
            </div>
            
            <div className="space-y-4">
@@ -101,11 +101,11 @@ export default function BooksHub() {
                       <div className="flex items-center gap-2 mt-1">
                          <p className="text-[11px] font-medium text-slate-400">{book.author}</p>
                          <span className="w-1 h-1 rounded-full bg-slate-200" />
-                         <p className="text-[9px] font-black text-violet-500 uppercase tracking-widest">{book.type}</p>
+                         <p className="text-[9px] font-semibold text-violet-500 ">{book.type}</p>
                       </div>
                    </div>
                    <div className="text-right">
-                      <span className={`text-[9px] font-black px-3 py-1 rounded-full border border-slate-100 ${book.status.includes('DUE') ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50'}`}>
+                      <span className={`text-[9px] font-semibold px-3 py-1 rounded-full border border-slate-100 ${book.status.includes('DUE') ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50'}`}>
                          {book.status}
                       </span>
                    </div>
@@ -120,13 +120,13 @@ export default function BooksHub() {
            <div className="relative z-10 flex flex-col gap-6">
               <div className="flex items-center gap-3">
                  <Sparkles size={20} className="text-violet-400" />
-                 <p className="text-[11px] font-black tracking-widest uppercase text-white/40">Market Integration</p>
+                 <p className="text-[11px] font-semibold tracking-widest uppercase text-white/40">Market Integration</p>
               </div>
               <h2 className="text-[28px] font-bold tracking-widest leading-none">Recycle Your Knowledge.</h2>
               <p className="text-[14px] text-white/40 leading-relaxed font-medium">
                  List your used textbooks on the Pulse Marketplace and earn instant university credits.
               </p>
-              <button className="w-fit px-8 py-4 bg-white text-navy rounded-full text-[11px] font-black uppercase tracking-widest hover:bg-violet-500 hover:text-white transition-all">
+              <button className="w-fit px-8 py-4 bg-white text-navy rounded-full text-[11px] font-semibold hover:bg-violet-500 hover:text-white transition-all">
                  List Textbook
               </button>
            </div>

@@ -92,7 +92,7 @@ export default function AdminPrestigePage() {
          
          <div className="flex items-center gap-8 p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md">
             <div className="text-center">
-               <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Pending Syncs</p>
+               <p className="text-[10px] font-bold text-white/40  mb-1">Pending Syncs</p>
                <p className="text-[20px] font-bold">{campaigns.length}</p>
             </div>
             <div className="w-px h-10 bg-white/10" />
@@ -104,14 +104,14 @@ export default function AdminPrestigePage() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
          
          <div className="lg:col-span-12 space-y-4">
-            <h3 className="text-[14px] font-bold text-white/20 uppercase tracking-[0.2em] mb-8">Authorization Queue</h3>
+            <h3 className="text-[14px] font-bold text-white/20  mb-8">Authorization Queue</h3>
             
             {campaigns.length === 0 ? (
                <div className="py-32 text-center bg-white/5 rounded-[4rem] border border-white/5">
                   <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/10 mb-6">
                      <CheckCircle2 size={40} />
                   </div>
-                  <p className="text-[13px] font-bold text-white/20 uppercase tracking-[0.2em]">Queue Pulse Clean</p>
+                  <p className="text-[13px] font-bold text-white/20 ">Queue Pulse Clean</p>
                </div>
             ) : (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -128,23 +128,23 @@ export default function AdminPrestigePage() {
 
                        <div className="relative z-10 space-y-6">
                           <div className="flex justify-between items-start">
-                             <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border
+                             <div className={`px-3 py-1 rounded-full text-[9px] font-bold  border
                                ${camp.template_id === 'overture' ? 'bg-slate-900/10 text-blue-400 border-blue-400/20' : camp.template_id === 'spotlight' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-orange-500/10 text-orange-400 border-orange-400/20'}`}
                              >
                                 {camp.template_id}
                              </div>
                              <div className="flex items-center gap-2 text-white/20">
                                 <Clock size={12} />
-                                <span className="text-[9px] font-bold uppercase tracking-widest">{camp.schedule_slot || 'ASAP'}</span>
+                                <span className="text-[9px] font-bold ">{camp.schedule_slot || 'ASAP'}</span>
                              </div>
                           </div>
 
                           <div className="space-y-1">
                              <h4 className="text-[18px] font-bold tracking-widest text-white line-clamp-1">{camp.creative?.headline || camp.item?.title}</h4>
                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-accent uppercase tracking-widest">{camp.campus || 'Global'}</span>
+                                <span className="text-[10px] font-bold text-accent ">{camp.campus || 'Global'}</span>
                                 <span className="w-1 h-1 rounded-full bg-white/10" />
-                                <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest">{camp.item?.seller_name || 'MIIT Official'}</p>
+                                <p className="text-[11px] font-bold text-white/30 ">{camp.item?.seller_name || 'MIIT Official'}</p>
                              </div>
                           </div>
 
@@ -183,7 +183,7 @@ export default function AdminPrestigePage() {
             <motion.div 
                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                onClick={() => setSelectedCamp(null)}
-               className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+               className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" 
             />
             <motion.div 
                initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -195,7 +195,7 @@ export default function AdminPrestigePage() {
                   <div className="flex justify-between items-center">
                      <div className="space-y-1">
                         <h3 className="text-[20px] font-bold">Creative Audit</h3>
-                        <p className="text-[11px] font-bold text-white/30 uppercase tracking-widest">Protocol: {selectedCamp.template_id}</p>
+                        <p className="text-[11px] font-bold text-white/30 ">Protocol: {selectedCamp.template_id}</p>
                      </div>
                      <button onClick={() => setSelectedCamp(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
                         <XCircle size={20} />
@@ -206,11 +206,11 @@ export default function AdminPrestigePage() {
                      {/* AUDIT METADATA */}
                      <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                           <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Target Campus</p>
+                           <p className="text-[9px] font-bold text-white/30  mb-1">Target Campus</p>
                            <p className="text-[13px] font-bold text-white">{selectedCamp.campus || 'Trinity Core'}</p>
                         </div>
                         <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                           <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Launch Slot</p>
+                           <p className="text-[9px] font-bold text-white/30  mb-1">Launch Slot</p>
                            <p className="text-[13px] font-bold text-white">{selectedCamp.schedule_slot || 'Standard'}</p>
                         </div>
                      </div>
@@ -223,7 +223,7 @@ export default function AdminPrestigePage() {
                         </div>
                         <div className="flex items-center justify-between pt-6 border-t border-white/5">
                            <p className="text-[18px] font-bold text-white">RM {selectedCamp.item?.price?.toFixed(2)}</p>
-                           <div className="px-6 py-3 bg-accent text-[11px] font-bold rounded-full text-white uppercase tracking-widest shadow-md shadow-accent/20">
+                           <div className="px-6 py-3 bg-accent text-[11px] font-bold rounded-full text-white  shadow-md shadow-accent/20">
                               {selectedCamp.creative?.cta_text}
                            </div>
                         </div>
@@ -234,7 +234,7 @@ export default function AdminPrestigePage() {
                            <TrendingUp size={20} />
                         </div>
                         <div>
-                           <p className="text-[11px] font-bold text-blue-400 uppercase tracking-widest">Est. Campus Reach</p>
+                           <p className="text-[11px] font-bold text-blue-400 ">Est. Campus Reach</p>
                            <p className="text-[13px] font-bold text-white">850-1,200 Students</p>
                         </div>
                      </div>
@@ -243,7 +243,7 @@ export default function AdminPrestigePage() {
                   <div className="flex gap-4">
                      <button 
                         onClick={() => handleAuthorize(selectedCamp.id)}
-                        className="flex-1 h-16 bg-white text-navy rounded-full font-bold text-[13px] uppercase tracking-widest shadow-md shadow-white/10 active:scale-95 transition-all"
+                        className="flex-1 h-16 bg-white text-navy rounded-full font-bold text-[13px]  shadow-md shadow-white/10 active:scale-95 transition-all"
                      >
                         Authorize Sync
                      </button>

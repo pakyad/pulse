@@ -98,7 +98,7 @@ export default function FacilityBookingPage() {
             <BackButton />
             <div className="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-               <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Live Campus Data</span>
+               <span className="text-[10px] font-bold  text-emerald-600">Live Campus Data</span>
             </div>
          </div>
 
@@ -119,7 +119,7 @@ export default function FacilityBookingPage() {
                  <Radio size={20} />
               </div>
               <div>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Availability</p>
+                 <p className="text-[10px] font-bold text-slate-400  mb-1">Availability</p>
                  <p className="text-lg font-bold text-slate-800 leading-none">Open</p>
                  <p className="text-xs font-medium text-slate-400 mt-1.5">Ready for booking</p>
               </div>
@@ -130,7 +130,7 @@ export default function FacilityBookingPage() {
                  <Clock size={20} />
               </div>
               <div>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Current Occupancy</p>
+                 <p className="text-[10px] font-bold text-slate-400  mb-1">Current Occupancy</p>
                  <p className="text-lg font-bold text-slate-800 leading-none">{facility.occupancy}</p>
                  <p className="text-xs font-medium text-slate-400 mt-1.5">Live telemetry</p>
               </div>
@@ -168,7 +168,7 @@ export default function FacilityBookingPage() {
                        {selectedSlot?.type === 'WORKSTATION' ? <Monitor size={24} /> : <Cpu size={24} />}
                     </div>
                     <div>
-                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Desk Location</p>
+                       <p className="text-[10px] font-bold text-slate-400 ">Desk Location</p>
                        <h4 className="text-2xl font-bold text-slate-800">Pod {selectedSlotId}</h4>
                     </div>
                  </div>
@@ -185,7 +185,7 @@ export default function FacilityBookingPage() {
 
               {/* Duration Registry */}
               <div className="space-y-4">
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">How long do you need it?</p>
+                 <p className="text-[10px] font-bold text-slate-400  px-2">How long do you need it?</p>
                  <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
                    {['30m', '1h', '2h', '3h', '4h'].map((time) => (
                      <button 
@@ -238,16 +238,16 @@ export default function FacilityBookingPage() {
                  {isBooking ? (
                     <div className="flex items-center gap-3">
                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                       <span className="uppercase tracking-widest text-sm">Reserving...</span>
+                       <span className=" text-sm">Reserving...</span>
                     </div>
                  ) : bookingSuccess ? (
                     <>
                        <CheckCircle2 size={24} />
-                       <span className="uppercase tracking-widest text-sm">Reservation Secured</span>
+                       <span className=" text-sm">Reservation Secured</span>
                     </>
                  ) : (
                     <>
-                       <span className="uppercase tracking-widest text-sm font-bold">Book Pod {selectedSlotId}</span>
+                       <span className=" text-sm font-bold">Book Pod {selectedSlotId}</span>
                        <ArrowRight size={20} />
                     </>
                  )}

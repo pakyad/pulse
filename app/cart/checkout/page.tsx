@@ -157,7 +157,7 @@ export default function CartCheckoutPage() {
             {payStatus === 'processing' ? (
               <>
                 <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center">
-                  <span className="text-slate-900 font-black text-[13px] tracking-widest">FPX</span>
+                  <span className="text-slate-900 font-semibold text-[13px] tracking-widest">FPX</span>
                 </div>
                 <div className="space-y-1 text-center">
                   <p className="text-[15px] font-bold text-slate-900 tracking-tight">Almost there...</p>
@@ -165,13 +165,13 @@ export default function CartCheckoutPage() {
                 </div>
                 <div className="w-44 h-1 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-blue-600 rounded-full"
+                    className="h-full bg-slate-900 rounded-full"
                     initial={{ width: '0%' }}
                     animate={{ width: '90%' }}
                     transition={{ duration: 3, ease: 'easeInOut' }}
                   />
                 </div>
-                <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Processing Payment</p>
+                <p className="text-[10px] font-medium text-slate-300 ">Processing Payment</p>
               </>
             ) : (
               <>
@@ -250,7 +250,7 @@ export default function CartCheckoutPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                              <p className="text-[13px] font-bold text-slate-900 truncate">{item.title}</p>
-                             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">RM {item.price.toFixed(2)}</p>
+                             <p className="text-[10px] font-semibold text-slate-300 ">RM {item.price.toFixed(2)}</p>
                           </div>
                        </div>
 
@@ -258,13 +258,13 @@ export default function CartCheckoutPage() {
                        <div className="grid grid-cols-2 gap-2">
                           <button
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'SELF_COLLECT' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'SELF_COLLECT' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'SELF_COLLECT' ? 'bg-slate-900 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Package size={14} /> Self-Collect
                           </button>
                           <button
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'RUNNER' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'RUNNER' ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'RUNNER' ? 'bg-slate-900 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
                           >
                              <Truck size={14} /> Runner
                           </button>
@@ -273,7 +273,7 @@ export default function CartCheckoutPage() {
                        {/* Location Selection (If Runner) */}
                        {pref.type === 'RUNNER' && (
                           <div className="pt-2 space-y-2">
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Meeting Point</p>
+                             <p className="text-[10px] font-semibold text-slate-400  pl-1">Meeting Point</p>
                              <div className="grid grid-cols-2 gap-2">
                                 {hubs.map(hub => (
                                    <button
@@ -293,12 +293,12 @@ export default function CartCheckoutPage() {
                        {pref.type === 'RUNNER' && (
                           <div className="pt-2 space-y-3 animate-in fade-in slide-in-from-top-2 duration-500">
                              <div className="flex items-center gap-2 px-1">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inside Building (Optional)</p>
+                                <p className="text-[10px] font-semibold text-slate-400 ">Inside Building (Optional)</p>
                                 <div className="h-px flex-1 bg-slate-100" />
                              </div>
                              <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
-                                   <label className="text-[9px] font-black text-slate-300 uppercase tracking-tightest ml-1">Floor</label>
+                                   <label className="text-[9px] font-semibold text-slate-300 uppercase tracking-tightest ml-1">Floor</label>
                                    <input
                                       type="text"
                                       placeholder="e.g. Lvl 4"
@@ -308,7 +308,7 @@ export default function CartCheckoutPage() {
                                    />
                                 </div>
                                 <div className="space-y-1.5">
-                                   <label className="text-[9px] font-black text-slate-300 uppercase tracking-tightest ml-1">Room / Wing</label>
+                                   <label className="text-[9px] font-semibold text-slate-300 uppercase tracking-tightest ml-1">Room / Wing</label>
                                    <input
                                       type="text"
                                       placeholder="e.g. Lab 4.1"
@@ -336,9 +336,9 @@ export default function CartCheckoutPage() {
               <div className="flex items-center justify-between px-1">
                 <div className="space-y-0.5">
                   <p className="text-[11px] font-medium text-[#94a3b8]">Final Amount</p>
-                  <p className="text-[28px] font-black text-slate-900 tracking-tighter">RM {total.toFixed(2)}</p>
+                  <p className="text-[28px] font-semibold text-slate-900 tracking-tighter">RM {total.toFixed(2)}</p>
                 </div>
-                <div className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <div className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold  flex items-center gap-1.5">
                    <ShieldCheck size={12} />
                    Secure
                 </div>
@@ -351,7 +351,7 @@ export default function CartCheckoutPage() {
                      onClick={() => setSelectedBank(bank.id)}
                      className={`w-full h-16 px-5 rounded-2xl flex items-center justify-between border transition-all active:scale-95 ${
                        selectedBank === bank.id
-                       ? 'bg-white border-slate-900 shadow-md shadow-slate-900/5 ring-1 ring-slate-900'
+                       ? 'bg-white border-slate-900 shadow-md shadow-slate-900/10 ring-1 ring-slate-900'
                        : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-slate-200'
                      }`}
                    >
@@ -365,7 +365,7 @@ export default function CartCheckoutPage() {
                      </div>
 
                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedBank === bank.id ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'
+                        selectedBank === bank.id ? 'bg-slate-900 border-blue-600' : 'bg-white border-slate-200'
                      }`}>
                         {selectedBank === bank.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                      </div>
@@ -381,7 +381,7 @@ export default function CartCheckoutPage() {
         <button
           onClick={() => step === 1 ? setStep(2) : handlePay()}
           disabled={(step === 1 && !canProceedStep1) || (step === 2 && !canPay)}
-          className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-md shadow-blue-600/20"
+          className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-md shadow-slate-900/10"
         >
           {step === 1 ? 'Review Payment' : `Pay RM ${total.toFixed(2)}`}
           <ArrowRight size={18} />

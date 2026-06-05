@@ -54,13 +54,13 @@ export default function PulseLine({ state }: PulseLineProps) {
                 {isActive ? (
                   <Check size={20} className="text-white" strokeWidth={3} />
                 ) : (
-                  <step.icon size={20} className="text-black/10" />
+                  <step.icon size={20} className="text-slate-900/10" />
                 )}
               </motion.div>
 
               {/* Label (Micro-Utility Typography) */}
               <div className="text-center">
-                <p className={`text-[9px] font-black uppercase tracking-[0.2em] transition-colors ${isActive ? 'text-black' : 'text-black/10'}`}>
+                <p className={`text-[9px] font-semibold  transition-colors ${isActive ? 'text-slate-900' : 'text-slate-900/10'}`}>
                   {step.label}
                 </p>
                 {isCurrent && (

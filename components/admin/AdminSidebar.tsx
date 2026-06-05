@@ -119,8 +119,8 @@ export default function AdminSidebar({ activeModule, setActiveModule }: AdminSid
       
       {/* Institutional Branding */}
       <div className="p-8 pt-16 mb-6">
-        <h2 className="text-black font-black text-2xl tracking-tighter uppercase italic">Pulse<span className="text-[#00927C]">.</span></h2>
-        <p className="text-[9px] font-black uppercase tracking-[0.4em] text-black/20 mt-1">Institutional Root</p>
+        <h2 className="text-slate-900 font-semibold text-2xl tracking-tighter uppercase italic">Pulse<span className="text-[#00927C]">.</span></h2>
+        <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-slate-900/20 mt-1">Institutional Root</p>
       </div>
 
       {/* Synchronized Navigation */}
@@ -134,19 +134,19 @@ export default function AdminSidebar({ activeModule, setActiveModule }: AdminSid
               <button
                 onClick={() => toggleSection(section.id)}
                 className={`w-full flex items-center justify-between p-3.5 rounded-[12px] transition-all group ${
-                  isExpanded || hasActiveSub ? 'bg-black/5 text-black' : 'text-black/40 hover:text-black hover:bg-black/[0.02]'
+                  isExpanded || hasActiveSub ? 'bg-slate-900/5 text-slate-900' : 'text-slate-900/40 hover:text-slate-900 hover:bg-slate-900/[0.02]'
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <section.icon size={18} strokeWidth={2.5} className={isExpanded || hasActiveSub ? 'text-[#00927C]' : 'text-black/20'} />
-                  <span className="text-[12px] font-black uppercase tracking-tight">
+                  <section.icon size={18} strokeWidth={2.5} className={isExpanded || hasActiveSub ? 'text-[#00927C]' : 'text-slate-900/20'} />
+                  <span className="text-[12px] font-semibold uppercase tracking-tight">
                     {section.label}
                   </span>
                 </div>
                 {isExpanded ? (
-                  <ChevronDown size={14} className="text-black/20" />
+                  <ChevronDown size={14} className="text-slate-900/20" />
                 ) : (
-                  <ChevronRight size={14} className="text-black/10 group-hover:text-black/30" />
+                  <ChevronRight size={14} className="text-slate-900/10 group-hover:text-slate-900/30" />
                 )}
               </button>
 
@@ -164,10 +164,10 @@ export default function AdminSidebar({ activeModule, setActiveModule }: AdminSid
                         <button
                           key={item.id}
                           onClick={() => setActiveModule(item.id)}
-                          className={`w-full text-left p-2.5 rounded-[10px] text-[11px] font-black uppercase tracking-widest transition-all ${
+                          className={`w-full text-left p-2.5 rounded-[10px] text-[11px] font-semibold transition-all ${
                             activeModule === item.id 
                             ? 'text-[#00927C] bg-[#00927C]/5' 
-                            : 'text-black/30 hover:text-black'
+                            : 'text-slate-900/30 hover:text-slate-900'
                           }`}
                         >
                           {item.label}
@@ -186,10 +186,10 @@ export default function AdminSidebar({ activeModule, setActiveModule }: AdminSid
       <div className="p-8 border-t-[0.5px] border-[#F2F2F7]">
         <button 
           onClick={handleExit}
-          className="flex items-center gap-4 w-full p-4 rounded-[16px] bg-black text-white hover:bg-black/90 transition-all group"
+          className="flex items-center gap-4 w-full p-4 rounded-[16px] bg-slate-900 text-white hover:bg-slate-900/90 transition-all group"
         >
           <LogOut size={16} className="text-white/40 group-hover:text-white transition-colors" />
-          <span className="text-[11px] font-black uppercase tracking-[0.2em]">Terminate</span>
+          <span className="text-[11px] font-semibold ">Terminate</span>
         </button>
       </div>
     </aside>

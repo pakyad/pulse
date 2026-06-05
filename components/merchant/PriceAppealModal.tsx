@@ -62,7 +62,7 @@ export default function PriceAppealModal({ isOpen, onClose, item }: PriceAppealM
             <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-red-50 rounded-2xl flex items-center justify-center text-red-500"><ShieldAlert size={20} /></div>
-                  <h3 className="text-[17px] font-black text-slate-900 uppercase tracking-tight">Institutional Directive</h3>
+                  <h3 className="text-[17px] font-semibold text-slate-900 uppercase tracking-tight">Institutional Directive</h3>
                </div>
                <button onClick={onClose} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X size={20} /></button>
             </div>
@@ -74,10 +74,10 @@ export default function PriceAppealModal({ isOpen, onClose, item }: PriceAppealM
                        <CheckCircle2 size={40} />
                     </div>
                     <div className="space-y-2">
-                       <h4 className="text-[20px] font-black tracking-tight">Appeal Registered</h4>
+                       <h4 className="text-[20px] font-semibold tracking-tight">Appeal Registered</h4>
                        <p className="text-[14px] font-medium text-slate-400">Your justification has been queued for administrative audit. The asset remains locked until a decision is reached.</p>
                     </div>
-                    <button onClick={onClose} className="w-full h-14 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-md shadow-black/10">Close Terminal</button>
+                    <button onClick={onClose} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-semibold text-[11px]  transition-all hover:scale-105 active:scale-95 shadow-md shadow-slate-900/10">Close Terminal</button>
                  </div>
                ) : (
                  <>
@@ -87,12 +87,12 @@ export default function PriceAppealModal({ isOpen, onClose, item }: PriceAppealM
                       </p>
                       <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3">
                          <AlertCircle size={16} className="text-red-500 mt-0.5" />
-                         <p className="text-[11px] font-bold text-red-600/80 uppercase tracking-widest leading-relaxed">The asset is currently hidden from the marketplace registry.</p>
+                         <p className="text-[11px] font-bold text-red-600/80  leading-relaxed">The asset is currently hidden from the marketplace registry.</p>
                       </div>
                    </div>
 
                    <div className="space-y-4">
-                      <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Exemption Justification</label>
+                      <label className="text-[10px] font-semibold text-slate-300  px-1">Exemption Justification</label>
                       <textarea 
                         value={justification}
                         onChange={(e) => setJustification(e.target.value)}
@@ -104,7 +104,7 @@ export default function PriceAppealModal({ isOpen, onClose, item }: PriceAppealM
                    <button 
                      onClick={handleSubmit}
                      disabled={isSubmitting || justification.length < 10}
-                     className="w-full h-16 bg-black text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] shadow-md shadow-black/10 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-20 flex items-center justify-center gap-3"
+                     className="w-full h-16 bg-slate-900 text-white rounded-2xl font-semibold text-[13px]  shadow-md shadow-slate-900/10 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-20 flex items-center justify-center gap-3"
                    >
                       {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : 'Submit Directive Appeal'}
                    </button>

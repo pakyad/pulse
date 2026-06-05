@@ -90,7 +90,7 @@ export default function MobileMerchant({
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      className={`flex-1 py-2.5 rounded-xl text-[10px] font-semibold transition-all ${
                         activeTab === tab 
                           ? 'bg-white text-slate-900 shadow-sm' 
                           : 'text-[#94a3b8] opacity-50 hover:opacity-100'
@@ -149,7 +149,7 @@ export default function MobileMerchant({
                             {o.status === 'PENDING_VENDOR' ? (
                               <button 
                                 onClick={() => handleAcceptOrder(o.id)}
-                                className="flex-1 h-11 bg-slate-900 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-all shadow-sm shadow-slate-900/5"
+                                className="flex-1 h-11 bg-slate-900 text-white rounded-xl text-[11px] font-bold  active:scale-95 transition-all shadow-sm shadow-slate-900/10"
                               >
                                  Accept Order
                               </button>
@@ -159,7 +159,7 @@ export default function MobileMerchant({
                               </div>
                             ) : (
                               <div className="flex-1 h-11 bg-amber-50 rounded-xl flex items-center justify-center border border-amber-100">
-                                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-1.5">
+                                <p className="text-[10px] font-bold text-amber-600  flex items-center gap-1.5">
                                   <Bike size={14} />
                                   Waiting for runner
                                 </p>
@@ -195,19 +195,19 @@ export default function MobileMerchant({
                             </div>
                             <div>
                                <p className="text-[14px] font-bold text-slate-900">{o.customer_name || 'Student'}</p>
-                               <p className="text-[10px] font-medium text-[#94a3b8] uppercase tracking-widest">Order #{o.id.slice(-4).toUpperCase()}</p>
+                               <p className="text-[10px] font-medium text-[#94a3b8] ">Order #{o.id.slice(-4).toUpperCase()}</p>
                             </div>
                           </div>
                           <div className="text-right">
                              <p className="text-[14px] font-bold text-slate-900">RM {o.total?.toFixed(2)}</p>
-                             <p className={`text-[9px] font-black uppercase tracking-widest ${o.status === 'CANCELLED' ? 'text-red-500' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'text-slate-900' : 'text-emerald-500'}`}>
+                             <p className={`text-[9px] font-semibold ${o.status === 'CANCELLED' ? 'text-red-500' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'text-slate-900' : 'text-emerald-500'}`}>
                                 {o.status.replace(/_/g, ' ')}
                              </p>
                           </div>
                         </div>
                         {['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) && (
                           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-50 flex items-center justify-between">
-                             <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest flex items-center gap-2">
+                             <p className="text-[10px] font-bold text-[#94a3b8]  flex items-center gap-2">
                                 <User size={12} />
                                 With {o.runner_name || 'Runner'}
                              </p>
@@ -225,16 +225,16 @@ export default function MobileMerchant({
          {/* ── SECTION: QUICK STATS ── */}
             <div className="grid grid-cols-2 gap-3 mt-6">
                <div className="p-5 bg-white border border-slate-100 rounded-2xl flex flex-col justify-between shadow-sm shadow-slate-200/50">
-                  <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Total Earnings</p>
+                  <p className="text-[10px] font-bold text-[#94a3b8] ">Total Earnings</p>
                   <div className="mt-4 flex items-baseline gap-1">
                      <span className="text-[12px] font-bold text-slate-400">RM</span>
-                     <span className="text-[24px] font-black text-slate-900 tracking-tight">{revenue.toFixed(2)}</span>
+                     <span className="text-[24px] font-semibold text-slate-900 tracking-tight">{revenue.toFixed(2)}</span>
                   </div>
                </div>
                <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col justify-between">
-                  <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-widest">Orders To Do</p>
+                  <p className="text-[10px] font-bold text-[#94a3b8] ">Orders To Do</p>
                   <div className="mt-4 flex items-baseline gap-1.5">
-                     <span className="text-[24px] font-black text-slate-900 tracking-tight">{activeOrdersCount}</span>
+                     <span className="text-[24px] font-semibold text-slate-900 tracking-tight">{activeOrdersCount}</span>
                      <span className="text-[12px] font-bold text-slate-400">Active</span>
                   </div>
                </div>
@@ -245,7 +245,7 @@ export default function MobileMerchant({
            <section className="space-y-4">
               <div className="flex items-center gap-2 px-1">
                  <ShieldAlert size={14} className="text-amber-500" />
-                 <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest leading-none">Inventory Attention</p>
+                 <p className="text-[10px] font-semibold text-amber-500  leading-none">Inventory Attention</p>
               </div>
               <div className="bg-white border border-slate-50 rounded-2xl overflow-hidden shadow-sm divide-y divide-slate-50">
                  {topItems.filter((i: any) => (i.stock_count ?? 99) <= 5).map((item: any) => (
@@ -258,17 +258,17 @@ export default function MobileMerchant({
                              <p className="text-[13px] font-bold text-slate-900 truncate max-w-[120px]">{item.title}</p>
                              <button 
                                 onClick={() => setEditingItem(item)}
-                                className="mt-2 h-8 px-4 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center uppercase tracking-widest transition-all shadow-sm shadow-slate-900/5 active:scale-95"
+                                className="mt-2 h-8 px-4 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center  transition-all shadow-sm shadow-slate-900/10 active:scale-95"
                              >
                                 Restock Item
                              </button>
                           </div>
                        </div>
                        <div className="text-right">
-                          <p className={`text-[14px] font-black leading-none ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                          <p className={`text-[14px] font-semibold leading-none ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
                              {item.stock_count <= 0 ? 'EMPTY' : item.stock_count}
                           </p>
-                          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Units</p>
+                          <p className="text-[9px] font-semibold text-slate-300  mt-1">Units</p>
                        </div>
                     </div>
                  ))}

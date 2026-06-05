@@ -35,7 +35,7 @@ export default function MedHub() {
       <section className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50">
         <BackButton />
         <div className="text-center">
-          <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Health & Wellness</p>
+          <p className="text-[10px] font-bold text-emerald-500  mb-1">Health & Wellness</p>
           <h1 className="text-[18px] font-bold tracking-widest text-navy">Campus Clinic</h1>
         </div>
         <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
@@ -68,7 +68,7 @@ export default function MedHub() {
            <div className="relative z-10 space-y-8">
               <div className="flex justify-between items-start">
                  <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">MIIT Campus Clinic</p>
+                    <p className="text-[10px] font-bold text-white/40 ">MIIT Campus Clinic</p>
                     <h2 className="text-2xl font-bold tracking-tight">Wait Time</h2>
                  </div>
                  <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center">
@@ -77,9 +77,9 @@ export default function MedHub() {
               </div>
 
               <div className="flex items-end gap-6">
-                 <p className="text-[64px] font-black tracking-tighter leading-none text-white">12<span className="text-2xl text-white/20 ml-2">min</span></p>
+                 <p className="text-[64px] font-semibold tracking-tighter leading-none text-white">12<span className="text-2xl text-white/20 ml-2">min</span></p>
                  <div className="pb-2 space-y-1">
-                    <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Est. Wait</p>
+                    <p className="text-[10px] font-bold text-emerald-400 ">Est. Wait</p>
                     <div className="flex items-center gap-2">
                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                        <span className="text-[10px] font-medium text-white/40 italic">Clinic is quiet right now</span>
@@ -89,11 +89,11 @@ export default function MedHub() {
 
               <div className="grid grid-cols-2 gap-4 pt-4">
                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">On-duty Doctors</p>
+                    <p className="text-[10px] font-bold text-white/30  mb-1">On-duty Doctors</p>
                     <p className="text-xl font-bold">04</p>
                  </div>
                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Pharmacy</p>
+                    <p className="text-[10px] font-bold text-white/30  mb-1">Pharmacy</p>
                     <p className="text-xl font-bold">OPEN</p>
                  </div>
               </div>
@@ -119,7 +119,7 @@ export default function MedHub() {
                 </div>
                 <div>
                    <p className="text-[15px] font-bold text-navy tracking-widest leading-none mb-1">{item.label}</p>
-                   <p className="text-[11px] font-medium text-slate-400 uppercase tracking-widest">{item.sub}</p>
+                   <p className="text-[11px] font-medium text-slate-400 ">{item.sub}</p>
                 </div>
              </motion.button>
            ))}
@@ -150,7 +150,7 @@ export default function MedHub() {
       {/* FLOATING ACTION PILL */}
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
         <button className="bg-navy text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-md shadow-navy/40 hover:scale-105 active:scale-95 transition-all">
-          <span className="text-[11px] font-black uppercase tracking-widest">Connect with Medic</span>
+          <span className="text-[11px] font-semibold">Connect with Medic</span>
           <ArrowRight size={16} className="text-emerald-400" />
         </button>
       </div>

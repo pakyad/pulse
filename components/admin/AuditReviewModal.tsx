@@ -53,7 +53,7 @@ export default function AuditReviewModal({ item, limit, isRegulated, onClose, on
                  </div>
                  <div>
                     <h2 className={`text-[17px] font-bold ${accentColor} tracking-tight uppercase`}>{labelText}</h2>
-                    <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">{subLabelText}</p>
+                    <p className="text-[10px] font-medium text-slate-400  leading-none mt-1">{subLabelText}</p>
                  </div>
               </div>
               <button onClick={onClose} className="p-2 hover:bg-slate-50 text-slate-300 hover:text-slate-900 rounded-full transition-all">
@@ -69,7 +69,7 @@ export default function AuditReviewModal({ item, limit, isRegulated, onClose, on
                   {item.image_url && <img src={item.image_url} className="w-full h-full object-cover" />}
                </div>
                <div>
-                  <p className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-1">Asset Identity</p>
+                  <p className="text-[9px] font-medium text-slate-400  mb-1">Asset Identity</p>
                   <h3 className="text-[17px] font-bold text-slate-900 leading-tight mb-1">{item.title}</h3>
                   <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-tight">{item.seller_name}</p>
                </div>
@@ -78,11 +78,11 @@ export default function AuditReviewModal({ item, limit, isRegulated, onClose, on
             {/* Violation Context */}
             <div className="grid grid-cols-2 gap-10">
                <div>
-                  <p className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-2">Market Price</p>
+                  <p className="text-[9px] font-medium text-slate-400  mb-2">Market Price</p>
                   <p className={`text-[26px] font-bold ${isRegulated ? 'text-red-500' : 'text-amber-500'} tracking-tight`}>RM {item.price.toFixed(2)}</p>
                </div>
                <div>
-                  <p className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-2">{isRegulated ? 'Inst. Ceiling' : 'Adv. Ceiling'}</p>
+                  <p className="text-[9px] font-medium text-slate-400  mb-2">{isRegulated ? 'Inst. Ceiling' : 'Adv. Ceiling'}</p>
                   <p className={`text-[26px] font-bold ${isRegulated ? 'text-emerald-600' : 'text-slate-400'} tracking-tight`}>RM {limit.toFixed(2)}</p>
                </div>
             </div>
@@ -90,7 +90,7 @@ export default function AuditReviewModal({ item, limit, isRegulated, onClose, on
             <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100/50">
                <div className={`flex items-center gap-3 ${iconColor} mb-3`}>
                   <AlertCircle size={15} />
-                  <p className="text-[10px] font-bold uppercase tracking-widest">{isRegulated ? 'Breach Intensity' : 'Market Offset'}</p>
+                  <p className="text-[10px] font-bold ">{isRegulated ? 'Breach Intensity' : 'Market Offset'}</p>
                </div>
                <p className="text-[14px] font-semibold text-slate-700 leading-relaxed">
                   Asset exceeds category {isRegulated ? 'hard ceiling' : 'suggested limit'} by <span className={iconColor}>RM {violationAmount.toFixed(2)}</span> ({violationPercent.toFixed(1)}%). {isRegulated ? 'Continuous violation may result in institutional blacklisting.' : 'This listing is permitted but monitored for predatory spikes.'}
@@ -101,13 +101,13 @@ export default function AuditReviewModal({ item, limit, isRegulated, onClose, on
             <div className="grid grid-cols-2 gap-4 pt-4">
                <button 
                   onClick={() => onDismiss(item.id)}
-                  className="h-14 bg-white border border-slate-100 text-slate-400 rounded-2xl font-bold text-[11px] uppercase tracking-widest hover:bg-slate-50 hover:text-slate-900 transition-all flex items-center justify-center gap-2"
+                  className="h-14 bg-white border border-slate-100 text-slate-400 rounded-2xl font-bold text-[11px]  hover:bg-slate-50 hover:text-slate-900 transition-all flex items-center justify-center gap-2"
                >
                   <CheckCircle size={18} /> Dismiss
                </button>
                <button 
                   onClick={() => onSuspend(item.id)}
-                  className="h-14 bg-slate-900 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest hover:bg-black transition-all shadow-md shadow-slate-900/10 flex items-center justify-center gap-2"
+                  className="h-14 bg-slate-900 text-white rounded-2xl font-bold text-[11px]  hover:bg-slate-900 transition-all shadow-md shadow-slate-900/10 flex items-center justify-center gap-2"
                >
                   <Trash2 size={18} /> Suspend Asset
                </button>

@@ -92,14 +92,14 @@ export default function ApprovalList({ type }: ApprovalListProps) {
       {/* List Header (Institutional) */}
       <div className="flex justify-between items-end mb-12">
         <div className="flex items-center gap-5">
-          <div className="w-14 h-14 rounded-[16px] bg-black/5 flex items-center justify-center text-black/40">
+          <div className="w-14 h-14 rounded-[16px] bg-slate-900/5 flex items-center justify-center text-slate-900/40">
             {type === 'merchants' ? <Store size={24} /> : 
              type === 'runners' ? <Bike size={24} /> : 
              <User size={24} />}
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-1">Authorization Hub</p>
-            <h3 className="text-[20px] font-black text-black uppercase tracking-tighter leading-none">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-900/20 mb-1">Authorization Hub</p>
+            <h3 className="text-[20px] font-semibold text-slate-900 uppercase tracking-tighter leading-none">
               {type === 'merchants' ? 'Merchant Registry' : 
                type === 'runners' ? 'Runner Registry' : 
                type === 'students' ? 'Student Registry' : 'Official Clubs'}
@@ -108,15 +108,15 @@ export default function ApprovalList({ type }: ApprovalListProps) {
         </div>
         
         <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-[16px] border-[0.5px] border-[#F2F2F7]">
-           <Search size={16} className="text-black/10" />
-           <input type="text" placeholder="Filter node..." className="bg-transparent border-none outline-none text-[11px] font-black uppercase tracking-widest text-black/40 w-48 placeholder:text-black/10" />
+           <Search size={16} className="text-slate-900/10" />
+           <input type="text" placeholder="Filter node..." className="bg-transparent border-none outline-none text-[11px] font-semibold text-slate-900/40 w-48 placeholder:text-slate-900/10" />
         </div>
       </div>
 
       {items.length === 0 ? (
         <div className="h-64 w-full border-[0.5px] border-dashed border-black/10 rounded-[22px] flex flex-col items-center justify-center text-center p-12">
-           <p className="text-black/20 font-black text-[12px] uppercase tracking-[0.3em] mb-2">Registry Silent</p>
-           <p className="text-black/10 text-[10px] font-black uppercase tracking-widest italic">No pending {type} authorizations at this timestamp.</p>
+           <p className="text-slate-900/20 font-semibold text-[12px] uppercase tracking-[0.3em] mb-2">Registry Silent</p>
+           <p className="text-slate-900/10 text-[10px] font-semibold italic">No pending {type} authorizations at this timestamp.</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -139,13 +139,13 @@ export default function ApprovalList({ type }: ApprovalListProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <h4 className="text-black font-black text-[16px] uppercase tracking-tight leading-none">{item.full_name || 'Anonymous Node'}</h4>
+                    <h4 className="text-slate-900 font-semibold text-[16px] uppercase tracking-tight leading-none">{item.full_name || 'Anonymous Node'}</h4>
                     <div className="flex items-center gap-4">
-                      <p className="text-black/30 text-[11px] font-black uppercase tracking-widest italic">{item.email}</p>
+                      <p className="text-slate-900/30 text-[11px] font-semibold italic">{item.email}</p>
                       {item.matric_no && (
                         <>
-                          <div className="w-1 h-1 rounded-full bg-black/10" />
-                          <p className="text-black font-black text-[11px] tracking-widest uppercase opacity-40">{item.matric_no}</p>
+                          <div className="w-1 h-1 rounded-full bg-slate-900/10" />
+                          <p className="text-slate-900 font-semibold text-[11px] tracking-widest uppercase opacity-40">{item.matric_no}</p>
                         </>
                       )}
                     </div>
@@ -155,14 +155,14 @@ export default function ApprovalList({ type }: ApprovalListProps) {
                 <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                   <button 
                     onClick={() => handleAction(item.id, 'approve')}
-                    className="h-12 px-8 rounded-[16px] bg-[#00927C] text-white font-black text-[11px] hover:bg-[#007A68] transition-all active:scale-95 flex items-center gap-3 uppercase tracking-widest"
+                    className="h-12 px-8 rounded-[16px] bg-[#00927C] text-white font-semibold text-[11px] hover:bg-[#007A68] transition-all active:scale-95 flex items-center gap-3 "
                   >
                     <Check size={16} strokeWidth={3} />
                     Authorize
                   </button>
                   <button 
                     onClick={() => handleAction(item.id, 'reject')}
-                    className="h-12 w-12 rounded-[16px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-center text-black/20 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
+                    className="h-12 w-12 rounded-[16px] bg-white border-[0.5px] border-[#F2F2F7] flex items-center justify-center text-slate-900/20 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
                   >
                     <X size={18} />
                   </button>

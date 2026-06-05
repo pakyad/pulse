@@ -48,7 +48,7 @@ const AnnouncementCarousel = () => {
     <section className="space-y-6">
       <div className="flex justify-between items-center px-4">
         <h2 className="text-xl font-bold text-navy tracking-tight">Official Announcement</h2>
-        <button className="p-2 hover:bg-black/5 rounded-full transition-colors">
+        <button className="p-2 hover:bg-slate-900/5 rounded-full transition-colors">
           <ChevronRight size={20} className="text-navy" />
         </button>
       </div>
@@ -64,7 +64,7 @@ const AnnouncementCarousel = () => {
               className={`w-40 h-56 rounded-2xl p-4 flex flex-col justify-between shadow-sm border border-black/5 bg-linear-to-br ${item.gradient} relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer`}
             >
               <div className="space-y-3">
-                <span className={`text-[10px] font-black tracking-widest ${item.accent} opacity-60 uppercase`}>
+                <span className={`text-[10px] font-semibold tracking-widest ${item.accent} opacity-60 uppercase`}>
                   {item.category}
                 </span>
                 <h3 className="text-sm font-bold text-navy/80 leading-snug line-clamp-4">
@@ -76,7 +76,7 @@ const AnnouncementCarousel = () => {
                 <span className="text-[10px] font-bold text-navy/30">
                   {item.date}
                 </span>
-                <div className={`w-8 h-8 rounded-xl ${item.color} shadow-md shadow-black/5`} />
+                <div className={`w-8 h-8 rounded-xl ${item.color} shadow-md shadow-slate-900/10`} />
               </div>
 
               {/* Subtle Background Accent */}

@@ -201,7 +201,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
           >
             <div className="flex items-center gap-2 mb-4 text-amber-400">
                <Zap size={16} />
-               <p className="text-[10px] font-black uppercase tracking-widest">Opportunity Detected</p>
+               <p className="text-[10px] font-semibold">Opportunity Detected</p>
             </div>
             <h3 className="text-[16px] font-bold tracking-tight mb-2">Demand is peaking for this asset.</h3>
             <p className="text-[12px] text-white/60 font-medium leading-relaxed mb-6">
@@ -209,11 +209,11 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             </p>
             <div className="grid grid-cols-2 gap-3">
                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Recommendation</p>
+                  <p className="text-[9px] font-semibold text-white/40  mb-1">Recommendation</p>
                   <p className="text-[12px] font-bold italic text-white/90">Restock +10 units</p>
                </div>
                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Pricing Health</p>
+                  <p className="text-[9px] font-semibold text-white/40  mb-1">Pricing Health</p>
                   <p className="text-[12px] font-bold text-emerald-400">Competitive</p>
                </div>
             </div>
@@ -273,7 +273,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                   className="shrink-0 w-24 h-24 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center gap-1.5 hover:bg-slate-100 transition-all"
                 >
                   <Plus size={18} className="text-[#94a3b8]" />
-                  <span className="text-[9px] font-bold text-[#94a3b8] uppercase tracking-widest">Add</span>
+                  <span className="text-[9px] font-bold text-[#94a3b8] ">Add</span>
                 </button>
                 <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
                 {images.map((img, i) => (

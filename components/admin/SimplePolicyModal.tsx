@@ -43,17 +43,17 @@ export default function SimplePolicyModal({ isOpen, onClose, onSave }: SimplePol
 
           <div className="space-y-6 mb-10">
             <div>
-              <label className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] block mb-2 text-center">Governance Tier</label>
+              <label className="text-[9px] font-medium text-slate-400  block mb-2 text-center">Governance Tier</label>
               <div className="flex gap-2 p-1 bg-slate-50 rounded-xl">
                  <button 
                   onClick={() => setGovernanceType('REGULATED')}
-                  className={`flex-1 h-9 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${governanceType === 'REGULATED' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
+                  className={`flex-1 h-9 rounded-lg text-[10px] font-semibold transition-all ${governanceType === 'REGULATED' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
                  >
                     Regulated
                  </button>
                  <button 
                   onClick={() => setGovernanceType('PREMIUM')}
-                  className={`flex-1 h-9 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${governanceType === 'PREMIUM' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
+                  className={`flex-1 h-9 rounded-lg text-[10px] font-semibold transition-all ${governanceType === 'PREMIUM' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
                  >
                     Premium
                  </button>
@@ -61,7 +61,7 @@ export default function SimplePolicyModal({ isOpen, onClose, onSave }: SimplePol
             </div>
 
             <div>
-              <label className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] block mb-2 text-center">Target Category</label>
+              <label className="text-[9px] font-medium text-slate-400  block mb-2 text-center">Target Category</label>
               <input 
                 type="text" 
                 value={category}
@@ -71,7 +71,7 @@ export default function SimplePolicyModal({ isOpen, onClose, onSave }: SimplePol
               />
             </div>
             <div>
-              <label className="text-[9px] font-medium text-slate-400 uppercase tracking-[0.2em] block mb-2 text-center">Price Ceiling (RM)</label>
+              <label className="text-[9px] font-medium text-slate-400  block mb-2 text-center">Price Ceiling (RM)</label>
               <input 
                 type="number" 
                 value={price}
@@ -89,7 +89,7 @@ export default function SimplePolicyModal({ isOpen, onClose, onSave }: SimplePol
                 onClose();
               }
             }}
-            className="w-full h-14 bg-slate-900 text-white rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-black transition-all active:scale-95"
+            className="w-full h-14 bg-slate-900 text-white rounded-xl font-bold text-[11px]  hover:bg-slate-900 transition-all active:scale-95"
           >
             SAVE POLICY
           </button>

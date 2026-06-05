@@ -93,7 +93,7 @@ export default function RunnerOnboarding() {
               <div className="flex flex-wrap gap-2">
                 {TRANSPORT.map(t => (
                   <button key={t} onClick={() => update('transport', t)}
-                    className={`h-12 px-5 rounded-[16px] text-[13px] font-bold transition-all active:scale-95 ${form.transport === t ? 'bg-indigo-500 text-white shadow-sm border-transparent' : 'bg-white text-slate-400 border border-slate-100 hover:border-slate-200'}`}>
+                    className={`h-12 px-5 rounded-[16px] text-[13px] font-semibold transition-all active:scale-95 border ${form.transport === t ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'}`}>
                     {t}
                   </button>
                 ))}
@@ -105,9 +105,9 @@ export default function RunnerOnboarding() {
               <div className="flex flex-col gap-2">
                 {LOCATIONS.map(loc => (
                   <button key={loc} onClick={() => update('location', loc)}
-                    className={`h-14 px-5 rounded-[16px] text-[14px] font-bold transition-all active:scale-95 flex items-center justify-between ${form.location === loc ? 'bg-indigo-500 text-white shadow-sm border-transparent' : 'bg-white text-slate-400 border border-slate-100 hover:border-slate-200'}`}>
+                    className={`h-14 px-5 rounded-[16px] text-[14px] font-semibold transition-all active:scale-95 flex items-center justify-between border ${form.location === loc ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'}`}>
                     {loc}
-                    {form.location === loc && <div className="w-2 h-2 rounded-full bg-white" />}
+                    {form.location === loc && <div className="w-2 h-2 rounded-full bg-slate-900" />}
                   </button>
                 ))}
               </div>
@@ -147,7 +147,7 @@ export default function RunnerOnboarding() {
         {/* ── SUBMIT BUTTON ── */}
         <div className="pt-4 pb-12">
           <button onClick={handleSubmit} disabled={!canSubmit || submitting}
-            className={`w-full h-16 rounded-[20px] flex items-center justify-center gap-2 font-bold text-[15px] transition-all ${canSubmit ? 'bg-emerald-100 text-emerald-800 active:scale-95 shadow-sm hover:bg-emerald-200' : 'bg-slate-50 text-slate-300 border border-slate-100'}`}>
+            className={`w-full h-16 rounded-[20px] flex items-center justify-center gap-2 font-semibold text-[15px] transition-all ${canSubmit ? 'bg-slate-900 text-white active:scale-95 shadow-md hover:bg-slate-800' : 'bg-slate-50 text-slate-300 border border-slate-100'}`}>
             {submitting ? <Loader2 size={20} className="animate-spin" /> : 'Submit Application'}
             {!submitting && <ArrowRight size={18} />}
           </button>

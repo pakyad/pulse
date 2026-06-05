@@ -40,8 +40,8 @@ export default function DesktopMerchant({
         
         {/* Header */}
         <div className="px-6 py-8 flex items-center gap-2">
-          <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-             <span className="text-white font-black text-[14px]">P</span>
+          <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+             <span className="text-white font-semibold text-[14px]">P</span>
           </div>
           <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
         </div>
@@ -208,7 +208,7 @@ export default function DesktopMerchant({
                                <p className="text-[14px] font-bold text-slate-900">{o.title}</p>
                                <div className="flex items-center gap-2 mt-0.5">
                                  <VoxelStatus status={o.status} size={10} />
-                                 <p className="text-[10px] text-slate-900 font-black uppercase tracking-widest leading-none">
+                                 <p className="text-[10px] text-slate-900 font-semibold leading-none">
                                    {o.status.replace(/_/g, ' ')}
                                  </p>
                                </div>
@@ -284,7 +284,7 @@ export default function DesktopMerchant({
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                   <ShieldAlert size={14} className="text-amber-500" />
-                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Inventory Attention</p>
+                  <p className="text-[11px] font-bold text-slate-400 ">Inventory Attention</p>
                 </div>
                 
                 {/* 🔍 Drake Searchbar */}
@@ -311,12 +311,12 @@ export default function DesktopMerchant({
                         <span className="text-[13px] font-bold text-slate-900">{item.title}</span>
                       </div>
                       <div className="flex items-center gap-8">
-                        <span className={`text-[13px] font-black ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                        <span className={`text-[13px] font-semibold ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
                           {item.stock_count <= 0 ? 'OUT OF STOCK' : `${item.stock_count} REMAINING`}
                         </span>
                         <button 
                           onClick={() => router.push(`/marketplace/${item.id}/edit`)}
-                          className="text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest"
+                          className="text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors "
                         >
                           Restock
                         </button>
@@ -326,7 +326,7 @@ export default function DesktopMerchant({
                 ) : (
                   <div className="px-6 py-12 bg-white flex flex-col items-center justify-center text-center">
                     <Search size={24} className="text-slate-100 mb-2" />
-                    <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">No matching assets found</p>
+                    <p className="text-[11px] font-bold text-slate-300 ">No matching assets found</p>
                   </div>
                 )}
               </div>
@@ -363,12 +363,12 @@ export default function DesktopMerchant({
 
                             {/* 📄 Metadata Block */}
                             <div className="flex-1 min-w-0">
-                               <p className="text-[15px] font-black text-slate-900 truncate tracking-tight mb-1">{item.title}</p>
+                               <p className="text-[15px] font-semibold text-slate-900 truncate tracking-tight mb-1">{item.title}</p>
                                <div className="flex items-center gap-3">
-                                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">RM{item.price}</p>
+                                   <p className="text-[11px] font-semibold text-slate-400 ">RM{item.price}</p>
                                    <span className="w-1 h-1 bg-slate-200 rounded-full" />
                                    <div className="flex items-center gap-1.5">
-                                      <p className={`text-[11px] font-black uppercase tracking-widest ${
+                                      <p className={`text-[11px] font-semibold ${
                                          (item.stock_count ?? 0) === 0 ? 'text-red-500' :
                                          (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 
                                          'text-slate-400'
@@ -376,10 +376,10 @@ export default function DesktopMerchant({
                                          {item.stock_count ?? 0} STOCK
                                       </p>
                                       {(item.stock_count ?? 0) <= 5 && (item.stock_count ?? 0) > 0 && (
-                                         <span className="text-[9px] font-black bg-amber-50 text-amber-500 px-2 py-0.5 rounded-full border border-amber-100">LOW</span>
+                                         <span className="text-[9px] font-semibold bg-amber-50 text-amber-500 px-2 py-0.5 rounded-full border border-amber-100">LOW</span>
                                       )}
                                       {(item.stock_count ?? 0) === 0 && (
-                                         <span className="text-[9px] font-black bg-red-50 text-red-500 px-2 py-0.5 rounded-full border border-red-100">EMPTY</span>
+                                         <span className="text-[9px] font-semibold bg-red-50 text-red-500 px-2 py-0.5 rounded-full border border-red-100">EMPTY</span>
                                       )}
                                    </div>
                                </div>
@@ -389,7 +389,7 @@ export default function DesktopMerchant({
                              <div className="flex items-center gap-2 shrink-0">
                                 <button
                                    onClick={() => toggleItemStatus(item.id, item.status)}
-                                   className={`h-10 px-5 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all ${
+                                   className={`h-10 px-5 rounded-[16px] text-[10px] font-semibold transition-all ${
                                       item.status === 'active'
                                       ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100'
                                       : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'

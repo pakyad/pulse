@@ -97,7 +97,7 @@ export default function Header() {
             >
               <ShoppingCart size={22} />
               {cartCount > 0 && (
-                <div className="absolute top-1 right-1 bg-emerald-500 text-white text-[8px] font-black h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
+                <div className="absolute top-1 right-1 bg-emerald-500 text-white text-[8px] font-semibold h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
                   {cartCount}
                 </div>
               )}
@@ -109,7 +109,7 @@ export default function Header() {
             >
               <Bell size={22} strokeWidth={pathname === '/activity' ? 2.5 : 2} />
               {notificationCount > 0 && (
-                <div className="absolute top-1 right-1 bg-accent text-white text-[8px] font-black h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
+                <div className="absolute top-1 right-1 bg-accent text-white text-[8px] font-semibold h-3.5 w-3.5 rounded-md flex items-center justify-center border-2 border-[#FDFDFD]">
                   {notificationCount}
                 </div>
               )}

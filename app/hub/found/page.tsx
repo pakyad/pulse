@@ -83,7 +83,7 @@ export default function FoundHub() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Live</span>
+            <span className="text-[10px] font-bold text-slate-300 ">Live</span>
           </div>
           <button
             onClick={() => setIsReportOpen(true)}

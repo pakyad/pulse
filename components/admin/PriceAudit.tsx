@@ -39,17 +39,17 @@ export default function PriceAudit({ items, guidelines, onReview, onOpenPolicy }
       {/* TASK 1: RAW STATS */}
       <div className="flex gap-12 border-b border-slate-100 pb-8">
         <div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Flagged Assets</p>
-          <p className="text-[32px] font-black text-slate-900 leading-none">{flagged.length}</p>
+          <p className="text-[11px] font-bold text-slate-500  mb-1">Flagged Assets</p>
+          <p className="text-[32px] font-semibold text-slate-900 leading-none">{flagged.length}</p>
         </div>
         <div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Limits</p>
-          <p className="text-[32px] font-black text-slate-900 leading-none">{Object.keys(guidelines).length}</p>
+          <p className="text-[11px] font-bold text-slate-500  mb-1">Active Limits</p>
+          <p className="text-[32px] font-semibold text-slate-900 leading-none">{Object.keys(guidelines).length}</p>
         </div>
         <div className="ml-auto flex items-end">
           <button 
             onClick={onOpenPolicy}
-            className="h-10 px-6 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all"
+            className="h-10 px-6 bg-slate-900 text-white rounded-xl text-[11px] font-semibold hover:bg-slate-900 transition-all"
           >
             Create Policy
           </button>
@@ -59,10 +59,10 @@ export default function PriceAudit({ items, guidelines, onReview, onOpenPolicy }
       {/* TASK 2: AUDIT LEDGER */}
       <section>
         <div className="grid grid-cols-12 px-4 py-3 bg-slate-50 border-b border-slate-200">
-          <div className="col-span-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Asset & Merchant</div>
-          <div className="col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</div>
-          <div className="col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Market Price</div>
-          <div className="col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ceiling</div>
+          <div className="col-span-5 text-[10px] font-semibold text-slate-400 ">Asset & Merchant</div>
+          <div className="col-span-2 text-[10px] font-semibold text-slate-400 ">Category</div>
+          <div className="col-span-2 text-[10px] font-semibold text-slate-400 ">Market Price</div>
+          <div className="col-span-2 text-[10px] font-semibold text-slate-400 ">Ceiling</div>
           <div className="col-span-1"></div>
         </div>
 
@@ -81,18 +81,18 @@ export default function PriceAudit({ items, guidelines, onReview, onOpenPolicy }
                 </div>
                 <div className="col-span-2">
                   <div className="flex flex-col gap-1.5 items-start">
-                    <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase tracking-widest">{item.category}</span>
+                    <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md ">{item.category}</span>
                     {item.status === 'pending_exemption' && (
-                      <span className="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded-sm uppercase tracking-widest shadow-sm">Exemption</span>
+                      <span className="text-[8px] font-semibold bg-slate-900 text-white px-2 py-0.5 rounded-sm  shadow-sm">Exemption</span>
                     )}
                   </div>
                 </div>
-                <div className="col-span-2 text-[14px] font-black flex flex-col">
+                <div className="col-span-2 text-[14px] font-semibold flex flex-col">
                   <span className={isOver ? (isRegulated ? 'text-red-500' : 'text-amber-500') : 'text-orange-500'}>
                     RM {Number(item.price).toFixed(2)}
                   </span>
                   {item.price > (categoryAverages[item.category] * 1.5) && (
-                    <span className="text-[8px] font-black text-orange-500 uppercase tracking-widest mt-1">Spike Warning</span>
+                    <span className="text-[8px] font-semibold text-orange-500  mt-1">Spike Warning</span>
                   )}
                 </div>
                 <div className={`col-span-2 text-[14px] font-bold ${isRegulated ? 'text-emerald-600' : 'text-slate-400'}`}>
@@ -101,7 +101,7 @@ export default function PriceAudit({ items, guidelines, onReview, onOpenPolicy }
                 <div className="col-span-1 text-right">
                   <button 
                     onClick={() => onReview(item)}
-                    className="h-8 px-4 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all"
+                    className="h-8 px-4 bg-slate-900 text-white rounded-lg text-[10px] font-semibold hover:bg-slate-900 transition-all"
                   >
                     REVIEW
                   </button>
@@ -110,7 +110,7 @@ export default function PriceAudit({ items, guidelines, onReview, onOpenPolicy }
             );
           }) : (
             <div className="py-20 flex flex-col items-center justify-center">
-              <p className="text-[12px] font-bold text-slate-300 uppercase tracking-widest">Audit Registry Stable</p>
+              <p className="text-[12px] font-bold text-slate-300 ">Audit Registry Stable</p>
             </div>
           )}
         </div>

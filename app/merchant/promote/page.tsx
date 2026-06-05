@@ -151,14 +151,14 @@ function PromoteHubContent() {
               <BackButton fallback="/merchant" />
               <div>
                  <h1 className="text-[24px] font-bold tracking-widest text-navy">Promotion Center</h1>
-                 <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest leading-none mt-1">Boost your items to the front page</p>
+                 <p className="text-[11px] font-bold text-slate-300  leading-none mt-1">Boost your items to the front page</p>
               </div>
            </div>
            
            <div className="flex items-center gap-3 px-4 py-2.5 bg-[#0A1121] rounded-2xl border border-white/10 shadow-md shadow-navy/20">
               <Sparkles size={14} className="text-accent" />
               <div className="flex flex-col">
-                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest leading-none">Prestige Tokens</span>
+                 <span className="text-[9px] font-bold text-white/40  leading-none">Prestige Tokens</span>
                  <span className="text-[13px] font-bold text-white leading-none mt-0.5">{tokensRemaining} / 3</span>
               </div>
            </div>
@@ -207,7 +207,7 @@ function PromoteHubContent() {
                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300">
                        <BarChart3 size={20} />
                     </div>
-                    <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Aggregate Impact</p>
+                    <p className="text-[11px] font-bold text-slate-300 ">Aggregate Impact</p>
                   </div>
                   <h3 className="text-[32px] font-bold text-navy tracking-tighter">0.0<span className="text-[14px] text-slate-200 ml-1">Reach Alpha</span></h3>
                </div>
@@ -219,13 +219,13 @@ function PromoteHubContent() {
                   <h3 className="text-[14px] font-bold text-navy tracking-tight">Active Pulse Registry</h3>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Sync</span>
+                    <span className="text-[10px] font-bold text-slate-400 ">Live Sync</span>
                   </div>
                </div>
 
                {campaigns.length === 0 ? (
                   <div className="py-20 text-center bg-slate-50/50 border border-dashed border-slate-200 rounded-[3rem]">
-                     <p className="text-[13px] font-bold text-slate-300 uppercase tracking-[0.2em]">Institutional Hub Clean</p>
+                     <p className="text-[13px] font-bold text-slate-300 ">Institutional Hub Clean</p>
                   </div>
                ) : (
                   <div className="space-y-3">
@@ -289,7 +289,7 @@ function PromoteHubContent() {
                                  ${draft.campus === campus.id ? 'border-navy bg-navy text-white shadow-md shadow-navy/20' : 'border-slate-100'}`}
                              >
                                 <h4 className="text-[18px] font-bold mb-1">{campus.name}</h4>
-                                <p className={`text-[10px] font-bold uppercase tracking-widest ${draft.campus === campus.id ? 'text-white/40' : 'text-slate-300'}`}>{campus.sub}</p>
+                                <p className={`text-[10px] font-bold  ${draft.campus === campus.id ? 'text-white/40' : 'text-slate-300'}`}>{campus.sub}</p>
                              </button>
                           ))}
                        </div>
@@ -358,7 +358,7 @@ function PromoteHubContent() {
                           <div className="space-y-8">
                              {/* Objective Select */}
                              <div className="space-y-4">
-                                <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Select Objective</p>
+                                <p className="text-[11px] font-bold text-slate-300 ">Select Objective</p>
                                 <div className="grid grid-cols-3 gap-3">
                                    {[
                                      { id: 'overture', icon: LayoutDashboard, cost: 3 },
@@ -371,7 +371,7 @@ function PromoteHubContent() {
                                         className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all ${draft.template_id === t.id ? 'bg-navy border-navy text-white shadow-md shadow-navy/20' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                                       >
                                          <t.icon size={20} />
-                                         <p className="text-[9px] font-black uppercase tracking-widest">{t.id}</p>
+                                         <p className="text-[9px] font-semibold">{t.id}</p>
                                          <div className="text-[8px] opacity-40">Cost: {t.cost}T</div>
                                       </button>
                                    ))}
@@ -381,18 +381,18 @@ function PromoteHubContent() {
                              {/* Creative Forms */}
                              <div className="space-y-6">
                                 <div className="space-y-2">
-                                   <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">Campaign Headline</p>
+                                   <p className="text-[10px] font-bold text-slate-300  ml-1">Campaign Headline</p>
                                    <input value={draft.headline} onChange={e => setDraft({ ...draft, headline: e.target.value })} className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 font-bold text-navy outline-none focus:border-navy transition-all" />
                                 </div>
                                 <div className="space-y-2">
-                                   <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">Creative Caption</p>
+                                   <p className="text-[10px] font-bold text-slate-300  ml-1">Creative Caption</p>
                                    <textarea value={draft.caption} onChange={e => setDraft({ ...draft, caption: e.target.value })} className="w-full h-32 bg-slate-50 border border-slate-100 rounded-2xl p-6 font-bold text-navy outline-none focus:border-navy transition-all resize-none" />
                                 </div>
                              </div>
                              
                              {/* Action Selector */}
                              <div className="space-y-4">
-                                <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Action Protocol</p>
+                                <p className="text-[11px] font-bold text-slate-300 ">Action Protocol</p>
                                 <div className="grid grid-cols-2 gap-3">
                                    {[
                                      { id: 'in_app', name: 'In-App Sync', sub: 'Sync Listing' },
@@ -404,7 +404,7 @@ function PromoteHubContent() {
                                         className={`flex flex-col p-5 rounded-2xl border transition-all text-left ${draft.cta === a.sub ? 'bg-navy border-navy text-white shadow-md shadow-navy/20' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                                       >
                                          <p className="text-[11px] font-bold leading-none mb-1">{a.name}</p>
-                                         <p className="text-[9px] font-medium opacity-50 uppercase tracking-widest">{a.sub}</p>
+                                         <p className="text-[9px] font-medium opacity-50 ">{a.sub}</p>
                                       </button>
                                    ))}
                                 </div>
@@ -412,7 +412,7 @@ function PromoteHubContent() {
                              
                              <button 
                                onClick={() => setStudioStep(3)}
-                               className="w-full py-6 bg-navy text-white rounded-4xl font-bold uppercase tracking-widest text-[13px] shadow-md shadow-navy/20 active:scale-95 transition-all"
+                               className="w-full py-6 bg-navy text-white rounded-4xl font-bold  text-[13px] shadow-md shadow-navy/20 active:scale-95 transition-all"
                              >
                                 Review Final Sync
                              </button>
@@ -424,7 +424,7 @@ function PromoteHubContent() {
                           <div className="sticky top-40 space-y-8">
                              <div className="flex items-center gap-4 mb-6">
                                 <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                                <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Prestige Live Preview</p>
+                                <p className="text-[11px] font-bold text-slate-300 ">Prestige Live Preview</p>
                              </div>
                              
                              {/* THE PHONE MOCKUP */}
@@ -432,7 +432,7 @@ function PromoteHubContent() {
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#1e3a8a_0%,transparent_70%)] opacity-30" />
                                 <div className="relative z-10 space-y-6 pt-10">
                                    <div className="px-3 py-1 bg-white/10 rounded-full border border-white/10 w-fit">
-                                      <p className="text-[8px] font-bold text-white uppercase tracking-widest">{draft.template_id}</p>
+                                      <p className="text-[8px] font-bold text-white ">{draft.template_id}</p>
                                    </div>
                                    
                                    {/* CAMPAIGN CARD PEEK */}
@@ -461,15 +461,15 @@ function PromoteHubContent() {
                           <h2 className="text-[32px] font-bold tracking-widest text-navy">Ready for Authorization?</h2>
                           <div className="p-8 bg-slate-50 rounded-[3rem] text-left space-y-4 border border-slate-100">
                              <div className="flex justify-between items-center">
-                                <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Protocol Sync</p>
+                                <p className="text-[11px] font-bold text-slate-300 ">Protocol Sync</p>
                                 <p className="text-[13px] font-bold text-navy">{draft.template_id.toUpperCase()}</p>
                              </div>
                              <div className="flex justify-between items-center">
-                                <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Token Investment</p>
+                                <p className="text-[11px] font-bold text-slate-300 ">Token Investment</p>
                                 <p className="text-[13px] font-bold text-accent">-{draft.template_id === 'overture' ? 3 : draft.template_id === 'spotlight' ? 2 : 1} TOKENS</p>
                              </div>
                              <div className="flex justify-between items-center">
-                                <p className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Estimated Reach</p>
+                                <p className="text-[11px] font-bold text-slate-300 ">Estimated Reach</p>
                                 <p className="text-[13px] font-bold text-navy">850-1,200 Pulse Nodes</p>
                              </div>
                           </div>
