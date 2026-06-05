@@ -2,35 +2,13 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth, db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
 
-export default function AdminRedirect() {
+export default function AdminRoot() {
   const router = useRouter();
-
-  useEffect(() => {
-    const checkRedirect = auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        router.push('/auth');
-        return;
-      }
-
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      const profile = userDoc.data();
-
-      if (profile?.role === 'ADMIN' || user.email === 'admin@pulse.com') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/home'); // Students get sent back to home
-      }
-    });
-
-    return () => checkRedirect();
-  }, [router]);
-
+  useEffect(() => { router.replace('/admin/overview'); }, [router]);
   return (
-    <div className="h-screen w-full bg-[#111111] flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-white/10 border-t-[#007AFF] rounded-full animate-spin" />
+    <div className="flex items-center justify-center h-64">
+      <div className="w-6 h-6 border-[1.5px] border-[#E5E5EA] border-t-[#1C1C1E] rounded-full animate-spin" />
     </div>
   );
 }

@@ -22,31 +22,7 @@ const SmartFormFields: React.FC<SmartFormFieldsProps> = ({
   return (
     <div className="space-y-6">
 
-      {/* ── Subcategory ── */}
-      <div className="space-y-3">
-        <div className="space-y-0.5">
-          <p className="text-[14px] font-bold text-slate-900 tracking-tight">Subcategory</p>
-          <p className="text-[11px] font-medium text-[#94a3b8]">Pick the most specific match.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {category.subcategories.map((sub) => {
-            const isActive = subcategory === sub.label;
-            return (
-              <button
-                key={sub.label}
-                onClick={() => onSubcategoryChange(sub.label)}
-                className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
-                  isActive
-                    ? 'bg-slate-50 border-slate-400 text-slate-900'
-                    : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
-                }`}
-              >
-                {sub.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+
 
       {/* ── Category-specific fields ── */}
       {category.customFields.map((field) => (

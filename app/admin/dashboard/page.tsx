@@ -280,9 +280,9 @@ export default function AdminDashboard() {
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutGrid },
-    { id: 'command', label: 'Command Center', icon: Inbox },
+    { id: 'command', label: 'Price Audit Terminal', icon: Inbox },
     { id: 'price_review', label: 'Price Review Queue', icon: ShieldCheck, badge: priceReviews.length, href: '/admin/price-review' },
-    { id: 'monitor', label: 'Price Monitor', icon: BarChart3 },
+
     { id: 'disputes', label: 'Dispute Mediation', icon: ShieldAlert, badge: disputes.length },
     { 
       id: 'users', 
@@ -443,7 +443,7 @@ export default function AdminDashboard() {
           )}
 
           {/* 2. PRICE AUDIT TERMINAL */}
-          {(activeTab === 'command' || activeTab === 'monitor') && (
+          {activeTab === 'command' && (
             <section className="bg-white rounded-2xl border border-slate-100 p-10">
                <div className="mb-10">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Economic Oversight</p>
@@ -459,131 +459,6 @@ export default function AdminDashboard() {
             </section>
           )}
 
-          {activeTab === 'price_review' && (
-            <section className="space-y-6">
-              <div className="flex justify-between items-center px-2">
-                <div>
-                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">Market Governance</p>
-                  <h2 className="text-[22px] font-black text-slate-900 tracking-tight">Flagged Listings Queue</h2>
-                  <p className="text-[13px] font-medium text-slate-400 mt-1">
-                    Items auto-flagged by the system (price &gt; 150% ceiling) or reported by 3+ buyers.
-                  </p>
-                </div>
-                <div className="px-5 py-2 bg-amber-50 border border-amber-100 rounded-2xl">
-                  <span className="text-[11px] font-black text-amber-600 uppercase tracking-widest">{priceReviews.length} Flagged</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                {priceReviews.length === 0 ? (
-                  <div className="py-32 flex flex-col items-center justify-center gap-4">
-                    <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-400">
-                      <ShieldCheck size={28} />
-                    </div>
-                    <p className="text-[13px] font-bold text-slate-300 uppercase tracking-widest">All clear — no flagged listings</p>
-                  </div>
-                ) : (
-                  priceReviews.map((item) => {
-                    const overBy = item.price - (item.governance_ceiling || 0);
-                    const overPct = item.governance_ceiling ? Math.round((overBy / item.governance_ceiling) * 100) : 0;
-                    const isSystemFlag = item.flag_source === 'SYSTEM';
-                    return (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-2xl border border-slate-100 p-8 flex items-start justify-between gap-8 shadow-sm"
-                      >
-                        {/* Left — item info */}
-                        <div className="flex-1 space-y-5">
-                          <div className="flex items-start gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0">
-                              {item.images?.[0]
-                                ? <img src={item.images[0]} className="w-full h-full object-cover" alt="" />
-                                : <div className="w-full h-full flex items-center justify-center text-slate-300"><ShieldAlert size={20} /></div>
-                              }
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-[16px] font-black text-slate-900 tracking-tight">{item.title}</h3>
-                                {/* Flag source badge */}
-                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
-                                  isSystemFlag
-                                    ? 'bg-red-50 text-red-500 border border-red-100'
-                                    : 'bg-amber-50 text-amber-600 border border-amber-100'
-                                }`}>
-                                  {isSystemFlag ? '⚡ Auto-Flagged' : '👥 Community Report'}
-                                </span>
-                              </div>
-                              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                                {item.category} · {item.subcategory}
-                              </p>
-                              <p className="text-[12px] font-medium text-slate-400 mt-0.5">Seller: {item.seller_name || '—'}</p>
-                              {!isSystemFlag && (
-                                <p className="text-[11px] font-bold text-amber-500 mt-0.5">
-                                  {item.price_flag_count || 0} buyer report{(item.price_flag_count || 0) !== 1 ? 's' : ''}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Price comparison */}
-                          <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                            <div>
-                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Listed Price</p>
-                              <p className="text-[20px] font-black text-red-500">RM {Number(item.price).toFixed(2)}</p>
-                            </div>
-                            {item.governance_ceiling && (
-                              <>
-                                <div className="w-px h-8 bg-slate-200" />
-                                <div>
-                                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Category Ceiling</p>
-                                  <p className="text-[20px] font-black text-slate-900">RM {Number(item.governance_ceiling).toFixed(2)}</p>
-                                </div>
-                                <div className="w-px h-8 bg-slate-200" />
-                                <div>
-                                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5">Over By</p>
-                                  <p className="text-[20px] font-black text-amber-500">+{overPct}%</p>
-                                </div>
-                              </>
-                            )}
-                          </div>
-
-                          {/* Seller Justification / Appeal */}
-                          {item.price_appeal && (
-                            <div className="p-4 bg-red-50/50 rounded-2xl border border-red-100/50 space-y-1">
-                              <p className="text-[9px] font-black text-red-400 uppercase tracking-widest">Seller Justification</p>
-                              <p className="text-[12px] font-semibold text-red-700 italic">"{item.price_appeal}"</p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Right — actions */}
-                        <div className="flex flex-col gap-3 shrink-0 w-[180px]">
-                          <button
-                            onClick={() => handlePriceReview(item.id, 'DISMISS')}
-                            disabled={isProcessing === item.id}
-                            className="h-12 bg-slate-900 text-white rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-30"
-                          >
-                            {isProcessing === item.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                            Clear Flag
-                          </button>
-                          <button
-                            onClick={() => handlePriceReview(item.id, 'REMOVE')}
-                            disabled={isProcessing === item.id}
-                            className="h-12 bg-white text-red-500 border border-red-100 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-50 active:scale-95 transition-all disabled:opacity-30"
-                          >
-                            <X size={14} />
-                            Remove
-                          </button>
-                        </div>
-                      </motion.div>
-                    );
-                  })
-                )}
-              </div>
-            </section>
-          )}
 
           {/* 3. ACTIVE DISPUTES (TICKET SYSTEM) */}
           {activeTab === 'disputes' && (

@@ -68,12 +68,12 @@ export default function BottomNav() {
 
   // Filter items based on institutional role
   const navItems = allItems.filter(item => {
-    if (!profile) return item.roles.includes('STUDENT');
-    return item.roles.includes(profile.role);
+    // FORCE RENDER ALL ITEMS EXCEPT ADMIN FOR NOW TO FIX VANISHING BUG
+    return item.name !== 'Admin';
   });
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-100 bg-white/80 backdrop-blur-xl border-t-[0.5px] border-slate-200 pb-8 shadow-sm">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t-[0.5px] border-slate-200 pb-8 shadow-sm" style={{ zIndex: 100 }}>
       <div className="flex justify-around items-center h-[64px] max-w-lg mx-auto px-6">
         {navItems.map((item) => {
           const isActive = pathname === item.path || (item.path !== '/home' && pathname?.startsWith(item.path));

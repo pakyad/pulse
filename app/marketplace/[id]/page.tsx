@@ -347,18 +347,37 @@ export default function ItemDetailsPage() {
               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 uppercase tracking-widest">
                 <ShieldAlert size={12} /> Out of Stock
               </span>
-            ) : item.governance_status !== 'BLOCKED' ? (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 shrink-0 pt-1">
-                <ShieldCheck size={12} /> Verified
+            ) : item.status === 'HELD_FOR_REVISION' || item.status === 'FLAGGED_FOR_REVIEW' ? (
+              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500 shrink-0 pt-1 uppercase tracking-widest">
+                <ShieldAlert size={12} /> Action Required
+              </span>
+            ) : item.status === 'REJECTED_FRAUDULENT' ? (
+              <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 uppercase tracking-widest">
+                <ShieldAlert size={12} /> Suspended
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500 shrink-0 pt-1">
-                <ShieldAlert size={12} /> Under Review
+              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 shrink-0 pt-1 uppercase tracking-widest">
+                <ShieldCheck size={12} /> Verified
               </span>
             )}
           </div>
 
-          <div className="flex items-baseline justify-between gap-3">
+          {/* ── GOVERNANCE BANNER ── */}
+          {(item.status === 'HELD_FOR_REVISION' || item.status === 'REJECTED_FRAUDULENT') && (
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex gap-3 mt-4">
+              <ShieldAlert size={20} className="text-amber-500 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <h3 className="text-[13px] font-bold text-amber-900 tracking-tight">
+                  {item.status === 'HELD_FOR_REVISION' ? 'Listing Held for Revision' : 'Listing Suspended'}
+                </h3>
+                <p className="text-[12px] font-medium text-amber-800/80 leading-relaxed">
+                  {item.governance_message || 'This listing has been suspended due to a pricing violation.'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-baseline justify-between gap-3 mt-6">
             <div className="flex items-baseline gap-3">
               <span className="text-[28px] font-bold text-slate-900 tracking-tighter">
                 RM{Number(item.price).toFixed(2)}
@@ -458,41 +477,54 @@ export default function ItemDetailsPage() {
 
 
         {/* ── SELLER CONTACT ACTION ── */}
-        <section className="space-y-3 pt-4">
-          <button 
-             onClick={handleMessageSeller}
-             className="w-full h-14 border border-slate-100 bg-white text-slate-900 hover:bg-slate-50 font-bold text-[13px] tracking-tight rounded-full active:scale-95 transition-all shadow-sm">
-            Message Seller
-          </button>
-        </section>
+        {auth.currentUser?.uid !== item.seller_id && (
+          <section className="space-y-3 pt-4">
+            <button 
+               onClick={handleMessageSeller}
+               className="w-full h-14 border border-slate-100 bg-white text-slate-900 hover:bg-slate-50 font-bold text-[13px] tracking-tight rounded-full active:scale-95 transition-all shadow-sm">
+              Message Seller
+            </button>
+          </section>
+        )}
 
       </div>
 
       {/* ── STICKY FOOTER ── */}
       <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsWishlisted(!isWishlisted)}
-            className={`w-[52px] h-[52px] rounded-full border flex items-center justify-center shrink-0 active:scale-90 transition-all ${isWishlisted ? 'border-red-100 bg-red-50 text-red-400' : 'border-slate-100 bg-slate-50 text-slate-400'}`}
-          >
-            <Heart size={20} fill={isWishlisted ? 'currentColor' : 'none'} />
-          </button>
-          <button
-            disabled={isSoldOut}
-            onClick={handleAddToCart}
-            className="h-[52px] px-6 border border-slate-100 bg-slate-50 text-slate-900 font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-30"
-          >
-            <ShoppingCart size={16} />
-            {isSoldOut ? 'Out of Stock' : 'Add to Cart'}
-          </button>
-          <button
-            disabled={isSoldOut}
-            onClick={() => router.push(`/marketplace/${id}/checkout`)}
-            className="flex-1 h-[52px] bg-blue-600 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20 shadow-md shadow-blue-600/20"
-          >
-            {isSoldOut ? 'Sold Out' : 'Buy Now'}
-            {!isSoldOut && <ArrowUpRight size={16} />}
-          </button>
+          {auth.currentUser?.uid === item.seller_id ? (
+            <button
+              onClick={() => router.push('/me')}
+              className="flex-1 h-[52px] bg-slate-900 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-md"
+            >
+              Manage Your Listing
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsWishlisted(!isWishlisted)}
+                className={`w-[52px] h-[52px] rounded-full border flex items-center justify-center shrink-0 active:scale-90 transition-all ${isWishlisted ? 'border-red-100 bg-red-50 text-red-400' : 'border-slate-100 bg-slate-50 text-slate-400'}`}
+              >
+                <Heart size={20} fill={isWishlisted ? 'currentColor' : 'none'} />
+              </button>
+              <button
+                disabled={isSoldOut}
+                onClick={handleAddToCart}
+                className="h-[52px] px-6 border border-slate-100 bg-slate-50 text-slate-900 font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-30"
+              >
+                <ShoppingCart size={16} />
+                {isSoldOut ? 'Out of Stock' : 'Add to Cart'}
+              </button>
+              <button
+                disabled={isSoldOut}
+                onClick={() => router.push(`/marketplace/${id}/checkout`)}
+                className="flex-1 h-[52px] bg-blue-600 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-20 shadow-md shadow-blue-600/20"
+              >
+                {isSoldOut ? 'Sold Out' : 'Buy Now'}
+                {!isSoldOut && <ArrowUpRight size={16} />}
+              </button>
+            </>
+          )}
         </div>
       </footer>
 

@@ -170,11 +170,16 @@ export default function ActivityPage() {
         const qNotif = query(
           collection(db, 'notifications'), 
           where('user_id', '==', user.uid),
-          orderBy('created_at', 'desc'),
-          limit(20)
+          limit(50)
         );
         const uNotif = onSnapshot(qNotif, (s) => {
-           setNotifications(s.docs.map(d => ({ id: d.id, ...d.data() })));
+           const docs = s.docs.map(d => ({ id: d.id, ...d.data() }));
+           docs.sort((a: any, b: any) => {
+             const tA = a.created_at?.toMillis?.() || 0;
+             const tB = b.created_at?.toMillis?.() || 0;
+             return tB - tA;
+           });
+           setNotifications(docs);
         }, (err) => console.error("[Activity] Notification Sync Error:", err));
         unsubs.push(uNotif);
       } else {
@@ -261,29 +266,42 @@ export default function ActivityPage() {
 
                {/* ── INBOX LIST ── */}
                <div className="flex flex-col -mx-2 mt-4 space-y-1">
-                  {(notifications.length > 0 ? notifications : DEMO_NOTIFICATIONS)
+                   {(notifications.length > 0 ? notifications : DEMO_NOTIFICATIONS)
                     .filter(it => activeTab === 'All' || it.category === activeTab.toUpperCase())
-                    .map((item, i) => (
-                      <InboxItemCard 
-                        key={item.id}
-                        i={i}
-                        type={item.type || 'NOTIFICATION'}
-                        title={item.title}
-                        subtitle={item.body || item.message}
-                        statusText={item.time_ago || 'Now'}
-                        isUnread={!item.is_read}
-                        icon={item.icon || Bell}
-                        onClick={() => {
-                          if (item.type === 'ORDER ALERT' || item.type === 'LOGISTICS UPDATE') {
-                            router.push('/me/orders/history');
-                          } else if (item.category === 'CAMPUS') {
-                            router.push('/hub/found');
-                          } else {
-                            router.push('/messages');
-                          }
-                        }}
-                      />
-                    ))}
+                    .map((item, i) => {
+                      let timeString = item.time_ago || 'Now';
+                      if (!item.time_ago && item.created_at?.toMillis) {
+                        const diffMins = Math.floor((Date.now() - item.created_at.toMillis()) / 60000);
+                        if (diffMins < 1) timeString = 'Just now';
+                        else if (diffMins < 60) timeString = `${diffMins}m ago`;
+                        else if (diffMins < 1440) timeString = `${Math.floor(diffMins/60)}h ago`;
+                        else timeString = `${Math.floor(diffMins/1440)}d ago`;
+                      }
+
+                      return (
+                        <InboxItemCard 
+                          key={item.id}
+                          i={i}
+                          type={item.type || 'NOTIFICATION'}
+                          title={item.title}
+                          subtitle={item.body || item.message}
+                          statusText={timeString}
+                          isUnread={!item.is_read}
+                          icon={item.icon || Bell}
+                          onClick={() => {
+                            if (item.action_url) {
+                              router.push(item.action_url);
+                            } else if (item.type === 'ORDER ALERT' || item.type === 'LOGISTICS UPDATE') {
+                              router.push('/me/orders/history');
+                            } else if (item.category === 'CAMPUS') {
+                              router.push('/hub/found');
+                            } else {
+                              router.push('/messages');
+                            }
+                          }}
+                        />
+                      );
+                    })}
                   {(notifications.length > 0 ? notifications : DEMO_NOTIFICATIONS).filter(it => activeTab === 'All' || it.category === activeTab.toUpperCase()).length === 0 && (
                     <div className="py-24 flex flex-col items-center justify-center text-[#94a3b8] gap-4">
                        <Inbox size={40} strokeWidth={1} className="text-slate-300" />

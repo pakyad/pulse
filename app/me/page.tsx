@@ -65,7 +65,7 @@ export default function MePage() {
 
   if (loading) return null;
 
-  const isStudent = !profile?.role || profile?.role === 'STUDENT';
+  const isStudent = !profile?.role || profile?.role === 'STUDENT' || profile?.role === 'CLUB' || profile?.role === 'MERCHANT';
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans">
@@ -166,7 +166,7 @@ export default function MePage() {
                      onClick={() => router.push('/marketplace/create')}
                      className="shrink-0 w-36 h-48 rounded-2xl bg-white border border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-all group"
                   >
-                     <div className="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] group-hover:bg-slate-900 group-hover:text-white transition-all">
+                     <div className="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] group-hover:bg-slate-100 group-hover:text-slate-900 transition-all">
                         <Plus size={20} />
                      </div>
                      <span className="text-[10px] font-black uppercase tracking-widest text-[#94a3b8]">Add Listing</span>
@@ -204,36 +204,7 @@ export default function MePage() {
             </section>
          )}
 
-         {/* ── RUNNER HUB PROMO ── */}
-         <section>
-            <button 
-               onClick={() => setIsEnrollmentOpen(true)}
-               className="w-full p-8 bg-slate-900 text-white rounded-2xl flex items-center justify-between shadow-md shadow-slate-900/10 group"
-            >
-               <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400">
-                     <Footprints size={28} />
-                  </div>
-                  <div className="text-left">
-                     <p className="text-[16px] font-bold tracking-tight">Pulse Runner</p>
-                     <p className="text-[11px] text-white/50 font-medium">Join the campus delivery team</p>
-                  </div>
-               </div>
-               <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-slate-900 transition-all">
-                  <ArrowUpRight size={20} />
-               </div>
-            </button>
-         </section>
 
-         {/* ── ACCOUNT ACTIONS ── */}
-         <section className="pt-6">
-            <button 
-               onClick={() => { auth.signOut(); router.push('/auth'); }}
-               className="w-full h-16 rounded-2xl border border-slate-100 text-slate-900 font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-all"
-            >
-               Sign Out <LayoutGrid size={16} className="opacity-30" />
-            </button>
-         </section>
 
       </div>
 

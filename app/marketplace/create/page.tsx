@@ -1,11 +1,11 @@
 'use client'
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ChevronLeft, Plus, Trash2, Loader2,
-  UtensilsCrossed, BookOpen, Wrench, Home, Cpu, Shirt,
-  TrendingUp
+  Plus, Trash2, Loader2,
+  UtensilsCrossed, BookOpen, Home, Cpu, Shirt,
+  ShieldCheck, ShieldAlert, Globe, AlertCircle
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { db, auth, storage } from '@/lib/firebase';
@@ -13,7 +13,6 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
-import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
 import { CAMPUS_NODES, getLocationBadge } from '@/lib/core/locations';
 
 // ── DOMAIN ICONS (aligned with Marketplace page icon pattern) ──
@@ -33,6 +32,15 @@ const CATEGORY_LABELS: Record<CategoryID, string> = {
   APPAREL: 'Apparel',
 };
 
+interface MarketCheck {
+  market_baseline: number | null;
+  max_campus_price: number;
+  source: 'SERP_LIVE' | 'FIRESTORE_CACHE' | 'FIRESTORE_REFERENCE' | 'STATIC_CEILING' | 'NOT_COMPARABLE' | 'EXEMPT';
+  source_detail: string;
+  is_enforced: boolean;
+  comparable?: boolean;
+}
+
 export default function CreateListingPage() {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<CategoryID | ''>('');
@@ -51,14 +59,62 @@ export default function CreateListingPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
 
+  // ── LIVE MARKET INTELLIGENCE ──
+  const [marketCheck, setMarketCheck] = useState<MarketCheck | null>(null);
+  const [marketLoading, setMarketLoading] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── MARKET INTELLIGENCE ENGINE (Trust-First, Advisory Only) ──
-  const priceIntel: PriceIntelligence | null = useMemo(() => {
-    const numericPrice = parseFloat(price);
-    if (!selectedCategory || !price || isNaN(numericPrice) || numericPrice <= 0) return null;
-    return analysePrice(numericPrice, selectedCategory as CategoryID, subcategory);
-  }, [selectedCategory, subcategory, price]);
+  // Fire price check when title + category + subcategory are all set
+  const triggerPriceCheck = useCallback(async (t: string, cat: string, sub: string) => {
+    if (t.trim().length < 10 || !cat || !sub) return; // Require 10+ chars AND subcategory
+    setMarketLoading(true);
+    setMarketCheck(null);
+    try {
+      const res = await fetch('/api/marketplace/price-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: t.trim(), category: cat, subcategory: sub }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMarketCheck(data);
+      }
+    } catch (e) {
+      console.error('[PriceCheck] fetch failed', e);
+    } finally {
+      setMarketLoading(false);
+    }
+  }, []);
+
+  // Reset market check when category or subcategory changes
+  useEffect(() => {
+    setMarketCheck(null);
+  }, [selectedCategory, subcategory]);
+
+  // Debounced title-driven check — only fires when title + subcategory both ready
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (title.trim().length >= 10 && selectedCategory && subcategory) {
+      debounceRef.current = setTimeout(() => {
+        triggerPriceCheck(title, selectedCategory as string, subcategory);
+      }, 900);
+    } else if (!subcategory || title.trim().length < 10) {
+      setMarketCheck(null);
+    }
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [title, selectedCategory, subcategory, triggerPriceCheck]);
+
+  // Derive the dynamic title hint from the selected subcategory config
+  const selectedSubcategoryConfig = useMemo(() => {
+    if (!selectedCategory) return null;
+    return MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories
+      .find((s) => s.label === subcategory) ?? null;
+  }, [selectedCategory, subcategory]);
+
+  const titleHint = selectedSubcategoryConfig?.titleHint ?? 'e.g. Logitech MX Master 3, Thomas Calculus...';
+
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     Array.from(e.target.files || []).forEach(file => {
@@ -76,7 +132,18 @@ export default function CreateListingPage() {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
 
-      // Upload images to Firebase Storage → get download URLs
+      const numPrice = parseFloat(price);
+
+      // ── SERVER-SIDE ENFORCEMENT GATE ──
+      // Hard-block if market check is enforced and price exceeds maximum
+      if (marketCheck && marketCheck.is_enforced && numPrice > marketCheck.max_campus_price) {
+        setPostError(
+          `Price blocked. Max campus price is RM ${marketCheck.max_campus_price.toFixed(2)}. Please lower your price to continue.`
+        );
+        setIsPosting(false);
+        return;
+      }
+
       setIsUploading(true);
       const imageUrls: string[] = await Promise.all(
         images.map(async (base64, i) => {
@@ -87,10 +154,9 @@ export default function CreateListingPage() {
       );
       setIsUploading(false);
 
-      // Trust-First: ALL listings go live. Auto-flag only egregious ones.
-      const isAutoFlagged = priceIntel?.shouldAutoFlag === true;
       const stockCount = stock !== '' ? parseInt(stock, 10) : null;
-      const numPrice = parseFloat(price);
+      const isPriceEnforced = marketCheck?.is_enforced ?? false;
+      const isAutoFlagged = isPriceEnforced && numPrice > (marketCheck?.max_campus_price ?? Infinity);
 
       await addDoc(collection(db, 'items'), {
         title: title.trim(),
@@ -106,10 +172,10 @@ export default function CreateListingPage() {
         seller_name: user.displayName || 'Pulse Student',
         fulfillment_mode: fulfillmentMode,
         handover_node: handoverNode,
-        // Always goes live — never blocked
         status: stockCount === 0 ? 'sold_out' : 'active',
-        price_tier: priceIntel?.tier || 'COMPLIANT',
-        governance_ceiling: priceIntel?.ceiling || null,
+        governance_ceiling: marketCheck?.max_campus_price || null,
+        market_baseline: marketCheck?.market_baseline || null,
+        market_source: marketCheck?.source || 'STATIC_CEILING',
         is_price_flagged: isAutoFlagged,
         price_flag_count: isAutoFlagged ? 1 : 0,
         report_count: 0,
@@ -129,8 +195,9 @@ export default function CreateListingPage() {
     }
   };
 
-  // Sellers are never blocked — canPost has no price restriction
-  const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting;
+  const numPrice = parseFloat(price);
+  const isPriceBlocked = !!(marketCheck?.is_enforced && !isNaN(numPrice) && numPrice > marketCheck.max_campus_price);
+  const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting && !isPriceBlocked;
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
@@ -165,7 +232,7 @@ export default function CreateListingPage() {
                   onClick={() => { setSelectedCategory(id); setSubcategory(''); }}
                   className={`h-[32px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border-[0.5px] ${
                     isActive
-                      ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
+                      ? 'bg-[#2A5C50] border-[#2A5C50] text-white shadow-sm'
                       : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                   }`}
                 >
@@ -184,6 +251,32 @@ export default function CreateListingPage() {
             transition={{ duration: 0.25 }}
             className="space-y-10"
           >
+
+            {/* ── SECTION: SUBCATEGORY ── */}
+            <section className="space-y-3 pt-2 border-t border-slate-100">
+              <div className="space-y-0.5">
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Subcategory</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">Pick the most specific match.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories.map((sub) => {
+                  const isActive = subcategory === sub.label;
+                  return (
+                    <button
+                      key={sub.label}
+                      onClick={() => setSubcategory(sub.label)}
+                      className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
+                        isActive
+                          ? 'bg-[#2A5C50] border-[#2A5C50] text-white shadow-sm'
+                          : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
+                      }`}
+                    >
+                      {sub.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
 
             {/* ── SECTION: IMAGES ── */}
             <section className="space-y-4 pt-2 border-t border-slate-100">
@@ -221,15 +314,22 @@ export default function CreateListingPage() {
             {/* ── SECTION: NAME ── */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Name</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">Keep it short and clear.</p>
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Item Name</h2>
+                <p className="text-[11px] font-medium text-[#94a3b8]">
+                  {subcategory ? `Be specific — include brand and model where possible.` : 'Select a subcategory first to see naming guidance.'}
+                </p>
               </div>
               <input
-                placeholder="e.g. Calculus Textbook, Canon EOS..."
+                placeholder={titleHint}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-slate-900 placeholder:text-slate-200 focus:outline-none focus:border-slate-900 transition-colors"
+                className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-slate-900 transition-colors"
               />
+              {title.trim().length > 0 && title.trim().length < 10 && (
+                <p className="text-[10px] font-bold text-[#2A5C50]">
+                  Be more specific.
+                </p>
+              )}
             </section>
 
             {/* ── SECTION: DETAILS ── */}
@@ -247,14 +347,27 @@ export default function CreateListingPage() {
               />
             </section>
 
+
+
             {/* ── SECTION: PRICE ── */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
-              <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Price</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">Set your asking price in Ringgit.</p>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Price</h2>
+                  <p className="text-[11px] font-medium text-[#94a3b8]">Set your asking price in Ringgit.</p>
+                </div>
+                {marketLoading && (
+                  <div className="flex items-center gap-1.5">
+                    <Loader2 size={12} className="animate-spin text-slate-300" />
+                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Checking market...</span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-0 h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-slate-900 transition-colors">
-                <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">RM</span>
+
+              <div className={`flex items-center gap-0 h-12 bg-slate-50 border rounded-xl overflow-hidden transition-colors ${
+                isPriceBlocked ? 'border-red-300 bg-red-50/30' : 'border-slate-100 focus-within:border-slate-900'
+              }`}>
+                <span className={`px-4 text-[13px] font-bold border-r ${isPriceBlocked ? 'text-red-400 border-red-200' : 'text-[#94a3b8] border-slate-100'}`}>RM</span>
                 <input
                   type="number"
                   placeholder="0.00"
@@ -264,64 +377,144 @@ export default function CreateListingPage() {
                 />
               </div>
 
-              {/* ── MARKET INTELLIGENCE PANEL (Airbnb-style, advisory only) ── */}
-              <AnimatePresence>
-                {priceIntel && price && (
-                  <motion.div
-                    key={priceIntel.tier}
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={`rounded-2xl p-4 border transition-all ${
-                      priceIntel.tier === 'COMPLIANT'
-                        ? 'bg-emerald-50 border-emerald-100'
-                        : priceIntel.tier === 'ADVISORY'
-                        ? 'bg-amber-50 border-amber-100'
-                        : 'bg-slate-50 border-slate-200/60 shadow-sm'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                        priceIntel.tier === 'COMPLIANT' ? 'bg-emerald-100' :
-                        priceIntel.tier === 'ADVISORY' ? 'bg-amber-100' : 'bg-slate-200/60'
+              {/* ── LIVE MARKET INTELLIGENCE PANEL ── */}
+              <AnimatePresence mode="wait">
+                {marketCheck && !marketLoading && (() => {
+                  const numericPrice = parseFloat(price);
+                  const hasPriceInput = !!price && !isNaN(numericPrice) && numericPrice > 0;
+                  const isBlocked = hasPriceInput && marketCheck.is_enforced && numericPrice > marketCheck.max_campus_price;
+                  const isCompliant = hasPriceInput && numericPrice <= marketCheck.max_campus_price;
+
+                  if (!marketCheck.market_baseline) {
+                    return (
+                      <motion.div
+                        key="market-panel-static"
+                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                        transition={{ duration: 0.25 }}
+                        className="mt-2"
+                      >
+                        <p className={`text-[11px] font-medium leading-relaxed ${isBlocked ? 'text-red-600' : 'text-slate-400'}`}>
+                          {isBlocked 
+                            ? `⚠️ Your price exceeds the campus ceiling of RM ${marketCheck.max_campus_price.toFixed(2)} for this category. Please lower it.`
+                            : `Note: This category has a fixed campus price ceiling of RM ${marketCheck.max_campus_price.toFixed(2)}.`
+                          }
+                        </p>
+                      </motion.div>
+                    );
+                  }
+
+                  return (
+                    <motion.div
+                      key="market-panel-live"
+                      initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                      transition={{ duration: 0.25 }}
+                      className={`rounded-2xl border overflow-hidden mt-2 ${
+                        isBlocked
+                          ? 'bg-red-50/80 border-red-100'
+                          : isCompliant
+                          ? 'bg-emerald-50/80 border-emerald-100'
+                          : 'bg-slate-50 border-slate-100'
+                      }`}
+                    >
+                      {/* Header row */}
+                      <div className={`px-4 py-3 flex items-center gap-3 border-b ${
+                        isBlocked ? 'border-red-100/50 bg-red-50' :
+                        isCompliant ? 'border-emerald-100/50 bg-emerald-50/50' :
+                        'border-slate-100'
                       }`}>
-                        <TrendingUp size={14} className={`${
-                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-600' :
-                          priceIntel.tier === 'ADVISORY' ? 'text-amber-600' : 'text-slate-600'
-                        }`} />
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                          isBlocked ? 'bg-red-100' : isCompliant ? 'bg-emerald-100' : 'bg-slate-100'
+                        }`}>
+                          {isBlocked
+                            ? <ShieldAlert size={14} className="text-red-500" />
+                            : isCompliant
+                            ? <ShieldCheck size={14} className="text-emerald-600" />
+                            : <Globe size={14} className="text-slate-400" />
+                          }
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-[12px] font-bold tracking-tight ${
+                            isBlocked ? 'text-red-700' : isCompliant ? 'text-emerald-700' : 'text-slate-600'
+                          }`}>
+                            {isBlocked
+                              ? 'Listing Paused — Price Too High'
+                              : isCompliant
+                              ? 'Campus-Compliant Price ✓'
+                              : 'Market Intelligence Active'
+                            }
+                          </p>
+                        </div>
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${
+                          marketCheck.source === 'SERP_LIVE'
+                            ? 'bg-blue-50 text-blue-500'
+                            : marketCheck.source === 'FIRESTORE_CACHE'
+                            ? 'bg-violet-50 text-violet-500'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}>
+                        {marketCheck.source === 'SERP_LIVE' ? 'Live Data' :
+                           marketCheck.source === 'FIRESTORE_CACHE' ? 'Cached' : 'Reference'}
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <p className={`text-[12px] font-bold mb-1 ${
-                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-700' :
-                          priceIntel.tier === 'ADVISORY' ? 'text-amber-700' : 'text-slate-800'
-                        }`}>
-                          {priceIntel.message}
-                        </p>
-                        <p className={`text-[11px] font-medium leading-relaxed ${
-                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-600' :
-                          priceIntel.tier === 'ADVISORY' ? 'text-amber-600' : 'text-slate-500'
-                        }`}>
-                          {priceIntel.subMessage}
-                        </p>
-                        {priceIntel.tier === 'AUTO_FLAG' && (
-                          <div className="mt-3 space-y-2">
-                            <p className="text-[10px] font-semibold text-slate-400">
-                              System Advisory: This asking price is outside typical campus boundaries. It will be published live, but flagged silently for market review.
+
+                      {/* Price data rows */}
+                      <div className="px-4 py-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-medium text-slate-400">Open Market (Shopee/Lazada)</span>
+                          <span className="text-[12px] font-bold text-slate-600">RM {marketCheck.market_baseline.toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-medium text-slate-400">Max Campus Price (−10%)</span>
+                          <span className={`text-[13px] font-black ${isBlocked ? 'text-red-500' : 'text-slate-900'}`}>
+                            RM {marketCheck.max_campus_price.toFixed(2)}
+                          </span>
+                        </div>
+                        {hasPriceInput ? (
+                          <div className="flex items-center justify-between border-t border-slate-100/80 pt-2 mt-1">
+                            <span className="text-[11px] font-medium text-slate-400">Your Price</span>
+                            <span className={`text-[13px] font-black ${isBlocked ? 'text-red-500' : 'text-emerald-600'}`}>
+                              RM {numericPrice.toFixed(2)}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="border-t border-slate-100/80 pt-2 mt-1">
+                            <p className="text-[10px] font-medium text-slate-300 text-center">
+                              Enter your price above to check compliance ↑
                             </p>
-                            <textarea
-                              value={justification}
-                              onChange={(e) => setJustification(e.target.value)}
-                              placeholder="Describe any features justifying this price (e.g., custom bundle, premium packaging...)"
-                              className="w-full min-h-[60px] p-3 text-[11px] font-semibold bg-white border border-slate-200/80 rounded-xl focus:outline-none focus:border-slate-800 placeholder:text-slate-300 transition-colors text-slate-800"
-                              rows={2}
-                            />
                           </div>
                         )}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
+                       </div>
+
+                      {/* Blocked message */}
+                      {isBlocked && (
+                        <div className="px-4 pb-4">
+                          <div className="p-3 bg-red-100/60 rounded-xl flex gap-2">
+                            <AlertCircle size={14} className="text-red-500 shrink-0 mt-0.5" />
+                            <p className="text-[11px] font-medium text-red-700 leading-relaxed">
+                              We found this item on Shopee for RM {marketCheck.market_baseline.toFixed(2)}. Campus listings must be priced at most RM {marketCheck.max_campus_price.toFixed(2)} to guarantee a student discount.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Justification box for borderline cases */}
+                      {!isBlocked && !isCompliant && !isNaN(numericPrice) && numericPrice > 0 && (
+                        <div className="px-4 pb-4">
+                          <textarea
+                            value={justification}
+                            onChange={(e) => setJustification(e.target.value)}
+                            placeholder="Optional: add a note explaining your pricing (e.g. bundle deal, accessories included)..."
+                            className="w-full min-h-[56px] p-3 text-[11px] font-medium bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-slate-800 placeholder:text-slate-300 transition-colors text-slate-700 resize-none"
+                            rows={2}
+                          />
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })()}
               </AnimatePresence>
             </section>
 
@@ -349,23 +542,23 @@ export default function CreateListingPage() {
             {/* ── SECTION: DELIVERY PREFERENCE ── */}
             <section className="space-y-4 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Fulfillment Method</h2>
+                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Delivery Method</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Can a campus runner deliver this, or do you prefer to meet the buyer yourself?</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                  <button 
                    onClick={() => setFulfillmentMode('DELIVERY')}
-                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'DELIVERY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'DELIVERY' ? 'bg-[#2A5C50] border-[#2A5C50] text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                  >
                     <span className="text-[13px] font-bold mb-1">Runner Delivery</span>
-                    <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'DELIVERY' ? 'text-slate-300' : 'text-slate-400'}`}>Pulse runners will handle delivery</span>
+                    <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'DELIVERY' ? 'text-white/80' : 'text-slate-400'}`}>Pulse runners will handle delivery</span>
                  </button>
                  <button 
                    onClick={() => setFulfillmentMode('MEETUP_ONLY')}
-                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'MEETUP_ONLY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'MEETUP_ONLY' ? 'bg-[#2A5C50] border-[#2A5C50] text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                  >
                     <span className="text-[13px] font-bold mb-1">Strictly Meetup</span>
-                    <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'MEETUP_ONLY' ? 'text-slate-300' : 'text-slate-400'}`}>You meet the buyer face-to-face</span>
+                    <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'MEETUP_ONLY' ? 'text-white/80' : 'text-slate-400'}`}>You meet the buyer face-to-face</span>
                  </button>
               </div>
               
