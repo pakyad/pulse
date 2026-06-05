@@ -8,12 +8,12 @@ import { ChevronLeft, Loader2, ArrowRight } from 'lucide-react';
 export default function RunnerOnboarding() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  
+
   const [form, setForm] = useState({
-    studentId: '',
-    whatsapp: '',
     transport: 'Walking',
     location: 'Main Campus',
+    schedule: 'Flexible',
+    capacity: 'Light (Food, Docs)',
     bankName: '',
     accountNumber: ''
   });
@@ -23,8 +23,10 @@ export default function RunnerOnboarding() {
   const BANKS = ['Maybank', 'CIMB', 'Bank Islam', 'RHB', 'Public Bank', 'Hong Leong', 'Other'];
   const TRANSPORT = ['Walking', 'Motor', 'Car'];
   const LOCATIONS = ['Main Campus', 'Residensi RAH'];
+  const SCHEDULES = ['Flexible', 'Weekdays', 'Weekends/Nights'];
+  const CAPACITIES = ['Light (Food, Docs)', 'Medium (Parcels)', 'Heavy (Boxes)'];
 
-  const canSubmit = form.studentId.trim() && form.whatsapp.trim() && form.bankName && form.accountNumber.trim();
+  const canSubmit = form.bankName && form.accountNumber.trim();
 
   const handleSubmit = async () => {
     if (!auth.currentUser || !canSubmit) return;
@@ -59,31 +61,10 @@ export default function RunnerOnboarding() {
           <p className="text-[13px] font-medium text-slate-400">Fill in your details below to start earning on campus.</p>
         </div>
 
-        {/* ── CARD 1: CONTACT INFO ── */}
+        {/* ── CARD 1: DELIVERY STYLE ── */}
         <section className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 rounded-full bg-cyan-100/50 text-cyan-600 flex items-center justify-center font-bold text-[14px]">1</div>
-             <h2 className="text-[16px] font-bold text-slate-900 tracking-tight">Who are you?</h2>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-slate-700 ml-1">Student ID</label>
-              <input type="text" placeholder="e.g. 52214112345" value={form.studentId} onChange={e => update('studentId', e.target.value)}
-                className="w-full h-14 px-5 bg-white border border-slate-100 rounded-[20px] text-[14px] font-medium text-slate-900 outline-none focus:border-cyan-300 transition-colors shadow-sm" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-slate-700 ml-1">WhatsApp Number</label>
-              <input type="tel" placeholder="e.g. 0123456789" value={form.whatsapp} onChange={e => update('whatsapp', e.target.value)}
-                className="w-full h-14 px-5 bg-white border border-slate-100 rounded-[20px] text-[14px] font-medium text-slate-900 outline-none focus:border-cyan-300 transition-colors shadow-sm" />
-            </div>
-          </div>
-        </section>
-
-        {/* ── CARD 2: DELIVERY STYLE ── */}
-        <section className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-indigo-100/50 text-indigo-600 flex items-center justify-center font-bold text-[14px]">2</div>
              <h2 className="text-[16px] font-bold text-slate-900 tracking-tight">How do you deliver?</h2>
           </div>
           
@@ -115,10 +96,45 @@ export default function RunnerOnboarding() {
           </div>
         </section>
 
+        {/* ── CARD 2: CAPACITY & SCHEDULE ── */}
+        <section className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-full bg-violet-100/50 text-violet-600 flex items-center justify-center font-bold text-[14px]">2</div>
+             <h2 className="text-[16px] font-bold text-slate-900 tracking-tight">When & what can you carry?</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[13px] font-medium text-slate-700 ml-1">Preferred Schedule</label>
+              <div className="flex flex-wrap gap-2">
+                {SCHEDULES.map(s => (
+                  <button key={s} onClick={() => update('schedule', s)}
+                    className={`h-12 px-4 rounded-[16px] text-[13px] font-semibold transition-all active:scale-95 border ${form.schedule === s ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'}`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="space-y-2 pt-2">
+              <label className="text-[13px] font-medium text-slate-700 ml-1">Weight Capacity</label>
+              <div className="flex flex-col gap-2">
+                {CAPACITIES.map(cap => (
+                  <button key={cap} onClick={() => update('capacity', cap)}
+                    className={`h-14 px-5 rounded-[16px] text-[14px] font-semibold transition-all active:scale-95 flex items-center justify-between border ${form.capacity === cap ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'}`}>
+                    {cap}
+                    {form.capacity === cap && <div className="w-2 h-2 rounded-full bg-slate-900" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── CARD 3: PAYMENT ── */}
         <section className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-violet-100/50 text-violet-600 flex items-center justify-center font-bold text-[14px]">3</div>
+             <div className="w-8 h-8 rounded-full bg-emerald-100/50 text-emerald-600 flex items-center justify-center font-bold text-[14px]">3</div>
              <h2 className="text-[16px] font-bold text-slate-900 tracking-tight">Where do we send your money?</h2>
           </div>
           
