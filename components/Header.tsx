@@ -30,9 +30,9 @@ export default function Header() {
           if (snap.exists()) setProfile(snap.data());
         });
         const q = query(
-          collection(db, "transactions"),
-          where("buyer_id", "==", user.uid),
-          where("status", "==", "PENDING")
+          collection(db, "notifications"),
+          where("user_id", "==", user.uid),
+          where("is_read", "==", false)
         );
         const unsubNotify = onSnapshot(q, (snap) => {
           setNotificationCount(snap.docs.length);

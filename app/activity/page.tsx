@@ -290,7 +290,7 @@ export default function ActivityPage() {
                           icon={item.icon || Bell}
                           onClick={() => {
                             if (item.action_url) {
-                              router.push(item.action_url);
+                              router.push(item.action_url === '/logistics' ? '/run' : item.action_url);
                             } else if (item.type === 'ORDER ALERT' || item.type === 'LOGISTICS UPDATE') {
                               router.push('/me/orders/history');
                             } else if (item.category === 'CAMPUS') {

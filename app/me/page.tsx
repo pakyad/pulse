@@ -31,13 +31,51 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
   </p>
 );
 
+const PixelBag = ({ className }: { className?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="7" y="4" width="6" height="2" />
+    <rect x="5" y="6" width="2" height="2" />
+    <rect x="13" y="6" width="2" height="2" />
+    <rect x="3" y="8" width="14" height="2" />
+    <rect x="3" y="18" width="14" height="2" />
+    <rect x="3" y="10" width="2" height="8" />
+    <rect x="15" y="10" width="2" height="8" />
+    <rect x="7" y="12" width="6" height="4" />
+  </svg>
+);
+
+const PixelChart = ({ className }: { className?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="2" y="2" width="2" height="16" />
+    <rect x="4" y="16" width="14" height="2" />
+    <rect x="6" y="12" width="2" height="4" />
+    <rect x="10" y="8" width="2" height="8" />
+    <rect x="14" y="4" width="2" height="12" />
+  </svg>
+);
+
+const PixelUser = ({ className }: { className?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="7" y="4" width="6" height="2" />
+    <rect x="7" y="10" width="6" height="2" />
+    <rect x="5" y="6" width="2" height="4" />
+    <rect x="13" y="6" width="2" height="4" />
+    <rect x="7" y="12" width="6" height="2" />
+    <rect x="5" y="14" width="2" height="2" />
+    <rect x="13" y="14" width="2" height="2" />
+    <rect x="3" y="16" width="14" height="2" />
+    <rect x="3" y="18" width="2" height="2" />
+    <rect x="15" y="18" width="2" height="2" />
+  </svg>
+);
+
 const MENU_GROUPS = [
   {
     label: 'Account & Settings',
     items: [
-      { icon: ShoppingBag, label: 'Order History', path: '/me/orders', sub: 'View past purchases & deliveries' },
-      { icon: BarChart3, label: 'Earnings Ledger', path: '/campus/earnings', sub: 'Track your marketplace revenue' },
-      { icon: User, label: 'Edit Profile', path: '/me/edit', sub: 'Update your personal details' },
+      { icon: PixelBag, label: 'Order History', path: '/me/orders', sub: 'View past purchases & deliveries' },
+      { icon: PixelChart, label: 'Earnings Ledger', path: '/campus/earnings', sub: 'Track your marketplace revenue' },
+      { icon: PixelUser, label: 'Edit Profile', path: '/me/edit', sub: 'Update your personal details' },
     ]
   }
 ];
@@ -135,8 +173,8 @@ export default function MePage() {
                         className={`w-full flex items-center justify-between group p-5 hover:bg-slate-50 transition-colors ${i !== group.items.length - 1 ? 'border-b border-slate-100' : ''}`}
                      >
                         <div className="text-left flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-900 group-hover:border-slate-900 group-hover:text-white transition-all shadow-sm">
-                              <item.icon size={18} />
+                           <div className="w-10 h-10 rounded-[6px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-900 group-hover:border-slate-900 group-hover:text-white transition-all shadow-sm group-hover:shadow-[2px_4px_0_rgba(15,23,42,1)] group-hover:-translate-y-1 duration-300">
+                              <item.icon className="w-5 h-5 currentColor" />
                            </div>
                            <div>
                               <p className="text-[15px] font-semibold text-slate-800 group-hover:text-slate-900 tracking-tight transition-colors">{item.label}</p>

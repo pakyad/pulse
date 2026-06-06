@@ -26,14 +26,104 @@ const Subtext = ({ children, className = '' }: { children: React.ReactNode; clas
   <p className={`text-[11px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>{children}</p>
 );
 
+const PixelGrid = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="3" y="3" width="6" height="6" />
+    <rect x="11" y="3" width="6" height="6" />
+    <rect x="3" y="11" width="6" height="6" />
+    <rect x="11" y="11" width="6" height="6" />
+  </svg>
+);
+
+const PixelShield = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="3" y="2" width="14" height="2" />
+    <rect x="3" y="4" width="2" height="8" />
+    <rect x="15" y="4" width="2" height="8" />
+    <rect x="5" y="12" width="2" height="2" />
+    <rect x="13" y="12" width="2" height="2" />
+    <rect x="7" y="14" width="2" height="2" />
+    <rect x="11" y="14" width="2" height="2" />
+    <rect x="9" y="16" width="2" height="2" />
+    <rect x="7" y="8" width="2" height="2" />
+    <rect x="9" y="10" width="2" height="2" />
+    <rect x="11" y="6" width="2" height="4" />
+  </svg>
+);
+
+const PixelLaptop = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="4" y="5" width="12" height="2" />
+    <rect x="4" y="7" width="2" height="6" />
+    <rect x="14" y="7" width="2" height="6" />
+    <rect x="6" y="13" width="8" height="2" />
+    <rect x="2" y="15" width="16" height="2" />
+  </svg>
+);
+
+const PixelBook = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="3" y="4" width="6" height="2" />
+    <rect x="3" y="6" width="2" height="10" />
+    <rect x="3" y="16" width="6" height="2" />
+    <rect x="11" y="4" width="6" height="2" />
+    <rect x="15" y="6" width="2" height="10" />
+    <rect x="11" y="16" width="6" height="2" />
+    <rect x="9" y="4" width="2" height="14" />
+  </svg>
+);
+
+const PixelShirt = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="7" y="2" width="6" height="2" />
+    <rect x="3" y="4" width="4" height="2" />
+    <rect x="13" y="4" width="4" height="2" />
+    <rect x="1" y="6" width="2" height="4" />
+    <rect x="17" y="6" width="2" height="4" />
+    <rect x="3" y="10" width="2" height="2" />
+    <rect x="15" y="10" width="2" height="2" />
+    <rect x="5" y="6" width="2" height="10" />
+    <rect x="13" y="6" width="2" height="10" />
+    <rect x="7" y="16" width="6" height="2" />
+  </svg>
+);
+
+const PixelHeart = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="3" y="4" width="4" height="2" />
+    <rect x="13" y="4" width="4" height="2" />
+    <rect x="1" y="6" width="2" height="4" />
+    <rect x="9" y="6" width="2" height="2" />
+    <rect x="17" y="6" width="2" height="4" />
+    <rect x="3" y="10" width="2" height="2" />
+    <rect x="15" y="10" width="2" height="2" />
+    <rect x="5" y="12" width="2" height="2" />
+    <rect x="13" y="12" width="2" height="2" />
+    <rect x="7" y="14" width="2" height="2" />
+    <rect x="11" y="14" width="2" height="2" />
+    <rect x="9" y="16" width="2" height="2" />
+  </svg>
+);
+
+const PixelFilter = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="3" y="4" width="14" height="2" />
+    <rect x="5" y="6" width="2" height="2" />
+    <rect x="13" y="6" width="2" height="2" />
+    <rect x="7" y="8" width="2" height="2" />
+    <rect x="11" y="8" width="2" height="2" />
+    <rect x="9" y="10" width="2" height="6" />
+  </svg>
+);
+
 // ── CATEGORY CONFIG ──
 // 'all' is handled separately as a dedicated button (active when activeCategory === null)
 const CATEGORIES = [
-  { id: 'store',    label: 'Official', filter: 'Official', icon: ShieldCheck },
-  { id: 'tech',     label: 'Tech',     filter: 'Tech',     icon: Laptop      },
-  { id: 'books',    label: 'Academic', filter: 'Books',    icon: BookOpen    },
-  { id: 'apparel',  label: 'Apparel',  filter: 'Merch',    icon: Shirt       },
-  { id: 'services', label: 'Services', filter: 'Services', icon: HeartPulse  },
+  { id: 'store',    label: 'Official', filter: 'Official', icon: PixelShield },
+  { id: 'tech',     label: 'Tech',     filter: 'Tech',     icon: PixelLaptop },
+  { id: 'books',    label: 'Academic', filter: 'Books',    icon: PixelBook   },
+  { id: 'apparel',  label: 'Apparel',  filter: 'Merch',    icon: PixelShirt  },
+  { id: 'services', label: 'Services', filter: 'Services', icon: PixelHeart  },
 ];
 
 function MarketplacePage() {
@@ -291,7 +381,7 @@ function MarketplacePage() {
               onClick={() => setIsFilterOpen(true)}
               className="h-9 px-4 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-full border border-slate-100 flex items-center gap-2 active:scale-95 transition-all hover:bg-slate-50"
             >
-              <Filter size={14} className="text-slate-500" />
+              <PixelFilter size={14} className="text-slate-500" />
               <span className="text-[13px] font-semibold text-slate-600">Filter</span>
             </button>
           </div>
@@ -301,14 +391,14 @@ function MarketplacePage() {
             {/* "All Items" chip — explicitly active when nothing else is selected */}
             <button
               onClick={() => setActiveCategory(null)}
-              className={`h-[36px] px-5 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border ${
+              className={`h-[34px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border ${
                 activeCategory === null
                   ? 'bg-slate-900 border-transparent text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
                   : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 shadow-sm'
               }`}
             >
-              <LayoutGrid size={16} strokeWidth={activeCategory === null ? 2.5 : 2} />
-              <span className="text-[13px] font-semibold tracking-normal">All Items</span>
+              <PixelGrid size={14} />
+              <span className="text-[12px] font-bold tracking-normal">All Items</span>
             </button>
 
             {CATEGORIES.map(cat => {
@@ -317,14 +407,14 @@ function MarketplacePage() {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(prev => prev === cat.filter ? null : cat.filter)}
-                  className={`h-[36px] px-5 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border ${
+                  className={`h-[34px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border ${
                     isActive
                       ? 'bg-slate-900 border-transparent text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
                       : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 shadow-sm'
                   }`}
                 >
-                  <cat.icon size={16} strokeWidth={isActive ? 2.5 : 2} />
-                  <span className="text-[13px] font-semibold tracking-normal">{cat.label}</span>
+                  <cat.icon size={14} />
+                  <span className="text-[12px] font-bold tracking-normal">{cat.label}</span>
                 </button>
               );
             })}

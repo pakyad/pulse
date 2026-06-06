@@ -124,56 +124,64 @@ export default function AdminLedgerPage() {
                </div>
             ) : (
                <div className="space-y-4">
-                  {requests.map((req) => (
-                    <motion.div 
-                      key={req.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="bg-white/5 border border-white/5 p-8 rounded-[3rem] hover:bg-white/8 transition-all group"
-                    >
-                       <div className="flex justify-between items-start mb-8">
-                          <div className="flex items-center gap-4">
-                             <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/20">
-                                <Building2 size={24} />
-                             </div>
-                             <div>
-                                <h4 className="text-[18px] font-bold tracking-tight">{req.merchant_name}</h4>
-                                <p className="text-[11px] font-bold text-white/20 ">Institutional Provider</p>
-                             </div>
-                          </div>
-                          <div className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold  border border-emerald-500/20">
-                             Awaiting Auth
-                          </div>
-                       </div>
+                  {requests.map((req) => {
+                    const isRunner = req.type === 'WITHDRAWAL';
+                    const name = isRunner ? req.user_name : req.merchant_name;
+                    const entityType = isRunner ? 'Pulse Runner' : 'Institutional Provider';
+                    const gross = isRunner ? req.amount : req.total_revenue;
+                    const fee = isRunner ? 0 : (req.pulse_fee || 0);
 
-                       <div className="grid grid-cols-3 gap-8 mb-8 p-6 bg-white/5 rounded-2xl">
-                          <div>
-                             <p className="text-[9px] font-bold text-white/20  mb-1">Gross Revenue</p>
-                             <p className="text-[16px] font-bold tracking-widest text-white">RM {req.total_revenue.toFixed(2)}</p>
-                          </div>
-                          <div>
-                             <p className="text-[9px] font-bold text-white/20  mb-1">Pulse Fee (10%)</p>
-                             <p className="text-[16px] font-bold tracking-widest text-red-400">- RM {req.pulse_fee.toFixed(2)}</p>
-                          </div>
-                          <div>
-                             <p className="text-[9px] font-bold text-white/20  mb-1">Net Payout</p>
-                             <p className="text-[20px] font-bold tracking-tighter text-emerald-500">RM {req.net_payout.toFixed(2)}</p>
-                          </div>
-                       </div>
+                    return (
+                      <motion.div 
+                        key={req.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-white/5 border border-white/5 p-8 rounded-[3rem] hover:bg-white/8 transition-all group"
+                      >
+                         <div className="flex justify-between items-start mb-8">
+                            <div className="flex items-center gap-4">
+                               <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/20">
+                                  {isRunner ? <Wallet size={24} /> : <Building2 size={24} />}
+                               </div>
+                               <div>
+                                  <h4 className="text-[18px] font-bold tracking-tight">{name}</h4>
+                                  <p className="text-[11px] font-bold text-white/20 ">{entityType}</p>
+                               </div>
+                            </div>
+                            <div className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold  border border-emerald-500/20">
+                               Awaiting Auth
+                            </div>
+                         </div>
 
-                       <div className="flex gap-3">
-                          <button 
-                            onClick={() => handleAuthorizePayout(req)}
-                            className="flex-1 h-14 bg-white text-navy rounded-full font-bold text-[13px]  active:scale-95 transition-all shadow-md shadow-white/5"
-                          >
-                             Authorize Fund Transfer
-                          </button>
-                          <button className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-white/20 hover:text-red-500 transition-all">
-                             <XCircle size={18} />
-                          </button>
-                       </div>
-                    </motion.div>
-                  ))}
+                         <div className="grid grid-cols-3 gap-8 mb-8 p-6 bg-white/5 rounded-2xl">
+                            <div>
+                               <p className="text-[9px] font-bold text-white/20  mb-1">Gross Request</p>
+                               <p className="text-[16px] font-bold tracking-widest text-white">RM {gross?.toFixed(2) || '0.00'}</p>
+                            </div>
+                            <div>
+                               <p className="text-[9px] font-bold text-white/20  mb-1">Pulse Fee</p>
+                               <p className="text-[16px] font-bold tracking-widest text-red-400">- RM {fee.toFixed(2)}</p>
+                            </div>
+                            <div>
+                               <p className="text-[9px] font-bold text-white/20  mb-1">Net Payout</p>
+                               <p className="text-[20px] font-bold tracking-tighter text-emerald-500">RM {req.net_payout?.toFixed(2) || '0.00'}</p>
+                            </div>
+                         </div>
+
+                         <div className="flex gap-3">
+                            <button 
+                              onClick={() => handleAuthorizePayout(req)}
+                              className="flex-1 h-14 bg-white text-slate-900 rounded-full font-bold text-[13px]  active:scale-95 transition-all shadow-md shadow-white/5"
+                            >
+                               Authorize Fund Transfer
+                            </button>
+                            <button className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-white/20 hover:text-red-500 transition-all">
+                               <XCircle size={18} />
+                            </button>
+                         </div>
+                      </motion.div>
+                    );
+                  })}
                </div>
             )}
          </div>

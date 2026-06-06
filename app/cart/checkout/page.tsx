@@ -242,11 +242,11 @@ export default function CartCheckoutPage() {
                 {cart.map((item) => {
                   const pref = preferences[item.productId] || { type: 'RUNNER', location: 'k' };
                   return (
-                    <div key={item.productId} className="space-y-3 p-5 bg-slate-50 border border-slate-100 rounded-2xl">
+                    <div key={item.productId} className="space-y-3 p-5 bg-white border border-slate-100 shadow-sm rounded-[24px]">
                        {/* Item Header */}
-                       <div className="flex items-center gap-3 pb-3 border-b border-slate-200/50">
-                          <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-200 shrink-0 overflow-hidden">
-                             {item.image ? <img src={item.image} className="w-full h-full object-cover" /> : <Package size={18} />}
+                       <div className="flex items-center gap-4 pb-4 border-b border-slate-100">
+                          <div className="w-12 h-12 rounded-[16px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 shrink-0 overflow-hidden">
+                             {item.image ? <img src={item.image} className="w-full h-full object-cover" /> : <Package size={20} />}
                           </div>
                           <div className="flex-1 min-w-0">
                              <p className="text-[13px] font-bold text-slate-900 truncate">{item.title}</p>
@@ -255,18 +255,18 @@ export default function CartCheckoutPage() {
                        </div>
 
                        {/* Method Selection */}
-                       <div className="grid grid-cols-2 gap-2">
+                       <div className="grid grid-cols-2 gap-3">
                           <button
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'SELF_COLLECT' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'SELF_COLLECT' ? 'bg-slate-900 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-12 rounded-[16px] border flex items-center justify-center gap-2 text-[13px] font-semibold transition-all active:scale-95 ${pref.type === 'SELF_COLLECT' ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50'}`}
                           >
-                             <Package size={14} /> Self-Collect
+                             <Package size={16} /> Self-Collect
                           </button>
                           <button
                             onClick={() => setPreferences(prev => ({ ...prev, [item.productId]: { ...pref, type: 'RUNNER' } }))}
-                            className={`h-11 rounded-xl border flex items-center justify-center gap-2 text-[12px] font-bold transition-all active:scale-95 ${pref.type === 'RUNNER' ? 'bg-slate-900 border-blue-600 text-white shadow-md shadow-slate-900/10' : 'bg-white border-slate-200 text-slate-400'}`}
+                            className={`h-12 rounded-[16px] border flex items-center justify-center gap-2 text-[13px] font-semibold transition-all active:scale-95 ${pref.type === 'RUNNER' ? 'bg-slate-50 border-slate-900 text-slate-900 shadow-sm' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50'}`}
                           >
-                             <Truck size={14} /> Runner
+                             <Truck size={16} /> Runner
                           </button>
                        </div>
 
@@ -349,10 +349,10 @@ export default function CartCheckoutPage() {
                    <button
                      key={bank.id}
                      onClick={() => setSelectedBank(bank.id)}
-                     className={`w-full h-16 px-5 rounded-2xl flex items-center justify-between border transition-all active:scale-95 ${
+                     className={`w-full h-16 px-5 rounded-[20px] flex items-center justify-between border transition-all active:scale-95 ${
                        selectedBank === bank.id
-                       ? 'bg-white border-slate-900 shadow-md shadow-slate-900/10 ring-1 ring-slate-900'
-                       : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-slate-200'
+                       ? 'bg-slate-50 border-slate-900 shadow-sm'
+                       : 'bg-white border-slate-100 hover:bg-slate-50'
                      }`}
                    >
                      <div className="flex items-center gap-4">
@@ -364,8 +364,8 @@ export default function CartCheckoutPage() {
                         </span>
                      </div>
 
-                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedBank === bank.id ? 'bg-slate-900 border-blue-600' : 'bg-white border-slate-200'
+                     <div className={`w-5 h-5 rounded-full border-[1.5px] flex items-center justify-center transition-all ${
+                        selectedBank === bank.id ? 'border-slate-900 bg-slate-900' : 'border-slate-200 bg-white'
                      }`}>
                         {selectedBank === bank.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                      </div>
@@ -381,7 +381,7 @@ export default function CartCheckoutPage() {
         <button
           onClick={() => step === 1 ? setStep(2) : handlePay()}
           disabled={(step === 1 && !canProceedStep1) || (step === 2 && !canPay)}
-          className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-md shadow-slate-900/10"
+          className="w-full h-14 bg-slate-900 text-white rounded-[20px] font-semibold text-[15px] flex items-center justify-center gap-2 disabled:opacity-20 transition-all shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
         >
           {step === 1 ? 'Review Payment' : `Pay RM ${total.toFixed(2)}`}
           <ArrowRight size={18} />

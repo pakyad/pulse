@@ -35,18 +35,36 @@ export const VoxelPulse = ({ className = "text-emerald-500", size = 20 }: { clas
 
 export const VoxelRadar = ({ className = "text-slate-900", size = 20 }: { className?: string, size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <rect x="10" y="10" width="4" height="4" fill="currentColor" rx="0.5" />
+    {/* Central Core Voxel */}
+    <rect x="10" y="10" width="4" height="4" fill="currentColor" rx="1" />
+    
+    {/* Expanding Inner Voxel Field */}
     <motion.rect 
-      animate={{ scale: [1, 1.5], opacity: [1, 0] }}
-      transition={{ duration: 2, repeat: Infinity }}
-      x="8" y="8" width="8" height="8" stroke="currentColor" strokeWidth="1" fill="none" 
+      x="10" y="10" width="4" height="4" rx="1"
+      animate={{ 
+        x: [10, 2], y: [10, 2], width: [4, 20], height: [4, 20],
+        opacity: [0.8, 0], strokeWidth: [1.5, 0.5] 
+      }}
+      transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
+      stroke="currentColor" fill="none"
     />
-    <motion.path 
-      animate={{ opacity: [0, 1, 0] }}
-      transition={{ duration: 2, repeat: Infinity }}
-      d="M4 4H8V6H4V4ZM16 4H20V6H16V4ZM4 18H8V20H4V18ZM16 18H20V20H16V18Z" 
-      fill="currentColor" 
+    
+    {/* Expanding Outer Voxel Field */}
+    <motion.rect 
+      x="10" y="10" width="4" height="4" rx="1"
+      animate={{ 
+        x: [10, 2], y: [10, 2], width: [4, 20], height: [4, 20],
+        opacity: [0.8, 0], strokeWidth: [1.5, 0.5] 
+      }}
+      transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut", delay: 1.2 }}
+      stroke="currentColor" fill="none"
     />
+
+    {/* Four Corner Institutional Anchors */}
+    <motion.rect animate={{ opacity: [0.1, 0.5, 0.1] }} transition={{ duration: 2, repeat: Infinity }} x="3" y="3" width="2" height="2" fill="currentColor" rx="0.5" />
+    <motion.rect animate={{ opacity: [0.1, 0.5, 0.1] }} transition={{ duration: 2, repeat: Infinity, delay: 0.5 }} x="19" y="3" width="2" height="2" fill="currentColor" rx="0.5" />
+    <motion.rect animate={{ opacity: [0.1, 0.5, 0.1] }} transition={{ duration: 2, repeat: Infinity, delay: 1.0 }} x="19" y="19" width="2" height="2" fill="currentColor" rx="0.5" />
+    <motion.rect animate={{ opacity: [0.1, 0.5, 0.1] }} transition={{ duration: 2, repeat: Infinity, delay: 1.5 }} x="3" y="19" width="2" height="2" fill="currentColor" rx="0.5" />
   </svg>
 );
 

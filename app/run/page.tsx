@@ -412,20 +412,26 @@ export default function RunModule() {
               <Heading>Runner Dashboard</Heading>
               <Subtext>Manage your active missions and earnings</Subtext>
             </div>
-            <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+            <button 
+              onClick={() => router.push('/run/wallet')}
+              className="w-full bg-slate-50/50 p-6 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm active:scale-[0.98] transition-all text-left"
+            >
               <div className="flex items-center gap-5">
                 <div className={`w-1.5 h-12 rounded-full transition-all ${profile?.is_online ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-slate-200'}`} />
                 <div>
                   <p className="text-[28px] font-bold text-slate-900 tracking-tighter leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
-                  <p className="text-[11px] text-[#94a3b8] font-bold mt-1 lowercase tracking-tight">today's earnings</p>
+                  <p className="text-[11px] text-[#94a3b8] font-bold mt-1 tracking-tight flex items-center gap-1">
+                    Wallet
+                    <ChevronRight size={12} strokeWidth={3} />
+                  </p>
                 </div>
               </div>
-              <button onClick={toggleStatus}
+              <div onClick={(e) => { e.stopPropagation(); toggleStatus(); }}
                 className={`h-11 px-5 rounded-2xl text-[12px] font-bold border transition-all flex items-center gap-2 ${profile?.is_online ? 'bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-white border-slate-200 text-slate-400'}`}>
                 {profile?.is_online && <div className="w-2 h-2 rounded-full bg-white animate-pulse" />}
                 <span className="lowercase">{profile?.is_online ? 'online' : 'offline'}</span>
-              </button>
-            </div>
+              </div>
+            </button>
             <div className="grid grid-cols-2 gap-3 mt-4">
               {/* Delivery Hub Card */}
               <button 
@@ -449,7 +455,7 @@ export default function RunModule() {
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-violet-200/60 text-violet-950">
                   <History size={20} strokeWidth={2.5} />
                 </div>
-                <p className="text-[14px] font-bold tracking-tight truncate">Mission History</p>
+                <p className="text-[14px] font-bold tracking-tight truncate">Order History</p>
               </button>
             </div>
           </div>

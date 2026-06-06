@@ -6,21 +6,40 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import {
   LayoutGrid, Inbox, ShieldCheck, ShieldAlert, Users,
-  MessageSquare, ScrollText, Settings, LogOut, Archive, UserCheck
+  MessageSquare, ScrollText, Settings, LogOut, Archive, UserCheck, Wallet
 } from 'lucide-react';
 
-// ── NAV CONFIG ─────────────────────────────────────────────────────────────────
-const NAV = [
-  { href: '/admin/overview',       label: 'Overview',           icon: LayoutGrid   },
-  { href: '/admin/price-terminal', label: 'Price Audit',        icon: Inbox        },
-  { href: '/admin/price-review',   label: 'Price Review',       icon: ShieldCheck,   badgeKey: 'priceReview' },
-  { href: '/admin/disputes',       label: 'Disputes',           icon: ShieldAlert,   badgeKey: 'disputes' },
-  { href: '/admin/runners',        label: 'Runner Apps',        icon: UserCheck,     badgeKey: 'runnerApps' },
-  { href: '/admin/users',          label: 'Users',              icon: Users        },
-  { href: '/admin/appeals',        label: 'Price Appeals',      icon: MessageSquare, badgeKey: 'appeals' },
-  { href: '/admin/vault',          label: 'Governance Vault',   icon: Archive      },
-  { href: '/admin/logs',           label: 'Activity Logs',      icon: ScrollText   },
-  { href: '/admin/settings',       label: 'Settings',           icon: Settings     },
+const NAV_SECTIONS = [
+  {
+    title: 'MAIN',
+    items: [
+      { href: '/admin/overview',       label: 'Overview',           icon: LayoutGrid   },
+      { href: '/admin/escrow',         label: 'Escrow Control',     icon: Wallet       },
+    ]
+  },
+  {
+    title: 'GOVERNANCE',
+    items: [
+      { href: '/admin/price-review',   label: 'Price Review',       icon: ShieldCheck,   badgeKey: 'priceReview' },
+      { href: '/admin/appeals',        label: 'Price Appeals',      icon: MessageSquare, badgeKey: 'appeals' },
+      { href: '/admin/disputes',       label: 'Disputes',           icon: ShieldAlert,   badgeKey: 'disputes' },
+    ]
+  },
+  {
+    title: 'NETWORK',
+    items: [
+      { href: '/admin/runners',        label: 'Runner Apps',        icon: UserCheck,     badgeKey: 'runnerApps' },
+      { href: '/admin/users',          label: 'User Registry',      icon: Users        },
+    ]
+  },
+  {
+    title: 'SYSTEM',
+    items: [
+      { href: '/admin/vault',          label: 'Governance Vault',   icon: Archive      },
+      { href: '/admin/logs',           label: 'Activity Logs',      icon: ScrollText   },
+      { href: '/admin/settings',       label: 'Settings',           icon: Settings     },
+    ]
+  }
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -91,34 +110,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {NAV.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-            const badge    = item.badgeKey ? (badges[item.badgeKey] ?? 0) : 0;
-            return (
-              <button
-                key={item.href}
-                onClick={() => router.push(item.href)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group ${
-                  isActive
-                    ? 'bg-[#F2F2F7] text-[#1C1C1E]'
-                    : 'text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} className="shrink-0" />
-                  <span className={`text-[13px] tracking-tight ${isActive ? 'font-bold' : 'font-medium'}`}>
-                    {item.label}
-                  </span>
-                </div>
-                {badge > 0 && (
-                  <span className="bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                    {badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-6">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.title} className="space-y-1">
+              <p className="px-3 text-[10px] font-bold text-[#AEAEB2] tracking-wider mb-2">{section.title}</p>
+              {section.items.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                const badge    = item.badgeKey ? (badges[item.badgeKey] ?? 0) : 0;
+                return (
+                  <button
+                    key={item.href}
+                    onClick={() => router.push(item.href)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+                      isActive
+                        ? 'bg-[#F2F2F7] text-[#1C1C1E]'
+                        : 'text-[#8E8E93] hover:bg-[#F9F9FB] hover:text-[#1C1C1E]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} className="shrink-0" />
+                      <span className={`text-[13px] tracking-tight ${isActive ? 'font-bold' : 'font-medium'}`}>
+                        {item.label}
+                      </span>
+                    </div>
+                    {badge > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                        {badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Footer */}

@@ -89,6 +89,20 @@ export default function SettingsPage() {
         </button>
       </div>
 
+      {/* Presentation Controls */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
+        <div>
+          <h2 className="text-[16px] font-bold text-slate-900">Presentation Controls</h2>
+          <p className="text-[12px] text-slate-400 mt-1">
+            Enable Judging Mode to simulate live transactions and bypass delays during the FYP2 presentation.
+          </p>
+        </div>
+        <button onClick={() => alert("Judging Mode Enabled: Escrow timers disabled and auto-release triggered.")}
+          className="w-full h-12 rounded-xl font-bold text-[12px] bg-slate-50 border border-slate-200 text-slate-900 hover:bg-slate-100 transition-all active:scale-95">
+          Enable Judging Mode
+        </button>
+      </div>
+
       {/* Campus Defaults Reference */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100">

@@ -27,65 +27,71 @@ export default function EarningsLedgerPage() {
       }
 
       try {
-        // Fetch Completed Deliveries
-        const runnerQ = query(
-          collection(db, 'transactions'),
-          where('runner_id', '==', user.uid),
-          where('status', '==', 'DELIVERED')
+        // Query the new centralized Escrow Ledger
+        const ledgerQ = query(
+          collection(db, 'ledger'),
+          where('user_id', '==', user.uid),
+          where('status', '==', 'CLEARED')
         );
-        const runnerSnap = await getDocs(runnerQ);
-        
-        // Fetch Completed Sales
-        const sellerQ = query(
-          collection(db, 'transactions'),
-          where('merchant_id', '==', user.uid),
-          where('status', '==', 'COMPLETED')
-        );
-        const sellerSnap = await getDocs(sellerQ);
+        const ledgerSnap = await getDocs(ledgerQ);
 
         let totalEarned = 0;
         let deliveriesCompleted = 0;
         let salesCompleted = 0;
         const activities: any[] = [];
 
-        // Process Deliveries
-        runnerSnap.forEach(doc => {
+        ledgerSnap.forEach(doc => {
           const data = doc.data();
-          const fee = data.runner_fee || 0;
-          totalEarned += fee;
-          deliveriesCompleted++;
-          activities.push({
-            id: doc.id,
-            type: 'DELIVERY',
-            title: data.item_name || 'Campus Delivery',
-            amount: fee,
-            date: data.updated_at || data.created_at || new Date().toISOString()
-          });
-        });
-
-        // Process Sales
-        sellerSnap.forEach(doc => {
-          const data = doc.data();
-          const amount = data.total_amount || 0;
+          const amount = data.amount || 0;
           totalEarned += amount;
-          salesCompleted++;
+          
+          if (data.type === 'DELIVERY_FEE') deliveriesCompleted++;
+          if (data.type === 'SALE_REVENUE') salesCompleted++;
+
           activities.push({
             id: doc.id,
-            type: 'SALE',
-            title: data.item_name || 'Marketplace Sale',
+            type: data.type === 'DELIVERY_FEE' ? 'DELIVERY' : 'SALE',
+            title: data.title || data.description || 'Ledger Entry',
             amount: amount,
-            date: data.updated_at || data.created_at || new Date().toISOString()
+            date: data.created_at || new Date().toISOString()
           });
         });
 
-        // Sort recent activity
+        // Backward compatibility for old demo data
+        const runnerQ = query(collection(db, 'transactions'), where('runner_id', '==', user.uid), where('status', '==', 'DELIVERED'));
+        const sellerQ = query(collection(db, 'transactions'), where('merchant_id', '==', user.uid), where('status', '==', 'COMPLETED'));
+        
+        const [runnerSnap, sellerSnap] = await Promise.all([getDocs(runnerQ), getDocs(sellerQ)]);
+        
+        runnerSnap.forEach(doc => {
+          if (!activities.find(a => a.id === doc.id)) {
+            const data = doc.data();
+            totalEarned += data.runner_fee || 0;
+            deliveriesCompleted++;
+            activities.push({
+              id: doc.id, type: 'DELIVERY', title: data.item_name || 'Campus Delivery', amount: data.runner_fee || 0, date: data.updated_at || data.created_at || new Date().toISOString()
+            });
+          }
+        });
+
+        sellerSnap.forEach(doc => {
+          if (!activities.find(a => a.id === doc.id)) {
+            const data = doc.data();
+            totalEarned += data.total_amount || 0;
+            salesCompleted++;
+            activities.push({
+              id: doc.id, type: 'SALE', title: data.item_name || 'Marketplace Sale', amount: data.total_amount || 0, date: data.updated_at || data.created_at || new Date().toISOString()
+            });
+          }
+        });
+
         activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
         setEarnings({
           totalEarned,
           deliveriesCompleted,
           salesCompleted,
-          recentActivity: activities.slice(0, 10) // Show last 10
+          recentActivity: activities.slice(0, 10)
         });
       } catch (err) {
         console.error("Failed to load earnings ledger:", err);

@@ -1,107 +1,278 @@
-'use client'
+"use client";
+
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { UserCheck, Check, X, Car, Bike, PersonStanding } from 'lucide-react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { approveRunner, rejectRunner } from '@/app/actions/adminActions';
+import { UserCheck, CheckCircle2, Loader2, X, AlertTriangle, PersonStanding, Car, Bike } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export default function AdminRunners() {
+// ── Confirm Modal ─────────────────────────────────────────────────────────────
+function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
+  let title = action === 'approve' ? "Approve Runner" : "Reject Application";
+  let description = action === 'approve' 
+    ? "This student will instantly gain access to the Runner Logistics Terminal and can start accepting delivery orders."
+    : "This application will be rejected and the student will not be granted runner privileges. They can re-apply later.";
+
+  return (
+    <div className="fixed inset-0 z-60 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 max-w-sm w-full space-y-6">
+        
+        <div className="flex gap-4">
+          <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+            <AlertTriangle size={18} className="text-slate-900" />
+          </div>
+          <div>
+            <h3 className="text-[16px] font-bold text-slate-900">{title}</h3>
+            <p className="text-[13px] font-medium text-slate-500 mt-1 leading-relaxed">
+              {description}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button onClick={onClose} disabled={isWorking}
+            className="flex-1 h-11 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50">
+            Cancel
+          </button>
+          <button onClick={() => onConfirm(action)} disabled={isWorking}
+            className={`flex-1 h-11 rounded-xl text-[13px] font-bold text-white transition-all disabled:opacity-50 flex items-center justify-center ${
+              action === 'reject' ? 'bg-red-600 hover:bg-red-700' : 'bg-slate-900 hover:bg-slate-800'
+            }`}>
+            {isWorking ? <Loader2 size={16} className="animate-spin" /> : 'Confirm'}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Application Details Drawer ────────────────────────────────────────────────
+function AppDetailsDrawer({ app, onClose, onResolve }: { app: any; onClose: () => void; onResolve: (action: string) => Promise<void> }) {
+  const [confirmAction, setConfirmAction] = useState<string | null>(null);
+  const [isWorking, setIsWorking] = useState(false);
+
+  if (!app) return null;
+
+  const executeResolution = async (action: string) => {
+    setIsWorking(true);
+    await onResolve(action);
+    setIsWorking(false);
+    setConfirmAction(null);
+    onClose();
+  };
+
+  return (
+    <>
+      {confirmAction && (
+        <ConfirmDialog 
+          action={confirmAction} 
+          onClose={() => setConfirmAction(null)} 
+          onConfirm={executeResolution} 
+          isWorking={isWorking} 
+        />
+      )}
+
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        onClick={onClose} className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm" />
+      <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+        className="fixed top-0 right-0 bottom-0 w-full max-w-[480px] bg-white z-50 shadow-2xl flex flex-col">
+        
+        <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 mb-1">Dossier</p>
+            <h2 className="text-[20px] font-bold text-slate-900 tracking-tight">Runner Application</h2>
+          </div>
+          <button onClick={onClose} className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-8 space-y-8">
+          
+          <div className="space-y-4">
+            <h3 className="text-[12px] font-bold text-slate-900">Student Identity</h3>
+            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
+              <div className="flex justify-between text-[13px]">
+                <span className="font-semibold text-slate-500">Full Name</span>
+                <span className="font-bold text-slate-900">{app.displayName || app.full_name || 'Unknown'}</span>
+              </div>
+              <div className="flex justify-between text-[13px]">
+                <span className="font-semibold text-slate-500">Email Address</span>
+                <span className="font-bold text-slate-900">{app.email}</span>
+              </div>
+              <div className="flex justify-between text-[13px]">
+                <span className="font-semibold text-slate-500">Matric / Student ID</span>
+                <span className="font-bold text-slate-900">{app.runner_data?.studentId || app.matric_no || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-[12px] font-bold text-slate-900">Logistics Capacity</h3>
+            <div className="p-5 bg-white shadow-sm rounded-2xl border border-slate-100 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
+                  {app.runner_data?.transport === 'Walking' ? <PersonStanding size={18} className="text-slate-600" /> :
+                   app.runner_data?.transport === 'Car' ? <Car size={18} className="text-slate-600" /> : <Bike size={18} className="text-slate-600" />}
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 mb-0.5">Primary Transport</p>
+                  <p className="text-[14px] font-bold text-slate-900">{app.runner_data?.transport || 'Walking'}</p>
+                </div>
+              </div>
+              <div className="pt-3 border-t border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 mb-1">Coverage Area</p>
+                <p className="text-[13px] font-semibold text-slate-700">{app.runner_data?.location || 'General Campus'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-[12px] font-bold text-slate-900">Operational Details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 mb-1">WhatsApp</p>
+                <p className="text-[13px] font-bold text-slate-900">{app.runner_data?.whatsapp || 'Not provided'}</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 mb-1">Bank Name</p>
+                <p className="text-[13px] font-bold text-slate-900">{app.runner_data?.bankName || 'Not provided'}</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 col-span-2">
+                <p className="text-[10px] font-bold text-slate-400 mb-1">Bank Account No.</p>
+                <p className="text-[13px] font-bold text-slate-900 tracking-wider">{app.runner_data?.accountNumber || 'Not provided'}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Action Controls */}
+        <div className="p-8 border-t border-slate-100 bg-white space-y-4">
+          <h3 className="text-[12px] font-bold text-slate-900">Adjudication Controls</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={() => setConfirmAction('reject')}
+              className="h-12 flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-red-50 hover:border-red-200 transition-all group">
+              <span className="text-[13px] font-bold text-slate-700 group-hover:text-red-700">Reject</span>
+            </button>
+            <button onClick={() => setConfirmAction('approve')}
+              className="h-12 flex flex-col items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 transition-all group shadow-md shadow-slate-900/10">
+              <span className="text-[13px] font-bold text-white">Approve Runner</span>
+            </button>
+          </div>
+        </div>
+
+      </motion.div>
+    </>
+  );
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
+export default function AdminRunnersPage() {
   const [apps, setApps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewingApp, setViewingApp] = useState<any>(null);
 
   useEffect(() => {
     const q = query(collection(db, 'users'), where('runner_status', '==', 'pending'));
     const unsub = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setApps(data);
+      setApps(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
     });
     return () => unsub();
   }, []);
 
-  const handleApprove = async (id: string) => {
-    await updateDoc(doc(db, 'users', id), {
-      runner_status: 'approved',
-      is_verified_runner: true
-    });
+  const handleAction = async (action: string) => {
+    if (!viewingApp) return;
+    try {
+      let res;
+      if (action === 'approve') res = await approveRunner(viewingApp.id);
+      if (action === 'reject') res = await rejectRunner(viewingApp.id);
+      
+      if (!res?.success) throw new Error(res?.message || 'Failed to complete action');
+    } catch (e: any) {
+      alert("Error: " + e.message);
+    }
   };
-
-  const handleReject = async (id: string) => {
-    // We set to none so they can reapply if they want, or we could set to 'rejected'
-    await updateDoc(doc(db, 'users', id), {
-      runner_status: 'none',
-    });
-  };
-
-  if (loading) return <div className="text-sm font-medium text-[#8E8E93]">Loading applications...</div>;
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-8 max-w-[1400px] w-full">
+      
+      <AnimatePresence>
+        {viewingApp && (
+          <AppDetailsDrawer app={viewingApp} onClose={() => setViewingApp(null)} onResolve={handleAction} />
+        )}
+      </AnimatePresence>
+
+      {/* Header */}
       <div>
-        <h1 className="text-[24px] font-semibold text-[#1C1C1E] tracking-tight">Runner Applications</h1>
-        <p className="text-[14px] text-[#8E8E93] font-medium mt-1">Review and approve campus delivery runners.</p>
+        <p className="text-[10px] font-semibold text-slate-400 mb-1">Network Expansion</p>
+        <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Runner Registry</h1>
       </div>
 
-      {apps.length === 0 ? (
-        <div className="bg-white border border-[#E5E5EA] rounded-2xl p-12 flex flex-col items-center justify-center text-center">
-          <div className="w-12 h-12 bg-[#F2F2F7] rounded-full flex items-center justify-center text-[#8E8E93] mb-4">
-            <UserCheck size={24} />
+      {/* Main Container */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-[16px] font-bold text-slate-900">Pending Applications</h2>
+            <p className="text-[12px] text-slate-400 mt-1">
+              Review and approve campus delivery runners.
+            </p>
           </div>
-          <h3 className="text-[16px] font-bold text-[#1C1C1E]">No pending applications</h3>
-          <p className="text-[13px] text-[#8E8E93] font-medium mt-1">You're all caught up!</p>
+          <span className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[11px] font-bold text-slate-500">
+            {apps.length} Waiting
+          </span>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          {apps.map(app => (
-            <div key={app.id} className="bg-white border border-[#E5E5EA] rounded-2xl p-6 flex flex-col gap-6">
-              
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#F9F9FB] border border-[#E5E5EA] rounded-xl flex items-center justify-center text-[#1C1C1E]">
-                    {app.runner_data?.transport === 'Walking' ? <PersonStanding size={20} /> :
-                     app.runner_data?.transport === 'Car' ? <Car size={20} /> : <Bike size={20} />}
+
+        <div className="space-y-4">
+          {loading ? (
+            <div className="py-12 flex justify-center"><Loader2 size={24} className="animate-spin text-slate-300" /></div>
+          ) : apps.length === 0 ? (
+            <div className="py-12 text-center">
+              <CheckCircle2 size={32} className="mx-auto mb-3 text-slate-300" />
+              <p className="text-[13px] font-bold text-slate-500">No pending applications</p>
+            </div>
+          ) : (
+            apps.map((app) => (
+              <div key={app.id} className="p-5 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-center hover:bg-slate-100/50 transition-all">
+                
+                {/* Col 1-6: Applicant Info */}
+                <div className="md:col-span-6 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-200/50 flex items-center justify-center shrink-0">
+                    <UserCheck size={16} className="text-slate-600" />
                   </div>
                   <div>
-                    <h2 className="text-[16px] font-bold text-[#1C1C1E]">{app.displayName || 'Unknown Student'}</h2>
-                    <div className="flex items-center gap-2 text-[12px] font-medium text-[#8E8E93] mt-0.5">
-                      <span className="bg-[#F2F2F7] px-2 py-0.5 rounded-md text-[#1C1C1E]">{app.runner_data?.studentId}</span>
-                      <span>•</span>
-                      <span>{app.email}</span>
-                    </div>
+                    <h3 className="text-[14px] font-bold text-slate-900">{app.displayName || app.full_name || 'Unknown Student'}</h3>
+                    <p className="text-[11px] font-medium text-slate-400 mt-0.5">{app.email}</p>
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#F2F2F7]">
-                <div>
-                  <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider mb-1">Logistics</p>
-                  <p className="text-[13px] font-bold text-[#1C1C1E]">{app.runner_data?.location}</p>
-                  <p className="text-[13px] font-medium text-[#8E8E93]">{app.runner_data?.transport}</p>
+                {/* Col 7-9: Transport */}
+                <div className="md:col-span-3">
+                  <p className="text-[10px] font-bold text-slate-400 mb-0.5">Primary Transport</p>
+                  <p className="text-[13px] font-semibold text-slate-700 flex items-center gap-1.5">
+                    {app.runner_data?.transport === 'Walking' ? <PersonStanding size={14}/> :
+                     app.runner_data?.transport === 'Car' ? <Car size={14}/> : <Bike size={14}/>}
+                    {app.runner_data?.transport || 'Walking'}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider mb-1">Contact</p>
-                  <p className="text-[13px] font-bold text-[#1C1C1E]">WhatsApp: {app.runner_data?.whatsapp}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-wider mb-1">Bank Details</p>
-                  <p className="text-[13px] font-bold text-[#1C1C1E]">{app.runner_data?.bankName} — {app.runner_data?.accountNumber}</p>
-                </div>
-              </div>
 
-              <div className="flex gap-2 pt-2">
-                <button onClick={() => handleApprove(app.id)}
-                  className="flex-1 bg-[#1C1C1E] text-white h-11 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 hover:bg-slate-900 transition-colors">
-                  <Check size={16} /> Approve Runner
-                </button>
-                <button onClick={() => handleReject(app.id)}
-                  className="px-5 bg-white border border-[#E5E5EA] text-[#8E8E93] h-11 rounded-xl text-[13px] font-bold flex items-center justify-center hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
-                  <X size={16} />
-                </button>
+                {/* Col 10-12: Action Button */}
+                <div className="md:col-span-3 flex items-center justify-end">
+                  <button onClick={() => setViewingApp(app)}
+                    className="h-10 px-6 rounded-xl text-[12px] font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10">
+                    Review App
+                  </button>
+                </div>
+                
               </div>
-
-            </div>
-          ))}
+            ))
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

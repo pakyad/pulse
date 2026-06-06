@@ -36,9 +36,9 @@ export default function PerfectSignUp() {
     },
     {
       icon: Store,
-      headerTop: "Buy, sell, and",
-      headerBottom: "trade locally.",
-      desc: "Grab lunch from the cafe or trade used textbooks. A simple marketplace for everyday essentials."
+      headerTop: "Buy and sell",
+      headerBottom: "with confidence.",
+      desc: "Grab lunch from the cafe or buy used textbooks. A secure campus marketplace powered by Escrow."
     },
     {
       icon: Zap,

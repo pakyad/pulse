@@ -4,23 +4,23 @@ import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Custom HTML Icons (Pulse Amber/Emerald Aesthetic)
+// Custom HTML Icons (Pulse Zero-Black Aesthetic)
 const runnerIcon = L.divIcon({
   className: 'custom-runner-icon',
-  html: `<div style="width: 22px; height: 22px; background-color: #f59e0b; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 10px rgba(245,158,11,0.4); position: relative;">
-          <div style="position: absolute; inset: -4px; border-radius: 50%; background-color: #f59e0b; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.4;"></div>
+  html: `<div style="width: 26px; height: 26px; background-color: #0f172a; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); position: relative;">
+          <div style="position: absolute; inset: -6px; border-radius: 50%; background-color: #0f172a; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; opacity: 0.2;"></div>
          </div>`,
-  iconSize: [22, 22],
-  iconAnchor: [11, 11],
+  iconSize: [26, 26],
+  iconAnchor: [13, 13],
 });
 
 const dropoffIcon = L.divIcon({
   className: 'custom-dropoff-icon',
-  html: `<div style="width: 28px; height: 28px; background-color: #10b981; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 10px rgba(16,185,129,0.3); display: flex; align-items: center; justify-content: center;">
+  html: `<div style="width: 32px; height: 32px; background-color: #10b981; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(16,185,129,0.3); display: flex; align-items: center; justify-content: center;">
           <div style="width: 10px; height: 10px; background-color: white; border-radius: 50%;"></div>
          </div>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14],
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
 });
 
 function MapController({ runnerPos, dropoffPos }: any) {
@@ -71,7 +71,7 @@ export default function BuyerLiveMap({ runnerLocation }: BuyerLiveMapProps) {
         style={{ height: '100%', width: '100%', zIndex: 0 }}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
         
         <Marker position={dropoffPos} icon={dropoffIcon} />
@@ -81,9 +81,9 @@ export default function BuyerLiveMap({ runnerLocation }: BuyerLiveMapProps) {
             <Marker position={runnerPos} icon={runnerIcon} />
             <Polyline 
               positions={[runnerPos, dropoffPos]} 
-              color="#f59e0b" 
+              color="#0f172a" 
               weight={4} 
-              dashArray="8, 12" 
+              dashArray="6, 8" 
               lineCap="round"
             />
             <MapController runnerPos={runnerPos} dropoffPos={dropoffPos} />

@@ -393,7 +393,7 @@ export async function updatePriceGuideline(
 // ─────────────────────────────────────────────────────────────────────────────
 // 9. RESOLVE DISPUTE
 // ─────────────────────────────────────────────────────────────────────────────
-export async function resolveDispute(disputeId: string, action: "REFUND" | "RELEASE") {
+export async function resolveDispute(disputeId: string, action: "REFUND" | "RELEASE" | "SPLIT" | "PENALTY") {
   try {
     const disputeRef = adminDb.collection("disputes").doc(disputeId);
     const disputeDoc = await disputeRef.get();
@@ -403,8 +403,13 @@ export async function resolveDispute(disputeId: string, action: "REFUND" | "RELE
     const orderId = data?.order_id;
 
     if (orderId) {
+      let finalStatus = "COMPLETED";
+      if (action === "REFUND") finalStatus = "REFUNDED";
+      if (action === "SPLIT") finalStatus = "RESOLVED_SPLIT";
+      if (action === "PENALTY") finalStatus = "REFUNDED_PENALTY";
+
       await adminDb.collection("orders").doc(orderId).update({
-        status: action === "REFUND" ? "REFUNDED" : "COMPLETED",
+        status: finalStatus,
         resolution_type: action,
         resolved_at: new Date().toISOString(),
       });
@@ -422,11 +427,127 @@ export async function resolveDispute(disputeId: string, action: "REFUND" | "RELE
       });
     }
 
+    if (action === "PENALTY" && data?.runner_id) {
+      await adminDb.collection("users").doc(data.runner_id).update({
+        reputation: FieldValue.increment(-10),
+      });
+    }
+
     await writeLog("ADJUDICATION", disputeId, `Dispute resolved via ${action}.`);
     revalidatePath("/admin/disputes");
     return { success: true, message: `Dispute resolved: ${action}` };
   } catch (e) {
     console.error("[adminActions] resolveDispute:", e);
     return { success: false, message: "Failed to resolve dispute." };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. RESOLVE APPEAL
+// ─────────────────────────────────────────────────────────────────────────────
+export async function resolveAppeal(appealId: string, itemId: string, adminId: string, action: "APPROVE" | "REJECT") {
+  try {
+    if (action === "APPROVE") {
+      await adminDb.collection("items").doc(itemId).update({
+        status: "active",
+        is_price_flagged: false,
+        price_flag_count: 0,
+        report_count: 0,
+        flag_source: null,
+        appeal_approved_by: adminId,
+        appeal_approved_at: FieldValue.serverTimestamp(),
+      });
+      await adminDb.collection("appeals").doc(appealId).update({ status: "APPROVED" });
+    } else {
+      await adminDb.collection("items").doc(itemId).update({
+        status: "REJECTED_POLICY_VIOLATION",
+        is_price_flagged: false,
+        governance_rejected_by: adminId,
+        governance_rejected_at: FieldValue.serverTimestamp(),
+      });
+      await adminDb.collection("appeals").doc(appealId).update({ status: "REJECTED" });
+    }
+    revalidatePath("/admin/appeals");
+    return { success: true };
+  } catch (e) {
+    console.error("[adminActions] resolveAppeal:", e);
+    return { success: false, message: "Failed to resolve appeal." };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. ESCROW CONTROLS
+// ─────────────────────────────────────────────────────────────────────────────
+export async function holdEscrow(orderId: string) {
+  try {
+    await adminDb.collection("orders").doc(orderId).update({
+      escrow_status: "HELD_BY_ADMIN",
+      held_at: FieldValue.serverTimestamp(),
+    });
+    revalidatePath("/admin/escrow");
+    return { success: true };
+  } catch (e) {
+    console.error("[adminActions] holdEscrow:", e);
+    return { success: false, message: "Failed to hold escrow." };
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. RUNNER APPLICATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+export async function approveRunner(userId: string) {
+  try {
+    await adminDb.collection("users").doc(userId).update({
+      runner_status: "approved",
+      is_verified_runner: true,
+      runner_approved_at: FieldValue.serverTimestamp()
+    });
+
+    await sendNotification(userId, {
+      type: "RUNNER_APPROVED",
+      title: "Application Approved!",
+      body: "You are now a verified Pulse Runner. You can access the logistics terminal and start accepting orders.",
+      action_url: "/run"
+    });
+
+    revalidatePath("/admin/runners");
+    return { success: true };
+  } catch (e) {
+    console.error("[adminActions] approveRunner:", e);
+    return { success: false, message: "Failed to approve runner." };
+  }
+}
+
+export async function rejectRunner(userId: string) {
+  try {
+    await adminDb.collection("users").doc(userId).update({
+      runner_status: "none",
+      is_verified_runner: false
+    });
+
+    await sendNotification(userId, {
+      type: "RUNNER_REJECTED",
+      title: "Application Status Update",
+      body: "Your runner application was not approved at this time. Please contact administration for more details."
+    });
+
+    revalidatePath("/admin/runners");
+    return { success: true };
+  } catch (e) {
+    console.error("[adminActions] rejectRunner:", e);
+    return { success: false, message: "Failed to reject runner." };
+  }
+}
+export async function refundEscrow(orderId: string) {
+  try {
+    await adminDb.collection("orders").doc(orderId).update({
+      status: "REFUNDED",
+      escrow_status: "REFUNDED",
+      refunded_at: FieldValue.serverTimestamp(),
+    });
+    revalidatePath("/admin/escrow");
+    return { success: true };
+  } catch (e) {
+    console.error("[adminActions] refundEscrow:", e);
+    return { success: false, message: "Failed to refund escrow." };
   }
 }

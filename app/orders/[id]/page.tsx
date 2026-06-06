@@ -14,7 +14,7 @@ import BackButton from '@/components/shared/BackButton';
 
 import ReportIssueModal from '@/components/shared/ReportIssueModal';
 import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
-import { cancelOrder } from '@/app/actions/orderActions';
+import { cancelOrder, releaseEscrow } from '@/app/actions/orderActions';
 import OrderTracker from '@/components/shared/OrderTracker';
 import { VoxelPulse, VoxelRadar, VoxelBox, VoxelCheck } from '@/components/shared/VoxelStatus';
 import dynamic from 'next/dynamic';
@@ -54,27 +54,7 @@ function getPhase(status: string): number {
   return 1;
 }
 
-function StatusPill({ status }: { status: string }) {
-  const s = status?.toUpperCase() || '';
-  const isDone = ['DELIVERED', 'COMPLETED'].includes(s);
-  const isCancelled = s === 'CANCELLED';
-  const isLive = !isDone && !isCancelled;
 
-  return (
-    <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 ${
-      isDone ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
-      isCancelled ? 'bg-red-50 border-red-100 text-red-600' : 
-      'bg-amber-50 border-amber-100 text-amber-600'
-    }`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${
-        isDone ? 'bg-emerald-500' : 
-        isCancelled ? 'bg-red-500' : 
-        'bg-amber-500 animate-pulse'
-      }`} />
-      <span className="text-[11px] font-semibold">{s.replace(/_/g, ' ')}</span>
-    </div>
-  );
-}
 
 function getPathPoint(progress: number) {
   // Seg 1: (70,160) -> (70,100)  [len = 60]
@@ -111,6 +91,7 @@ function getPathPoint(progress: number) {
 
 function StatusKinetics({ status, orderType }: { status: string, orderType?: string }) {
   const s = status?.toUpperCase() || '';
+  const isCustom = ['PARCELS', 'ERRANDS'].includes((orderType || '').toUpperCase());
   
   // Determine kinetic state
   let state: 'WAITING' | 'PREPARING' | 'RUNNING' | 'DELIVERED' | 'CANCELLED' = 'RUNNING';
@@ -125,84 +106,98 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
   }
 
   return (
-    <div className={`w-full ${state === 'CANCELLED' ? 'h-[260px] pb-4' : 'h-[380px]'} bg-[#f8fafc] relative flex flex-col items-center justify-center pt-8 select-none overflow-hidden`}>
+    <div className={`w-full bg-white relative z-20 flex flex-col justify-center select-none`}>
       <AnimatePresence mode="wait">
         {state === 'WAITING' && (
           <motion.div
             key="waiting"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col items-center justify-center"
+            className="flex items-center justify-between w-full px-8 mt-12"
           >
-            <div className="w-24 h-24 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
-               <VoxelRadar size={48} className="text-slate-900" />
+            <div className="flex-1 pr-6 space-y-1">
+              <p className="text-[12px] font-semibold text-slate-500">Waiting for acceptance</p>
+              <h1 className="text-[22px] font-bold text-slate-900 tracking-tight leading-tight whitespace-pre-wrap">
+                {isCustom ? "Finding a\ncourier" : "Waiting for\nmerchant"}
+              </h1>
+              <p className="text-[12px] font-medium text-[#94a3b8] leading-relaxed pt-1">
+                {isCustom ? "We'll notify you once a runner accepts your order." : "The merchant is confirming your order."}
+              </p>
             </div>
-            <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none mb-1.5">
-              Finding a courier...
-            </p>
-            <p className="text-[12px] font-medium text-[#94a3b8]">Broadcasting to network</p>
+            <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center shrink-0 relative border border-orange-100">
+               <div className="absolute inset-0 bg-orange-200 rounded-full animate-ping opacity-20"></div>
+               <VoxelRadar size={40} className="text-orange-500 relative z-10" />
+            </div>
           </motion.div>
         )}
 
         {state === 'PREPARING' && (
           <motion.div
             key="preparing"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col items-center justify-center"
+            className="flex items-center justify-between w-full px-8 mt-12"
           >
-            <div className="w-24 h-24 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
-               <VoxelBox size={48} className="text-amber-500" />
+            <div className="flex-1 pr-6 space-y-1">
+              <p className="text-[12px] font-semibold text-slate-500">Order confirmed</p>
+              <h1 className="text-[22px] font-bold text-slate-900 tracking-tight leading-tight whitespace-pre-wrap">
+                {isCustom ? "Runner is\nheading to pickup" : "Merchant is\npreparing"}
+              </h1>
+              <p className="text-[12px] font-medium text-[#94a3b8] leading-relaxed pt-1">
+                {isCustom ? "Your runner is on the way to the pickup location." : "Please wait patiently while your order is packed."}
+              </p>
             </div>
-            <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none mb-1.5">
-              {orderType && orderType !== 'MARKETPLACE' ? 'Verifying Details...' : 'Merchant is preparing...'}
-            </p>
-            <p className="text-[12px] font-medium text-[#94a3b8]">Please wait patiently</p>
+            <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center shrink-0 relative border border-blue-100">
+               <div className="absolute inset-0 bg-blue-200 rounded-full animate-ping opacity-20"></div>
+               <VoxelBox size={40} className="text-blue-500 relative z-10" />
+            </div>
           </motion.div>
         )}
 
         {state === 'RUNNING' && (
           <motion.div
             key="running"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col items-center justify-center"
+            className="flex items-center justify-between w-full px-8 mt-12"
           >
-            <div className="w-24 h-24 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
-               <VoxelPulse size={48} className="text-slate-900" />
+            <div className="flex-1 pr-6 space-y-1">
+              <p className="text-[12px] font-semibold text-slate-500">Est. Arrival Time</p>
+              <h1 className="text-[22px] font-bold text-slate-900 tracking-tight leading-tight whitespace-pre-wrap">Runner is on{"\n"}the way</h1>
+              <p className="text-[12px] font-medium text-[#94a3b8] leading-relaxed pt-1">Your courier is heading to the drop-off location.</p>
             </div>
-            <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none mb-1.5">
-              Courier is on the way
-            </p>
-            <p className="text-[12px] font-medium text-[#94a3b8]">Check map for live tracking</p>
+            <div className="w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center shrink-0 relative border border-teal-100">
+               <div className="absolute inset-0 bg-teal-200 rounded-full animate-ping opacity-20"></div>
+               <VoxelPulse size={40} className="text-teal-500 relative z-10" />
+            </div>
           </motion.div>
         )}
 
         {state === 'DELIVERED' && (
           <motion.div
             key="delivered"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col items-center justify-center"
+            className="flex items-center justify-between w-full px-8 mt-12"
           >
-            <div className="w-24 h-24 bg-white rounded-[24px] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
-               <VoxelCheck size={48} className="text-emerald-500" />
+            <div className="flex-1 pr-6 space-y-1">
+              <p className="text-[12px] font-semibold text-slate-500">Completed</p>
+              <h1 className="text-[22px] font-bold text-slate-900 tracking-tight leading-tight">Order<br/>Delivered</h1>
+              <p className="text-[12px] font-medium text-[#94a3b8] leading-relaxed pt-1">Enjoy your purchase and leave a review!</p>
             </div>
-            <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none mb-1.5">
-              Order Delivered
-            </p>
-            <p className="text-[12px] font-medium text-[#94a3b8]">Enjoy your purchase</p>
+            <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center shrink-0 relative border border-emerald-100">
+               <VoxelCheck size={40} className="text-emerald-500 relative z-10" />
+            </div>
           </motion.div>
         )}
-
       </AnimatePresence>
     </div>
   );
@@ -220,6 +215,18 @@ export default function LiveOrderPage() {
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [mapSrc, setMapSrc] = useState('/map-bg.png');
+  const [releasing, setReleasing] = useState(false);
+
+  const handleReleaseEscrow = async () => {
+    setReleasing(true);
+    try {
+      await releaseEscrow(id as string);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setReleasing(false);
+    }
+  };
 
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '';
@@ -360,18 +367,19 @@ export default function LiveOrderPage() {
     : Math.max(0, Math.round(250 * (1 - progress)));
 
   const durationMin = Math.max(1, Math.ceil(distance / 80));
-  const isClose = distance > 0 && distance < 200;
+  const isClose = distance > 0 && distance < 200 && !isDone && !isCancelled;
   const isMoving = ['ON_THE_WAY', 'IN_TRANSIT', 'PICKED_UP'].includes(status);
   const isRunner = userId === order.runner_id;
   const showBuyerMap = isMoving && !!order.runner_location;
+  const hasMapHero = isRunner || showBuyerMap;
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-36 relative">
 
       {/* ── VIBRANT MAP HERO ── */}
-      {!isCancelled && (
-        <div className="absolute top-0 left-0 right-0 h-[380px] z-0 overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-b from-amber-500/10 to-white z-10 pointer-events-none" />
+      {!isCancelled && hasMapHero && (
+        <div className="absolute top-0 left-0 right-0 h-[380px] z-0 overflow-hidden bg-slate-100">
+          {/* Map rendered below without washing-out gradients */}
           
           {/* Google Maps Walking Directions HUD (Runner Only) */}
           {isRunner && isMoving && (
@@ -413,12 +421,10 @@ export default function LiveOrderPage() {
                 )}
               </svg>
             </div>
-          ) : showBuyerMap ? (
+          ) : (
             <div className="w-full h-[380px] bg-[#f8fafc] relative overflow-hidden">
               <BuyerLiveMap runnerLocation={order.runner_location} />
             </div>
-          ) : (
-            <StatusKinetics status={status} orderType={order?.type} />
           )}
         </div>
       )}
@@ -432,28 +438,18 @@ export default function LiveOrderPage() {
             <p className="text-[10px] font-semibold text-amber-600 tracking-wider leading-none mt-0.5">#{order.order_code || order.id.slice(0, 6).toUpperCase()}</p>
           </div>
         </div>
-        <div className="pointer-events-auto">
-          <StatusPill status={status} />
-        </div>
       </nav>
 
       {/* ── MAIN CONTENT ── */}
-      <div className={`${isCancelled ? 'pt-32' : 'pt-[420px]'} px-6 space-y-10 relative z-10`}>
-
-        {/* Proximity Alert Banner (< 200m) */}
-        {isClose && (
-          <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center gap-3.5 animate-pulse shadow-sm shadow-emerald-500/5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0">
-              <MapPin size={16} />
-            </div>
-            <div className="space-y-0.5 flex-1 min-w-0">
-              <p className="text-[12px] font-semibold text-emerald-950  leading-none mb-1">Nearby Alert</p>
-              <p className="text-[11px] font-semibold text-emerald-700 leading-tight">
-                Runner is under {distance}m away! Meet at drop-off point now.
-              </p>
-            </div>
+      <div className={`${isCancelled ? 'pt-32' : hasMapHero ? 'pt-[420px]' : 'pt-[100px]'} px-6 space-y-8 relative z-10`}>
+      
+        {!isCancelled && !hasMapHero && (
+          <div className="pb-4">
+            <StatusKinetics status={status} orderType={order?.type} />
           </div>
         )}
+
+
 
         {/* Cancellation Notice */}
         {isCancelled && (
@@ -578,42 +574,35 @@ export default function LiveOrderPage() {
           </section>
         )}
 
+        {/* ── ESCROW RELEASE BUTTON REMOVED (Admin Only Now) ── */}
+
+        {/* ── POST-DELIVERY REVIEW ── */}
+        {showReview && userId && (
+          <section className="pt-6 border-t border-slate-100">
+            <PostDeliveryReview order={order} userId={userId} />
+          </section>
+        )}
+
         {/* ── DRAKE SAFETY NET (Support after Delivery) ── */}
         {!isCancelled && !isPending && (
-          <section className="space-y-4 pt-4 border-t border-slate-50">
-            <div className="flex items-center gap-3">
-               <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />
-               <h3 className="text-[11px] font-semibold text-slate-900 ">Support & Resolution</h3>
-            </div>
-            
-            <div className="p-6 bg-white border border-slate-100 rounded-2xl space-y-4">
-               <div className="space-y-1">
-                  <p className="text-[14px] font-bold text-slate-900">Need help?</p>
-                  <p className="text-[11px] text-[#94a3b8] leading-relaxed">
-                     You can report any issues within 24 hours after your order arrives.
+          <section className="pt-4 pb-8">
+            <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between gap-4">
+               <div className="space-y-1 flex-1">
+                  <p className="text-[13px] font-bold text-slate-900">Need help?</p>
+                  <p className="text-[11px] text-[#94a3b8] leading-relaxed pr-2">
+                     Report any issues within 24 hours.
                   </p>
                </div>
                
                <button
                  onClick={() => setIsReportOpen(true)}
                  disabled={!order.handshake?.seller_confirmed && !isDone}
-                 className="w-full h-14 bg-white border border-slate-100 text-[13px] font-bold text-slate-900 rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-sm disabled:opacity-30"
+                 className="h-10 px-4 bg-white border border-slate-200 text-[12px] font-bold text-slate-900 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm disabled:opacity-30 whitespace-nowrap"
                >
-                 <ShieldAlert size={18} className="text-red-500" />
-                 Report Issue or Refund
+                 <ShieldAlert size={14} className="text-red-500" />
+                 Report Issue
                </button>
             </div>
-          </section>
-        )}
-
-        {/* ── POST-DELIVERY REVIEW ── */}
-        {showReview && userId && (
-          <section className="space-y-4 pt-2 border-t border-slate-100">
-            <div className="flex items-center gap-2">
-              <Star size={14} className="text-amber-400" fill="currentColor" />
-              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Rate Your Experience</h2>
-            </div>
-            <PostDeliveryReview order={order} userId={userId} />
           </section>
         )}
 
@@ -719,6 +708,37 @@ export default function LiveOrderPage() {
         order={order}
         onSuccess={() => setIsReportOpen(false)}
       />
+
+      {/* ── DEMO/JUDGING CONTROLS ── */}
+      <div className="fixed bottom-6 right-6 z-50 animate-bounce">
+        <button 
+          onClick={async () => {
+             const s = (order?.status || '').toUpperCase();
+             let nextStatus = 'PENDING_RUNNER';
+             if (['DELIVERED', 'COMPLETED'].includes(s)) nextStatus = 'PENDING_RUNNER';
+             else if (['IN_TRANSIT', 'ON_THE_WAY'].includes(s)) nextStatus = 'DELIVERED';
+             else if (s === 'PICKED_UP') nextStatus = 'IN_TRANSIT';
+             else if (['READY_FOR_PICKUP', 'AWAITING_RUNNER'].includes(s)) nextStatus = 'PICKED_UP';
+             else if (s === 'PREPARING') nextStatus = 'READY_FOR_PICKUP';
+             else nextStatus = 'PREPARING'; // Catch-all for Pending phases
+             
+             try {
+                await updateDoc(doc(db, 'orders', id as string), { 
+                  status: nextStatus, 
+                  runner_location: { latitude: 3.1593, longitude: 101.6996 },
+                  hasAcknowledgedSuccess: nextStatus === 'DELIVERED' ? false : (order.hasAcknowledgedSuccess ?? false)
+                });
+             } catch (e) {
+                console.error("Demo cycle failed", e);
+             }
+          }}
+          className="h-12 px-5 bg-slate-900 text-white border-2 border-indigo-500 rounded-[20px] text-[12px] font-bold shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-2 active:scale-95 transition-all"
+        >
+          <Activity size={16} className="text-indigo-400" />
+          Simulate Next Status
+        </button>
+      </div>
+
     </main>
   );
 }

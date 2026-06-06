@@ -2,7 +2,56 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Phone, MessageSquare, Star, Package } from 'lucide-react';
+import { Phone, MessageSquare, Star, CheckCircle2 } from 'lucide-react';
+
+const PixelReceipt = ({ className }: { className?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="4" y="2" width="12" height="2" />
+    <rect x="4" y="16" width="12" height="2" />
+    <rect x="4" y="4" width="2" height="12" />
+    <rect x="14" y="4" width="2" height="12" />
+    <rect x="7" y="6" width="6" height="2" />
+    <rect x="7" y="10" width="4" height="2" />
+  </svg>
+);
+
+const PixelBox = ({ className }: { className?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="3" y="5" width="14" height="2" />
+    <rect x="3" y="15" width="14" height="2" />
+    <rect x="3" y="7" width="2" height="8" />
+    <rect x="15" y="7" width="2" height="8" />
+    <rect x="9" y="7" width="2" height="8" />
+    <rect x="5" y="9" width="4" height="2" />
+    <rect x="11" y="9" width="4" height="2" />
+  </svg>
+);
+
+const PixelTruck = ({ className }: { className?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="2" y="5" width="10" height="2" />
+    <rect x="2" y="7" width="2" height="6" />
+    <rect x="2" y="13" width="10" height="2" />
+    <rect x="10" y="7" width="2" height="6" />
+    <rect x="12" y="8" width="6" height="2" />
+    <rect x="16" y="10" width="2" height="5" />
+    <rect x="12" y="13" width="4" height="2" />
+    <rect x="4" y="15" width="3" height="2" />
+    <rect x="12" y="15" width="3" height="2" />
+  </svg>
+);
+
+const PixelPin = ({ className }: { className?: string }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="7" y="2" width="6" height="2" />
+    <rect x="5" y="4" width="2" height="6" />
+    <rect x="13" y="4" width="2" height="6" />
+    <rect x="7" y="10" width="2" height="2" />
+    <rect x="11" y="10" width="2" height="2" />
+    <rect x="9" y="12" width="2" height="6" />
+    <rect x="9" y="5" width="2" height="2" />
+  </svg>
+);
 
 interface OrderTrackerProps {
   order: any;
@@ -19,9 +68,19 @@ export function getTrackerStep(status: string) {
 export default function OrderTracker({ order }: OrderTrackerProps) {
   const step = getTrackerStep(order.status);
   const isCustom = ['PARCELS', 'ERRANDS'].includes(order.type?.toUpperCase());
-  const labels = isCustom 
-    ? ['Requested', 'Runner Found', 'Delivering', 'Arrived']
-    : ['Ordered', 'Preparing', 'On The Way', 'Arrived'];
+  const stepsData = isCustom 
+    ? [
+        { label: 'Requested', Icon: PixelReceipt },
+        { label: 'Found', Icon: PixelBox },
+        { label: 'Delivering', Icon: PixelTruck },
+        { label: 'Arrived', Icon: PixelPin },
+      ]
+    : [
+        { label: 'Ordered', Icon: PixelReceipt },
+        { label: 'Preparing', Icon: PixelBox },
+        { label: 'On The Way', Icon: PixelTruck },
+        { label: 'Arrived', Icon: PixelPin },
+      ];
   const deliveryPhoto = order.delivery_proof_url;
 
   const isCancelled = order.status?.toUpperCase() === 'CANCELLED';
@@ -37,43 +96,45 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
   return (
     <div className="space-y-10">
       {/* ── HEADER ── */}
-      <div className="px-2">
-        <h2 className="text-[20px] font-bold text-slate-900 tracking-tight mb-1">
-          {getHeaderText()}
-        </h2>
-      </div>
+      {step >= 3 && (
+        <div className="px-2">
+          <h2 className="text-[20px] font-bold text-slate-900 tracking-tight mb-1">
+            {getHeaderText()}
+          </h2>
+        </div>
+      )}
 
-      {/* ── VIBRANT 4-STEP PROGRESS BAR ── */}
-      <div className="flex items-center justify-between relative px-6">
-        <div className="absolute left-10 right-10 top-[11px] h-px bg-slate-100 z-0"></div>
+      {/* ── CRISP PIXEL 4-STEP PROGRESS BAR ── */}
+      <div className="flex items-center justify-between relative px-4 mt-2">
+        <div className="absolute left-[36px] right-[36px] top-[20px] h-[2px] bg-slate-100 z-0"></div>
         <motion.div 
-          className="absolute left-10 top-[11px] h-px bg-amber-500 z-0" 
-          initial={{ width: 0 }}
-          animate={{ width: `calc(${((step - 1) / 3) * 100}% - 4px)` }}
+          className="absolute left-[36px] right-[36px] top-[20px] h-[2px] bg-slate-900 z-0 origin-left" 
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: (step - 1) / 3 }}
           transition={{ duration: 0.8, ease: "circOut" }}
         />
         
-        {labels.map((label, i) => {
+        {stepsData.map((stepData, i) => {
           const isPast = step > i + 1;
           const isCurrent = step === i + 1;
+          const IconComponent = stepData.Icon;
+          
           return (
-            <div key={label} className="relative z-10 flex flex-col items-center gap-3">
+            <div key={stepData.label} className="relative z-10 flex flex-col items-center gap-3">
               <motion.div 
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition-all duration-500 border-2 ${
+                className={`w-10 h-10 rounded-[6px] flex items-center justify-center transition-all duration-300 border-2 ${
                    isCancelled ? 'bg-white border-slate-200 text-slate-300' :
-                   isPast ? 'bg-amber-500 border-amber-500 text-white' : 
-                   isCurrent ? 'bg-white border-amber-500 text-amber-500' : 
+                   isPast ? 'bg-slate-900 border-slate-900 text-white' : 
+                   isCurrent ? 'bg-white border-slate-900 text-slate-900 shadow-[2px_4px_0_rgba(15,23,42,1)] -translate-y-1' : 
                    'bg-white border-slate-200 text-slate-300'
                 }`}
-                animate={isCurrent && !isCancelled ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+                animate={isCurrent && !isCancelled ? { scale: [1, 1.02, 1] } : { scale: 1 }}
                 transition={{ repeat: isCurrent && !isCancelled ? Infinity : 0, duration: 2.5 }}
               >
-                {isPast && !isCancelled ? <CheckCircle2 size={12} strokeWidth={3} /> : (
-                   <span className={`font-semibold ${isCurrent && !isCancelled ? 'text-amber-500' : ''}`}>{i + 1}</span>
-                )}
+                <IconComponent className="w-5 h-5 currentColor" />
               </motion.div>
-              <span className={`text-[10px] font-semibold absolute -bottom-6 w-max transition-colors duration-500 ${isCancelled ? 'text-slate-300' : (isPast || isCurrent ? 'text-slate-900' : 'text-slate-300')}`}>
-                {label}
+              <span className={`text-[10px] font-bold absolute -bottom-6 w-max transition-colors duration-500 ${isCancelled ? 'text-slate-300' : (isPast || isCurrent ? 'text-slate-900' : 'text-[#94a3b8]')}`}>
+                {stepData.label}
               </span>
             </div>
           );
