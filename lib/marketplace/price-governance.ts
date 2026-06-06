@@ -40,7 +40,9 @@ export interface PriceIntelligence {
 export function analysePrice(
   price: number,
   categoryId: CategoryID | '',
-  subcategory: string
+  subcategory: string,
+  overrideCeiling?: number | null,
+  marketBaseline?: number | null
 ): PriceIntelligence {
   const empty: PriceIntelligence = {
     tier: 'COMPLIANT',
@@ -59,7 +61,7 @@ export function analysePrice(
   if (!category) return empty;
 
   const subConfig = category.subcategories.find((s: any) => s.label === subcategory);
-  const ceiling = subConfig?.ceiling || category.ceiling;
+  const ceiling = overrideCeiling ?? subConfig?.fixedCeiling ?? category.ceiling;
 
   if (!ceiling) return { ...empty, tier: 'COMPLIANT' };
 
@@ -75,11 +77,23 @@ export function analysePrice(
   //   AUTO_FLAG    → price > ceiling × 1.5             (allow + auto-flag for reviewer)
 
   if (ratio <= 1.0) {
-    let subMessage = `Typical range: RM ${rangeMin.toFixed(2)} – RM ${rangeMax.toFixed(2)}. You're in a great spot.`;
-    if (price > rangeMax) {
-      subMessage = `Typical range: RM ${rangeMin.toFixed(2)} – RM ${rangeMax.toFixed(2)}. You're slightly above average, but fully compliant.`;
-    } else if (price < rangeMin) {
-      subMessage = `Typical range: RM ${rangeMin.toFixed(2)} – RM ${rangeMax.toFixed(2)}. Your price is extremely competitive!`;
+    let subMessage: string;
+    if (marketBaseline) {
+      const marketMax = parseFloat((marketBaseline * 0.9).toFixed(2));
+      if (price > marketMax) {
+        subMessage = `Market avg: RM ${marketBaseline.toFixed(2)}. Your price is above the market max of RM ${marketMax.toFixed(2)}.`;
+      } else if (price > marketBaseline) {
+        subMessage = `Market avg: RM ${marketBaseline.toFixed(2)}. You're slightly above the open market, but compliant.`;
+      } else {
+        subMessage = `Market avg: RM ${marketBaseline.toFixed(2)}. Your price beats the open market.`;
+      }
+    } else {
+      subMessage = `Campus range: RM ${rangeMin.toFixed(2)} – RM ${rangeMax.toFixed(2)}.`;
+      if (price > rangeMax) {
+        subMessage += ` You're slightly above average, but fully compliant.`;
+      } else if (price < rangeMin) {
+        subMessage += ` Your price is extremely competitive!`;
+      }
     }
 
     return {
@@ -99,8 +113,10 @@ export function analysePrice(
       rangeMin,
       rangeMax,
       overPercentage,
-      message: 'Above the typical campus range',
-      subMessage: `Campus range: RM ${rangeMin}–${rangeMax}. You can still list, but buyers may compare elsewhere.`,
+      message: marketBaseline ? `Online: RM ${marketBaseline.toFixed(2)}` : 'Above the typical campus range',
+      subMessage: marketBaseline
+        ? `Market avg is RM ${marketBaseline.toFixed(2)}. Max campus price (90%) is RM ${(marketBaseline * 0.9).toFixed(2)}. You can still list with a reason.`
+        : `Campus range: RM ${rangeMin}–${rangeMax}. You can still list, but buyers may compare elsewhere.`,
       shouldAutoFlag: false,
     };
   } else {
@@ -110,8 +126,10 @@ export function analysePrice(
       rangeMin,
       rangeMax,
       overPercentage,
-      message: `${overPercentage}% above campus ceiling`,
-      subMessage: `Campus ceiling: RM ${ceiling.toFixed(2)}. This will be listed, but flagged for market review.`,
+      message: marketBaseline ? `Online: RM ${marketBaseline.toFixed(2)}` : `${overPercentage}% above campus ceiling`,
+      subMessage: marketBaseline
+        ? `Market avg is RM ${marketBaseline.toFixed(2)}. Your price is ${overPercentage}% above the RM ${ceiling.toFixed(2)} ceiling. Flagged for review.`
+        : `Campus ceiling: RM ${ceiling.toFixed(2)}. This will be listed, but flagged for market review.`,
       shouldAutoFlag: true,
     };
   }

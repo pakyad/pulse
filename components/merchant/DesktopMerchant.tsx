@@ -7,6 +7,7 @@ import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, I
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import VoxelStatus from '@/components/shared/VoxelStatus';
+import PriceHealthIndicator from '@/components/marketplace/PriceHealthIndicator';
 
 export default function DesktopMerchant({ 
   merchant, 
@@ -24,6 +25,8 @@ export default function DesktopMerchant({
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
+
+  const isClub = merchant?.role === 'CLUB' || merchant?.is_verified_merchant;
 
   const filteredAttentionItems = items?.filter((item: any) => {
     const isAttention = (item.stock_count ?? 99) <= 5;
@@ -70,20 +73,24 @@ export default function DesktopMerchant({
             <Package size={20} />
             <span className="text-[15px] tracking-[-0.24px]">Products</span>
           </button>
-          <button 
-            onClick={() => router.push('/merchant/disputes')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
-          >
-            <ClipboardList size={20} />
-            <span className="text-[15px] tracking-[-0.24px]">Log</span>
-          </button>
-          <button 
-            onClick={() => router.push('/me/insights')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
-          >
-            <BarChart3 size={20} />
-            <span className="text-[15px] tracking-[-0.24px]">Analytics</span>
-          </button>
+          {isClub && (
+            <>
+              <button 
+                onClick={() => router.push('/merchant/disputes')}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
+              >
+                <ClipboardList size={20} />
+                <span className="text-[15px] tracking-[-0.24px]">Log</span>
+              </button>
+              <button 
+                onClick={() => router.push('/me/insights')}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
+              >
+                <BarChart3 size={20} />
+                <span className="text-[15px] tracking-[-0.24px]">Analytics</span>
+              </button>
+            </>
+          )}
           <button 
             onClick={() => router.push('/me/edit')}
             className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
@@ -108,7 +115,14 @@ export default function DesktopMerchant({
         {/* Top Header */}
         <header className="bg-white border-b border-slate-200 px-10 py-6 flex items-center justify-between sticky top-0 z-30">
           <div>
-             <h1 className="text-[20px] font-bold text-slate-900">Shop Manager</h1>
+             <div className="flex items-center gap-3">
+               <h1 className="text-[20px] font-bold text-slate-900">Shop Manager</h1>
+               <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full border ${
+                 isClub ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200'
+               }`}>
+                 {isClub ? 'CLUB MERCHANT' : 'SELLER'}
+               </span>
+             </div>
              <p className="text-[13px] text-slate-500 mt-1">Logged in as {merchant?.full_name}</p>
           </div>
 
@@ -120,12 +134,14 @@ export default function DesktopMerchant({
                <input className="h-full w-full outline-none text-[12px] pr-2 bg-transparent placeholder-slate-400 font-medium" type="text" placeholder="Search orders, student names..." /> 
              </div>
 
-             <button 
-               onClick={() => setIsCreateOpen(true)}
-               className="h-10 px-6 bg-slate-900 text-white text-[13px] font-bold rounded-md hover:bg-blue-700 transition-all"
-             >
-                New Entry
-             </button>
+             {isClub && (
+               <button 
+                 onClick={() => setIsCreateOpen(true)}
+                 className="h-10 px-6 bg-slate-900 text-white text-[13px] font-bold rounded-md hover:bg-blue-700 transition-all"
+               >
+                 New Entry
+               </button>
+             )}
 
              <div className="w-px h-6 bg-slate-200" />
 
@@ -173,10 +189,10 @@ export default function DesktopMerchant({
                            <h4 className="text-[15px] font-bold text-slate-900">{o.title}</h4>
                         </div>
                         <div className="flex items-center gap-8">
-                           <div className="text-right">
-                              <p className="text-[14px] font-bold text-slate-900">RM {Number(o.price).toFixed(2)}</p>
-                              <p className="text-[12px] text-slate-400">{o.deliveryType || 'N/A'}</p>
-                           </div>
+                            <div className="text-right">
+                               <p className="text-[14px] font-bold text-slate-900">RM {Number(o.total || o.price || 0).toFixed(2)}</p>
+                               <p className="text-[12px] text-slate-400">{o.delivery_type || 'N/A'}</p>
+                            </div>
                            <button 
                              onClick={() => handleAcceptOrder(o.id)}
                              className="h-9 px-5 bg-slate-900 text-white rounded-md text-[12px] font-bold hover:bg-blue-700"
@@ -224,11 +240,11 @@ export default function DesktopMerchant({
                                Waiting for Runner
                              </span>
                            )}
-                           {o.status === 'AWAITING_RUNNER' && (
-                             <span className="px-3 py-1.5 bg-blue-50 text-slate-900 rounded text-[11px] font-bold border border-blue-100">
-                               Runner Called
-                             </span>
-                           )}
+                            {o.status === 'PENDING_RUNNER' && (
+                              <span className="px-3 py-1.5 bg-blue-50 text-slate-900 rounded text-[11px] font-bold border border-blue-100">
+                                Runner Called
+                              </span>
+                            )}
                            
                            {/* 🏛️ The Handshake Directive */}
                            {o.status !== 'DELIVERED' && o.status !== 'COMPLETED' && (
@@ -257,29 +273,28 @@ export default function DesktopMerchant({
              </div>
 
           {/* Key Indicators */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 px-1">
-               <Info size={14} className="text-slate-400" />
-               <p className="text-[11px] font-medium text-slate-400 italic">Daily summary of shop activity for {merchant?.full_name}.</p>
-            </div>
-            <div className="grid grid-cols-3 gap-6">
-              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Total Earnings</p>
-                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">RM {revenue.toFixed(2)}</h2>
+          {isClub && (
+            <section className="space-y-4">
+              <div className="flex items-center gap-2 px-1">
+                 <Info size={14} className="text-slate-400" />
+                 <p className="text-[11px] font-medium text-slate-400 italic">Daily summary of shop activity for {merchant?.full_name}.</p>
               </div>
-              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Orders to Do</p>
-                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">{activeOrdersCount}</h2>
+              <div className="grid grid-cols-3 gap-6">
+                <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                   <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Total Earnings</p>
+                   <h2 className="text-[28px] font-bold text-slate-900 mt-2">RM {revenue.toFixed(2)}</h2>
+                </div>
+                <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                   <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Orders to Do</p>
+                   <h2 className="text-[28px] font-bold text-slate-900 mt-2">{activeOrdersCount}</h2>
+                </div>
+
               </div>
-              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                 <p className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">System Reach</p>
-                 <h2 className="text-[28px] font-bold text-slate-900 mt-2">Institutional</h2>
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* 🏛️ Minimal Inventory Registry (Matured) */}
-          {items?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
+          {isClub && items?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
             <section className="space-y-4">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
@@ -334,89 +349,89 @@ export default function DesktopMerchant({
           )}
 
              {/* My Inventory: Visual Grid */}
-             <div className="space-y-6">
-                <div className="flex items-center justify-between px-1">
+             {isClub && (
+               <div className="space-y-6">
+                 <div className="flex items-center justify-between px-1">
                    <div className="flex items-center gap-3">
-                      <h3 className="text-[14px] font-bold text-slate-900">My Inventory</h3>
-                      <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                         <Info size={12} /> Manage your listed items and stock.
-                      </div>
+                     <h3 className="text-[14px] font-bold text-slate-900">My Inventory</h3>
+                     <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                       <Info size={12} /> Manage your listed items and stock.
+                     </div>
                    </div>
-                </div>
+                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                 <div className="grid grid-cols-2 gap-6">
                    {items?.length === 0 ? (
-                      <p className="col-span-2 text-center py-12 text-slate-400 italic text-[13px]">No assets registered in the registry.</p>
+                     <p className="col-span-2 text-center py-12 text-slate-400 italic text-[13px]">No assets registered in the registry.</p>
                    ) : (
-                      items.map((item: any) => (
-                         <div key={item.id} className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-6 hover:border-slate-300 transition-all group">
-                            {/* 🖼️ Precise Asset Thumbnail */}
-                            <div className="w-20 h-20 bg-slate-50 rounded-[20px] overflow-hidden shrink-0 border-[0.5px] border-slate-100">
-                               {item.image_url ? (
-                                  <img src={item.image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="" />
-                               ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-slate-200">
-                                     <LayoutGrid size={24} strokeWidth={1.5} />
-                                  </div>
-                               )}
-                            </div>
-
-                            {/* 📄 Metadata Block */}
-                            <div className="flex-1 min-w-0">
-                               <p className="text-[15px] font-semibold text-slate-900 truncate tracking-tight mb-1">{item.title}</p>
-                               <div className="flex items-center gap-3">
-                                   <p className="text-[11px] font-semibold text-slate-400 ">RM{item.price}</p>
-                                   <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                                   <div className="flex items-center gap-1.5">
-                                      <p className={`text-[11px] font-semibold ${
-                                         (item.stock_count ?? 0) === 0 ? 'text-red-500' :
-                                         (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 
-                                         'text-slate-400'
-                                      }`}>
-                                         {item.stock_count ?? 0} STOCK
-                                      </p>
-                                      {(item.stock_count ?? 0) <= 5 && (item.stock_count ?? 0) > 0 && (
-                                         <span className="text-[9px] font-semibold bg-amber-50 text-amber-500 px-2 py-0.5 rounded-full border border-amber-100">LOW</span>
-                                      )}
-                                      {(item.stock_count ?? 0) === 0 && (
-                                         <span className="text-[9px] font-semibold bg-red-50 text-red-500 px-2 py-0.5 rounded-full border border-red-100">EMPTY</span>
-                                      )}
-                                   </div>
-                               </div>
-                            </div>
-
-                             {/* 🛠️ Control Nodes */}
-                             <div className="flex items-center gap-2 shrink-0">
-                                <button
-                                   onClick={() => toggleItemStatus(item.id, item.status)}
-                                   className={`h-10 px-5 rounded-[16px] text-[10px] font-semibold transition-all ${
-                                      item.status === 'active'
-                                      ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100'
-                                      : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'
-                                   }`}
-                                >
-                                   {item.status === 'active' ? 'Active' : 'Hidden'}
-                                </button>
-                                <button
-                                   onClick={() => router.push(`/marketplace/${item.id}/edit`)}
-                                   title="Edit listing"
-                                   className="h-10 w-10 rounded-[16px] bg-slate-50 border-[0.5px] border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"
-                                >
-                                   <Pencil size={14} />
-                                </button>
-                                <button
-                                   title="Delete listing"
-                                   onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed to delete.'); } }}
-                                   className="h-10 w-10 rounded-[16px] bg-red-50 border-[0.5px] border-red-100 flex items-center justify-center text-red-300 hover:text-red-500 hover:border-red-300 transition-all"
-                                >
-                                   <Trash2 size={14} />
-                                </button>
+                     items.map((item: any) => (
+                       <div key={item.id} className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-6 hover:border-slate-300 transition-all group">
+                         <div className="w-20 h-20 bg-slate-50 rounded-[20px] overflow-hidden shrink-0 border-[0.5px] border-slate-100">
+                           {item.image_url ? (
+                             <img src={item.image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="" />
+                           ) : (
+                             <div className="w-full h-full flex items-center justify-center text-slate-200">
+                               <LayoutGrid size={24} strokeWidth={1.5} />
                              </div>
+                           )}
                          </div>
-                      ))
+
+                         <div className="flex-1 min-w-0">
+                           <p className="text-[15px] font-semibold text-slate-900 truncate tracking-tight mb-1">{item.title}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[11px] font-semibold text-slate-400 ">RM{item.price}</p>
+                              <PriceHealthIndicator price={item.price} category={item.category} subcategory={item.subcategory} />
+                              <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                             <div className="flex items-center gap-1.5">
+                               <p className={`text-[11px] font-semibold ${
+                                 (item.stock_count ?? 0) === 0 ? 'text-red-500' :
+                                 (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 
+                                 'text-slate-400'
+                               }`}>
+                                 {item.stock_count ?? 0} STOCK
+                               </p>
+                               {(item.stock_count ?? 0) <= 5 && (item.stock_count ?? 0) > 0 && (
+                                 <span className="text-[9px] font-semibold bg-amber-50 text-amber-500 px-2 py-0.5 rounded-full border border-amber-100">LOW</span>
+                               )}
+                               {(item.stock_count ?? 0) === 0 && (
+                                 <span className="text-[9px] font-semibold bg-red-50 text-red-500 px-2 py-0.5 rounded-full border border-red-100">EMPTY</span>
+                               )}
+                             </div>
+                           </div>
+                         </div>
+
+                         <div className="flex items-center gap-2 shrink-0">
+                           <button
+                             onClick={() => toggleItemStatus(item.id, item.status)}
+                             className={`h-10 px-5 rounded-[16px] text-[10px] font-semibold transition-all ${
+                               item.status === 'active'
+                               ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100'
+                               : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'
+                             }`}
+                           >
+                             {item.status === 'active' ? 'Active' : 'Hidden'}
+                           </button>
+                           <button
+                             onClick={() => router.push(`/marketplace/${item.id}/edit`)}
+                             title="Edit listing"
+                             className="h-10 w-10 rounded-[16px] bg-slate-50 border-[0.5px] border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"
+                           >
+                             <Pencil size={14} />
+                           </button>
+                           <button
+                             title="Delete listing"
+                             onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed to delete.'); } }}
+                             className="h-10 w-10 rounded-[16px] bg-red-50 border-[0.5px] border-red-100 flex items-center justify-center text-red-300 hover:text-red-500 hover:border-red-300 transition-all"
+                           >
+                             <Trash2 size={14} />
+                           </button>
+                         </div>
+                       </div>
+                     ))
                    )}
-                </div>
-             </div>
+                 </div>
+               </div>
+             )}
 
           </div>
         </div>

@@ -85,7 +85,7 @@ export default function NavigationGate() {
           }
 
           if (userData.role === 'ADMIN') {
-             if (!isAdminPath && !isAuthPage) router.replace('/admin/dashboard');
+             if (!isAdminPath && !isAuthPage) router.replace('/admin/overview');
           } else if (userData.role === 'CLUB') {
              const isAllowedSharedPath = 
                pathname === '/me' || 

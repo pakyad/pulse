@@ -58,15 +58,23 @@ export const placeOrder = onCall({
       });
 
       const parentOrderId = `PULSE-${Date.now()}`;
+
+      // Use Firestore prices, not client-supplied prices
+      const actualPrices: Record<string, number> = {};
+      for (let i = 0; i < cartItems.length; i++) {
+        const itemData = itemDocs[i]?.data();
+        actualPrices[cartItems[i].productId] = itemData?.price ?? cartItems[i].price;
+      }
+
       let totalAmount = 0;
-      cartItems.forEach((item: any) => totalAmount += (item.price * item.qty));
+      cartItems.forEach((item: any) => totalAmount += ((actualPrices[item.productId] || item.price) * item.qty));
 
       // 3. ATOMIC DECREMENT & SUB-ORDER CREATION
       for (const vendorId in ordersByVendor) {
         const subOrderRef = db.collection('orders').doc();
         const itemsForThisVendor = ordersByVendor[vendorId];
         let subtotal = 0;
-        itemsForThisVendor.forEach((i: any) => subtotal += (i.price * i.qty));
+        itemsForThisVendor.forEach((i: any) => subtotal += ((actualPrices[i.productId] || i.price) * i.qty));
 
         itemsForThisVendor.forEach((item: any) => {
           const ref = db.collection('items').doc(item.productId);
@@ -82,7 +90,10 @@ export const placeOrder = onCall({
           parent_id: parentOrderId,
           buyer_id: finalUserId,
           seller_id: vendorId,
-          items: itemsForThisVendor,
+          items: itemsForThisVendor.map((item: any) => ({
+            ...item,
+            price: actualPrices[item.productId] || item.price // Store actual price in item record
+          })),
           price: subtotal,
           title: itemsForThisVendor.length > 1 
             ? `${itemsForThisVendor.length} Items Bundle` 

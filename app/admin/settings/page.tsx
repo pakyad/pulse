@@ -6,7 +6,7 @@ import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories
 import { CheckCircle, Loader2 } from 'lucide-react';
 
 const CAMPUS_DEFAULTS: Record<string, number> = {
-  HUNGER: 25, ACADEMIC: 200, HOSTEL: 500, TECH: 3500, APPAREL: 300,
+  ACADEMIC: 200, HOSTEL: 500, TECH: 3500, APPAREL: 300,
 };
 
 export default function SettingsPage() {

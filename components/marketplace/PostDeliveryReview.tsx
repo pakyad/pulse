@@ -9,9 +9,11 @@ import { submitReview } from '@/app/actions/reviewActions';
 interface PostDeliveryReviewProps {
   order: any;
   userId: string;
+  itemId?: string;
+  isOfficial?: boolean;
 }
 
-export default function PostDeliveryReview({ order, userId }: PostDeliveryReviewProps) {
+export default function PostDeliveryReview({ order, userId, itemId, isOfficial }: PostDeliveryReviewProps) {
   const [vendorRating, setVendorRating] = useState(0);
   const [runnerRating, setRunnerRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -20,6 +22,8 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
   const router = useRouter();
 
   const isRunnerDelivery = order.delivery_type === 'RUNNER' && order.runner_id;
+  const targetType = isOfficial ? 'SELLER' : 'ITEM';
+  const reviewItemId = itemId || order.items?.[0]?.productId || '';
 
   const handleSubmit = async () => {
     if (vendorRating === 0 || (isRunnerDelivery && runnerRating === 0)) return;
@@ -33,7 +37,9 @@ export default function PostDeliveryReview({ order, userId }: PostDeliveryReview
         runnerRating: isRunnerDelivery ? runnerRating : 0,
         vendorId: order.seller_id,
         runnerId: isRunnerDelivery ? order.runner_id : null,
-        comment
+        comment,
+        itemId: reviewItemId,
+        targetType
       });
 
       if (res.success) {

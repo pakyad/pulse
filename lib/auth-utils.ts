@@ -7,12 +7,11 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 
 /**
- * Institutional Guard: Validates that the email belongs to the UniKL domain.
- * Supports both Student (@s.unikl.edu.my) and Staff (@unikl.edu.my) nodes.
+ * Institutional Guard: Validates that the email belongs to the student domain.
+ * Only @s.unikl.edu.my emails are accepted.
  */
 export const isValidUniKLEmail = (email: string) => {
-  const uniklRegex = /^[a-zA-Z0-9._%+-]+@(s\.)?unikl\.edu\.my$/;
-  // Note: External merchant whitelisting is handled post-auth in the login flow
+  const uniklRegex = /^[a-zA-Z0-9._%+-]+@s\.unikl\.edu\.my$/;
   return uniklRegex.test(email.toLowerCase());
 };
 
@@ -23,7 +22,7 @@ export const isValidUniKLEmail = (email: string) => {
 export const registerStudent = async (email: string, pass: string, fullName: string, matricNo: string) => {
   // 🏛️ REQ_F101: Institutional Gating
   if (!isValidUniKLEmail(email)) {
-    return { user: null, error: 'Unauthorized: You must use a valid UniKL email address to join CODEP.' };
+    return { user: null, error: 'Unauthorized: You must use your @s.unikl.edu.my email to join.' };
   }
 
   try {

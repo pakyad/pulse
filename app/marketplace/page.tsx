@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ProductCard from '@/components/shared/ProductCard';
+import AnnouncementBanner from '@/components/AnnouncementBanner';
 import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/MarketplaceFilterOverlay';
 import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
@@ -363,6 +364,9 @@ function MarketplacePage() {
             </motion.section>
           )}
         </AnimatePresence>
+
+        {/* ── HAPPENING THIS WEEK ── */}
+        <AnnouncementBanner />
 
         {/* ── DISCOVER ITEMS ── */}
         <section className="space-y-8">

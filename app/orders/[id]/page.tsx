@@ -209,6 +209,7 @@ export default function LiveOrderPage() {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
   const [userId, setUserId] = useState<string>('');
+  const [sellerOfficial, setSellerOfficial] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -220,7 +221,7 @@ export default function LiveOrderPage() {
   const handleReleaseEscrow = async () => {
     setReleasing(true);
     try {
-      await releaseEscrow(id as string);
+      await releaseEscrow(id as string, userId);
     } catch (e) {
       console.error(e);
     } finally {
@@ -249,8 +250,14 @@ export default function LiveOrderPage() {
       });
     });
 
+    // Fetch seller official status for review targeting
+    if (order?.seller_id) {
+      getDoc(doc(db, 'users', order.seller_id)).then(snap => {
+        if (snap.exists()) setSellerOfficial(!!snap.data().is_official);
+      });
+    }
     return () => { unsubAuth(); unsub?.(); };
-  }, [id, router]);
+  }, [id, router, order?.seller_id]);
 
 
   // ── Cancel order (PENDING_VENDOR only) ──
@@ -579,7 +586,12 @@ export default function LiveOrderPage() {
         {/* ── POST-DELIVERY REVIEW ── */}
         {showReview && userId && (
           <section className="pt-6 border-t border-slate-100">
-            <PostDeliveryReview order={order} userId={userId} />
+            <PostDeliveryReview 
+              order={order} 
+              userId={userId} 
+              itemId={order.items?.[0]?.productId} 
+              isOfficial={sellerOfficial} 
+            />
           </section>
         )}
 

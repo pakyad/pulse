@@ -327,7 +327,7 @@ export default function MissionControl() {
         tx.update(ref, { 
           runner_id: auth.currentUser?.uid, 
           runner_name: profile?.full_name || 'Runner',
-          status: 'PREPARING',
+          status: 'READY_FOR_PICKUP',
           accepted_at: serverTimestamp()
         });
       });
@@ -364,7 +364,7 @@ export default function MissionControl() {
       const storageRef = ref(storage, `delivery_proofs/${activeMission.id}_${Date.now()}.jpg`);
       const uploadRes = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(uploadRes.ref);
-      const res = await completeDelivery(activeMission.id, url);
+      const res = await completeDelivery(activeMission.id, url, auth.currentUser.uid);
       if (res.success) { setPodPhoto(null); setPodPreview(null); setProofMode(null); }
     } catch (e: any) { console.error('[Delivery]', e); } finally { setIsProcessing(false); }
   };

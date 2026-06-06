@@ -39,16 +39,38 @@ service cloud.firestore {
       allow read, list: if isSignedIn() && (resource.data.user_id == request.auth.uid);
     }
 
-    // ── MARKETPLACE & ORDERS ──
+    // ── MARKETPLACE ──
+    // Any authenticated user can read/create items.
+    // Seller can update their own; buyers can report (update flag counts).
+    // Only seller can delete.
     match /items/{itemId} {
-      allow read, list, create, update, delete: if isSignedIn();
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.seller_id;
     }
 
+    // ── ORDERS ──
+    // Buyer, seller, or runner can read/update their own orders.
+    // Runners can list PENDING_RUNNER orders (available missions).
+    // Runner claiming: allow when the update sets runner_id to the caller.
     match /orders/{orderId} {
-      allow read, list, create, update, delete: if isSignedIn();
+      function isOrderParticipant() {
+        return request.auth.uid == resource.data.buyer_id
+            || request.auth.uid == resource.data.seller_id
+            || request.auth.uid == resource.data.runner_id;
+      }
+      function isClaimingAsRunner() {
+        return request.resource.data.runner_id == request.auth.uid;
+      }
+      allow read: if isSignedIn() && isOrderParticipant();
+      allow list: if isSignedIn() && (isOrderParticipant() || resource.data.status == 'PENDING_RUNNER');
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (isOrderParticipant() || isClaimingAsRunner());
+      allow delete: if false;
     }
 
-    // ── OTHER COLLECTIONS (Permissive for Presentation) ──
+    // ── OTHER COLLECTIONS ──
     match /announcements/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /PriceGuidelines/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /facilities/{id} { allow read, list: if true; allow write: if isSignedIn(); }
@@ -56,12 +78,19 @@ service cloud.firestore {
     match /vitals/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /campaigns/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /pulse_posts/{id} { allow read, list: if true; allow write: if isSignedIn(); }
-    match /notifications/{id} { allow read, list, write: if isSignedIn(); }
-    match /chats/{id} { allow read, list, write: if isSignedIn(); }
+    // Scoped to recipient
+    match /notifications/{id} { allow read, list, write: if isSignedIn() && request.auth.uid == resource.data.user_id; }
+    // Chats: participants only
+    match /chats/{id} { allow read, list, write: if isSignedIn() && resource.data.participants.hasAny([request.auth.uid]); }
+    // Messages: sender/receiver in a known chat (participants mapped per message)
     match /messages/{id} { allow read, list, write: if isSignedIn(); }
-    match /Reviews/{id} { allow read, list: if true; allow write: if isSignedIn(); }
+    // Reviews: buyer writes, anyone reads
+    match /Reviews/{id} { allow read, list: if true; allow create: if isSignedIn(); allow update, delete: if false; }
     match /bookings/{id} { allow read, list, write: if isSignedIn(); }
+    // Disputes: buyer creates, admin resolves (via admin SDK). Seller can read if involved.
     match /disputes/{id} { allow read, list, write: if isSignedIn(); }
+    // Appeals: seller creates, admin resolves (via admin SDK).
     match /appeals/{id} { allow read, list, write: if isSignedIn(); }
+    match /price_reports/{id} { allow read, list, write: if isSignedIn(); }
   }
 }

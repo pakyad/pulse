@@ -124,6 +124,12 @@ function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: (
                 <span className="font-semibold text-red-400">Campus Ceiling</span>
                 <span className="font-bold text-red-900">RM {ceiling.toFixed(2)}</span>
               </div>
+              {item.price_appeal && (
+                <div className="pt-3 border-t border-red-200">
+                  <p className="text-[10px] font-semibold text-red-400 mb-1">Seller Justification</p>
+                  <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">{item.price_appeal}</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -279,8 +285,9 @@ export default function PriceReviewPage() {
                   <div className="md:col-span-3">
                     <p className="text-[15px] font-bold text-red-600">RM {Number(item.price).toFixed(2)}</p>
                     {ceiling > 0 && (
-                      <p className="text-[10px] font-bold text-slate-400 mt-0.5">Limit: {ceiling}</p>
+                      <p className="text-[10px] font-bold text-slate-400 mt-0.5">Limit: RM {ceiling.toFixed(2)}</p>
                     )}
+                    <p className="text-[9px] font-bold mt-0.5 text-slate-400 uppercase tracking-wider">{item.flag_source === 'SELLER_APPEAL' ? 'Appeal' : item.flag_source === 'COMMUNITY' ? 'Community Flagged' : 'System Flagged'}</p>
                   </div>
 
                   {/* Col 10-12: Action Button */}

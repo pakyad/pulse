@@ -146,13 +146,13 @@ export default function PulseHome() {
             <ServiceGrid />
          </section>
 
-         {/* ── MARKETPLACE PREVIEW ── */}
-         <section className="space-y-8">
-            <div className="flex justify-between items-end px-1">
-               <div>
-                  <Heading>Marketplace</Heading>
-                  <Subtext>Browse items for sale from other students</Subtext>
-               </div>
+          {/* ── MARKETPLACE PREVIEW ── */}
+          <section className="space-y-8">
+             <div className="flex justify-between items-end px-1">
+                <div>
+                   <Heading>Marketplace</Heading>
+                   <Subtext>Browse items for sale from other students</Subtext>
+                </div>
                <button onClick={() => router.push('/marketplace')} className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5 active:scale-95 transition-all">
                   Browse All <LayoutGrid size={14} />
                </button>
@@ -190,7 +190,7 @@ export default function PulseHome() {
 
       </div>
 
-      
+       
     </main>
   );
 }

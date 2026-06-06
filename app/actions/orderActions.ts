@@ -3,9 +3,21 @@
 import { getAdminDb } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 
-export async function releaseEscrow(orderId: string) {
+export async function releaseEscrow(orderId: string, callerUid?: string) {
   try {
     const db = getAdminDb();
+
+    if (!callerUid) {
+      return { success: false, message: "Authentication required." };
+    }
+
+    // Verify caller is admin
+    const callerDoc = await db.collection("users").doc(callerUid).get();
+    const callerData = callerDoc.data();
+    if (!callerData || callerData.role !== 'ADMIN') {
+      return { success: false, message: "Only admins can release escrow." };
+    }
+
     const orderRef = db.collection("orders").doc(orderId);
 
     await db.runTransaction(async (transaction) => {
@@ -17,8 +29,8 @@ export async function releaseEscrow(orderId: string) {
         throw new Error("Escrow already released for this order.");
       }
 
-      const merchantTotal = Number(orderData.item_total || orderData.items_total || 0);
-      const runnerFee = Number(orderData.runner_fee || orderData.delivery_fee || 0);
+      const merchantTotal = Number(orderData.price || orderData.item_total || orderData.items_total || 0);
+      const runnerFee = Number(orderData.runner_fee || orderData.delivery_fee || orderData.delivery_fee_amount || 0);
       const sellerId = orderData.seller_id;
       const runnerId = orderData.runner_id;
 
@@ -96,6 +108,15 @@ export async function cancelOrder(orderId: string, role: 'BUYER' | 'MERCHANT', u
       if (!orderDoc.exists) throw new Error("Order not found");
       
       const orderData = orderDoc.data()!;
+
+      // Verify caller is the buyer or seller
+      if (role === 'BUYER' && orderData.buyer_id !== userId) {
+        throw new Error("You can only cancel your own orders.");
+      }
+      if (role === 'MERCHANT' && orderData.seller_id !== userId) {
+        throw new Error("You can only cancel orders for your own store.");
+      }
+
       const currentStatus = orderData.status?.toUpperCase() || 'PENDING';
       
       // Strict Cancellation Rules

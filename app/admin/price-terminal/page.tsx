@@ -11,7 +11,7 @@ import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories
 
 // ── Campus-level default ceilings (used if no Firestore guideline exists) ─────
 const CAMPUS_DEFAULTS: Record<string, number> = {
-  HUNGER:   25,
+
   ACADEMIC: 200,
   HOSTEL:   500,
   TECH:     3500,

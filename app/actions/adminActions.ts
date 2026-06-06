@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 // ── CAMPUS DEFAULT CEILINGS ────────────────────────────────────────────────────
 const CAMPUS_DEFAULTS: Record<string, number> = {
-  HUNGER: 25, ACADEMIC: 200, HOSTEL: 500, TECH: 3500, APPAREL: 300,
+  ACADEMIC: 200, HOSTEL: 500, TECH: 3500, APPAREL: 300,
 };
 
 // ── INTERNAL: Send notification to a user ─────────────────────────────────────

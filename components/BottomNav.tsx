@@ -62,7 +62,7 @@ export default function BottomNav() {
     { name: 'Market', path: '/marketplace', icon: ShoppingBag, roles: ['STUDENT'] },
     { name: 'Pulse', path: '/pulse', icon: Newspaper, roles: ['STUDENT'], isCenter: true },
     { name: 'Run', path: '/run', icon: Bike, roles: ['STUDENT'] },
-    { name: 'Admin', path: '/admin/dashboard', icon: LayoutGrid, roles: ['ADMIN'] },
+    { name: 'Admin', path: '/admin/overview', icon: LayoutGrid, roles: ['ADMIN'] },
     { name: 'Me', path: '/me', icon: User, roles: ['STUDENT', 'ADMIN'] },
   ];
 

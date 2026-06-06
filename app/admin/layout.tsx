@@ -6,7 +6,8 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import {
   LayoutGrid, Inbox, ShieldCheck, ShieldAlert, Users,
-  MessageSquare, ScrollText, Settings, LogOut, Archive, UserCheck, Wallet
+  MessageSquare, ScrollText, Settings, LogOut, Archive, UserCheck, Wallet,
+  Megaphone
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -35,6 +36,7 @@ const NAV_SECTIONS = [
   {
     title: 'SYSTEM',
     items: [
+      { href: '/admin/announcements', label: 'Announcements', icon: Megaphone },
       { href: '/admin/vault',          label: 'Governance Vault',   icon: Archive      },
       { href: '/admin/logs',           label: 'Activity Logs',      icon: ScrollText   },
       { href: '/admin/settings',       label: 'Settings',           icon: Settings     },
@@ -51,13 +53,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // ── Auth guard ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (user) => {
-      if (!user) { router.push('/auth'); return; }
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      const profile = snap.data();
-      if (profile?.role !== 'ADMIN' && user.email !== 'admin@pulse.com') {
-        router.push('/home'); return;
-      }
-      setReady(true);
+      try {
+        if (!user) { router.push('/auth'); return; }
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        const profile = snap.data();
+        if (profile?.role !== 'ADMIN' && user.email !== 'admin@pulse.com') {
+          router.push('/home'); return;
+        }
+        setReady(true);
+      } catch (err) { console.error('[Admin Layout] Auth error:', err); }
     });
     return () => unsub();
   }, [router]);

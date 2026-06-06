@@ -6,12 +6,14 @@ import { doc, onSnapshot, getDoc, setDoc, serverTimestamp } from 'firebase/fires
 import { 
   ChevronLeft, ChevronRight, Share2, Heart, ShieldCheck, ShieldAlert,
   ArrowUpRight, Clock, MapPin, Layers, Shirt,
-  UtensilsCrossed, BookOpen, Wrench, Home, Cpu, Star, ShoppingCart, CheckCircle2
+  BookOpen, Wrench, Home, Cpu, Star, ShoppingCart, CheckCircle2, MessageCircle, Edit3
 } from 'lucide-react';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import { useCart } from '@/lib/context/CartContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import ReportPriceButton from '@/components/shared/ReportPriceButton';
+import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { replyToReview } from '@/app/actions/reviewActions';
 
 // ── CATEGORY REGISTRY RENDERER ──
 function DomainRegistry({ item }: { item: any }) {
@@ -20,26 +22,9 @@ function DomainRegistry({ item }: { item: any }) {
 
   const rows: { label: string; value: React.ReactNode }[] = [];
 
-  if (item.category === 'HUNGER') {
-    if (item.metadata.active_until) rows.push({
-      label: 'Available Until',
-      value: (
-        <span className="flex items-center gap-1.5 text-red-500 font-bold text-[13px]">
-          <Clock size={12} />{item.metadata.active_until}
-        </span>
-      )
-    });
-    if (item.metadata.pickup_location) rows.push({
-      label: 'Pickup Point',
-      value: (
-        <span className="flex items-center gap-1.5 font-bold text-[13px] text-slate-900">
-          <MapPin size={12} className="text-[#94a3b8]" />{item.metadata.pickup_location}
-        </span>
-      )
-    });
-  }
   if (item.category === 'ACADEMIC') {
-    if (item.metadata.department) rows.push({ label: 'Faculty', value: item.metadata.department });
+    const program = item.metadata.program || item.metadata.department;
+    if (program) rows.push({ label: 'Program', value: program });
     if (item.metadata.year_semester) rows.push({ label: 'Year / Sem', value: item.metadata.year_semester });
     if (item.metadata.subject_code) rows.push({ label: 'Subject Code', value: item.metadata.subject_code });
   }
@@ -117,7 +102,25 @@ export default function ItemDetailsPage() {
   const [addedToCart, setAddedToCart] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [replying, setReplying] = useState(false);
   const { addToCart, cartCount } = useCart();
+
+  const handleReply = async (reviewId: string) => {
+    if (!replyText.trim() || !auth.currentUser) return;
+    setReplying(true);
+    try {
+      await replyToReview(reviewId, auth.currentUser.uid, replyText);
+      setReplyingTo(null);
+      setReplyText('');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setReplying(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -142,6 +145,19 @@ export default function ItemDetailsPage() {
     }, (err) => console.error(err));
     return () => unsub();
   }, [id]);
+
+  // Fetch reviews — for student items: by item_id; for club items: by seller_id
+  useEffect(() => {
+    if (!item || !seller) return;
+    const isOfficial = seller?.is_official === true;
+    const reviewsQuery = isOfficial
+      ? query(collection(db, "Reviews"), where("seller_id", "==", item.seller_id), where("target_type", "==", "SELLER"), orderBy("created_at", "desc"), limit(10))
+      : query(collection(db, "Reviews"), where("item_id", "==", item.id), where("target_type", "==", "ITEM"), orderBy("created_at", "desc"), limit(10));
+    const unsub = onSnapshot(reviewsQuery, (snap) => {
+      setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => console.error("[Reviews]", err));
+    return () => unsub();
+  }, [item, seller]);
 
   const handleAddToCart = () => {
     addToCart({
@@ -206,7 +222,7 @@ export default function ItemDetailsPage() {
   const images: string[] = item.images?.length ? item.images : item.image_url ? [item.image_url] : [];
 
   const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
-    HUNGER: UtensilsCrossed, ACADEMIC: BookOpen, HOSTEL: Home, TECH: Cpu, APPAREL: Shirt
+    ACADEMIC: BookOpen, HOSTEL: Home, TECH: Cpu, APPAREL: Shirt
   };
   const CategoryIcon = category ? CATEGORY_ICONS[item.category as CategoryID] : Layers;
 
@@ -355,11 +371,7 @@ export default function ItemDetailsPage() {
               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 ">
                 <ShieldAlert size={12} /> Suspended
               </span>
-            ) : (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 shrink-0 pt-1 ">
-                <ShieldCheck size={12} /> Verified
-              </span>
-            )}
+            ) : null}
           </div>
 
           {/* ── GOVERNANCE BANNER ── */}
@@ -434,33 +446,79 @@ export default function ItemDetailsPage() {
         <section className="space-y-6 pt-2 border-t border-slate-100">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Community Feedback</h2>
-              <p className="text-[11px] font-medium text-[#94a3b8]">Verified institutional reviews</p>
+              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">
+                {seller?.is_official ? 'Reviews' : 'Buyer Feedback'}
+              </h2>
+              <p className="text-[11px] font-medium text-[#94a3b8]">
+                {seller?.is_official ? 'From verified purchases' : 'From the buyer of this item'}
+              </p>
             </div>
-            <button 
-              onClick={() => router.push(`/user/${item.seller_id}/reviews`)}
-              className="text-[12px] font-bold text-slate-900 opacity-40 hover:opacity-100 transition-opacity active:scale-95">
-              View All
-            </button>
           </div>
           
-          {/* Mock Review if none exist yet - for demo integrity */}
-          <div className="space-y-4">
-             <div className="p-5 bg-slate-50/50 border border-slate-50 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-white border border-slate-100 flex items-center justify-center text-[10px] font-bold">AZ</div>
-                      <span className="text-[12px] font-bold text-slate-900">amirul.z</span>
-                   </div>
-                   <div className="flex items-center gap-0.5 text-amber-400">
-                      {[1,2,3,4,5].map(s => <Star key={s} size={10} fill="currentColor" />)}
-                   </div>
+          {reviews.length > 0 ? (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="p-5 bg-slate-50/50 border border-slate-50 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-white border border-slate-100 flex items-center justify-center text-[9px] font-bold">
+                          {(review.reviewer_id || '?').slice(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-[12px] font-bold text-slate-900">{review.reviewer_id?.slice(0, 8)}</span>
+                     </div>
+                     <div className="flex items-center gap-0.5 text-amber-400">
+                        {[1,2,3,4,5].map(s => (
+                          <Star key={s} size={10} fill={s <= review.rating ? "currentColor" : "none"} stroke={s <= review.rating ? "currentColor" : "#e2e8f0"} />
+                        ))}
+                     </div>
+                  </div>
+                  <p className="text-[13px] font-medium text-slate-900/70 leading-relaxed">{review.comment}</p>
+                  {review.reply ? (
+                    <div className="ml-6 pl-4 border-l-2 border-slate-200 space-y-1">
+                      <p className="text-[11px] font-bold text-slate-500">Seller reply</p>
+                      <p className="text-[12px] font-medium text-slate-600 leading-relaxed">{review.reply.text}</p>
+                    </div>
+                  ) : seller?.is_official && auth.currentUser?.uid === item.seller_id && (
+                    <div className="ml-6 pl-4 border-l-2 border-slate-200">
+                      {replyingTo === review.id ? (
+                        <div className="space-y-2 mt-2">
+                          <input
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder="Write a reply..."
+                            className="w-full text-[12px] font-medium text-slate-900 bg-white border border-slate-100 rounded-xl px-3 py-2 outline-none focus:border-slate-300 placeholder:text-slate-300"
+                          />
+                          <div className="flex gap-2">
+                            <button onClick={() => handleReply(review.id)} disabled={replying || !replyText.trim()}
+                              className="text-[11px] font-bold text-white bg-slate-900 rounded-lg px-3 py-1.5 disabled:opacity-30 active:scale-95 transition-all">
+                              {replying ? 'Posting...' : 'Reply'}
+                            </button>
+                            <button onClick={() => { setReplyingTo(null); setReplyText(''); }}
+                              className="text-[11px] font-medium text-slate-400 hover:text-slate-600 px-2">
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => setReplyingTo(review.id)}
+                          className="text-[11px] font-semibold text-slate-400 hover:text-slate-900 transition-colors mt-1 flex items-center gap-1">
+                          <MessageCircle size={12} /> Reply
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <p className="text-[13px] font-medium text-slate-900/70 leading-relaxed italic">
-                  "Item arrived in perfect condition. Seller was very responsive and the transaction was smooth."
-                </p>
-             </div>
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-5 bg-slate-50/50 border border-slate-50 rounded-2xl">
+              <p className="text-[13px] font-medium text-slate-400 text-center italic">
+                {seller?.is_official 
+                  ? 'No reviews yet. Be the first to order!' 
+                  : 'This item has not been purchased yet.'}
+              </p>
+            </div>
+          )}
         </section>
 
         {/* ── DESCRIPTION ── */}
@@ -493,12 +551,27 @@ export default function ItemDetailsPage() {
       <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
         <div className="flex items-center gap-3">
           {auth.currentUser?.uid === item.seller_id ? (
-            <button
-              onClick={() => router.push('/me')}
-              className="flex-1 h-[52px] bg-slate-900 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-md"
-            >
-              Manage Your Listing
-            </button>
+            <div className="flex-1 flex gap-3">
+              <button
+                onClick={() => router.push(`/marketplace/edit/${id}`)}
+                className="flex-1 h-[52px] bg-slate-50 border border-slate-100 text-slate-900 font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-sm"
+              >
+                <Edit3 size={16} className="text-slate-400" />
+                Edit Listing
+              </button>
+              <button
+                onClick={async () => {
+                  if (confirm('Mark this item as sold? It will be removed from the marketplace.')) {
+                    const { doc, updateDoc } = await import('firebase/firestore');
+                    await updateDoc(doc(db, 'items', id as string), { status: 'sold', stock_count: 0 });
+                    router.push('/me');
+                  }
+                }}
+                className="h-[52px] px-6 border border-red-100 bg-red-50/50 text-red-600 font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all"
+              >
+                Mark as Sold
+              </button>
+            </div>
           ) : (
             <>
               <button

@@ -36,6 +36,10 @@ export default function MerchantDashboard() {
       
       const snap = await getDoc(doc(db, "users", user.uid));
       const userData = snap.data();
+      if (userData?.role !== 'CLUB' && !userData?.is_verified_merchant) {
+        router.push('/home');
+        return;
+      }
       setMerchant(snap.exists() ? { ...userData, uid: user.uid } : { full_name: user.displayName || "Pulse Vendor", uid: user.uid });
       
       
@@ -79,7 +83,6 @@ export default function MerchantDashboard() {
     await updateDoc(doc(db, "orders", orderId), { 
       status: "PENDING_RUNNER",
       delivery_type: "RUNNER",
-      deliveryType: "RUNNER",
       ready_at: serverTimestamp() 
     });
   };
@@ -139,8 +142,8 @@ export default function MerchantDashboard() {
   };
 
   // ── SHARED ANALYTICS LOGIC ──
-  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.price || 0), 0), [orders]);
-  const activeOrdersList = orders.filter(o => ["PENDING_VENDOR", "PREPARING", "AWAITING_RUNNER", "READY_FOR_PICKUP"].includes(o.status));
+  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.total || o.price || 0), 0), [orders]);
+  const activeOrdersList = orders.filter(o => ["PENDING_VENDOR", "PREPARING", "PENDING_RUNNER", "READY_FOR_PICKUP"].includes(o.status));
   
   const incomingOrders = activeOrdersList.filter(o => o.status === 'PENDING_VENDOR' && !o.runner_id);
   const urgentOrders = activeOrdersList.filter(o => o.status === 'PENDING_VENDOR');

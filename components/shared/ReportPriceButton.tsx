@@ -132,7 +132,7 @@ export default function ReportPriceButton({ itemId, sellerId, compact = false }:
                       <textarea
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        placeholder="e.g. Same item sells for RM 30 on Shopee..."
+                        placeholder="e.g. Same item sells for RM 30 on other platforms..."
                         rows={3}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-medium text-slate-900 placeholder:text-slate-200 focus:outline-none focus:border-slate-300 resize-none leading-relaxed"
                       />

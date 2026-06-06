@@ -67,7 +67,7 @@ export default function CreateListingPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fire price check when title + category + subcategory are all set
-  const triggerPriceCheck = useCallback(async (t: string, cat: string, sub: string) => {
+  const triggerPriceCheck = useCallback(async (t: string, cat: string, sub: string, p?: string) => {
     if (t.trim().length < 10 || !cat || !sub) return; // Require 10+ chars AND subcategory
     setMarketLoading(true);
     setMarketCheck(null);
@@ -75,7 +75,7 @@ export default function CreateListingPage() {
       const res = await fetch('/api/marketplace/price-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: t.trim(), category: cat, subcategory: sub }),
+        body: JSON.stringify({ title: t.trim(), category: cat, subcategory: sub, proposedPrice: p ? parseFloat(p) : undefined, sellerId: auth.currentUser?.uid }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -99,7 +99,7 @@ export default function CreateListingPage() {
     if (title.trim().length >= 10 && selectedCategory && subcategory) {
       debounceRef.current = setTimeout(() => {
         const fullTitle = metadata.brand ? `${metadata.brand} ${title.trim()}` : title.trim();
-        triggerPriceCheck(fullTitle, selectedCategory as string, subcategory);
+        triggerPriceCheck(fullTitle, selectedCategory as string, subcategory, price);
       }, 900);
     } else if (!subcategory || title.trim().length < 10) {
       setMarketCheck(null);
@@ -197,7 +197,7 @@ export default function CreateListingPage() {
   };
 
   const numPrice = parseFloat(price);
-  const isPriceBlocked = !!(marketCheck?.is_enforced && !isNaN(numPrice) && numPrice > marketCheck.max_campus_price);
+  const isPriceBlocked = !!(marketCheck?.validation?.zone === 'red');
   const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting && !isPriceBlocked;
 
   return (
@@ -402,8 +402,9 @@ export default function CreateListingPage() {
                 {marketCheck && !marketLoading && (() => {
                   const numericPrice = parseFloat(price);
                   const hasPriceInput = !!price && !isNaN(numericPrice) && numericPrice > 0;
-                  const isBlocked = hasPriceInput && marketCheck.is_enforced && numericPrice > marketCheck.max_campus_price;
-                  const isCompliant = hasPriceInput && numericPrice <= marketCheck.max_campus_price;
+                  const isBlocked = marketCheck.validation?.zone === 'red';
+                  const isWarning = marketCheck.validation?.zone === 'yellow';
+                  const isCompliant = marketCheck.validation?.zone === 'green';
 
                   if (!marketCheck.market_baseline) {
                     return (
@@ -437,6 +438,8 @@ export default function CreateListingPage() {
                           ? 'bg-red-50/80 border-red-100'
                           : isCompliant
                           ? 'bg-emerald-50/80 border-emerald-100'
+                          : isWarning
+                          ? 'bg-amber-50/80 border-amber-100'
                           : 'bg-slate-50 border-slate-100'
                       }`}
                     >
@@ -447,24 +450,24 @@ export default function CreateListingPage() {
                         'border-slate-100'
                       }`}>
                         <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                          isBlocked ? 'bg-red-100' : isCompliant ? 'bg-emerald-100' : 'bg-slate-100'
+                          isBlocked ? 'bg-red-100' : isCompliant ? 'bg-emerald-100' : isWarning ? 'bg-amber-100' : 'bg-slate-100'
                         }`}>
                           {isBlocked
                             ? <ShieldAlert size={14} className="text-red-500" />
                             : isCompliant
                             ? <ShieldCheck size={14} className="text-emerald-600" />
-                            : <Globe size={14} className="text-slate-400" />
+                            : isWarning ? <AlertCircle size={14} className="text-amber-500" /> : <Globe size={14} className="text-slate-400" />
                           }
                         </div>
                         <div className="flex-1">
                           <p className={`text-[12px] font-bold tracking-tight ${
-                            isBlocked ? 'text-red-700' : isCompliant ? 'text-emerald-700' : 'text-slate-600'
+                            isBlocked ? 'text-red-700' : isCompliant ? 'text-emerald-700' : isWarning ? 'text-amber-700' : 'text-slate-600'
                           }`}>
                             {isBlocked
                               ? 'Listing Paused — Price Too High'
                               : isCompliant
                               ? 'Campus-Compliant Price ✓'
-                              : 'Market Intelligence Active'
+                              : isWarning ? 'Fair Price Range' : 'Market Intelligence Active'
                             }
                           </p>
                         </div>
@@ -495,7 +498,7 @@ export default function CreateListingPage() {
                         {hasPriceInput ? (
                           <div className="flex items-center justify-between border-t border-slate-100/80 pt-2 mt-1">
                             <span className="text-[11px] font-medium text-slate-400">Your Price</span>
-                            <span className={`text-[13px] font-semibold ${isBlocked ? 'text-red-500' : 'text-emerald-600'}`}>
+                            <span className={`text-[13px] font-semibold ${isBlocked ? 'text-red-500' : isWarning ? 'text-amber-600' : 'text-emerald-600'}`}>
                               RM {numericPrice.toFixed(2)}
                             </span>
                           </div>

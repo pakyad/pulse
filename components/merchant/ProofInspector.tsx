@@ -79,54 +79,54 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
             <motion.div 
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              className="w-full md:w-96 bg-[#FFFFFF] rounded-[2.5rem] p-8 flex flex-col justify-between shadow-md"
+              className="w-full md:w-96 bg-white rounded-[2.5rem] p-8 flex flex-col justify-between shadow-md"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="space-y-8">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#8E8E93] mb-2">Logistics Audit</p>
-                  <h3 className="text-[24px] font-semibold text-[#1C1C1E] tracking-tight">Delivery Proof</h3>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400 mb-2">Logistics Audit</p>
+                  <h3 className="text-[24px] font-semibold text-slate-900 tracking-tight">Delivery Proof</h3>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="p-5 rounded-2xl bg-[#F2F2F7] border border-[#E5E5EA] flex items-center justify-between">
+                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#1C1C1E] shadow-sm">
+                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-900 shadow-sm">
                         <ShieldCheck size={20} />
                       </div>
-                      <span className="text-[13px] font-bold text-[#8E8E93]">Status</span>
+                      <span className="text-[13px] font-bold text-slate-400">Status</span>
                     </div>
-                    <span className="text-[14px] font-semibold text-[#34C759] ">{order.status}</span>
+                    <span className="text-[14px] font-semibold text-emerald-500">{order.status}</span>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-[#F2F2F7] border border-[#E5E5EA] space-y-4">
+                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-[#8E8E93]">
+                      <div className="flex items-center gap-3 text-slate-400">
                         <Clock size={16} />
                         <span className="text-[12px] font-bold">Fulfillment Time</span>
                       </div>
-                      <span className="text-[12px] font-semibold text-[#1C1C1E]">
+                      <span className="text-[12px] font-semibold text-slate-900">
                         {order.updated_at ? new Date(order.updated_at).toLocaleString() : 'Processing...'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-[#8E8E93]">
+                      <div className="flex items-center gap-3 text-slate-400">
                         <Package size={16} />
                         <span className="text-[12px] font-bold">Order Registry</span>
                       </div>
-                      <span className="text-[12px] font-semibold text-[#1C1C1E]">#{order.id.slice(0, 8).toUpperCase()}</span>
+                      <span className="text-[12px] font-semibold text-slate-900">#{order.id.slice(0, 8).toUpperCase()}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-[#8E8E93]">
+                      <div className="flex items-center gap-3 text-slate-400">
                         <MapPin size={16} />
                         <span className="text-[12px] font-bold">Destination</span>
                       </div>
-                      <span className="text-[12px] font-semibold text-[#1C1C1E] truncate max-w-[120px]">{order.delivery_address || 'Campus Drop-off'}</span>
+                      <span className="text-[12px] font-semibold text-slate-900 truncate max-w-[120px]">{order.delivery_address || 'Campus Drop-off'}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-[#1C1C1E] p-5 rounded-2xl">
+                <div className="bg-slate-900 p-5 rounded-2xl">
                   <p className="text-[12px] font-medium text-white/70 leading-relaxed">
                     This visual evidence confirms the physical hand-over of <span className="text-white font-bold">{order.title}</span>. 
                     If the asset is unclear, contact logistics support.
@@ -140,14 +140,14 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
                     href={order.proofOfDeliveryUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="w-full h-14 rounded-2xl border border-[#E5E5EA] flex items-center justify-center gap-3 text-[14px] font-bold text-[#1C1C1E] hover:bg-[#F2F2F7] transition-all"
+                    className="w-full h-14 rounded-2xl border border-slate-200 flex items-center justify-center gap-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 transition-all"
                   >
                     <Download size={18} /> Export Evidence
                   </a>
                 )}
                 <button 
                   onClick={onClose}
-                  className="w-full h-16 rounded-2xl bg-slate-900 text-white font-semibold text-[15px]  active:scale-95 transition-transform"
+                  className="w-full h-16 rounded-2xl bg-slate-900 text-white font-semibold text-[15px] active:scale-95 transition-transform"
                 >
                   Dismiss Audit
                 </button>

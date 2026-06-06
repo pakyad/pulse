@@ -255,10 +255,14 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    useEffect(() => {
      if (!isApiConfigured || !isLoaded || !mission || !step) return;
      try {
+        const pickupNode = parseLocationToken(mission.pickup_location || '');
+        const dropoffNode = parseLocationToken(mission.drop_off_location || '');
+        const origin = step <= 2 ? pickupNode.label : dropoffNode.label;
+        const destination = step <= 2 ? dropoffNode.label : pickupNode.label;
         const directionsService = new google.maps.DirectionsService();
         directionsService.route({
-           origin: step <= 2 ? "UniKL City Campus" : "Cafe Block A UniKL",
-           destination: step <= 2 ? "Cafe Block A UniKL" : "UniKL Library",
+           origin: origin || "UniKL City Campus",
+           destination: destination || "UniKL City Campus",
            travelMode: google.maps.TravelMode.WALKING,
         }, (result, status) => {
            if (status === 'OK') setDirections(result);
@@ -275,23 +279,10 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
          const uploadResult = await uploadBytes(storageRef, podPhoto);
          const proofUrl = await getDownloadURL(uploadResult.ref);
 
-         const res = await completeDelivery(mission.orderId || mission.id, proofUrl);
+         const res = await completeDelivery(mission.orderId || mission.id, proofUrl, auth.currentUser.uid);
 
          if (res.success) {
-            const userRef = doc(db, 'users', auth.currentUser.uid);
-            const snap = await getDoc(userRef);
-            const payout = mission.payout || 4.50;
-            
-            await addDoc(collection(db, 'users', auth.currentUser.uid, 'transactions'), {
-               item: mission.title || mission.items_summary, price: payout, date: new Date().toLocaleString(), timestamp: new Date()
-            });
-
-            await updateDoc(userRef, { 
-               current_missions: [], 
-               balance: (snap.data()?.balance || 0) + payout 
-            });
-
-            setStep(6); 
+            setStep(6);
          }
       } catch (error) {
       } finally {

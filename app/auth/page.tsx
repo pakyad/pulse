@@ -41,7 +41,7 @@ export default function AuthPage() {
       
       if (userSnap.exists()) {
         const userData = userSnap.data();
-        if (userData.role === 'ADMIN') router.push('/admin/dashboard');
+        if (userData.role === 'ADMIN') router.push('/admin/overview');
         else if (userData.role === 'CLUB') router.push('/merchant');
         else router.push('/home');
       } else {
@@ -61,7 +61,7 @@ export default function AuthPage() {
     // 🏛️ REQ_F101: Institutional UI Gating
     const { isValidUniKLEmail } = await import('@/lib/auth-utils');
     if (!isValidUniKLEmail(regData.email)) {
-      setError('Unauthorized: You must use a valid UniKL email address to join CODEP.');
+      setError('Unauthorized: You must use your @s.unikl.edu.my email to join.');
       setLoading(false);
       return;
     }

@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { doc, onSnapshot, collection, serverTimestamp, runTransaction, query, where } from 'firebase/firestore';
-import { ChevronLeft, ChevronRight, Plus, ArrowDownToLine, History, Receipt, X, Loader2, CalendarRange, Landmark } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, ArrowDownToLine, History, Receipt, X, Loader2, CalendarRange } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
@@ -166,8 +166,8 @@ export default function RunnerWalletPage() {
                  {viewMode === 'OVERALL' ? 'Available Balance' : "Today's Earnings"}
                  <ChevronRight size={12} strokeWidth={3} className="rotate-90" />
                </button>
-               <div className="flex items-start justify-center gap-1 text-slate-900">
-                 <span className="text-[21px] font-bold mt-1.5">RM</span>
+                <div className="flex items-start justify-center gap-1 text-slate-900">
+                  <span className="text-sm font-semibold text-slate-400 pt-1">RM</span>
                  <motion.span 
                     key={viewMode}
                     initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
@@ -223,64 +223,60 @@ export default function RunnerWalletPage() {
               className="absolute inset-0 bg-slate-900/20 backdrop-blur-md" />
             
             <motion.div initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }} transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="relative w-full max-w-sm bg-white rounded-2xl p-8 space-y-6 shadow-2xl overflow-hidden border border-slate-100"
+              className="relative w-full max-w-sm bg-slate-50 p-10 rounded-[32px] space-y-8 shadow-sm overflow-hidden border border-slate-100"
             >
+              {/* Shine overlay */}
+              <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-gradient-to-b from-white/60 to-transparent rounded-full pointer-events-none" />
+
               {/* Header */}
-              <div className="flex items-center justify-between">
-                <h2 className="text-[18px] font-bold text-slate-900 tracking-tight">{isTopUpOpen ? 'Add Funds' : 'Withdrawal'}</h2>
-                <button onClick={() => { setIsTopUpOpen(false); setIsWithdrawOpen(false); }} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 active:scale-95 transition-all">
-                  <X size={20} />
+              <div className="flex items-center justify-between relative z-10">
+                <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">{isTopUpOpen ? 'Top Up' : 'Withdrawal'}</h2>
+                <button onClick={() => { setIsTopUpOpen(false); setIsWithdrawOpen(false); }} className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-400 active:scale-95 transition-all shadow-sm">
+                  <X size={18} />
                 </button>
               </div>
 
               {/* Main Interaction Area */}
-              {isWithdrawOpen && (profile?.balance || 0) <= 0 ? (
-                <div className="py-6 text-center space-y-3">
-                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
-                     <Landmark size={32} />
-                   </div>
-                   <p className="text-[14px] font-bold text-slate-400 max-w-[200px] mx-auto leading-relaxed">No available capital.</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="text-center relative">
-                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em]">Amount in RM</span>
-                    <div className="flex items-center justify-center gap-2 mt-1">
-                       <span className={`text-[24px] font-bold transition-colors ${parseFloat(amount) > (profile?.balance || 999999) ? 'text-rose-500' : 'text-slate-200'}`}>RM</span>
-                       <input 
-                         type="number" 
-                         value={amount} 
-                         onChange={(e) => setAmount(e.target.value)} 
-                         placeholder="0.00"
-                         className={`bg-transparent text-[42px] font-bold text-slate-900 outline-none placeholder:text-slate-100 tracking-tighter w-full max-w-[180px] text-center transition-colors ${parseFloat(amount) > (profile?.balance || 999999) ? 'text-rose-500' : ''}`} 
-                       />
-                    </div>
+              <div className="space-y-8 relative z-10">
+                <div className="text-center space-y-4">
+                  <p className="text-[13px] font-semibold text-slate-500">Available: RM {(profile?.balance || 0).toFixed(2)}</p>
+                  <div className="flex items-start justify-center gap-1.5">
+                     <span className={`text-sm font-semibold pt-1 transition-colors ${parseFloat(amount) > (profile?.balance || 999999) ? 'text-rose-400' : 'text-slate-400'}`}>RM</span>
+                     <input 
+                       type="number" 
+                       value={amount} 
+                       onChange={(e) => setAmount(e.target.value)} 
+                       placeholder="0.00"
+                       className={`bg-transparent text-[56px] font-black text-slate-900 outline-none placeholder:text-slate-200/50 tracking-tighter w-full max-w-[220px] text-center transition-colors ${parseFloat(amount) > (profile?.balance || 999999) ? 'text-rose-500' : ''}`} 
+                     />
                   </div>
-                  
-                    <button 
-                      onClick={() => setAmount(profile?.balance?.toString() || '0')}
-                      className="flex items-center justify-center mx-auto py-1.5 px-4 bg-slate-50 border border-slate-100 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] hover:bg-slate-100 hover:text-slate-900 transition-all"
-                    >
-                      Withdraw All
-                    </button>
+                  <span className="block text-[12px] font-medium text-slate-400">Enter amount to withdraw</span>
                 </div>
-              )}
+                
+                  <button 
+                    onClick={() => setAmount(profile?.balance?.toString() || '0')}
+                    className="flex items-center justify-center mx-auto py-2 px-5 bg-white border border-slate-100 rounded-full text-[12px] font-medium text-slate-500 hover:text-slate-900 transition-all shadow-sm"
+                  >
+                    Withdraw all
+                  </button>
+              </div>
 
               {/* Functional Button */}
               <button 
                 onClick={isTopUpOpen ? handleTopUp : handleWithdraw}
                 disabled={loading || !amount || parseFloat(amount) <= 0 || (isWithdrawOpen && parseFloat(amount) > (profile?.balance || 0))}
-                className="w-full h-12 bg-slate-900 text-white rounded-2xl font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-30 disabled:grayscale"
+                className="relative z-10 w-full h-14 bg-slate-900 text-white rounded-[20px] font-bold text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-30 disabled:grayscale overflow-hidden"
               >
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
                 {loading ? (
                   <Loader2 size={20} className="animate-spin" />
                 ) : (
                   <>
                     <span>
-                      {isTopUpOpen ? 'Authorize Injection' : 
-                       (profile?.balance || 0) <= 0 ? 'Zero Balance' :
+                      {isTopUpOpen ? 'Top Up' : 
+                       (profile?.balance || 0) <= 0 ? 'Insufficient Capital' :
                        parseFloat(amount) > (profile?.balance || 0) ? 'Insufficient Capital' : 
-                       'Authorize Withdrawal'}
+                       'Withdraw'}
                     </span>
                     {!loading && <ChevronRight size={16} strokeWidth={3} />}
                   </>

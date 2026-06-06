@@ -17,6 +17,7 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import RunnerEnrollmentSheet from '@/components/shared/RunnerEnrollmentSheet';
 import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
+import ProductCard from '@/components/shared/ProductCard';
 
 // ── STANDARDIZED TYPOGRAPHY COMPONENTS (Concept: Skibidi) ──
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -135,9 +136,18 @@ export default function MePage() {
                   <ShieldCheck size={16} />
                </div>
             </button>
-            <div className="flex-1 min-w-0 space-y-0.5">
+            <div className="flex-1 min-w-0 space-y-1">
                <Heading className="truncate">{profile?.full_name || 'Pulse Member'}</Heading>
-               <Subtext>Matric Number: {profile?.matric_no || 'Pending'}</Subtext>
+               <div className="space-y-0.5">
+                  <Subtext>Matric Number: {profile?.matric_no || 'Pending'}</Subtext>
+                  {(profile?.faculty || profile?.year_of_study) && (
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight flex items-center gap-2">
+                       {profile?.faculty && <span>{profile.faculty}</span>}
+                       {profile?.faculty && profile?.year_of_study && <span className="w-1 h-1 bg-slate-200 rounded-full" />}
+                       {profile?.year_of_study && <span>{profile.year_of_study}</span>}
+                    </p>
+                  )}
+               </div>
             </div>
          </section>
 
@@ -188,55 +198,62 @@ export default function MePage() {
             </section>
          ))}
 
-         {/* ── LISTINGS SECTION (Horizontal Visuals) ── */}
+         {/* ── LISTINGS SECTION (Grid Layout) ── */}
          {isStudent && (
             <section className="space-y-8">
-               <div className="px-1 space-y-1">
-                  <Heading>Listings</Heading>
-                  <Subtext>Operational assets in the marketplace</Subtext>
-               </div>
-
-               <div className="flex gap-5 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-4">
-                  {/* ADD LISTING CARD */}
+               <div className="flex items-center justify-between px-1">
+                  <div className="space-y-1">
+                    <Heading>Your Listings</Heading>
+                    <Subtext>Operational assets in the marketplace</Subtext>
+                  </div>
                   <button 
-                     onClick={() => router.push('/marketplace/create')}
-                     className="shrink-0 w-36 h-48 rounded-[24px] bg-white border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition-all group"
+                    onClick={() => router.push('/marketplace/create')}
+                    className="h-10 px-4 bg-slate-900 text-white rounded-xl text-[12px] font-bold flex items-center gap-2 active:scale-95 transition-all shadow-sm"
                   >
-                     <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 group-hover:bg-slate-900 group-hover:border-slate-900 group-hover:text-white transition-all shadow-sm">
-                        <Plus size={20} />
-                     </div>
-                     <span className="text-[12px] font-semibold text-slate-500">Add Listing</span>
+                    <Plus size={16} />
+                    New Listing
                   </button>
-
-                  {/* ACTIVE LISTINGS */}
-                  {myListings.map((item) => (
-                     <button 
-                        key={item.id} 
-                        onClick={() => router.push(`/marketplace/${item.id}`)}
-                        className="shrink-0 w-36 h-48 rounded-[24px] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-slate-100 overflow-hidden relative group flex flex-col text-left active:scale-[0.97] transition-all"
-                     >
-                        <div className="h-28 w-full bg-white relative">
-                           {item.images?.[0] ? (
-                              <img src={item.images[0]} className="w-full h-full object-cover" />
-                           ) : (
-                              <div className="w-full h-full flex items-center justify-center text-slate-100">
-                                 <Package size={24} />
-                              </div>
-                           )}
-                           <div className="absolute top-2 right-2 px-2 py-1 bg-white/80 backdrop-blur-md rounded-lg border border-slate-100 shadow-sm">
-                              <p className="text-[8px] font-semibold text-slate-900 uppercase tracking-tighter">RM {item.price?.toFixed(2)}</p>
-                           </div>
-                        </div>
-                        <div className="flex-1 p-4 flex flex-col justify-between">
-                           <p className="text-[12px] font-bold text-slate-900 tracking-tight truncate">{item.title}</p>
-                           <div className="flex items-center justify-between">
-                              <span className="text-[9px] font-semibold text-[#94a3b8] ">{item.status}</span>
-                              <Edit3 size={12} className="text-slate-200 group-hover:text-slate-900 transition-colors" />
-                           </div>
-                        </div>
-                      </button>
-                   ))}
                </div>
+
+               {myListings.length > 0 ? (
+                 <div className="grid grid-cols-2 gap-4">
+                    {myListings.map((item) => (
+                       <div key={item.id} className="relative group">
+                          <ProductCard 
+                            item={{
+                              id: item.id,
+                              title: item.title,
+                              price: item.price,
+                              image_url: item.images?.[0] || item.image_url,
+                              seller_id: item.seller_id,
+                              seller_name: profile?.full_name,
+                              seller_photo_url: profile?.photo_url,
+                              stock_count: item.stock_count,
+                              is_official: item.is_official,
+                              category: item.category,
+                              subcategory: item.subcategory
+                            }}
+                            onClick={() => router.push(`/marketplace/${item.id}`)}
+                          />
+                          {/* Owner Quick Edit Overlay */}
+                          <div className="absolute top-4 left-4 pointer-events-none">
+                             <div className="bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg border border-slate-100 shadow-sm flex items-center gap-1.5">
+                                <Edit3 size={10} className="text-slate-900" />
+                                <span className="text-[9px] font-bold text-slate-900 uppercase">Owner View</span>
+                             </div>
+                          </div>
+                       </div>
+                    ))}
+                 </div>
+               ) : (
+                 <div className="py-12 flex flex-col items-center justify-center bg-slate-50 rounded-[32px] border border-dashed border-slate-200">
+                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-300 border border-slate-100 mb-4">
+                       <Package size={24} />
+                    </div>
+                    <p className="text-[13px] font-bold text-slate-900">No active listings</p>
+                    <p className="text-[11px] font-medium text-slate-400 mt-1">Start selling to see them here.</p>
+                 </div>
+               )}
             </section>
          )}
 

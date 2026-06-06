@@ -80,36 +80,36 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
               <div className="space-y-8">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400 mb-2">Audit Protocol</p>
-                  <h3 className="text-[24px] font-semibold text-navy tracking-tight">Payment Verification</h3>
+                  <h3 className="text-[24px] font-semibold text-slate-900 tracking-tight">Payment Verification</h3>
                 </div>
 
                 <div className="space-y-4">
                   <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-navy shadow-sm">
+                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-900 shadow-sm">
                         <ShieldCheck size={20} />
                       </div>
-                      <span className="text-[13px] font-bold text-navy/60">Amount Found</span>
+                      <span className="text-[13px] font-bold text-slate-400">Amount Found</span>
                     </div>
-                    <span className="text-[18px] font-semibold text-navy">RM {amount.toFixed(2)}</span>
+                    <span className="text-[18px] font-semibold text-slate-900">RM {amount.toFixed(2)}</span>
                   </div>
 
                   <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-navy/40">
+                      <div className="flex items-center gap-3 text-slate-400">
                         <Clock size={16} />
                         <span className="text-[12px] font-bold">Registry Time</span>
                       </div>
-                      <span className="text-[12px] font-semibold text-navy">
+                      <span className="text-[12px] font-semibold text-slate-900">
                         {timestamp ? new Date(timestamp).toLocaleString() : 'N/A'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-navy/40">
+                      <div className="flex items-center gap-3 text-slate-400">
                         <Package size={16} />
                         <span className="text-[12px] font-bold">Transaction ID</span>
                       </div>
-                      <span className="text-[12px] font-semibold text-navy">#{orderId.slice(0, 8)}</span>
+                      <span className="text-[12px] font-semibold text-slate-900">#{orderId.slice(0, 8)}</span>
                     </div>
                   </div>
                 </div>
@@ -126,7 +126,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
                   href={imageUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-full h-14 rounded-2xl border border-slate-100 flex items-center justify-center gap-3 text-[14px] font-bold text-navy hover:bg-slate-50 transition-all"
+                  className="w-full h-14 rounded-2xl border border-slate-200 flex items-center justify-center gap-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 transition-all"
                 >
                   <Download size={18} /> Download Asset
                 </a>

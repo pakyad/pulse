@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkMarketPrice } from '@/lib/marketplace/price-engine';
+import { checkMarketPrice, validatePriceZone } from '@/lib/marketplace/price-engine';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, category, subcategory } = body;
+    const { title, category, subcategory, proposedPrice, sellerId } = body;
 
     if (!title || typeof title !== 'string' || title.trim().length < 4) {
       return NextResponse.json({ error: 'Title too short.' }, { status: 400 });
@@ -16,8 +16,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Subcategory required.' }, { status: 400 });
     }
 
-    const result = await checkMarketPrice(title.trim(), category, subcategory);
-    return NextResponse.json(result, { status: 200 });
+    const marketData = await checkMarketPrice(title.trim(), category, subcategory);
+    
+    // If a proposed price is provided, run it through the zone validator
+    let zoneData = null;
+    if (proposedPrice !== undefined && proposedPrice !== null) {
+      zoneData = await validatePriceZone(Number(proposedPrice), marketData, sellerId);
+    }
+
+    return NextResponse.json({
+      ...marketData,
+      validation: zoneData
+    }, { status: 200 });
   } catch (err: any) {
     console.error('[/api/marketplace/price-check]', err);
     return NextResponse.json({ error: 'Price check failed.' }, { status: 500 });

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { CheckCircle2, Loader2, X, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { holdEscrow, refundEscrow } from '@/app/actions/adminActions';
@@ -197,6 +197,14 @@ export default function AdminEscrowPage() {
   const [disputes, setDisputes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewingOrder, setViewingOrder] = useState<any>(null);
+  const [adminUid, setAdminUid] = useState<string>('');
+
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged(user => {
+      if (user) setAdminUid(user.uid);
+    });
+    return unsub;
+  }, []);
 
   useEffect(() => {
     const qOrders = query(
@@ -224,9 +232,9 @@ export default function AdminEscrowPage() {
     if (!viewingOrder) return;
     try {
       let res;
-      if (action === 'distribute') res = await releaseEscrow(viewingOrder.id);
-      if (action === 'hold') res = await holdEscrow(viewingOrder.id);
-      if (action === 'refund') res = await refundEscrow(viewingOrder.id);
+      if (action === 'distribute') res = await releaseEscrow(viewingOrder.id, adminUid);
+      if (action === 'hold') res = await holdEscrow(viewingOrder.id, adminUid);
+      if (action === 'refund') res = await refundEscrow(viewingOrder.id, adminUid);
       
       if (!res?.success) throw new Error(res?.message || 'Failed to complete action');
     } catch (e: any) {
