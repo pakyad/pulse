@@ -106,6 +106,28 @@ const PixelHeart = ({ className, size=20 }: { className?: string, size?: number 
   </svg>
 );
 
+const PixelFood = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="4" y="3" width="12" height="2" />
+    <rect x="3" y="5" width="2" height="6" />
+    <rect x="15" y="5" width="2" height="6" />
+    <rect x="5" y="11" width="10" height="2" />
+    <rect x="7" y="13" width="6" height="4" />
+  </svg>
+);
+
+const PixelHome = ({ className, size=20 }: { className?: string, size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
+    <rect x="9" y="2" width="2" height="2" />
+    <rect x="7" y="4" width="6" height="2" />
+    <rect x="5" y="6" width="10" height="2" />
+    <rect x="3" y="8" width="14" height="2" />
+    <rect x="4" y="10" width="2" height="8" />
+    <rect x="14" y="10" width="2" height="8" />
+    <rect x="6" y="16" width="8" height="2" />
+  </svg>
+);
+
 const PixelFilter = ({ className, size=20 }: { className?: string, size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
     <rect x="3" y="4" width="14" height="2" />
@@ -118,13 +140,14 @@ const PixelFilter = ({ className, size=20 }: { className?: string, size?: number
 );
 
 // ── CATEGORY CONFIG ──
-// 'all' is handled separately as a dedicated button (active when activeCategory === null)
 const CATEGORIES = [
-  { id: 'store',    label: 'Official', filter: 'Official', icon: PixelShield },
-  { id: 'tech',     label: 'Tech',     filter: 'Tech',     icon: PixelLaptop },
-  { id: 'books',    label: 'Academic', filter: 'Books',    icon: PixelBook   },
-  { id: 'apparel',  label: 'Apparel',  filter: 'Merch',    icon: PixelShirt  },
-  { id: 'services', label: 'Services', filter: 'Services', icon: PixelHeart  },
+  { id: 'store',    label: 'Official',    filter: 'OFFICIAL', icon: PixelShield },
+  { id: 'tech',     label: 'Electronics', filter: 'TECH',     icon: PixelLaptop },
+  { id: 'apparel',  label: 'Clothing',    filter: 'APPAREL',  icon: PixelShirt  },
+  { id: 'books',    label: 'Books',       filter: 'ACADEMIC', icon: PixelBook   },
+  { id: 'services', label: 'Services',    filter: 'SERVICES', icon: PixelHeart  },
+  { id: 'food',     label: 'Food',        filter: 'HUNGER',   icon: PixelFood   },
+  { id: 'hostel',   label: 'Hostel',      filter: 'HOSTEL',   icon: PixelHome   },
 ];
 
 function MarketplacePage() {
@@ -191,7 +214,11 @@ function MarketplacePage() {
 
     // Category
     if (activeCategory) {
-      result = result.filter(i => i.category?.toLowerCase() === activeCategory.toLowerCase());
+      if (activeCategory === 'OFFICIAL') {
+         result = result.filter(i => i.is_official === true);
+      } else {
+         result = result.filter(i => i.category?.toLowerCase() === activeCategory.toLowerCase());
+      }
     }
 
     // Student Market Filter

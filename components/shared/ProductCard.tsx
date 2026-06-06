@@ -30,7 +30,8 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
   const timeAgo = item.time_ago || "Just now";
   
   // Format price safely
-  const formattedPrice = item.price !== undefined ? Number(item.price).toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0';
+  const rawPrice = Number(item.price);
+  const formattedPrice = isNaN(rawPrice) ? '0' : rawPrice.toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   // Check if item is under price governance
   let isGoverned = false;
@@ -55,7 +56,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
         <img 
           src={item.image_url || `https://picsum.photos/seed/${item.id || item.title}/400/400`} 
           onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${item.id}/400/400`; }}
-          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${isSold ? 'blur-[1px] grayscale opacity-50' : ''}`}
+          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
           loading="lazy"
           alt={item.title}
         />
@@ -67,9 +68,9 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
         )}
 
         {isSold && (
-          <div className="absolute inset-0 bg-slate-900/25 flex items-center justify-center z-20">
-            <p className="text-[10px] font-semibold text-white uppercase tracking-[0.15em] bg-slate-900/50 px-4 py-1.5 rounded-full backdrop-blur-md">
-              {item.status === 'SOLD' ? 'Sold' : 'Out of Stock'}
+          <div className="absolute inset-x-0 bottom-0 bg-slate-900/90 py-1.5 px-3 flex items-center justify-center z-20 backdrop-blur-sm">
+            <p className="text-[11px] font-bold text-white uppercase tracking-tight">
+              SOLD
             </p>
           </div>
         )}

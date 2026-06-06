@@ -162,22 +162,24 @@ export default function PulsePage() {
       }
 
       const uAnn = onSnapshot(
-        query(collection(db, 'announcements'), where('type', 'in', ['OFFICIAL', 'ADMIN']), orderBy('created_at', 'desc'), limit(20)),
-        snap => { setAnnouncements(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingAnn(false); },
+        query(collection(db, 'announcements'), limit(50)),
+        snap => { 
+          const list = snap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter((a: any) => a.type === 'OFFICIAL' || a.type === 'ADMIN');
+          
+          list.sort((a: any, b: any) => {
+            const ta = a.created_at?.toMillis?.() || 0;
+            const tb = b.created_at?.toMillis?.() || 0;
+            return tb - ta;
+          });
+
+          setAnnouncements(list.slice(0, 20)); 
+          setLoadingAnn(false); 
+        },
         (err) => {
           console.error('[Pulse] Announcements:', err);
-          const uFallback = onSnapshot(
-            query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(20)),
-            snap => {
-              setAnnouncements(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter((a: any) => a.type === 'OFFICIAL' || a.type === 'ADMIN'));
-              setLoadingAnn(false);
-            },
-            (e) => {
-               console.error('[Pulse] Announcements Fallback:', e);
-               setLoadingAnn(false);
-            }
-          );
-          unsubs.push(uFallback);
+          setLoadingAnn(false);
         }
       );
       unsubs.push(uAnn);

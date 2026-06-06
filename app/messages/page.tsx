@@ -138,8 +138,8 @@ export default function MessagesPage() {
       </section>
 
       <section className="px-6 mt-10 space-y-4">
-         {(conversations.length > 0 ? conversations : DEMO_CONVERSATIONS).map((chat, i) => {
-           const otherParticipant = chat.otherParticipant || chat.participants?.[0] || { name: 'Pulse User', avatar: '' };
+         {conversations.map((chat, i) => {
+           const otherParticipant = chat.otherParticipant || { name: 'Pulse User', avatar: '' };
            const isUnread = chat.last_message_sender_id !== auth.currentUser?.uid && chat.unread_count > 0;
            
            return (
@@ -197,7 +197,7 @@ export default function MessagesPage() {
               </motion.button>
            );
          })}
-         {(conversations.length > 0 ? conversations : DEMO_CONVERSATIONS).length === 0 && (
+         {conversations.length === 0 && (
            <div className="py-32 flex flex-col items-center justify-center text-[#94a3b8] gap-4">
               <MessageSquare size={40} strokeWidth={1} className="text-slate-300" />
               <p className="text-[12px] font-bold ">No conversations yet</p>

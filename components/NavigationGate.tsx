@@ -137,6 +137,8 @@ export default function NavigationGate() {
     isRoot || 
     pathname === '/me' || 
     pathname === '/activity' || 
+    pathname === '/me/edit' ||
+    pathname === '/me/settings' ||
     pathname?.startsWith('/merchant') || 
     pathname?.startsWith('/admin') || 
     pathname?.startsWith('/run') || 
@@ -166,6 +168,7 @@ export default function NavigationGate() {
     !isBuyingFlow &&
     pathname !== '/me/insights' &&
     pathname !== '/me/edit' &&
+    pathname !== '/me/settings' &&
     !pathname?.startsWith('/messages') &&
     !pathname?.startsWith('/admin') && 
     !pathname?.startsWith('/merchant') &&
@@ -175,6 +178,7 @@ export default function NavigationGate() {
     !pathname?.startsWith('/campaigns') &&
     !pathname?.startsWith('/run/missions') &&
     !pathname?.startsWith('/run/history') &&
+    !pathname?.startsWith('/run/wallet') &&
     !pathname?.startsWith('/run/success') &&
     !(role === 'CLUB' && (pathname === '/me' || pathname === '/activity' || pathname?.startsWith('/me/orders')));
 

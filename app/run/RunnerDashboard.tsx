@@ -40,7 +40,12 @@ export default function RunnerDashboard({ profile, onBack }: { profile: any, onB
                    <p className="text-[10px] font-bold  text-white/30">Total Balance</p>
                    <div>
                       <p className="text-[24px] font-bold text-white tracking-tight">RM {(profile?.balance || 45.00).toFixed(2)}</p>
-                      <button className="text-[11px] font-bold text-white/50 mt-2 flex items-center gap-1">Manage Wallet <ChevronRight size={12}/></button>
+                      <button 
+                         onClick={() => router.push('/run/wallet')}
+                         className="text-[11px] font-bold text-white/50 mt-2 flex items-center gap-1 active:scale-95 transition-all"
+                      >
+                         Manage Wallet <ChevronRight size={12}/>
+                      </button>
                    </div>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-6 flex flex-col justify-between min-h-[160px]">

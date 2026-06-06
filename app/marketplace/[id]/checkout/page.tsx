@@ -2,24 +2,27 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, getDoc, runTransaction, serverTimestamp, collection } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import {
   ChevronLeft, Truck, Plus, Package, Check,
-  ArrowRight, ShieldCheck, CheckCircle2, Lock
+  ArrowRight, ShieldCheck, CheckCircle2, Lock, ShieldAlert
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { placeSingleOrder } from '@/app/actions/orderActions';
+
 import { CAMPUS_NODES, LocationNode, getLocationBadge } from '@/lib/core/locations';
 
 const FPX_BANKS = [
-  { id: 'maybank', label: 'Maybank2u', short: 'MB', bg: 'bg-[#FFCC00]', text: 'text-slate-900' },
-  { id: 'cimb',    label: 'CIMB Clicks', short: 'CB', bg: 'bg-[#7E1F2A]', text: 'text-white' },
-  { id: 'rhb',     label: 'RHB Now', short: 'RH', bg: 'bg-[#0067B1]', text: 'text-white' },
-  { id: 'hlb',     label: 'Hong Leong', short: 'HL', bg: 'bg-[#E3000F]', text: 'text-white' },
-  { id: 'pbb',     label: 'Public Bank', short: 'PB', bg: 'bg-[#E0121D]', text: 'text-white' },
-  { id: 'ambank',  label: 'AmOnline', short: 'AM', bg: 'bg-[#ED1A3B]', text: 'text-white' },
+// ...
+  { id: 'maybank', label: 'Maybank2u',  logo: 'https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/maybank.png' },
+  { id: 'cimb',    label: 'CIMB Clicks', logo: 'https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/cimb.png' },
+  { id: 'rhb',     label: 'RHB Now',     logo: 'https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/rhb.png' },
+  { id: 'hlb',     label: 'Hong Leong',  logo: 'https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/hlb.png' },
+  { id: 'pbb',     label: 'Public Bank', logo: 'https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/publicbank.png' },
+  { id: 'ambank',  label: 'AmOnline',    logo: 'https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/ambank.png' },
 ];
 
 type PayStatus = 'idle' | 'processing' | 'done';
@@ -43,7 +46,7 @@ export default function CheckoutPage() {
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [payStatus,    setPayStatus]    = useState<PayStatus>('idle');
 
-  const [errorState, setErrorState] = useState<null | 'INSUFFICIENT_STOCK'>(null);
+  const [errorState,    setErrorState]    = useState<null | 'INSUFFICIENT_STOCK' | 'PAYMENT_FAILED'>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -91,73 +94,29 @@ export default function CheckoutPage() {
     setPayStatus('processing');
     await new Promise(r => setTimeout(r, 2500));
     try {
-      const parentOrderId = `PULSE-${Date.now()}`;
-      
-      await runTransaction(db, async (transaction) => {
-        const itemRef = doc(db, 'items', id as string);
-        const itemDoc = await transaction.get(itemRef);
-        
-        if (!itemDoc.exists()) throw new Error("ITEM_NOT_FOUND");
-        
-        const currentStock = itemDoc.data().stock_count;
-        
-        if (currentStock !== undefined && currentStock !== null) {
-           if (currentStock < qty) {
-              throw new Error("SOLD_OUT");
-           }
-           transaction.update(itemRef, { stock_count: currentStock - qty });
-        }
+      const dropOffStr = choice === 'RUNNER' 
+        ? (isPremium ? `RAH-DOOR-${roomNumber}` : selectedNode.token) 
+        : (item.handover_node || 'MIIT-G-LOBBY');
 
-        // Sub-order
-        const subOrderRef = doc(collection(db, 'orders'));
-        const dropOffStr = choice === 'RUNNER' 
-          ? (isPremium ? `RAH-DOOR-${roomNumber}` : selectedNode.token) 
-          : (item.handover_node || 'MIIT-G-LOBBY');
-        
-        // 🏛️ Runner-First Protocol
-        const initialStatus = choice === 'RUNNER' ? 'PENDING_RUNNER' : 'PENDING_VENDOR';
-
-        transaction.set(subOrderRef, {
-          order_id: subOrderRef.id,
-          parent_id: parentOrderId,
-          buyer_id: auth.currentUser!.uid,
-          seller_id: item.seller_id,
-          seller_name: item.seller_name || 'Merchant',
-          customer_name: auth.currentUser!.displayName || 'Student',
-          title: item.title,
-          price: itemPrice * qty,
-          total: total,
-          items: [{ productId: id, title: item.title, price: itemPrice, qty, vendorId: item.seller_id, image_url: itemImage }],
-          image_url: itemImage,
-          delivery_type: choice,
-          drop_off_location: dropOffStr,
-          status: initialStatus,
-          handshake: {
-            seller_confirmed: false,
-            buyer_confirmed: false,
-            seller_coords: null,
-            buyer_coords: null,
-            verification_type: 'PENDING'
-          },
-          created_at: serverTimestamp()
-        });
-
-        // Parent Order
-        const parentRef = doc(db, 'parent_orders', parentOrderId);
-        transaction.set(parentRef, {
-          id: parentOrderId,
-          buyer_id: auth.currentUser!.uid,
-          total_price: total,
-          item_count: 1,
-          status: 'PAID',
-          items_summary: item.title,
-          created_at: serverTimestamp()
-        });
+      const result = await placeSingleOrder({
+        itemId: id as string,
+        qty: qty,
+        choice: choice!,
+        dropOffStr: dropOffStr,
+        itemPrice: itemPrice,
+        total: total,
+        buyerId: auth.currentUser!.uid,
+        buyerName: auth.currentUser!.displayName || 'Student',
+        image_url: itemImage
       });
+
+      if (!result.success) {
+        throw new Error(result.message || 'TRANSACTION_FAILED');
+      }
 
       setPayStatus('done');
       await new Promise(r => setTimeout(r, 1600));
-      router.replace(`/orders/success?id=${parentOrderId}`);
+      router.replace(`/orders/success?id=${result.parentId}`);
     } catch (e: any) {
       console.error('[FPX Pay]', e);
       setPayStatus('idle');
@@ -165,7 +124,7 @@ export default function CheckoutPage() {
       if (e.message === 'SOLD_OUT') {
         setErrorState('INSUFFICIENT_STOCK');
       } else {
-        setErrorState('INSUFFICIENT_STOCK'); // Reuse overlay for all errors gracefully
+        setErrorState('PAYMENT_FAILED');
         console.error('[FPX Pay] Unexpected failure:', e.message);
       }
     }
@@ -187,27 +146,43 @@ export default function CheckoutPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ════ ERROR: INSUFFICIENT STOCK OVERLAY ════ */}
+      {/* ════ ERROR OVERLAYS ════ */}
       <AnimatePresence>
-        {errorState === 'INSUFFICIENT_STOCK' && (
+        {errorState && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-200 bg-white flex flex-col items-center justify-center px-10 text-center"
           >
-            <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center mb-6">
-              <Lock size={32} className="text-red-500" />
+            <div className={`w-16 h-16 ${errorState === 'INSUFFICIENT_STOCK' ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'} border rounded-2xl flex items-center justify-center mb-6`}>
+              {errorState === 'INSUFFICIENT_STOCK' ? <Lock size={32} className="text-red-500" /> : <ShieldAlert size={32} className="text-slate-400" />}
             </div>
-            <h2 className="text-[20px] font-bold text-slate-900 tracking-tight mb-2">Insufficient Stock</h2>
+            <h2 className="text-[20px] font-bold text-slate-900 tracking-tight mb-2">
+              {errorState === 'INSUFFICIENT_STOCK' ? 'Insufficient Stock' : 'Checkout Failed'}
+            </h2>
             <p className="text-[13px] font-medium text-[#94a3b8] leading-relaxed mb-8">
-              Someone just bought the last remaining units while you were in checkout. 
-              We have not charged your account.
+              {errorState === 'INSUFFICIENT_STOCK' 
+                ? "Someone just bought the last remaining units while you were in checkout. We have not charged your account."
+                : "Something went wrong while processing your order. Please try again or contact support if the issue persists."}
             </p>
-            <button 
-              onClick={() => router.push(`/marketplace/${id}`)}
-              className="w-full h-12 bg-white border border-slate-200 shadow-sm text-slate-900 hover:bg-slate-50 rounded-xl font-bold text-[14px] active:scale-95 transition-all"
-            >
-              Return to Item
-            </button>
+            <div className="flex flex-col w-full gap-3">
+              <button 
+                onClick={() => {
+                  if (errorState === 'INSUFFICIENT_STOCK') router.push(`/marketplace/${id}`);
+                  else setErrorState(null);
+                }}
+                className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-[14px] active:scale-95 transition-all"
+              >
+                {errorState === 'INSUFFICIENT_STOCK' ? 'Return to Item' : 'Try Again'}
+              </button>
+              {errorState === 'PAYMENT_FAILED' && (
+                <button 
+                  onClick={() => router.push(`/marketplace/${id}`)}
+                  className="w-full h-12 bg-white border border-slate-200 text-slate-900 rounded-xl font-bold text-[14px] active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -498,8 +473,8 @@ export default function CheckoutPage() {
               <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden cursor-pointer" onClick={() => setPaymentMethod('FPX')}>
                 {/* Method header */}
                 <div className="flex items-center gap-4 px-4 py-4 border-b border-slate-100 bg-white">
-                  <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                    <span className="text-slate-900 font-semibold text-[11px] tracking-widest">FPX</span>
+                  <div className="w-11 h-11 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+                    <img src="https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/fpx.png" className="w-full h-full object-contain" alt="FPX" />
                   </div>
                   <div className="flex-1">
                     <p className="text-[13px] font-bold text-slate-900">FPX Online Banking</p>
@@ -533,8 +508,8 @@ export default function CheckoutPage() {
                             )}
                             
                             {/* Bank Logo / Icon */}
-                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-[12px] font-semibold tracking-widest mb-2 shadow-inner border border-black/5 ${bank.bg} ${bank.text}`}>
-                              {bank.short}
+                            <div className="w-12 h-9 rounded-lg flex items-center justify-center mb-2 overflow-hidden">
+                              <img src={bank.logo} className="w-full h-full object-contain" alt={bank.label} />
                             </div>
                             
                             <span className={`text-[11px] font-bold text-center leading-tight ${
@@ -553,8 +528,8 @@ export default function CheckoutPage() {
               {/* ── TNG eWallet card ── */}
               <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden cursor-pointer" onClick={() => setPaymentMethod('TNG')}>
                 <div className="flex items-center gap-4 px-4 py-4 bg-white">
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                    <span className="text-blue-600 font-semibold text-[10px] tracking-wider">TNG</span>
+                  <div className="w-11 h-11 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden p-1">
+                    <img src="https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/tng.png" className="w-full h-full object-contain" alt="TNG" />
                   </div>
                   <div className="flex-1">
                     <p className="text-[13px] font-bold text-slate-900">Touch 'n Go eWallet</p>

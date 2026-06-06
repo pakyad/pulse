@@ -43,20 +43,16 @@ service cloud.firestore {
     // ── MARKETPLACE ──
     match /items/{itemId} {
       allow read, list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
-      allow delete: if isSignedIn() && request.auth.uid == resource.data.seller_id;
+      allow create, update, delete: if isSignedIn();
     }
 
     // ── ORDERS ──
     match /orders/{orderId} {
-      allow create: if isSignedIn();
-      allow read, list, update: if isSignedIn() && (
-        request.auth.uid == resource.data.buyer_id || 
-        request.auth.uid == resource.data.seller_id || 
-        request.auth.uid == resource.data.runner_id ||
-        resource.data.status == 'PENDING_RUNNER'
-      );
+      allow read, list, create, update, delete: if isSignedIn();
+    }
+
+    match /parent_orders/{id} {
+      allow read, list, create, update, delete: if isSignedIn();
     }
 
     // ── OTHER COLLECTIONS ──

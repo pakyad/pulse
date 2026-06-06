@@ -38,10 +38,10 @@ export async function releaseEscrow(orderId: string, callerUid?: string) {
       if (sellerId && merchantTotal > 0) {
         const sellerRef = db.collection("users").doc(sellerId);
         const sellerDoc = await transaction.get(sellerRef);
-        const currentBalance = sellerDoc.exists ? (sellerDoc.data()!.wallet_balance || 0) : 0;
+        const currentBalance = sellerDoc.exists ? (sellerDoc.data()!.balance || 0) : 0;
         
         transaction.update(sellerRef, {
-          wallet_balance: currentBalance + merchantTotal
+          balance: currentBalance + merchantTotal
         });
 
         const ledgerRef = db.collection("ledger").doc();
@@ -60,10 +60,10 @@ export async function releaseEscrow(orderId: string, callerUid?: string) {
       if (runnerId && runnerFee > 0) {
         const runnerRef = db.collection("users").doc(runnerId);
         const runnerDoc = await transaction.get(runnerRef);
-        const currentBalance = runnerDoc.exists ? (runnerDoc.data()!.wallet_balance || 0) : 0;
+        const currentBalance = runnerDoc.exists ? (runnerDoc.data()!.balance || 0) : 0;
         
         transaction.update(runnerRef, {
-          wallet_balance: currentBalance + runnerFee
+          balance: currentBalance + runnerFee
         });
 
         const ledgerRef = db.collection("ledger").doc();
@@ -91,6 +91,93 @@ export async function releaseEscrow(orderId: string, callerUid?: string) {
   } catch (error: any) {
     console.error("Escrow Release Error:", error);
     return { success: false, message: error.message || "Failed to release escrow" };
+  }
+}
+
+export async function placeSingleOrder(params: {
+  itemId: string;
+  qty: number;
+  choice: 'SELF_COLLECT' | 'RUNNER';
+  dropOffStr: string;
+  itemPrice: number;
+  total: number;
+  buyerId: string;
+  buyerName: string;
+  image_url: string;
+}) {
+  try {
+    const db = getAdminDb();
+    const parentOrderId = `PULSE-${Date.now()}`;
+    
+    await db.runTransaction(async (transaction) => {
+      const itemRef = db.collection('items').doc(params.itemId);
+      const itemDoc = await transaction.get(itemRef);
+      
+      if (!itemDoc.exists) throw new Error("ITEM_NOT_FOUND");
+      
+      const item = itemDoc.data()!;
+      const currentStock = item.stock_count;
+      
+      if (currentStock !== undefined && currentStock !== null) {
+         if (currentStock < params.qty) {
+            throw new Error("SOLD_OUT");
+         }
+         transaction.update(itemRef, { stock_count: currentStock - params.qty });
+      }
+
+      // Sub-order
+      const subOrderRef = db.collection('orders').doc();
+      const initialStatus = params.choice === 'RUNNER' ? 'PENDING_RUNNER' : 'PENDING_VENDOR';
+
+      transaction.set(subOrderRef, {
+        order_id: subOrderRef.id,
+        parent_id: parentOrderId,
+        buyer_id: params.buyerId,
+        seller_id: item.seller_id,
+        seller_name: item.seller_name || 'Merchant',
+        customer_name: params.buyerName || 'Student',
+        title: item.title,
+        price: params.itemPrice * params.qty,
+        total: params.total,
+        items: [{ 
+           productId: params.itemId, 
+           title: item.title, 
+           price: params.itemPrice, 
+           qty: params.qty, 
+           vendorId: item.seller_id, 
+           image_url: params.image_url 
+        }],
+        image_url: params.image_url,
+        delivery_type: params.choice,
+        drop_off_location: params.dropOffStr,
+        status: initialStatus,
+        handshake: {
+          seller_confirmed: false,
+          buyer_confirmed: false,
+          seller_coords: null,
+          buyer_coords: null,
+          verification_type: 'PENDING'
+        },
+        created_at: new Date().toISOString()
+      });
+
+      // Parent Order
+      const parentRef = db.collection('parent_orders').doc(parentOrderId);
+      transaction.set(parentRef, {
+        id: parentOrderId,
+        buyer_id: params.buyerId,
+        total_price: params.total,
+        item_count: 1,
+        status: 'PAID',
+        items_summary: item.title,
+        created_at: new Date().toISOString()
+      });
+    });
+
+    return { success: true, parentId: parentOrderId };
+  } catch (error: any) {
+    console.error("placeSingleOrder Error:", error);
+    return { success: false, message: error.message };
   }
 }
 

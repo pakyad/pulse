@@ -7,7 +7,7 @@ import { onSnapshot, doc, collection, query, where } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, ShieldCheck, ShoppingBag, Store, Heart, MapPin, 
-  Wallet, ChevronRight, User, LayoutGrid, 
+  Wallet, ChevronRight, User, LayoutGrid, Settings,
   ClipboardList, BarChart3, Upload, Footprints,
   Sparkles, Search, Plus, Activity, Edit3, ArrowUpRight, Package
 } from 'lucide-react';
@@ -77,6 +77,7 @@ const MENU_GROUPS = [
       { icon: PixelBag, label: 'Order History', path: '/me/orders', sub: 'View past purchases & deliveries' },
       { icon: PixelChart, label: 'Earnings Ledger', path: '/campus/earnings', sub: 'Track your marketplace revenue' },
       { icon: PixelUser, label: 'Edit Profile', path: '/me/edit', sub: 'Update your personal details' },
+      { icon: Settings, label: 'Settings', path: '/me/settings', sub: 'App preferences and security' },
     ]
   }
 ];
@@ -231,13 +232,6 @@ export default function MePage() {
                             }}
                             onClick={() => router.push(`/marketplace/${item.id}`)}
                           />
-                          {/* Owner Quick Edit Overlay */}
-                          <div className="absolute top-4 left-4 pointer-events-none">
-                             <div className="bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg border border-slate-100 shadow-sm flex items-center gap-1.5">
-                                <Edit3 size={10} className="text-slate-900" />
-                                <span className="text-[9px] font-bold text-slate-900 uppercase">Owner View</span>
-                             </div>
-                          </div>
                        </div>
                     ))}
                  </div>

@@ -6,6 +6,7 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Camera, Loader2, ChevronDown, Check } from 'lucide-react';
+import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 const MIIT_COURSES = [
   'Bachelor of Software Engineering',
@@ -112,7 +113,18 @@ export default function EditProfilePage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 pb-40 font-sans selection:bg-slate-100 antialiased">
       
-      <div className="p-6 pt-12 space-y-12">
+      {/* ── LOCAL NAVIGATION ── */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
+         <div className="flex items-center gap-4">
+            <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
+               <ChevronLeft size={20} />
+            </button>
+            <p className="text-[14px] font-bold tracking-tight">Edit Profile</p>
+         </div>
+         <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
+      </nav>
+
+      <div className="pt-28 p-6 space-y-12">
         
         {/* ── AVATAR PICKER ── */}
         <section className="flex flex-col items-center justify-center space-y-4">

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { auth, db, functions, storage } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc, query, where } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { ChevronLeft, X, Loader2, ChevronRight, ArrowRight, Package, Map, History, Upload, Check } from 'lucide-react';
+import { ChevronLeft, X, Loader2, ChevronRight, ArrowRight, Package, Map, History, Upload, Check, Search, ShieldCheck } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -17,14 +17,8 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
 );
 
 // ── VOXEL ICONS ──
-const VoxelFood = ({ className, size = 24 }: any) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}><rect x="4" y="14" width="16" height="4" fill="currentColor" rx="1" /><rect x="6" y="8" width="4" height="6" fill="currentColor" opacity="0.8" rx="1" /><rect x="12" y="6" width="6" height="8" fill="currentColor" opacity="0.6" rx="1" /></svg>
-);
 const VoxelLogistics = ({ className, size = 24 }: any) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}><rect x="2" y="10" width="16" height="8" fill="currentColor" rx="1" /><rect x="14" y="6" width="8" height="12" fill="currentColor" opacity="0.6" rx="1" /><rect x="4" y="18" width="4" height="2" fill="currentColor" rx="0.5" /><rect x="12" y="18" width="4" height="2" fill="currentColor" rx="0.5" /></svg>
-);
-const VoxelBooks = ({ className, size = 24 }: any) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}><rect x="4" y="4" width="4" height="16" fill="currentColor" rx="1" /><rect x="10" y="4" width="4" height="16" fill="currentColor" opacity="0.8" rx="1" /><rect x="16" y="4" width="4" height="16" fill="currentColor" opacity="0.6" rx="1" /></svg>
 );
 const VoxelErrands = ({ className, size = 24 }: any) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}><rect x="8" y="4" width="8" height="8" fill="currentColor" rx="1" /><rect x="4" y="14" width="16" height="6" fill="currentColor" opacity="0.6" rx="1" /></svg>
@@ -41,7 +35,7 @@ const SERVICES = [
             { title: 'Review',     desc: 'Confirm your request'        }] },
 ];
 
-// ── THEMED CHIP SELECTOR (COMPACT) ──
+// ── COMPACT COMPONENTS ──
 const ChipRow = ({ options, value, onChange, activeService }: { options: string[]; value: string; onChange: (v: string) => void; activeService?: any }) => {
   const activeClass = activeService?.selectedStyle ? `${activeService.selectedStyle} border-[1.5px]` : 'bg-slate-900 text-white border-[1.5px] border-slate-900';
   const inactiveClass = `bg-slate-50 text-slate-400 border-[1.5px] border-slate-50 hover:border-slate-100`;
@@ -57,7 +51,6 @@ const ChipRow = ({ options, value, onChange, activeService }: { options: string[
   );
 };
 
-// ── STANDARD FIELD INPUT (COMPACT) ──
 const Field = ({ label, placeholder, value, onChange, multiline = false }: any) => {
   return (
     <div className="space-y-1.5">
@@ -72,7 +65,6 @@ const Field = ({ label, placeholder, value, onChange, multiline = false }: any) 
   );
 };
 
-// ── IMAGE DROPZONE (COMPACT) ──
 const ImageDropzone = ({ fileName, onFileSelected }: { fileName: string, onFileSelected: (f: File) => void }) => {
   return (
     <div className="space-y-1.5">
@@ -99,12 +91,10 @@ const ImageDropzone = ({ fileName, onFileSelected }: { fileName: string, onFileS
   );
 };
 
-// ── DETAILED ADDRESS FIELD (COMPACT) ──
 const DetailedAddressField = ({ title, value, onChange, nameLabel = "Recipient Name", phoneLabel = "Phone Number" }: { title: string, value: any, onChange: (v: any) => void, nameLabel?: string, phoneLabel?: string }) => {
   return (
     <div className="space-y-3 bg-white border border-slate-100 rounded-[20px] p-4 shadow-sm">
       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight px-1">{title}</p>
-      
       <div className="space-y-2">
         <div className="flex gap-2">
           <input type="text" placeholder={nameLabel} value={value.name || ''} onChange={e => onChange({...value, name: e.target.value})}
@@ -112,10 +102,8 @@ const DetailedAddressField = ({ title, value, onChange, nameLabel = "Recipient N
           <input type="text" placeholder={phoneLabel} value={value.phone || ''} onChange={e => onChange({...value, phone: e.target.value})}
             className="w-1/2 h-10 px-3 bg-slate-50 border border-slate-50 rounded-[12px] text-[12px] font-medium text-slate-900 outline-none focus:bg-white focus:border-slate-200 transition-all" />
         </div>
-        
         <input type="text" placeholder="Building/Block/Floor" value={value.location || ''} onChange={e => onChange({...value, location: e.target.value})}
           className="w-full h-10 px-3 bg-slate-50 border border-slate-50 rounded-[12px] text-[12px] font-medium text-slate-900 outline-none focus:bg-white focus:border-slate-200 transition-all" />
-          
         <input type="text" placeholder="Room/Unit (Optional)" value={value.detail || ''} onChange={e => onChange({...value, detail: e.target.value})}
           className="w-full h-10 px-3 bg-slate-50 border border-slate-50 rounded-[12px] text-[12px] font-medium text-slate-900 outline-none focus:bg-white focus:border-slate-200 transition-all" />
       </div>
@@ -128,9 +116,7 @@ export default function RunModule() {
   const [profile, setProfile] = useState<any>(null);
   const [activeService, setActiveService] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [activeMission, setActiveMission] = useState(false);
   const [customFee, setCustomFee] = useState<string>('');
@@ -143,15 +129,35 @@ export default function RunModule() {
   });
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged(async (user) => {
+    let unsubProfile: any;
+    let unsubMissions: any;
+    const unsubAuth = auth.onAuthStateChanged(user => {
       if (user) {
-        onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()), e => console.error('[Run] Profile Sync:', e));
-        const q = query(collection(db, 'orders'), where('buyer_id', '==', user.uid), where('status', 'in', ['PENDING_RUNNER', 'RUNNER_ASSIGNED', 'PICKED_UP']));
-        onSnapshot(q, snap => setActiveMission(!snap.empty), e => console.error('[Run] Active Mission Sync:', e));
+        unsubProfile = onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()), e => console.error(e));
+        const q = query(
+          collection(db, 'orders'),
+          where('runner_id', '==', user.uid),
+          where('status', 'in', ['RUNNER_ON_THE_WAY', 'DELIVERING', 'RUNNER_DELIVERING', 'PICKED_UP', 'ARRIVED_AT_PICKUP', 'ARRIVED_AT_MERCHANT', 'ARRIVED_AT_BUILDING', 'ARRIVED_AT_BUYER', 'ACCEPTED'])
+        );
+        unsubMissions = onSnapshot(q, snap => setActiveMission(!snap.empty), e => console.error(e));
       }
     });
-    return () => unsub();
+    return () => {
+      unsubAuth();
+      if (unsubProfile) unsubProfile();
+      if (unsubMissions) unsubMissions();
+    };
   }, []);
+
+  const toggleStatus = async () => {
+    if (!auth.currentUser) return;
+    if (profile?.is_online && activeMission) {
+      setStatusError('Cannot go offline while on a mission.');
+      setTimeout(() => setStatusError(null), 3000);
+      return;
+    }
+    await updateDoc(doc(db, 'users', auth.currentUser.uid), { is_online: !profile?.is_online, last_active: serverTimestamp() });
+  };
 
   const setF = (k: string, v: any) => setForm((p: any) => ({ ...p, [k]: v }));
 
@@ -172,9 +178,8 @@ export default function RunModule() {
     if (!auth.currentUser) return router.push('/auth');
     setSubmitting(true);
     try {
-      const isParcel = activeService.id === 'parcels';
       let downloadUrl = '';
-      
+      const isParcel = activeService.id === 'parcels';
       const imgObj = isParcel ? form.parcelImageObj : form.errandImageObj;
       const imgName = isParcel ? form.parcelImageName : form.errandImageName;
 
@@ -194,81 +199,76 @@ export default function RunModule() {
         pickup_location: isParcel ? form.pickupNode : formatAddress(form.errandPickup),
         drop_off_location: isParcel ? formatAddress(form.dropOffAddress) : formatAddress(form.errandDropoff),
         total_price: parseFloat(customFee) || activeService.fee || 4.50,
-        items_summary: isParcel ? `${form.parcelSize} Parcel` : `${form.errandSize}: ${form.errandBrief}${form.errandInstructions ? ` (Note: ${form.errandInstructions})` : ''}`,
+        items_summary: isParcel ? `${form.parcelSize} Parcel` : `${form.errandSize}: ${form.errandBrief}${form.errandInstructions ? ` (${form.errandInstructions})` : ''}`,
         attached_file: downloadUrl,
         status: 'PENDING_RUNNER',
         created_at: serverTimestamp()
       });
       router.push(`/run/success?id=${orderRef.id}&type=${activeService.id}`);
-    } catch {
-      setSubmitError('Could not submit request.');
-      setTimeout(() => setSubmitError(null), 4000);
+    } catch (e) {
+      console.error(e);
     } finally { setSubmitting(false); }
   };
 
   const renderStep = () => {
     const id = activeService?.id;
-    switch (id) {
-      case 'parcels':
-        if (currentStep === 0) return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <p className="text-[10px] font-bold text-slate-400 uppercase ml-1">Parcel Size</p>
-              <ChipRow activeService={activeService} options={['Small', 'Medium', 'Large']} value={form.parcelSize} onChange={v => setF('parcelSize', v)} />
+    if (id === 'parcels') {
+      if (currentStep === 0) return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold text-slate-400 uppercase ml-1">Parcel Size</p>
+            <ChipRow activeService={activeService} options={['Small', 'Medium', 'Large']} value={form.parcelSize} onChange={v => setF('parcelSize', v)} />
+          </div>
+          <Field label="Where is the parcel?" placeholder="e.g. Block A Guard, Registry Mailroom" value={form.pickupNode} onChange={(v: string) => setF('pickupNode', v)} />
+          <ImageDropzone fileName={form.parcelImageName} onFileSelected={(f) => { setF('parcelImageName', f.name); setForm((p:any) => ({...p, parcelImageObj: f})); }} />
+        </div>
+      );
+      if (currentStep === 1) return <DetailedAddressField title="Deliver To" value={form.dropOffAddress} onChange={(v: any) => setF('dropOffAddress', v)} />;
+      if (currentStep === 2) return (
+        <div className="space-y-3">
+          <p className="text-[11px] font-bold text-slate-400 uppercase px-1">Summary</p>
+          {[
+            { label: 'Parcel', value: form.parcelSize },
+            { label: 'From', value: form.pickupNode },
+            { label: 'To', value: form.dropOffAddress.location },
+          ].map(r => (
+            <div key={r.label} className="flex justify-between py-2.5 border-b border-slate-50">
+              <span className="text-[12px] font-bold text-slate-400">{r.label}</span>
+              <span className="text-[12px] font-bold text-slate-900">{r.value}</span>
             </div>
-            <Field label="Where is the parcel?" placeholder="e.g. Block A Guard, Registry Mailroom" value={form.pickupNode} onChange={(v: string) => setF('pickupNode', v)} />
-            <ImageDropzone fileName={form.parcelImageName} onFileSelected={(f) => { setF('parcelImageName', f.name); setForm((p:any) => ({...p, parcelImageObj: f})); }} />
+          ))}
+        </div>
+      );
+    }
+    if (id === 'errands') {
+      if (currentStep === 0) return (
+        <div className="space-y-4">
+          <Field label="What to pass?" placeholder="e.g. Room keys, textbook" value={form.errandBrief} onChange={(v: string) => setF('errandBrief', v)} />
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold text-slate-400 uppercase ml-1">Item Size / Handling</p>
+            <ChipRow activeService={activeService} options={['Pocket Size', 'Bag / Bulky', 'Fragile']} value={form.errandSize} onChange={v => setF('errandSize', v)} />
           </div>
-        );
-        if (currentStep === 1) return <DetailedAddressField title="Deliver To" value={form.dropOffAddress} onChange={(v: any) => setF('dropOffAddress', v)} />;
-        if (currentStep === 2) return (
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold text-slate-400 uppercase px-1">Summary</p>
-            {[
-              { label: 'Parcel', value: form.parcelSize },
-              { label: 'From', value: form.pickupNode },
-              { label: 'To', value: form.dropOffAddress.location },
-              { label: 'Photo', value: form.parcelImageName ? 'Yes' : 'None' },
-            ].map(r => (
-              <div key={r.label} className="flex justify-between py-2.5 border-b border-slate-50">
-                <span className="text-[12px] font-bold text-slate-400">{r.label}</span>
-                <span className="text-[12px] font-bold text-slate-900">{r.value}</span>
-              </div>
-            ))}
-          </div>
-        );
-        break;
-
-      case 'errands':
-        if (currentStep === 0) return (
-          <div className="space-y-4">
-            <Field label="What to pass?" placeholder="e.g. Room keys, textbook" value={form.errandBrief} onChange={(v: string) => setF('errandBrief', v)} />
-            <div className="space-y-2">
-              <p className="text-[10px] font-bold text-slate-400 uppercase ml-1">Item Size / Handling</p>
-              <ChipRow activeService={activeService} options={['Pocket Size', 'Bag / Bulky', 'Fragile']} value={form.errandSize} onChange={v => setF('errandSize', v)} />
+          <Field label="Pick-up Point" placeholder="e.g. MIIT Level 2 Lobby" value={form.errandPickup.location} onChange={(v: string) => setF('errandPickup', { ...form.errandPickup, location: v })} />
+          <Field label="Meetup Note" placeholder="e.g. Red jacket" value={form.errandInstructions} onChange={(v: string) => setF('errandInstructions', v)} />
+          <ImageDropzone fileName={form.errandImageName} onFileSelected={(f) => { setF('errandImageName', f.name); setForm((p:any) => ({...p, errandImageObj: f})); }} />
+        </div>
+      );
+      if (currentStep === 1) return <DetailedAddressField title="Drop-off Point" value={form.errandDropoff} onChange={(v: any) => setF('errandDropoff', v)} />;
+      if (currentStep === 2) return (
+        <div className="space-y-3">
+          <p className="text-[11px] font-bold text-slate-400 uppercase px-1">Summary</p>
+          {[
+            { label: 'Item', value: form.errandBrief },
+            { label: 'From', value: form.errandPickup.location },
+            { label: 'To', value: form.errandDropoff.location },
+          ].map(r => (
+            <div key={r.label} className="flex justify-between py-2.5 border-b border-slate-50">
+              <span className="text-[12px] font-bold text-slate-400">{r.label}</span>
+              <span className="text-[12px] font-bold text-slate-900">{r.value}</span>
             </div>
-            <Field label="Pick-up Point" placeholder="e.g. MIIT Level 2 Lobby" value={form.errandPickup.location} onChange={(v: string) => setF('errandPickup', { ...form.errandPickup, location: v })} />
-            <Field label="Meetup Note (Optional)" placeholder="e.g. I'm wearing a red jacket" value={form.errandInstructions} onChange={(v: string) => setF('errandInstructions', v)} />
-            <ImageDropzone fileName={form.errandImageName} onFileSelected={(f) => { setF('errandImageName', f.name); setForm((p:any) => ({...p, errandImageObj: f})); }} />
-          </div>
-        );
-        if (currentStep === 1) return <DetailedAddressField title="Drop-off Point" value={form.errandDropoff} onChange={(v: any) => setF('errandDropoff', v)} />;
-        if (currentStep === 2) return (
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold text-slate-400 uppercase px-1">Summary</p>
-            {[
-              { label: 'Item', value: form.errandBrief },
-              { label: 'From', value: form.errandPickup.location },
-              { label: 'To', value: form.errandDropoff.location },
-            ].map(r => (
-              <div key={r.label} className="flex justify-between py-2.5 border-b border-slate-50">
-                <span className="text-[12px] font-bold text-slate-400">{r.label}</span>
-                <span className="text-[12px] font-bold text-slate-900">{r.value}</span>
-              </div>
-            ))}
-          </div>
-        );
-        break;
+          ))}
+        </div>
+      );
     }
     return null;
   };
@@ -295,19 +295,16 @@ export default function RunModule() {
               </div>
               <button onClick={() => setActiveService(null)} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400"><X size={16} /></button>
             </div>
-
             <div className="flex gap-1.5 mb-2">
               {activeService.steps.map((s: any, i: number) => (
                 <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= currentStep ? activeService.themeColor : 'bg-slate-100'}`} />
               ))}
             </div>
-
             <AnimatePresence mode="wait">
               <motion.div key={currentStep} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
                 {renderStep()}
               </motion.div>
             </AnimatePresence>
-
             <div className="pt-4 flex flex-col gap-3">
               <button onClick={currentStep === activeService.steps.length - 1 ? handleFinalizeRequest : () => setCurrentStep(s => s + 1)}
                 disabled={!isStepValid() || submitting}
@@ -322,24 +319,37 @@ export default function RunModule() {
           </div>
         ) : (
           <div className="space-y-10">
-            <div className="space-y-6">
-              <div className="px-1">
-                <Heading>Runner Dashboard</Heading>
-                <Subtext>Manage your active missions and earnings</Subtext>
-              </div>
-              {/* Simplified Dashboard Card */}
-              <div className="p-5 bg-slate-50 border border-slate-100 rounded-3xl space-y-4">
-                 <div className="flex justify-between items-center">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Available Balance</p>
-                    <div className="h-6 px-2.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold flex items-center gap-1.5 border border-emerald-100">
-                       <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                       Online
+            {profile?.is_verified_runner && (
+              <div className="space-y-6">
+                <div className="px-1">
+                  <Heading>Runner Dashboard</Heading>
+                  <Subtext>Manage missions and earnings</Subtext>
+                </div>
+                <button onClick={() => router.push('/run/wallet')} className="w-full bg-slate-50 p-6 rounded-[28px] border border-slate-100 flex items-center justify-between shadow-sm active:scale-[0.98] transition-all text-left">
+                  <div className="flex items-center gap-5">
+                    <div className={`w-1.5 h-12 rounded-full ${profile?.is_online ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                    <div>
+                      <p className="text-[28px] font-bold text-slate-900 tracking-tighter leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
+                      <p className="text-[11px] text-[#94a3b8] font-bold mt-1 tracking-tight flex items-center gap-1">Wallet <ChevronRight size={12} /></p>
                     </div>
-                 </div>
-                 <h2 className="text-[32px] font-bold text-slate-900 tracking-tighter leading-none">RM {(profile?.balance || 0).toFixed(2)}</h2>
+                  </div>
+                  <div onClick={(e) => { e.stopPropagation(); toggleStatus(); }} className={`h-11 px-5 rounded-2xl text-[12px] font-bold border transition-all flex items-center gap-2 ${profile?.is_online ? 'bg-emerald-500 border-emerald-500 text-white shadow-md' : 'bg-white border-slate-200 text-slate-400'}`}>
+                    {profile?.is_online && <div className="w-2 h-2 rounded-full bg-white animate-pulse" />}
+                    <span>{profile?.is_online ? 'Online' : 'Offline'}</span>
+                  </div>
+                </button>
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <button onClick={() => profile?.is_online && router.push('/run/missions')} disabled={!profile?.is_online} className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all shadow-sm ${profile?.is_online ? 'bg-cyan-50 text-cyan-950 active:scale-95' : 'bg-slate-50 text-slate-400 opacity-60 cursor-not-allowed'}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${profile?.is_online ? 'bg-cyan-200/70' : 'bg-slate-200'}`}><Package size={20} strokeWidth={2.5} /></div>
+                    <p className="text-[14px] font-bold tracking-tight">Missions</p>
+                  </button>
+                  <button onClick={() => router.push('/run/history')} className="w-full flex flex-col items-start gap-4 p-5 rounded-[24px] bg-violet-50 transition-all active:scale-95 text-violet-950 shadow-sm">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-violet-200/60"><History size={20} strokeWidth={2.5} /></div>
+                    <p className="text-[14px] font-bold tracking-tight">History</p>
+                  </button>
+                </div>
               </div>
-            </div>
-
+            )}
             <div className="space-y-6">
               <div className="px-1">
                 <Heading>New Request</Heading>
@@ -352,10 +362,7 @@ export default function RunModule() {
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.circleBg} ${s.accent}`}>
                       <s.icon size={20} strokeWidth={2.5} />
                     </div>
-                    <div className="text-left">
-                       <p className={`text-[14px] font-bold tracking-tight ${s.accent}`}>{s.label}</p>
-                       <p className={`text-[10px] font-medium opacity-60 ${s.accent} mt-0.5`}>{s.desc}</p>
-                    </div>
+                    <div className="text-left"><p className={`text-[14px] font-bold tracking-tight ${s.accent}`}>{s.label}</p><p className={`text-[10px] font-medium opacity-60 ${s.accent} mt-0.5`}>{s.desc}</p></div>
                   </button>
                 ))}
               </div>

@@ -53,13 +53,13 @@ export default function ReportPriceButton({ itemId, sellerId, compact = false }:
       {/* Trigger button */}
       <button
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsOpen(true); }}
-        className={`flex items-center gap-1.5 text-slate-300 hover:text-slate-400 transition-colors ${
-          compact ? 'p-1' : 'text-[11px] font-bold'
+        className={`flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all active:scale-95 ${
+          compact ? 'p-1' : 'px-4 py-2 bg-slate-50/50 border border-slate-100 rounded-full text-[10px] font-bold uppercase tracking-widest'
         }`}
         title="Report this listing"
       >
-        <Flag size={compact ? 12 : 11} />
-        {!compact && <span>Report</span>}
+        <Flag size={compact ? 12 : 12} />
+        {!compact && <span>Report Listing</span>}
       </button>
 
       {/* Modal */}

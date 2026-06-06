@@ -33,18 +33,21 @@ export default function AnnouncementBanner() {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    const q = query(collection(db, 'announcements'), where('status', '==', 'published'), orderBy('published_at', 'desc'));
+    const q = query(collection(db, 'announcements'), where('status', '==', 'published'));
     const unsub = onSnapshot(q, snap => {
       const now = Date.now();
       const list = snap.docs
         .map(d => ({ id: d.id, ...d.data() } as Announcement))
         .filter(a => !a.expires_at || a.expires_at.toMillis() > now);
+      
+      // Sort in-memory: Pinned first, then by published_at desc
       list.sort((a, b) => {
         if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
         const pa = a.published_at?.toMillis() || 0;
         const pb = b.published_at?.toMillis() || 0;
         return pb - pa;
       });
+      
       setAnnouncements(list);
     });
     return () => unsub();
@@ -63,7 +66,7 @@ export default function AnnouncementBanner() {
       <div className="space-y-2">
         <AnimatePresence>
           {visible.map((item, i) => {
-            const s = TYPE_STYLES[item.type];
+            const s = TYPE_STYLES[item.type] || TYPE_STYLES.system;
             return (
               <motion.div
                 key={item.id}

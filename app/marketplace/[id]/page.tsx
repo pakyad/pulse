@@ -150,12 +150,26 @@ export default function ItemDetailsPage() {
   useEffect(() => {
     if (!item || !seller) return;
     const isOfficial = seller?.is_official === true;
+    
+    // 🏛️ Simplified query to avoid composite index crash
     const reviewsQuery = isOfficial
-      ? query(collection(db, "Reviews"), where("seller_id", "==", item.seller_id), where("target_type", "==", "SELLER"), orderBy("created_at", "desc"), limit(10))
-      : query(collection(db, "Reviews"), where("item_id", "==", item.id), where("target_type", "==", "ITEM"), orderBy("created_at", "desc"), limit(10));
+      ? query(collection(db, "Reviews"), where("seller_id", "==", item.seller_id), where("target_type", "==", "SELLER"), limit(20))
+      : query(collection(db, "Reviews"), where("item_id", "==", item.id), where("target_type", "==", "ITEM"), limit(20));
+
     const unsub = onSnapshot(reviewsQuery, (snap) => {
-      setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => console.error("[Reviews]", err));
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() as any }));
+      // Sort in memory to avoid requiring a composite index in Firestore
+      list.sort((a, b) => {
+        const ta = a.created_at?.toMillis ? a.created_at.toMillis() : new Date(a.created_at || 0).getTime();
+        const tb = b.created_at?.toMillis ? b.created_at.toMillis() : new Date(b.created_at || 0).getTime();
+        return tb - ta;
+      });
+      setReviews(list);
+    }, (err) => {
+      console.error("[Reviews] Firestore Fetch Error:", err);
+      // Fail gracefully — don't crash the whole page if reviews fail
+      setReviews([]);
+    });
     return () => unsub();
   }, [item, seller]);
 
@@ -311,7 +325,7 @@ export default function ItemDetailsPage() {
       {/* ── GALLERY ── */}
       <section className="w-full aspect-square bg-slate-50 overflow-hidden relative">
         {images.length > 0 ? (
-          <img src={images[activeImage]} className={`w-full h-full object-cover ${isSoldOut ? 'blur-[2px] grayscale opacity-70' : ''}`} alt={item.title} />
+          <img src={images[activeImage]} className="w-full h-full object-cover" alt={item.title} />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-200">
             <Layers size={48} strokeWidth={1} />
@@ -319,16 +333,16 @@ export default function ItemDetailsPage() {
         )}
 
         {isSoldOut && (
-          <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center z-20">
-             <div className="px-6 py-2 bg-white/90 backdrop-blur-xl rounded-full border border-white shadow-md">
-                <p className="text-[12px] font-semibold text-red-500 ">Restocking Soon</p>
-             </div>
+          <div className="absolute inset-x-0 bottom-0 bg-slate-900/90 py-3 px-3 flex items-center justify-center z-20 backdrop-blur-sm">
+            <p className="text-[13px] font-bold text-white uppercase tracking-tight">
+              SOLD
+            </p>
           </div>
         )}
         
         {/* Image strip (multiple photos) */}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
+          <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-1.5">
             {images.map((_: string, i: number) => (
               <button
                 key={i}
@@ -336,16 +350,6 @@ export default function ItemDetailsPage() {
                 className={`h-1 rounded-full transition-all ${i === activeImage ? 'w-6 bg-slate-900' : 'w-1.5 bg-slate-900/20'}`}
               />
             ))}
-          </div>
-        )}
-
-        {/* Category pill (bottom-left) */}
-        {category && (
-          <div className="absolute bottom-4 left-4">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-md border border-slate-100 rounded-full text-[10px] font-bold text-slate-900 shadow-sm">
-              <CategoryIcon size={11} strokeWidth={2} />
-              {category.label}
-            </span>
           </div>
         )}
       </section>
@@ -361,7 +365,7 @@ export default function ItemDetailsPage() {
             </h1>
             {isSoldOut ? (
               <span className="flex items-center gap-1 text-[10px] font-bold text-red-500 shrink-0 pt-1 ">
-                <ShieldAlert size={12} /> Out of Stock
+                <ShieldAlert size={12} /> SOLD
               </span>
             ) : item.status === 'HELD_FOR_REVISION' || item.status === 'FLAGGED_FOR_REVIEW' ? (
               <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500 shrink-0 pt-1 ">
@@ -401,7 +405,7 @@ export default function ItemDetailsPage() {
               )}
             </div>
             
-            {item.stock_count !== undefined && item.stock_count !== null && item.stock_count > 0 && (
+            {item.is_official && item.stock_count !== undefined && item.stock_count !== null && item.stock_count > 0 && (
               <div className="flex items-center gap-2">
                 <div className={`w-1.5 h-1.5 rounded-full ${item.stock_count <= 5 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">
@@ -433,10 +437,6 @@ export default function ItemDetailsPage() {
             </div>
             <ChevronRight size={18} className="text-slate-200 group-hover:text-slate-900 transition-colors" />
           </button>
-          {/* Subtle report link — non-intrusive, placed below seller info */}
-          <div className="flex justify-end">
-            <ReportPriceButton itemId={item.id} sellerId={item.seller_id} />
-          </div>
         </section>
 
         {/* ── CATEGORY REGISTRY ── */}
@@ -545,6 +545,13 @@ export default function ItemDetailsPage() {
           </section>
         )}
 
+        {/* ── REPORT ACTION ── */}
+        {auth.currentUser?.uid !== item.seller_id && (
+          <section className="flex justify-center pt-8 pb-4">
+            <ReportPriceButton itemId={item.id} sellerId={item.seller_id} />
+          </section>
+        )}
+
       </div>
 
       {/* ── STICKY FOOTER ── */}
@@ -554,9 +561,9 @@ export default function ItemDetailsPage() {
             <div className="flex-1 flex gap-3">
               <button
                 onClick={() => router.push(`/marketplace/edit/${id}`)}
-                className="flex-1 h-[52px] bg-slate-50 border border-slate-100 text-slate-900 font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-sm"
+                className="flex-1 h-[52px] bg-slate-900 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-md shadow-slate-900/10"
               >
-                <Edit3 size={16} className="text-slate-400" />
+                <Edit3 size={16} />
                 Edit Listing
               </button>
               <button
@@ -567,7 +574,7 @@ export default function ItemDetailsPage() {
                     router.push('/me');
                   }
                 }}
-                className="h-[52px] px-6 border border-red-100 bg-red-50/50 text-red-600 font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all"
+                className="h-[52px] px-6 bg-white border border-slate-100 text-red-500 font-bold text-[13px] rounded-full flex items-center justify-center active:scale-[0.97] transition-all"
               >
                 Mark as Sold
               </button>
