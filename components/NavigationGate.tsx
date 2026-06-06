@@ -165,6 +165,7 @@ export default function NavigationGate() {
     !isRoot && 
     !isBuyingFlow &&
     pathname !== '/me/insights' &&
+    pathname !== '/me/edit' &&
     !pathname?.startsWith('/messages') &&
     !pathname?.startsWith('/admin') && 
     !pathname?.startsWith('/merchant') &&

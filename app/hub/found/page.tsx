@@ -24,28 +24,38 @@ export default function FoundHub() {
   useEffect(() => {
     setMounted(true);
     
-    // Listen to campus_radar database
-    const q = query(collection(db, 'campus_radar'), orderBy('created_at', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(doc => {
-        const d = doc.data();
-        let timeStr = 'Just now';
-        if (d.created_at?.toDate) {
-          const diff = Math.floor((Date.now() - d.created_at.toDate().getTime()) / 1000);
-          if (diff < 3600) timeStr = `${Math.floor(diff / 60)}m ago`;
-          else if (diff < 86400) timeStr = `${Math.floor(diff / 3600)}h ago`;
-          else timeStr = `${Math.floor(diff / 86400)}d ago`;
-        }
-        return {
-          id: doc.id,
-          ...d,
-          time: timeStr
-        };
+    let unsub: (() => void) | undefined;
+
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (unsub) unsub();
+      
+      const q = query(collection(db, 'campus_radar'), orderBy('created_at', 'desc'));
+      unsub = onSnapshot(q, (snap) => {
+        const data = snap.docs.map(doc => {
+          const d = doc.data();
+          let timeStr = 'Just now';
+          if (d.created_at?.toDate) {
+            const diff = Math.floor((Date.now() - d.created_at.toDate().getTime()) / 1000);
+            if (diff < 3600) timeStr = `${Math.floor(diff / 60)}m ago`;
+            else if (diff < 86400) timeStr = `${Math.floor(diff / 3600)}h ago`;
+            else timeStr = `${Math.floor(diff / 86400)}d ago`;
+          }
+          return {
+            id: doc.id,
+            ...d,
+            time: timeStr
+          };
+        });
+        setItems(data);
+      }, (err) => {
+        console.error('[Radar] Listener Error:', err);
       });
-      setItems(data);
     });
 
-    return () => unsub();
+    return () => {
+      unsubAuth();
+      if (unsub) unsub();
+    };
   }, []);
 
   if (!mounted) return null;

@@ -175,23 +175,20 @@ export default function MePage() {
                   <Heading>{group.label}</Heading>
                   <Subtext>Manage your account and preferences</Subtext>
                </div>
-               <div className="bg-white border border-slate-100 rounded-[24px] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+               <div className="space-y-4">
                   {group.items.map((item, i) => (
                      <button 
                         key={i}
                         onClick={() => router.push(item.path)}
-                        className={`w-full flex items-center justify-between group p-5 hover:bg-slate-50 transition-colors ${i !== group.items.length - 1 ? 'border-b border-slate-100' : ''}`}
+                        className="w-full flex items-center gap-4 py-4 active:scale-[0.98] transition-all"
                      >
-                        <div className="text-left flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-[6px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-900 group-hover:border-slate-900 group-hover:text-white transition-all shadow-sm group-hover:shadow-[2px_4px_0_rgba(15,23,42,1)] group-hover:-translate-y-1 duration-300">
-                              <item.icon className="w-5 h-5 currentColor" />
-                           </div>
-                           <div>
-                              <p className="text-[15px] font-semibold text-slate-800 group-hover:text-slate-900 tracking-tight transition-colors">{item.label}</p>
-                              <p className="text-[12px] text-slate-500 font-medium">{item.sub}</p>
-                           </div>
+                        <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                           <item.icon className="w-5 h-5 currentColor" />
                         </div>
-                        <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
+                        <div className="text-left">
+                           <p className="text-[15px] font-bold text-slate-800 tracking-tight">{item.label}</p>
+                           <p className="text-[12px] text-slate-400 font-medium">{item.sub}</p>
+                        </div>
                      </button>
                   ))}
                </div>
@@ -201,24 +198,23 @@ export default function MePage() {
          {/* ── LISTINGS SECTION (Grid Layout) ── */}
          {isStudent && (
             <section className="space-y-8">
-               <div className="flex items-center justify-between px-1">
-                  <div className="space-y-1">
-                    <Heading>Your Listings</Heading>
-                    <Subtext>Operational assets in the marketplace</Subtext>
-                  </div>
-                  <button 
-                    onClick={() => router.push('/marketplace/create')}
-                    className="h-10 px-4 bg-slate-900 text-white rounded-xl text-[12px] font-bold flex items-center gap-2 active:scale-95 transition-all shadow-sm"
-                  >
-                    <Plus size={16} />
-                    New Listing
-                  </button>
+               <div className="px-1 space-y-1">
+                 <Heading>Your Listings</Heading>
+                 <Subtext>Operational assets in the marketplace</Subtext>
                </div>
 
-               {myListings.length > 0 ? (
-                 <div className="grid grid-cols-2 gap-4">
-                    {myListings.map((item) => (
-                       <div key={item.id} className="relative group">
+               <div className="grid grid-cols-2 gap-4">
+                  {/* Buttery Add Card */}
+                  <button 
+                    onClick={() => router.push('/marketplace/create')}
+                    className="aspect-square rounded-[28px] bg-slate-50 border border-slate-100/50 flex flex-col items-center justify-center gap-1.5 group active:scale-95 transition-all shadow-sm"
+                  >
+                    <Plus size={22} strokeWidth={2} className="text-slate-300 group-hover:text-slate-900 transition-colors" />
+                    <span className="text-[12px] font-bold text-slate-300 group-hover:text-slate-900 transition-colors">Add</span>
+                  </button>
+
+                  {myListings.map((item) => (
+                     <div key={item.id} className="relative group">
                           <ProductCard 
                             item={{
                               id: item.id,
@@ -245,15 +241,6 @@ export default function MePage() {
                        </div>
                     ))}
                  </div>
-               ) : (
-                 <div className="py-12 flex flex-col items-center justify-center bg-slate-50 rounded-[32px] border border-dashed border-slate-200">
-                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-300 border border-slate-100 mb-4">
-                       <Package size={24} />
-                    </div>
-                    <p className="text-[13px] font-bold text-slate-900">No active listings</p>
-                    <p className="text-[11px] font-medium text-slate-400 mt-1">Start selling to see them here.</p>
-                 </div>
-               )}
             </section>
          )}
 

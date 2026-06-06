@@ -1,16 +1,13 @@
 'use client'
 
 import { 
-  BarChart3, TrendingUp, Users, Clock, CheckCircle2,
-  Package, LayoutGrid, ClipboardList, User, ChevronRight,
-  Search, ArrowLeft, MessageSquare, ArrowUpRight, MapPin,
-  Star, Info, Bell, Inbox, ShoppingBag, Truck
+  TrendingUp, Bell, Inbox, ShoppingBag, Truck, MapPin, MessageSquare
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, onSnapshot, collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import BackButton from '@/components/shared/BackButton';
 
@@ -47,48 +44,42 @@ const DEMO_NOTIFICATIONS = [
   }
 ];
 
-function InboxItemCard({ type, title, subtitle, statusText, isUnread, onClick, avatarUrl, icon: Icon, extraAction, i }: any) {
+function InboxItemCard({ type, title, subtitle, statusText, isUnread, onClick, avatarUrl, icon: Icon, i }: any) {
   return (
     <motion.button
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: i * 0.02 }}
       onClick={onClick}
-      className={`w-full flex items-start gap-4 p-4 rounded-2xl transition-all text-left group relative ${isUnread ? 'bg-slate-50/50' : 'bg-transparent'}`}
+      className={`w-full flex items-start gap-3 p-3 rounded-2xl transition-all text-left group relative ${isUnread ? 'bg-slate-50/50' : 'bg-transparent hover:bg-slate-50/30'}`}
     >
       <div className="relative shrink-0 mt-0.5">
-         <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 group-active:scale-95 transition-transform flex items-center justify-center text-slate-400">
+         <div className="w-11 h-11 rounded-[14px] overflow-hidden bg-slate-50 border border-slate-100 group-active:scale-95 transition-transform flex items-center justify-center text-slate-400">
             {avatarUrl ? (
                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
             ) : (
-               Icon ? <Icon size={24} strokeWidth={1.5} className={isUnread ? "text-slate-900" : ""} /> : <Bell size={24} strokeWidth={1.5} />
+               Icon ? <Icon size={20} strokeWidth={1.5} className={isUnread ? "text-slate-900" : ""} /> : <Bell size={20} strokeWidth={1.5} />
             )}
          </div>
          {isUnread && (
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
-               <div className="w-2 h-2 bg-white rounded-full" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-slate-900 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
+               <div className="w-1.5 h-1.5 bg-white rounded-full" />
             </div>
          )}
       </div>
 
       <div className="flex-1 min-w-0 pt-0.5">
-         <div className="flex items-center justify-between mb-1">
-            <h3 className={`text-[15px] tracking-tight truncate pr-2 ${isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
+         <div className="flex items-center justify-between mb-0.5">
+            <h3 className={`text-[14px] tracking-tight truncate pr-2 ${isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
                {title}
             </h3>
-            <span className="text-[11px] font-medium text-slate-400 shrink-0">
+            <span className="text-[10px] font-medium text-slate-400 shrink-0">
                {statusText}
             </span>
          </div>
-         <p className="text-[14px] font-medium text-slate-500 leading-snug line-clamp-2">
+         <p className="text-[13px] font-medium text-slate-500 leading-snug line-clamp-2">
             {subtitle}
          </p>
-         
-         <div className="flex items-center mt-2 gap-2">
-           <span className="text-[10px] font-bold  text-slate-400">
-             {type}
-           </span>
-         </div>
       </div>
     </motion.button>
   );
@@ -142,12 +133,10 @@ export default function ActivityPage() {
   useEffect(() => {
     let unsubs: (() => void)[] = [];
     const unsubAuth = auth.onAuthStateChanged(async (user) => {
-      // Clear existing listeners on auth change
       unsubs.forEach(u => u());
       unsubs = [];
 
       if (user) {
-        // 👤 Profile Sync
         const uProfile = onSnapshot(doc(db, 'users', user.uid), (snap) => {
            const data = snap.data();
            setProfile({ ...data, uid: user.uid });
@@ -158,7 +147,6 @@ export default function ActivityPage() {
         });
         unsubs.push(uProfile);
 
-        // 🛍️ Operational Analytics (for Merchants/Clubs)
         if (profile?.role === 'CLUB' || profile?.role === 'OFFICIAL' || profile?.is_verified_merchant) {
           const uOrders = onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
              setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -166,7 +154,6 @@ export default function ActivityPage() {
           unsubs.push(uOrders);
         }
 
-        // 🔔 Notification Relay
         const qNotif = query(
           collection(db, 'notifications'), 
           where('user_id', '==', user.uid),
@@ -211,10 +198,10 @@ export default function ActivityPage() {
          </div>
       </nav>
 
-      <section className="px-8 pt-28 pb-4">
+      <section className="px-8 pt-28">
          {/* If Merchant, show Insights toggle here in the body */}
          {(profile?.role === 'CLUB' || profile?.role === 'OFFICIAL' || profile?.is_verified_merchant) && (
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-2 mb-2">
                <button 
                  onClick={() => setActiveTab('All')}
                  className={`px-5 py-2.5 rounded-xl text-[12px] font-bold transition-all ${activeTab !== 'Insights' ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
@@ -229,20 +216,9 @@ export default function ActivityPage() {
                </button>
             </div>
          )}
-
-        {activeTab !== 'Insights' && (
-          <div className="relative group">
-             <Search size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
-             <input 
-                type="text" 
-                placeholder="Search alerts..."
-                className="w-full h-12 bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-6 text-[14px] font-medium placeholder:text-[#94a3b8] outline-none focus:bg-white focus:ring-4 focus:ring-slate-100/50 transition-all"
-             />
-          </div>
-        )}
       </section>
 
-      <section className="px-6 mt-4 space-y-4">
+      <section className="px-6 mt-2 space-y-4">
          {activeTab === 'Insights' && (profile?.role === 'CLUB' || profile?.role === 'OFFICIAL' || profile?.is_verified_merchant) ? (
             <MerchantInsights profile={profile} orders={orders} />
          ) : (
@@ -282,7 +258,6 @@ export default function ActivityPage() {
                         <InboxItemCard 
                           key={item.id}
                           i={i}
-                          type={item.type || 'NOTIFICATION'}
                           title={item.title}
                           subtitle={item.body || item.message}
                           statusText={timeString}
@@ -312,8 +287,6 @@ export default function ActivityPage() {
             </>
          )}
       </section>
-
-      
     </main>
   );
 }

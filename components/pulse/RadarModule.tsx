@@ -131,64 +131,74 @@ export function RadarCard({ item, onMarkResolved, isMyPost }: { item: RadarItem;
 
   return (
     <>
-      <div className={`shrink-0 w-[240px] rounded-[24px] p-5 flex flex-col transition-all ${
+      <div className={`shrink-0 w-[200px] rounded-[18px] p-3 flex flex-col transition-all ${
         item.resolved
           ? 'bg-slate-50/50 opacity-60'
-          : 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-100/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)]'
+          : 'bg-white shadow-[0_4px_16px_rgb(0,0,0,0.04)] border border-slate-100/50 hover:shadow-[0_8px_24px_rgb(0,0,0,0.06)]'
       }`}>
-        {/* Header: Subtle Type badge + time */}
-        <div className="flex items-center justify-between mb-3">
-          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold capitalize ${
-            item.resolved 
-              ? 'bg-slate-100/50 text-slate-500' 
-              : isLost 
-                ? 'bg-rose-50 text-rose-600' 
-                : 'bg-emerald-50 text-emerald-600'
-          }`}>
-            {item.resolved
-              ? <CheckCircle2 size={12} />
-              : isLost ? <AlertTriangle size={12} /> : <CheckCircle2 size={12} />
-            }
-            {item.resolved ? 'Resolved' : item.type.toLowerCase()}
+        {/* Header: Type badge + Profile + time */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <div className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold capitalize ${
+              item.resolved 
+                ? 'bg-slate-100/50 text-slate-500' 
+                : isLost 
+                  ? 'bg-rose-50 text-rose-600' 
+                  : 'bg-emerald-50 text-emerald-600'
+            }`}>
+              {item.resolved ? 'Resolved' : item.type.toLowerCase()}
+            </div>
+            <div className="flex items-center gap-1 border-l border-slate-100 pl-1.5">
+               <img 
+                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.reporter_name || 'Pulse'}&mouth=smile,default`} 
+                 className="w-3.5 h-3.5 rounded-full bg-slate-50" 
+               />
+               <span className="text-[9px] font-bold text-slate-500 truncate max-w-[50px]">
+                 {item.reporter_name?.split(' ')[0] || 'User'}
+               </span>
+            </div>
           </div>
-          <span className="text-[11px] font-medium text-slate-400">{item.time}</span>
+          <span className="text-[8px] font-medium text-slate-400 shrink-0">{item.time}</span>
         </div>
 
         {/* Content */}
-        <div className="flex-1 space-y-2 mb-4">
-          <p className="text-[14px] font-bold text-slate-800 leading-snug tracking-tight">
+        <div className="flex-1 space-y-0.5 mb-2">
+          <p className="text-[12px] font-bold text-slate-800 leading-tight tracking-tight truncate">
             {item.title.replace(/^(Lost|Found):\s*/i, '')}
           </p>
-          <p className="text-[12px] font-medium text-slate-500 leading-relaxed line-clamp-3">
+          <p className="text-[10px] font-medium text-slate-400 leading-snug line-clamp-2">
             {item.detail}
           </p>
         </div>
 
-        {/* Footer info */}
-        <div className="text-[11px] font-medium text-slate-500 pt-3 border-t border-slate-100/80 mb-4">
-          {item.reward && <span className="block font-bold text-slate-800 mb-0.5">{item.reward}</span>}
-          <span>{item.contact}</span>
+        {/* Footer info - Super Compact */}
+        <div className="flex flex-col gap-0.5 pt-1.5 border-t border-slate-50 mb-2">
+          {item.reward && (
+            <p className="text-[9px] font-bold text-emerald-600 truncate">
+               {item.reward}
+            </p>
+          )}
+          <p className="text-[8px] font-medium text-slate-300 truncate">Contact Owner</p>
         </div>
 
-        {/* CTA Button - Soft UI Style */}
+        {/* CTA Button - Tightest */}
         {!item.resolved && (
           isMyPost ? (
             <button
               onClick={() => onMarkResolved?.(item.id)}
-              className="w-full h-10 rounded-xl bg-emerald-50 text-emerald-700 text-[12px] font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all hover:bg-emerald-100"
+              className="w-full h-7 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold flex items-center justify-center gap-1 active:scale-95 transition-all"
             >
-              <CheckCircle2 size={16} />
-              Mark as Resolved
+              Resolve
             </button>
           ) : (
             <button
               onClick={() => setShowContact(true)}
-              className={`w-full h-10 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all ${
-                isLost ? 'bg-blue-50 text-blue-700 hover:bg-blue-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+              className={`w-full h-7 rounded-md text-[10px] font-bold flex items-center justify-center gap-1 active:scale-95 transition-all ${
+                isLost ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
               }`}
             >
-              {isLost ? <Search size={14} /> : <CheckCircle2 size={14} />}
-              {isLost ? 'I Have This' : 'This Is Mine'}
+              {isLost ? <Search size={10} /> : <CheckCircle2 size={10} />}
+              {isLost ? 'Found' : 'Claim'}
             </button>
           )
         )}
@@ -213,11 +223,10 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
 
   const [title, setTitle] = useState('');
   const [detail, setDetail] = useState('');
-  const [contact, setContact] = useState('');
   const [reward, setReward] = useState('');
 
   const isLost = type === 'LOST';
-  const canSubmit = title.trim() && detail.trim() && contact.trim();
+  const canSubmit = title.trim() && detail.trim();
 
   const handleSubmit = async () => {
     if (!canSubmit || submitting) return;
@@ -228,7 +237,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
         type,
         title: title.trim(),
         detail: detail.trim(),
-        contact: contact.trim(),
+        contact: 'In-App Message',
         reward: reward.trim() || null,
         resolved: false,
         reporter_uid: user?.uid || null,
@@ -256,7 +265,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 80, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="bg-white w-full max-w-sm rounded-[24px] p-8 space-y-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+        className="bg-white w-full max-w-sm rounded-[24px] p-6 space-y-4 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -266,7 +275,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
               {done ? 'Posted!' : step === 'pick' ? 'Campus Radar' : isLost ? 'Report Lost Item' : 'Report Found Item'}
             </p>
             <p className="text-[13px] font-medium text-slate-500 mt-0.5">
-              {done ? 'Your post is now live on Pulse.' : step === 'pick' ? 'What do you want to report?' : 'Fill in the details below'}
+              {done ? 'Your post is now live.' : step === 'pick' ? 'What do you want to report?' : 'Fill in the details below'}
             </p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 active:scale-95 hover:bg-slate-100 transition-all">
@@ -281,7 +290,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
               <CheckCircle2 size={28} className="text-emerald-500" />
             </div>
             <p className="text-[13px] font-medium text-slate-500 text-center">
-              Other students can now see your report and contact you directly.
+               Other students can now see your report and contact you directly.
             </p>
             <button onClick={onClose} className="w-full h-12 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-[16px] font-bold text-[13px] active:scale-95 transition-all hover:bg-indigo-100 shadow-sm">
               Done
@@ -291,37 +300,31 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
 
         {/* STEP 1 — PICK TYPE */}
         {!done && step === 'pick' && (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => { setType('LOST'); setStep('form'); }}
-              className="w-full p-5 rounded-[20px] border border-rose-100/50 bg-rose-50/50 flex items-center justify-between group active:scale-95 transition-all hover:bg-rose-50"
+              className="p-5 rounded-[20px] border border-rose-100/50 bg-rose-50/50 flex flex-col gap-2 group active:scale-95 transition-all hover:bg-rose-50"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-[16px] bg-rose-100/80 flex items-center justify-center">
-                  <AlertTriangle size={20} className="text-rose-600" />
-                </div>
-                <div className="text-left">
-                  <p className="text-[15px] font-bold text-slate-900">I Lost Something</p>
-                  <p className="text-[12px] font-medium text-slate-500">Post a lost item alert</p>
-                </div>
+              <div className="w-12 h-12 rounded-[16px] bg-rose-100/80 flex items-center justify-center">
+                <AlertTriangle size={20} className="text-rose-600" />
               </div>
-              <ChevronRight size={18} className="text-slate-300" />
+              <div className="text-left">
+                <p className="text-[15px] font-bold text-slate-900">Lost</p>
+                <p className="text-[12px] font-medium text-slate-500">I lost something</p>
+              </div>
             </button>
 
             <button
               onClick={() => { setType('FOUND'); setStep('form'); }}
-              className="w-full p-5 rounded-[20px] border border-emerald-100/50 bg-emerald-50/50 flex items-center justify-between group active:scale-95 transition-all hover:bg-emerald-50"
+              className="p-5 rounded-[20px] border border-emerald-100/50 bg-emerald-50/50 flex flex-col gap-2 group active:scale-95 transition-all hover:bg-emerald-50"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-[16px] bg-emerald-100/80 flex items-center justify-center">
-                  <CheckCircle2 size={20} className="text-emerald-600" />
-                </div>
-                <div className="text-left">
-                  <p className="text-[15px] font-bold text-slate-900">I Found Something</p>
-                  <p className="text-[12px] font-medium text-slate-500">Help return a found item</p>
-                </div>
+              <div className="w-12 h-12 rounded-[16px] bg-emerald-100/80 flex items-center justify-center">
+                <CheckCircle2 size={20} className="text-emerald-600" />
               </div>
-              <ChevronRight size={18} className="text-slate-300" />
+              <div className="text-left">
+                <p className="text-[15px] font-bold text-slate-900">Found</p>
+                <p className="text-[12px] font-medium text-slate-500">I found an item</p>
+              </div>
             </button>
           </div>
         )}
@@ -329,48 +332,33 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
         {/* STEP 2 — FORM */}
         {!done && step === 'form' && (
           <div className="space-y-4">
-            {/* Item name */}
             <div className="space-y-2">
-              <label className="text-[12px] font-semibold text-slate-800">
+              <label className="text-[12px] font-semibold text-slate-800 px-1">
                 {isLost ? 'What did you lose?' : 'What did you find?'}
               </label>
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                placeholder={isLost ? 'e.g. Blue Casio Calculator' : 'e.g. Student ID Card'}
+                placeholder={isLost ? 'e.g. Student ID Card' : 'e.g. Keys'}
                 className="w-full h-12 px-4 rounded-[16px] border border-slate-100 bg-slate-50 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-300 transition-colors"
               />
             </div>
 
-            {/* Location / detail */}
             <div className="space-y-2">
-              <label className="text-[12px] font-semibold text-slate-800">
+              <label className="text-[12px] font-semibold text-slate-800 px-1">
                 {isLost ? 'Where did you last see it?' : 'Where did you find it?'}
               </label>
-              <textarea
+              <input
                 value={detail}
                 onChange={e => setDetail(e.target.value)}
-                placeholder={isLost ? 'e.g. Level 3 Library, near the window seats' : 'e.g. Surrendered to guard at Main Lobby'}
-                rows={2}
-                className="w-full px-4 py-3 rounded-[16px] border border-slate-100 bg-slate-50 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-300 transition-colors resize-none"
-              />
-            </div>
-
-            {/* Contact */}
-            <div className="space-y-2">
-              <label className="text-[12px] font-semibold text-slate-800">Your contact</label>
-              <input
-                value={contact}
-                onChange={e => setContact(e.target.value)}
-                placeholder="e.g. DM @haziq_miit or 011-XXXXXXXX"
+                placeholder={isLost ? 'e.g. Level 3 Library' : 'e.g. Café Rasa'}
                 className="w-full h-12 px-4 rounded-[16px] border border-slate-100 bg-slate-50 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-300 transition-colors"
               />
             </div>
 
-            {/* Reward (lost only) */}
             {isLost && (
               <div className="space-y-2">
-                <label className="text-[12px] font-semibold text-slate-800">Reward (optional)</label>
+                <label className="text-[12px] font-semibold text-slate-800 px-1">Reward (optional)</label>
                 <input
                   value={reward}
                   onChange={e => setReward(e.target.value)}

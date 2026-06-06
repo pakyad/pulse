@@ -208,7 +208,13 @@ function MarketplacePage() {
     // Price
     result = result.filter(i => Number(i.price) <= filters.priceRange[1]);
 
-    // Official only
+    // EXCLUSION: Hide official UniStore items from general discover grid
+    // These are reserved for the UniStore Hub only
+    if (!filters.officialOnly) {
+       result = result.filter(i => i.is_official !== true);
+    }
+
+    // Official only (if user explicitly filters for it)
     if (filters.officialOnly) {
       result = result.filter(i => i.is_official === true);
     }

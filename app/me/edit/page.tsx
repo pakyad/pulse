@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Camera, GraduationCap, MessageSquare, Loader2, ChevronDown, Check } from 'lucide-react';
+import { ChevronLeft, Camera, Loader2, ChevronDown, Check } from 'lucide-react';
 
 const MIIT_COURSES = [
   'Bachelor of Software Engineering',
@@ -32,6 +32,19 @@ const AVATAR_STYLES = [
   { id: 'shapes', label: 'Abstract' },
   { id: 'initials', label: 'Formal' }
 ];
+
+// ── STANDARDIZED TYPOGRAPHY COMPONENTS (From Me Page) ──
+const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <h2 className={`text-[17px] font-bold text-slate-900 tracking-tight ${className}`}>
+    {children}
+  </h2>
+);
+
+const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <p className={`text-[11px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
+    {children}
+  </p>
+);
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -96,21 +109,10 @@ export default function EditProfilePage() {
     </div>
   );
 
-  const TitleStyle = "text-[15px] font-bold text-slate-900 tracking-tight";
-
   return (
     <main className="min-h-screen bg-white text-slate-900 pb-40 font-sans selection:bg-slate-100 antialiased">
       
-      {/* ── HEADER ── */}
-      <nav className="sticky top-0 z-50 px-6 py-5 bg-white/90 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between">
-        <button onClick={() => router.back()} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 active:scale-95 transition-all">
-          <ChevronLeft size={20} />
-        </button>
-        <h1 className={TitleStyle}>Edit Profile</h1>
-        <div className="w-10" />
-      </nav>
-
-      <div className="p-6 space-y-12">
+      <div className="p-6 pt-12 space-y-12">
         
         {/* ── AVATAR PICKER ── */}
         <section className="flex flex-col items-center justify-center space-y-4">
@@ -126,31 +128,31 @@ export default function EditProfilePage() {
               </div>
            </button>
            <div className="text-center space-y-1">
-              <p className={TitleStyle}>{profile?.full_name}</p>
-              <p className="text-[11px] font-medium text-slate-400">@{profile?.email?.split('@')[0]}</p>
+              <Heading>{profile?.full_name}</Heading>
+              <Subtext>@{profile?.email?.split('@')[0]}</Subtext>
            </div>
         </section>
 
         {/* ── ACADEMIC INFO ── */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3 text-slate-900 px-1">
-            <GraduationCap size={18} />
-            <label className={TitleStyle}>ACADEMIC INFO</label>
+          <div className="px-1 space-y-1">
+            <Heading>Academic Details</Heading>
+            <Subtext>Update your course and year of study</Subtext>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-4">
              {/* MIIT Course Dropdown */}
-             <div className="space-y-3">
-                <p className={`${TitleStyle} px-1`}>MIIT COURSE</p>
+             <div className="space-y-2">
+                <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">MIIT Course</p>
                 <div className="relative">
                   <button 
                     onClick={() => setPickerType(pickerType === 'course' ? null : 'course')}
-                    className="w-full h-16 bg-slate-50 border border-slate-100 rounded-[22px] px-6 flex items-center justify-between active:scale-[0.98] transition-all"
+                    className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
                   >
-                    <span className={`text-[14px] font-bold ${faculty ? 'text-slate-900' : 'text-slate-400'}`}>
+                    <span className={`text-[13px] font-bold ${faculty ? 'text-slate-900' : 'text-slate-400'}`}>
                        {faculty || 'Select Course'}
                     </span>
-                    <ChevronDown size={18} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'course' ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'course' ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {pickerType === 'course' && (
@@ -162,7 +164,7 @@ export default function EditProfilePage() {
                           <button
                             key={course}
                             onClick={() => { setFaculty(course); setPickerType(null); }}
-                            className={`w-full px-6 py-4 text-left text-[13px] font-bold transition-colors flex items-center justify-between ${
+                            className={`w-full px-6 py-4 text-left text-[12px] font-bold transition-colors flex items-center justify-between ${
                               faculty === course ? 'bg-blue-500 text-white' : 'text-slate-600 hover:bg-slate-100'
                             }`}
                           >
@@ -177,17 +179,17 @@ export default function EditProfilePage() {
              </div>
 
              {/* Current Year Dropdown */}
-             <div className="space-y-3">
-                <p className={`${TitleStyle} px-1`}>CURRENT YEAR</p>
+             <div className="space-y-2">
+                <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Current Year</p>
                 <div className="relative">
                   <button 
                     onClick={() => setPickerType(pickerType === 'year' ? null : 'year')}
-                    className="w-full h-16 bg-slate-50 border border-slate-100 rounded-[22px] px-6 flex items-center justify-between active:scale-[0.98] transition-all"
+                    className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
                   >
-                    <span className={`text-[14px] font-bold ${yearOfStudy ? 'text-slate-900' : 'text-slate-400'}`}>
+                    <span className={`text-[13px] font-bold ${yearOfStudy ? 'text-slate-900' : 'text-slate-400'}`}>
                        {yearOfStudy || 'Select Year'}
                     </span>
-                    <ChevronDown size={18} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'year' ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'year' ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {pickerType === 'year' && (
@@ -199,7 +201,7 @@ export default function EditProfilePage() {
                           <button
                             key={year}
                             onClick={() => { setYearOfStudy(year); setPickerType(null); }}
-                            className={`w-full px-6 py-4 text-left text-[13px] font-bold transition-colors flex items-center justify-between ${
+                            className={`w-full px-6 py-4 text-left text-[12px] font-bold transition-colors flex items-center justify-between ${
                               yearOfStudy === year ? 'bg-blue-500 text-white' : 'text-slate-600 hover:bg-slate-100'
                             }`}
                           >
@@ -217,19 +219,19 @@ export default function EditProfilePage() {
 
         {/* ── ABOUT & CONTACT ── */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3 text-slate-900 px-1">
-            <MessageSquare size={18} />
-            <label className={TitleStyle}>ABOUT & CONTACT</label>
+          <div className="px-1 space-y-1">
+            <Heading>Public Profile</Heading>
+            <Subtext>Tell peers about yourself</Subtext>
           </div>
           
-          <div className="space-y-3">
-             <p className={`${TitleStyle} px-1`}>BIO</p>
+          <div className="space-y-2">
+             <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Short Bio</p>
              <textarea 
                value={bio}
                onChange={(e) => setBio(e.target.value.slice(0, 150))}
                rows={4}
-               className="w-full bg-slate-50 border border-slate-100 rounded-[24px] p-6 text-[14px] font-medium leading-relaxed outline-none focus:border-slate-900 transition-all resize-none shadow-sm"
-               placeholder="Short bio..."
+               className="w-full bg-slate-50 border border-slate-100 rounded-[24px] p-5 text-[14px] font-medium leading-relaxed outline-none focus:border-slate-900 transition-all resize-none shadow-sm"
+               placeholder="Write something about yourself..."
              />
              <p className="text-right text-[9px] font-bold text-slate-300 px-2 tracking-tighter">{bio.length}/150</p>
           </div>

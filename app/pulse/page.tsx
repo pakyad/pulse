@@ -164,24 +164,36 @@ export default function PulsePage() {
       const uAnn = onSnapshot(
         query(collection(db, 'announcements'), where('type', 'in', ['OFFICIAL', 'ADMIN']), orderBy('created_at', 'desc'), limit(20)),
         snap => { setAnnouncements(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingAnn(false); },
-        () => {
+        (err) => {
+          console.error('[Pulse] Announcements:', err);
           const uFallback = onSnapshot(
             query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(20)),
             snap => {
               setAnnouncements(snap.docs.map(d => ({ id: d.id, ...d.data() })).filter((a: any) => a.type === 'OFFICIAL' || a.type === 'ADMIN'));
               setLoadingAnn(false);
             },
-            () => setLoadingAnn(false)
+            (e) => {
+               console.error('[Pulse] Announcements Fallback:', e);
+               setLoadingAnn(false);
+            }
           );
           unsubs.push(uFallback);
         }
       );
       unsubs.push(uAnn);
 
-      const uRadar = onSnapshot(query(collection(db, 'campus_radar'), orderBy('created_at', 'desc'), limit(20)), snap => setRadarItems(snap.docs.map(d => ({ id: d.id, ...d.data() }))), () => {});
+      const uRadar = onSnapshot(
+        query(collection(db, 'campus_radar'), orderBy('created_at', 'desc'), limit(20)), 
+        snap => setRadarItems(snap.docs.map(d => ({ id: d.id, ...d.data() }))), 
+        (err) => console.error('[Pulse] Radar:', err)
+      );
       unsubs.push(uRadar);
 
-      const uEvents = onSnapshot(query(collection(db, 'events'), orderBy('date', 'asc'), limit(10)), snap => setEvents(snap.docs.map(d => ({ id: d.id, ...d.data() }))), () => {});
+      const uEvents = onSnapshot(
+        query(collection(db, 'events'), orderBy('date', 'asc'), limit(10)), 
+        snap => setEvents(snap.docs.map(d => ({ id: d.id, ...d.data() }))), 
+        (err) => console.error('[Pulse] Events:', err)
+      );
       unsubs.push(uEvents);
     });
 
