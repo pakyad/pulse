@@ -435,39 +435,37 @@ exports.onReviewCreated = (0, firestore_1.onDocumentCreated)("Reviews/{reviewId}
 });
 const anthropicApiKey = (0, params_1.defineSecret)("ANTHROPIC_API_KEY");
 const resendApiKey = (0, params_1.defineSecret)("RESEND_API_KEY");
-exports.pcsValidate = (0, firestore_1.onDocumentCreated)({
-    document: "items/{itemId}",
+exports.pcsValidate = (0, https_1.onCall)({
     secrets: [anthropicApiKey],
     region: "us-central1",
-}, async (event) => {
-    const snap = event.data;
-    if (!snap)
-        return;
-    const item = snap.data();
-    const itemId = event.params.itemId;
-    const name = item.name || item.title || "";
-    const description = item.description || "";
-    const subcategory = item.subcategory || "";
-    const price = parseFloat(item.price) || 0;
+    maxInstances: 10,
+}, async (request) => {
+    const { itemTitle, itemPrice, category, sellerId, itemId } = request.data;
+    const price = parseFloat(itemPrice) || 0;
+    const name = itemTitle || "";
+    const subcategory = request.data.subcategory || ""; // Fallback or extra field if needed
     try {
         let isPriceControlled = false;
-        if (subcategory) {
-            const guidelinesSnap = await db.collection("PriceGuidelines").get();
-            guidelinesSnap.forEach((doc) => {
-                const data = doc.data();
-                const subcategories = data.subcategories || [];
-                const match = subcategories.find((s) => s.label === subcategory);
-                if (match) {
-                    isPriceControlled = match.is_price_controlled === true;
-                }
-            });
-        }
+        // Use the category passed or lookup by subcategory
+        const guidelinesSnap = await db.collection("PriceGuidelines").get();
+        guidelinesSnap.forEach((doc) => {
+            const data = doc.data();
+            if (doc.id.toUpperCase() === (category === null || category === void 0 ? void 0 : category.toUpperCase())) {
+                isPriceControlled = true;
+            }
+            const subcategories = data.subcategories || [];
+            const match = subcategories.find((s) => s.label === subcategory);
+            if (match) {
+                isPriceControlled = match.is_price_controlled === true;
+            }
+        });
         if (!isPriceControlled) {
-            await snap.ref.update({
-                status: "ACTIVE",
-                pcs_certified: false,
-            });
-            return;
+            return {
+                isApproved: true,
+                marketBaselinePrice: 0,
+                maxAllowedStudentPrice: 0,
+                justification: "Category not under price control."
+            };
         }
         const response = await fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
@@ -477,7 +475,7 @@ exports.pcsValidate = (0, firestore_1.onDocumentCreated)({
                 "anthropic-version": "2023-06-01",
             },
             body: JSON.stringify({
-                model: "claude-sonnet-4-20250514",
+                model: "claude-3-5-sonnet-20240620",
                 max_tokens: 500,
                 tools: [
                     {
@@ -489,7 +487,7 @@ exports.pcsValidate = (0, firestore_1.onDocumentCreated)({
                 messages: [
                     {
                         role: "user",
-                        content: `Item name: ${name}. Subcategory: ${subcategory}. Condition notes: ${description}. Listed price: RM${price}. Search Shopee Malaysia or Lazada Malaysia for the current price of this item and validate.`,
+                        content: `Item name: ${name}. Category: ${category}. Listed price: RM${price}. Search Shopee Malaysia or Lazada Malaysia for the current price of this item and validate.`,
                     },
                 ],
             }),
@@ -513,24 +511,21 @@ exports.pcsValidate = (0, firestore_1.onDocumentCreated)({
         const marketPrice = parseFloat(result.marketPrice) || 0;
         const maxAllowedPrice = parseFloat(result.maxAllowedPrice) || 0;
         const justification = result.justification || "";
-        await snap.ref.update({
-            status: isApproved ? "ACTIVE" : "FLAGGED_FOR_REVIEW",
-            pcs_certified: isApproved,
-            pcs_result: {
-                isApproved,
-                marketPrice,
-                maxAllowedPrice,
-                justification,
-                checkedAt: new Date().toISOString(),
-            },
-        });
+        return {
+            isApproved,
+            marketBaselinePrice: marketPrice,
+            maxAllowedStudentPrice: maxAllowedPrice,
+            justification
+        };
     }
     catch (error) {
         logger.error(`[pcsValidate] Error validating item ${itemId}:`, error);
-        await snap.ref.update({
-            status: "ACTIVE",
-            pcs_certified: false,
-        });
+        return {
+            isApproved: true,
+            marketBaselinePrice: 0,
+            maxAllowedStudentPrice: 0,
+            justification: "Validation failed, default approval granted."
+        };
     }
 });
 /**

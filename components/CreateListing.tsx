@@ -9,9 +9,9 @@ import {
   ArrowUpRight, Zap, TrendingUp
 } from 'lucide-react';
 
-import { db, auth, functions } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, onSnapshot, doc } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
 import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
@@ -168,7 +168,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       const sellerId = userId || user?.uid || 'ANON';
       const itemId = existingItem?.id || doc(collection(db, 'items')).id;
 
-      // ── PCS GUARDRAILS INTERCEPTION ──
+      const functions = getFunctions();
       const pcsValidate = httpsCallable(functions, 'pcsValidate');
       const pcsResult = await pcsValidate({
         itemTitle: title,

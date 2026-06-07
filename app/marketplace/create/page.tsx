@@ -8,9 +8,9 @@ import {
   ShieldCheck, ShieldAlert, Globe, AlertCircle
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
-import { db, auth, storage, functions } from '@/lib/firebase';
-import { collection, addDoc, doc, onSnapshot, getDocs, serverTimestamp } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
+import { db, auth, storage } from '@/lib/firebase';
+import { collection, addDoc, doc, onSnapshot, getDocs, serverTimestamp, setDoc, query, where } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
@@ -188,7 +188,7 @@ export default function CreateListingPage() {
       const sellerId = user.uid;
       const itemId = doc(collection(db, 'items')).id;
 
-      // ── PCS GUARDRAILS INTERCEPTION ──
+      const functions = getFunctions();
       const pcsValidate = httpsCallable(functions, 'pcsValidate');
       const pcsResult = await pcsValidate({
         itemTitle: title,
@@ -251,7 +251,7 @@ export default function CreateListingPage() {
         created_at: serverTimestamp(),
       };
 
-      const { setDoc, doc, collection } = await import('firebase/firestore');
+      const { setDoc: _setDoc } = await import('firebase/firestore');
       await setDoc(doc(db, 'items', itemId), itemData);
       router.push('/marketplace');
     } catch (e: any) {
