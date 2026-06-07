@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, CheckCircle2, Pencil, Trash2, ShieldAlert, Package, LogOut, ChevronLeft, MessageSquare, AlertCircle, Settings, X, Loader2 } from 'lucide-react';
+import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, CheckCircle2, Pencil, Trash2, ShieldAlert, Package, LogOut, ChevronLeft, MessageSquare, AlertCircle, Settings, X, Loader2, ShoppingBag, TrendingUp } from 'lucide-react';
 import { db, auth } from '@/lib/firebase';
 import { deleteDoc, doc, collection, query, onSnapshot, where, addDoc, serverTimestamp } from 'firebase/firestore';
 import CreateListing from '@/components/CreateListing';
