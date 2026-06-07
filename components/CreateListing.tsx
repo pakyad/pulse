@@ -480,7 +480,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                             onClick={() => { setPrice(pcsError.maxAllowedStudentPrice.toString()); setPcsError(null); }}
                             className="mt-3 bg-amber-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-amber-800 transition-colors"
                           >
-                            Set to RM{pcsError.maxAllowedStudentPrice.toFixed(2)} and continue >
+                            Set to RM{pcsError.maxAllowedStudentPrice.toFixed(2)} and continue {'>'}
                           </button>
                         </div>
                       </div>
