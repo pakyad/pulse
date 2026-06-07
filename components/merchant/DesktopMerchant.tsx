@@ -180,6 +180,7 @@ export default function DesktopMerchant({
   const isClub = merchant?.role === 'CLUB' || merchant?.is_verified_merchant;
 
   const [activeSection, setActiveSection] = React.useState<'overview' | 'products' | 'settings' | 'log'>('overview');
+  const [shopPaused, setShopPaused] = React.useState(merchant?.status === 'PAUSED');
 
   const isActive = (section: string) => activeSection === section;
   const activeClass = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-gray-900 text-white font-medium shadow-sm transition-all";
@@ -242,7 +243,16 @@ export default function DesktopMerchant({
                   <p className="text-sm font-semibold text-gray-900">Shop Visibility</p>
                   <p className="text-xs text-gray-500 mt-0.5">Toggle your shop active or paused</p>
                 </div>
-                <button className="bg-gray-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-gray-800 transition-colors">Active</button>
+                <button 
+                  onClick={async () => {
+                    const { doc, updateDoc } = await import('firebase/firestore');
+                    await updateDoc(doc(db, 'users', merchant.uid), { status: shopPaused ? 'ACTIVE' : 'PAUSED' });
+                    setShopPaused(!shopPaused);
+                  }}
+                  className={shopPaused ? "bg-amber-500 text-white text-xs rounded-full px-4 py-1.5" : "bg-emerald-500 text-white text-xs rounded-full px-4 py-1.5"}
+                >
+                  {shopPaused ? 'Paused - Click to Resume' : 'Active'}
+                </button>
               </div>
               <div className="flex items-center justify-between py-4 border-b border-gray-100">
                 <div>
@@ -253,10 +263,10 @@ export default function DesktopMerchant({
               </div>
               <div className="flex items-center justify-between py-4 border-b border-gray-100">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Notification Preferences</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Manage order and system alerts</p>
+                  <p className="text-sm font-semibold text-gray-900">My Listings</p>
+                  <p className="text-xs text-gray-500 mt-0.5">View and manage all your listed items</p>
                 </div>
-                <button className="border border-gray-200 text-gray-600 text-xs rounded-full px-4 py-1.5 hover:bg-gray-50 transition-colors">Manage</button>
+                <button onClick={() => setActiveSection('products')} className="border border-gray-200 text-gray-600 text-xs rounded-full px-4 py-1.5 hover:bg-gray-50">View</button>
               </div>
               <div className="flex items-center justify-between py-4">
                 <div>

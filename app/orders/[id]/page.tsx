@@ -714,14 +714,21 @@ export default function LiveOrderPage() {
         {/*  ESCROW RELEASE BUTTON REMOVED (Admin Only Now)  */}
 
         {/*  POST-DELIVERY REVIEW  */}
-        {showReview && userId && (
+        {userId && (
           <section className="pt-6 border-t border-slate-100">
-            <PostDeliveryReview 
-              order={order} 
-              userId={userId} 
-              itemId={order.items?.[0]?.productId} 
-              isOfficial={sellerOfficial} 
-            />
+            {showReview ? (
+              <PostDeliveryReview 
+                order={order} 
+                userId={userId} 
+                itemId={order.items?.[0]?.productId} 
+                isOfficial={sellerOfficial} 
+              />
+            ) : (
+              <div className="bg-gray-50 rounded-2xl p-4 text-center">
+                <p className="text-sm font-medium text-gray-500">Rate your experience</p>
+                <p className="text-xs text-gray-400 mt-1">Available after delivery is confirmed</p>
+              </div>
+            )}
           </section>
         )}
 

@@ -81,6 +81,12 @@ export default function CreateListingPage() {
 
   const handlePost = async () => {
     if (!selectedCategory) return;
+    
+    const numPrice = parseFloat(price);
+    if (!title || title.trim().length < 3) { alert('Please enter a valid product name.'); return; }
+    if (isNaN(numPrice) || numPrice <= 0) { alert('Please enter a valid price greater than 0.'); return; }
+    if (!selectedCategory) { alert('Please select a category.'); return; }
+
     setIsPosting(true);
     setPostError(null);
     setPcsError(null);
