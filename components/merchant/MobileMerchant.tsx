@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, CheckCircle2, Pencil, Trash2, ShieldAlert, Package, LogOut, ChevronLeft, MessageSquare, AlertCircle, Settings, X, Loader2, ShoppingBag, TrendingUp } from 'lucide-react';
+import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, CheckCircle2, Pencil, Trash2, ShieldAlert, Package, LogOut, ChevronLeft, MessageSquare, AlertCircle, Settings, X, Loader2, ShoppingBag, TrendingUp, Trophy } from 'lucide-react';
 import { db, auth } from '@/lib/firebase';
 import { deleteDoc, doc, collection, query, onSnapshot, where, addDoc, serverTimestamp } from 'firebase/firestore';
 import CreateListing from '@/components/CreateListing';
@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import IncomingOrderAlert from './IncomingOrderAlert';
 import DisputeThread from './DisputeThread';
 import PriceHealthIndicator from '@/components/marketplace/PriceHealthIndicator';
+import { ResponsiveContainer, LineChart, Line, XAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
 
 /**
  * Pulse Mobile Merchant Terminal
@@ -121,80 +122,73 @@ export default function MobileMerchant({
   const resolvedDisputes = disputes.filter((d: any) => d.status === 'RESOLVED' || d.status === 'SETTLED');
   const currentDisputes = disputesTab === 'PENDING' ? pendingDisputes : resolvedDisputes;
 
-  //  STATS TAB (FIX 10) 
-  const [statsData, setStatsData] = React.useState<any>({
-    totalEarned: 0,
-    itemsSold: 0,
-    activeListings: 0,
-    trustRating: 0,
-    bestSellingItem: '...',
-    recentSales: [],
-    loading: true
-  });
-
-  React.useEffect(() => {
-    if (view !== 'insights' || !merchant?.uid) return;
-
-    // 1. Listen for Delivered Orders
-    const qOrders = query(
-      collection(db, "orders"), 
-      where("seller_id", "==", merchant.uid),
-      where("status", "==", "DELIVERED")
-    );
+  //  STATS COMPUTATION 
+  const stats = React.useMemo(() => {
+    const all = recentOrders || [];
+    const delivered = all.filter((o: any) => o.status === 'DELIVERED' || o.status === 'COMPLETED');
+    const totalRevenue = delivered.reduce((s: number, o: any) => s + (o.total || 0), 0);
+    const totalOrders = delivered.length;
+    const avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
     
-    const unsubOrders = onSnapshot(qOrders, (snapshot) => {
-      const delivered = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      const totalEarned = delivered.reduce((s, o: any) => s + Number(o.total || o.price || 0), 0);
-      
-      // Best Selling Item
-      const products: Record<string, number> = {};
-      delivered.forEach((o: any) => {
-        const title = o.title || (o.items?.[0]?.title) || 'Unknown Item';
-        products[title] = (products[title] || 0) + 1;
-      });
-      const bestSellingItem = Object.entries(products)
-        .sort((a, b) => b[1] - a[1])[0]?.[0] || 'No sales yet';
+    // Revenue This Month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthRevenue = delivered.filter((o: any) => {
+      const d = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
+      return d >= startOfMonth;
+    }).reduce((s: number, o: any) => s + (o.total || 0), 0);
 
-      // Recent Sales (Last 5)
-      const recentSales = [...delivered]
-        .sort((a: any, b: any) => {
-          const da = a.created_at?.toDate ? a.created_at.toDate() : new Date(a.created_at);
-          const db = b.created_at?.toDate ? b.created_at.toDate() : new Date(b.created_at);
-          return db.getTime() - da.getTime();
-        })
-        .slice(0, 5);
-
-      setStatsData(prev => ({ 
-        ...prev, 
-        totalEarned, 
-        itemsSold: delivered.length, 
-        bestSellingItem,
-        recentSales,
-        loading: false 
-      }));
+    // Revenue Trend (Last 7 Days)
+    const last7Days = [...Array(7)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const label = d.toLocaleDateString('en-MY', { weekday: 'short' });
+      const rev = delivered.filter((o: any) => {
+        const od = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
+        return od.toDateString() === d.toDateString();
+      }).reduce((s: number, o: any) => s + (o.total || 0), 0);
+      return { day: label, revenue: rev };
     });
 
-    // 2. Listen for Active Items
-    const qItems = query(
-      collection(db, "items"), 
-      where("seller_id", "==", merchant.uid),
-      where("status", "==", "active")
-    );
-    const unsubItems = onSnapshot(qItems, (snapshot) => {
-      setStatsData(prev => ({ ...prev, activeListings: snapshot.docs.length }));
-    });
+    // Order Breakdown
+    const pendingCount = all.filter((o: any) => !['DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status)).length;
+    const cancelledCount = all.filter((o: any) => o.status === 'CANCELLED').length;
+    const deliveredCount = totalOrders;
 
-    // 3. Trust Rating from User Doc
-    const unsubUser = onSnapshot(doc(db, "users", merchant.uid), (snap) => {
-      setStatsData(prev => ({ ...prev, trustRating: snap.data()?.trust_rating || 0 }));
+    // Top Products
+    const products: Record<string, { name: string, revenue: number, units: number }> = {};
+    delivered.forEach((o: any) => {
+      const title = o.title || 'Unknown Item';
+      if (!products[title]) products[title] = { name: title, revenue: 0, units: 0 };
+      products[title].revenue += (o.total || 0);
+      products[title].units += 1;
     });
+    const topProducts = Object.values(products).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+    const bestSeller = Object.values(products).sort((a, b) => b.units - a.units)[0] || null;
 
-    return () => {
-      unsubOrders();
-      unsubItems();
-      unsubUser();
+    // Recent Sales
+    const recentSales = [...delivered].sort((a: any, b: any) => {
+      const da = a.created_at?.toDate ? a.created_at.toDate() : new Date(a.created_at);
+      const db = b.created_at?.toDate ? b.created_at.toDate() : new Date(b.created_at);
+      return db.getTime() - da.getTime();
+    }).slice(0, 5);
+
+    return {
+      totalRevenue,
+      totalOrders,
+      avgOrder,
+      monthRevenue,
+      last7Days,
+      breakdown: [
+        { name: 'Delivered', value: deliveredCount, fill: '#111827' },
+        { name: 'Pending', value: pendingCount, fill: '#d1d5db' },
+        { name: 'Cancelled', value: cancelledCount, fill: '#f3f4f6' }
+      ],
+      topProducts,
+      bestSeller,
+      recentSales
     };
-  }, [view, merchant?.uid]);
+  }, [recentOrders]);
 
   const viewLabels: Record<string, string> = {
     terminal: 'Manage your shop and fulfill orders.',
@@ -249,7 +243,7 @@ export default function MobileMerchant({
          </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-[#F9FAFB]">
         <AnimatePresence mode="wait">
           {/*  TERMINAL VIEW  */}
           {view === 'terminal' && (
@@ -311,8 +305,8 @@ export default function MobileMerchant({
                   >
                     {activeTab === 'ACTIVE' && (
                       pendingList.length === 0 ? (
-                        <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[12px] flex flex-col items-center justify-center text-center">
-                          <div className="w-14 h-14 bg-white rounded-[12px] flex items-center justify-center text-[#9CA3AF] mb-4 shadow-sm border border-slate-100">
+                        <div className="py-16 px-6 bg-white border border-dashed border-slate-200 rounded-[12px] flex flex-col items-center justify-center text-center">
+                          <div className="w-14 h-14 bg-slate-50 rounded-[12px] flex items-center justify-center text-[#9CA3AF] mb-4 border border-slate-100">
                             <PackageCheck size={24} strokeWidth={1.5} />
                           </div>
                           <h3 className="text-[16px] font-medium text-[#111827] tracking-tight mb-1">No active orders</h3>
@@ -409,8 +403,8 @@ export default function MobileMerchant({
                     )}
                     {activeTab === 'HISTORY' && (
                       historyList.length === 0 ? (
-                        <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[12px] flex flex-col items-center justify-center text-center">
-                          <div className="w-14 h-14 bg-white rounded-[12px] flex items-center justify-center text-[#9CA3AF] mb-4 shadow-sm border border-slate-100">
+                        <div className="py-16 px-6 bg-white border border-dashed border-slate-200 rounded-[12px] flex flex-col items-center justify-center text-center">
+                          <div className="w-14 h-14 bg-slate-50 rounded-[12px] flex items-center justify-center text-[#9CA3AF] mb-4 border border-slate-100">
                             <ClipboardList size={24} strokeWidth={1.5} />
                           </div>
                           <h3 className="text-[16px] font-medium text-[#111827] tracking-tight mb-1">No past orders</h3>
@@ -623,90 +617,173 @@ export default function MobileMerchant({
             </motion.div>
           )}
 
-          {/*  INSIGHTS VIEW (FIX 10)  */}
+          {/*  INSIGHTS VIEW (FIX 1)  */}
           {view === 'insights' && (
             <motion.div
               key="insights"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="py-6 px-6 space-y-8"
+              className="py-6 px-0 space-y-0"
             >
-              {statsData.loading ? (
-                <div className="space-y-6">
-                  <div className="h-40 bg-slate-50 rounded-[20px] animate-pulse" />
-                  <div className="flex gap-3">
-                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
-                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
-                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
+              {/* HERO SECTION */}
+              <div className="bg-[#111827] rounded-[32px] p-6 mx-4 mb-4 shadow-xl shadow-slate-900/10">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">Total Revenue</p>
+                <h2 className="text-[36px] font-bold text-white tracking-tight leading-none mb-4">RM {stats.totalRevenue.toFixed(2)}</h2>
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-2 flex-1">
+                    <p className="text-[10px] font-medium text-slate-400 mb-0.5">This Month</p>
+                    <p className="text-[14px] font-bold text-white tracking-tight">RM {stats.monthRevenue.toFixed(2)}</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-2 flex-1">
+                    <p className="text-[10px] font-medium text-slate-400 mb-0.5">Avg Order</p>
+                    <p className="text-[14px] font-bold text-white tracking-tight">RM {stats.avgOrder.toFixed(2)}</p>
                   </div>
                 </div>
-              ) : (
-                <>
-                  {/* Hero Card */}
-                  <div className="p-8 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] relative overflow-hidden shadow-sm">
-                    <div className="relative z-10">
-                      <p className="text-[13px] font-medium text-[#9CA3AF] uppercase tracking-widest mb-1">Total Earned</p>
-                      <h2 className="text-[32px] font-bold text-[#111827] tracking-tighter leading-none">RM {statsData.totalEarned.toFixed(2)}</h2>
-                    </div>
-                  </div>
+              </div>
 
-                  {/* Stat Pills */}
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                    <div className="px-5 py-2.5 bg-[#111827] text-white rounded-full flex items-center gap-2 shrink-0">
-                      <ShoppingBag size={14} />
-                      <span className="text-[11px] font-medium">{statsData.itemsSold} Sold</span>
-                    </div>
-                    <div className="px-5 py-2.5 bg-white border border-[#D1D5DB] text-[#374151] rounded-full flex items-center gap-2 shrink-0">
-                      <Package size={14} />
-                      <span className="text-[11px] font-medium">{statsData.activeListings} Active</span>
-                    </div>
-                    <div className="px-5 py-2.5 bg-amber-50 border border-amber-100 text-amber-600 rounded-full flex items-center gap-2 shrink-0">
-                      <TrendingUp size={14} />
-                      <span className="text-[11px] font-medium"> {statsData.trustRating}</span>
-                    </div>
-                  </div>
+              {/* QUICK STATS ROW */}
+              <div className="grid grid-cols-3 gap-3 px-4 mb-4">
+                <div className="bg-white rounded-[20px] p-4 border border-slate-100 text-center shadow-sm">
+                  <p className="text-[20px] font-bold text-[#111827] leading-none mb-1">{stats.totalOrders}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Orders</p>
+                </div>
+                <div className="bg-white rounded-[20px] p-4 border border-slate-100 text-center shadow-sm">
+                  <p className="text-[20px] font-bold text-[#111827] leading-none mb-1">{topItems?.length || 0}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Listings</p>
+                </div>
+                <div className="bg-white rounded-[20px] p-4 border border-slate-100 text-center shadow-sm">
+                  <p className="text-[20px] font-bold text-emerald-600 leading-none mb-1">{(merchant?.trust_rating || 5.0).toFixed(1)}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rating</p>
+                </div>
+              </div>
 
-                  {/* Best Selling Item */}
-                  <div className="p-5 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] space-y-3 shadow-sm">
-                    <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-widest">Top Selling</p>
-                    <div className="flex items-center gap-3 text-[#111827]">
-                      <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
-                        <TrendingUp size={20} />
+              {/* REVENUE TREND */}
+              <div className="bg-white rounded-[24px] border border-slate-100 mx-4 mb-4 p-5 shadow-sm">
+                <h3 className="text-[14px] font-bold text-[#111827] tracking-tight mb-4">Sales This Week</h3>
+                <div className="h-[120px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={stats.last7Days}>
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', fontSize: '12px', fontWeight: 'bold' }}
+                        formatter={(v: any) => [`RM ${v.toFixed(2)}`, 'Revenue']}
+                        labelStyle={{ display: 'none' }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke="#111827" 
+                        strokeWidth={3} 
+                        dot={false}
+                        activeDot={{ r: 4, strokeWidth: 0, fill: '#111827' }}
+                      />
+                      <XAxis 
+                        dataKey="day" 
+                        hide 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex justify-between items-center px-1 mt-3">
+                  {stats.last7Days.map((d, i) => (
+                    <span key={i} className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{d.day}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* ORDER BREAKDOWN */}
+              <div className="bg-white rounded-[24px] border border-slate-100 mx-4 mb-4 p-5 shadow-sm">
+                <h3 className="text-[14px] font-bold text-[#111827] tracking-tight mb-4">Order Status</h3>
+                <div className="h-[140px] w-full relative flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={stats.breakdown}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={45}
+                        outerRadius={65}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {stats.breakdown.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} cornerRadius={4} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <p className="text-[18px] font-black text-[#111827] leading-none">{stats.totalOrders}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Orders</p>
+                  </div>
+                </div>
+                <div className="flex justify-center gap-3 mt-4">
+                  {stats.breakdown.map((s, i) => (
+                    <div key={i} className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.fill }} />
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{s.name} {s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* TOP PRODUCTS */}
+              <div className="bg-white rounded-[24px] border border-slate-100 mx-4 mb-4 p-5 shadow-sm">
+                <h3 className="text-[14px] font-bold text-[#111827] tracking-tight mb-4">Top Products</h3>
+                <div className="space-y-1">
+                  {stats.topProducts.map((p, i) => (
+                    <div key={i} className="flex justify-between items-center py-3 border-b border-slate-50 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-black text-slate-300 w-4">{i + 1}</span>
+                        <p className="text-[13px] font-bold text-[#111827] tracking-tight truncate max-w-[180px]">{p.name}</p>
                       </div>
-                      <p className="text-[16px] font-medium tracking-tight truncate flex-1"> {statsData.bestSellingItem}</p>
+                      <p className="text-[13px] font-black text-[#111827]">RM {p.revenue.toFixed(2)}</p>
                     </div>
-                  </div>
+                  ))}
+                </div>
+              </div>
 
-                  {/* Recent Sales List */}
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-[16px] font-medium text-[#111827] tracking-tight">Recent Sales</h3>
+              {/* BEST SELLER */}
+              {stats.bestSeller && (
+                <div className="bg-gradient-to-br from-[#111827] to-[#1e293b] rounded-[24px] mx-4 mb-4 p-5 shadow-lg shadow-slate-900/10">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-amber-400/10 rounded-2xl flex items-center justify-center border border-amber-400/20">
+                      <Trophy size={24} className="text-amber-400" />
                     </div>
-                    <div className="space-y-4">
-                      {statsData.recentSales.map((sale: any) => (
-                        <div key={sale.id} className="flex items-center justify-between group p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
-                              <User size={16} className="text-[#9CA3AF]" />
-                            </div>
-                            <div>
-                              <p className="text-[16px] font-medium text-[#111827] tracking-tight leading-tight">{sale.title}</p>
-                              <p className="text-[13px] text-[#9CA3AF] mt-0.5">{sale.customer_name || 'Student'}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[16px] font-medium text-[#111827]">RM {Number(sale.total || sale.price || 0).toFixed(2)}</p>
-                            <p className="text-[11px] text-[#9CA3AF] mt-0.5">
-                              {sale.created_at?.toDate ? sale.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : '...'}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex-1">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-1">Best Seller</p>
+                      <h4 className="text-[16px] font-bold text-white tracking-tight mb-1">{stats.bestSeller.name}</h4>
+                      <p className="text-[11px] font-medium text-slate-400">{stats.bestSeller.units} units sold</p>
                     </div>
                   </div>
-                </>
+                </div>
               )}
+
+              {/* RECENT SALES */}
+              <div className="bg-white rounded-[24px] border border-slate-100 mx-4 mb-8 p-5 shadow-sm">
+                <h3 className="text-[14px] font-bold text-[#111827] tracking-tight mb-4">Recent Sales</h3>
+                <div className="space-y-5">
+                  {stats.recentSales.map((sale: any) => (
+                    <div key={sale.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#111827] flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
+                           <span className="text-[12px] font-black text-white">{(sale.customer_name || 'S').charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-bold text-[#111827] truncate max-w-[160px] tracking-tight leading-tight">{sale.title}</p>
+                          <p className="text-[11px] font-medium text-slate-400 mt-0.5">{sale.customer_name || 'Student'}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[13px] font-black text-[#111827]">RM {Number(sale.total || sale.price || 0).toFixed(2)}</p>
+                        <p className="text-[9px] font-bold text-slate-300 uppercase mt-1">
+                          {sale.created_at?.toDate ? sale.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : '...'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           )}
 
