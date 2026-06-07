@@ -37,7 +37,7 @@ export default function DesktopMerchant({
   const monthRevenue = React.useMemo(() => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    return completedOrders.filter((o: any) => {
+    return (completedOrders || []).filter((o: any) => {
       const d = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
       return d >= startOfMonth;
     }).reduce((s: number, o: any) => s + (o.total || 0), 0);
@@ -146,7 +146,7 @@ export default function DesktopMerchant({
   };
 
   const handleExportOrders = () => {
-    const all = [...pipelineOrders, ...completedOrders].sort((a,b) => {
+    const all = [...(pipelineOrders || []), ...(completedOrders || [])].sort((a,b) => {
       const ta = a.created_at?.toDate ? a.created_at.toDate().getTime() : new Date(a.created_at).getTime();
       const tb = b.created_at?.toDate ? b.created_at.toDate().getTime() : new Date(b.created_at).getTime();
       return tb - ta;
@@ -272,7 +272,7 @@ export default function DesktopMerchant({
     }
 
     if (activeSection === 'log') {
-      const allOrders = [...pipelineOrders, ...completedOrders].sort((a, b) => {
+      const allOrders = [...(pipelineOrders || []), ...(completedOrders || [])].sort((a, b) => {
         const ta = a.created_at?.toDate ? a.created_at.toDate().getTime() : new Date(a.created_at).getTime();
         const tb = b.created_at?.toDate ? b.created_at.toDate().getTime() : new Date(b.created_at).getTime();
         return tb - ta;
@@ -295,7 +295,7 @@ export default function DesktopMerchant({
             </div>
             <div className="bg-gray-50 rounded-xl p-4 flex-1">
               <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Delivered</p>
-              <p className="text-2xl font-bold text-gray-900">{completedOrders.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{(completedOrders || []).length}</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-4 flex-1">
               <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Cancelled</p>
@@ -347,16 +347,16 @@ export default function DesktopMerchant({
     return (
       <div className="p-10 space-y-12">
         {/* Strike Awareness Banner */}
-        {merchant?.strikes >= 1 && (
+        {merchant?.strike_count >= 1 && (
           <div className="mb-8">
-            {merchant.strikes < 3 ? (
-              <div className={"rounded-2xl p-4 flex items-center gap-3 shadow-sm " + (merchant.strikes === 1 ? "bg-amber-50 border border-amber-100" : "bg-orange-50 border border-orange-100")}>
-                <div className={"w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 " + (merchant.strikes === 1 ? "bg-amber-100" : "bg-orange-100")}>
-                  <ShieldAlert size={20} className={merchant.strikes === 1 ? "text-amber-600" : "text-orange-600"}/>
+            {merchant.strike_count < 3 ? (
+              <div className={"rounded-2xl p-4 flex items-center gap-3 shadow-sm " + (merchant.strike_count === 1 ? "bg-amber-50 border border-amber-100" : "bg-orange-50 border border-orange-100")}>
+                <div className={"w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 " + (merchant.strike_count === 1 ? "bg-amber-100" : "bg-orange-100")}>
+                  <ShieldAlert size={20} className={merchant.strike_count === 1 ? "text-amber-600" : "text-orange-600"}/>
                 </div>
                 <div>
-                  <p className={"text-sm font-bold " + (merchant.strikes === 1 ? "text-amber-900" : "text-orange-900")}>
-                    {merchant.strikes === 1 ? "1 pricing warning on record" : "2 warnings - one more and your shop will be suspended"}
+                  <p className={"text-sm font-bold " + (merchant.strike_count === 1 ? "text-amber-900" : "text-orange-900")}>
+                    {merchant.strike_count === 1 ? "1 pricing warning on record" : "2 warnings - one more and your shop will be suspended"}
                   </p>
                   <p className="text-[12px] text-gray-500 mt-0.5">Maintain fair campus pricing to keep your shop active.</p>
                 </div>
@@ -385,7 +385,7 @@ export default function DesktopMerchant({
              <button onClick={handleExportOrders} className="bg-white border border-[#D1D5DB] text-[#374151] rounded-full px-4 py-2 text-xs font-medium hover:bg-slate-50 transition-colors">Export CSV</button>
           </div>
           <div className="divide-y divide-slate-100">
-             {pipelineOrders.length === 0 ? (
+             {(pipelineOrders || []).length === 0 ? (
                <div className="py-12 text-center text-gray-500 text-sm">No active orders</div>
              ) : (
                pipelineOrders.map((o: any) => (
@@ -492,7 +492,7 @@ export default function DesktopMerchant({
           </div>
           <div className="bg-gray-50 rounded-xl p-4 flex-1 shadow-sm border border-slate-100">
             <p className="text-[10px] text-gray-500 uppercase tracking-widest font-medium mb-1">Total Listings</p>
-            <p className="text-xl font-bold text-gray-900">{items?.length || 0}</p>
+            <p className="text-xl font-bold text-gray-900">{(items || []).length}</p>
           </div>
         </div>
 
