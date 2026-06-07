@@ -168,12 +168,13 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       const sellerId = userId || user?.uid || 'ANON';
       const itemId = existingItem?.id || doc(collection(db, 'items')).id;
 
-      const functions = getFunctions();
+      const functions = getFunctions(undefined, 'us-central1');
       const pcsValidate = httpsCallable(functions, 'pcsValidate');
       const pcsResult = await pcsValidate({
         itemTitle: title,
         itemPrice: parseFloat(price),
         category: selectedCategory,
+        subcategory,
         sellerId,
         itemId
       });

@@ -180,24 +180,29 @@ export default function CreateListingPage() {
     setIsPosting(true);
     setPostError(null);
     setPcsError(null);
+    
+    const numPrice = parseFloat(price);
+    console.log('PCS validating:', title, numPrice);
+
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
 
-      const numPrice = parseFloat(price);
       const sellerId = user.uid;
       const itemId = doc(collection(db, 'items')).id;
 
-      const functions = getFunctions();
+      const functions = getFunctions(undefined, 'us-central1');
       const pcsValidate = httpsCallable(functions, 'pcsValidate');
       const pcsResult = await pcsValidate({
         itemTitle: title,
         itemPrice: numPrice,
         category: selectedCategory,
+        subcategory,
         sellerId,
         itemId
       });
 
+      console.log('PCS result:', JSON.stringify(pcsResult.data));
       const pcsData = pcsResult.data as any;
 
       if (pcsData.isApproved === false) {
@@ -207,7 +212,7 @@ export default function CreateListingPage() {
           itemTitle: title
         });
         setIsPosting(false);
-        return;
+        return; // HARD STOP — nothing below this runs
       }
 
       setIsUploading(true);

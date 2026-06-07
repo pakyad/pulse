@@ -433,6 +433,7 @@ exports.onReviewCreated = (0, firestore_1.onDocumentCreated)("Reviews/{reviewId}
         logger.error(`[onReviewCreated] Error processing review ${event.params.reviewId}:`, error);
     }
 });
+const sdk_1 = require("@anthropic-ai/sdk");
 const anthropicApiKey = (0, params_1.defineSecret)("ANTHROPIC_API_KEY");
 const resendApiKey = (0, params_1.defineSecret)("RESEND_API_KEY");
 exports.pcsValidate = (0, https_1.onCall)({
@@ -440,13 +441,15 @@ exports.pcsValidate = (0, https_1.onCall)({
     region: "us-central1",
     maxInstances: 10,
 }, async (request) => {
-    const { itemTitle, itemPrice, category } = request.data;
-    const price = parseFloat(itemPrice) || 0;
+    console.log('pcsValidate called with:', request.data);
+    const { itemTitle, category } = request.data;
     const name = itemTitle || "";
-    const subcategory = request.data.subcategory || ""; // Fallback or extra field if needed
+    const subcategory = request.data.subcategory || "";
     try {
+        const anthropic = new sdk_1.Anthropic({
+            apiKey: anthropicApiKey.value(),
+        });
         let isPriceControlled = false;
-        // Use the category passed or lookup by subcategory
         const guidelinesSnap = await db.collection("PriceGuidelines").get();
         guidelinesSnap.forEach((doc) => {
             const data = doc.data();
@@ -467,50 +470,51 @@ exports.pcsValidate = (0, https_1.onCall)({
                 justification: "Category not under price control."
             };
         }
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": anthropicApiKey.value(),
-                "anthropic-version": "2023-06-01",
-            },
-            body: JSON.stringify({
-                model: "claude-3-5-sonnet-20240620",
-                max_tokens: 500,
-                tools: [
-                    {
-                        type: "web_search_20250305",
-                        name: "web_search",
-                    },
-                ],
-                system: 'You are a price validation engine for a Malaysian university student marketplace called Pulse. Your only job is to find the current market price of the listed item on Shopee Malaysia or Lazada Malaysia, then determine if the student\'s listed price is at least 10% below that market price. You must respond with ONLY a valid JSON object — no other text, no markdown, no explanation outside the JSON. JSON schema: { isApproved: boolean, marketPrice: number, maxAllowedPrice: number, justification: string } where marketPrice is what you found on Shopee/Lazada in RM, maxAllowedPrice is marketPrice multiplied by 0.90, isApproved is true if the listed price is below maxAllowedPrice, and justification is one sentence max explaining the decision.',
-                messages: [
-                    {
-                        role: "user",
-                        content: `Item name: ${name}. Category: ${category}. Listed price: RM${price}. Search Shopee Malaysia or Lazada Malaysia for the current price of this item and validate.`,
-                    },
-                ],
-            }),
+        const msg = await anthropic.messages.create({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 1000,
+            system: "You are a price validation engine for Pulse. Find the current market price (RM) on Shopee Malaysia or Lazada Malaysia. respond with ONLY a raw JSON object. Format: {\"marketBaselinePrice\": 299.00, \"isApproved\": boolean, \"maxAllowedStudentPrice\": number, \"justification\": \"string\"}",
+            messages: [
+                {
+                    role: "user",
+                    content: `Search Shopee Malaysia or Lazada Malaysia for the current retail price of "${name}". Respond with ONLY JSON.`,
+                },
+            ],
         });
-        const body = await response.json();
-        let claudeContent = "";
-        if (body.content && Array.isArray(body.content)) {
-            for (const block of body.content) {
-                if (block.type === "text") {
-                    claudeContent = block.text;
-                    break;
-                }
+        let rawText = '';
+        for (const block of msg.content) {
+            if (block.type === 'text') {
+                rawText += block.text;
             }
         }
-        let cleaned = claudeContent.trim();
-        if (cleaned.startsWith("```")) {
-            cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "");
+        console.log('Claude SDK raw text:', rawText);
+        let isApproved = true;
+        let marketPrice = 0;
+        let maxAllowedPrice = 0;
+        let justification = "";
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            console.error('No JSON found in Claude SDK response');
+            isApproved = true;
+            justification = "Validation failed, default approval granted.";
         }
-        const result = JSON.parse(cleaned);
-        const isApproved = result.isApproved === true;
-        const marketPrice = parseFloat(result.marketPrice) || 0;
-        const maxAllowedPrice = parseFloat(result.maxAllowedPrice) || 0;
-        const justification = result.justification || "";
+        else {
+            try {
+                const parsed = JSON.parse(jsonMatch[0]);
+                marketPrice = parseFloat(parsed.marketBaselinePrice) || 0;
+                maxAllowedPrice = parseFloat(parsed.maxAllowedStudentPrice) || (marketPrice * 0.9);
+                // FORCED NUMERIC VALIDATION: Don't trust AI for the boolean check
+                const listedPrice = parseFloat(request.data.itemPrice) || 0;
+                isApproved = marketPrice > 0 ? (listedPrice <= maxAllowedPrice + 0.01) : true;
+                justification = parsed.justification || (isApproved ? "Price is within campus guidelines." : "Price exceeds the calculated campus limit.");
+            }
+            catch (e) {
+                console.error('JSON parse error from Claude SDK text:', e);
+                isApproved = true;
+                justification = "Validation parse error, default approval granted.";
+            }
+        }
+        console.log('PCS verdict:', isApproved, marketPrice, maxAllowedPrice, 'Listed:', request.data.itemPrice);
         return {
             isApproved,
             marketBaselinePrice: marketPrice,
