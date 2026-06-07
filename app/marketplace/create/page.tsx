@@ -480,17 +480,19 @@ export default function CreateListingPage() {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <div className="rounded-2xl p-4 mt-3 border border-amber-200 bg-amber-50">
+                    <div className="rounded-2xl p-4 mt-3 bg-amber-50 border border-amber-100">
                       <div className="flex items-start gap-3">
-                        <span className="text-xl"></span>
+                        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-sm">📊</span>
+                        </div>
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-amber-900 mb-1">Heads up  price is a bit high</p>
-                          <p className="text-xs text-amber-700 leading-relaxed">We checked the market and found <strong>{pcsError.itemTitle}</strong> going for around <strong>RM{pcsError.marketBaselinePrice.toFixed(2)}</strong> online. To keep things fair for students, campus listings are capped at <strong>RM{pcsError.maxAllowedStudentPrice.toFixed(2)}</strong>  that's 10% below retail.</p>
-                          <button 
-                            onClick={() => { setPrice(pcsError.maxAllowedStudentPrice.toString()); setPcsError(null); }}
-                            className="mt-3 bg-amber-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-amber-800 transition-colors"
+                          <p className="text-sm font-semibold text-gray-900 mb-0.5">Whoa, that is a bit steep</p>
+                          <p className="text-xs text-gray-500 leading-relaxed mb-3">We found <strong className="text-gray-700">{pcsError?.itemTitle}</strong> going for around <strong className="text-gray-700">RM{pcsError?.marketBaselinePrice}</strong> out there. Campus listings get a 10% friendlier cap so the max here is <strong className="text-gray-700">RM{pcsError?.maxAllowedStudentPrice}</strong>.</p>
+                          <button
+                            onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }}
+                            className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800 active:scale-95 transition-all"
                           >
-                            Set to RM{pcsError.maxAllowedStudentPrice.toFixed(2)} and continue {'>'}
+                            Set to RM{pcsError?.maxAllowedStudentPrice} and keep going
                           </button>
                         </div>
                       </div>
@@ -708,27 +710,34 @@ export default function CreateListingPage() {
 
             {/*  POST BUTTON  */}
             <div className="pt-4">
-              <button
-                disabled={!canPost || isUploading}
-                onClick={handlePost}
-                className={(isPosting || isUploading) 
-                  ? "w-full bg-gray-900 text-white rounded-full py-3 text-sm font-medium border-2 border-gray-700 flex items-center justify-center gap-2 opacity-90 animate-pulse transition-all"
-                  : `w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
-                      (canPost && !isUploading)
-                        ? 'bg-slate-900 text-white active:scale-95 shadow-sm'
-                        : 'bg-slate-50 text-slate-200 border border-slate-100'
-                    }`
-                }
-              >
-                {(isPosting || isUploading) ? (
-                  <>
-                    <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    {isUploading ? 'Uploading Photos...' : 'Checking market price...'}
-                  </>
-                ) : (
-                  'Publish Listing'
-                )}
-              </button>
+              {isPosting ? (
+                <button disabled className="w-full bg-gray-900 text-white rounded-2xl py-3.5 text-sm font-medium flex items-center justify-center gap-2.5 opacity-95 shadow-sm">
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <span>Sizing up the market...</span>
+                </button>
+              ) : (
+                <button
+                  disabled={!canPost || isUploading}
+                  onClick={handlePost}
+                  className={isUploading
+                    ? "w-full bg-gray-900 text-white rounded-full py-3 text-sm font-medium border-2 border-gray-700 flex items-center justify-center gap-2 opacity-90 animate-pulse transition-all"
+                    : `w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
+                        (canPost && !isUploading)
+                          ? 'bg-slate-900 text-white active:scale-95 shadow-sm'
+                          : 'bg-slate-50 text-slate-200 border border-slate-100'
+                      }`
+                  }
+                >
+                  {isUploading ? (
+                    <>
+                      <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Uploading Photos...
+                    </>
+                  ) : (
+                    'Publish Listing'
+                  )}
+                </button>
+              )}
 
               {/*  PCS APPROVED BANNER  */}
               {pcsApprovedBanner && (
