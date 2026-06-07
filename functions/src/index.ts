@@ -491,7 +491,7 @@ export const pcsValidate = onCall(
     maxInstances: 10,
   },
   async (request) => {
-    const { itemTitle, itemPrice, category, sellerId, itemId } = request.data;
+    const { itemTitle, itemPrice, category } = request.data;
     const price = parseFloat(itemPrice) || 0;
     const name = itemTitle || "";
     const subcategory = request.data.subcategory || ""; // Fallback or extra field if needed
@@ -578,7 +578,7 @@ export const pcsValidate = onCall(
         justification
       };
     } catch (error) {
-      logger.error(`[pcsValidate] Error validating item ${itemId}:`, error);
+      logger.error(`[pcsValidate] Error validating item validation:`, error);
       return {
         isApproved: true,
         marketBaselinePrice: 0,
