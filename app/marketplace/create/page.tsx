@@ -90,6 +90,8 @@ export default function CreateListingPage() {
     setIsPosting(true);
     setPostError(null);
     setPcsError(null);
+    
+    const numPrice = parseFloat(price);
 
     try {
       const user = auth.currentUser;

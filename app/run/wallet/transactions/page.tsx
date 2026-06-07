@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
@@ -6,7 +6,6 @@ import { collection, query, onSnapshot, doc } from 'firebase/firestore';
 import { ChevronLeft, Filter, Calendar, Loader2, Wallet, Banknote, Landmark, Package, Gift, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
-import BackButton from '@/components/shared/BackButton';
 
 export default function TransactionsPage() {
   const router = useRouter();
@@ -15,6 +14,7 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filter States
   const [activeFilter, setActiveFilter] = useState<'type' | 'month' | null>(null);
   const [selectedType, setSelectedType] = useState('ALL');
   const [selectedMonth, setSelectedMonth] = useState('ALL');
@@ -25,16 +25,20 @@ export default function TransactionsPage() {
         onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()));
         const q = query(collection(db, 'users', user.uid, 'transactions'));
         
-        return onSnapshot(q, (snapshot) => {
-          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          list.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-          setTransactions(list);
-          setLoading(false);
-        }, (err) => {
-          console.error(err);
-          setError(err.message);
-          setLoading(false);
-        });
+        return onSnapshot(q, 
+          (snapshot) => {
+            const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            // Manual sort by timestamp desc since index might be missing
+            list.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            setTransactions(list);
+            setLoading(false);
+          },
+          (err) => {
+            console.error("Firestore Query Error:", err);
+            setError(err.message);
+            setLoading(false);
+          }
+        );
       } else {
         router.push('/auth');
       }
@@ -52,12 +56,16 @@ export default function TransactionsPage() {
     return <Wallet size={20} />;
   };
 
+  //  FILTER LOGIC 
   const availableMonths = useMemo(() => {
     const months = new Set<string>();
     transactions.forEach(tx => {
       if (tx.date) {
+        // Assuming format like "21 May 2026, 14:15"
         const parts = tx.date.split(' ');
-        if (parts.length >= 3) months.add(`${parts[1]} ${parts[2].replace(',', '')}`);
+        if (parts.length >= 3) {
+          months.add(`${parts[1]} ${parts[2].replace(',', '')}`); // e.g. "May 2026"
+        }
       }
     });
     return Array.from(months);
@@ -65,7 +73,10 @@ export default function TransactionsPage() {
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(tx => {
+      // Filter by Type
       if (selectedType !== 'ALL' && tx.type !== selectedType) return false;
+      
+      // Filter by Month
       if (selectedMonth !== 'ALL' && tx.date) {
          const parts = tx.date.split(' ');
          if (parts.length >= 3) {
@@ -87,76 +98,126 @@ export default function TransactionsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F9F9FB] text-gray-900 antialiased pb-20 font-sans">
-      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white border-b border-gray-100 shadow-sm">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-20">
+      
+      {/*  HEADER  */}
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
-          <BackButton fallback="/run/wallet" />
-          <p className="text-xl font-bold tracking-tight">Transactions</p>
+          <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
+             <ChevronLeft size={20} />
+          </button>
+          <p className="text-[14px] font-bold tracking-tight">Transaction History</p>
         </div>
         <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
       </nav>
 
-      <div className="pt-28 px-6 flex gap-2 mb-6">
-        <button onClick={() => setActiveFilter('type')} className={`h-10 px-4 rounded-full border text-[12px] font-bold flex items-center gap-2 transition-all ${selectedType !== 'ALL' ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white border-gray-100 text-gray-500'}`}>
+      {/*  FILTERS  */}
+      <div className="pt-28 px-6 flex gap-2 border-b border-slate-50 pb-4">
+        <button 
+          onClick={() => setActiveFilter('type')}
+          className={`h-10 px-4 rounded-xl border-[0.5px] text-[12px] font-bold flex items-center gap-2 active:scale-95 transition-all ${selectedType !== 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-slate-200 text-slate-600'}`}
+        >
           {getTypeLabel(selectedType)} <Filter size={14} />
         </button>
-        <button onClick={() => setActiveFilter('month')} className={`h-10 px-4 rounded-full border text-[12px] font-bold flex items-center gap-2 transition-all ${selectedMonth !== 'ALL' ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white border-gray-100 text-gray-500'}`}>
+        <button 
+          onClick={() => setActiveFilter('month')}
+          className={`h-10 px-4 rounded-xl border-[0.5px] text-[12px] font-bold flex items-center gap-2 active:scale-95 transition-all ${selectedMonth !== 'ALL' ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-slate-200 text-slate-600'}`}
+        >
           {selectedMonth === 'ALL' ? 'All Months' : selectedMonth} <Calendar size={14} />
         </button>
       </div>
 
-      <div className="px-4 space-y-3">
+      {/*  TRANSACTION LIST  */}
+      <div className="divide-y divide-slate-50">
         {loading ? (
-          <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-gray-200" size={32} /></div>
+          <div className="py-20 flex justify-center">
+            <Loader2 className="animate-spin text-slate-200" size={32} />
+          </div>
         ) : error ? (
-          <div className="py-20 text-center px-10 space-y-3"><p className="text-sm font-bold text-red-500">Query Error</p><p className="text-xs text-gray-400 leading-relaxed">{error}</p></div>
+          <div className="py-20 text-center px-10 space-y-3">
+             <p className="text-[14px] font-bold text-red-500">Query Error</p>
+             <p className="text-[11px] text-slate-400 leading-relaxed">{error}</p>
+          </div>
         ) : filteredTransactions.length === 0 ? (
-          <div className="py-20 text-center space-y-3"><p className="text-sm font-bold text-gray-400">No transactions found</p></div>
+          <div className="py-20 text-center space-y-3">
+             <p className="text-[14px] font-bold text-slate-400">No transactions found</p>
+          </div>
         ) : (
           filteredTransactions.map((tx) => {
             const isPositive = tx.price > 0;
             return (
-              <div key={tx.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between shadow-sm transition-all active:scale-[0.98]">
-                <div className="flex gap-4 items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-400'}`}>
+              <div key={tx.id} className="py-4 flex items-start justify-between active:bg-slate-50 transition-colors px-6 group">
+                <div className="flex gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-active:scale-90 ${isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}>
                     {getIcon(tx.type, tx.item)}
                   </div>
-                  <div>
-                    <p className="text-[14px] font-bold text-gray-900 tracking-tight leading-tight">{tx.item || 'Reward'}</p>
-                    <p className="text-[11px] font-medium text-gray-400 mt-1 uppercase tracking-widest">{tx.date}</p>
+                  <div className="space-y-0.5">
+                    <p className="text-[14px] font-bold text-slate-900 tracking-tight leading-none">{tx.item || 'Mission Reward'}</p>
+                    <div className="flex flex-col gap-0.5 mt-1">
+                      {tx.latest_balance !== undefined && (
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Latest Balance: RM {tx.latest_balance.toFixed(2)}</p>
+                      )}
+                      <p className="text-[11px] font-medium text-[#94a3b8]">{tx.date}</p>
+                    </div>
                   </div>
                 </div>
-                <p className={`text-[15px] font-bold tracking-tight ${isPositive ? 'text-emerald-600' : 'text-gray-900'}`}>
-                  {isPositive ? '+' : ''}RM {tx.price.toFixed(2)}
-                </p>
+                <div className="text-right">
+                  <p className={`text-[15px] font-black tracking-tight ${isPositive ? 'text-emerald-600' : 'text-rose-500'}`}>
+                    {isPositive ? '+' : '-'}RM {Math.abs(tx.price).toFixed(2)}
+                  </p>
+                </div>
               </div>
             )
           })
         )}
       </div>
 
+      {/*  FILTER BOTTOM SHEETS  */}
       <AnimatePresence>
         {activeFilter && (
           <div className="fixed inset-0 z-200 flex items-end justify-center">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setActiveFilter(null)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }} className="relative w-full max-w-lg bg-white rounded-t-[32px] p-8 pb-12 shadow-2xl">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-lg font-bold text-gray-900">{activeFilter === 'type' ? 'Filter by Type' : 'Filter by Month'}</h2>
-                <button onClick={() => setActiveFilter(null)} className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400"><X size={20} /></button>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+              onClick={() => setActiveFilter(null)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
+            
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="relative w-full max-w-lg bg-white rounded-t-[32px] p-6 pb-12 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-[18px] font-bold text-slate-900 tracking-tight">
+                  {activeFilter === 'type' ? 'Filter by Type' : 'Filter by Month'}
+                </h2>
+                <button onClick={() => setActiveFilter(null)} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 active:scale-95">
+                  <X size={20} />
+                </button>
               </div>
-              <div className="grid grid-cols-1 gap-3">
+
+              <div className="space-y-2">
                 {activeFilter === 'type' ? (
-                  ['ALL', 'EARNING', 'WITHDRAWAL', 'TOPUP'].map(id => (
-                    <button key={id} onClick={() => { setSelectedType(id); setActiveFilter(null); }}
-                      className={`w-full h-14 rounded-2xl font-bold text-sm transition-all border ${selectedType === id ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-400 border-gray-100'}`}>
-                      {getTypeLabel(id)}
-                    </button>
-                  ))
+                  <>
+                    {[
+                      { id: 'ALL', label: 'All Types' },
+                      { id: 'EARNING', label: 'Earnings' },
+                      { id: 'WITHDRAWAL', label: 'Withdrawals' },
+                      { id: 'TOPUP', label: 'Top Ups' },
+                    ].map(opt => (
+                      <button key={opt.id} onClick={() => { setSelectedType(opt.id); setActiveFilter(null); }}
+                        className={`w-full flex items-center justify-between p-4 rounded-[20px] font-bold text-[14px] transition-all active:scale-[0.98] ${selectedType === opt.id ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border-[1.5px] border-slate-100 hover:border-slate-200'}`}>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </>
                 ) : (
                   <>
-                    <button onClick={() => { setSelectedMonth('ALL'); setActiveFilter(null); }} className={`w-full h-14 rounded-2xl font-bold text-sm transition-all border ${selectedMonth === 'ALL' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-400 border-gray-100'}`}>All Months</button>
+                    <button onClick={() => { setSelectedMonth('ALL'); setActiveFilter(null); }}
+                      className={`w-full flex items-center justify-between p-4 rounded-[20px] font-bold text-[14px] transition-all active:scale-[0.98] ${selectedMonth === 'ALL' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border-[1.5px] border-slate-100 hover:border-slate-200'}`}>
+                      All Months
+                    </button>
                     {availableMonths.map(month => (
-                      <button key={month} onClick={() => { setSelectedMonth(month); setActiveFilter(null); }} className={`w-full h-14 rounded-2xl font-bold text-sm transition-all border ${selectedMonth === month ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-400 border-gray-100'}`}>{month}</button>
+                      <button key={month} onClick={() => { setSelectedMonth(month); setActiveFilter(null); }}
+                        className={`w-full flex items-center justify-between p-4 rounded-[20px] font-bold text-[14px] transition-all active:scale-[0.98] ${selectedMonth === month ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border-[1.5px] border-slate-100 hover:border-slate-200'}`}>
+                        {month}
+                      </button>
                     ))}
                   </>
                 )}
@@ -165,6 +226,7 @@ export default function TransactionsPage() {
           </div>
         )}
       </AnimatePresence>
+
     </main>
   );
 }

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db, functions, storage } from '@/lib/firebase';
@@ -10,10 +10,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-xl font-bold text-gray-900 tracking-tight ${className}`}>{children}</h2>
+  <h2 className={`text-[19px] font-bold text-slate-900 tracking-tight ${className}`}>{children}</h2>
 );
 const Subtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-sm text-gray-400 leading-relaxed ${className}`}>{children}</p>
+  <p className={`text-[12px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>{children}</p>
 );
 
 //  VOXEL ICONS 
@@ -37,13 +37,13 @@ const SERVICES = [
 
 //  COMPACT COMPONENTS 
 const ChipRow = ({ options, value, onChange, activeService }: { options: string[]; value: string; onChange: (v: string) => void; activeService?: any }) => {
-  const activeClass = activeService?.selectedStyle ? `${activeService.selectedStyle} border-[1.5px]` : 'bg-gray-900 text-white border-[1.5px] border-gray-900';
-  const inactiveClass = `bg-gray-50 text-gray-400 border-[1.5px] border-gray-50 hover:border-gray-100`;
+  const activeClass = activeService?.selectedStyle ? `${activeService.selectedStyle} border-[1.5px]` : 'bg-slate-900 text-white border-[1.5px] border-slate-900';
+  const inactiveClass = `bg-slate-50 text-slate-400 border-[1.5px] border-slate-50 hover:border-slate-100`;
   return (
     <div className="flex flex-wrap gap-2">
       {options.map(opt => (
         <button key={opt} onClick={() => onChange(opt)}
-          className={`h-11 px-4 rounded-full text-[12px] font-bold transition-all active:scale-95 grow basis-[calc(50%-4px)] flex items-center justify-center ${value === opt ? activeClass : inactiveClass}`}>
+          className={`h-11 px-4 rounded-[14px] text-[12px] font-bold transition-all active:scale-95 grow basis-[calc(50%-4px)] flex items-center justify-center ${value === opt ? activeClass : inactiveClass}`}>
           {opt}
         </button>
       ))}
@@ -54,12 +54,12 @@ const ChipRow = ({ options, value, onChange, activeService }: { options: string[
 const Field = ({ label, placeholder, value, onChange, multiline = false }: any) => {
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] font-bold ml-1 text-gray-400 uppercase tracking-tight">{label}</label>
+      <label className="text-[10px] font-bold ml-1 text-slate-400 uppercase tracking-tight">{label}</label>
       {multiline
         ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={3}
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-[13px] font-medium text-gray-900 outline-none focus:border-gray-300 placeholder:text-gray-300 resize-none transition-all" />
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-[18px] text-[13px] font-medium text-slate-900 outline-none focus:border-slate-300 placeholder:text-slate-300 resize-none transition-all" />
         : <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-            className="w-full h-11 px-4 bg-gray-50 border border-gray-100 rounded-full text-[13px] font-medium text-gray-900 outline-none focus:border-gray-300 placeholder:text-gray-300 transition-all" />
+            className="w-full h-11 px-4 bg-slate-50 border border-slate-100 rounded-[14px] text-[13px] font-medium text-slate-900 outline-none focus:border-slate-300 placeholder:text-slate-300 transition-all" />
       }
     </div>
   );
@@ -68,19 +68,19 @@ const Field = ({ label, placeholder, value, onChange, multiline = false }: any) 
 const ImageDropzone = ({ fileName, onFileSelected }: { fileName: string, onFileSelected: (f: File) => void }) => {
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] font-bold ml-1 text-gray-400 uppercase tracking-tight">Parcel Photo (Optional)</label>
+      <label className="text-[10px] font-bold ml-1 text-slate-400 uppercase tracking-tight">Parcel Photo (Optional)</label>
       <div className="w-full relative group">
         <input type="file" accept="image/*" onChange={(e) => {
           if(e.target.files?.[0]) onFileSelected(e.target.files[0]);
         }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-        <div className={`w-full h-14 rounded-2xl border border-dashed flex items-center justify-center transition-all ${fileName ? 'border-cyan-400 bg-cyan-50' : 'border-gray-200 bg-gray-50'}`}>
+        <div className={`w-full h-14 rounded-[14px] border border-dashed flex items-center justify-center transition-all ${fileName ? 'border-cyan-400 bg-cyan-50' : 'border-slate-200 bg-slate-50'}`}>
           {fileName ? (
             <div className="flex items-center gap-2 px-4 w-full text-cyan-600">
               <Check size={14} />
               <p className="text-[12px] font-bold truncate">{fileName}</p>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-gray-400">
+            <div className="flex items-center gap-2 text-slate-400">
               <Upload size={14} />
               <span className="text-[12px] font-bold">Attach Photo</span>
             </div>
@@ -93,19 +93,19 @@ const ImageDropzone = ({ fileName, onFileSelected }: { fileName: string, onFileS
 
 const DetailedAddressField = ({ title, value, onChange, nameLabel = "Recipient Name", phoneLabel = "Phone Number" }: { title: string, value: any, onChange: (v: any) => void, nameLabel?: string, phoneLabel?: string }) => {
   return (
-    <div className="space-y-3 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight px-1">{title}</p>
+    <div className="space-y-3 bg-white border border-slate-100 rounded-[20px] p-4 shadow-sm">
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight px-1">{title}</p>
       <div className="space-y-2">
         <div className="flex gap-2">
           <input type="text" placeholder={nameLabel} value={value.name || ''} onChange={e => onChange({...value, name: e.target.value})}
-            className="w-1/2 h-10 px-3 bg-gray-50 border border-gray-50 rounded-xl text-[12px] font-medium text-gray-900 outline-none focus:bg-white focus:border-gray-200 transition-all" />
+            className="w-1/2 h-10 px-3 bg-slate-50 border border-slate-50 rounded-[12px] text-[12px] font-medium text-slate-900 outline-none focus:bg-white focus:border-slate-200 transition-all" />
           <input type="text" placeholder={phoneLabel} value={value.phone || ''} onChange={e => onChange({...value, phone: e.target.value})}
-            className="w-1/2 h-10 px-3 bg-gray-50 border border-gray-50 rounded-xl text-[12px] font-medium text-gray-900 outline-none focus:bg-white focus:border-gray-200 transition-all" />
+            className="w-1/2 h-10 px-3 bg-slate-50 border border-slate-50 rounded-[12px] text-[12px] font-medium text-slate-900 outline-none focus:bg-white focus:border-slate-200 transition-all" />
         </div>
         <input type="text" placeholder="Building/Block/Floor" value={value.location || ''} onChange={e => onChange({...value, location: e.target.value})}
-          className="w-full h-10 px-3 bg-gray-50 border border-gray-50 rounded-xl text-[12px] font-medium text-gray-900 outline-none focus:bg-white focus:border-gray-200 transition-all" />
+          className="w-full h-10 px-3 bg-slate-50 border border-slate-50 rounded-[12px] text-[12px] font-medium text-slate-900 outline-none focus:bg-white focus:border-slate-200 transition-all" />
         <input type="text" placeholder="Room/Unit (Optional)" value={value.detail || ''} onChange={e => onChange({...value, detail: e.target.value})}
-          className="w-full h-10 px-3 bg-gray-50 border border-gray-50 rounded-xl text-[12px] font-medium text-gray-900 outline-none focus:bg-white focus:border-gray-200 transition-all" />
+          className="w-full h-10 px-3 bg-slate-50 border border-slate-50 rounded-[12px] text-[12px] font-medium text-slate-900 outline-none focus:bg-white focus:border-slate-200 transition-all" />
       </div>
     </div>
   );
@@ -216,7 +216,7 @@ export default function RunModule() {
       if (currentStep === 0) return (
         <div className="space-y-4">
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-gray-400 uppercase ml-1">Parcel Size</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase ml-1">Parcel Size</p>
             <ChipRow activeService={activeService} options={['Small', 'Medium', 'Large']} value={form.parcelSize} onChange={v => setF('parcelSize', v)} />
           </div>
           <Field label="Where is the parcel?" placeholder="e.g. Block A Guard, Registry Mailroom" value={form.pickupNode} onChange={(v: string) => setF('pickupNode', v)} />
@@ -226,15 +226,15 @@ export default function RunModule() {
       if (currentStep === 1) return <DetailedAddressField title="Deliver To" value={form.dropOffAddress} onChange={(v: any) => setF('dropOffAddress', v)} />;
       if (currentStep === 2) return (
         <div className="space-y-3">
-          <p className="text-[11px] font-bold text-gray-400 uppercase px-1">Summary</p>
+          <p className="text-[11px] font-bold text-slate-400 uppercase px-1">Summary</p>
           {[
             { label: 'Parcel', value: form.parcelSize },
             { label: 'From', value: form.pickupNode },
             { label: 'To', value: form.dropOffAddress.location },
           ].map(r => (
-            <div key={r.label} className="flex justify-between py-2.5 border-b border-gray-50">
-              <span className="text-[12px] font-bold text-gray-400">{r.label}</span>
-              <span className="text-[12px] font-bold text-gray-900">{r.value}</span>
+            <div key={r.label} className="flex justify-between py-2.5 border-b border-slate-50">
+              <span className="text-[12px] font-bold text-slate-400">{r.label}</span>
+              <span className="text-[12px] font-bold text-slate-900">{r.value}</span>
             </div>
           ))}
         </div>
@@ -245,7 +245,7 @@ export default function RunModule() {
         <div className="space-y-4">
           <Field label="What to pass?" placeholder="e.g. Room keys, textbook" value={form.errandBrief} onChange={(v: string) => setF('errandBrief', v)} />
           <div className="space-y-2">
-            <p className="text-[10px] font-bold text-gray-400 uppercase ml-1">Item Size / Handling</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase ml-1">Item Size / Handling</p>
             <ChipRow activeService={activeService} options={['Pocket Size', 'Bag / Bulky', 'Fragile']} value={form.errandSize} onChange={v => setF('errandSize', v)} />
           </div>
           <Field label="Pick-up Point" placeholder="e.g. MIIT Level 2 Lobby" value={form.errandPickup.location} onChange={(v: string) => setF('errandPickup', { ...form.errandPickup, location: v })} />
@@ -256,15 +256,15 @@ export default function RunModule() {
       if (currentStep === 1) return <DetailedAddressField title="Drop-off Point" value={form.errandDropoff} onChange={(v: any) => setF('errandDropoff', v)} />;
       if (currentStep === 2) return (
         <div className="space-y-3">
-          <p className="text-[11px] font-bold text-gray-400 uppercase px-1">Summary</p>
+          <p className="text-[11px] font-bold text-slate-400 uppercase px-1">Summary</p>
           {[
             { label: 'Item', value: form.errandBrief },
             { label: 'From', value: form.errandPickup.location },
             { label: 'To', value: form.errandDropoff.location },
           ].map(r => (
-            <div key={r.label} className="flex justify-between py-2.5 border-b border-gray-50">
-              <span className="text-[12px] font-bold text-gray-400">{r.label}</span>
-              <span className="text-[12px] font-bold text-gray-900">{r.value}</span>
+            <div key={r.label} className="flex justify-between py-2.5 border-b border-slate-50">
+              <span className="text-[12px] font-bold text-slate-400">{r.label}</span>
+              <span className="text-[12px] font-bold text-slate-900">{r.value}</span>
             </div>
           ))}
         </div>
@@ -274,10 +274,10 @@ export default function RunModule() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-gray-900 antialiased pb-40">
-      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-gray-100 flex items-center justify-between">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
+      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 active:scale-95 transition-all">
+          <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] active:scale-95 transition-all">
              <ChevronLeft size={20} />
           </button>
           <p className="text-[14px] font-bold tracking-tight">Deliveries</p>
@@ -293,11 +293,11 @@ export default function RunModule() {
                 <Heading>{activeService.label}</Heading>
                 <Subtext>{activeService.steps[currentStep].desc}</Subtext>
               </div>
-              <button onClick={() => setActiveService(null)} className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400"><X size={16} /></button>
+              <button onClick={() => setActiveService(null)} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400"><X size={16} /></button>
             </div>
             <div className="flex gap-1.5 mb-2">
               {activeService.steps.map((s: any, i: number) => (
-                <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= currentStep ? activeService.themeColor : 'bg-gray-100'}`} />
+                <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= currentStep ? activeService.themeColor : 'bg-slate-100'}`} />
               ))}
             </div>
             <AnimatePresence mode="wait">
@@ -308,12 +308,12 @@ export default function RunModule() {
             <div className="pt-4 flex flex-col gap-3">
               <button onClick={currentStep === activeService.steps.length - 1 ? handleFinalizeRequest : () => setCurrentStep(s => s + 1)}
                 disabled={!isStepValid() || submitting}
-                className={`w-full h-14 rounded-full text-[14px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm ${activeService.themeColor} text-white disabled:opacity-20`}>
+                className={`w-full h-14 rounded-full text-[14px] font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md ${activeService.themeColor} text-white disabled:opacity-20`}>
                 {submitting ? <Loader2 size={20} className="animate-spin" /> : currentStep === activeService.steps.length - 1 ? 'Confirm' : 'Continue'}
                 {!submitting && <ArrowRight size={18} />}
               </button>
               {currentStep > 0 && (
-                <button onClick={() => setCurrentStep(s => s - 1)} className="w-full h-12 text-gray-400 font-bold text-[13px] active:scale-95 transition-all">Back</button>
+                <button onClick={() => setCurrentStep(s => s - 1)} className="w-full h-12 text-slate-400 font-bold text-[13px] active:scale-95 transition-all">Back</button>
               )}
             </div>
           </div>
@@ -325,27 +325,27 @@ export default function RunModule() {
                   <Heading>Runner Dashboard</Heading>
                   <Subtext>Manage missions and earnings</Subtext>
                 </div>
-                <button onClick={() => router.push('/run/wallet')} className="w-full bg-gray-50 p-6 rounded-2xl border border-gray-100 flex items-center justify-between shadow-sm active:scale-[0.98] transition-all text-left">
+                <button onClick={() => router.push('/run/wallet')} className="w-full bg-slate-50 p-6 rounded-[28px] border border-slate-100 flex items-center justify-between shadow-sm active:scale-[0.98] transition-all text-left">
                   <div className="flex items-center gap-5">
-                    <div className={`w-1.5 h-12 rounded-full ${profile?.is_online ? 'bg-emerald-500' : 'bg-gray-200'}`} />
+                    <div className={`w-1.5 h-12 rounded-full ${profile?.is_online ? 'bg-emerald-500' : 'bg-slate-200'}`} />
                     <div>
-                      <p className="text-3xl font-bold text-gray-900 tracking-tighter leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
-                      <p className="text-[11px] text-gray-400 font-bold mt-1 tracking-tight flex items-center gap-1 uppercase">Wallet <ChevronRight size={12} /></p>
+                      <p className="text-[28px] font-bold text-slate-900 tracking-tighter leading-none">RM {(profile?.balance || 0).toFixed(2)}</p>
+                      <p className="text-[11px] text-[#94a3b8] font-bold mt-1 tracking-tight flex items-center gap-1">Wallet <ChevronRight size={12} /></p>
                     </div>
                   </div>
-                  <div onClick={(e) => { e.stopPropagation(); toggleStatus(); }} className={`h-11 px-5 rounded-full text-[12px] font-bold border transition-all flex items-center gap-2 ${profile?.is_online ? 'bg-emerald-500 border-emerald-500 text-white shadow-md' : 'bg-white border-gray-200 text-gray-400'}`}>
+                  <div onClick={(e) => { e.stopPropagation(); toggleStatus(); }} className={`h-11 px-5 rounded-2xl text-[12px] font-bold border transition-all flex items-center gap-2 ${profile?.is_online ? 'bg-emerald-500 border-emerald-500 text-white shadow-md' : 'bg-white border-slate-200 text-slate-400'}`}>
                     {profile?.is_online && <div className="w-2 h-2 rounded-full bg-white animate-pulse" />}
                     <span>{profile?.is_online ? 'Online' : 'Offline'}</span>
                   </div>
                 </button>
                 <div className="grid grid-cols-2 gap-3 mt-4">
-                  <button onClick={() => profile?.is_online && router.push('/run/missions')} disabled={!profile?.is_online} className={`w-full flex flex-col items-start gap-4 p-5 rounded-2xl transition-all shadow-sm ${profile?.is_online ? 'bg-cyan-50 text-cyan-950 active:scale-95' : 'bg-gray-50 text-gray-400 opacity-60 cursor-not-allowed'}`}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${profile?.is_online ? 'bg-cyan-200/70' : 'bg-gray-200'}`}><Package size={20} strokeWidth={2.5} /></div>
-                    <p className="text-sm font-bold tracking-tight">Missions</p>
+                  <button onClick={() => profile?.is_online && router.push('/run/missions')} disabled={!profile?.is_online} className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all shadow-sm ${profile?.is_online ? 'bg-cyan-50 text-cyan-950 active:scale-95' : 'bg-slate-50 text-slate-400 opacity-60 cursor-not-allowed'}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${profile?.is_online ? 'bg-cyan-200/70' : 'bg-slate-200'}`}><Package size={20} strokeWidth={2.5} /></div>
+                    <p className="text-[14px] font-bold tracking-tight">Missions</p>
                   </button>
-                  <button onClick={() => router.push('/run/history')} className="w-full flex flex-col items-start gap-4 p-5 rounded-2xl bg-violet-50 transition-all active:scale-95 text-violet-950 shadow-sm">
+                  <button onClick={() => router.push('/run/history')} className="w-full flex flex-col items-start gap-4 p-5 rounded-[24px] bg-violet-50 transition-all active:scale-95 text-violet-950 shadow-sm">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-violet-200/60"><History size={20} strokeWidth={2.5} /></div>
-                    <p className="text-sm font-bold tracking-tight">History</p>
+                    <p className="text-[14px] font-bold tracking-tight">History</p>
                   </button>
                 </div>
               </div>
@@ -358,11 +358,11 @@ export default function RunModule() {
               <div className="grid grid-cols-2 gap-3">
                 {SERVICES.map(s => (
                   <button key={s.id} onClick={() => { setActiveService(s); setCurrentStep(0); setCustomFee(s.fee.toFixed(2)); }}
-                    className={`p-5 rounded-2xl border border-gray-50 flex flex-col items-start gap-4 transition-all active:scale-95 shadow-sm ${s.iconBg} hover:shadow-md`}>
+                    className={`p-5 rounded-[28px] border border-slate-50 flex flex-col items-start gap-4 transition-all active:scale-95 shadow-sm ${s.iconBg} hover:shadow-md`}>
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.circleBg} ${s.accent}`}>
                       <s.icon size={20} strokeWidth={2.5} />
                     </div>
-                    <div className="text-left"><p className={`text-sm font-bold tracking-tight ${s.accent}`}>{s.label}</p><p className={`text-[10px] font-medium opacity-60 ${s.accent} mt-0.5`}>{s.desc}</p></div>
+                    <div className="text-left"><p className={`text-[14px] font-bold tracking-tight ${s.accent}`}>{s.label}</p><p className={`text-[10px] font-medium opacity-60 ${s.accent} mt-0.5`}>{s.desc}</p></div>
                   </button>
                 ))}
               </div>
