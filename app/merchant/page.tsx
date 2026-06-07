@@ -111,11 +111,13 @@ export default function MerchantDashboard() {
 
         if (handshake.buyer_confirmed && handshake.buyer_coords) {
           const R = 6371e3;
-          const 1 = coords.lat * Math.PI/180;
-          const 2 = handshake.buyer_coords.lat * Math.PI/180;
-          const  = (handshake.buyer_coords.lat - coords.lat) * Math.PI/180;
-          const  = (handshake.buyer_coords.lng - coords.lng) * Math.PI/180;
-          const a = Math.sin(/2) * Math.sin(/2) + Math.cos(1) * Math.cos(2) * Math.sin(/2) * Math.sin(/2);
+          const phi1 = coords.lat * Math.PI/180;
+          const phi2 = handshake.buyer_coords.lat * Math.PI/180;
+          const deltaPhi = (handshake.buyer_coords.lat - coords.lat) * Math.PI/180;
+          const deltaLambda = (handshake.buyer_coords.lng - coords.lng) * Math.PI/180;
+          const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+            Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
           const dist = R * c;
           handshake.distance = dist;
