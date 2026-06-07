@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,11 +10,10 @@ import {
 } from 'lucide-react';
 
 import { db, auth } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, onSnapshot, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
-import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
 
 interface CreateListingProps {
   userId: string;
@@ -42,16 +41,11 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const [selectedCategory, setSelectedCategory] = useState<CategoryID | ''>(existingItem?.category || '');
   const [subcategory, setSubcategory] = useState(existingItem?.subcategory || '');
   const [images, setImages] = useState<string[]>(existingItem?.images || []);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [title, setTitle] = useState(existingItem?.title || '');
   const [description, setDescription] = useState(existingItem?.description || '');
   const [price, setPrice] = useState(existingItem?.price?.toString() || '');
   const [metadata, setMetadata] = useState<Record<string, any>>(existingItem?.metadata || {});
   const [stock, setStock] = useState(existingItem?.stock_count?.toString() || '1');
-  const [justification, setJustification] = useState(existingItem?.price_appeal || '');
-  const [priceGuidelines, setPriceGuidelines] = useState<Record<string, any>>({});
-  const [marketData, setMarketData] = useState<any>(null);
-  const [analyzingMarket, setAnalyzingMarket] = useState(false);
 
   const [isPosting, setIsPosting] = useState(false);
   const [pcsError, setPcsError] = useState<{
@@ -60,7 +54,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     itemTitle: string;
   } | null>(null);
 
-  //  FORCE SYNC EXISTING ITEM DATA 
+  // -- FORCE SYNC EXISTING ITEM DATA --
   useEffect(() => {
     if (existingItem) {
       setSelectedCategory(existingItem.category || '');
@@ -74,54 +68,9 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     }
   }, [existingItem]);
 
-  //  DYNAMIC PRICE GUIDELINES (Firestore overrides hardcoded ceilings) 
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'PriceGuidelines'), (snap) => {
-      const g: Record<string, any> = {};
-      snap.docs.forEach(d => { g[d.id.toUpperCase()] = { id: d.id, ...d.data() }; });
-      setPriceGuidelines(g);
-    });
-    return () => unsub();
-  }, []);
-
-  //  SERPAPI MARKET INTELLIGENCE (Debounced API Call) 
-  useEffect(() => {
-    if (title.trim().length < 3 || !selectedCategory || !subcategory) {
-      setMarketData(null);
-      return;
-    }
-
-    setAnalyzingMarket(true);
-    const timer = setTimeout(async () => {
-      try {
-        const res = await fetch('/api/price-intelligence', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, category: selectedCategory, subcategory })
-        });
-        const data = await res.json();
-        if (data.success) setMarketData(data.data);
-      } catch {
-        setMarketData(null);
-      } finally {
-        setAnalyzingMarket(false);
-      }
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [title, selectedCategory, subcategory]);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  //  MARKET INTELLIGENCE ENGINE (Trust-First, Advisory Only) 
-  const dynamicCeiling = selectedCategory ? priceGuidelines[selectedCategory]?.max_price : null;
-  const priceIntel: PriceIntelligence | null = useMemo(() => {
-    const numericPrice = parseFloat(price);
-    if (!selectedCategory || !price || isNaN(numericPrice) || numericPrice <= 0) return null;
-    return analysePrice(numericPrice, selectedCategory as CategoryID, subcategory, dynamicCeiling, marketData?.baseline);
-  }, [selectedCategory, subcategory, price, dynamicCeiling, marketData?.baseline]);
-
-  //  Institutional Image Compressor: Prevents 1MB Firestore limit crashes
+  // Institutional Image Compressor: Prevents 1MB Firestore limit crashes
   const compressImage = (base64: string): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -163,7 +112,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     setIsPosting(true);
     setPcsError(null);
     try {
-      const { updateDoc, doc } = await import('firebase/firestore');
+      const { updateDoc, doc: _doc } = await import('firebase/firestore');
       const user = auth.currentUser;
       const sellerId = userId || user?.uid || 'ANON';
       const itemId = existingItem?.id || doc(collection(db, 'items')).id;
@@ -191,11 +140,6 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         return;
       }
 
-      // Trust-First: ALL listings go live.
-      // Tier A (REGULATED) is hard-blocked in canPost  should never reach here.
-      // Tier B (OPEN) above ceiling gets flagged + justification sent to admin queue.
-      const isAutoFlagged = priceIntel?.shouldAutoFlag === true;
-      const needsAdminReview = !isHardBlocked && !!justification.trim();
       const stockCount = stock !== '' ? parseInt(stock, 10) : null;
       const itemStatus = stockCount === 0 ? 'sold_out' : 'active';
 
@@ -210,16 +154,11 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         images,
         seller_id: sellerId,
         seller_name: user?.displayName || 'Pulse Vendor',
-        // Always goes live  trust the seller by default
         status: itemStatus,
-        // Governance intelligence stored for admin reference
-        price_tier: priceIntel?.tier || 'COMPLIANT',
-        governance_ceiling: priceIntel?.ceiling || null,
-        // Auto-flag if price > 150% of ceiling, or Tier B above ceiling with justification
-        is_price_flagged: isAutoFlagged || needsAdminReview,
-        price_flag_count: isAutoFlagged || needsAdminReview ? 1 : 0,
-        flag_source: isAutoFlagged ? 'SYSTEM' : needsAdminReview ? 'SELLER_APPEAL' : null,
-        price_appeal: isAutoFlagged || needsAdminReview ? justification : '',
+        is_price_flagged: false,
+        price_flag_count: 0,
+        flag_source: null,
+        price_appeal: '',
         is_official: role?.toUpperCase() === 'CLUB' || role?.toUpperCase() === 'MERCHANT',
         pcs_certified: true,
         updated_at: serverTimestamp(),
@@ -228,7 +167,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       if (existingItem) {
         await updateDoc(doc(db, 'items', existingItem.id), data);
       } else {
-        const { setDoc, doc, collection } = await import('firebase/firestore');
+        const { setDoc } = await import('firebase/firestore');
         await setDoc(doc(db, 'items', itemId), {
           ...data,
           created_at: serverTimestamp()
@@ -243,16 +182,16 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     }
   };
 
-  // Governance rules (ceiling + SerpAPI market enforcement)
-  const categoryConfig = selectedCategory ? MARKETPLACE_CATEGORIES[selectedCategory as CategoryID] : null;
-  const isRegulated = categoryConfig?.governance === 'REGULATED';
-  const isAboveCeiling = priceIntel?.tier === 'ADVISORY' || priceIntel?.tier === 'AUTO_FLAG';
-  const numericPrice = parseFloat(price);
-  const isMarketBlocked = !!(marketData?.is_enforced && !isNaN(numericPrice) && numericPrice > marketData?.maxAllowed);
-  const isHardBlocked = isRegulated && (isAboveCeiling || isMarketBlocked);
-  const needsMarketJustification = !isRegulated && isMarketBlocked;
+  const canPost = !!title && !!price && !!selectedCategory && !!subcategory && images.length > 0 && !isPosting;
 
-  const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting && !isHardBlocked;
+  // Derive the dynamic title hint from the selected subcategory config
+  const selectedSubcategoryConfig = useMemo(() => {
+    if (!selectedCategory) return null;
+    return MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories
+      .find((s) => s.label === subcategory) ?? null;
+  }, [selectedCategory, subcategory]);
+
+  const titleHint = selectedSubcategoryConfig?.titleHint ?? 'e.g. Logitech MX Master 3, Thomas Calculus...';
 
   return (
     <div className="fixed inset-0 z-1000 flex flex-col bg-white overflow-hidden font-sans antialiased text-slate-900">
@@ -490,127 +429,9 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              {/*  MARKET INTELLIGENCE PANEL  */}
-              <AnimatePresence>
-                {priceIntel && price && (
-                  <motion.div
-                    key={priceIntel.tier}
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={`rounded-2xl p-4 border transition-all ${
-                      isHardBlocked
-                        ? 'bg-red-50 border-red-200'
-                        : priceIntel.tier === 'COMPLIANT'
-                        ? 'bg-emerald-50 border-emerald-100'
-                        : priceIntel.tier === 'ADVISORY'
-                        ? 'bg-amber-50 border-amber-100'
-                        : 'bg-slate-50 border-slate-200/60 shadow-sm'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                        isHardBlocked ? 'bg-red-100' :
-                        priceIntel.tier === 'COMPLIANT' ? 'bg-emerald-100' :
-                        priceIntel.tier === 'ADVISORY' ? 'bg-amber-100' : 'bg-slate-200/60'
-                      }`}>
-                        <TrendingUp size={14} className={`${
-                          isHardBlocked ? 'text-red-600' :
-                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-600' :
-                          priceIntel.tier === 'ADVISORY' ? 'text-amber-600' : 'text-slate-600'
-                        }`} />
-                      </div>
-                      <div className="flex-1">
-                        {/* Tier message */}
-                        <p className={`text-[12px] font-bold mb-1 ${
-                          isHardBlocked ? 'text-red-700' :
-                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-700' :
-                          priceIntel.tier === 'ADVISORY' ? 'text-amber-700' : 'text-slate-800'
-                        }`}>
-                          {isHardBlocked ? (isMarketBlocked ? 'Above market benchmark max' : 'Exceeds campus price limit') : priceIntel.message}
-                        </p>
-                        <p className={`text-[11px] font-medium leading-relaxed ${
-                          isHardBlocked ? 'text-red-600' :
-                          priceIntel.tier === 'COMPLIANT' ? 'text-emerald-600' :
-                          priceIntel.tier === 'ADVISORY' ? 'text-amber-600' : 'text-slate-500'
-                        }`}>
-                          {isMarketBlocked && isHardBlocked
-                            ? `Online market average RM ${Number(marketData?.baseline).toFixed(2)}. Campus max (90%) is RM ${Number(marketData?.maxAllowed).toFixed(2)}.`
-                            : priceIntel.subMessage
-                          }
-                        </p>
-
-                        {/* SerpAPI market baseline */}
-                        {analyzingMarket && (
-                          <p className="text-[10px] text-slate-400 mt-2 font-medium">Checking market prices...</p>
-                        )}
-                        {marketData?.baseline && !analyzingMarket && (
-                          <div className="mt-3 border-t border-slate-100/60 pt-3">
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className="text-[9px] font-semibold text-slate-400">Market</span>
-                                <span className="text-[12px] font-bold text-slate-800">RM {Number(marketData.baseline).toFixed(2)}</span>
-                              </div>
-                              <span className="text-[9px] text-slate-300"></span>
-                              <span className="text-[9px] font-semibold text-slate-400">Max campus</span>
-                              <span className="text-[12px] font-bold text-slate-800">RM {Number(marketData.maxAllowed).toFixed(2)}</span>
-                              {Number(price) !== marketData.maxAllowed && (
-                                <button
-                                  onClick={() => setPrice(marketData.maxAllowed.toString())}
-                                  className="ml-auto h-6 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[9px] font-bold transition-all active:scale-95"
-                                >
-                                  Use RM {Number(marketData.maxAllowed).toFixed(2)}
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* HARD BLOCK: Tier A Regulated  prevent listing */}
-                        {isHardBlocked && (
-                          <div className="mt-3 p-3 bg-red-100/50 rounded-xl border border-red-200">
-                            <p className="text-[10px] font-bold text-red-700">
-                              {isMarketBlocked
-                                ? `Blocked  RM ${numericPrice.toFixed(2)} exceeds the Market-based max of RM ${Number(marketData?.maxAllowed).toFixed(2)}.`
-                                : `This item is in a regulated category. Prices cannot exceed the campus limit of RM ${priceIntel.ceiling?.toFixed(2)}.`
-                              }
-                            </p>
-                            {marketData?.baseline && (
-                              <p className="text-[10px] font-medium text-red-500 mt-1">
-                                Comparable items sell for around RM {Number(marketData.baseline).toFixed(2)} on Market.
-                              </p>
-                            )}
-                          </div>
-                        )}
-
-                        {/* JUSTIFICATION PROTOCOL: Tier B Open  show when above ceiling or above market max */}
-                        {!isRegulated && (isAboveCeiling || needsMarketJustification) && (
-                          <div className="mt-3 space-y-2">
-                            <p className="text-[10px] font-semibold text-slate-400">
-                              {needsMarketJustification
-                                ? `This price exceeds the Market benchmark of RM ${Number(marketData?.baseline).toFixed(2)}. It can still be listed, but will be sent for admin review. Provide a reason to support your pricing.`
-                                : 'This price is above the campus ceiling. It can still be listed, but will be sent for admin review. Provide a reason to support your pricing.'
-                              }
-                            </p>
-                            <textarea
-                              value={justification}
-                              onChange={(e) => setJustification(e.target.value)}
-                              placeholder="Describe any features justifying this price (e.g., brand new sealed, rare model, custom bundle...)"
-                              className="w-full min-h-[60px] p-3 text-[11px] font-semibold bg-white border border-slate-200/80 rounded-xl focus:outline-none focus:border-slate-800 placeholder:text-slate-300 transition-colors text-slate-800"
-                              rows={2}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </section>
 
-            {/*  SECTION: STOCK  */}
+            {/*  STOCK  */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">{existingItem ? 'Stock' : 'Stock'}</h2>
@@ -675,4 +496,3 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     </div>
   );
 }
-

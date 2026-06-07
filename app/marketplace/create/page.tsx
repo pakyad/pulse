@@ -82,11 +82,6 @@ export default function CreateListingPage() {
   const [pcsApprovedBanner, setPcsApprovedBanner] = useState(false);
   const pcsUnsubRef = useRef<(() => void) | null>(null);
 
-  //  LIVE MARKET INTELLIGENCE 
-  const [marketCheck, setMarketCheck] = useState<MarketCheck | null>(null);
-  const [marketLoading, setMarketLoading] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   // Cleanup PCS listener on unmount
   useEffect(() => {
     return () => {
@@ -96,31 +91,8 @@ export default function CreateListingPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fire price check when title + category + subcategory are all set
-  const triggerPriceCheck = useCallback(async (t: string, cat: string, sub: string, p?: string) => {
-    if (t.trim().length < 10 || !cat || !sub) return; // Require 10+ chars AND subcategory
-    setMarketLoading(true);
-    setMarketCheck(null);
-    try {
-      const res = await fetch('/api/marketplace/price-check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: t.trim(), category: cat, subcategory: sub, proposedPrice: p ? parseFloat(p) : undefined, sellerId: auth.currentUser?.uid }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setMarketCheck(data);
-      }
-    } catch (e) {
-      console.error('[PriceCheck] fetch failed', e);
-    } finally {
-      setMarketLoading(false);
-    }
-  }, []);
-
-  // Reset market check and PCS state when category or subcategory changes
+  // Reset PCS state when category or subcategory changes
   useEffect(() => {
-    setMarketCheck(null);
     setPcsPhase('idle');
     setPcsResult(null);
     setPcsItemId(null);
@@ -130,20 +102,6 @@ export default function CreateListingPage() {
       pcsUnsubRef.current = null;
     }
   }, [selectedCategory, subcategory]);
-
-  // Debounced title-driven check  only fires when title + subcategory both ready
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (title.trim().length >= 10 && selectedCategory && subcategory) {
-      debounceRef.current = setTimeout(() => {
-        const fullTitle = metadata.brand ? `${metadata.brand} ${title.trim()}` : title.trim();
-        triggerPriceCheck(fullTitle, selectedCategory as string, subcategory, price);
-      }, 900);
-    } else if (!subcategory || title.trim().length < 10) {
-      setMarketCheck(null);
-    }
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [title, selectedCategory, subcategory, triggerPriceCheck, metadata.brand]);
 
   // Derive the dynamic title hint from the selected subcategory config
   const selectedSubcategoryConfig = useMemo(() => {
@@ -226,8 +184,6 @@ export default function CreateListingPage() {
       setIsUploading(false);
 
       const stockCount = stock !== '' ? parseInt(stock, 10) : null;
-      const isPriceEnforced = marketCheck?.is_enforced ?? false;
-      const isAutoFlagged = isPriceEnforced && numPrice > (marketCheck?.max_campus_price ?? Infinity);
 
       const itemData = {
         title: title.trim(),
@@ -244,13 +200,10 @@ export default function CreateListingPage() {
         fulfillment_mode: fulfillmentMode,
         handover_node: handoverNode,
         status: stockCount === 0 ? 'sold_out' : 'active',
-        governance_ceiling: marketCheck?.max_campus_price || null,
-        market_baseline: marketCheck?.market_baseline || null,
-        market_source: marketCheck?.source || 'STATIC_CEILING',
-        is_price_flagged: isAutoFlagged,
-        price_flag_count: isAutoFlagged ? 1 : 0,
+        is_price_flagged: false,
+        price_flag_count: 0,
         report_count: 0,
-        flag_source: isAutoFlagged ? 'SYSTEM' : null,
+        flag_source: null,
         price_justification: justification.trim() || '',
         pcs_certified: true,
         created_at: serverTimestamp(),
@@ -271,8 +224,7 @@ export default function CreateListingPage() {
   };
 
   const numPrice = parseFloat(price);
-  const isPriceBlocked = !!(marketCheck?.validation?.zone === 'red');
-  const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting && !isPriceBlocked && pcsPhase !== 'verifying';
+  const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting && pcsPhase !== 'verifying';
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
@@ -353,25 +305,6 @@ export default function CreateListingPage() {
                 })}
               </div>
             </section>
-
-            {/*  SECTION: SMART CATEGORY FIELDS  */}
-            {subcategory && selectedCategory !== 'SERVICES' && MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.customFields?.some(f => !f.applicableSubcategories || f.applicableSubcategories.includes(subcategory)) && (
-              <section className="pt-2 border-t border-slate-100">
-                <div className="space-y-0.5 mb-6">
-                  <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">More Details</h2>
-                  <p className="text-[11px] font-medium text-[#94a3b8]">
-                    Specific information about this type of listing.
-                  </p>
-                </div>
-                <SmartFormFields
-                  categoryId={selectedCategory as CategoryID}
-                  subcategory={subcategory}
-                  onSubcategoryChange={setSubcategory}
-                  metadata={metadata}
-                  onMetadataChange={(k, v) => setMetadata(prev => ({ ...prev, [k]: v }))}
-                />
-              </section>
-            )}
 
             {/*  SECTION: IMAGES  */}
             <section className="space-y-4 pt-2 border-t border-slate-100">

@@ -3,11 +3,11 @@ import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import SwipeToReady from './SwipeToReady';
 import { deleteDoc, doc } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info, Pencil, Trash2, ShieldAlert, ClipboardList, CheckCircle2, X, ShoppingBag } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import VoxelStatus from '@/components/shared/VoxelStatus';
-import PriceHealthIndicator from '@/components/marketplace/PriceHealthIndicator';
 
 export default function DesktopMerchant({ 
   merchant, 
@@ -55,6 +55,24 @@ export default function DesktopMerchant({
     setIsSubmitting(true);
 
     try {
+      // -- PCS VALIDATION GATE --
+      const functions = getFunctions(undefined, 'us-central1');
+      const pcsValidate = httpsCallable(functions, 'pcsValidate');
+      const pcsResult = await pcsValidate({ 
+        itemTitle: formData.name, 
+        itemPrice: parseFloat(formData.price), 
+        category: formData.category.toUpperCase(), 
+        sellerId: merchant.uid, 
+        itemId: 'preview'
+      });
+      const pcsData = pcsResult.data as any;
+
+      if (!pcsData.isApproved) {
+        setIsSubmitting(false);
+        alert('Price too high! Market price is RM' + pcsData.marketBaselinePrice + '. Max allowed is RM' + pcsData.maxAllowedStudentPrice + '. Please lower your price.');
+        return;
+      }
+
       const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
       const { storage } = await import('@/lib/firebase');
       const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
@@ -82,6 +100,7 @@ export default function DesktopMerchant({
         seller_name: merchant.full_name,
         status: "ACTIVE",
         merchant: true,
+        pcs_certified: true,
         created_at: serverTimestamp()
       });
 
