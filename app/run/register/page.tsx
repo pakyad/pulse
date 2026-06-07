@@ -43,7 +43,7 @@ function RunnerRegistrationContent() {
 
   const handleFinalize = async () => {
     if (!auth.currentUser) {
-      alert("IDENTITY LOST: Session expired. Please log in again to synchronize your registry.");
+      alert("Session expired. Please log in again.");
       router.push('/auth');
       return;
     }
@@ -53,11 +53,11 @@ function RunnerRegistrationContent() {
       if (success) {
         nextStep('complete');
       } else {
-        alert(`SYNCHRONIZATION ERROR: ${error}`);
+        alert(`Error: ${error}`);
       }
     } catch (err: any) {
       console.error("Finalization failed:", err);
-      alert(`SYSTEM CRITICAL: ${err.message}`);
+      alert(`Critical error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -66,12 +66,12 @@ function RunnerRegistrationContent() {
   const nextStep = (next: RegisterStep) => setStep(next);
 
   const StepIndicator = ({ current }: { current: number }) => (
-    <div className="flex gap-2 mb-12">
+    <div className="flex gap-2 mb-10">
       {[1, 2, 3, 4, 5].map((i) => (
         <div 
           key={i} 
-          className={`h-1 rounded-full transition-all duration-500 ${
-            i <= current ? 'w-8 bg-navy' : 'w-4 bg-slate-100'
+          className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+            i <= current ? 'bg-gray-900' : 'bg-gray-100'
           }`}
         />
       ))}
@@ -79,11 +79,13 @@ function RunnerRegistrationContent() {
   );
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] font-sans text-navy antialiased">
+    <main className="min-h-screen bg-white font-sans text-gray-900 antialiased">
       <div className="max-w-md mx-auto px-6 pt-16 pb-12">
         
         {/* Navigation */}
-        <BackButton />
+        <div className="mb-8">
+          <BackButton />
+        </div>
 
         <AnimatePresence mode="wait">
           {step === 'identity' && (
@@ -94,61 +96,61 @@ function RunnerRegistrationContent() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={1} />
-              <h1 className="text-[32px] font-bold tracking-widest mb-3">Identity Registry</h1>
-              <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
+              <h1 className="text-2xl font-bold tracking-tight mb-2">Identity Registry</h1>
+              <p className="text-gray-400 text-sm font-medium mb-10 leading-relaxed">
                 Connect your professional persona to the Pulse {type === 'runner' ? 'Carrier' : 'Merchant'} Network.
               </p>
 
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Full Legal Name</p>
+                  <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Full Legal Name</p>
                   <div className="relative">
-                    <User size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <User size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" />
                     <input 
                       type="text" 
                       placeholder="As per Student ID"
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                      className="w-full h-[60px] bg-white border border-slate-100 rounded-2xl pl-14 pr-6 font-bold text-navy outline-none focus:border-navy transition-all" 
+                      className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl pl-14 pr-6 font-bold text-gray-900 outline-none focus:border-gray-900 transition-all" 
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Matric Identification</p>
+                  <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Matric Identification</p>
                   <div className="relative">
-                    <CreditCard size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <CreditCard size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" />
                     <input 
                       type="text" 
                       placeholder="UniKL ID Number"
                       value={formData.matricId}
                       onChange={(e) => setFormData({...formData, matricId: e.target.value})}
-                      className="w-full h-[60px] bg-white border border-slate-100 rounded-2xl pl-14 pr-6 font-bold text-navy outline-none focus:border-navy transition-all" 
+                      className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl pl-14 pr-6 font-bold text-gray-900 outline-none focus:border-gray-900 transition-all" 
                     />
                   </div>
                 </div>
 
-                <div className="space-y-6 pt-4 border-t border-slate-50">
-                  <p className="text-[11px] font-semibold  text-navy/30 ml-1">Emergency Protocols</p>
+                <div className="space-y-6 pt-4 border-t border-gray-50">
+                  <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Emergency Protocols</p>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <p className="text-[10px] font-bold  text-slate-300 ml-1">Next of Kin</p>
+                      <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Next of Kin</p>
                       <input 
                         type="text" 
                         placeholder="Name"
                         value={formData.emergencyContact}
                         onChange={(e) => setFormData({...formData, emergencyContact: e.target.value})}
-                        className="w-full h-[54px] bg-slate-50 border border-slate-100 rounded-xl px-4 font-bold text-navy outline-none focus:border-navy transition-all text-sm" 
+                        className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-4 font-bold text-gray-900 outline-none focus:border-gray-900 transition-all text-sm" 
                       />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-[10px] font-bold  text-slate-300 ml-1">Emergency Phone</p>
+                      <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Phone</p>
                       <input 
                         type="text" 
                         placeholder="01x-xxx"
                         value={formData.emergencyPhone}
                         onChange={(e) => setFormData({...formData, emergencyPhone: e.target.value})}
-                        className="w-full h-[54px] bg-slate-50 border border-slate-100 rounded-xl px-4 font-bold text-navy outline-none focus:border-navy transition-all text-sm" 
+                        className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-4 font-bold text-gray-900 outline-none focus:border-gray-900 transition-all text-sm" 
                       />
                     </div>
                   </div>
@@ -159,7 +161,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={() => nextStep('campus' as any)}
                   disabled={!formData.fullName || !formData.matricId || !formData.emergencyContact || !formData.emergencyPhone}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full h-14 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg active:scale-95 transition-all disabled:opacity-50"
                 >
                   Confirm Identity
                 </button>
@@ -175,22 +177,22 @@ function RunnerRegistrationContent() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={2} />
-              <h1 className="text-[32px] font-bold tracking-widest mb-3">Campus Registry</h1>
-              <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
+              <h1 className="text-2xl font-bold tracking-tight mb-2">Campus Registry</h1>
+              <p className="text-gray-400 text-sm font-medium mb-10 leading-relaxed">
                 Identify your operational hub {type === 'merchant' ? 'for logistical synchronization.' : 'within the UniKL ecosystem.'}
               </p>
 
               <div className="space-y-2">
-                <p className="text-[11px] font-bold  text-slate-300 ml-1">Select Institution</p>
+                <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Select Institution</p>
                 <div className="relative">
                   <select 
                     value={formData.campus}
                     onChange={(e) => setFormData({...formData, campus: e.target.value})}
-                    className={`w-full h-[60px] bg-white border border-slate-100 rounded-2xl px-6 font-bold outline-none focus:border-navy appearance-none transition-colors ${
-                      formData.campus ? 'text-navy' : 'text-slate-400'
+                    className={`w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-6 font-bold outline-none focus:border-gray-900 appearance-none transition-colors ${
+                      formData.campus ? 'text-gray-900' : 'text-gray-400'
                     }`}
                   >
-                    <option value="" className="text-slate-400">Choose your campus</option>
+                    <option value="" className="text-gray-400">Choose your campus</option>
                     <option value="City Campus">UniKL City Campus (MIIT/BIS/MIDI)</option>
                     <option value="BMI">UniKL BMI (Gombak)</option>
                     <option value="MFI">UniKL MFI (Bangi)</option>
@@ -208,7 +210,7 @@ function RunnerRegistrationContent() {
 
               {formData.campus === 'City Campus' && (
                 <div className="mt-8 space-y-4">
-                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Operational Zones</p>
+                  <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Operational Zones</p>
                   <div className="flex flex-wrap gap-2">
                     {['MIIT Branch', 'UBIS Branch', 'MIDI Branch'].map(zone => (
                       <button
@@ -219,10 +221,10 @@ function RunnerRegistrationContent() {
                             : [...formData.zones, zone];
                           setFormData({...formData, zones: newZones});
                         }}
-                        className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+                        className={`px-5 py-2.5 rounded-full border text-xs font-bold transition-all ${
                           formData.zones.includes(zone) 
-                            ? 'bg-navy text-white border-navy shadow-md shadow-navy/10' 
-                            : 'bg-white text-slate-400 border-slate-100'
+                            ? 'bg-gray-900 text-white border-gray-900 shadow-md' 
+                            : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50'
                         }`}
                       >
                         {zone}
@@ -236,7 +238,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={() => nextStep('logistics')}
                   disabled={!formData.campus || (formData.campus === 'City Campus' && formData.zones.length === 0)}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full h-14 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg active:scale-95 transition-all disabled:opacity-50"
                 >
                   Verify Campus
                 </button>
@@ -252,8 +254,8 @@ function RunnerRegistrationContent() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={3} />
-              <h1 className="text-[32px] font-bold tracking-widest mb-3">{type === 'merchant' ? 'Terminal Profile' : 'Logistics Profile'}</h1>
-              <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
+              <h1 className="text-2xl font-bold tracking-tight mb-2">{type === 'merchant' ? 'Terminal Profile' : 'Logistics Profile'}</h1>
+              <p className="text-gray-400 text-sm font-medium mb-10 leading-relaxed">
                 {type === 'merchant' 
                   ? 'Define your store operational bandwidth and fulfillment mode.' 
                   : 'Define your logistical reach and operational availability.'
@@ -261,21 +263,21 @@ function RunnerRegistrationContent() {
               </p>
 
               <div className="space-y-4">
-                <p className="text-[11px] font-bold  text-slate-300 ml-1">Transport Mode</p>
+                <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Transport Mode</p>
                 <div className="grid grid-cols-1 gap-3">
                   {['Walking', 'Bicycle / Scooter', 'Motorcycle', 'Car'].map((mode) => (
                     <button
                       key={mode}
                       onClick={() => setFormData({...formData, transport: mode})}
-                      className={`h-[68px] rounded-2xl border px-6 flex items-center justify-between transition-all ${
-                        formData.transport === mode ? 'border-navy bg-navy/5' : 'border-slate-100 bg-white'
+                      className={`h-16 rounded-2xl border px-6 flex items-center justify-between transition-all ${
+                        formData.transport === mode ? 'border-gray-900 bg-gray-900/5' : 'border-gray-100 bg-white'
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        <Bike size={20} className={formData.transport === mode ? 'text-navy' : 'text-slate-300'} />
-                        <span className={`font-bold transition-colors ${formData.transport === mode ? 'text-navy' : 'text-slate-600'}`}>{mode}</span>
+                        <Bike size={20} className={formData.transport === mode ? 'text-gray-900' : 'text-gray-300'} />
+                        <span className={`font-bold transition-colors ${formData.transport === mode ? 'text-gray-900' : 'text-gray-500'}`}>{mode}</span>
                       </div>
-                      {formData.transport === mode && <CheckCircle2 size={20} className="text-navy" />}
+                      {formData.transport === mode && <CheckCircle2 size={20} className="text-gray-900" />}
                     </button>
                   ))}
                 </div>
@@ -283,11 +285,11 @@ function RunnerRegistrationContent() {
 
               {(formData.transport === 'Motorcycle' || formData.transport === 'Car') && (
                 <div className="mt-8 space-y-4">
-                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Identity Evidence</p>
-                  <div className="bg-slate-50 border-2 border-dashed border-slate-100 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-slate-100/50 transition-all">
-                    <ShieldCheck size={28} className="text-slate-300" />
-                    <p className="text-xs font-bold text-slate-400">Upload Driving License</p>
-                    <span className="text-[10px] text-slate-300 font-medium text-center">PDF or JPEG (Max 5MB)</span>
+                  <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Identity Evidence</p>
+                  <div className="bg-gray-50 border-2 border-dashed border-gray-100 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-gray-100/50 transition-all">
+                    <ShieldCheck size={28} className="text-gray-300" />
+                    <p className="text-xs font-bold text-gray-400">Upload Driving License</p>
+                    <span className="text-[10px] text-gray-300 font-medium text-center uppercase tracking-widest">PDF or JPEG (Max 5MB)</span>
                   </div>
                 </div>
               )}
@@ -296,7 +298,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={() => nextStep('payouts')}
                   disabled={!formData.transport}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full h-14 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg active:scale-95 transition-all disabled:opacity-50"
                 >
                   Confirm Profile
                 </button>
@@ -312,22 +314,22 @@ function RunnerRegistrationContent() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={4} />
-              <h1 className="text-[32px] font-bold tracking-widest mb-3">Payout Terminal</h1>
-              <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
+              <h1 className="text-2xl font-bold tracking-tight mb-2">Payout Terminal</h1>
+              <p className="text-gray-400 text-sm font-medium mb-10 leading-relaxed">
                 Synchronize your bank account for secure, automated hustle payouts.
               </p>
 
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Bank Name</p>
+                  <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Bank Name</p>
                   <div className="relative">
-                    <Building size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <Building size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" />
                     <select 
                       value={formData.bankName}
                       onChange={(e) => setFormData({...formData, bankName: e.target.value})}
-                      className="w-full h-[60px] bg-white border border-slate-100 rounded-2xl pl-14 pr-6 font-bold text-navy outline-none focus:border-navy appearance-none"
+                      className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl pl-14 pr-6 font-bold text-gray-900 outline-none focus:border-gray-900 appearance-none"
                     >
-                      <option value="">Select University Partner Bank</option>
+                      <option value="">Select Partner Bank</option>
                       <option value="Maybank">Maybank</option>
                       <option value="CIMB">CIMB Bank</option>
                       <option value="Bank Islam">Bank Islam</option>
@@ -337,15 +339,15 @@ function RunnerRegistrationContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold  text-slate-300 ml-1">Account Number</p>
+                  <p className="text-[10px] font-bold text-gray-400 ml-1 uppercase tracking-widest">Account Number</p>
                   <div className="relative">
-                    <CheckCircle2 size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <CheckCircle2 size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" />
                     <input 
                       type="text" 
-                      placeholder="Recipient Payout ID"
+                      placeholder="Account ID"
                       value={formData.accountNumber}
                       onChange={(e) => setFormData({...formData, accountNumber: e.target.value})}
-                      className="w-full h-[60px] bg-white border border-slate-100 rounded-2xl pl-14 pr-6 font-bold text-navy outline-none focus:border-navy transition-all" 
+                      className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl pl-14 pr-6 font-bold text-gray-900 outline-none focus:border-gray-900 transition-all" 
                     />
                   </div>
                 </div>
@@ -355,7 +357,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={() => nextStep('agreement')}
                   disabled={!formData.bankName || !formData.accountNumber}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full h-14 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg active:scale-95 transition-all disabled:opacity-50"
                 >
                   Link Payment Gateway
                 </button>
@@ -371,18 +373,18 @@ function RunnerRegistrationContent() {
               exit={{ opacity: 0, x: -20 }}
             >
               <StepIndicator current={5} />
-              <h1 className="text-[32px] font-bold tracking-widest mb-3">Protocol Agreement</h1>
-              <p className="text-slate-400 text-[15px] font-medium mb-10 leading-relaxed">
-                Review the {type === 'merchant' ? 'Merchant' : 'Carrier'} Standard Operating Procedures for Pulse.
+              <h1 className="text-2xl font-bold tracking-tight mb-2">Protocol Agreement</h1>
+              <p className="text-gray-400 text-sm font-medium mb-10 leading-relaxed">
+                Review the {type === 'merchant' ? 'Merchant' : 'Carrier'} SOPs for Pulse.
               </p>
 
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 space-y-4 mb-10">
+              <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 space-y-4 mb-10">
                 <div className="flex gap-4">
-                  <ShieldCheck size={20} className="text-navy shrink-0 mt-0.5" />
+                  <ShieldCheck size={20} className="text-gray-900 shrink-0 mt-0.5" />
                   <p className="text-[13px] font-medium leading-relaxed">I agree to maintain a professional standard of conduct during all deliveries.</p>
                 </div>
                 <div className="flex gap-4">
-                  <Clock size={20} className="text-navy shrink-0 mt-0.5" />
+                  <Clock size={20} className="text-gray-900 shrink-0 mt-0.5" />
                   <p className="text-[13px] font-medium leading-relaxed">I understand that fulfillment times are critical to my Pulse Reputation Score.</p>
                 </div>
               </div>
@@ -391,7 +393,7 @@ function RunnerRegistrationContent() {
                 <button 
                   onClick={handleFinalize}
                   disabled={loading}
-                  className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full h-14 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg active:scale-95 transition-all disabled:opacity-50"
                 >
                   {loading ? <Loader2 size={24} className="animate-spin opacity-40" /> : 'Agree & Synchronize'}
                 </button>
@@ -406,16 +408,16 @@ function RunnerRegistrationContent() {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-20"
             >
-              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[2.2rem] flex items-center justify-center mx-auto mb-8 shadow-inner">
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
                 <CheckCircle2 size={40} />
               </div>
-              <h1 className="text-[32px] font-bold tracking-widest mb-4">Registration Sent</h1>
-              <p className="text-slate-400 text-[16px] font-medium leading-relaxed mb-12">
-                Your credentials are being verified by the Pulse Protocol. You will be notified once your terminal is active.
+              <h1 className="text-2xl font-bold tracking-tight mb-2">Registration Sent</h1>
+              <p className="text-gray-400 text-sm font-medium leading-relaxed mb-12">
+                Your credentials are being verified. You will be notified once your terminal is active.
               </p>
               <button 
                 onClick={() => router.push('/run')}
-                className="w-full h-[60px] bg-navy text-white rounded-2xl flex items-center justify-center font-bold text-[16px] shadow-md shadow-navy/20 active:scale-95 transition-all border border-white/10"
+                className="w-full h-14 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg active:scale-95 transition-all"
               >
                 Back to Dashboard
               </button>
@@ -430,8 +432,8 @@ function RunnerRegistrationContent() {
 export default function RunnerRegistration() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-navy/10 border-t-navy rounded-full animate-spin" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-gray-100 border-t-gray-900 rounded-full animate-spin" />
       </div>
     }>
       <RunnerRegistrationContent />
