@@ -182,7 +182,7 @@ export default function DesktopMerchant({
   });
 
   return (
-    <div className="min-h-screen bg-[#F9F9FB] selection:bg-gray-100 hidden md:flex">
+    <div className="min-h-screen bg-[#F9F9FB] flex font-sans">
       
       {/*  Fixed Sidebar  */}
       <aside className="w-64 h-screen bg-white border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">

@@ -1,13 +1,11 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 import DesktopMerchant from '@/components/merchant/DesktopMerchant';
-import MobileMerchant from '@/components/merchant/MobileMerchant';
 import ProofInspector from '@/components/merchant/ProofInspector';
-import PriceAppealModal from '@/components/merchant/PriceAppealModal';
 
 export default function MerchantDashboard() {
   const router = useRouter();
@@ -17,18 +15,12 @@ export default function MerchantDashboard() {
   const [merchant, setMerchant] = useState<any>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isProofOpen, setIsProofOpen] = useState(false);
-  const [selectedFlaggedItem, setSelectedFlaggedItem] = useState<any>(null);
-  
-  // Smart Window Hook
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     let unsubItems: (() => void) | null = null;
     let unsubOrders: (() => void) | null = null;
 
-    // Check Auth & Fetch Data
     const unsubAuth = auth.onAuthStateChanged(async (user) => {
-      // Cleanup previous
       if (unsubItems) unsubItems();
       if (unsubOrders) unsubOrders();
 
@@ -41,7 +33,6 @@ export default function MerchantDashboard() {
         return;
       }
       setMerchant(snap.exists() ? { ...userData, uid: user.uid } : { full_name: user.displayName || "Pulse Vendor", uid: user.uid });
-      
       
       unsubItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid)), 
         (s) => setItems(s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => {
@@ -56,21 +47,13 @@ export default function MerchantDashboard() {
       });
     });
 
-    // Handle Resize
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-
     return () => {
       unsubAuth();
       if (unsubItems) unsubItems();
       if (unsubOrders) unsubOrders();
-      window.removeEventListener('resize', handleResize);
     };
   }, [router]);
 
-  //  REQ_L101: THE LOGISTICS BRIDGE
-  // Transitions order from Merchant Prep to Runner Radar
   const handleAcceptOrder = async (orderId: string) => {
     await updateDoc(doc(db, "orders", orderId), { 
       status: "PREPARING",
@@ -79,7 +62,6 @@ export default function MerchantDashboard() {
   };
 
   const handleCallRunner = async (orderId: string) => {
-    // Status PENDING_RUNNER matches the runner radar query in /run/terminal and /run/missions
     await updateDoc(doc(db, "orders", orderId), { 
       status: "PENDING_RUNNER",
       delivery_type: "RUNNER",
@@ -88,10 +70,7 @@ export default function MerchantDashboard() {
   };
 
   const handleConfirmDelivery = async (orderId: string) => {
-    if (!navigator.geolocation) {
-      console.warn("[Merchant] Geolocation not available.");
-      return;
-    }
+    if (!navigator.geolocation) return;
     
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
@@ -133,8 +112,6 @@ export default function MerchantDashboard() {
       } catch (e) {
         console.error("[Merchant] Confirm delivery error:", e);
       }
-    }, (err) => {
-      console.warn("[Merchant] Location access denied:", err);
     });
   };
 
@@ -143,10 +120,8 @@ export default function MerchantDashboard() {
     await updateDoc(doc(db, "items", itemId), { status: newStatus });
   };
 
-  //  SHARED ANALYTICS LOGIC 
   const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP", "READY"].includes(o.status)).reduce((s, o) => s + Number(o.total || o.price || 0), 0), [orders]);
   
-  // FIX 2 & 3: Active Pipeline query - NOT DELIVERED and NOT CANCELLED
   const pipelineOrders = useMemo(() => orders.filter(o => 
     o.seller_id === merchant?.uid && 
     !["DELIVERED", "CANCELLED", "COMPLETED"].includes(o.status)
@@ -156,12 +131,8 @@ export default function MerchantDashboard() {
     ["DELIVERED", "COMPLETED"].includes(o.status)
   ).slice(0, 50), [orders]);
 
-  const cancelledOrders = useMemo(() => orders.filter(o => o.status === 'CANCELLED'), [orders]);
-
-  // FIX 5 & 6: Action Handlers
   const handlePrepareOrder = async (orderId: string, items: any[]) => {
     try {
-      const { runTransaction, doc, serverTimestamp } = await import('firebase/firestore');
       await updateDoc(doc(db, "orders", orderId), { 
         status: "PREPARING",
         prepared_at: serverTimestamp() 
@@ -219,51 +190,28 @@ export default function MerchantDashboard() {
 
   return (
     <>
-      {isMobile ? (
-        <MobileMerchant 
-          merchant={merchant}
-          revenue={revenue}
-          activeOrdersCount={pipelineOrders.length}
-          pipelineOrders={pipelineOrders}
-          completedOrders={completedOrders}
-          cancelledOrders={cancelledOrders}
-          items={items}
-          recentOrders={orders.slice(0, 10)}
-          handleAcceptOrder={handleAcceptOrder}
-          handlePrepareOrder={handlePrepareOrder}
-          handleMarkReady={handleMarkReady}
-          handleMessageUser={handleMessageUser}
-          handleCallRunner={handleCallRunner}
-          handleConfirmDelivery={handleConfirmDelivery}
-          toggleItemStatus={toggleItemStatus}
-          onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
-        />
-      ) : (
-        <DesktopMerchant 
-          merchant={merchant}
-          revenue={revenue}
-          activeOrdersCount={pipelineOrders.length}
-          pipelineOrders={pipelineOrders}
-          completedOrders={completedOrders}
-          items={items}
-          handleAcceptOrder={handleAcceptOrder}
-          handlePrepareOrder={handlePrepareOrder}
-          handleMarkReady={handleMarkReady}
-          handleMessageUser={handleMessageUser}
-          handleCallRunner={handleCallRunner}
-          handleConfirmDelivery={handleConfirmDelivery}
-          toggleItemStatus={toggleItemStatus}
-          onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
-        />
-      )}
+      <DesktopMerchant 
+        merchant={merchant}
+        revenue={revenue}
+        activeOrdersCount={pipelineOrders.length}
+        pipelineOrders={pipelineOrders}
+        completedOrders={completedOrders}
+        items={items}
+        handleAcceptOrder={handleAcceptOrder}
+        handlePrepareOrder={handlePrepareOrder}
+        handleMarkReady={handleMarkReady}
+        handleMessageUser={handleMessageUser}
+        handleCallRunner={handleCallRunner}
+        handleConfirmDelivery={handleConfirmDelivery}
+        toggleItemStatus={toggleItemStatus}
+        onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
+      />
 
       <ProofInspector 
         isOpen={isProofOpen}
         onClose={() => setIsProofOpen(false)}
         order={selectedOrder}
       />
-
-      {/* PriceAppealModal reserved for future governance flow */}
     </>
   );
 }
