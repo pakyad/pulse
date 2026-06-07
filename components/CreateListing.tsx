@@ -9,8 +9,9 @@ import {
   ArrowUpRight, Zap, TrendingUp
 } from 'lucide-react';
 
-import { db, auth } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { db, auth, functions } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, onSnapshot, doc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
 import { analysePrice, PriceIntelligence } from '@/lib/marketplace/price-governance';
@@ -53,6 +54,11 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const [analyzingMarket, setAnalyzingMarket] = useState(false);
 
   const [isPosting, setIsPosting] = useState(false);
+  const [pcsError, setPcsError] = useState<{
+    marketBaselinePrice: number;
+    maxAllowedStudentPrice: number;
+    itemTitle: string;
+  } | null>(null);
 
   // ── FORCE SYNC EXISTING ITEM DATA ──
   useEffect(() => {
@@ -155,9 +161,34 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const handlePost = async () => {
     if (!selectedCategory) return;
     setIsPosting(true);
+    setPcsError(null);
     try {
       const { updateDoc, doc } = await import('firebase/firestore');
       const user = auth.currentUser;
+      const sellerId = userId || user?.uid || 'ANON';
+      const itemId = existingItem?.id || doc(collection(db, 'items')).id;
+
+      // ── PCS GUARDRAILS INTERCEPTION ──
+      const pcsValidate = httpsCallable(functions, 'pcsValidate');
+      const pcsResult = await pcsValidate({
+        itemTitle: title,
+        itemPrice: parseFloat(price),
+        category: selectedCategory,
+        sellerId,
+        itemId
+      });
+
+      const pcsData = pcsResult.data as any;
+
+      if (pcsData.isApproved === false) {
+        setPcsError({
+          marketBaselinePrice: pcsData.marketBaselinePrice,
+          maxAllowedStudentPrice: pcsData.maxAllowedStudentPrice,
+          itemTitle: title
+        });
+        setIsPosting(false);
+        return;
+      }
 
       // Trust-First: ALL listings go live.
       // Tier A (REGULATED) is hard-blocked in canPost — should never reach here.
@@ -176,7 +207,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         stock_count: stockCount,
         metadata,
         images,
-        seller_id: userId || user?.uid || 'ANON',
+        seller_id: sellerId,
         seller_name: user?.displayName || 'Pulse Vendor',
         // Always goes live — trust the seller by default
         status: itemStatus,
@@ -189,14 +220,15 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         flag_source: isAutoFlagged ? 'SYSTEM' : needsAdminReview ? 'SELLER_APPEAL' : null,
         price_appeal: isAutoFlagged || needsAdminReview ? justification : '',
         is_official: role?.toUpperCase() === 'CLUB' || role?.toUpperCase() === 'MERCHANT',
+        pcs_certified: true,
         updated_at: serverTimestamp(),
       };
 
       if (existingItem) {
         await updateDoc(doc(db, 'items', existingItem.id), data);
       } else {
-        const { addDoc, collection } = await import('firebase/firestore');
-        await addDoc(collection(db, 'items'), {
+        const { setDoc, doc, collection } = await import('firebase/firestore');
+        await setDoc(doc(db, 'items', itemId), {
           ...data,
           created_at: serverTimestamp()
         });
@@ -429,6 +461,31 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                 />
               </div>
 
+              {/* ── PCS ERROR ALERT ── */}
+              <AnimatePresence>
+                {pcsError && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-red-50 border border-red-200 rounded-xl p-4 mt-2 text-sm"
+                  >
+                    <p className="text-red-800 font-medium">
+                      ⚠️ Price Limit Exceeded! We found {pcsError.itemTitle} on the market for RM{pcsError.marketBaselinePrice.toFixed(2)}. To protect the student economy, the max campus listing price is RM{pcsError.maxAllowedStudentPrice.toFixed(2)}.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setPrice(pcsError.maxAllowedStudentPrice.toString());
+                        setPcsError(null);
+                      }}
+                      className="mt-3 bg-gray-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-gray-800 transition-colors"
+                    >
+                      Set price to RM{pcsError.maxAllowedStudentPrice.toFixed(2)} automatically
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* ── MARKET INTELLIGENCE PANEL ── */}
               <AnimatePresence>
                 {priceIntel && price && (
@@ -598,7 +655,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
           }`}
         >
           {isPosting ? <Loader2 size={16} className="animate-spin" /> : <ArrowUpRight size={18} />}
-          {isPosting ? 'Publishing...' : (existingItem ? 'Update Listing' : 'Publish Listing')}
+          {isPosting ? 'Running campus guardrails...' : (existingItem ? 'Update Listing' : 'Publish Listing')}
         </button>
       </div>
 

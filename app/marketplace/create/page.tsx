@@ -8,8 +8,9 @@ import {
   ShieldCheck, ShieldAlert, Globe, AlertCircle
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
-import { db, auth, storage } from '@/lib/firebase';
+import { db, auth, storage, functions } from '@/lib/firebase';
 import { collection, addDoc, doc, onSnapshot, getDocs, serverTimestamp } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
@@ -68,6 +69,11 @@ export default function CreateListingPage() {
   const [isPosting, setIsPosting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
+  const [pcsError, setPcsError] = useState<{
+    marketBaselinePrice: number;
+    maxAllowedStudentPrice: number;
+    itemTitle: string;
+  } | null>(null);
 
   // ── PCS VERIFICATION STATE ──
   const [pcsPhase, setPcsPhase] = useState<'idle' | 'verifying' | 'approved' | 'rejected'>('idle');
@@ -173,23 +179,36 @@ export default function CreateListingPage() {
     if (!selectedCategory) return;
     setIsPosting(true);
     setPostError(null);
+    setPcsError(null);
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
 
       const numPrice = parseFloat(price);
+      const sellerId = user.uid;
+      const itemId = doc(collection(db, 'items')).id;
 
-      // ── SERVER-SIDE ENFORCEMENT GATE ──
-      if (marketCheck && marketCheck.is_enforced && numPrice > marketCheck.max_campus_price) {
-        setPostError(
-          `Price blocked. Max campus price is RM ${marketCheck.max_campus_price.toFixed(2)}. Please lower your price to continue.`
-        );
+      // ── PCS GUARDRAILS INTERCEPTION ──
+      const pcsValidate = httpsCallable(functions, 'pcsValidate');
+      const pcsResult = await pcsValidate({
+        itemTitle: title,
+        itemPrice: numPrice,
+        category: selectedCategory,
+        sellerId,
+        itemId
+      });
+
+      const pcsData = pcsResult.data as any;
+
+      if (pcsData.isApproved === false) {
+        setPcsError({
+          marketBaselinePrice: pcsData.marketBaselinePrice,
+          maxAllowedStudentPrice: pcsData.maxAllowedStudentPrice,
+          itemTitle: title
+        });
         setIsPosting(false);
         return;
       }
-
-      // ── CHECK PCS STATUS ──
-      const isPriceControlled = await checkIsPriceControlled(subcategory);
 
       setIsUploading(true);
       const imageUrls: string[] = await Promise.all(
@@ -228,39 +247,13 @@ export default function CreateListingPage() {
         report_count: 0,
         flag_source: isAutoFlagged ? 'SYSTEM' : null,
         price_justification: justification.trim() || '',
+        pcs_certified: true,
         created_at: serverTimestamp(),
       };
 
-      if (!isPriceControlled) {
-        // Case 1 — Free market: publish immediately
-        await addDoc(collection(db, 'items'), itemData);
-        router.push('/marketplace');
-      } else {
-        // Case 2 — PCS category: trigger Cloud Function and listen
-        const docRef = await addDoc(collection(db, 'items'), itemData);
-        const newItemId = docRef.id;
-        setPcsItemId(newItemId);
-        setPcsPhase('verifying');
-        setIsPosting(false);
-
-        pcsUnsubRef.current = onSnapshot(doc(db, 'items', newItemId), (snap) => {
-          const data = snap.data();
-          if (!data) return;
-
-          if (data.status === 'ACTIVE' && data.pcs_certified === true) {
-            if (pcsUnsubRef.current) pcsUnsubRef.current();
-            pcsUnsubRef.current = null;
-            setPcsPhase('approved');
-            setPcsApprovedBanner(true);
-            setTimeout(() => router.push('/marketplace'), 1500);
-          } else if (data.status === 'FLAGGED_FOR_REVIEW') {
-            if (pcsUnsubRef.current) pcsUnsubRef.current();
-            pcsUnsubRef.current = null;
-            setPcsPhase('rejected');
-            setPcsResult(data.pcs_result || null);
-          }
-        });
-      }
+      const { setDoc, doc, collection } = await import('firebase/firestore');
+      await setDoc(doc(db, 'items', itemId), itemData);
+      router.push('/marketplace');
     } catch (e: any) {
       console.error('[CreateListing]', e);
       setIsUploading(false);
@@ -461,55 +454,6 @@ export default function CreateListingPage() {
                 )}
               </div>
 
-              {/* ── PCS FLAGGED FOR REVIEW ALERT ── */}
-              {pcsPhase === 'rejected' && pcsResult && (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-red-50 border border-red-200 rounded-xl space-y-3"
-                >
-                  <h4 className="text-[13px] font-bold text-red-800">Price over student limit</h4>
-                  <p className="text-[11px] font-medium text-red-700 leading-relaxed">
-                    {pcsResult.justification}
-                  </p>
-                  <div className="text-[11px] font-medium text-red-600 space-y-1">
-                    <p>Found on Shopee/Lazada: RM {Number(pcsResult.marketPrice).toFixed(2)}</p>
-                    <p>Maximum student price: RM {Number(pcsResult.maxAllowedPrice).toFixed(2)}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setPrice(String(Number(pcsResult.maxAllowedPrice).toFixed(2)));
-                      setPcsPhase('idle');
-                      setPcsResult(null);
-                      setPcsItemId(null);
-                    }}
-                    className="w-full h-10 bg-red-600 text-white rounded-xl font-bold text-[12px] hover:bg-red-700 transition-all active:scale-95"
-                  >
-                    Set to RM {Number(pcsResult.maxAllowedPrice).toFixed(2)}
-                  </button>
-                  <button
-                    onClick={async () => {
-                      try {
-                        await addDoc(collection(db, 'appeals'), {
-                          item_id: pcsItemId,
-                          pcs_result: pcsResult,
-                          status: 'PENDING',
-                          created_at: serverTimestamp(),
-                        });
-                        setPcsPhase('idle');
-                        setPcsResult(null);
-                        setPcsItemId(null);
-                      } catch (e) {
-                        console.error('[Appeal]', e);
-                      }
-                    }}
-                    className="text-[11px] font-bold text-red-500 underline block text-center w-full"
-                  >
-                    Disagree? Appeal to admin
-                  </button>
-                </motion.div>
-              )}
-
               <div className={`flex items-center gap-0 h-12 bg-slate-50 border rounded-xl overflow-hidden transition-colors ${
                 isPriceBlocked ? 'border-red-300 bg-red-50/30' : 'border-slate-100 focus-within:border-slate-900'
               }`}>
@@ -523,6 +467,31 @@ export default function CreateListingPage() {
                 />
               </div>
 
+              {/* ── PCS ERROR ALERT ── */}
+              <AnimatePresence>
+                {pcsError && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-red-50 border border-red-200 rounded-xl p-4 mt-2 text-sm"
+                  >
+                    <p className="text-red-800 font-medium">
+                      ⚠️ Price Limit Exceeded! We found {pcsError.itemTitle} on the market for RM{pcsError.marketBaselinePrice.toFixed(2)}. To protect the student economy, the max campus listing price is RM{pcsError.maxAllowedStudentPrice.toFixed(2)}.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setPrice(pcsError.maxAllowedStudentPrice.toString());
+                        setPcsError(null);
+                      }}
+                      className="mt-3 bg-gray-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-gray-800 transition-colors"
+                    >
+                      Set price to RM{pcsError.maxAllowedStudentPrice.toFixed(2)} automatically
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* ── LIVE MARKET INTELLIGENCE PANEL ── */}
               <AnimatePresence mode="wait">
                 {marketCheck && !marketLoading && (() => {
@@ -533,23 +502,7 @@ export default function CreateListingPage() {
                   const isCompliant = marketCheck.validation?.zone === 'green';
 
                   if (!marketCheck.market_baseline) {
-                    return (
-                      <motion.div
-                        key="market-panel-static"
-                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -4, scale: 0.98 }}
-                        transition={{ duration: 0.25 }}
-                        className="mt-2"
-                      >
-                        <p className={`text-[11px] font-medium leading-relaxed ${isBlocked ? 'text-red-600' : 'text-slate-400'}`}>
-                          {isBlocked 
-                            ? `⚠️ Your price exceeds the campus ceiling of RM ${marketCheck.max_campus_price.toFixed(2)} for this category. Please lower it.`
-                            : `Note: This category has a fixed campus price ceiling of RM ${marketCheck.max_campus_price.toFixed(2)}.`
-                          }
-                        </p>
-                      </motion.div>
-                    );
+                    return null; // Removed hardcoded ceiling text
                   }
 
                   return (
@@ -749,16 +702,16 @@ export default function CreateListingPage() {
             {/* ── POST BUTTON ── */}
             <div className="pt-4">
               <button
-                disabled={!canPost || isUploading || pcsPhase === 'verifying'}
+                disabled={!canPost || isUploading}
                 onClick={handlePost}
                 className={`w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
-                  (canPost && !isUploading && pcsPhase !== 'verifying')
+                  (canPost && !isUploading)
                     ? 'bg-slate-900 text-white active:scale-95 shadow-sm'
                     : 'bg-slate-50 text-slate-200 border border-slate-100'
                 }`}
               >
-                {(isPosting || isUploading || pcsPhase === 'verifying') && <Loader2 size={16} className="animate-spin" />}
-                {isUploading ? 'Uploading Photos...' : pcsPhase === 'verifying' ? 'Verifying student price…' : 'Publish Listing'}
+                {(isPosting || isUploading) && <Loader2 size={16} className="animate-spin" />}
+                {isUploading ? 'Uploading Photos...' : isPosting ? 'Running campus guardrails...' : 'Publish Listing'}
               </button>
 
               {/* ── PCS APPROVED BANNER ── */}
