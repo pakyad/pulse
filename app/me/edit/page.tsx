@@ -165,10 +165,10 @@ export default function EditProfilePage() {
       {/* ── LOCAL NAVIGATION ── */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
-            <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
+            <button onClick={() => router.back()} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#6B7280] border border-slate-50 active:scale-95 transition-all">
                <ChevronLeft size={20} />
             </button>
-            <p className="text-[14px] font-bold tracking-tight">Edit Profile</p>
+            <p className="text-[24px] font-semibold text-[#111827] tracking-tight">Edit Profile</p>
          </div>
          <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
       </nav>
@@ -181,36 +181,36 @@ export default function EditProfilePage() {
              onClick={() => setPickerType('avatar')}
              className="relative group active:scale-95 transition-all"
            >
-              <div className="w-24 h-24 rounded-[32px] bg-slate-50 border border-slate-100 overflow-hidden shadow-sm group-hover:border-slate-300 transition-colors">
+              <div className="w-24 h-24 rounded-[12px] bg-white border border-[#E5E7EB] overflow-hidden shadow-sm group-hover:border-slate-300 transition-colors">
                  <img src={photoUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name}`} className="w-full h-full object-cover" alt="Profile" />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-slate-900 rounded-full border-2 border-white flex items-center justify-center text-white shadow-md">
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#111827] rounded-full border-2 border-white flex items-center justify-center text-white shadow-md">
                  <Camera size={14} />
               </div>
            </button>
            <div className="text-center space-y-1">
-              <Heading>{profile?.full_name}</Heading>
-              <Subtext>@{profile?.email?.split('@')[0]}</Subtext>
+              <h2 className="text-[17px] font-bold text-[#111827] tracking-tight">{profile?.full_name}</h2>
+              <p className="text-[13px] text-[#6B7280]">@{profile?.email?.split('@')[0]}</p>
            </div>
         </section>
 
         {/* ── ACADEMIC INFO ── */}
         <section className="space-y-6">
           <div className="px-1 space-y-1">
-            <Heading>Academic Details</Heading>
-            <Subtext>Update your course and year of study</Subtext>
+            <h2 className="text-[16px] font-semibold text-[#111827]">Academic Details</h2>
+            <p className="text-[13px] text-[#6B7280]">Update your course and year of study</p>
           </div>
           
            <div className="space-y-4">
               {/* Programme Dropdown */}
               <div className="space-y-2">
-                 <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Programme</p>
+                 <p className="text-[13px] font-semibold text-[#6B7280] capitalize px-1">Programme</p>
                  <div className="relative">
                    <button 
                      onClick={() => setPickerType(pickerType === 'programme' ? null : 'programme')}
-                     className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
+                     className="w-full h-14 bg-white border border-[#E5E7EB] rounded-[12px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
                    >
-                     <span className={`text-[13px] font-bold ${programme ? 'text-slate-900' : 'text-slate-400'}`}>
+                     <span className={`text-[13px] font-bold ${programme ? 'text-[#111827]' : 'text-slate-400'}`}>
                         {programme || 'Select Programme'}
                      </span>
                      <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'programme' ? 'rotate-180' : ''}`} />
@@ -219,11 +219,11 @@ export default function EditProfilePage() {
                      {pickerType === 'programme' && (
                        <motion.div 
                          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                         className="absolute top-full left-0 right-0 mt-3 bg-slate-50 border border-slate-100 rounded-[24px] overflow-hidden z-20 shadow-2xl shadow-slate-900/5 max-h-[300px] overflow-y-auto pr-1 scrollbar-hide"
+                         className="absolute top-full left-0 right-0 mt-3 bg-white border border-[#E5E7EB] rounded-[12px] overflow-hidden z-20 shadow-2xl shadow-slate-900/5 max-h-[300px] overflow-y-auto pr-1 scrollbar-hide"
                        >
                          {PROGRAMMES_GROUPS.map(group => (
                            <div key={group.label}>
-                             <p className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50/80 sticky top-0">
+                             <p className="px-6 py-3 text-[10px] font-bold text-[#6B7280] uppercase tracking-widest bg-slate-50/80 sticky top-0">
                                {group.label}
                              </p>
                              {group.options.map(opt => (
@@ -248,34 +248,34 @@ export default function EditProfilePage() {
 
               {/* Matric Number */}
               <div className="space-y-2">
-                 <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Matric Number</p>
+                 <p className="text-[13px] font-semibold text-[#6B7280] capitalize px-1">Matric Number</p>
                  <input
                    type="text"
                    placeholder="e.g. MIIT2210234"
                    value={matricNumber}
                    onChange={(e) => setMatricNumber(e.target.value)}
-                   className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 text-[13px] font-bold text-slate-900 outline-none focus:border-slate-900 transition-all placeholder:text-slate-400"
+                   className="w-full h-14 bg-white border border-[#E5E7EB] rounded-[12px] px-5 text-[13px] font-bold text-[#111827] outline-none focus:border-[#111827] transition-all placeholder:text-slate-400"
                  />
               </div>
 
               {/* Campus (read-only) */}
               <div className="space-y-2">
-                 <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Campus</p>
-                 <div className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between">
-                   <span className="text-[13px] font-bold text-slate-600">MIIT — Malaysian Institute of Information Technology</span>
+                 <p className="text-[13px] font-semibold text-[#6B7280] capitalize px-1">Campus</p>
+                 <div className="w-full h-14 bg-slate-50 border border-[#E5E7EB] rounded-[12px] px-5 flex items-center justify-between">
+                   <span className="text-[13px] font-bold text-[#6B7280]">MIIT — Malaysian Institute of Information Technology</span>
                    <Lock size={16} className="text-slate-400 shrink-0" />
                  </div>
               </div>
 
               {/* Current Year Dropdown */}
               <div className="space-y-2">
-                 <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Current Year</p>
+                 <p className="text-[13px] font-semibold text-[#6B7280] capitalize px-1">Current Year</p>
                  <div className="relative">
                    <button 
                      onClick={() => setPickerType(pickerType === 'year' ? null : 'year')}
-                     className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
+                     className="w-full h-14 bg-white border border-[#E5E7EB] rounded-[12px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
                    >
-                     <span className={`text-[13px] font-bold ${yearOfStudy ? 'text-slate-900' : 'text-slate-400'}`}>
+                     <span className={`text-[13px] font-bold ${yearOfStudy ? 'text-[#111827]' : 'text-slate-400'}`}>
                         {yearOfStudy || 'Select Year'}
                      </span>
                      <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'year' ? 'rotate-180' : ''}`} />
@@ -284,7 +284,7 @@ export default function EditProfilePage() {
                      {pickerType === 'year' && (
                        <motion.div 
                          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                         className="absolute top-full left-0 right-0 mt-3 bg-slate-50 border border-slate-100 rounded-[24px] overflow-hidden z-20 shadow-2xl shadow-slate-900/5"
+                         className="absolute top-full left-0 right-0 mt-3 bg-white border border-[#E5E7EB] rounded-[12px] overflow-hidden z-20 shadow-2xl shadow-slate-900/5"
                        >
                          {YEARS.map(year => (
                            <button
@@ -309,20 +309,20 @@ export default function EditProfilePage() {
         {/* ── ABOUT & CONTACT ── */}
         <section className="space-y-6">
           <div className="px-1 space-y-1">
-            <Heading>Public Profile</Heading>
-            <Subtext>Tell peers about yourself</Subtext>
+            <h2 className="text-[16px] font-semibold text-[#111827]">Public Profile</h2>
+            <p className="text-[13px] text-[#6B7280]">Tell peers about yourself</p>
           </div>
           
           <div className="space-y-2">
-             <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Short Bio</p>
+             <p className="text-[13px] font-semibold text-[#6B7280] capitalize px-1">Short Bio</p>
              <textarea 
                value={bio}
                onChange={(e) => setBio(e.target.value.slice(0, 150))}
                rows={4}
-               className="w-full bg-slate-50 border border-slate-100 rounded-[24px] p-5 text-[14px] font-medium leading-relaxed outline-none focus:border-slate-900 transition-all resize-none shadow-sm"
+               className="w-full bg-white border border-[#E5E7EB] rounded-[12px] p-5 text-[14px] font-medium leading-relaxed outline-none focus:border-[#111827] transition-all resize-none shadow-sm"
                placeholder="Write something about yourself..."
              />
-             <p className="text-right text-[9px] font-bold text-slate-300 px-2 tracking-tighter">{bio.length}/150</p>
+             <p className="text-right text-[9px] font-bold text-[#6B7280] px-2 tracking-tighter">{bio.length}/150</p>
           </div>
         </section>
 
@@ -333,7 +333,7 @@ export default function EditProfilePage() {
         <button 
           onClick={handleSave} 
           disabled={saving}
-          className="w-full h-14 bg-slate-900 text-white rounded-full text-[14px] font-bold disabled:opacity-30 flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-md"
+          className="w-full h-14 bg-[#111827] text-white rounded-full text-[14px] font-medium disabled:opacity-30 flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-md"
         >
           {saving ? <Loader2 size={18} className="animate-spin" /> : 'Save Changes'}
         </button>

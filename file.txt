@@ -1,0 +1,1880 @@
+=== DesktopMerchant.tsx ===
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { auth, db } from '@/lib/firebase';
+import SwipeToReady from './SwipeToReady';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info, Pencil, Trash2, ShieldAlert, ClipboardList } from 'lucide-react';
+import CreateListing from '@/components/CreateListing';
+import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import VoxelStatus from '@/components/shared/VoxelStatus';
+import PriceHealthIndicator from '@/components/marketplace/PriceHealthIndicator';
+
+export default function DesktopMerchant({ 
+  merchant, 
+  revenue, 
+  activeOrdersCount, 
+  pipelineOrders,
+  completedOrders,
+  items,
+  onViewProof,
+  handleAcceptOrder,
+  handlePrepareOrder,
+  handleMarkReady,
+  handleMessageUser,
+  handleCallRunner,
+  handleConfirmDelivery,
+  toggleItemStatus
+}: any) {
+  const router = useRouter();
+  const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+  const [isInlineFormOpen, setIsInlineFormOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  // ── FIX 7: Inline Form State ──
+  const [formData, setFormData] = React.useState({
+    name: '',
+    description: '',
+    price: '',
+    stock: '',
+    maxPerStudent: '',
+    category: 'Academic'
+  });
+  const [formImages, setFormImages] = React.useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files).slice(0, 5);
+      setFormImages(files);
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!merchant?.uid || isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+      const { storage } = await import('@/lib/firebase');
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+
+      const imageUrls = await Promise.all(
+        formImages.map(async (file) => {
+          const storageRef = ref(storage, `items/${merchant.uid}/${Date.now()}_${file.name}`);
+          const snapshot = await uploadBytes(storageRef, file);
+          return getDownloadURL(snapshot.ref);
+        })
+      );
+
+      await addDoc(collection(db, "items"), {
+        title: formData.name, // Mapping 'name' to 'title' as per existing schema
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        stock_count: parseInt(formData.stock),
+        stock: parseInt(formData.stock),
+        maxPerStudent: formData.maxPerStudent ? parseInt(formData.maxPerStudent) : null,
+        category: formData.category.toUpperCase(),
+        imageUrls,
+        image_url: imageUrls[0] || null, // Primary image
+        seller_id: merchant.uid,
+        seller_name: merchant.full_name,
+        status: "ACTIVE",
+        merchant: true,
+        created_at: serverTimestamp()
+      });
+
+      setFormData({ name: '', description: '', price: '', stock: '', maxPerStudent: '', category: 'Academic' });
+      setFormImages([]);
+      setIsInlineFormOpen(false);
+      alert("Product added successfully!");
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("Failed to add product.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const [selectedOrders, setSelectedOrders] = React.useState<string[]>([]);
+
+  const handleBulkMarkReady = async () => {
+    try {
+      const { writeBatch, doc, serverTimestamp } = await import('firebase/firestore');
+      const batch = writeBatch(db);
+      selectedOrders.forEach(orderId => {
+        const orderRef = doc(db, 'orders', orderId);
+        batch.update(orderRef, { status: 'READY', ready_at: serverTimestamp() });
+      });
+      await batch.commit();
+      setSelectedOrders([]);
+      alert(`${selectedOrders.length} orders marked as ready.`);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to mark orders as ready.');
+    }
+  };
+
+  const handleExportOrders = () => {
+    const csvRows = [
+      ['Order Code', 'Buyer Name', 'Item', 'Quantity', 'Handover Node', 'Status', 'Amount', 'Created At']
+    ];
+    pipelineOrders.forEach((o: any) => {
+      csvRows.push([
+        o.id.slice(-6).toUpperCase(),
+        o.customer_name || 'Student',
+        o.title,
+        o.items?.[0]?.qty || 1,
+        o.drop_off_location || 'Campus Delivery',
+        o.status,
+        Number(o.total || o.price || 0).toFixed(2),
+        o.created_at?.toDate ? o.created_at.toDate().toLocaleString() : new Date(o.created_at).toLocaleString()
+      ].map(str => `"${String(str).replace(/"/g, '""')}"`));
+    });
+    const csvString = csvRows.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pulse_orders_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const toggleOrderSelection = (orderId: string) => {
+    setSelectedOrders(prev => 
+      prev.includes(orderId) ? prev.filter(id => id !== orderId) : [...prev, orderId]
+    );
+  };
+
+  const isClub = merchant?.role === 'CLUB' || merchant?.is_verified_merchant;
+
+  const filteredAttentionItems = items?.filter((item: any) => {
+    const isAttention = (item.stock_count ?? 99) <= 5;
+    if (!isAttention) return false;
+    if (!searchTerm) return true;
+    return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  return (
+    <div className="min-h-screen bg-[#F2F2F7] selection:bg-gray-100 hidden md:flex">
+      
+      {/* ── Fixed Sidebar (Column 1) ── */}
+      <aside className="w-64 h-screen bg-[#FFFFFF] border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
+        
+        {/* Header */}
+        <div className="px-6 py-8 flex items-center gap-2">
+          <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+             <span className="text-white font-semibold text-[14px]">P</span>
+          </div>
+          <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
+        </div>
+
+        {/* Directory Links */}
+        <nav className="flex-1 px-4 py-2 space-y-1.5">
+          <button 
+            onClick={() => router.push('/merchant')}
+            className="w-full flex items-center gap-3 px-3 py-2.5 bg-blue-50 text-slate-900 rounded-xl transition-colors group"
+          >
+            <LayoutGrid size={20} />
+            <span className="text-[15px] font-bold tracking-[-0.24px]">Overview</span>
+          </button>
+          
+          <button 
+            onClick={() => router.push('/orders')}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
+          >
+            <Bell size={20} />
+            <span className="text-[15px] tracking-[-0.24px]">Live Orders</span>
+          </button>
+          <button 
+            onClick={() => router.push('/marketplace')}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
+          >
+            <Package size={20} />
+            <span className="text-[15px] tracking-[-0.24px]">Products</span>
+          </button>
+          {isClub && (
+            <>
+              <button 
+                onClick={() => router.push('/merchant/disputes')}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
+              >
+                <ClipboardList size={20} />
+                <span className="text-[15px] tracking-[-0.24px]">Log</span>
+              </button>
+              <button 
+                onClick={() => router.push('/me/insights')}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
+              >
+                <BarChart3 size={20} />
+                <span className="text-[15px] tracking-[-0.24px]">Analytics</span>
+              </button>
+            </>
+          )}
+          <button 
+            onClick={() => router.push('/me/edit')}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] rounded-xl transition-colors font-medium group"
+          >
+            <Settings size={20} />
+            <span className="text-[15px] tracking-[-0.24px]">Settings</span>
+          </button>
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t-[0.5px] border-[#E5E5EA]">
+          <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8E8E93] hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors font-medium">
+            <LogOut size={20} />
+            <span className="text-[15px] tracking-[-0.24px]">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Main Content Area ── */}
+      <main className="flex-1 ml-64 flex flex-col min-h-screen bg-white text-slate-900">
+        
+        {/* Top Header */}
+        <header className="bg-white border-b border-slate-200 px-10 py-6 flex items-center justify-between sticky top-0 z-30">
+          <div>
+             <div className="flex items-center gap-3">
+               <h1 className="text-[24px] font-semibold text-[#111827]">Shop Manager</h1>
+               <span className={`text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] border ${
+                 isClub ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200'
+               }`}>
+                 {isClub ? 'CLUB MERCHANT' : 'SELLER'}
+               </span>
+             </div>
+             <p className="text-[13px] text-[#6B7280] mt-1">Logged in as {merchant?.full_name}</p>
+          </div>
+
+          <div className="flex items-center gap-6">
+             <div className="relative flex items-center w-80 h-10 rounded-xl border border-slate-200 bg-slate-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+               <div className="px-3 text-slate-400">
+                 <Search size={16} />
+               </div>
+               <input className="h-full w-full outline-none text-[12px] pr-2 bg-transparent placeholder-slate-400 font-medium" type="text" placeholder="Search orders, student names..." /> 
+             </div>
+
+             {isClub && (
+               <button 
+                 onClick={() => setIsInlineFormOpen(!isInlineFormOpen)}
+                 className="h-10 px-6 bg-slate-900 text-white text-[13px] font-bold rounded-md hover:bg-blue-700 transition-all"
+               >
+                 + Add Product
+               </button>
+             )}
+
+             <div className="w-px h-6 bg-slate-200" />
+
+             <button className="text-slate-400 hover:text-slate-900">
+                <Bell size={20} />
+             </button>
+             <button 
+               onClick={() => { auth.signOut(); router.push('/auth'); }}
+               className="text-slate-400 hover:text-rose-600 transition-colors"
+             >
+                <LogOut size={20} />
+             </button>
+              <AvatarDropdown 
+                 photoUrl={merchant?.photo_url} 
+                 userName={merchant?.full_name || 'Merchant'} 
+              />
+          </div>
+        </header>
+
+        {/* ── FIX 7: Inline Form ── */}
+        <AnimatePresence>
+          {isInlineFormOpen && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-slate-50 border-b border-slate-200 overflow-hidden"
+            >
+              <form onSubmit={handleFormSubmit} className="p-10 max-w-4xl space-y-8">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-[18px] font-bold text-slate-900">Add New Product</h2>
+                  <button type="button" onClick={() => setIsInlineFormOpen(false)} className="text-slate-400 hover:text-slate-900">
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Product Name</label>
+                      <input 
+                        required
+                        type="text" 
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-[14px] font-medium outline-none focus:border-slate-900 transition-all"
+                        placeholder="e.g. Calculus Textbook"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Description</label>
+                      <textarea 
+                        required
+                        rows={4}
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        className="w-full p-4 bg-white border border-slate-200 rounded-xl text-[14px] font-medium outline-none focus:border-slate-900 transition-all resize-none"
+                        placeholder="Tell students about your product..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Price (RM)</label>
+                        <input 
+                          required
+                          type="number" 
+                          step="0.01"
+                          value={formData.price}
+                          onChange={(e) => setFormData({...formData, price: e.target.value})}
+                          className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-[14px] font-medium outline-none focus:border-slate-900 transition-all"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Stock Quantity</label>
+                        <input 
+                          required
+                          type="number" 
+                          value={formData.stock}
+                          onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                          className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-[14px] font-medium outline-none focus:border-slate-900 transition-all"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Purchase limit per student</label>
+                      <input 
+                        type="number" 
+                        value={formData.maxPerStudent}
+                        onChange={(e) => setFormData({...formData, maxPerStudent: e.target.value})}
+                        className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-[14px] font-medium outline-none focus:border-slate-900 transition-all"
+                        placeholder="Optional"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Category</label>
+                      <select 
+                        value={formData.category}
+                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                        className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-[14px] font-medium outline-none focus:border-slate-900 transition-all appearance-none"
+                      >
+                        <option>Academic</option>
+                        <option>Tech</option>
+                        <option>Hostel</option>
+                        <option>Apparel</option>
+                        <option>Services</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[12px] font-bold text-slate-500 uppercase tracking-tight">Product Images (Up to 5)</label>
+                  <div className="flex gap-4">
+                    <label className="w-24 h-24 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-white hover:border-slate-900 transition-all group">
+                      <Plus size={20} className="text-slate-300 group-hover:text-slate-900" />
+                      <span className="text-[10px] font-bold text-slate-300 group-hover:text-slate-900">Upload</span>
+                      <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                    </label>
+                    {formImages.map((file, i) => (
+                      <div key={i} className="w-24 h-24 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden relative group">
+                        <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" alt="" />
+                        <button type="button" onClick={() => setFormImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-slate-900/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    disabled={isSubmitting}
+                    type="submit" 
+                    className="h-12 px-10 bg-slate-900 text-white text-[14px] font-bold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                        Adding...
+                      </>
+                    ) : 'Publish Product'}
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setIsInlineFormOpen(false)}
+                    className="h-12 px-10 bg-white border border-slate-200 text-slate-600 text-[14px] font-bold rounded-xl hover:bg-slate-50 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── ADMINISTRATIVE VIEW ── */}
+        <div className="p-10 space-y-12">
+          
+          {/* Data Tables */}
+          <div className="grid grid-cols-1 gap-12">
+             
+              {/* FIX 5: Orders to Do / Active Pipeline */}
+              <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] mb-[20px]">
+                 <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                       <h3 className="text-[16px] font-semibold text-[#111827]">Active Pipeline</h3>
+                       <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
+                          <Info size={14} /> Manage and fulfill your active orders.
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <button onClick={handleExportOrders} className="bg-white border border-[#D1D5DB] text-[#374151] rounded-full px-[18px] py-[8px] text-[13px] font-medium transition-all hover:bg-slate-50">
+                         Export Orders
+                       </button>
+                       <span className="text-[13px] text-[#111827] font-semibold">{pipelineOrders.length} Orders</span>
+                    </div>
+                 </div>
+                 
+                 <div className="divide-y divide-slate-100">
+                    {pipelineOrders.length === 0 ? (
+                      <p className="py-10 text-center text-[#6B7280] italic text-[13px]">No active orders found.</p>
+                    ) : pipelineOrders.map((o: any) => (
+                      <div key={o.id} className="py-6 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <input 
+                              type="checkbox" 
+                              checked={selectedOrders.includes(o.id)}
+                              onChange={() => toggleOrderSelection(o.id)}
+                              className="w-4 h-4 rounded border-slate-300 text-[#111827] focus:ring-[#111827] cursor-pointer"
+                            />
+                            <div className="w-10 h-10 bg-slate-100 rounded border border-slate-200 flex items-center justify-center text-slate-400">
+                               <Package size={18} />
+                            </div>
+                             <div>
+                                <p className="text-[14px] font-bold text-[#111827]">{o.title}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className={`text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] ${
+                                    o.status === 'PAID' ? 'bg-[#FEF3C7] text-[#92400E]' :
+                                    o.status === 'PREPARING' ? 'bg-[#DBEAFE] text-[#1E40AF]' :
+                                    o.status === 'READY' ? 'bg-[#D1FAE5] text-[#065F46]' :
+                                    o.status === 'RUNNER_ASSIGNED' ? 'bg-[#EDE9FE] text-[#4C1D95]' :
+                                    o.status === 'PICKED_UP' ? 'bg-[#CFFAFE] text-[#164E63]' :
+                                    o.status === 'DELIVERED' ? 'bg-[#F3F4F6] text-[#374151]' :
+                                    o.status === 'CANCELLED' ? 'bg-[#FEE2E2] text-[#991B1B]' :
+                                    'bg-slate-100 text-slate-600'
+                                  }`}>
+                                    {o.status.replace(/_/g, ' ')}
+                                  </span>
+                                </div>
+                             </div>
+                         </div>
+                         <div className="flex items-center gap-4">
+                            {/* status PAID (or PENDING_VENDOR): Prepare Order */}
+                            {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && (
+                              <button 
+                                onClick={() => handlePrepareOrder(o.id, o.items || [])}
+                                className="bg-[#111827] text-white rounded-full px-[18px] py-[8px] text-[13px] font-medium transition-all hover:bg-slate-800"
+                              >
+                                Prepare Order
+                              </button>
+                            )}
+
+                            {/* status PREPARING: Mark Ready for Pickup */}
+                            {o.status === 'PREPARING' && (
+                              <button 
+                                onClick={() => handleMarkReady(o.id)}
+                                className="bg-[#111827] text-white rounded-full px-[18px] py-[8px] text-[13px] font-medium transition-all hover:bg-slate-800"
+                              >
+                                Mark Ready
+                              </button>
+                            )}
+
+                            {/* status READY or RUNNER_ASSIGNED: Message Runner & Message Buyer */}
+                            {(o.status === 'READY' || o.status === 'READY_FOR_PICKUP' || o.status === 'PENDING_RUNNER' || o.runner_id) && (
+                              <div className="flex items-center gap-2">
+                                <button 
+                                  onClick={() => handleMessageUser(o.id, o.buyer_id, o.customer_name, 'BUYER', o.title)}
+                                  className="bg-[#111827] text-white rounded-full px-[18px] py-[8px] text-[13px] font-medium transition-all hover:bg-slate-800"
+                                >
+                                  Message Buyer
+                                </button>
+                                {(o.runner_id || o.status === 'PENDING_RUNNER') && (
+                                  <button 
+                                    onClick={() => handleMessageUser(o.id, o.runner_id || 'DEMO_RUNNER', o.runner_name || 'Runner', 'RUNNER', undefined, o.drop_off_location)}
+                                    className="bg-white border border-[#D1D5DB] text-[#374151] rounded-full px-[18px] py-[8px] text-[13px] font-medium transition-all hover:bg-slate-50"
+                                  >
+                                    Message Runner
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
+                            {/* status PICKED_UP: Collected notice */}
+                            {o.status === 'PICKED_UP' && (
+                              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#D1FAE5] text-[#065F46] rounded-[20px] border border-emerald-100">
+                                <CheckCircle2 size={14} />
+                                <span className="text-[11px] font-medium">Collected</span>
+                              </div>
+                            )}
+                            
+                            {/* Handoff Confirmation */}
+                            {o.status !== 'DELIVERED' && o.status !== 'COMPLETED' && o.status !== 'PAID' && o.status !== 'PENDING_VENDOR' && (
+                              <button 
+                                onClick={() => handleConfirmDelivery(o.id)}
+                                disabled={o.handshake?.seller_confirmed}
+                                className={`rounded-full px-[18px] py-[8px] text-[13px] font-medium transition-all shadow-sm ${
+                                  o.handshake?.seller_confirmed 
+                                  ? 'bg-[#D1FAE5] text-[#065F46] border border-emerald-100' 
+                                  : 'bg-[#111827] text-white hover:bg-slate-800'
+                                }`}
+                              >
+                                {o.handshake?.seller_confirmed ? 'Handoff Sent' : 'Confirm Delivery'}
+                              </button>
+                            )}
+                            <button 
+                              onClick={() => onViewProof(o)}
+                              className="bg-white border border-[#D1D5DB] text-[#374151] rounded-full px-[18px] py-[8px] text-[13px] font-medium transition-all hover:bg-slate-50"
+                            >
+                              Audit
+                            </button>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+
+              {/* Completed Orders Section */}
+              <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] mb-[20px]">
+                 <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-[16px] font-semibold text-[#111827]">Completed Orders</h3>
+                    <span className="text-[13px] text-[#6B7280] font-medium">{completedOrders.length} orders</span>
+                 </div>
+
+                 <div className="divide-y divide-slate-100">
+                    {completedOrders.length === 0 ? (
+                      <p className="py-10 text-center text-[#6B7280] italic text-[13px]">No completed orders yet.</p>
+                    ) : completedOrders.map((o: any) => (
+                      <div key={o.id} className="py-6 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-emerald-50 rounded border border-emerald-100 flex items-center justify-center text-emerald-600">
+                               <CheckCircle2 size={18} />
+                            </div>
+                             <div>
+                                <p className="text-[14px] font-bold text-[#111827]">{o.title}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] bg-[#F3F4F6] text-[#374151]">
+                                    {o.status.replace(/_/g, ' ')}
+                                  </span>
+                                </div>
+                             </div>
+                         </div>
+                         <div className="flex items-center gap-4">
+                            <div className="text-right">
+                               <p className="text-[14px] font-bold text-[#111827]">RM {Number(o.total || o.price || 0).toFixed(2)}</p>
+                               <p className="text-[12px] text-[#6B7280]">{o.delivery_type || 'N/A'}</p>
+                            </div>
+                            <button 
+                              onClick={() => onViewProof(o)}
+                              className="bg-white border border-[#D1D5DB] text-[#374151] rounded-full px-[18px] py-[8px] text-[13px] font-medium transition-all hover:bg-slate-50"
+                            >
+                              Details
+                            </button>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+
+          {/* Key Indicators */}
+          {isClub && (
+            <section className="space-y-4">
+              <div className="flex items-center gap-2 px-1">
+                 <Info size={14} className="text-[#6B7280]" />
+                 <p className="text-[13px] font-medium text-[#6B7280] italic">Daily summary of shop activity for {merchant?.full_name}.</p>
+              </div>
+              <div className="grid grid-cols-3 gap-6">
+                <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px]">
+                   <p className="text-[13px] font-semibold text-[#6B7280] uppercase tracking-tight">Total Earnings</p>
+                   <h2 className="text-[28px] font-bold text-[#111827] mt-2">RM {revenue.toFixed(2)}</h2>
+                </div>
+                <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px]">
+                   <p className="text-[13px] font-semibold text-[#6B7280] uppercase tracking-tight">Orders to Do</p>
+                   <h2 className="text-[28px] font-bold text-[#111827] mt-2">{activeOrdersCount}</h2>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* 🏛️ Minimal Inventory Registry (Matured) */}
+          {isClub && items?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
+            <section className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert size={14} className="text-amber-500" />
+                  <p className="text-[13px] font-semibold text-[#111827]">Inventory Attention</p>
+                </div>
+                
+                {/* 🔍 Drake Searchbar */}
+                <div className="relative group">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#111827] transition-colors" />
+                  <input 
+                    type="text"
+                    placeholder="Search registry..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="h-9 w-64 pl-9 pr-4 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-medium text-[#111827] placeholder:text-slate-300 focus:outline-none focus:bg-white focus:border-slate-200 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-white border border-[#E5E7EB] rounded-[12px] overflow-hidden shadow-sm">
+                {filteredAttentionItems?.length > 0 ? (
+                  filteredAttentionItems.map((item: any) => (
+                    <div key={item.id} className="flex items-center justify-between px-6 py-4 bg-white hover:bg-slate-50 transition-colors border-b border-[#E5E7EB] last:border-0">
+                      <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300">
+                          <Package size={14} />
+                        </div>
+                        <span className="text-[13px] font-bold text-[#111827]">{item.title}</span>
+                      </div>
+                      <div className="flex items-center gap-8">
+                        <span className={`text-[13px] font-semibold ${item.stock_count <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                          {item.stock_count <= 0 ? 'OUT OF STOCK' : `${item.stock_count} REMAINING`}
+                        </span>
+                        <button 
+                          onClick={() => router.push(`/marketplace/${item.id}/edit`)}
+                          className="text-[11px] font-bold text-[#6B7280] hover:text-[#111827] transition-colors "
+                        >
+                          Restock
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-6 py-12 bg-white flex flex-col items-center justify-center text-center">
+                    <Search size={24} className="text-slate-100 mb-2" />
+                    <p className="text-[11px] font-bold text-slate-300 ">No matching assets found</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+             {/* My Inventory: Visual Grid */}
+             {isClub && (
+               <div className="space-y-6">
+                 <div className="flex items-center justify-between px-1">
+                   <div className="flex items-center gap-3">
+                     <h3 className="text-[16px] font-semibold text-[#111827]">My Inventory</h3>
+                     <div className="flex items-center gap-1 text-[13px] text-[#6B7280]">
+                       <Info size={12} /> Manage your listed items and stock.
+                     </div>
+                   </div>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-6">
+                   {items?.length === 0 ? (
+                     <p className="col-span-2 text-center py-12 text-[#6B7280] italic text-[13px]">No assets registered in the registry.</p>
+                   ) : (
+                     items.map((item: any) => (
+                       <div key={item.id} className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] mb-[20px] flex items-center gap-6 hover:border-slate-300 transition-all group">
+                         <div className="w-20 h-20 bg-slate-50 rounded-[12px] overflow-hidden shrink-0 border-[0.5px] border-slate-100">
+                           {item.image_url ? (
+                             <img src={item.image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="" />
+                           ) : (
+                             <div className="w-full h-full flex items-center justify-center text-slate-200">
+                               <LayoutGrid size={24} strokeWidth={1.5} />
+                             </div>
+                           )}
+                         </div>
+
+                         <div className="flex-1 min-w-0">
+                           <div className="flex items-center gap-2 mb-1">
+                             <p className="text-[15px] font-semibold text-[#111827] truncate tracking-tight">{item.title}</p>
+                             {item.stock_count > 0 && item.stock_count <= 10 && (
+                               <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[9px] font-bold rounded-full border border-red-100">Low Stock</span>
+                             )}
+                             {(item.stock_count <= 0 || item.status === 'OUT_OF_STOCK') && (
+                               <span className="px-2 py-0.5 bg-slate-100 text-[#6B7280] text-[9px] font-bold rounded-full border border-slate-200">Out of Stock</span>
+                             )}
+                           </div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[13px] font-medium text-[#6B7280]">RM{item.price}</p>
+                              <PriceHealthIndicator price={item.price} category={item.category} subcategory={item.subcategory} />
+                              <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                             <div className="flex items-center gap-1.5">
+                               <p className={`text-[13px] font-medium ${
+                                 (item.stock_count ?? 0) === 0 ? 'text-red-500' :
+                                 (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 
+                                 'text-[#6B7280]'
+                               }`}>
+                                 {item.stock_count ?? 0} STOCK
+                               </p>
+                             </div>
+                           </div>
+                         </div>
+
+                         <div className="flex items-center gap-2 shrink-0">
+                           <button
+                             onClick={() => toggleItemStatus(item.id, item.status)}
+                             className={`h-10 px-4 rounded-[12px] text-[11px] font-semibold transition-all ${
+                               item.status === 'active'
+                               ? 'bg-emerald-50 text-emerald-600 border-[0.5px] border-emerald-100'
+                               : 'bg-slate-50 text-slate-300 border-[0.5px] border-slate-100'
+                             }`}
+                           >
+                             {item.status === 'active' ? 'Active' : 'Hidden'}
+                           </button>
+                           <button
+                             onClick={() => router.push(`/marketplace/${item.id}/edit`)}
+                             title="Edit listing"
+                             className="h-10 w-10 rounded-[12px] bg-slate-50 border-[0.5px] border-slate-100 flex items-center justify-center text-[#6B7280] hover:text-[#111827] hover:border-slate-300 transition-all"
+                           >
+                             <Pencil size={14} />
+                           </button>
+                           <button
+                             title="Delete listing"
+                             onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed to delete.'); } }}
+                             className="h-10 w-10 rounded-[12px] bg-red-50 border-[0.5px] border-red-100 flex items-center justify-center text-red-300 hover:text-red-500 hover:border-red-300 transition-all"
+                           >
+                             <Trash2 size={14} />
+                           </button>
+                         </div>
+                       </div>
+                     ))
+                   )}
+                 </div>
+               </div>
+             )}
+
+          </div>
+        </div>
+
+      </main>
+
+      {/* ── FIX 16: Floating Action Bar ── */}
+      <AnimatePresence>
+        {selectedOrders.length >= 2 && (
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 ml-32 z-50 bg-slate-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 border border-slate-700"
+          >
+            <span className="text-[13px] font-bold">{selectedOrders.length} orders selected</span>
+            <div className="w-px h-4 bg-slate-700" />
+            <button 
+              onClick={handleBulkMarkReady}
+              className="bg-white text-slate-900 px-5 py-2 rounded-full text-[12px] font-bold hover:bg-slate-100 transition-colors"
+            >
+              Mark All as Ready
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── MODAL LAYER ── */}
+      {isCreateOpen && (
+        <CreateListing 
+          userId={merchant?.uid} 
+          role="merchant" 
+          onClose={() => setIsCreateOpen(false)} 
+        />
+      )}
+    </div>
+  );
+}
+
+
+=== MobileMerchant.tsx ===
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, CheckCircle2, Pencil, Trash2, ShieldAlert, Package, LogOut, ChevronLeft, MessageSquare, AlertCircle, Settings, X, Loader2 } from 'lucide-react';
+import { db, auth } from '@/lib/firebase';
+import { deleteDoc, doc, collection, query, onSnapshot, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import CreateListing from '@/components/CreateListing';
+import AvatarDropdown from '@/components/shared/AvatarDropdown';
+import SwipeToReady from './SwipeToReady';
+import { motion, AnimatePresence } from 'framer-motion';
+import IncomingOrderAlert from './IncomingOrderAlert';
+import DisputeThread from './DisputeThread';
+import PriceHealthIndicator from '@/components/marketplace/PriceHealthIndicator';
+
+/**
+ * Pulse Mobile Merchant Terminal
+ */
+export default function MobileMerchant({ 
+  merchant, 
+  revenue, 
+  activeOrdersCount, 
+  incomingOrders,
+  urgentOrders, 
+  preparingOrders,
+  historyOrders,
+  topItems,
+  recentOrders,
+  handleAcceptOrder, 
+  handlePrepareOrder,
+  handleMarkReady,
+  handleMessageUser,
+  handleCallRunner,
+  handleConfirmDelivery,
+  toggleItemStatus,
+  onViewProof
+}: any) {
+  const router = useRouter();
+  const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+  const [editingItem, setEditingItem] = React.useState<any>(null);
+  const [view, setView] = React.useState<'terminal' | 'disputes' | 'insights' | 'account'>('terminal');
+
+  const isClub = merchant?.role === 'CLUB' || merchant?.is_verified_merchant;
+  const historyList = historyOrders || [];
+  
+  // FIX 2 & 3: Match desktop filtering
+  const pipelineOrders = (recentOrders || []).filter((o: any) => 
+    !["DELIVERED", "CANCELLED", "COMPLETED"].includes(o.status)
+  );
+  const pendingList = pipelineOrders;
+
+  const pulseData = React.useMemo(() => {
+    const pending = (recentOrders || []).filter((o: any) => o.status === 'PAID' || o.status === 'PENDING_VENDOR').length;
+    const preparing = (recentOrders || []).filter((o: any) => o.status === 'PREPARING').length;
+    const delivering = (recentOrders || []).filter((o: any) => o.status === 'READY' || o.status === 'READY_FOR_PICKUP' || o.status === 'PENDING_RUNNER').length;
+    const total = pending + preparing + delivering;
+    return { pending, preparing, delivering, total };
+  }, [recentOrders]);
+
+  const [unreadNotifications, setUnreadNotifications] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!merchant?.uid) return;
+    const qNotifs = query(
+      collection(db, "notifications"),
+      where("userId", "==", merchant.uid),
+      where("read", "==", false)
+    );
+    const unsubNotifs = onSnapshot(qNotifs, (snapshot) => {
+      setUnreadNotifications(snapshot.docs.length);
+    });
+    return () => unsubNotifs();
+  }, [merchant?.uid]);
+  const [activeTab, setActiveTab] = React.useState<'ACTIVE' | 'HISTORY'>('ACTIVE');
+  const [selectedDayIndex, setSelectedDayIndex] = React.useState<number | null>(null);
+  const [disputes, setDisputes] = React.useState<any[]>([]);
+  const [disputesLoading, setDisputesLoading] = React.useState(true);
+  const [selectedDispute, setSelectedDispute] = React.useState<any>(null);
+  const [disputesTab, setDisputesTab] = React.useState<'PENDING' | 'RESOLVED'>('PENDING');
+  const [seeding, setSeeding] = React.useState(false);
+
+  const seedDispute = async () => {
+    if (!merchant?.uid || seeding) return;
+    setSeeding(true);
+    try {
+      const sampleOrders = recentOrders?.filter((o: any) => o.status === 'COMPLETED' || o.status === 'DELIVERED') || [];
+      const refOrder = sampleOrders[0];
+      await addDoc(collection(db, 'disputes'), {
+        order_id: refOrder?.id || 'test-order',
+        buyer_id: refOrder?.buyer_id || 'test-buyer',
+        seller_id: merchant.uid,
+        reporter_name: 'Aiman',
+        order_code: refOrder?.id?.slice(-4).toUpperCase() || 'TEST',
+        reason: 'Item never delivered',
+        narrative: 'I went to the meetup spot but nobody was there. I waited for 15 minutes and the seller never showed up.',
+        status: 'AWAITING_ADMIN',
+        created_at: serverTimestamp(),
+      });
+    } catch (e) {
+      console.error('Seed failed', e);
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (view !== 'disputes' || !isClub || !merchant?.uid) return;
+    const q = query(collection(db, 'disputes'), where('seller_id', '==', merchant.uid));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      data.sort((a: any, b: any) => {
+        const dateA = a.created_at?.toDate ? a.created_at.toDate() : new Date(0);
+        const dateB = b.created_at?.toDate ? b.created_at.toDate() : new Date(0);
+        return dateB.getTime() - dateA.getTime();
+      });
+      setDisputes(data);
+      setDisputesLoading(false);
+    });
+    return () => unsub();
+  }, [view, isClub, merchant?.uid]);
+
+  const pendingDisputes = disputes.filter((d: any) => d.status !== 'RESOLVED' && d.status !== 'SETTLED');
+  const resolvedDisputes = disputes.filter((d: any) => d.status === 'RESOLVED' || d.status === 'SETTLED');
+  const currentDisputes = disputesTab === 'PENDING' ? pendingDisputes : resolvedDisputes;
+
+  // ── STATS TAB (FIX 10) ──
+  const [statsData, setStatsData] = React.useState<any>({
+    totalEarned: 0,
+    itemsSold: 0,
+    activeListings: 0,
+    trustRating: 0,
+    bestSellingItem: '...',
+    recentSales: [],
+    loading: true
+  });
+
+  React.useEffect(() => {
+    if (view !== 'insights' || !merchant?.uid) return;
+
+    // 1. Listen for Delivered Orders
+    const qOrders = query(
+      collection(db, "orders"), 
+      where("seller_id", "==", merchant.uid),
+      where("status", "==", "DELIVERED")
+    );
+    
+    const unsubOrders = onSnapshot(qOrders, (snapshot) => {
+      const delivered = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const totalEarned = delivered.reduce((s, o: any) => s + Number(o.total || o.price || 0), 0);
+      
+      // Best Selling Item
+      const products: Record<string, number> = {};
+      delivered.forEach((o: any) => {
+        const title = o.title || (o.items?.[0]?.title) || 'Unknown Item';
+        products[title] = (products[title] || 0) + 1;
+      });
+      const bestSellingItem = Object.entries(products)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || 'No sales yet';
+
+      // Recent Sales (Last 5)
+      const recentSales = [...delivered]
+        .sort((a: any, b: any) => {
+          const da = a.created_at?.toDate ? a.created_at.toDate() : new Date(a.created_at);
+          const db = b.created_at?.toDate ? b.created_at.toDate() : new Date(b.created_at);
+          return db.getTime() - da.getTime();
+        })
+        .slice(0, 5);
+
+      setStatsData(prev => ({ 
+        ...prev, 
+        totalEarned, 
+        itemsSold: delivered.length, 
+        bestSellingItem,
+        recentSales,
+        loading: false 
+      }));
+    });
+
+    // 2. Listen for Active Items
+    const qItems = query(
+      collection(db, "items"), 
+      where("seller_id", "==", merchant.uid),
+      where("status", "==", "active")
+    );
+    const unsubItems = onSnapshot(qItems, (snapshot) => {
+      setStatsData(prev => ({ ...prev, activeListings: snapshot.docs.length }));
+    });
+
+    // 3. Trust Rating from User Doc
+    const unsubUser = onSnapshot(doc(db, "users", merchant.uid), (snap) => {
+      setStatsData(prev => ({ ...prev, trustRating: snap.data()?.trust_rating || 0 }));
+    });
+
+    return () => {
+      unsubOrders();
+      unsubItems();
+      unsubUser();
+    };
+  }, [view, merchant?.uid]);
+
+  const viewLabels: Record<string, string> = {
+    terminal: 'Manage your shop and fulfill orders.',
+    disputes: 'Track and resolve order disputes.',
+    insights: 'Performance summary for your shop.',
+    account: 'Your profile and account settings.'
+  };
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col text-[#111827] selection:bg-blue-100 md:hidden pb-[60px] font-sans antialiased">
+      
+      {/* ── HEADER ── */}
+      <header className="h-[56px] px-6 border-b-[0.5px] border-[#E5E7EB] sticky top-0 bg-white/80 backdrop-blur-xl z-50 flex items-center justify-between">
+         <div className="flex items-center gap-3">
+            {view !== 'terminal' && (
+              <button onClick={() => setView('terminal')} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-[#111827] active:scale-95 transition-all">
+                <ChevronLeft size={20} />
+              </button>
+            )}
+            <div className="flex items-center gap-2">
+              <h1 className="text-[16px] font-medium text-[#111827] tracking-tight">
+                {view === 'terminal' ? (merchant?.full_name || 'Terminal') : 
+                 view === 'disputes' ? 'Disputes' :
+                 view === 'insights' ? 'Analytics' : 'Account'}
+              </h1>
+              {view === 'terminal' && (
+                <span className={`text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] ${
+                  isClub ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
+                }`}>
+                  {isClub ? 'CLUB' : 'SELLER'}
+                </span>
+              )}
+            </div>
+         </div>
+         <div className="flex items-center gap-4">
+           {view === 'terminal' && (
+             <button onClick={() => router.push('/merchant/notifications')} className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-[#111827] relative active:scale-95 transition-all">
+                <Bell size={18} />
+                {unreadNotifications > 0 && (
+                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border-2 border-white">
+                    {unreadNotifications}
+                  </span>
+                )}
+             </button>
+           )}
+           <div className="w-8 h-8 rounded-full overflow-hidden border border-[#E5E7EB]">
+             <AvatarDropdown 
+                photoUrl={merchant?.photo_url} 
+                userName={merchant?.full_name || 'Merchant'} 
+             />
+           </div>
+         </div>
+      </header>
+
+      <div className="flex-1 overflow-y-auto">
+        <AnimatePresence mode="wait">
+          {/* ════════════════ TERMINAL VIEW ════════════════ */}
+          {view === 'terminal' && (
+            <motion.div
+              key="terminal"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-8 py-6 px-6"
+            >
+              {/* Today */}
+              {pulseData.total > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: 'Pending', count: pulseData.pending },
+                    { label: 'Preparing', count: pulseData.preparing },
+                    { label: 'Ready', count: pulseData.delivering }
+                  ].map(s => (
+                    <div key={s.label} className="bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] p-4 text-center">
+                      <p className="text-[20px] font-bold text-[#111827]">{s.count}</p>
+                      <p className="text-[11px] font-medium text-[#9CA3AF] mt-0.5">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <section className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-1">
+                    <div className="space-y-1">
+                      <h3 className="text-[16px] font-medium text-[#111827] tracking-tight">Orders</h3>
+                      <p className="text-[13px] text-[#9CA3AF]">Manage incoming and active orders.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 bg-slate-50 p-1 rounded-[12px] border border-slate-100">
+                    {(['ACTIVE', 'HISTORY'] as const).map(tab => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`flex-1 py-2.5 rounded-[10px] text-[11px] font-medium transition-all ${
+                          activeTab === tab 
+                            ? 'bg-white text-[#111827] shadow-sm' 
+                            : 'text-[#9CA3AF]'
+                        }`}
+                      >
+                        {tab}
+                        {tab === 'ACTIVE' && pendingList.length > 0 && ` (${pendingList.length})`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-4"
+                  >
+                    {activeTab === 'ACTIVE' && (
+                      pendingList.length === 0 ? (
+                        <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[12px] flex flex-col items-center justify-center text-center">
+                          <div className="w-14 h-14 bg-white rounded-[12px] flex items-center justify-center text-[#9CA3AF] mb-4 shadow-sm border border-slate-100">
+                            <PackageCheck size={24} strokeWidth={1.5} />
+                          </div>
+                          <h3 className="text-[16px] font-medium text-[#111827] tracking-tight mb-1">No active orders</h3>
+                          <p className="text-[13px] text-[#9CA3AF] leading-relaxed max-w-[220px]">
+                            New orders from students will appear here.
+                          </p>
+                        </div>
+                      ) : (
+                        pendingList.map((o: any) => (
+                          <motion.div key={o.id} whileTap={{ scale: 0.98 }} className="p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm space-y-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-[#9CA3AF]">
+                                  <ClipboardList size={16} />
+                                </div>
+                                <div>
+                                  <p className="text-[16px] font-medium text-[#111827] tracking-tight">{o.customer_name || 'Student'}</p>
+                                  <p className="text-[11px] text-[#9CA3AF]">Order #{o.id.slice(-4).toUpperCase()}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-[16px] font-medium text-[#111827]">RM {o.total?.toFixed(2)}</p>
+                                <span className="text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] bg-slate-100 text-[#111827] uppercase tracking-wider">{o.status.replace(/_/g, ' ')}</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 pt-1 border-t border-slate-50">
+                              {/* status PAID / PENDING_VENDOR: Prepare Order */}
+                              {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && (
+                                <button 
+                                  onClick={() => handlePrepareOrder(o.id, o.items || [])} 
+                                  className="w-full h-11 bg-[#111827] text-white rounded-full text-[13px] font-medium active:scale-95 transition-all shadow-sm"
+                                >
+                                  Prepare Order
+                                </button>
+                              )}
+
+                              {/* status PREPARING: Mark Ready */}
+                              {o.status === 'PREPARING' && (
+                                <button 
+                                  onClick={() => handleMarkReady(o.id)} 
+                                  className="w-full h-11 bg-[#111827] text-white rounded-full text-[13px] font-medium active:scale-95 transition-all shadow-sm"
+                                >
+                                  Mark Ready for Pickup
+                                </button>
+                              )}
+
+                              {/* status READY / PENDING_RUNNER: Message options */}
+                              {(o.status === 'READY' || o.status === 'READY_FOR_PICKUP' || o.status === 'PENDING_RUNNER' || o.runner_id) && (
+                                <div className="grid grid-cols-2 gap-2">
+                                  <button 
+                                    onClick={() => handleMessageUser(o.id, o.buyer_id, o.customer_name, 'BUYER', o.title)}
+                                    className="h-11 bg-[#111827] text-white rounded-full text-[13px] font-medium active:scale-95 transition-all"
+                                  >
+                                    Buyer
+                                  </button>
+                                  {(o.runner_id || o.status === 'PENDING_RUNNER') && (
+                                    <button 
+                                      onClick={() => handleMessageUser(o.id, o.runner_id || 'DEMO_RUNNER', o.runner_name || 'Runner', 'RUNNER', undefined, o.drop_off_location)}
+                                      className="h-11 bg-white border border-[#D1D5DB] text-[#374151] rounded-full text-[13px] font-medium active:scale-95 transition-all"
+                                    >
+                                      Runner
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* status PICKED_UP: Collected notice */}
+                              {o.status === 'PICKED_UP' && (
+                                <div className="w-full h-11 bg-emerald-50 rounded-full flex items-center justify-center border border-emerald-100">
+                                  <p className="text-[11px] font-medium text-emerald-600 flex items-center gap-1.5">
+                                    <CheckCircle2 size={14} /> Collected by Runner
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Handshake / Confirmation (if not final) */}
+                              {o.status !== 'DELIVERED' && o.status !== 'COMPLETED' && o.status !== 'PAID' && o.status !== 'PENDING_VENDOR' && (
+                                <button 
+                                  onClick={() => handleConfirmDelivery(o.id)}
+                                  disabled={o.handshake?.seller_confirmed}
+                                  className={`h-11 rounded-full text-[13px] font-medium transition-all ${
+                                    o.handshake?.seller_confirmed 
+                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                                    : 'bg-[#111827] text-white active:scale-95'
+                                  }`}
+                                >
+                                  {o.handshake?.seller_confirmed ? 'Handoff Sent' : 'Confirm Delivery'}
+                                </button>
+                              )}
+                            </div>
+                          </motion.div>
+                        ))
+                      )
+                    )}
+                    {activeTab === 'HISTORY' && (
+                      historyList.length === 0 ? (
+                        <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[12px] flex flex-col items-center justify-center text-center">
+                          <div className="w-14 h-14 bg-white rounded-[12px] flex items-center justify-center text-[#9CA3AF] mb-4 shadow-sm border border-slate-100">
+                            <ClipboardList size={24} strokeWidth={1.5} />
+                          </div>
+                          <h3 className="text-[16px] font-medium text-[#111827] tracking-tight mb-1">No past orders</h3>
+                          <p className="text-[13px] text-[#9CA3AF] leading-relaxed max-w-[220px]">
+                            Completed and cancelled orders will show up here.
+                          </p>
+                        </div>
+                      ) : (
+                        historyList.map((o: any) => (
+                          <div key={o.id} className="p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm space-y-4">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${o.status === 'CANCELLED' ? 'bg-red-50 text-red-400' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'bg-blue-50 text-[#111827]' : 'bg-emerald-50 text-emerald-500'}`}>
+                                  {o.status === 'CANCELLED' ? <Trash2 size={18} /> : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? <Bike size={18} /> : <CheckCircle2 size={18} />}
+                                </div>
+                                <div>
+                                  <p className="text-[16px] font-medium text-[#111827]">{o.customer_name || 'Student'}</p>
+                                  <p className="text-[11px] text-[#9CA3AF]">Order #{o.id.slice(-4).toUpperCase()}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-[16px] font-medium text-[#111827]">RM {o.total?.toFixed(2)}</p>
+                                <span className={`text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] ${o.status === 'CANCELLED' ? 'bg-red-50 text-red-500' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'bg-blue-50 text-[#111827]' : 'bg-emerald-50 text-emerald-500'}`}>
+                                  {o.status.replace(/_/g, ' ')}
+                                </span>
+                              </div>
+                            </div>
+                            {['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) && (
+                              <div className="p-3 bg-slate-50/50 rounded-[12px] border border-slate-50 flex items-center justify-between">
+                                <p className="text-[11px] font-medium text-[#9CA3AF] flex items-center gap-2">
+                                  <User size={12} /> With {o.runner_name || 'Runner'}
+                                </p>
+                                <p className="text-[11px] font-medium text-[#111827] truncate ml-4">{o.drop_off_location || 'Campus'}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </section>
+
+              {isClub && topItems?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 px-1">
+                    <ShieldAlert size={14} className="text-[#9CA3AF]" />
+                    <p className="text-[11px] font-medium text-[#9CA3AF] leading-none">Low Stock</p>
+                  </div>
+                  <div className="bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] overflow-hidden shadow-sm divide-y divide-slate-50">
+                    {topItems.filter((i: any) => (i.stock_count ?? 99) <= 5).map((item: any) => (
+                      <div key={item.id} className="p-4 flex items-center justify-between bg-white active:bg-slate-50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-slate-100">
+                            <Package size={18} />
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-medium text-[#111827] truncate max-w-[120px]">{item.title}</p>
+                            <button onClick={() => setEditingItem(item)} className="mt-2 h-8 px-4 rounded-full bg-white border border-[#D1D5DB] text-[11px] font-medium text-[#374151] hover:bg-slate-50 flex items-center justify-center transition-all active:scale-95">
+                              Restock
+                            </button>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-[16px] font-medium leading-none ${item.stock_count <= 0 ? 'text-red-500' : 'text-[#374151]'}`}>
+                            {item.stock_count <= 0 ? 'EMPTY' : item.stock_count}
+                          </p>
+                          <p className="text-[11px] font-medium text-[#9CA3AF] mt-1">left</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {isClub && (
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between px-1">
+                    <div className="space-y-1">
+                      <h3 className="text-[16px] font-medium text-[#111827] tracking-tight">Inventory</h3>
+                      <p className="text-[13px] text-[#9CA3AF]">Items listed on the marketplace.</p>
+                    </div>
+                    <button onClick={() => setIsCreateOpen(true)} className="w-9 h-9 rounded-full bg-[#111827] text-white flex items-center justify-center shadow-md active:scale-95 transition-all">
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    {topItems?.map((item: any) => (
+                      <div key={item.id} className="p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] flex items-center justify-between shadow-sm">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-[12px] bg-white border border-[#E5E7EB] overflow-hidden">
+                            {item.image_url ? <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-200"><LayoutGrid size={20} /></div>}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-[16px] font-medium text-[#111827] tracking-tight">{item.title}</p>
+                              {item.stock_count > 0 && item.stock_count <= 10 && (
+                                <span className="px-[10px] py-[3px] bg-red-50 text-red-600 text-[11px] font-medium rounded-[20px] border border-red-100 uppercase tracking-tighter">Low</span>
+                              )}
+                              {(item.stock_count <= 0 || item.status === 'OUT_OF_STOCK') && (
+                                <span className="px-[10px] py-[3px] bg-slate-100 text-[#9CA3AF] text-[11px] font-medium rounded-[20px] border border-slate-200 uppercase tracking-tighter">Empty</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[13px] text-[#9CA3AF]">RM {item.price?.toFixed(2)}</p>
+                              <PriceHealthIndicator price={item.price} category={item.category} subcategory={item.subcategory} />
+                              <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                              <p className={`text-[11px] font-medium uppercase tracking-tight ${(item.stock_count ?? 0) === 0 ? 'text-red-500' : (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 'text-[#9CA3AF]'}`}>
+                                {item.stock_count ?? 0} left
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setEditingItem(item)} title="Edit" className="w-9 h-9 rounded-full bg-slate-50 border border-slate-50 flex items-center justify-center text-[#9CA3AF] active:scale-95 transition-all">
+                            <Pencil size={14} />
+                          </button>
+                          <button title="Delete" onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed.'); } }} className="w-9 h-9 rounded-full bg-slate-50 border border-slate-50 flex items-center justify-center text-red-300 active:scale-95 transition-all">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </motion.div>
+          )}
+
+          {/* ════════════════ LOG VIEW (FIX 14) ════════════════ */}
+          {view === 'logs' && (
+            <motion.div
+              key="logs"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="py-6 px-0 space-y-4"
+            >
+              <div className="flex gap-2 overflow-x-auto no-scrollbar px-6 pb-2 sticky top-[56px] z-40 bg-white/90 backdrop-blur-md py-2 border-b border-slate-50">
+                {['All', 'Active', 'Completed', 'Cancelled'].map(tab => {
+                  const isActiveTab = (activeTab as string || 'All') === tab;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab as any)}
+                      className={`px-5 py-2.5 rounded-full text-[11px] font-medium transition-all shrink-0 ${isActiveTab ? 'bg-[#111827] text-white' : 'bg-white text-[#374151] border border-[#D1D5DB] hover:bg-slate-50'}`}
+                    >
+                      {tab}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="px-6 space-y-3">
+                {(() => {
+                  const filteredOrders = (historyOrders || []).filter((o: any) => {
+                    const currentTab = activeTab as string || 'All';
+                    if (currentTab === 'Active') return ['PAID', 'PREPARING', 'READY', 'RUNNER_ASSIGNED', 'PICKED_UP'].includes(o.status);
+                    if (currentTab === 'Completed') return o.status === 'DELIVERED';
+                    if (currentTab === 'Cancelled') return o.status === 'CANCELLED';
+                    return true;
+                  });
+
+                  const getStatusColor = (status: string) => {
+                    switch (status) {
+                      case 'PAID': return 'bg-[#FEF3C7] text-[#92400E]';
+                      case 'PREPARING': return 'bg-[#DBEAFE] text-[#1E40AF]';
+                      case 'READY': return 'bg-[#D1FAE5] text-[#065F46]';
+                      case 'RUNNER_ASSIGNED': return 'bg-[#EDE9FE] text-[#4C1D95]';
+                      case 'PICKED_UP': return 'bg-[#CFFAFE] text-[#164E63]';
+                      case 'DELIVERED': return 'bg-[#F3F4F6] text-[#374151]';
+                      case 'CANCELLED': return 'bg-[#FEE2E2] text-[#991B1B]';
+                      default: return 'bg-slate-100 text-[#374151]';
+                    }
+                  };
+
+                  if (filteredOrders.length === 0) {
+                    return (
+                      <div className="py-20 text-center flex flex-col items-center">
+                        <ClipboardList size={32} className="text-[#9CA3AF] mb-4" />
+                        <p className="text-[13px] font-medium text-[#111827]">No orders found</p>
+                      </div>
+                    );
+                  }
+
+                  return filteredOrders.map((o: any) => (
+                    <div key={o.id} className="p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-[11px] font-medium text-[#9CA3AF]">
+                            {o.created_at?.toDate ? o.created_at.toDate().toLocaleString('en-MY', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : ''}
+                          </p>
+                          <p className="text-[11px] font-mono font-bold text-[#9CA3AF] mt-0.5">#{o.id.slice(-6).toUpperCase()}</p>
+                        </div>
+                        <span className={`px-[10px] py-[3px] rounded-[20px] text-[11px] font-medium uppercase tracking-wider ${getStatusColor(o.status)}`}>
+                          {o.status.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-end border-t border-slate-50 pt-3">
+                        <div>
+                          <p className="text-[16px] font-medium text-[#111827]">{o.customer_name || 'Student'}</p>
+                          <p className="text-[13px] text-[#9CA3AF]">{o.title}</p>
+                        </div>
+                        <p className="text-[16px] font-medium text-[#111827]">RM {Number(o.total || o.price || 0).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ════════════════ INSIGHTS VIEW (FIX 10) ════════════════ */}
+          {view === 'insights' && (
+            <motion.div
+              key="insights"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="py-6 px-6 space-y-8"
+            >
+              {statsData.loading ? (
+                <div className="space-y-6">
+                  <div className="h-40 bg-slate-50 rounded-[20px] animate-pulse" />
+                  <div className="flex gap-3">
+                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
+                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
+                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Hero Card */}
+                  <div className="p-8 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] relative overflow-hidden shadow-sm">
+                    <div className="relative z-10">
+                      <p className="text-[13px] font-medium text-[#9CA3AF] uppercase tracking-widest mb-1">Total Earned</p>
+                      <h2 className="text-[32px] font-bold text-[#111827] tracking-tighter leading-none">RM {statsData.totalEarned.toFixed(2)}</h2>
+                    </div>
+                  </div>
+
+                  {/* Stat Pills */}
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    <div className="px-5 py-2.5 bg-[#111827] text-white rounded-full flex items-center gap-2 shrink-0">
+                      <ShoppingBag size={14} />
+                      <span className="text-[11px] font-medium">{statsData.itemsSold} Sold</span>
+                    </div>
+                    <div className="px-5 py-2.5 bg-white border border-[#D1D5DB] text-[#374151] rounded-full flex items-center gap-2 shrink-0">
+                      <Package size={14} />
+                      <span className="text-[11px] font-medium">{statsData.activeListings} Active</span>
+                    </div>
+                    <div className="px-5 py-2.5 bg-amber-50 border border-amber-100 text-amber-600 rounded-full flex items-center gap-2 shrink-0">
+                      <TrendingUp size={14} />
+                      <span className="text-[11px] font-medium">⭐ {statsData.trustRating}</span>
+                    </div>
+                  </div>
+
+                  {/* Best Selling Item */}
+                  <div className="p-5 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] space-y-3 shadow-sm">
+                    <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-widest">Top Selling</p>
+                    <div className="flex items-center gap-3 text-[#111827]">
+                      <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                        <TrendingUp size={20} />
+                      </div>
+                      <p className="text-[16px] font-medium tracking-tight truncate flex-1">🏆 {statsData.bestSellingItem}</p>
+                    </div>
+                  </div>
+
+                  {/* Recent Sales List */}
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-[16px] font-medium text-[#111827] tracking-tight">Recent Sales</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {statsData.recentSales.map((sale: any) => (
+                        <div key={sale.id} className="flex items-center justify-between group p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
+                              <User size={16} className="text-[#9CA3AF]" />
+                            </div>
+                            <div>
+                              <p className="text-[16px] font-medium text-[#111827] tracking-tight leading-tight">{sale.title}</p>
+                              <p className="text-[13px] text-[#9CA3AF] mt-0.5">{sale.customer_name || 'Student'}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[16px] font-medium text-[#111827]">RM {Number(sale.total || sale.price || 0).toFixed(2)}</p>
+                            <p className="text-[11px] text-[#9CA3AF] mt-0.5">
+                              {sale.created_at?.toDate ? sale.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : '...'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {/* ════════════════ ACCOUNT VIEW ════════════════ */}
+          {view === 'account' && (
+            <motion.div
+              key="account"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="py-6 px-6 space-y-8"
+            >
+              <div className="p-5 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] flex items-center gap-4 shadow-sm">
+                <AvatarDropdown photoUrl={merchant?.photo_url} userName={merchant?.full_name || 'Merchant'} />
+                <div>
+                  <p className="text-[16px] font-medium text-[#111827]">{merchant?.full_name || 'Merchant'}</p>
+                  <p className="text-[13px] text-[#9CA3AF]">{merchant?.role === 'CLUB' ? 'Club Merchant' : 'Seller'}</p>
+                </div>
+              </div>
+              <button onClick={() => router.push('/me/edit')} className="w-full p-5 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] flex items-center justify-between shadow-sm active:scale-98 transition-all">
+                <div className="flex items-center gap-3">
+                  <Settings size={18} className="text-[#9CA3AF]" />
+                  <span className="text-[16px] font-medium text-[#111827]">Settings</span>
+                </div>
+                <ChevronRight size={16} className="text-[#9CA3AF]" />
+              </button>
+              <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full p-5 bg-white border-[0.5px] border-red-100 rounded-[12px] flex items-center justify-between shadow-sm active:scale-98 transition-all">
+                <div className="flex items-center gap-3">
+                  <LogOut size={18} className="text-red-400" />
+                  <span className="text-[16px] font-medium text-red-500">Logout</span>
+                </div>
+                <ChevronRight size={16} className="text-red-300" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── BOTTOM NAV ── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t-[0.5px] border-[#E5E7EB] px-6 h-[60px]">
+        <div className="flex items-center justify-between h-full max-w-lg mx-auto">
+            {[
+              { id: 'terminal', label: 'Terminal', icon: LayoutGrid },
+              ...(isClub ? [{ id: 'logs', label: 'Log', icon: ClipboardList }] : []),
+              ...(isClub ? [{ id: 'insights', label: 'Stats', icon: BarChart3 }] : []),
+              { id: 'account', label: 'Account', icon: User }
+            ].map((nav: any) => {
+              const active = view === nav.id;
+              return (
+                <button 
+                  key={nav.id}
+                  onClick={() => setView(nav.id)}
+                  className="flex flex-col items-center justify-center gap-1 group"
+                >
+                  <nav.icon size={22} strokeWidth={active ? 2.5 : 2} className={active ? 'text-[#111827]' : 'text-[#9CA3AF]'} />
+                  <span className={`text-[10px] font-medium transition-all ${active ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>{nav.label}</span>
+                </button>
+              );
+            })}
+        </div>
+      </nav>
+
+      {/* CREATE/EDIT LISTING OVERLAY */}
+      <AnimatePresence>
+         {(isCreateOpen || editingItem) && (
+            <motion.div 
+               initial={{ y: '100%' }}
+               animate={{ y: 0 }}
+               exit={{ y: '100%' }}
+               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+               className="fixed inset-0 z-1000"
+            >
+               <CreateListing 
+                  key={editingItem?.id || 'create'}
+                  userId={merchant?.uid} 
+                  role={merchant?.role} 
+                  onClose={() => { setIsCreateOpen(false); setEditingItem(null); }} 
+                  existingItem={editingItem}
+               />
+            </motion.div>
+         )}
+      </AnimatePresence>
+      {/* Incoming Order Alert Overlay */}
+      <AnimatePresence>
+        {incomingOrders?.length > 0 && (
+          <IncomingOrderAlert 
+            key={incomingOrders[0].id}
+            order={incomingOrders[0]} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Dispute Response Overlay */}
+      <AnimatePresence>
+        {selectedDispute && (
+          <DisputeThread 
+            dispute={selectedDispute} 
+            onClose={() => setSelectedDispute(null)} 
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+
+=== Market Insights Page (app/me/insights/page.tsx) ===
+'use client'
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { db, auth } from '@/lib/firebase';
+import { collection, query, where, onSnapshot, doc, orderBy, limit } from 'firebase/firestore';
+import { 
+  TrendingUp, ArrowLeft, Package, DollarSign, ListOrdered, 
+  HardDrive, ShoppingBag, Info, Shirt, ChevronRight 
+} from 'lucide-react';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
+  ResponsiveContainer, BarChart, Bar, Cell 
+} from 'recharts';
+
+const StatCard = ({ title, value, subtext }: { title: string, value: string | number, subtext?: string }) => (
+  <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm">
+    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{title}</p>
+    <p className="text-[24px] font-bold text-slate-900 mt-1">{value}</p>
+    {subtext && <p className="text-[11px] text-slate-400 mt-1 font-medium">{subtext}</p>}
+  </div>
+);
+
+export default function MarketInsightsPage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let unsubs: (() => void)[] = [];
+    const unsubAuth = auth.onAuthStateChanged(async (user) => {
+      unsubs.forEach(u => u());
+      unsubs = [];
+
+      if (user) {
+        // User Profile
+        unsubs.push(onSnapshot(doc(db, 'users', user.uid), (snap) => {
+           setProfile({ ...snap.data(), uid: user.uid });
+        }));
+
+        // FIX 9: Queries use seller_id == currentMerchant.uid AND status == "DELIVERED"
+        const q = query(
+          collection(db, "orders"), 
+          where("seller_id", "==", user.uid),
+          where("status", "==", "DELIVERED")
+        );
+        
+        unsubs.push(onSnapshot(q, (s) => {
+           setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })));
+           setLoading(false);
+        }));
+      } else {
+        router.push('/auth');
+      }
+    });
+    return () => {
+      unsubAuth();
+      unsubs.forEach(u => u());
+    };
+  }, [router]);
+
+  // ── SECTION 1: Stat Cards ──
+  const stats = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const totalRevenue = orders.reduce((s, o) => s + Number(o.total || o.price || 0), 0);
+    const thisMonthRevenue = orders.filter(o => {
+      const d = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }).reduce((s, o) => s + Number(o.total || o.price || 0), 0);
+    
+    const totalOrders = orders.length;
+    const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "—";
+
+    return { totalRevenue, thisMonthRevenue, totalOrders, avgOrderValue };
+  }, [orders]);
+
+  // ── SECTION 2: Sales Over Time (Last 7 Days) ──
+  const lineChartData = useMemo(() => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const dayName = days[d.getDay()];
+      
+      const dayRevenue = orders.filter(o => {
+        const od = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
+        od.setHours(0, 0, 0, 0);
+        return od.getTime() === d.getTime();
+      }).reduce((s, o) => s + Number(o.total || o.price || 0), 0);
+
+      data.push({ name: dayName, revenue: dayRevenue });
+    }
+    return data;
+  }, [orders]);
+
+  // ── SECTION 3: Top Products (Horizontal Bar Chart) ──
+  const barChartData = useMemo(() => {
+    const products: Record<string, number> = {};
+    orders.forEach(o => {
+      const title = o.title || (o.items?.[0]?.title) || 'Unknown Item';
+      products[title] = (products[title] || 0) + Number(o.total || o.price || 0);
+    });
+
+    return Object.entries(products)
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+  }, [orders]);
+
+  // ── SECTION 4: Recent Orders Table ──
+  const recentOrders = useMemo(() => {
+    return [...orders]
+      .sort((a, b) => {
+        const da = a.created_at?.toDate ? a.created_at.toDate() : new Date(a.created_at);
+        const db = b.created_at?.toDate ? b.created_at.toDate() : new Date(b.created_at);
+        return db.getTime() - da.getTime();
+      })
+      .slice(0, 10);
+  }, [orders]);
+
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" />
+    </div>
+  );
+
+  return (
+    <main className="min-h-screen bg-[#F8F9FA] pb-40 font-sans antialiased text-slate-900">
+      
+      {/* Header */}
+      <nav className="px-10 py-8 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-30">
+        <div className="flex items-center gap-4">
+          <button onClick={() => router.back()} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#6B7280] hover:text-[#111827] transition-all">
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-[24px] font-semibold text-[#111827] tracking-tight">Analytics</h1>
+            <p className="text-[13px] text-[#6B7280]">Merchant Performance Dashboard</p>
+          </div>
+        </div>
+        <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Merchant'} />
+      </nav>
+
+      <div className="max-w-7xl mx-auto px-10 py-12 space-y-12">
+        
+        {/* SECTION 1: Stat Cards */}
+        <div className="grid grid-cols-4 gap-6">
+          <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px]">
+            <p className="text-[13px] font-semibold text-[#6B7280] uppercase tracking-tight">Total Revenue</p>
+            <p className="text-[28px] font-bold text-[#111827] mt-2">{`RM ${stats.totalRevenue.toFixed(2)}`}</p>
+            <p className="text-[13px] text-[#6B7280] mt-1">Life-to-date earnings</p>
+          </div>
+          <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px]">
+            <p className="text-[13px] font-semibold text-[#6B7280] uppercase tracking-tight">This Month</p>
+            <p className="text-[28px] font-bold text-[#111827] mt-2">{`RM ${stats.thisMonthRevenue.toFixed(2)}`}</p>
+            <p className="text-[13px] text-[#6B7280] mt-1">Current calendar month</p>
+          </div>
+          <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px]">
+            <p className="text-[13px] font-semibold text-[#6B7280] uppercase tracking-tight">Total Orders</p>
+            <p className="text-[28px] font-bold text-[#111827] mt-2">{stats.totalOrders}</p>
+            <p className="text-[13px] text-[#6B7280] mt-1">Successful deliveries</p>
+          </div>
+          <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px]">
+            <p className="text-[13px] font-semibold text-[#6B7280] uppercase tracking-tight">Avg Order Value</p>
+            <p className="text-[28px] font-bold text-[#111827] mt-2">{stats.avgOrderValue === "—" ? "—" : `RM ${stats.avgOrderValue}`}</p>
+            <p className="text-[13px] text-[#6B7280] mt-1">Revenue per order</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-8">
+          {/* SECTION 2: Sales Over Time */}
+          <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] space-y-8">
+            <div>
+              <h3 className="text-[16px] font-semibold text-[#111827] uppercase tracking-tight">Sales Over Time</h3>
+              <p className="text-[13px] text-[#6B7280] mt-1">Revenue performance for the last 7 days</p>
+            </div>
+            <div className="h-[250px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={lineChartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    formatter={(val: any) => [`RM ${val.toFixed(2)}`, 'Revenue']}
+                  />
+                  <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* SECTION 3: Top Products */}
+          <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] space-y-8">
+            <div>
+              <h3 className="text-[16px] font-semibold text-[#111827] uppercase tracking-tight">Top Products</h3>
+              <p className="text-[13px] text-[#6B7280] mt-1">Highest revenue generating assets</p>
+            </div>
+            <div className="h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barChartData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F1F5F9" />
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} width={100} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    formatter={(val: any) => [`RM ${val.toFixed(2)}`, 'Revenue']}
+                  />
+                  <Bar dataKey="revenue" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 4: Recent Orders Table */}
+        <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] overflow-hidden">
+          <div className="mb-6">
+            <h3 className="text-[16px] font-semibold text-[#111827] uppercase tracking-tight">Recent Deliveries</h3>
+            <p className="text-[13px] text-[#6B7280] mt-1">Last 10 successful fulfillment cycles</p>
+          </div>
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-100">
+                <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Order Code</th>
+                <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Buyer Name</th>
+                <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Item</th>
+                <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Amount (RM)</th>
+                <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {recentOrders.map((o, idx) => (
+                <tr key={o.id} className={idx % 2 === 1 ? 'bg-slate-50/30' : 'bg-white'}>
+                  <td className="px-8 py-5 text-[13px] font-mono font-bold text-slate-400">#{o.id.slice(-6).toUpperCase()}</td>
+                  <td className="px-8 py-5 text-[13px] font-bold text-[#111827]">{o.customer_name || 'Student'}</td>
+                  <td className="px-8 py-5 text-[13px] font-medium text-[#374151]">{o.title}</td>
+                  <td className="px-8 py-5 text-[13px] font-bold text-[#111827]">RM {Number(o.total || o.price || 0).toFixed(2)}</td>
+                  <td className="px-8 py-5 text-[11px] font-bold text-[#6B7280]">
+                    {o.created_at?.toDate ? o.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : new Date(o.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+              {recentOrders.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-8 py-12 text-center text-slate-300 text-[13px] font-medium">No delivered orders found in registry.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  );
+}

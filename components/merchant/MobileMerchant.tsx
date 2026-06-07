@@ -25,6 +25,9 @@ export default function MobileMerchant({
   topItems,
   recentOrders,
   handleAcceptOrder, 
+  handlePrepareOrder,
+  handleMarkReady,
+  handleMessageUser,
   handleCallRunner,
   handleConfirmDelivery,
   toggleItemStatus,
@@ -36,17 +39,36 @@ export default function MobileMerchant({
   const [view, setView] = React.useState<'terminal' | 'disputes' | 'insights' | 'account'>('terminal');
 
   const isClub = merchant?.role === 'CLUB' || merchant?.is_verified_merchant;
-  const pendingList = [...(urgentOrders || []), ...(preparingOrders || [])];
   const historyList = historyOrders || [];
+  
+  // FIX 2 & 3: Match desktop filtering
+  const pipelineOrders = (recentOrders || []).filter((o: any) => 
+    !["DELIVERED", "CANCELLED", "COMPLETED"].includes(o.status)
+  );
+  const pendingList = pipelineOrders;
+
   const pulseData = React.useMemo(() => {
-    const pending = (recentOrders || []).filter((o: any) => o.status === 'PENDING_VENDOR').length;
-    const preparing = (recentOrders || []).filter((o: any) => o.status === 'PREPARING' || o.status === 'READY_FOR_PICKUP').length;
-    const delivering = (recentOrders || []).filter((o: any) => o.status === 'PENDING_RUNNER').length;
+    const pending = (recentOrders || []).filter((o: any) => o.status === 'PAID' || o.status === 'PENDING_VENDOR').length;
+    const preparing = (recentOrders || []).filter((o: any) => o.status === 'PREPARING').length;
+    const delivering = (recentOrders || []).filter((o: any) => o.status === 'READY' || o.status === 'READY_FOR_PICKUP' || o.status === 'PENDING_RUNNER').length;
     const total = pending + preparing + delivering;
     return { pending, preparing, delivering, total };
   }, [recentOrders]);
 
-  // ── DISPUTES STATE ──
+  const [unreadNotifications, setUnreadNotifications] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!merchant?.uid) return;
+    const qNotifs = query(
+      collection(db, "notifications"),
+      where("userId", "==", merchant.uid),
+      where("read", "==", false)
+    );
+    const unsubNotifs = onSnapshot(qNotifs, (snapshot) => {
+      setUnreadNotifications(snapshot.docs.length);
+    });
+    return () => unsubNotifs();
+  }, [merchant?.uid]);
   const [activeTab, setActiveTab] = React.useState<'ACTIVE' | 'HISTORY'>('ACTIVE');
   const [selectedDayIndex, setSelectedDayIndex] = React.useState<number | null>(null);
   const [disputes, setDisputes] = React.useState<any[]>([]);
@@ -99,6 +121,81 @@ export default function MobileMerchant({
   const resolvedDisputes = disputes.filter((d: any) => d.status === 'RESOLVED' || d.status === 'SETTLED');
   const currentDisputes = disputesTab === 'PENDING' ? pendingDisputes : resolvedDisputes;
 
+  // ── STATS TAB (FIX 10) ──
+  const [statsData, setStatsData] = React.useState<any>({
+    totalEarned: 0,
+    itemsSold: 0,
+    activeListings: 0,
+    trustRating: 0,
+    bestSellingItem: '...',
+    recentSales: [],
+    loading: true
+  });
+
+  React.useEffect(() => {
+    if (view !== 'insights' || !merchant?.uid) return;
+
+    // 1. Listen for Delivered Orders
+    const qOrders = query(
+      collection(db, "orders"), 
+      where("seller_id", "==", merchant.uid),
+      where("status", "==", "DELIVERED")
+    );
+    
+    const unsubOrders = onSnapshot(qOrders, (snapshot) => {
+      const delivered = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const totalEarned = delivered.reduce((s, o: any) => s + Number(o.total || o.price || 0), 0);
+      
+      // Best Selling Item
+      const products: Record<string, number> = {};
+      delivered.forEach((o: any) => {
+        const title = o.title || (o.items?.[0]?.title) || 'Unknown Item';
+        products[title] = (products[title] || 0) + 1;
+      });
+      const bestSellingItem = Object.entries(products)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || 'No sales yet';
+
+      // Recent Sales (Last 5)
+      const recentSales = [...delivered]
+        .sort((a: any, b: any) => {
+          const da = a.created_at?.toDate ? a.created_at.toDate() : new Date(a.created_at);
+          const db = b.created_at?.toDate ? b.created_at.toDate() : new Date(b.created_at);
+          return db.getTime() - da.getTime();
+        })
+        .slice(0, 5);
+
+      setStatsData(prev => ({ 
+        ...prev, 
+        totalEarned, 
+        itemsSold: delivered.length, 
+        bestSellingItem,
+        recentSales,
+        loading: false 
+      }));
+    });
+
+    // 2. Listen for Active Items
+    const qItems = query(
+      collection(db, "items"), 
+      where("seller_id", "==", merchant.uid),
+      where("status", "==", "active")
+    );
+    const unsubItems = onSnapshot(qItems, (snapshot) => {
+      setStatsData(prev => ({ ...prev, activeListings: snapshot.docs.length }));
+    });
+
+    // 3. Trust Rating from User Doc
+    const unsubUser = onSnapshot(doc(db, "users", merchant.uid), (snap) => {
+      setStatsData(prev => ({ ...prev, trustRating: snap.data()?.trust_rating || 0 }));
+    });
+
+    return () => {
+      unsubOrders();
+      unsubItems();
+      unsubUser();
+    };
+  }, [view, merchant?.uid]);
+
   const viewLabels: Record<string, string> = {
     terminal: 'Manage your shop and fulfill orders.',
     disputes: 'Track and resolve order disputes.',
@@ -107,49 +204,49 @@ export default function MobileMerchant({
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col text-slate-900 selection:bg-blue-100 md:hidden pb-32 font-sans antialiased">
+    <div className="min-h-screen bg-white flex flex-col text-[#111827] selection:bg-blue-100 md:hidden pb-[60px] font-sans antialiased">
       
       {/* ── HEADER ── */}
-      <header className="px-8 py-8 border-b-[0.5px] border-slate-50 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
-        <div className="flex items-center justify-between">
-           <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                {view === 'terminal' && (
-                  <>
-                    <h1 className="text-[17px] font-bold text-slate-900 tracking-tight leading-none">{merchant?.full_name || 'Terminal'}</h1>
-                    <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full border ${
-                      isClub ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200'
-                    }`}>
-                      {isClub ? 'CLUB' : 'SELLER'}
-                    </span>
-                  </>
+      <header className="h-[56px] px-6 border-b-[0.5px] border-[#E5E7EB] sticky top-0 bg-white/80 backdrop-blur-xl z-50 flex items-center justify-between">
+         <div className="flex items-center gap-3">
+            {view !== 'terminal' && (
+              <button onClick={() => setView('terminal')} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-[#111827] active:scale-95 transition-all">
+                <ChevronLeft size={20} />
+              </button>
+            )}
+            <div className="flex items-center gap-2">
+              <h1 className="text-[16px] font-medium text-[#111827] tracking-tight">
+                {view === 'terminal' ? (merchant?.full_name || 'Terminal') : 
+                 view === 'disputes' ? 'Disputes' :
+                 view === 'insights' ? 'Analytics' : 'Account'}
+              </h1>
+              {view === 'terminal' && (
+                <span className={`text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] ${
+                  isClub ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
+                }`}>
+                  {isClub ? 'CLUB' : 'SELLER'}
+                </span>
+              )}
+            </div>
+         </div>
+         <div className="flex items-center gap-4">
+           {view === 'terminal' && (
+             <button onClick={() => router.push('/merchant/notifications')} className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-[#111827] relative active:scale-95 transition-all">
+                <Bell size={18} />
+                {unreadNotifications > 0 && (
+                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border-2 border-white">
+                    {unreadNotifications}
+                  </span>
                 )}
-                {view === 'disputes' && <h1 className="text-[17px] font-bold text-slate-900 tracking-tight leading-none">Disputes</h1>}
-                {view === 'insights' && <h1 className="text-[17px] font-bold text-slate-900 tracking-tight leading-none">Analytics</h1>}
-                {view === 'account' && <h1 className="text-[17px] font-bold text-slate-900 tracking-tight leading-none">Account</h1>}
-              </div>
-              <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">{viewLabels[view]}</p>
+             </button>
+           )}
+           <div className="w-8 h-8 rounded-full overflow-hidden border border-[#E5E7EB]">
+             <AvatarDropdown 
+                photoUrl={merchant?.photo_url} 
+                userName={merchant?.full_name || 'Merchant'} 
+             />
            </div>
-           <div className="flex items-center gap-4">
-             {view !== 'terminal' && (
-               <button onClick={() => setView('terminal')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-slate-900 border border-slate-50">
-                 <ChevronLeft size={18} />
-               </button>
-             )}
-             {view === 'terminal' && (
-               <>
-                 <button className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] hover:text-slate-900 relative border border-slate-50">
-                    <Bell size={18} />
-                    {urgentOrders?.length > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-slate-900 rounded-full border-2 border-white"></span>}
-                 </button>
-                 <AvatarDropdown 
-                    photoUrl={merchant?.photo_url} 
-                    userName={merchant?.full_name || 'Merchant'} 
-                 />
-               </>
-             )}
-           </div>
-        </div>
+         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto">
@@ -161,7 +258,7 @@ export default function MobileMerchant({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="space-y-12 py-10 px-8"
+              className="space-y-8 py-6 px-6"
             >
               {/* Today */}
               {pulseData.total > 0 && (
@@ -169,11 +266,11 @@ export default function MobileMerchant({
                   {[
                     { label: 'Pending', count: pulseData.pending },
                     { label: 'Preparing', count: pulseData.preparing },
-                    { label: 'Delivering', count: pulseData.delivering }
+                    { label: 'Ready', count: pulseData.delivering }
                   ].map(s => (
-                    <div key={s.label} className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
-                      <p className="text-[20px] font-bold text-slate-900">{s.count}</p>
-                      <p className="text-[9px] font-bold text-[#94a3b8] mt-0.5">{s.label}</p>
+                    <div key={s.label} className="bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] p-4 text-center">
+                      <p className="text-[20px] font-bold text-[#111827]">{s.count}</p>
+                      <p className="text-[11px] font-medium text-[#9CA3AF] mt-0.5">{s.label}</p>
                     </div>
                   ))}
                 </div>
@@ -183,19 +280,19 @@ export default function MobileMerchant({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between px-1">
                     <div className="space-y-1">
-                      <h3 className="text-[15px] font-bold text-slate-900 tracking-tight">Orders</h3>
-                      <p className="text-[11px] font-medium text-[#94a3b8]">Manage incoming and active orders.</p>
+                      <h3 className="text-[16px] font-medium text-[#111827] tracking-tight">Orders</h3>
+                      <p className="text-[13px] text-[#9CA3AF]">Manage incoming and active orders.</p>
                     </div>
                   </div>
-                  <div className="flex gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
+                  <div className="flex gap-2 bg-slate-50 p-1 rounded-[12px] border border-slate-100">
                     {(['ACTIVE', 'HISTORY'] as const).map(tab => (
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 py-2.5 rounded-xl text-[10px] font-bold transition-all ${
+                        className={`flex-1 py-2.5 rounded-[10px] text-[11px] font-medium transition-all ${
                           activeTab === tab 
-                            ? 'bg-white text-slate-900 shadow-sm' 
-                            : 'text-[#94a3b8] opacity-50 hover:opacity-100'
+                            ? 'bg-white text-[#111827] shadow-sm' 
+                            : 'text-[#9CA3AF]'
                         }`}
                       >
                         {tab}
@@ -214,50 +311,97 @@ export default function MobileMerchant({
                   >
                     {activeTab === 'ACTIVE' && (
                       pendingList.length === 0 ? (
-                        <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center">
-                          <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4 shadow-sm border border-slate-100">
+                        <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[12px] flex flex-col items-center justify-center text-center">
+                          <div className="w-14 h-14 bg-white rounded-[12px] flex items-center justify-center text-[#9CA3AF] mb-4 shadow-sm border border-slate-100">
                             <PackageCheck size={24} strokeWidth={1.5} />
                           </div>
-                          <h3 className="text-[14px] font-bold text-slate-900 tracking-tight mb-1">No active orders</h3>
-                          <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed max-w-[220px]">
+                          <h3 className="text-[16px] font-medium text-[#111827] tracking-tight mb-1">No active orders</h3>
+                          <p className="text-[13px] text-[#9CA3AF] leading-relaxed max-w-[220px]">
                             New orders from students will appear here.
                           </p>
                         </div>
                       ) : (
                         pendingList.map((o: any) => (
-                          <motion.div key={o.id} whileTap={{ scale: 0.98 }} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-4">
+                          <motion.div key={o.id} whileTap={{ scale: 0.98 }} className="p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm space-y-4">
                             <div className="flex justify-between items-start">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-[#94a3b8]">
+                                <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-[#9CA3AF]">
                                   <ClipboardList size={16} />
                                 </div>
                                 <div>
-                                  <p className="text-[14px] font-bold text-slate-900 tracking-tight">{o.customer_name || 'Student'}</p>
-                                  <p className="text-[10px] font-medium text-[#94a3b8]">Order #{o.id.slice(-4).toUpperCase()}</p>
+                                  <p className="text-[16px] font-medium text-[#111827] tracking-tight">{o.customer_name || 'Student'}</p>
+                                  <p className="text-[11px] text-[#9CA3AF]">Order #{o.id.slice(-4).toUpperCase()}</p>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-[14px] font-bold text-slate-900">RM {o.total?.toFixed(2)}</p>
-                                <p className="text-[9px] font-bold text-slate-900 uppercase tracking-wider">{o.status.replace(/_/g, ' ')}</p>
+                                <p className="text-[16px] font-medium text-[#111827]">RM {o.total?.toFixed(2)}</p>
+                                <span className="text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] bg-slate-100 text-[#111827] uppercase tracking-wider">{o.status.replace(/_/g, ' ')}</span>
                               </div>
                             </div>
-                            <div className="flex gap-2 pt-1 border-t border-slate-50">
-                              {o.status === 'PENDING_VENDOR' ? (
-                                <button onClick={() => handleAcceptOrder(o.id)} className="flex-1 h-11 bg-slate-900 text-white rounded-xl text-[11px] font-bold active:scale-95 transition-all shadow-sm shadow-slate-900/10">
-                                  Accept Order
+                            <div className="flex flex-col gap-2 pt-1 border-t border-slate-50">
+                              {/* status PAID / PENDING_VENDOR: Prepare Order */}
+                              {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && (
+                                <button 
+                                  onClick={() => handlePrepareOrder(o.id, o.items || [])} 
+                                  className="w-full h-11 bg-[#111827] text-white rounded-full text-[13px] font-medium active:scale-95 transition-all shadow-sm"
+                                >
+                                  Prepare Order
                                 </button>
-                              ) : o.status === 'PREPARING' ? (
-                                <div className="flex-1"><SwipeToReady orderId={o.id} /></div>
-                              ) : (
-                                <div className="flex-1 h-11 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100">
-                                  <p className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5">
-                                    <Bike size={14} /> Waiting for runner
+                              )}
+
+                              {/* status PREPARING: Mark Ready */}
+                              {o.status === 'PREPARING' && (
+                                <button 
+                                  onClick={() => handleMarkReady(o.id)} 
+                                  className="w-full h-11 bg-[#111827] text-white rounded-full text-[13px] font-medium active:scale-95 transition-all shadow-sm"
+                                >
+                                  Mark Ready for Pickup
+                                </button>
+                              )}
+
+                              {/* status READY / PENDING_RUNNER: Message options */}
+                              {(o.status === 'READY' || o.status === 'READY_FOR_PICKUP' || o.status === 'PENDING_RUNNER' || o.runner_id) && (
+                                <div className="grid grid-cols-2 gap-2">
+                                  <button 
+                                    onClick={() => handleMessageUser(o.id, o.buyer_id, o.customer_name, 'BUYER', o.title)}
+                                    className="h-11 bg-[#111827] text-white rounded-full text-[13px] font-medium active:scale-95 transition-all"
+                                  >
+                                    Buyer
+                                  </button>
+                                  {(o.runner_id || o.status === 'PENDING_RUNNER') && (
+                                    <button 
+                                      onClick={() => handleMessageUser(o.id, o.runner_id || 'DEMO_RUNNER', o.runner_name || 'Runner', 'RUNNER', undefined, o.drop_off_location)}
+                                      className="h-11 bg-white border border-[#D1D5DB] text-[#374151] rounded-full text-[13px] font-medium active:scale-95 transition-all"
+                                    >
+                                      Runner
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* status PICKED_UP: Collected notice */}
+                              {o.status === 'PICKED_UP' && (
+                                <div className="w-full h-11 bg-emerald-50 rounded-full flex items-center justify-center border border-emerald-100">
+                                  <p className="text-[11px] font-medium text-emerald-600 flex items-center gap-1.5">
+                                    <CheckCircle2 size={14} /> Collected by Runner
                                   </p>
                                 </div>
                               )}
-                              <button className="w-11 h-11 rounded-xl bg-slate-50 text-[#94a3b8] flex items-center justify-center border border-slate-100">
-                                <Info size={16} />
-                              </button>
+
+                              {/* Handshake / Confirmation (if not final) */}
+                              {o.status !== 'DELIVERED' && o.status !== 'COMPLETED' && o.status !== 'PAID' && o.status !== 'PENDING_VENDOR' && (
+                                <button 
+                                  onClick={() => handleConfirmDelivery(o.id)}
+                                  disabled={o.handshake?.seller_confirmed}
+                                  className={`h-11 rounded-full text-[13px] font-medium transition-all ${
+                                    o.handshake?.seller_confirmed 
+                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                                    : 'bg-[#111827] text-white active:scale-95'
+                                  }`}
+                                >
+                                  {o.handshake?.seller_confirmed ? 'Handoff Sent' : 'Confirm Delivery'}
+                                </button>
+                              )}
                             </div>
                           </motion.div>
                         ))
@@ -265,41 +409,41 @@ export default function MobileMerchant({
                     )}
                     {activeTab === 'HISTORY' && (
                       historyList.length === 0 ? (
-                        <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center">
-                          <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-[#94a3b8] mb-4 shadow-sm border border-slate-100">
+                        <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-[12px] flex flex-col items-center justify-center text-center">
+                          <div className="w-14 h-14 bg-white rounded-[12px] flex items-center justify-center text-[#9CA3AF] mb-4 shadow-sm border border-slate-100">
                             <ClipboardList size={24} strokeWidth={1.5} />
                           </div>
-                          <h3 className="text-[14px] font-bold text-slate-900 tracking-tight mb-1">No past orders</h3>
-                          <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed max-w-[220px]">
+                          <h3 className="text-[16px] font-medium text-[#111827] tracking-tight mb-1">No past orders</h3>
+                          <p className="text-[13px] text-[#9CA3AF] leading-relaxed max-w-[220px]">
                             Completed and cancelled orders will show up here.
                           </p>
                         </div>
                       ) : (
                         historyList.map((o: any) => (
-                          <div key={o.id} className="p-6 bg-white border border-slate-50 rounded-2xl shadow-sm space-y-4">
+                          <div key={o.id} className="p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm space-y-4">
                             <div className="flex justify-between items-start">
                               <div className="flex items-center gap-4">
-                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${o.status === 'CANCELLED' ? 'bg-red-50 text-red-400' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'bg-blue-50 text-slate-900' : 'bg-emerald-50 text-emerald-500'}`}>
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${o.status === 'CANCELLED' ? 'bg-red-50 text-red-400' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'bg-blue-50 text-[#111827]' : 'bg-emerald-50 text-emerald-500'}`}>
                                   {o.status === 'CANCELLED' ? <Trash2 size={18} /> : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? <Bike size={18} /> : <CheckCircle2 size={18} />}
                                 </div>
                                 <div>
-                                  <p className="text-[14px] font-bold text-slate-900">{o.customer_name || 'Student'}</p>
-                                  <p className="text-[10px] font-medium text-[#94a3b8]">Order #{o.id.slice(-4).toUpperCase()}</p>
+                                  <p className="text-[16px] font-medium text-[#111827]">{o.customer_name || 'Student'}</p>
+                                  <p className="text-[11px] text-[#9CA3AF]">Order #{o.id.slice(-4).toUpperCase()}</p>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-[14px] font-bold text-slate-900">RM {o.total?.toFixed(2)}</p>
-                                <p className={`text-[9px] font-bold ${o.status === 'CANCELLED' ? 'text-red-500' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'text-slate-900' : 'text-emerald-500'}`}>
+                                <p className="text-[16px] font-medium text-[#111827]">RM {o.total?.toFixed(2)}</p>
+                                <span className={`text-[11px] font-medium px-[10px] py-[3px] rounded-[20px] ${o.status === 'CANCELLED' ? 'bg-red-50 text-red-500' : ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) ? 'bg-blue-50 text-[#111827]' : 'bg-emerald-50 text-emerald-500'}`}>
                                   {o.status.replace(/_/g, ' ')}
-                                </p>
+                                </span>
                               </div>
                             </div>
                             {['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY'].includes(o.status) && (
-                              <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-50 flex items-center justify-between">
-                                <p className="text-[10px] font-bold text-[#94a3b8] flex items-center gap-2">
+                              <div className="p-3 bg-slate-50/50 rounded-[12px] border border-slate-50 flex items-center justify-between">
+                                <p className="text-[11px] font-medium text-[#9CA3AF] flex items-center gap-2">
                                   <User size={12} /> With {o.runner_name || 'Runner'}
                                 </p>
-                                <p className="text-[10px] font-bold text-slate-900 truncate ml-4">{o.drop_off_location || 'Campus'}</p>
+                                <p className="text-[11px] font-medium text-[#111827] truncate ml-4">{o.drop_off_location || 'Campus'}</p>
                               </div>
                             )}
                           </div>
@@ -313,28 +457,28 @@ export default function MobileMerchant({
               {isClub && topItems?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
                 <section className="space-y-4">
                   <div className="flex items-center gap-2 px-1">
-                    <ShieldAlert size={14} className="text-slate-400" />
-                    <p className="text-[10px] font-semibold text-slate-500 leading-none">Low Stock</p>
+                    <ShieldAlert size={14} className="text-[#9CA3AF]" />
+                    <p className="text-[11px] font-medium text-[#9CA3AF] leading-none">Low Stock</p>
                   </div>
-                  <div className="bg-white border border-slate-50 rounded-2xl overflow-hidden shadow-sm divide-y divide-slate-50">
+                  <div className="bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] overflow-hidden shadow-sm divide-y divide-slate-50">
                     {topItems.filter((i: any) => (i.stock_count ?? 99) <= 5).map((item: any) => (
-                      <div key={item.id} className="p-6 flex items-center justify-between bg-white active:bg-slate-50 transition-colors">
+                      <div key={item.id} className="p-4 flex items-center justify-between bg-white active:bg-slate-50 transition-colors">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-100">
+                          <div className="w-10 h-10 rounded-[12px] bg-slate-50 flex items-center justify-center text-slate-100">
                             <Package size={18} />
                           </div>
                           <div>
-                            <p className="text-[13px] font-bold text-slate-900 truncate max-w-[120px]">{item.title}</p>
-                            <button onClick={() => setEditingItem(item)} className="mt-2 h-8 px-4 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center transition-all shadow-sm shadow-slate-900/10 active:scale-95">
-                              Restock Item
+                            <p className="text-[13px] font-medium text-[#111827] truncate max-w-[120px]">{item.title}</p>
+                            <button onClick={() => setEditingItem(item)} className="mt-2 h-8 px-4 rounded-full bg-white border border-[#D1D5DB] text-[11px] font-medium text-[#374151] hover:bg-slate-50 flex items-center justify-center transition-all active:scale-95">
+                              Restock
                             </button>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`text-[14px] font-semibold leading-none ${item.stock_count <= 0 ? 'text-red-500' : 'text-slate-500'}`}>
+                          <p className={`text-[16px] font-medium leading-none ${item.stock_count <= 0 ? 'text-red-500' : 'text-[#374151]'}`}>
                             {item.stock_count <= 0 ? 'EMPTY' : item.stock_count}
                           </p>
-                          <p className="text-[9px] font-semibold text-slate-300 mt-1">left</p>
+                          <p className="text-[11px] font-medium text-[#9CA3AF] mt-1">left</p>
                         </div>
                       </div>
                     ))}
@@ -346,37 +490,45 @@ export default function MobileMerchant({
                 <section className="space-y-6">
                   <div className="flex items-center justify-between px-1">
                     <div className="space-y-1">
-                      <h3 className="text-[15px] font-bold text-slate-900 tracking-tight">Inventory</h3>
-                      <p className="text-[11px] font-medium text-[#94a3b8]">Items listed on the marketplace.</p>
+                      <h3 className="text-[16px] font-medium text-[#111827] tracking-tight">Inventory</h3>
+                      <p className="text-[13px] text-[#9CA3AF]">Items listed on the marketplace.</p>
                     </div>
-                    <button onClick={() => setIsCreateOpen(true)} className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-md shadow-slate-900/10">
+                    <button onClick={() => setIsCreateOpen(true)} className="w-9 h-9 rounded-full bg-[#111827] text-white flex items-center justify-center shadow-md active:scale-95 transition-all">
                       <Plus size={18} />
                     </button>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
                     {topItems?.map((item: any) => (
-                      <div key={item.id} className="p-5 bg-slate-50/50 border border-slate-50 rounded-2xl flex items-center justify-between">
+                      <div key={item.id} className="p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] flex items-center justify-between shadow-sm">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 overflow-hidden">
+                          <div className="w-12 h-12 rounded-[12px] bg-white border border-[#E5E7EB] overflow-hidden">
                             {item.image_url ? <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-200"><LayoutGrid size={20} /></div>}
                           </div>
                           <div>
-                            <p className="text-[14px] font-bold text-slate-900 tracking-tight">{item.title}</p>
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-[16px] font-medium text-[#111827] tracking-tight">{item.title}</p>
+                              {item.stock_count > 0 && item.stock_count <= 10 && (
+                                <span className="px-[10px] py-[3px] bg-red-50 text-red-600 text-[11px] font-medium rounded-[20px] border border-red-100 uppercase tracking-tighter">Low</span>
+                              )}
+                              {(item.stock_count <= 0 || item.status === 'OUT_OF_STOCK') && (
+                                <span className="px-[10px] py-[3px] bg-slate-100 text-[#9CA3AF] text-[11px] font-medium rounded-[20px] border border-slate-200 uppercase tracking-tighter">Empty</span>
+                              )}
+                            </div>
                             <div className="flex items-center gap-2">
-                              <p className="text-[11px] font-medium text-[#94a3b8]">RM {item.price?.toFixed(2)}</p>
+                              <p className="text-[13px] text-[#9CA3AF]">RM {item.price?.toFixed(2)}</p>
                               <PriceHealthIndicator price={item.price} category={item.category} subcategory={item.subcategory} />
                               <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                              <p className={`text-[11px] font-bold uppercase tracking-tight ${(item.stock_count ?? 0) === 0 ? 'text-red-500' : (item.stock_count ?? 0) <= 5 ? 'text-slate-500' : 'text-[#94a3b8]'}`}>
-                                {item.stock_count ?? 0} in stock
+                              <p className={`text-[11px] font-medium uppercase tracking-tight ${(item.stock_count ?? 0) === 0 ? 'text-red-500' : (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 'text-[#9CA3AF]'}`}>
+                                {item.stock_count ?? 0} left
                               </p>
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={() => setEditingItem(item)} title="Edit" className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all">
+                          <button onClick={() => setEditingItem(item)} title="Edit" className="w-9 h-9 rounded-full bg-slate-50 border border-slate-50 flex items-center justify-center text-[#9CA3AF] active:scale-95 transition-all">
                             <Pencil size={14} />
                           </button>
-                          <button title="Delete" onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed.'); } }} className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 hover:text-red-500 transition-all">
+                          <button title="Delete" onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed.'); } }} className="w-9 h-9 rounded-full bg-slate-50 border border-slate-50 flex items-center justify-center text-red-300 active:scale-95 transition-all">
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -388,362 +540,173 @@ export default function MobileMerchant({
             </motion.div>
           )}
 
-          {/* ════════════════ LOG VIEW ════════════════ */}
-          {view === 'disputes' && (
+          {/* ════════════════ LOG VIEW (FIX 14) ════════════════ */}
+          {view === 'logs' && (
             <motion.div
-              key="disputes"
+              key="logs"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="py-10 px-8 space-y-8"
+              className="py-6 px-0 space-y-4"
             >
-              {(() => {
-                const toRespond = disputes.filter((d: any) => d.status === 'AWAITING_ADMIN');
-                const underReview = disputes.filter((d: any) => d.status === 'MERCHANT_RESPONDED');
-                const resolvedCount = disputes.filter((d: any) => d.status === 'RESOLVED' || d.status === 'SETTLED').length;
+              <div className="flex gap-2 overflow-x-auto no-scrollbar px-6 pb-2 sticky top-[56px] z-40 bg-white/90 backdrop-blur-md py-2 border-b border-slate-50">
+                {['All', 'Active', 'Completed', 'Cancelled'].map(tab => {
+                  const isActiveTab = (activeTab as string || 'All') === tab;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab as any)}
+                      className={`px-5 py-2.5 rounded-full text-[11px] font-medium transition-all shrink-0 ${isActiveTab ? 'bg-[#111827] text-white' : 'bg-white text-[#374151] border border-[#D1D5DB] hover:bg-slate-50'}`}
+                    >
+                      {tab}
+                    </button>
+                  );
+                })}
+              </div>
 
-                return (
-                  <>
-                    {/* Seed button */}
-                    {disputes.length === 0 && !disputesLoading && (
-                      <button
-                        onClick={seedDispute}
-                        disabled={seeding}
-                        className="w-full py-3 bg-slate-900 text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-2 disabled:opacity-30"
-                      >
-                        {seeding ? <Loader2 size={14} className="animate-spin" /> : <AlertCircle size={14} />}
-                        Create Test Dispute
-                      </button>
-                    )}
+              <div className="px-6 space-y-3">
+                {(() => {
+                  const filteredOrders = (historyOrders || []).filter((o: any) => {
+                    const currentTab = activeTab as string || 'All';
+                    if (currentTab === 'Active') return ['PAID', 'PREPARING', 'READY', 'RUNNER_ASSIGNED', 'PICKED_UP'].includes(o.status);
+                    if (currentTab === 'Completed') return o.status === 'DELIVERED';
+                    if (currentTab === 'Cancelled') return o.status === 'CANCELLED';
+                    return true;
+                  });
 
-                    {/* Dispute Summary */}
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { label: 'To Respond', count: toRespond.length, sub: 'needs your reply', color: 'text-red-500' },
-                        { label: 'Under Review', count: underReview.length, sub: 'waiting on admin', color: 'text-blue-600' },
-                        { label: 'Resolved', count: resolvedCount, sub: 'cases closed', color: 'text-emerald-600' }
-                      ].map(s => (
-                        <div key={s.label} className="p-4 bg-white border border-slate-100 rounded-2xl space-y-1.5">
-                          <p className="text-[9px] font-bold text-[#94a3b8]">{s.label}</p>
-                          <p className={`text-[22px] font-bold tracking-tight leading-none ${s.color}`}>{s.count}</p>
-                          <p className="text-[8px] font-medium text-[#94a3b8]">{s.sub}</p>
+                  const getStatusColor = (status: string) => {
+                    switch (status) {
+                      case 'PAID': return 'bg-[#FEF3C7] text-[#92400E]';
+                      case 'PREPARING': return 'bg-[#DBEAFE] text-[#1E40AF]';
+                      case 'READY': return 'bg-[#D1FAE5] text-[#065F46]';
+                      case 'RUNNER_ASSIGNED': return 'bg-[#EDE9FE] text-[#4C1D95]';
+                      case 'PICKED_UP': return 'bg-[#CFFAFE] text-[#164E63]';
+                      case 'DELIVERED': return 'bg-[#F3F4F6] text-[#374151]';
+                      case 'CANCELLED': return 'bg-[#FEE2E2] text-[#991B1B]';
+                      default: return 'bg-slate-100 text-[#374151]';
+                    }
+                  };
+
+                  if (filteredOrders.length === 0) {
+                    return (
+                      <div className="py-20 text-center flex flex-col items-center">
+                        <ClipboardList size={32} className="text-[#9CA3AF] mb-4" />
+                        <p className="text-[13px] font-medium text-[#111827]">No orders found</p>
+                      </div>
+                    );
+                  }
+
+                  return filteredOrders.map((o: any) => (
+                    <div key={o.id} className="p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-[11px] font-medium text-[#9CA3AF]">
+                            {o.created_at?.toDate ? o.created_at.toDate().toLocaleString('en-MY', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : ''}
+                          </p>
+                          <p className="text-[11px] font-mono font-bold text-[#9CA3AF] mt-0.5">#{o.id.slice(-6).toUpperCase()}</p>
                         </div>
-                      ))}
-                    </div>
-
-                    {/* Disputes */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-6 border-b border-slate-50">
-                        {['PENDING', 'RESOLVED'].map(tab => (
-                          <button key={tab} onClick={() => setDisputesTab(tab as any)} className={`pb-3 text-[10px] font-bold transition-all relative ${disputesTab === tab ? 'text-slate-900' : 'text-[#94a3b8] hover:text-slate-900'}`}>
-                            {tab === 'PENDING' ? `Active (${pendingDisputes.length})` : `Resolved (${resolvedDisputes.length})`}
-                            {disputesTab === tab && <motion.div layoutId="disputesTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900" />}
-                          </button>
-                        ))}
+                        <span className={`px-[10px] py-[3px] rounded-[20px] text-[11px] font-medium uppercase tracking-wider ${getStatusColor(o.status)}`}>
+                          {o.status.replace(/_/g, ' ')}
+                        </span>
                       </div>
-
-                      <div className="space-y-3">
-                        {currentDisputes.length === 0 ? (
-                          <div className="py-16 px-6 bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center">
-                            <CheckCircle2 size={24} className="text-[#94a3b8] mb-3" />
-                            <h3 className="text-[14px] font-bold text-slate-900 tracking-tight mb-1">No {disputesTab === 'PENDING' ? 'active' : 'resolved'} disputes</h3>
-                            <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed max-w-[200px]">
-                              {disputesTab === 'PENDING' ? 'Any issues raised by students will show up here.' : 'Resolved disputes will be archived here.'}
-                            </p>
-                          </div>
-                        ) : (
-                          currentDisputes.map((dispute: any, idx: number) => (
-                            <motion.div
-                              key={dispute.id}
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.04 }}
-                              onClick={() => setSelectedDispute(dispute)}
-                              className="p-4 bg-white border border-slate-100 rounded-2xl hover:border-slate-200 transition-all cursor-pointer group space-y-3"
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex items-start gap-3 min-w-0">
-                                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                                    dispute.status === 'MERCHANT_RESPONDED' ? 'bg-blue-50 text-blue-600' : dispute.status === 'RESOLVED' || dispute.status === 'SETTLED' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'
-                                  }`}>
-                                    {dispute.status === 'RESOLVED' || dispute.status === 'SETTLED' ? <CheckCircle2 size={16} /> : dispute.status === 'MERCHANT_RESPONDED' ? <MessageSquare size={16} /> : <AlertCircle size={16} />}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <p className="text-[13px] font-bold text-slate-900 truncate">{dispute.reporter_name}</p>
-                                      <span className="text-[8px] font-bold text-[#94a3b8] bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 shrink-0">#{dispute.order_code}</span>
-                                    </div>
-                                    <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2 mt-0.5">{dispute.reason}: {dispute.narrative}</p>
-                                  </div>
-                                </div>
-                                <ChevronRight size={14} className="text-slate-200 group-hover:text-slate-500 shrink-0 mt-1.5" />
-                              </div>
-                              <div className="flex items-center justify-between pt-2.5 border-t border-slate-50">
-                                <span className="text-[9px] font-medium text-[#94a3b8]">
-                                  {dispute.created_at?.toDate ? dispute.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : 'Pending'}
-                                </span>
-                                <span className={`text-[9px] font-bold ${
-                                  dispute.status === 'RESOLVED' || dispute.status === 'SETTLED' ? 'text-emerald-600' : dispute.status === 'MERCHANT_RESPONDED' ? 'text-blue-600' : 'text-red-500'
-                                }`}>
-                                  {dispute.status === 'RESOLVED' || dispute.status === 'SETTLED' ? 'Resolved' : dispute.status === 'MERCHANT_RESPONDED' ? 'Under Review' : 'Open'}
-                                </span>
-                              </div>
-                            </motion.div>
-                          ))
-                        )}
+                      <div className="flex justify-between items-end border-t border-slate-50 pt-3">
+                        <div>
+                          <p className="text-[16px] font-medium text-[#111827]">{o.customer_name || 'Student'}</p>
+                          <p className="text-[13px] text-[#9CA3AF]">{o.title}</p>
+                        </div>
+                        <p className="text-[16px] font-medium text-[#111827]">RM {Number(o.total || o.price || 0).toFixed(2)}</p>
                       </div>
                     </div>
-                  </>
-                );
-              })()}
+                  ));
+                })()}
+              </div>
             </motion.div>
           )}
 
-          {/* ════════════════ INSIGHTS VIEW ════════════════ */}
+          {/* ════════════════ INSIGHTS VIEW (FIX 10) ════════════════ */}
           {view === 'insights' && (
             <motion.div
               key="insights"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="py-10 px-8 space-y-8"
+              className="py-6 px-6 space-y-8"
             >
-              {(() => {
-                const statuses = ['COMPLETED', 'DELIVERED', 'READY_FOR_PICKUP', 'PREPARING', 'PENDING_VENDOR', 'PENDING_RUNNER', 'CANCELLED'];
-                const statusColors: Record<string, string> = {
-                  COMPLETED: 'bg-emerald-500', DELIVERED: 'bg-emerald-400',
-                  READY_FOR_PICKUP: 'bg-blue-500', PREPARING: 'bg-amber-400',
-                  PENDING_VENDOR: 'bg-amber-500', PENDING_RUNNER: 'bg-slate-400',
-                  CANCELLED: 'bg-red-400'
-                };
-                const statusLabels: Record<string, string> = {
-                  COMPLETED: 'Completed', DELIVERED: 'Delivered',
-                  READY_FOR_PICKUP: 'Ready', PREPARING: 'Preparing',
-                  PENDING_VENDOR: 'Pending', PENDING_RUNNER: 'Runner',
-                  CANCELLED: 'Cancelled'
-                };
-                const counts = statuses.map(s => ({ status: s, count: recentOrders?.filter((o: any) => o.status === s).length || 0 }));
-                const totalOrders = counts.reduce((s, c) => s + c.count, 0);
-                const activeOrders = ['PENDING_VENDOR', 'PREPARING', 'READY_FOR_PICKUP', 'PENDING_RUNNER'].map(s => counts.find(c => c.status === s)?.count || 0).reduce((a, b) => a + b, 0);
-                const completedOrders = ['COMPLETED', 'DELIVERED'].map(s => counts.find(c => c.status === s)?.count || 0).reduce((a, b) => a + b, 0);
-
-                const now = new Date();
-                const dayOfWeek = now.getDay();
-                const monday = new Date(now);
-                monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-                monday.setHours(0,0,0,0);
-                const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                const pastelColors = ['bg-rose-300', 'bg-orange-300', 'bg-amber-300', 'bg-lime-300', 'bg-emerald-300', 'bg-sky-300', 'bg-violet-300'];
-                const weekDays = dayNames.map((_, i) => {
-                  const d = new Date(monday);
-                  d.setDate(monday.getDate() + i);
-                  return d;
-                });
-                const weekCounts = weekDays.map(d => {
-                  const next = new Date(d);
-                  next.setDate(d.getDate() + 1);
-                  return recentOrders?.filter((o: any) => {
-                    if (!o.created_at) return false;
-                    const t = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
-                    return t >= d && t < next;
-                  }).length || 0;
-                });
-                const maxWeek = Math.max(...weekCounts, 1);
-                const bestDayIndex = weekCounts.indexOf(Math.max(...weekCounts));
-                const totalThisWeek = weekCounts.reduce((a, b) => a + b, 0);
-
-                const recentActivity = [...(recentOrders || [])]
-                  .sort((a: any, b: any) => {
-                    const ta = a.created_at?.toDate ? a.created_at.toDate() : new Date(a.created_at || 0);
-                    const tb = b.created_at?.toDate ? b.created_at.toDate() : new Date(b.created_at || 0);
-                    return tb.getTime() - ta.getTime();
-                  })
-                  .slice(0, 5);
-
-                const needingRestock = (topItems || [])
-                  .filter((i: any) => (i.stock_count ?? 0) <= 10)
-                  .sort((a: any, b: any) => (a.stock_count ?? 0) - (b.stock_count ?? 0))
-                  .slice(0, 5);
-
-                const topSelling = [...(recentOrders || [])]
-                  .filter((o: any) => o.status !== 'CANCELLED')
-                  .reduce((acc: Record<string, { title: string, count: number, revenue: number }>, o: any) => {
-                    const key = o.title || 'Unknown';
-                    if (!acc[key]) acc[key] = { title: key, count: 0, revenue: 0 };
-                    acc[key].count++;
-                    acc[key].revenue += Number(o.total || o.price || 0);
-                    return acc;
-                  }, {});
-                const topSellingSorted = Object.values(topSelling)
-                  .sort((a: any, b: any) => b.count - a.count)
-                  .slice(0, 5);
-
-                const ordersByDay = weekDays.map(d => {
-                  const next = new Date(d);
-                  next.setDate(d.getDate() + 1);
-                  return (recentOrders || []).filter((o: any) => {
-                    if (!o.created_at) return false;
-                    const t = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
-                    return t >= d && t < next;
-                  });
-                });
-
-                return (
-                  <>
-                    {/* Revenue Card */}
-                    <div className="p-6 bg-white border border-slate-100 rounded-2xl">
-                      <p className="text-[10px] font-bold text-[#94a3b8]">Total Earnings</p>
-                      <p className="text-[28px] font-bold text-slate-900 tracking-tight mt-2">RM {revenue.toFixed(2)}</p>
-                      <div className="flex items-center gap-3 mt-2 text-[10px] text-[#94a3b8]">
-                        <span>{totalOrders} orders</span>
-                        <span className="w-1 h-1 rounded-full bg-slate-200" />
-                        <span>{activeOrders} active</span>
-                        <span className="w-1 h-1 rounded-full bg-slate-200" />
-                        <span>{completedOrders} completed</span>
-                      </div>
+              {statsData.loading ? (
+                <div className="space-y-6">
+                  <div className="h-40 bg-slate-50 rounded-[20px] animate-pulse" />
+                  <div className="flex gap-3">
+                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
+                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
+                    <div className="h-10 flex-1 bg-slate-50 rounded-full animate-pulse" />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Hero Card */}
+                  <div className="p-8 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] relative overflow-hidden shadow-sm">
+                    <div className="relative z-10">
+                      <p className="text-[13px] font-medium text-[#9CA3AF] uppercase tracking-widest mb-1">Total Earned</p>
+                      <h2 className="text-[32px] font-bold text-[#111827] tracking-tighter leading-none">RM {statsData.totalEarned.toFixed(2)}</h2>
                     </div>
+                  </div>
 
-                    {/* Weekly Trend */}
-                    <div className="p-6 bg-white border border-slate-100 rounded-2xl space-y-5">
-                      <div>
-                        <h4 className="text-[13px] font-bold text-slate-900">Weekly Trend</h4>
-                        <p className="text-[10px] text-[#94a3b8] mt-0.5 leading-relaxed">
-                          {totalThisWeek > 0
-                            ? `${totalThisWeek} order${totalThisWeek > 1 ? 's' : ''} this week. Tap a bar for details.`
-                            : 'No orders recorded this week yet.'}
-                        </p>
-                      </div>
-                      <div className="relative flex items-end gap-2 h-28">
-                        {weekCounts.map((count, i) => (
-                          <button key={i} onClick={() => setSelectedDayIndex(selectedDayIndex === i ? null : i)} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group relative">
-                            <span className="text-[9px] font-bold text-slate-400">{count}</span>
-                            <motion.div
-                              initial={{ height: 0 }}
-                              animate={{ height: `${(count / maxWeek) * 100}%` }}
-                              transition={{ duration: 0.5, delay: i * 0.08, ease: 'easeOut' }}
-                              className={`w-full rounded-t-lg transition-all duration-200 cursor-pointer ${count > 0 ? pastelColors[i] : 'bg-slate-100'} ${selectedDayIndex === i ? 'scale-y-105 shadow-md' : 'hover:opacity-80'}`}
-                              style={{ minHeight: count > 0 ? 4 : 0 }}
-                            />
-                            <span className={`text-[8px] font-bold uppercase transition-colors ${selectedDayIndex === i ? 'text-slate-900' : 'text-[#94a3b8]'}`}>{dayNames[i]}</span>
-
-                            {/* Popover anchored to this bar */}
-                            {selectedDayIndex === i && (() => {
-                              const orders = ordersByDay[i] || [];
-                              if (orders.length === 0) return null;
-                              return (
-                                <motion.div
-                                  initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-50">
-                                    <div className="flex items-center gap-2">
-                                      <div className={`w-2.5 h-2.5 rounded-full ${pastelColors[i]}`} />
-                                      <span className="text-[11px] font-bold text-slate-900">{dayNames[i]}</span>
-                                      <span className="text-[9px] font-medium text-[#94a3b8]">{orders.length} order{orders.length > 1 ? 's' : ''}</span>
-                                    </div>
-                                    <button onClick={() => setSelectedDayIndex(null)} className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900">
-                                      <X size={12} />
-                                    </button>
-                                  </div>
-                                  <div className="px-4 py-3 space-y-3 max-h-40 overflow-y-auto">
-                                    {orders.map((o: any) => (
-                                      <div key={o.id} className="flex items-center justify-between gap-2">
-                                        <div className="flex items-center gap-2.5 min-w-0">
-                                          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${o.status === 'COMPLETED' || o.status === 'DELIVERED' ? 'bg-emerald-500' : o.status === 'CANCELLED' ? 'bg-red-400' : 'bg-amber-400'}`} />
-                                          <div className="min-w-0">
-                                            <p className="text-[11px] font-bold text-slate-900 truncate leading-tight">{o.customer_name || 'Student'}</p>
-                                            <p className="text-[8px] font-medium text-[#94a3b8] truncate leading-tight">{o.title}</p>
-                                          </div>
-                                        </div>
-                                        <p className="text-[11px] font-bold text-slate-900 shrink-0">RM{Number(o.total || o.price || 0).toFixed(2)}</p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </motion.div>
-                              );
-                            })()}
-                          </button>
-                        ))}
-                      </div>
+                  {/* Stat Pills */}
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    <div className="px-5 py-2.5 bg-[#111827] text-white rounded-full flex items-center gap-2 shrink-0">
+                      <ShoppingBag size={14} />
+                      <span className="text-[11px] font-medium">{statsData.itemsSold} Sold</span>
                     </div>
+                    <div className="px-5 py-2.5 bg-white border border-[#D1D5DB] text-[#374151] rounded-full flex items-center gap-2 shrink-0">
+                      <Package size={14} />
+                      <span className="text-[11px] font-medium">{statsData.activeListings} Active</span>
+                    </div>
+                    <div className="px-5 py-2.5 bg-amber-50 border border-amber-100 text-amber-600 rounded-full flex items-center gap-2 shrink-0">
+                      <TrendingUp size={14} />
+                      <span className="text-[11px] font-medium">⭐ {statsData.trustRating}</span>
+                    </div>
+                  </div>
 
-                    {/* Top Selling Items */}
-                    {topSellingSorted.length > 0 && (
-                      <div className="p-6 bg-white border border-slate-100 rounded-2xl space-y-4">
-                        <div>
-                          <h4 className="text-[13px] font-bold text-slate-900">Best Sellers</h4>
-                          <p className="text-[10px] text-[#94a3b8] mt-0.5 leading-relaxed">Most ordered items.</p>
-                        </div>
-                        <div className="space-y-2">
-                          {topSellingSorted.map((item: any, i: number) => (
-                            <div key={item.title} className="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
-                              <span className="text-[9px] font-bold text-[#94a3b8] w-4">#{i + 1}</span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[12px] font-bold text-slate-900 truncate">{item.title}</p>
-                                <p className="text-[9px] font-medium text-[#94a3b8]">{item.count} order{item.count > 1 ? 's' : ''}</p>
-                              </div>
-                              <p className="text-[11px] font-bold text-slate-900 shrink-0">RM {item.revenue.toFixed(2)}</p>
-                            </div>
-                          ))}
-                        </div>
+                  {/* Best Selling Item */}
+                  <div className="p-5 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] space-y-3 shadow-sm">
+                    <p className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-widest">Top Selling</p>
+                    <div className="flex items-center gap-3 text-[#111827]">
+                      <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                        <TrendingUp size={20} />
                       </div>
-                    )}
+                      <p className="text-[16px] font-medium tracking-tight truncate flex-1">🏆 {statsData.bestSellingItem}</p>
+                    </div>
+                  </div>
 
-                    {/* Stock Watch */}
-                    {needingRestock.length > 0 && (
-                      <div className="p-6 bg-white border border-slate-100 rounded-2xl space-y-4">
-                        <div>
-                          <h4 className="text-[13px] font-bold text-slate-900">Low Stock</h4>
-                          <p className="text-[10px] text-[#94a3b8] mt-0.5 leading-relaxed">
-                            {needingRestock.length} item{needingRestock.length > 1 ? 's' : ''} running low.
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          {needingRestock.map((item: any, i: number) => (
-                            <div key={item.id} className="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
-                              <span className="text-[9px] font-bold text-[#94a3b8] w-4">#{i + 1}</span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[12px] font-bold text-slate-900 truncate">{item.title}</p>
-                                <p className="text-[9px] font-medium text-[#94a3b8]">RM {item.price}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className={`text-[11px] font-bold ${(item.stock_count ?? 0) <= 0 ? 'text-red-500' : (item.stock_count ?? 0) <= 5 ? 'text-amber-500' : 'text-slate-900'}`}>
-                                  {item.stock_count ?? 0}
-                                </p>
-                                <p className="text-[8px] font-medium text-[#94a3b8]">left</p>
-                              </div>
+                  {/* Recent Sales List */}
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-[16px] font-medium text-[#111827] tracking-tight">Recent Sales</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {statsData.recentSales.map((sale: any) => (
+                        <div key={sale.id} className="flex items-center justify-between group p-4 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] shadow-sm">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
+                              <User size={16} className="text-[#9CA3AF]" />
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Recent Activity */}
-                    {recentActivity.length > 0 && (
-                      <div className="p-6 bg-white border border-slate-100 rounded-2xl space-y-4">
-                        <div>
-                          <h4 className="text-[13px] font-bold text-slate-900">Recent Orders</h4>
-                          <p className="text-[10px] text-[#94a3b8] mt-0.5 leading-relaxed">Latest 5 orders.</p>
-                        </div>
-                        <div className="space-y-0">
-                          {recentActivity.map((o: any) => (
-                            <div key={o.id} className="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0">
-                              <div className={`w-2 h-2 rounded-full shrink-0 ${o.status === 'COMPLETED' || o.status === 'DELIVERED' ? 'bg-emerald-500' : o.status === 'CANCELLED' ? 'bg-red-400' : 'bg-amber-400'}`} />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[12px] font-bold text-slate-900 truncate">{o.customer_name || 'Student'}</p>
-                                <p className="text-[9px] font-medium text-[#94a3b8]">{o.status.replace(/_/g, ' ')}</p>
-                              </div>
-                              <p className="text-[12px] font-bold text-slate-900 shrink-0">RM {Number(o.total || o.price || 0).toFixed(2)}</p>
+                            <div>
+                              <p className="text-[16px] font-medium text-[#111827] tracking-tight leading-tight">{sale.title}</p>
+                              <p className="text-[13px] text-[#9CA3AF] mt-0.5">{sale.customer_name || 'Student'}</p>
                             </div>
-                          ))}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[16px] font-medium text-[#111827]">RM {Number(sale.total || sale.price || 0).toFixed(2)}</p>
+                            <p className="text-[11px] text-[#9CA3AF] mt-0.5">
+                              {sale.created_at?.toDate ? sale.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : '...'}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
 
@@ -754,26 +717,26 @@ export default function MobileMerchant({
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="py-10 px-8 space-y-8"
+              className="py-6 px-6 space-y-8"
             >
-              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4">
+              <div className="p-5 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] flex items-center gap-4 shadow-sm">
                 <AvatarDropdown photoUrl={merchant?.photo_url} userName={merchant?.full_name || 'Merchant'} />
                 <div>
-                  <p className="text-[16px] font-bold text-slate-900">{merchant?.full_name || 'Merchant'}</p>
-                  <p className="text-[11px] font-medium text-[#94a3b8]">{merchant?.role === 'CLUB' ? 'Club Merchant' : 'Seller'}</p>
+                  <p className="text-[16px] font-medium text-[#111827]">{merchant?.full_name || 'Merchant'}</p>
+                  <p className="text-[13px] text-[#9CA3AF]">{merchant?.role === 'CLUB' ? 'Club Merchant' : 'Seller'}</p>
                 </div>
               </div>
-              <button onClick={() => router.push('/me/edit')} className="w-full p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between hover:border-slate-200 transition-all">
+              <button onClick={() => router.push('/me/edit')} className="w-full p-5 bg-white border-[0.5px] border-[#E5E7EB] rounded-[12px] flex items-center justify-between shadow-sm active:scale-98 transition-all">
                 <div className="flex items-center gap-3">
-                  <Settings size={18} className="text-[#94a3b8]" />
-                  <span className="text-[14px] font-bold text-slate-900">Settings</span>
+                  <Settings size={18} className="text-[#9CA3AF]" />
+                  <span className="text-[16px] font-medium text-[#111827]">Settings</span>
                 </div>
-                <ChevronRight size={16} className="text-[#94a3b8]" />
+                <ChevronRight size={16} className="text-[#9CA3AF]" />
               </button>
-              <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full p-5 bg-white border border-red-100 rounded-2xl flex items-center justify-between hover:border-red-200 transition-all">
+              <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full p-5 bg-white border-[0.5px] border-red-100 rounded-[12px] flex items-center justify-between shadow-sm active:scale-98 transition-all">
                 <div className="flex items-center gap-3">
                   <LogOut size={18} className="text-red-400" />
-                  <span className="text-[14px] font-bold text-red-500">Logout</span>
+                  <span className="text-[16px] font-medium text-red-500">Logout</span>
                 </div>
                 <ChevronRight size={16} className="text-red-300" />
               </button>
@@ -783,11 +746,11 @@ export default function MobileMerchant({
       </div>
 
       {/* ── BOTTOM NAV ── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t-[0.5px] border-slate-50 px-8 py-6">
-        <div className="flex items-center justify-between max-w-lg mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t-[0.5px] border-[#E5E7EB] px-6 h-[60px]">
+        <div className="flex items-center justify-between h-full max-w-lg mx-auto">
             {[
               { id: 'terminal', label: 'Terminal', icon: LayoutGrid },
-              ...(isClub ? [{ id: 'disputes', label: 'Log', icon: ClipboardList }] : []),
+              ...(isClub ? [{ id: 'logs', label: 'Log', icon: ClipboardList }] : []),
               ...(isClub ? [{ id: 'insights', label: 'Stats', icon: BarChart3 }] : []),
               { id: 'account', label: 'Account', icon: User }
             ].map((nav: any) => {
@@ -796,12 +759,10 @@ export default function MobileMerchant({
                 <button 
                   key={nav.id}
                   onClick={() => setView(nav.id)}
-                  className="flex flex-col items-center gap-1.5 group"
+                  className="flex flex-col items-center justify-center gap-1 group"
                 >
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${active ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'text-[#94a3b8] group-hover:text-slate-900'}`}>
-                    <nav.icon size={20} strokeWidth={active ? 2.5 : 2} />
-                  </div>
-                  <span className={`text-[10px] font-bold tracking-widest uppercase transition-all ${active ? 'text-slate-900' : 'text-[#94a3b8] opacity-50'}`}>{nav.label}</span>
+                  <nav.icon size={22} strokeWidth={active ? 2.5 : 2} className={active ? 'text-[#111827]' : 'text-[#9CA3AF]'} />
+                  <span className={`text-[10px] font-medium transition-all ${active ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>{nav.label}</span>
                 </button>
               );
             })}

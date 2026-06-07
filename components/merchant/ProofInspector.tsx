@@ -1,7 +1,9 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ZoomIn, Download, ShieldCheck, Clock, Package, MapPin, Camera } from "lucide-react";
+import { X, User, Package, MapPin, Camera, Clock, DollarSign, FileText, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 
 interface ProofInspectorProps {
   isOpen: boolean;
@@ -10,12 +12,41 @@ interface ProofInspectorProps {
 }
 
 export default function ProofInspector({ isOpen, onClose, order }: ProofInspectorProps) {
-  const [isZoomed, setIsZoomed] = useState(false);
+  const [buyerData, setBuyerData] = useState<any>(null);
+  const [runnerData, setRunnerData] = useState<any>(null);
+  const [evidence, setEvidence] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    if (!isOpen || !order) return;
+    const fetchAuditData = async () => {
+      setLoading(true);
+      try {
+        // Buyer lookup
+        if (order.buyer_id) {
+          const buyerSnap = await getDoc(doc(db, 'users', order.buyer_id));
+          if (buyerSnap.exists()) setBuyerData(buyerSnap.data());
+        }
+        // Runner lookup
+        if (order.runner_id) {
+          const runnerSnap = await getDoc(doc(db, 'users', order.runner_id));
+          if (runnerSnap.exists()) setRunnerData(runnerSnap.data());
+        }
+        // Evidence lookup
+        const evQuery = query(collection(db, 'admin_evidence'), where('orderId', '==', order.id));
+        const evSnap = await getDocs(evQuery);
+        setEvidence(evSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (e) {
+        console.error("Failed to fetch audit data", e);
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchAuditData();
+  }, [isOpen, order]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
@@ -25,137 +56,174 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 md:p-12"
-          onClick={onClose}
-        >
-          {/* Close Button */}
-          <button 
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1000] bg-slate-900/40 backdrop-blur-sm"
             onClick={onClose}
-            className="fixed top-8 right-8 z-[1010] w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10"
+          />
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-[#F8F9FA] z-[1010] shadow-2xl flex flex-col overflow-hidden"
           >
-            <X size={24} />
-          </button>
+            <div className="flex items-center justify-between px-6 py-5 bg-white border-b border-slate-100 shrink-0">
+              <div>
+                <h2 className="text-[18px] font-bold text-slate-900 tracking-tight">Audit Trail</h2>
+                <p className="text-[11px] font-medium text-slate-400 mt-0.5">Order #{order.id.slice(-6).toUpperCase()}</p>
+              </div>
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
 
-          <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl h-full max-h-[85vh]">
-            
-            {/* ── Evidence Canvas ── */}
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="relative flex-1 bg-white/5 rounded-[2.5rem] overflow-hidden border border-white/10 group cursor-zoom-in flex items-center justify-center"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsZoomed(!isZoomed);
-              }}
-            >
-              {order.proofOfDeliveryUrl ? (
-                <img 
-                  src={order.proofOfDeliveryUrl} 
-                  alt="Proof of Delivery"
-                  className={`w-full h-full object-contain transition-transform duration-500 ${isZoomed ? 'scale-150' : 'scale-100'}`}
-                />
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {loading ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+                </div>
               ) : (
-                <div className="flex flex-col items-center gap-4 text-white/40">
-                    <Camera size={48} strokeWidth={1} />
-                    <p className="text-[13px] font-bold ">No Visual Evidence Captured</p>
-                </div>
+                <>
+                  {/* Section 1: Order Details */}
+                  <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText size={16} className="text-slate-400" />
+                      <h3 className="text-[13px] font-bold text-slate-900 uppercase tracking-tight">Order Details</h3>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase">Order Code</p>
+                        <p className="text-[13px] font-mono font-bold text-slate-900 mt-0.5">#{order.id.slice(-6).toUpperCase()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase">Created</p>
+                        <p className="text-[13px] font-medium text-slate-900 mt-0.5">
+                          {order.created_at?.toDate ? order.created_at.toDate().toLocaleString('en-MY', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase">Payment</p>
+                        <p className="text-[13px] font-medium text-slate-900 mt-0.5">{order.payment_method || 'Online Banking'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase">Total</p>
+                        <p className="text-[13px] font-bold text-slate-900 mt-0.5">RM {Number(order.total || order.price || 0).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Section 2: Buyer Info */}
+                  <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <User size={16} className="text-slate-400" />
+                      <h3 className="text-[13px] font-bold text-slate-900 uppercase tracking-tight">Buyer Info</h3>
+                    </div>
+                    <div>
+                      <p className="text-[14px] font-bold text-slate-900">{order.customer_name || 'Student'}</p>
+                      {buyerData && (
+                        <div className="mt-2 space-y-1">
+                          {buyerData.matricNumber && <p className="text-[12px] text-slate-500 font-mono">ID: {buyerData.matricNumber}</p>}
+                          {buyerData.programme && <p className="text-[12px] text-slate-500">{buyerData.programme}</p>}
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  {/* Section 3: Fulfillment */}
+                  <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Package size={16} className="text-slate-400" />
+                      <h3 className="text-[13px] font-bold text-slate-900 uppercase tracking-tight">Fulfillment</h3>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start pb-3 border-b border-slate-50">
+                        <div>
+                          <p className="text-[13px] font-bold text-slate-900">{order.title}</p>
+                          <p className="text-[11px] font-medium text-slate-400 mt-0.5">Qty: {order.items?.[0]?.qty || 1} × RM {Number(order.price / (order.items?.[0]?.qty || 1)).toFixed(2)}</p>
+                        </div>
+                        <p className="text-[13px] font-bold text-slate-900">RM {Number(order.price || 0).toFixed(2)}</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <MapPin size={14} className="text-slate-400 mt-0.5" />
+                        <div>
+                          <p className="text-[11px] font-semibold text-slate-400 uppercase">Handover Node</p>
+                          <p className="text-[12px] font-medium text-slate-900 mt-0.5">{order.drop_off_location || 'Campus Delivery'}</p>
+                        </div>
+                      </div>
+                      {order.runner_id && (
+                        <div className="flex items-start gap-3">
+                          <User size={14} className="text-slate-400 mt-0.5" />
+                          <div>
+                            <p className="text-[11px] font-semibold text-slate-400 uppercase">Runner</p>
+                            <p className="text-[12px] font-medium text-slate-900 mt-0.5">{runnerData?.full_name || order.runner_name || 'Assigned Runner'}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  {/* Section 4: Evidence Photos */}
+                  <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Camera size={16} className="text-slate-400" />
+                      <h3 className="text-[13px] font-bold text-slate-900 uppercase tracking-tight">Evidence Photos</h3>
+                    </div>
+                    {evidence.length === 0 ? (
+                      <p className="text-[12px] italic text-slate-400">No photos yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        {evidence.map(ev => (
+                          <div key={ev.id} className="space-y-1.5">
+                            <div className="aspect-square rounded-lg bg-slate-50 border border-slate-100 overflow-hidden">
+                              <img src={ev.url} alt="Evidence" className="w-full h-full object-cover" />
+                            </div>
+                            <p className="text-[10px] font-bold text-center text-slate-600 uppercase">
+                              {ev.type === 'PICKUP' ? 'Pickup Photo' : ev.type === 'DELIVERY' ? 'Delivery Confirmation' : 'Evidence'}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+
+                  {/* Section 5: Order Timeline */}
+                  <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Clock size={16} className="text-slate-400" />
+                      <h3 className="text-[13px] font-bold text-slate-900 uppercase tracking-tight">Timeline</h3>
+                    </div>
+                    <div className="pl-2 space-y-6 border-l-2 border-slate-100 relative left-2">
+                      {[
+                        { label: 'Order Created', time: order.created_at, active: true },
+                        { label: 'Payment Confirmed', time: order.created_at, active: ['PAID', 'PREPARING', 'READY', 'READY_FOR_PICKUP', 'PENDING_RUNNER', 'RUNNER_ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'DELIVERED', 'COMPLETED'].includes(order.status) },
+                        { label: 'Preparing', time: order.prepared_at, active: !!order.prepared_at || ['READY', 'READY_FOR_PICKUP', 'PENDING_RUNNER', 'RUNNER_ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'DELIVERED', 'COMPLETED'].includes(order.status) },
+                        { label: 'Ready for Pickup', time: order.ready_at, active: !!order.ready_at || ['READY', 'READY_FOR_PICKUP', 'PENDING_RUNNER', 'RUNNER_ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'DELIVERED', 'COMPLETED'].includes(order.status) },
+                        { label: 'Runner Assigned', subLabel: order.runner_name, time: order.runner_assigned_at, active: !!order.runner_id || ['RUNNER_ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'DELIVERED', 'COMPLETED'].includes(order.status) },
+                        { label: 'Item Picked Up', time: order.picked_up_at, active: !!order.picked_up_at || ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'DELIVERED', 'COMPLETED'].includes(order.status) },
+                        { label: 'Delivered', time: order.delivered_at, active: ['DELIVERED', 'COMPLETED'].includes(order.status) }
+                      ].filter(step => step.active).map((step, i, arr) => (
+                        <div key={step.label} className="relative pl-6">
+                          <div className={`absolute -left-[25px] top-0.5 w-4 h-4 rounded-full border-4 border-white ${i === arr.length - 1 ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                          <p className={`text-[12px] font-bold ${i === arr.length - 1 ? 'text-slate-900' : 'text-slate-500'}`}>{step.label}</p>
+                          {step.subLabel && <p className="text-[10px] font-medium text-slate-400 mt-0.5">{step.subLabel}</p>}
+                          {step.time && (
+                            <p className="text-[10px] font-semibold text-slate-400 mt-1">
+                              {step.time?.toDate ? step.time.toDate().toLocaleString('en-MY', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : new Date(step.time).toLocaleString('en-MY', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                </>
               )}
-              
-              {order.proofOfDeliveryUrl && !isZoomed && (
-                <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20 flex items-center gap-2 text-white font-bold">
-                    <ZoomIn size={18} /> Inspect Asset
-                  </div>
-                </div>
-              )}
-            </motion.div>
-
-            {/* ── Audit Sidebar ── */}
-            <motion.div 
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              className="w-full md:w-96 bg-white rounded-[2.5rem] p-8 flex flex-col justify-between shadow-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="space-y-8">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400 mb-2">Logistics Audit</p>
-                  <h3 className="text-[24px] font-semibold text-slate-900 tracking-tight">Delivery Proof</h3>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-900 shadow-sm">
-                        <ShieldCheck size={20} />
-                      </div>
-                      <span className="text-[13px] font-bold text-slate-400">Status</span>
-                    </div>
-                    <span className="text-[14px] font-semibold text-emerald-500">{order.status}</span>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-slate-400">
-                        <Clock size={16} />
-                        <span className="text-[12px] font-bold">Fulfillment Time</span>
-                      </div>
-                      <span className="text-[12px] font-semibold text-slate-900">
-                        {order.updated_at ? new Date(order.updated_at).toLocaleString() : 'Processing...'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-slate-400">
-                        <Package size={16} />
-                        <span className="text-[12px] font-bold">Order Registry</span>
-                      </div>
-                      <span className="text-[12px] font-semibold text-slate-900">#{order.id.slice(0, 8).toUpperCase()}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-slate-400">
-                        <MapPin size={16} />
-                        <span className="text-[12px] font-bold">Destination</span>
-                      </div>
-                      <span className="text-[12px] font-semibold text-slate-900 truncate max-w-[120px]">{order.delivery_address || 'Campus Drop-off'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-900 p-5 rounded-2xl">
-                  <p className="text-[12px] font-medium text-white/70 leading-relaxed">
-                    This visual evidence confirms the physical hand-over of <span className="text-white font-bold">{order.title}</span>. 
-                    If the asset is unclear, contact logistics support.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-8">
-                {order.proofOfDeliveryUrl && (
-                  <a 
-                    href={order.proofOfDeliveryUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full h-14 rounded-2xl border border-slate-200 flex items-center justify-center gap-3 text-[14px] font-bold text-slate-900 hover:bg-slate-50 transition-all"
-                  >
-                    <Download size={18} /> Export Evidence
-                  </a>
-                )}
-                <button 
-                  onClick={onClose}
-                  className="w-full h-16 rounded-2xl bg-slate-900 text-white font-semibold text-[15px] active:scale-95 transition-transform"
-                >
-                  Dismiss Audit
-                </button>
-              </div>
-            </motion.div>
-
-          </div>
-        </motion.div>
+            </div>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );

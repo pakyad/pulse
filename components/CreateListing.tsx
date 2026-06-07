@@ -41,6 +41,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const [selectedCategory, setSelectedCategory] = useState<CategoryID | ''>(existingItem?.category || '');
   const [subcategory, setSubcategory] = useState(existingItem?.subcategory || '');
   const [images, setImages] = useState<string[]>(existingItem?.images || []);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [title, setTitle] = useState(existingItem?.title || '');
   const [description, setDescription] = useState(existingItem?.description || '');
   const [price, setPrice] = useState(existingItem?.price?.toString() || '');
@@ -364,7 +365,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                   <Plus size={18} className="text-[#94a3b8]" />
                   <span className="text-[9px] font-bold text-[#94a3b8] ">Add</span>
                 </button>
-                <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                <input type="file" multiple accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
                 {images.map((img, i) => (
                   <div key={i} className="shrink-0 w-24 h-24 relative rounded-xl overflow-hidden border border-slate-100 group">
                     <img src={img} className="w-full h-full object-cover" />

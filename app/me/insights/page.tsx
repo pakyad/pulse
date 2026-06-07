@@ -3,27 +3,31 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
-import { TrendingUp, ArrowLeft, Package, DollarSign, ListOrdered, HardDrive, ShoppingBag, Info, Shirt } from 'lucide-react';
+import { collection, query, where, onSnapshot, doc, orderBy, limit } from 'firebase/firestore';
+import { 
+  TrendingUp, ArrowLeft, Package, DollarSign, ListOrdered, 
+  HardDrive, ShoppingBag, Info, Shirt, ChevronRight,
+  LayoutGrid, Bell, BarChart3, Settings, LogOut, ClipboardList,
+  Search
+} from 'lucide-react';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
+  ResponsiveContainer, BarChart, Bar, Cell 
+} from 'recharts';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
-const SkibidiHeading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <h2 className={`text-[17px] font-bold text-slate-900 tracking-tight ${className}`}>
-    {children}
-  </h2>
+const StatCard = ({ title, value, subtext }: { title: string, value: string | number, subtext?: string }) => (
+  <div className="p-6 bg-gray-50 rounded-xl flex-1">
+    <p className="text-xs text-gray-500 uppercase tracking-widest font-medium mb-2">{title}</p>
+    <p className="text-2xl font-bold text-gray-900">{value}</p>
+    {subtext && <p className="text-[11px] text-gray-400 mt-1 font-medium">{subtext}</p>}
+  </div>
 );
 
-const SkibidiSubtext = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-[11px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>
-    {children}
-  </p>
-);
-
-export default function MarketInsightsPage() {
+export default function MerchantInsightsPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
-  const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,21 +37,22 @@ export default function MarketInsightsPage() {
       unsubs = [];
 
       if (user) {
-        const uProfile = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+        // User Profile
+        unsubs.push(onSnapshot(doc(db, 'users', user.uid), (snap) => {
            setProfile({ ...snap.data(), uid: user.uid });
-        });
-        unsubs.push(uProfile);
+        }));
 
-        const uOrders = onSnapshot(query(collection(db, "orders"), where("seller_id", "==", user.uid)), (s) => {
+        // FIX 9: Queries use seller_id == currentMerchant.uid AND status == "DELIVERED"
+        const q = query(
+          collection(db, "orders"), 
+          where("seller_id", "==", user.uid),
+          where("status", "==", "DELIVERED")
+        );
+        
+        unsubs.push(onSnapshot(q, (s) => {
            setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })));
-        });
-        unsubs.push(uOrders);
-
-        const uItems = onSnapshot(query(collection(db, "items"), where("seller_id", "==", user.uid)), (s) => {
-           setItems(s.docs.map(d => ({ id: d.id, ...d.data() })));
            setLoading(false);
-        });
-        unsubs.push(uItems);
+        }));
       } else {
         router.push('/auth');
       }
@@ -58,209 +63,238 @@ export default function MarketInsightsPage() {
     };
   }, [router]);
 
-  // Shared Metrics
-  const completedOrders = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)), [orders]);
-  const totalRevenue = useMemo(() => completedOrders.reduce((s, o) => s + Number(o.price || o.total || 0), 0), [completedOrders]);
-  const salesVolume = completedOrders.length;
-  
-  const inventoryValue = useMemo(() => items.reduce((s, item) => s + (Number(item.price || 0) * Number(item.stock_count || 0)), 0), [items]);
-  const totalUnitsAvailable = useMemo(() => items.reduce((s, item) => s + Number(item.stock_count || 0), 0), [items]);
+  // ── SECTION 1: Stat Cards ──
+  const stats = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
-  // Item Sales Mapping
-  const itemSales = useMemo(() => {
-    const counts: Record<string, number> = {};
-    completedOrders.forEach(o => {
-       if (o.item_id) counts[o.item_id] = (counts[o.item_id] || 0) + 1;
+    const totalRevenue = orders.reduce((s, o) => s + Number(o.total || o.price || 0), 0);
+    const thisMonthRevenue = orders.filter(o => {
+      const d = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }).reduce((s, o) => s + Number(o.total || o.price || 0), 0);
+    
+    const totalOrders = orders.length;
+    const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "—";
+
+    return { totalRevenue, thisMonthRevenue, totalOrders, avgOrderValue };
+  }, [orders]);
+
+  // ── SECTION 2: Sales Over Time (Last 7 Days) ──
+  const lineChartData = useMemo(() => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const dayName = days[d.getDay()];
+      
+      const dayRevenue = orders.filter(o => {
+        const od = o.created_at?.toDate ? o.created_at.toDate() : new Date(o.created_at);
+        od.setHours(0, 0, 0, 0);
+        return od.getTime() === d.getTime();
+      }).reduce((s, o) => s + Number(o.total || o.price || 0), 0);
+
+      data.push({ name: dayName, revenue: dayRevenue });
+    }
+    return data;
+  }, [orders]);
+
+  // ── SECTION 3: Top Products (Horizontal Bar Chart) ──
+  const barChartData = useMemo(() => {
+    const products: Record<string, number> = {};
+    orders.forEach(o => {
+      const title = o.title || (o.items?.[0]?.title) || 'Unknown Item';
+      products[title] = (products[title] || 0) + Number(o.total || o.price || 0);
     });
-    return items.map(item => ({
-       ...item,
-       units_sold: counts[item.id] || 0
-    })).sort((a, b) => b.units_sold - a.units_sold);
-  }, [items, completedOrders]);
 
-  if (loading) return null;
+    return Object.entries(products)
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+  }, [orders]);
 
-  const isProMode = profile?.role === 'CLUB' || profile?.is_verified_merchant;
+  // ── SECTION 4: Recent Orders Table ──
+  const recentOrders = useMemo(() => {
+    return [...orders]
+      .sort((a, b) => {
+        const da = a.created_at?.toDate ? a.created_at.toDate() : new Date(a.created_at);
+        const db = b.created_at?.toDate ? b.created_at.toDate() : new Date(b.created_at);
+        return db.getTime() - da.getTime();
+      })
+      .slice(0, 10);
+  }, [orders]);
+
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" />
+    </div>
+  );
+
+  const isClub = profile?.role === 'CLUB' || profile?.is_verified_merchant;
 
   return (
-    <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900">
-      <section className="px-8 pt-28 pb-2">
-         <div className="space-y-0.5">
-            <SkibidiHeading>Market Insights</SkibidiHeading>
-            <SkibidiSubtext>{isProMode ? 'Operational Analytics' : 'Selling Progress'}</SkibidiSubtext>
-         </div>
-      </section>
+    <div className="min-h-screen bg-[#F9F9FB] selection:bg-gray-100 hidden md:flex">
+      
+      {/* ── Fixed Sidebar ── */}
+      <aside className="w-64 h-screen bg-[#FFFFFF] border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
+        <div className="px-6 py-8 flex items-center gap-2">
+          <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+             <span className="text-white font-semibold text-[14px]">P</span>
+          </div>
+          <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
+        </div>
 
-      <section className="px-8 mt-10">
-        <div className="flex flex-col space-y-12 animate-in fade-in duration-500 pb-40">
-          
-          {/* TOP BANNER */}
-          {isProMode ? (
-             <section className="space-y-6">
-                <div className="p-6 bg-slate-900 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
-                   <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-amber-400">
-                      <TrendingUp size={22} />
-                   </div>
-                   <div className="space-y-1">
-                      <p className="text-[14px] font-bold tracking-tight">Weekly Performance</p>
-                      <p className="text-[11px] text-white/50 font-medium leading-relaxed">Your store activity is looking solid. Keep inventory updated to maintain sales momentum.</p>
-                   </div>
-                </div>
-                <div className="px-1 space-y-1">
-                   <SkibidiHeading>Merchant Insights</SkibidiHeading>
-                   <SkibidiSubtext>Track your campus impact and store growth.</SkibidiSubtext>
-                </div>
-             </section>
-          ) : (
-             <section className="space-y-6">
-                <div className="p-6 bg-slate-900 rounded-2xl text-white flex items-start gap-5 shadow-md shadow-slate-900/10">
-                   <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-white">
-                      <Shirt size={22} />
-                   </div>
-                   <div className="space-y-1">
-                      <p className="text-[14px] font-bold tracking-tight">Activity Status</p>
-                      <p className="text-[11px] text-white/80 font-medium leading-relaxed">You've successfully fulfilled {salesVolume} orders. Keep your listings updated.</p>
-                   </div>
-                </div>
-                <div className="px-1 space-y-1">
-                   <SkibidiHeading>Selling Progress</SkibidiHeading>
-                   <SkibidiSubtext>See how much you've made from your old stuff.</SkibidiSubtext>
-                </div>
-             </section>
+        <nav className="flex-1 px-4 py-2 space-y-1.5">
+          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+            <LayoutGrid size={20} />
+            <span className="text-sm">Overview</span>
+          </button>
+          <button onClick={() => router.push('/orders')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+            <Bell size={20} />
+            <span className="text-sm">Live Orders</span>
+          </button>
+          <button onClick={() => router.push('/marketplace')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+            <Package size={20} />
+            <span className="text-sm">Products</span>
+          </button>
+          {isClub && (
+            <>
+              <button onClick={() => router.push('/merchant/disputes')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                <ClipboardList size={20} />
+                <span className="text-sm">Log</span>
+              </button>
+              <button onClick={() => router.push('/me/insights')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white">
+                <BarChart3 size={20} />
+                <span className="text-sm font-medium">Analytics</span>
+              </button>
+            </>
           )}
+          <button onClick={() => router.push('/me/edit')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+            <Settings size={20} />
+            <span className="text-sm">Settings</span>
+          </button>
+        </nav>
 
-          {/* METRICS GRID (2x2) */}
-          <div className="grid grid-cols-2 gap-4">
-             <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
-                <p className="text-[10px] font-semibold text-[#94a3b8]  mb-2">{isProMode ? 'Total Earnings' : 'Money Earned'}</p>
-                <div>
-                   <p className="text-[20px] font-bold text-slate-900 tracking-tighter">RM {totalRevenue.toFixed(2)}</p>
-                </div>
-             </div>
-             
-             <div className="p-6 border border-slate-50 rounded-2xl bg-white shadow-sm flex flex-col justify-between h-32">
-                <p className="text-[10px] font-semibold text-[#94a3b8]  mb-2">{isProMode ? 'Sales Volume' : 'Items Sold'}</p>
-                <div>
-                   <p className="text-[20px] font-bold text-slate-900 tracking-tighter">{salesVolume}</p>
-                </div>
-             </div>
+        <div className="p-4 border-t-[0.5px] border-[#E5E5EA]">
+          <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+            <LogOut size={20} />
+            <span className="text-sm">Logout</span>
+          </button>
+        </div>
+      </aside>
 
-             <div className="p-6 border border-slate-50 rounded-2xl bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
-                <p className="text-[10px] font-semibold text-[#94a3b8]  mb-2">{isProMode ? 'Inventory Value' : 'Closet Value'}</p>
-                <div>
-                   <p className="text-[20px] font-bold text-slate-900 tracking-tighter">RM {inventoryValue.toFixed(2)}</p>
-                </div>
-             </div>
+      {/* ── Main Content Area ── */}
+      <main className="flex-1 ml-64 flex flex-col min-h-screen bg-white text-slate-900">
+        
+        {/* Top Header */}
+        <header className="bg-white border-b border-slate-200 px-10 py-6 flex items-center justify-between sticky top-0 z-30">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Merchant Insights</h1>
+            <p className="text-xs text-[#1D9E75] font-medium mt-1">Market analytics and performance overview</p>
+          </div>
+          <div className="flex items-center gap-6">
+            <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Merchant'} />
+          </div>
+        </header>
 
-             <div className="p-6 border border-slate-50 rounded-2xl bg-slate-50/50 shadow-sm flex flex-col justify-between h-32">
-                <p className="text-[10px] font-semibold text-[#94a3b8]  mb-2">{isProMode ? 'Total Units' : 'Items Left'}</p>
-                <div>
-                   <p className="text-[20px] font-bold text-slate-900 tracking-tighter">{totalUnitsAvailable}</p>
-                </div>
-             </div>
+        <div className="p-10 space-y-12">
+          
+          {/* SECTION 1: Stat Cards */}
+          <div className="grid grid-cols-4 gap-6">
+            <StatCard title="Total Revenue" value={`RM ${stats.totalRevenue.toFixed(2)}`} subtext="Life-to-date earnings" />
+            <StatCard title="This Month" value={`RM ${stats.thisMonthRevenue.toFixed(2)}`} subtext="Current calendar month" />
+            <StatCard title="Total Orders" value={stats.totalOrders} subtext="Successful deliveries" />
+            <StatCard title="Avg Order Value" value={stats.avgOrderValue === "—" ? "—" : `RM ${stats.avgOrderValue}`} subtext="Revenue per order" />
           </div>
 
-          {/* VISUAL BREAKDOWN SECTION */}
-          {isProMode ? (
-             <>
-                {/* PRO MODE: STOCK HEALTH */}
-                <section className="space-y-8 p-8 bg-slate-50/30 rounded-2xl border border-slate-50">
-                   <div className="px-1 space-y-1">
-                      <SkibidiHeading>Stock Health</SkibidiHeading>
-                      <SkibidiSubtext>Live inventory status across all assets</SkibidiSubtext>
-                   </div>
-                   
-                   <div className="space-y-5">
-                      {[
-                         { name: 'Healthy Stock (>5 units)', color: 'bg-emerald-500', count: items.filter(i => (i.stock_count || 0) > 5).length },
-                         { name: 'Low Stock Alert (1-5 units)', color: 'bg-amber-500', count: items.filter(i => (i.stock_count || 0) > 0 && (i.stock_count || 0) <= 5).length },
-                         { name: 'Out of Stock (0 units)', color: 'bg-rose-500', count: items.filter(i => (i.stock_count || 0) === 0).length }
-                      ].map(f => {
-                         const pct = items.length > 0 ? Math.round((f.count / items.length) * 100) : 0;
-                         return (
-                           <div key={f.name} className="flex items-center gap-4">
-                              <div className={`w-1.5 h-1.5 rounded-full ${f.color}`} />
-                              <p className="text-[13px] font-bold text-slate-500 flex-1">{f.name}</p>
-                              <div className="text-right">
-                                <p className="text-[13px] font-semibold text-slate-900">{pct}%</p>
-                                <p className="text-[9px] text-slate-400 font-bold ">{f.count} Items</p>
-                              </div>
-                           </div>
-                         );
-                      })}
-                   </div>
-                </section>
+          <div className="grid grid-cols-2 gap-8">
+            {/* SECTION 2: Sales Over Time */}
+            <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] space-y-8">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900 uppercase tracking-tight">Sales Over Time</h3>
+                <p className="text-[13px] text-[#6B7280] mt-1">Revenue performance for the last 7 days</p>
+              </div>
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={lineChartData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      formatter={(val: any) => [`RM ${val.toFixed(2)}`, 'Revenue']}
+                    />
+                    <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
 
-                {/* PRO MODE: TOP PERFORMING ASSETS */}
-                <section className="space-y-6">
-                   <div className="px-1 space-y-1">
-                      <SkibidiHeading>Top Moving Inventory</SkibidiHeading>
-                      <SkibidiSubtext>Assets with the highest sales volume</SkibidiSubtext>
-                   </div>
-                   
-                   <div className="space-y-3">
-                      {itemSales.slice(0, 3).map((item, idx) => (
-                         <div key={item.id} className="p-4 rounded-2xl border border-slate-50 bg-white shadow-sm flex items-center justify-between hover:border-slate-200 transition-colors">
-                            <div className="flex items-center gap-4">
-                               <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center font-semibold text-slate-300 text-[11px]">
-                                  #{idx + 1}
-                               </div>
-                               <div>
-                                  <p className="text-[13px] font-bold text-slate-900 tracking-tight">{item.title}</p>
-                                  <p className="text-[10px] text-slate-400 font-medium">{item.stock_count || 0} Units Remaining</p>
-                               </div>
-                            </div>
-                            <div className="px-3 py-1 bg-blue-50 text-slate-900 rounded-lg">
-                               <p className="text-[11px] font-semibold">{item.units_sold} Sold</p>
-                            </div>
-                         </div>
-                      ))}
-                      {itemSales.length === 0 && (
-                         <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-2xl">
-                            <ShoppingBag size={24} className="opacity-20" />
-                            <p className="text-[11px] font-bold ">No Sales Data Yet</p>
-                         </div>
-                      )}
-                   </div>
-                </section>
-             </>
-          ) : (
-             <>
-                {/* CASUAL MODE: RECENT SALES */}
-                <section className="space-y-6">
-                   <div className="px-1 flex items-center justify-between">
-                      <div className="space-y-1">
-                         <SkibidiHeading>Recent Sales</SkibidiHeading>
-                         <SkibidiSubtext>Stuff you successfully sold.</SkibidiSubtext>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                         <Info size={14} />
-                      </div>
-                   </div>
-                   
-                   <div className="space-y-3">
-                      {completedOrders.slice(0, 5).map(order => (
-                         <div key={order.id} className="p-5 rounded-2xl border border-slate-50 bg-white shadow-sm flex items-center justify-between">
-                            <div className="space-y-0.5">
-                               <p className="text-[13px] font-bold text-slate-900 tracking-tight truncate max-w-[200px]">{order.title}</p>
-                               <p className="text-[10px] text-slate-400 font-medium">To: {order.buyer_name || 'Anonymous Student'}</p>
-                            </div>
-                            <p className="text-[14px] font-semibold text-slate-900">RM {Number(order.price || order.total || 0).toFixed(2)}</p>
-                         </div>
-                      ))}
-                      {completedOrders.length === 0 && (
-                         <div className="p-8 text-center text-slate-400 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                            <Shirt size={24} className="opacity-20" />
-                            <p className="text-[11px] font-bold ">No Items Sold Yet</p>
-                         </div>
-                      )}
-                   </div>
-                </section>
-             </>
-          )}
+            {/* SECTION 3: Top Products */}
+            <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] space-y-8">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900 uppercase tracking-tight">Top Products</h3>
+                <p className="text-[13px] text-[#6B7280] mt-1">Highest revenue generating assets</p>
+              </div>
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barChartData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F1F5F9" />
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} width={100} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      formatter={(val: any) => [`RM ${val.toFixed(2)}`, 'Revenue']}
+                    />
+                    <Bar dataKey="revenue" fill="#10B981" radius={[0, 4, 4, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 4: Recent Orders Table */}
+          <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] overflow-hidden">
+            <div className="mb-6">
+              <h3 className="text-base font-semibold text-gray-900 uppercase tracking-tight">Recent Deliveries</h3>
+              <p className="text-[13px] text-[#6B7280] mt-1">Last 10 successful fulfillment cycles</p>
+            </div>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100">
+                  <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Order Code</th>
+                  <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Buyer Name</th>
+                  <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Item</th>
+                  <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Amount (RM)</th>
+                  <th className="px-8 py-4 text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {recentOrders.map((o, idx) => (
+                  <tr key={o.id} className={idx % 2 === 1 ? 'bg-slate-50/30' : 'bg-white'}>
+                    <td className="px-8 py-5 text-[13px] font-mono font-bold text-slate-400">#{o.id.slice(-6).toUpperCase()}</td>
+                    <td className="px-8 py-5 text-[13px] font-bold text-[#111827]">{o.customer_name || 'Student'}</td>
+                    <td className="px-8 py-5 text-[13px] font-medium text-[#374151]">{o.title}</td>
+                    <td className="px-8 py-5 text-[13px] font-bold text-[#111827]">RM {Number(o.total || o.price || 0).toFixed(2)}</td>
+                    <td className="px-8 py-5 text-[11px] font-bold text-[#6B7280]">
+                      {o.created_at?.toDate ? o.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : new Date(o.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+                {recentOrders.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-8 py-12 text-center text-slate-300 text-[13px] font-medium">No delivered orders found in registry.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
         </div>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 }

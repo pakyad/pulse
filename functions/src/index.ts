@@ -78,14 +78,7 @@ export const placeOrder = onCall({
         let subtotal = 0;
         itemsForThisVendor.forEach((i: any) => subtotal += ((actualPrices[i.productId] || i.price) * i.qty));
 
-        itemsForThisVendor.forEach((item: any) => {
-          const ref = db.collection('items').doc(item.productId);
-          transaction.update(ref, {
-            stock_count: admin.firestore.FieldValue.increment(-item.qty),
-            // Maintain legacy field for compatibility
-            stock: admin.firestore.FieldValue.increment(-item.qty)
-          });
-        });
+        // Stock decrement moved to Merchant "Prepare Order" stage per REQ_FIX_5
 
         transaction.set(subOrderRef, {
           order_id: subOrderRef.id,

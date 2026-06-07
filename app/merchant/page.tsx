@@ -142,12 +142,76 @@ export default function MerchantDashboard() {
   };
 
   // ── SHARED ANALYTICS LOGIC ──
-  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.total || o.price || 0), 0), [orders]);
-  const activeOrdersList = orders.filter(o => !["DELIVERED", "COMPLETED", "CANCELLED"].includes(o.status));
+  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP", "READY"].includes(o.status)).reduce((s, o) => s + Number(o.total || o.price || 0), 0), [orders]);
   
-  const pipelineOrders = activeOrdersList.filter(o => ['PENDING_VENDOR', 'PREPARING', 'READY_FOR_PICKUP', 'PENDING_RUNNER', 'PICKED_UP'].includes(o.status));
-  const completedOrders = orders.filter(o => ['DELIVERED', 'COMPLETED'].includes(o.status)).slice(0, 50);
-  const cancelledOrders = orders.filter(o => o.status === 'CANCELLED');
+  // FIX 2 & 3: Active Pipeline query - NOT DELIVERED and NOT CANCELLED
+  const pipelineOrders = useMemo(() => orders.filter(o => 
+    o.seller_id === merchant?.uid && 
+    !["DELIVERED", "CANCELLED", "COMPLETED"].includes(o.status)
+  ), [orders, merchant?.uid]);
+
+  const completedOrders = useMemo(() => orders.filter(o => 
+    ["DELIVERED", "COMPLETED"].includes(o.status)
+  ).slice(0, 50), [orders]);
+
+  const cancelledOrders = useMemo(() => orders.filter(o => o.status === 'CANCELLED'), [orders]);
+
+  // FIX 5 & 6: Action Handlers
+  const handlePrepareOrder = async (orderId: string, items: any[]) => {
+    try {
+      const { runTransaction, doc, serverTimestamp } = await import('firebase/firestore');
+      await updateDoc(doc(db, "orders", orderId), { 
+        status: "PREPARING",
+        prepared_at: serverTimestamp() 
+      });
+    } catch (e) {
+      console.error("Prepare order error:", e);
+      alert("Failed to prepare order.");
+    }
+  };
+
+  const handleMarkReady = async (orderId: string) => {
+    await updateDoc(doc(db, "orders", orderId), { 
+      status: "READY",
+      ready_at: serverTimestamp() 
+    });
+  };
+
+  const handleMessageUser = async (orderId: string, targetId: string, targetName: string, type: 'BUYER' | 'RUNNER', itemName?: string, handoverNode?: string) => {
+    if (!merchant?.uid) return;
+    
+    const chatId = `post_${merchant.uid}_${targetId}_${orderId}`;
+    const chatRef = doc(db, "chats", chatId);
+    const chatSnap = await getDoc(chatRef);
+
+    if (!chatSnap.exists()) {
+      const message = type === 'BUYER' 
+        ? `Hi! Thank you for your order of ${itemName} (Order #${orderId.slice(0,8).toUpperCase()}).`
+        : `Hi ${targetName}, your pickup for Order #${orderId.slice(0,8).toUpperCase()} is ready at ${handoverNode || 'the handover point'}.`;
+
+      const { setDoc, collection, addDoc } = await import('firebase/firestore');
+      await setDoc(chatRef, {
+        members: [merchant.uid, targetId],
+        participant_names: {
+          [merchant.uid]: merchant.full_name,
+          [targetId]: targetName,
+        },
+        type: "MARKETPLACE",
+        orderId: orderId,
+        lastMessage: message,
+        last_message_sender_id: merchant.uid,
+        updatedAt: serverTimestamp(),
+      });
+
+      await addDoc(collection(chatRef, "messages"), {
+        senderId: merchant.uid,
+        text: message,
+        createdAt: serverTimestamp(),
+      });
+    }
+
+    router.push(`/messages?chatId=${chatId}`);
+  };
 
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" /></div>;
 
@@ -164,6 +228,9 @@ export default function MerchantDashboard() {
           items={items}
           recentOrders={orders.slice(0, 10)}
           handleAcceptOrder={handleAcceptOrder}
+          handlePrepareOrder={handlePrepareOrder}
+          handleMarkReady={handleMarkReady}
+          handleMessageUser={handleMessageUser}
           handleCallRunner={handleCallRunner}
           handleConfirmDelivery={handleConfirmDelivery}
           toggleItemStatus={toggleItemStatus}
@@ -178,6 +245,9 @@ export default function MerchantDashboard() {
           completedOrders={completedOrders}
           items={items}
           handleAcceptOrder={handleAcceptOrder}
+          handlePrepareOrder={handlePrepareOrder}
+          handleMarkReady={handleMarkReady}
+          handleMessageUser={handleMessageUser}
           handleCallRunner={handleCallRunner}
           handleConfirmDelivery={handleConfirmDelivery}
           toggleItemStatus={toggleItemStatus}

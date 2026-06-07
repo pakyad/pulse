@@ -111,21 +111,53 @@ export async function placeSingleOrder(params: {
     const db = getAdminDb();
     const parentOrderId = `PULSE-${Date.now()}`;
     
+    const { serverTimestamp } = await import('firebase/firestore');
+    let finalNewStock = 0;
+    let itemName = '';
+    let sellerId = '';
+
     await db.runTransaction(async (transaction) => {
       const itemRef = db.collection('items').doc(params.itemId);
       const itemDoc = await transaction.get(itemRef);
       
-      if (!itemDoc.exists) throw new Error("ITEM_NOT_FOUND");
+      if (!itemDoc.exists) throw new Error("This item no longer exists.");
       
       const item = itemDoc.data()!;
-      const currentStock = item.stock_count;
-      
-      if (currentStock !== undefined && currentStock !== null) {
-         if (currentStock < params.qty) {
-            throw new Error("SOLD_OUT");
-         }
-         transaction.update(itemRef, { stock_count: currentStock - params.qty });
+      itemName = item.title;
+      sellerId = item.seller_id;
+      const currentStock = item.stock_count ?? item.stock ?? 0;
+
+      // 1. Check stock
+      if (currentStock <= 0) {
+        throw new Error("This item is out of stock");
       }
+      if (currentStock < params.qty) {
+        throw new Error(`Only ${currentStock} units remaining.`);
+      }
+
+      // 2. Check maxPerStudent
+      if (item.maxPerStudent) {
+        const existingOrdersQuery = await db.collection('orders')
+          .where('buyer_id', '==', params.buyerId)
+          .where('items', 'array-contains', { productId: params.itemId }) // Simple check, might need refinement if items array is complex
+          .get();
+        
+        // More robust check: filter in memory if array-contains is tricky with objects
+        const userOrderCount = existingOrdersQuery.docs.filter(d => 
+          d.data().items?.some((i: any) => (i.productId || i.id) === params.itemId)
+        ).length;
+
+        if (userOrderCount >= item.maxPerStudent) {
+          throw new Error("You have reached the purchase limit for this item");
+        }
+      }
+
+      // 3. Create the order AND decrement stock
+      finalNewStock = currentStock - params.qty;
+      transaction.update(itemRef, { 
+        stock_count: finalNewStock,
+        stock: finalNewStock // Sync legacy field
+      });
 
       // Sub-order
       const subOrderRef = db.collection('orders').doc();
@@ -178,6 +210,25 @@ export async function placeSingleOrder(params: {
         created_at: new Date().toISOString()
       });
     });
+
+    // 4. Post-transaction tasks
+    if (finalNewStock <= 10 && sellerId) {
+      await db.collection('notifications').add({
+        userId: sellerId,
+        type: "LOW_STOCK",
+        title: "⚠️ Low Stock Alert",
+        body: `${itemName} has only ${finalNewStock} units remaining.`,
+        read: false,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    // 5. Update status if sold out
+    if (finalNewStock === 0) {
+      await db.collection('items').doc(params.itemId).update({
+        status: "OUT_OF_STOCK"
+      });
+    }
 
     return { success: true, parentId: parentOrderId };
   } catch (error: any) {
