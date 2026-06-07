@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
@@ -25,7 +25,7 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
       
-      {/* ── NAV (Optical Institutionalism) ── */}
+      {/*  NAV (Optical Institutionalism)  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-4">
           <BackButton fallback="/marketplace" />
@@ -147,7 +147,7 @@ export default function CartPage() {
         </AnimatePresence>
       </div>
 
-      {/* ── STICKY FOOTER ── */}
+      {/*  STICKY FOOTER  */}
       {cart.length > 0 && (
         <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
           <button

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -19,7 +19,7 @@ import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 import ProductCard from '@/components/shared/ProductCard';
 
-// ── STANDARDIZED TYPOGRAPHY COMPONENTS (Concept: Skibidi) ──
+//  STANDARDIZED TYPOGRAPHY COMPONENTS (Concept: Skibidi) 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[17px] font-bold text-slate-900 tracking-tight ${className}`}>
     {children}
@@ -110,7 +110,7 @@ export default function MePage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans">
       
-      {/* ── GLOBAL NAVIGATION ── */}
+      {/*  GLOBAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
             <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
@@ -123,11 +123,11 @@ export default function MePage() {
 
       <div className="pt-28 px-4 space-y-12">
          
-         {/* ── ACTIVE ORDER BANNER ── */}
+         {/*  ACTIVE ORDER BANNER  */}
          <ActiveOrderBanner />
          <FloatingActiveTask />
 
-         {/* ── PROFILE HEADER ── */}
+         {/*  PROFILE HEADER  */}
          <section className="flex items-center gap-6">
             <button onClick={() => setIsIDOpen(true)} className="relative group">
                <div className="w-20 h-20 rounded-[24px] bg-slate-50 border border-slate-100 overflow-hidden shadow-sm group-hover:border-slate-300 transition-all">
@@ -154,7 +154,7 @@ export default function MePage() {
             </div>
          </section>
 
-         {/* ── ACCOUNT STATS ── */}
+         {/*  ACCOUNT STATS  */}
          <section className="grid grid-cols-2 gap-4">
             <div className="p-6 bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-2">
                <Subtext className="text-[12px] font-semibold text-slate-500 capitalize">Trust Rating</Subtext>
@@ -171,7 +171,7 @@ export default function MePage() {
             </div>
          </section>
 
-         {/* ── DIRECTORY / SETTINGS ── */}
+         {/*  DIRECTORY / SETTINGS  */}
          {MENU_GROUPS.map((group, idx) => (
             <section key={idx} className="space-y-8">
                <div className="px-1 space-y-1">
@@ -198,7 +198,7 @@ export default function MePage() {
             </section>
          ))}
 
-         {/* ── LISTINGS SECTION (Grid Layout) ── */}
+         {/*  LISTINGS SECTION (Grid Layout)  */}
          {isStudent && (
             <section className="space-y-8">
                <div className="px-1 space-y-1">
@@ -249,7 +249,7 @@ export default function MePage() {
           <div className="fixed inset-0 z-300 flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsIDOpen(false)} className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" />
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative z-10 w-full max-w-sm">
-              <HologramID name={profile?.full_name || 'Pulse Member'} role={profile?.is_verified_runner ? 'Pulse Runner' : 'Student'} matricNo={profile?.matricNumber || profile?.matric_no || '—'} qrValue={user?.uid || 'anonymous'} />
+              <HologramID name={profile?.full_name || 'Pulse Member'} role={profile?.is_verified_runner ? 'Pulse Runner' : 'Student'} matricNo={profile?.matricNumber || profile?.matric_no || ''} qrValue={user?.uid || 'anonymous'} />
               <button onClick={() => setIsIDOpen(false)} className="mt-8 w-full h-14 bg-white/10 rounded-[20px] text-white font-semibold text-[14px] hover:bg-white/20 transition-all">Close ID</button>
             </motion.div>
           </div>

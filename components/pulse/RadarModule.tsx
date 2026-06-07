@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-// ─── RADAR CARD ───────────────────────────────────────────────────────────────
+//  RADAR CARD 
 
 interface RadarItem {
   id: string;
@@ -213,7 +213,7 @@ export function RadarCard({ item, onMarkResolved, isMyPost }: { item: RadarItem;
   );
 }
 
-// ─── REPORT MODAL ─────────────────────────────────────────────────────────────
+//  REPORT MODAL 
 
 export function ReportRadarModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<'pick' | 'form'>('pick');
@@ -298,7 +298,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
-        {/* STEP 1 — PICK TYPE */}
+        {/* STEP 1  PICK TYPE */}
         {!done && step === 'pick' && (
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -329,7 +329,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
-        {/* STEP 2 — FORM */}
+        {/* STEP 2  FORM */}
         {!done && step === 'form' && (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -351,7 +351,7 @@ export function ReportRadarModal({ onClose }: { onClose: () => void }) {
               <input
                 value={detail}
                 onChange={e => setDetail(e.target.value)}
-                placeholder={isLost ? 'e.g. Level 3 Library' : 'e.g. Café Rasa'}
+                placeholder={isLost ? 'e.g. Level 3 Library' : 'e.g. Caf Rasa'}
                 className="w-full h-12 px-4 rounded-[16px] border border-slate-100 bg-slate-50 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-300 transition-colors"
               />
             </div>

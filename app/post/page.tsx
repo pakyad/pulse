@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState, useEffect } from 'react';
 import { db, auth, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, onSnapshot } from 'firebase/firestore';
@@ -97,7 +97,7 @@ export default function DeployAsset() {
   return (
     <main className="min-h-screen bg-[#FDFDFD] font-sans text-navy antialiased pb-40">
       
-      {/* ── Compact 45% Container ── */}
+      {/*  Compact 45% Container  */}
       <div className="max-w-[480px] mx-auto px-6">
         
         {/* Nav */}

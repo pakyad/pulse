@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { getAdminDb } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
@@ -216,7 +216,7 @@ export async function placeSingleOrder(params: {
       await db.collection('notifications').add({
         userId: sellerId,
         type: "LOW_STOCK",
-        title: "⚠️ Low Stock Alert",
+        title: " Low Stock Alert",
         body: `${itemName} has only ${finalNewStock} units remaining.`,
         read: false,
         createdAt: new Date().toISOString()

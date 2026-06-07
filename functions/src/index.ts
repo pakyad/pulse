@@ -1,4 +1,4 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+﻿import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { defineSecret } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
@@ -131,7 +131,7 @@ export const placeOrder = onCall({
 });
 
 /**
- * 🏛️ Price Sentinel (UC_1801)
+ *  Price Sentinel (UC_1801)
  * Autonomous enforcement of institutional category ceilings.
  */
 export const priceSentinel = onCall({ 
@@ -173,7 +173,7 @@ export const priceSentinel = onCall({
 });
 
 /**
- * 🏛️ Adjudicate Appeal
+ *  Adjudicate Appeal
  */
 export const adjudicateAppeal = onCall({ cors: true }, async (request) => {
   const data = request.data || {};
@@ -201,7 +201,7 @@ export const adjudicateAppeal = onCall({ cors: true }, async (request) => {
 });
 
 /**
- * 🛰️ completeHandshake (UC_1901)
+ *  completeHandshake (UC_1901)
  * Proximity-based Double-Check Handshake.
  */
 export const completeHandshake = onCall({ 
@@ -270,21 +270,21 @@ export const completeHandshake = onCall({
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3; // metres
-  const φ1 = lat1 * Math.PI/180;
-  const φ2 = lat2 * Math.PI/180;
-  const Δφ = (lat2-lat1) * Math.PI/180;
-  const Δλ = (lon2-lon1) * Math.PI/180;
+  const 1 = lat1 * Math.PI/180;
+  const 2 = lat2 * Math.PI/180;
+  const  = (lat2-lat1) * Math.PI/180;
+  const  = (lon2-lon1) * Math.PI/180;
 
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-          Math.cos(φ1) * Math.cos(φ2) *
-          Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const a = Math.sin(/2) * Math.sin(/2) +
+          Math.cos(1) * Math.cos(2) *
+          Math.sin(/2) * Math.sin(/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
   return R * c; // in metres
 }
 
 /**
- * 🚀 Push Notification Engine
+ *  Push Notification Engine
  * Listens for order status changes and sends FCM push notifications to the buyer.
  */
 export const onOrderStatusChanged = onDocumentUpdated("orders/{orderId}", async (event) => {
@@ -387,7 +387,7 @@ export const onOrderCreated = onDocumentCreated("orders/{orderId}", async (event
     await db.collection("notifications").add({
       user_id: sellerId,
       type: "SALE",
-      title: "Item Sold! 🎉",
+      title: "Item Sold! ",
       body: `Your ${itemName} was just purchased. Drop it at ${handoverNode} for the runner.`,
       order_id: orderId,
       is_read: false,
@@ -400,7 +400,7 @@ export const onOrderCreated = onDocumentCreated("orders/{orderId}", async (event
     const chatId = `post_${sellerId}_${buyerId}_${orderId}`;
     const chatRef = db.collection("chats").doc(chatId);
 
-    const lastMessageText = `Hi! I just purchased your ${itemName} (Order #${orderId.slice(0, 8).toUpperCase()}). Looking forward to receiving it! 📦`;
+    const lastMessageText = `Hi! I just purchased your ${itemName} (Order #${orderId.slice(0, 8).toUpperCase()}). Looking forward to receiving it! `;
 
     await chatRef.set({
       members: [sellerId, buyerId],
@@ -667,7 +667,7 @@ export const sendWelcomeEmail = auth
             <td style="padding-top:24px;">
               <p style="margin:0;font-size:15px;color:#475569;line-height:24px;">
                 See you on campus.<br>
-                <strong style="color:#0f172a;">— The Pulse Team</strong>
+                <strong style="color:#0f172a;"> The Pulse Team</strong>
               </p>
             </td>
           </tr>
@@ -687,7 +687,7 @@ export const sendWelcomeEmail = auth
           body: JSON.stringify({
             from: "Pulse Campus <onboarding@resend.dev>",
             to: [email],
-            subject: `Welcome to Pulse, ${firstName} 👋`,
+            subject: `Welcome to Pulse, ${firstName} `,
             html: htmlBody,
           }),
         });

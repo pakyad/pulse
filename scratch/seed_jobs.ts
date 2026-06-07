@@ -1,4 +1,4 @@
-
+﻿
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 
@@ -45,12 +45,12 @@ const JOBS = [
 ];
 
 async function seed() {
-  console.log("🚀 Initializing Handshake Seeding...");
+  console.log(" Initializing Handshake Seeding...");
   for (const job of JOBS) {
     await addDoc(collection(db, "delivery_jobs"), job);
-    console.log(`✅ Seeded: ${job.source} -> ${job.dest}`);
+    console.log(` Seeded: ${job.source} -> ${job.dest}`);
   }
-  console.log("✨ Seeding Complete. Check your Terminal.");
+  console.log(" Seeding Complete. Check your Terminal.");
 }
 
 seed();

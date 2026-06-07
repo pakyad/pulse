@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ZoomIn, Download, ShieldCheck, Clock, ExternalLink, Package } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -44,7 +44,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
 
           <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl h-full max-h-[85vh]">
             
-            {/* ── Receipt Image Canvas ── */}
+            {/*  Receipt Image Canvas  */}
             <motion.div 
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
@@ -70,7 +70,7 @@ export default function ReceiptViewer({ isOpen, onClose, imageUrl, orderId, amou
               )}
             </motion.div>
 
-            {/* ── Verification Sidebar ── */}
+            {/*  Verification Sidebar  */}
             <motion.div 
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}

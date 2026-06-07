@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -60,7 +60,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     itemTitle: string;
   } | null>(null);
 
-  // ── FORCE SYNC EXISTING ITEM DATA ──
+  //  FORCE SYNC EXISTING ITEM DATA 
   useEffect(() => {
     if (existingItem) {
       setSelectedCategory(existingItem.category || '');
@@ -74,7 +74,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     }
   }, [existingItem]);
 
-  // ── DYNAMIC PRICE GUIDELINES (Firestore overrides hardcoded ceilings) ──
+  //  DYNAMIC PRICE GUIDELINES (Firestore overrides hardcoded ceilings) 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'PriceGuidelines'), (snap) => {
       const g: Record<string, any> = {};
@@ -84,7 +84,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     return () => unsub();
   }, []);
 
-  // ── SERPAPI MARKET INTELLIGENCE (Debounced API Call) ──
+  //  SERPAPI MARKET INTELLIGENCE (Debounced API Call) 
   useEffect(() => {
     if (title.trim().length < 3 || !selectedCategory || !subcategory) {
       setMarketData(null);
@@ -113,7 +113,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── MARKET INTELLIGENCE ENGINE (Trust-First, Advisory Only) ──
+  //  MARKET INTELLIGENCE ENGINE (Trust-First, Advisory Only) 
   const dynamicCeiling = selectedCategory ? priceGuidelines[selectedCategory]?.max_price : null;
   const priceIntel: PriceIntelligence | null = useMemo(() => {
     const numericPrice = parseFloat(price);
@@ -121,7 +121,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     return analysePrice(numericPrice, selectedCategory as CategoryID, subcategory, dynamicCeiling, marketData?.baseline);
   }, [selectedCategory, subcategory, price, dynamicCeiling, marketData?.baseline]);
 
-  // 🏛️ Institutional Image Compressor: Prevents 1MB Firestore limit crashes
+  //  Institutional Image Compressor: Prevents 1MB Firestore limit crashes
   const compressImage = (base64: string): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -192,7 +192,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       }
 
       // Trust-First: ALL listings go live.
-      // Tier A (REGULATED) is hard-blocked in canPost — should never reach here.
+      // Tier A (REGULATED) is hard-blocked in canPost  should never reach here.
       // Tier B (OPEN) above ceiling gets flagged + justification sent to admin queue.
       const isAutoFlagged = priceIntel?.shouldAutoFlag === true;
       const needsAdminReview = !isHardBlocked && !!justification.trim();
@@ -210,7 +210,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         images,
         seller_id: sellerId,
         seller_name: user?.displayName || 'Pulse Vendor',
-        // Always goes live — trust the seller by default
+        // Always goes live  trust the seller by default
         status: itemStatus,
         // Governance intelligence stored for admin reference
         price_tier: priceIntel?.tier || 'COMPLIANT',
@@ -257,7 +257,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   return (
     <div className="fixed inset-0 z-1000 flex flex-col bg-white overflow-hidden font-sans antialiased text-slate-900">
       
-      {/* ── HEADER (Mirroring student navigation) ── */}
+      {/*  HEADER (Mirroring student navigation)  */}
       <nav className="px-6 py-5 flex items-center justify-between bg-white border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <button
@@ -275,7 +275,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-40 px-6 pt-10">
 
-        {/* 🏛️ Actionable Intelligence (Institutional Guidance) */}
+        {/*  Actionable Intelligence (Institutional Guidance) */}
         {existingItem && existingItem.stock_count <= 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -302,7 +302,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
           </motion.div>
         )}
         
-        {/* ── SECTION: CLASSIFICATION ── */}
+        {/*  SECTION: CLASSIFICATION  */}
         <section className="space-y-4">
           <div className="space-y-0.5">
             <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">{existingItem ? 'Category' : 'What are you listing?'}</h2>
@@ -339,7 +339,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             className="space-y-10 mt-10"
           >
 
-            {/* ── SUBCATEGORY ── */}
+            {/*  SUBCATEGORY  */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Subcategory</h2>
@@ -365,7 +365,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
               </div>
             </section>
 
-            {/* ── SMART CATEGORY FIELDS ── */}
+            {/*  SMART CATEGORY FIELDS  */}
             {subcategory && (
               <section className="pt-2 border-t border-slate-100">
                 <SmartFormFields
@@ -380,7 +380,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
 
             
 
-            {/* ── IMAGES ── */}
+            {/*  IMAGES  */}
             <section className="space-y-4 pt-2 border-t border-slate-100">
               <div className="flex justify-between items-center pt-6">
                 <div className="space-y-0.5">
@@ -413,7 +413,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
               </div>
             </section>
 
-            {/* ── NAME ── */}
+            {/*  NAME  */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Item Name</h2>
@@ -427,7 +427,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
               />
             </section>
 
-            {/* ── DESCRIPTION (condition-aware) ── */}
+            {/*  DESCRIPTION (condition-aware)  */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Description</h2>
@@ -444,7 +444,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
 
             
 
-            {/* ── PRICE ── */}
+            {/*  PRICE  */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Price</h2>
@@ -462,7 +462,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                 />
               </div>
 
-              {/* ── PCS ERROR ALERT ── */}
+              {/*  PCS ERROR ALERT  */}
               <AnimatePresence>
                 {pcsError && (
                   <motion.div
@@ -472,10 +472,10 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                   >
                     <div className="rounded-2xl p-4 mt-3 border border-amber-200 bg-amber-50">
                       <div className="flex items-start gap-3">
-                        <span className="text-xl">💡</span>
+                        <span className="text-xl"></span>
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-amber-900 mb-1">Heads up — price is a bit high</p>
-                          <p className="text-xs text-amber-700 leading-relaxed">We checked the market and found <strong>{pcsError.itemTitle}</strong> going for around <strong>RM{pcsError.marketBaselinePrice.toFixed(2)}</strong> online. To keep things fair for students, campus listings are capped at <strong>RM{pcsError.maxAllowedStudentPrice.toFixed(2)}</strong> — that's 10% below retail.</p>
+                          <p className="text-sm font-semibold text-amber-900 mb-1">Heads up  price is a bit high</p>
+                          <p className="text-xs text-amber-700 leading-relaxed">We checked the market and found <strong>{pcsError.itemTitle}</strong> going for around <strong>RM{pcsError.marketBaselinePrice.toFixed(2)}</strong> online. To keep things fair for students, campus listings are capped at <strong>RM{pcsError.maxAllowedStudentPrice.toFixed(2)}</strong>  that's 10% below retail.</p>
                           <button 
                             onClick={() => { setPrice(pcsError.maxAllowedStudentPrice.toString()); setPcsError(null); }}
                             className="mt-3 bg-amber-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-amber-800 transition-colors"
@@ -489,7 +489,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                 )}
               </AnimatePresence>
 
-              {/* ── MARKET INTELLIGENCE PANEL ── */}
+              {/*  MARKET INTELLIGENCE PANEL  */}
               <AnimatePresence>
                 {priceIntel && price && (
                   <motion.div
@@ -551,7 +551,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                                 <span className="text-[9px] font-semibold text-slate-400">Market</span>
                                 <span className="text-[12px] font-bold text-slate-800">RM {Number(marketData.baseline).toFixed(2)}</span>
                               </div>
-                              <span className="text-[9px] text-slate-300">→</span>
+                              <span className="text-[9px] text-slate-300"></span>
                               <span className="text-[9px] font-semibold text-slate-400">Max campus</span>
                               <span className="text-[12px] font-bold text-slate-800">RM {Number(marketData.maxAllowed).toFixed(2)}</span>
                               {Number(price) !== marketData.maxAllowed && (
@@ -566,12 +566,12 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                           </div>
                         )}
 
-                        {/* HARD BLOCK: Tier A Regulated — prevent listing */}
+                        {/* HARD BLOCK: Tier A Regulated  prevent listing */}
                         {isHardBlocked && (
                           <div className="mt-3 p-3 bg-red-100/50 rounded-xl border border-red-200">
                             <p className="text-[10px] font-bold text-red-700">
                               {isMarketBlocked
-                                ? `Blocked — RM ${numericPrice.toFixed(2)} exceeds the Market-based max of RM ${Number(marketData?.maxAllowed).toFixed(2)}.`
+                                ? `Blocked  RM ${numericPrice.toFixed(2)} exceeds the Market-based max of RM ${Number(marketData?.maxAllowed).toFixed(2)}.`
                                 : `This item is in a regulated category. Prices cannot exceed the campus limit of RM ${priceIntel.ceiling?.toFixed(2)}.`
                               }
                             </p>
@@ -583,7 +583,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                           </div>
                         )}
 
-                        {/* JUSTIFICATION PROTOCOL: Tier B Open — show when above ceiling or above market max */}
+                        {/* JUSTIFICATION PROTOCOL: Tier B Open  show when above ceiling or above market max */}
                         {!isRegulated && (isAboveCeiling || needsMarketJustification) && (
                           <div className="mt-3 space-y-2">
                             <p className="text-[10px] font-semibold text-slate-400">
@@ -608,7 +608,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
               </AnimatePresence>
             </section>
 
-            {/* ── SECTION: STOCK ── */}
+            {/*  SECTION: STOCK  */}
             <section className="space-y-3 pt-6 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">{existingItem ? 'Stock' : 'Stock'}</h2>
@@ -626,7 +626,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
               </div>
             </section>
 
-            {/* ── CONDITION-DEPENDENT FIELD: broken item details ── */}
+            {/*  CONDITION-DEPENDENT FIELD: broken item details  */}
             {metadata.condition === 'For Parts Only' && (
               <section className="space-y-3 pt-6 border-t border-slate-100">
                 <div className="space-y-0.5">
@@ -646,7 +646,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         )}
       </div>
 
-      {/* ── STICKY FOOTER ACTION ── */}
+      {/*  STICKY FOOTER ACTION  */}
       <div className="fixed bottom-0 left-0 right-0 z-60 p-8 bg-white/90 backdrop-blur-2xl border-t border-slate-50">
         <button 
           disabled={!canPost}

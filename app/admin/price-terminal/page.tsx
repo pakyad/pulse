@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,7 +9,7 @@ import { ShieldAlert, Plus, X, CheckCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 
-// ── Campus-level default ceilings (used if no Firestore guideline exists) ─────
+//  Campus-level default ceilings (used if no Firestore guideline exists) 
 const CAMPUS_DEFAULTS: Record<string, number> = {
 
   ACADEMIC: 200,
@@ -18,7 +18,7 @@ const CAMPUS_DEFAULTS: Record<string, number> = {
   APPAREL:  300,
 };
 
-// ── Policy Modal ───────────────────────────────────────────────────────────────
+//  Policy Modal 
 function PolicyModal({ onClose, onSave }: { onClose: () => void; onSave: (cat: string, price: number, type: 'REGULATED' | 'PREMIUM') => Promise<void> }) {
   const [category, setCategory]           = useState<CategoryID>('TECH');
   const [price,    setPrice]              = useState('');
@@ -76,7 +76,7 @@ function PolicyModal({ onClose, onSave }: { onClose: () => void; onSave: (cat: s
         {/* Price */}
         <div>
           <label className="text-[10px] font-bold text-slate-400  block mb-2">
-            Price Ceiling (RM) — Current default: RM {CAMPUS_DEFAULTS[category] ?? '–'}
+            Price Ceiling (RM)  Current default: RM {CAMPUS_DEFAULTS[category] ?? ''}
           </label>
           <input type="number" value={price} onChange={e => setPrice(e.target.value)}
             placeholder={`e.g. ${CAMPUS_DEFAULTS[category]}`}
@@ -93,7 +93,7 @@ function PolicyModal({ onClose, onSave }: { onClose: () => void; onSave: (cat: s
   );
 }
 
-// ── Page ───────────────────────────────────────────────────────────────────────
+//  Page 
 export default function PriceTerminalPage() {
   const router     = useRouter();
   const [items,      setItems]      = useState<any[]>([]);
@@ -127,7 +127,7 @@ export default function PriceTerminalPage() {
     categoryAvg[cat] = categoryStats[cat].total / categoryStats[cat].count;
   });
 
-  // Flagging logic — ceiling from Firestore OR campus defaults
+  // Flagging logic  ceiling from Firestore OR campus defaults
   const flagged = items.filter(i => {
     const guide   = guidelines[i.category];
     const ceiling = guide?.max_price ?? CAMPUS_DEFAULTS[i.category] ?? 9999;
@@ -236,7 +236,7 @@ export default function PriceTerminalPage() {
                 <div key={item.id} className="grid grid-cols-12 px-6 py-4 items-center hover:bg-slate-50/30 transition-colors">
                   <div className="col-span-5">
                     <p className="text-[13px] font-bold text-slate-900 leading-tight truncate">{item.title}</p>
-                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight mt-0.5">{item.seller_name || '—'}</p>
+                    <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight mt-0.5">{item.seller_name || ''}</p>
                   </div>
                   <div className="col-span-2">
                     <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md ">
@@ -249,7 +249,7 @@ export default function PriceTerminalPage() {
                   </div>
                   <div className="col-span-2">
                     <p className="text-[14px] font-bold text-slate-500">
-                      RM {ceiling > 0 ? Number(ceiling).toFixed(2) : `${CAMPUS_DEFAULTS[item.category] ?? '–'}`}
+                      RM {ceiling > 0 ? Number(ceiling).toFixed(2) : `${CAMPUS_DEFAULTS[item.category] ?? ''}`}
                     </p>
                     {!guide && (
                       <p className="text-[8px] font-bold text-slate-300  mt-0.5">Default</p>

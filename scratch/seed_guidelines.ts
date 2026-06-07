@@ -1,8 +1,8 @@
-import { db } from '../lib/firebase';
+﻿import { db } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
 async function seedPriceGuidelines() {
-  console.log("🏛️ Pulse Administrative Seeding: Price Guidelines...");
+  console.log(" Pulse Administrative Seeding: Price Guidelines...");
   
   const guidelines = [
     { id: 'tech', maxBasePrice: 50.00 },
@@ -16,10 +16,10 @@ async function seedPriceGuidelines() {
       maxBasePrice: g.maxBasePrice,
       updated_at: new Date().toISOString()
     });
-    console.log(`✅ Established: ${g.id} limit set to RM ${g.maxBasePrice.toFixed(2)}`);
+    console.log(` Established: ${g.id} limit set to RM ${g.maxBasePrice.toFixed(2)}`);
   }
 
-  console.log("🚀 Seeding Complete. Restart the Admin Terminal to see violations.");
+  console.log(" Seeding Complete. Restart the Admin Terminal to see violations.");
   process.exit(0);
 }
 

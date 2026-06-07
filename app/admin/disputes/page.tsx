@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
@@ -7,7 +7,7 @@ import { resolveDispute } from '@/app/actions/adminActions';
 import { Loader2, CheckCircle, FileText, X, AlertTriangle, Scale, ShieldAlert, BadgeCent, Camera, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Confirm Modal ─────────────────────────────────────────────────────────────
+//  Confirm Modal 
 function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
   let title = "";
   let description = "";
@@ -60,7 +60,7 @@ function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
   );
 }
 
-// ── Dispute Details Drawer ────────────────────────────────────────────────────
+//  Dispute Details Drawer 
 function DisputeDetailsDrawer({ dispute, onClose, onResolve }: { dispute: any; onClose: () => void; onResolve: (id: string, action: string) => Promise<void> }) {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
@@ -185,7 +185,7 @@ function DisputeDetailsDrawer({ dispute, onClose, onResolve }: { dispute: any; o
                         {ev.type === 'PICKUP' ? 'Pickup Photo' : 'Delivery Photo'}
                         {ev.timestamp?.toDate && (
                           <span className="font-medium text-slate-300">
-                            · {new Date(ev.timestamp.toDate()).toLocaleString()}
+                             {new Date(ev.timestamp.toDate()).toLocaleString()}
                           </span>
                         )}
                       </p>
@@ -228,7 +228,7 @@ function DisputeDetailsDrawer({ dispute, onClose, onResolve }: { dispute: any; o
   );
 }
 
-// ── Main Disputes Page ────────────────────────────────────────────────────────
+//  Main Disputes Page 
 export default function DisputesPage() {
   const [disputes,      setDisputes]      = useState<any[]>([]);
   const [loading,       setLoading]       = useState(true);
@@ -318,7 +318,7 @@ export default function DisputesPage() {
                 {/* Col 6-9: Reporter */}
                 <div className="md:col-span-3">
                   <p className="text-[10px] font-bold text-slate-400 mb-0.5">Reported By</p>
-                  <p className="text-[13px] font-semibold text-slate-700">{d.reporter_name || '—'}</p>
+                  <p className="text-[13px] font-semibold text-slate-700">{d.reporter_name || ''}</p>
                 </div>
 
                 {/* Col 10-12: Actions */}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '@/lib/firebase';
@@ -8,7 +8,7 @@ import { holdEscrow, refundEscrow } from '@/app/actions/adminActions';
 import { releaseEscrow } from '@/app/actions/orderActions';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Confirm Modal ─────────────────────────────────────────────────────────────
+//  Confirm Modal 
 function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
   let title = "";
   let description = "";
@@ -58,7 +58,7 @@ function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
   );
 }
 
-// ── Order Details Drawer ──────────────────────────────────────────────────────
+//  Order Details Drawer 
 function OrderDetailsDrawer({ order, onClose, onResolve }: { order: any; onClose: () => void; onResolve: (action: string) => Promise<void> }) {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
@@ -191,7 +191,7 @@ function OrderDetailsDrawer({ order, onClose, onResolve }: { order: any; onClose
   );
 }
 
-// ── Main Escrow Page ──────────────────────────────────────────────────────────
+//  Main Escrow Page 
 export default function AdminEscrowPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [disputes, setDisputes] = useState<any[]>([]);
@@ -325,7 +325,7 @@ export default function AdminEscrowPage() {
                     await batch.commit();
                     await addDoc(collection(db, 'activityLogs'), {
                       action: 'BULK_ESCROW_RELEASE',
-                      details: `Bulk escrow release — ${toRelease.length} orders released.`,
+                      details: `Bulk escrow release  ${toRelease.length} orders released.`,
                       time: serverTimestamp(),
                     });
                   } catch (e: any) {

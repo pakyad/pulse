@@ -1,4 +1,4 @@
-import admin from "firebase-admin";
+﻿import admin from "firebase-admin";
 import * as dotenv from "dotenv";
 import * as path from "path";
 
@@ -40,12 +40,12 @@ const EMAILS = [
 ];
 
 async function seed() {
-  console.log("🚀 Starting demo data seed (Admin Mode)...");
+  console.log(" Starting demo data seed (Admin Mode)...");
 
   const userMap: Record<string, string> = {};
 
   // 1. Get UIDs for all emails
-  console.log("🔍 Fetching user UIDs...");
+  console.log(" Fetching user UIDs...");
   const usersRef = db.collection("users");
   
   for (const email of EMAILS) {
@@ -53,13 +53,13 @@ async function seed() {
       const snap = await usersRef.where("email", "==", email).get();
       if (!snap.empty) {
         userMap[email] = snap.docs[0].id;
-        console.log(`✅ Found ${email}: ${userMap[email]}`);
+        console.log(` Found ${email}: ${userMap[email]}`);
       } else {
-        console.warn(`⚠️ User not found for email: ${email}`);
+        console.warn(` User not found for email: ${email}`);
         userMap[email] = `MOCK_${email.split('@')[0]}`;
       }
     } catch (e) {
-      console.error(`❌ Error fetching user ${email}:`, e);
+      console.error(` Error fetching user ${email}:`, e);
       userMap[email] = `MOCK_${email.split('@')[0]}`;
     }
   }
@@ -72,7 +72,7 @@ async function seed() {
   const irfanUid = userMap["irfan@s.unikl.edu.my"];
 
   // 2. ITEMS Collection
-  console.log("📦 Seeding ITEMS...");
+  console.log(" Seeding ITEMS...");
   const items = [
     { title: "Official Sports Jersey 2026", price: 45, stock_count: 50, category: "APPAREL", seller_id: sportsUid, seller_name: "Sports Council", status: "ACTIVE", merchant: true, pcs_certified: true, pcs_status: "APPROVED", image_url: "", description: "Official UniKL MIIT Sports Council jersey for 2026. Limited edition.", drop_off_location: "Ground Floor Lobby", created_at: admin.firestore.FieldValue.serverTimestamp() },
     { title: "Badminton Racket - Yonex Astrox 77", price: 180, stock_count: 10, category: "SPORTS", seller_id: sportsUid, seller_name: "Sports Council", status: "ACTIVE", merchant: true, pcs_certified: true, pcs_status: "APPROVED", image_url: "", description: "Lightly used Yonex Astrox 77. Excellent condition.", drop_off_location: "Ground Floor Lobby", created_at: admin.firestore.FieldValue.serverTimestamp() },
@@ -86,7 +86,7 @@ async function seed() {
   }
 
   // 3. ORDERS Collection
-  console.log("🛒 Seeding ORDERS...");
+  console.log(" Seeding ORDERS...");
   const orders = [
     { title: "Official Sports Jersey 2026", price: 45, total: 45, status: "DELIVERED", buyer_id: iyadUid, seller_id: sportsUid, runner_id: irfanUid, customer_name: "Iyad Mohmad Nazri", seller_name: "Sports Council", drop_off_location: "Level 4 Teater Perdana", delivery_method: "runner", created_at: admin.firestore.FieldValue.serverTimestamp(), delivered_at: admin.firestore.FieldValue.serverTimestamp() },
     { title: "Badminton Racket - Yonex Astrox 77", price: 180, total: 180, status: "DELIVERED", buyer_id: amirulUid, seller_id: sportsUid, runner_id: irfanUid, customer_name: "Amirul", seller_name: "Sports Council", drop_off_location: "Ground Floor Lobby", delivery_method: "runner", created_at: admin.firestore.FieldValue.serverTimestamp(), delivered_at: admin.firestore.FieldValue.serverTimestamp() },
@@ -103,7 +103,7 @@ async function seed() {
   }
 
   // 4. REVIEWS Collection
-  console.log("⭐ Seeding REVIEWS...");
+  console.log(" Seeding REVIEWS...");
   const reviews = [
     { orderId: orderIds[0], sellerId: sportsUid, buyerId: iyadUid, rating: 5, comment: "Fast delivery, jersey quality is excellent!", created_at: admin.firestore.FieldValue.serverTimestamp() },
     { orderId: orderIds[2], sellerId: techsocietyUid, buyerId: iyadUid, rating: 4, comment: "Good product, well packaged.", created_at: admin.firestore.FieldValue.serverTimestamp() }
@@ -114,7 +114,7 @@ async function seed() {
     console.log(`   Added review for order ${review.orderId} (${docRef.id})`);
   }
 
-  console.log("✨ Seed complete!");
+  console.log(" Seed complete!");
 }
 
 seed().catch(console.error);

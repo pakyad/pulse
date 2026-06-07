@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
@@ -87,11 +87,11 @@ export default function LogsPage() {
                 </td>
                 <td className="px-6 py-4">
                   <code className="text-[11px] font-bold text-slate-400">
-                    #{log.target_id?.substring(0, 8).toUpperCase() || '—'}
+                    #{log.target_id?.substring(0, 8).toUpperCase() || ''}
                   </code>
                 </td>
                 <td className="px-6 py-4">
-                  <p className="text-[13px] font-medium text-slate-600">{log.details || '—'}</p>
+                  <p className="text-[13px] font-medium text-slate-600">{log.details || ''}</p>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <span className="text-[11px] font-bold text-slate-300 ">

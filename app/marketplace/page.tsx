@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,7 +18,7 @@ import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/Marke
 import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
-// ── TYPOGRAPHY COMPONENTS ──
+//  TYPOGRAPHY COMPONENTS 
 const Heading = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[15px] font-bold text-slate-900 tracking-tight ${className}`}>{children}</h2>
 );
@@ -139,7 +139,7 @@ const PixelFilter = ({ className, size=20 }: { className?: string, size?: number
   </svg>
 );
 
-// ── CATEGORY CONFIG ──
+//  CATEGORY CONFIG 
 const CATEGORIES = [
   { id: 'store',    label: 'Official',    filter: 'OFFICIAL', icon: PixelShield },
   { id: 'tech',     label: 'Electronics', filter: 'TECH',     icon: PixelLaptop },
@@ -284,7 +284,7 @@ function MarketplacePage() {
       return (tb || 0) - (ta || 0);
     });
 
-    // Search — real-time text filter by title or description
+    // Search  real-time text filter by title or description
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(i =>
@@ -299,7 +299,7 @@ function MarketplacePage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ── NAV ── */}
+      {/*  NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-60 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -312,7 +312,7 @@ function MarketplacePage() {
             <p className="text-[14px] font-bold tracking-tight">Marketplace</p>
           </div>
           <div className="flex items-center gap-4">
-            {/* Search toggle — opens real inline search bar */}
+            {/* Search toggle  opens real inline search bar */}
             <button
               onClick={() => { setIsSearchOpen(o => !o); if (isSearchOpen) setSearchQuery(''); }}
               className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 active:scale-95 transition-all"
@@ -323,7 +323,7 @@ function MarketplacePage() {
           </div>
         </div>
 
-        {/* Inline search bar — slides down */}
+        {/* Inline search bar  slides down */}
         <AnimatePresence>
           {isSearchOpen && (
             <motion.div
@@ -358,11 +358,11 @@ function MarketplacePage() {
 
       <div className="pt-28 px-4 space-y-12">
 
-        {/* ── ACTIVE ORDER BANNER ── */}
+        {/*  ACTIVE ORDER BANNER  */}
         <ActiveOrderBanner />
         <FloatingActiveTask />
 
-        {/* ── OFFICIAL STORE BANNERS ── */}
+        {/*  OFFICIAL STORE BANNERS  */}
         <AnimatePresence>
           {campaigns.length > 0 && urlFilter !== 'student_market' && (
             <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
@@ -394,7 +394,7 @@ function MarketplacePage() {
                     <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-2">
                       <div>
                         <span className="text-[10px] font-bold  text-white/80 drop-shadow-sm block mb-1">
-                          {camp.tag} • {camp.club_name}
+                          {camp.tag} - {camp.club_name}
                         </span>
                         <h4 className="text-[20px] font-semibold text-white leading-tight tracking-tight drop-shadow-md">{camp.title}</h4>
                       </div>
@@ -409,10 +409,10 @@ function MarketplacePage() {
           )}
         </AnimatePresence>
 
-        {/* ── HAPPENING THIS WEEK ── */}
+        {/*  HAPPENING THIS WEEK  */}
         <AnnouncementBanner />
 
-        {/* ── DISCOVER ITEMS ── */}
+        {/*  DISCOVER ITEMS  */}
         <section className="space-y-8">
           <div className="px-1 flex justify-between items-end">
             <div className="space-y-1">
@@ -434,8 +434,8 @@ function MarketplacePage() {
             </button>
           </div>
 
-          {/* ── STUDENT MARKET TOGGLE ── */}
-          {/* Requires composite index: status ASC, pcs_certified ASC — create in Firebase console if query fails */}
+          {/*  STUDENT MARKET TOGGLE  */}
+          {/* Requires composite index: status ASC, pcs_certified ASC  create in Firebase console if query fails */}
           <div className="flex gap-2 -mx-8 px-8">
             <button
               onClick={() => setPcsEnabled(prev => !prev)}
@@ -445,7 +445,7 @@ function MarketplacePage() {
                   : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 shadow-sm'
               }`}
             >
-              <span className="text-[12px] font-bold tracking-normal">🛡 Student Market</span>
+              <span className="text-[12px] font-bold tracking-normal"> Student Market</span>
             </button>
           </div>
 
@@ -455,9 +455,9 @@ function MarketplacePage() {
             </p>
           )}
 
-          {/* ── CATEGORY CHIPS ── */}
+          {/*  CATEGORY CHIPS  */}
           <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2 -mx-8 px-8">
-            {/* "All Items" chip — explicitly active when nothing else is selected */}
+            {/* "All Items" chip  explicitly active when nothing else is selected */}
             <button
               onClick={() => setActiveCategory(null)}
               className={`h-[34px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border ${
@@ -489,7 +489,7 @@ function MarketplacePage() {
             })}
           </div>
 
-          {/* ── ITEM GRID ── */}
+          {/*  ITEM GRID  */}
           {items.length > 0 ? (
             filteredItems.length > 0 ? (
               <div className="grid grid-cols-2 gap-x-3 gap-y-8">
@@ -513,7 +513,7 @@ function MarketplacePage() {
             </div>
           )}
 
-          {/* ── STUDENT MARKET EXIT ── */}
+          {/*  STUDENT MARKET EXIT  */}
           {urlFilter === 'student_market' && (
             <div className="pt-8 pb-12 flex flex-col items-center justify-center gap-2">
               <p className="text-[11px] font-medium text-slate-400">Looking for more?</p>

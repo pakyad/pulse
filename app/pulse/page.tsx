@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,38 +16,38 @@ import { RadarCard, ReportRadarModal } from '@/components/pulse/RadarModule';
 import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
-// ─── DEMO DATA ───────────────────────────────────────────────────────────────
+//  DEMO DATA 
 
 const DEMO_ANNOUNCEMENTS = [
   {
     id: 'ann_demo_1', type: 'ADMIN', tag: 'ACADEMIC',
-    headline: 'Final Exam Timetable Published — Check Your Portal',
+    headline: 'Final Exam Timetable Published  Check Your Portal',
     body: 'All final examination venues and timetables for Semester 2 2025/2026 have been finalized. Students are required to check the official Academic Portal for their specific room assignments. No changes will be accommodated after 48 hours of this notice.',
     created_at: { toDate: () => new Date('2026-06-03T09:00:00Z') },
   },
   {
     id: 'ann_demo_2', type: 'ADMIN', tag: 'SYSTEM',
-    headline: 'Library Booking System — Scheduled Maintenance Tonight',
+    headline: 'Library Booking System  Scheduled Maintenance Tonight',
     body: 'The Library Management System will undergo scheduled maintenance from 1:00 AM to 4:00 AM on 31 May 2026. All active seat bookings will be preserved. The physical library remains open.',
     created_at: { toDate: () => new Date('2026-06-02T14:30:00Z') },
   },
   {
     id: 'ann_demo_3', type: 'OFFICIAL', tag: 'MARKETPLACE',
-    headline: 'New Vendor Approved — BiteClub Now Serving Block A',
+    headline: 'New Vendor Approved  BiteClub Now Serving Block A',
     body: 'Pulse Marketplace is pleased to announce that BiteClub has been officially approved as a verified campus vendor. Their menu will be available for runner deliveries across Block A, B, and the Library Complex starting Monday.',
     created_at: { toDate: () => new Date('2026-06-01T08:15:00Z') },
   },
   {
     id: 'ann_demo_4', type: 'OFFICIAL', tag: 'CAMPUS NOTICE',
-    headline: 'Café Rasa Operating Hours Extended Until 9PM',
-    body: 'In response to student feedback, Café Rasa will extend operations until 9:00 PM Monday through Friday effective immediately. Weekend hours remain unchanged.',
+    headline: 'Caf Rasa Operating Hours Extended Until 9PM',
+    body: 'In response to student feedback, Caf Rasa will extend operations until 9:00 PM Monday through Friday effective immediately. Weekend hours remain unchanged.',
     created_at: { toDate: () => new Date('2026-05-30T11:45:00Z') },
   },
 ];
 
 const DEMO_RADAR = [
   { id: 'radar_1', type: 'LOST',  title: 'Lost: MacBook Charger (USB-C)',       detail: 'Last seen at Level 3 Library, near the window seats. White charger with blue tape on cable.', reward: 'RM 10 reward', contact: 'DM @haziq_miit',            time: '2h ago', reporter_uid: 'demo_user_1', reporter_name: 'Haziq' },
-  { id: 'radar_2', type: 'FOUND', title: 'Found: Student ID Card',               detail: 'Found at Café Rasa counter. Name on card: Ahmad Faris. Surrendered to the security guard on duty.', contact: 'Collect at Guard Post, Main Lobby', time: '4h ago', reporter_uid: 'demo_user_2', reporter_name: 'Faris' },
+  { id: 'radar_2', type: 'FOUND', title: 'Found: Student ID Card',               detail: 'Found at Caf Rasa counter. Name on card: Ahmad Faris. Surrendered to the security guard on duty.', contact: 'Collect at Guard Post, Main Lobby', time: '4h ago', reporter_uid: 'demo_user_2', reporter_name: 'Faris' },
   { id: 'radar_3', type: 'LOST',  title: 'Lost: Blue Casio Scientific Calculator', detail: 'Possibly left in Lab 214 after CFD class on Thursday. Has a "Amir" sticker on the back.', reward: 'RM 15 reward', contact: 'Call 011-2398XXXX', time: '1d ago', reporter_uid: 'demo_user_3', reporter_name: 'Amir' },
   { id: 'radar_4', type: 'FOUND', title: 'Found: Airpods Pro (Gen 2) Case',      detail: 'Found in the male prayer room after Zohor. White AirPod Pro case, no pods inside.',            contact: 'DM @pulse_campus to claim',      time: '1d ago', reporter_uid: 'demo_user_4', reporter_name: 'Pulse Admin' },
 ];
@@ -59,7 +59,7 @@ const DEMO_EVENTS = [
   { id: 'ev_4', title: 'UI/UX Design Workshop',          organiser: 'Creative Club',   date: 'Wed, 11 Jun', time: '2:00 PM',  location: 'Lab 301, Block C',          tag: 'Workshop', imageUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&q=80' },
 ];
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+//  HELPERS 
 
 function relativeTime(ts: any): string {
   if (!ts) return '';
@@ -135,7 +135,7 @@ function AnnouncementCard({ ann }: { ann: any }) {
   );
 }
 
-// ─── PAGE ─────────────────────────────────────────────────────────────────────
+//  PAGE 
 
 export default function PulsePage() {
   const router = useRouter();
@@ -211,7 +211,7 @@ export default function PulsePage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ── NAV ── */}
+      {/*  NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push('/home')} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
@@ -229,11 +229,11 @@ export default function PulsePage() {
 
       <div className="pt-24 px-4 space-y-10">
 
-        {/* ── ACTIVE ORDER ── */}
+        {/*  ACTIVE ORDER  */}
         <ActiveOrderBanner />
         <FloatingActiveTask />
 
-        {/* ── ANNOUNCEMENTS ── */}
+        {/*  ANNOUNCEMENTS  */}
         <section className="space-y-4">
           <div className="px-1">
             <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Announcements</h2>
@@ -262,12 +262,12 @@ export default function PulsePage() {
           </div>
         </section>
 
-        {/* ── CAMPUS RADAR ── */}
+        {/*  CAMPUS RADAR  */}
         <section className="space-y-4">
           <div className="px-1 flex items-center justify-between">
             <div>
               <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Campus Radar</h2>
-              <p className="text-[12px] font-medium text-slate-500 mt-0.5">Lost items · Found items · Peer alerts</p>
+              <p className="text-[12px] font-medium text-slate-500 mt-0.5">Lost items  Found items  Peer alerts</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -283,7 +283,7 @@ export default function PulsePage() {
           </div>
         </section>
 
-        {/* ── HAPPENING THIS WEEK ── */}
+        {/*  HAPPENING THIS WEEK  */}
         <section className="space-y-4">
           <div className="px-1">
             <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Happening This Week</h2>
@@ -310,7 +310,7 @@ export default function PulsePage() {
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 text-[11px] font-medium text-slate-500">
                       <Calendar size={12} className="shrink-0 text-slate-400" />
-                      <span>{ev.date} · {ev.time}</span>
+                      <span>{ev.date}  {ev.time}</span>
                     </div>
                     <div className="flex items-center gap-2 text-[11px] font-medium text-slate-500">
                       <MapPin size={12} className="shrink-0 text-slate-400" />
@@ -337,7 +337,7 @@ export default function PulsePage() {
         {isReportOpen && <ReportRadarModal onClose={() => setIsReportOpen(false)} />}
       </AnimatePresence>
 
-      {/* ── EVENT DETAIL SHEET ── */}
+      {/*  EVENT DETAIL SHEET  */}
       <AnimatePresence>
         {selectedEvent && (
           <motion.div
@@ -368,7 +368,7 @@ export default function PulsePage() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-3 text-[13px] font-medium text-slate-700">
                     <Calendar size={14} className="text-slate-400 shrink-0" />
-                    <span>{selectedEvent.date} · {selectedEvent.time}</span>
+                    <span>{selectedEvent.date}  {selectedEvent.time}</span>
                   </div>
                   <div className="flex items-center gap-3 text-[13px] font-medium text-slate-700">
                     <MapPin size={14} className="text-slate-400 shrink-0" />

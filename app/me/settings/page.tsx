@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
-// ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
+//  STANDARDIZED TYPOGRAPHY COMPONENTS 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[17px] font-bold text-slate-900 tracking-tight ${className}`}>{children}</h2>
 );
@@ -104,7 +104,7 @@ export default function SettingsPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
       
-      {/* ── LOCAL NAVIGATION ── */}
+      {/*  LOCAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
             <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
@@ -152,7 +152,7 @@ export default function SettingsPage() {
           </section>
         ))}
 
-        {/* ── DANGER ZONE ── */}
+        {/*  DANGER ZONE  */}
         <section className="space-y-6 pt-6 border-t border-slate-100">
           <div className="px-1 space-y-1">
             <Heading className="text-rose-500">Account Actions</Heading>

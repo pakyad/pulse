@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -23,7 +23,7 @@ import {
 import { auth, db, storage } from '@/lib/firebase';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
 
-// ── CONSTANTS ──
+//  CONSTANTS 
 const CAMPUSES = ["UniKL MIIT", "UniKL BMI", "UniKL MFI", "UniKL MSI", "UniKL UBIS"];
 const FACULTIES = ["Creative Multimedia", "Software Engineering", "System & Networking", "Computer Engineering"];
 const HOTSPOTS = ["Cafe Block A", "Starbucks MIIT", "Library Node", "Level 2 Lounge", "West Wing Cafeteria"];
@@ -89,7 +89,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
           transition={{ type: "spring", damping: 30, stiffness: 300 }}
           className="fixed inset-0 z-500 bg-white flex flex-col"
         >
-          {/* ── HEADER ── */}
+          {/*  HEADER  */}
           <nav className="px-8 pt-10 pb-6 flex items-center justify-between border-b border-[#F2F2F7]">
             <div className="flex items-center gap-4">
                {step > 1 && step < 5 && (
@@ -102,7 +102,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
             <button onClick={onClose} className="p-2 text-slate-300"><X size={24} /></button>
           </nav>
 
-          {/* ── PROGRESS BAR ── */}
+          {/*  PROGRESS BAR  */}
           {step < 5 && (
             <div className="h-1 bg-slate-50 w-full">
               <motion.div 
@@ -113,7 +113,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
             </div>
           )}
 
-          {/* ── CONTENT ── */}
+          {/*  CONTENT  */}
           <div className="flex-1 overflow-y-auto no-scrollbar p-8 pb-40">
              <div className="max-w-lg mx-auto space-y-12">
                 
@@ -342,7 +342,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
              </div>
           </div>
 
-          {/* ── FOOTER BUTTON ── */}
+          {/*  FOOTER BUTTON  */}
           {step < 5 && (
             <div className="fixed bottom-0 left-0 right-0 p-8 bg-white/80 backdrop-blur-xl border-t border-[#F2F2F7] supports-backdrop-filter:bg-white/60" style={{ WebkitBackdropFilter: 'blur(20px)' }}>
                <button 

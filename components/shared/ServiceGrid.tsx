@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
-// ── HIGH-FIDELITY VOXEL / 3D PIXEL ART ENGINE (Pure SVG) ──
+//  HIGH-FIDELITY VOXEL / 3D PIXEL ART ENGINE (Pure SVG) 
 
 const VoxelContainer = ({ children, color, shadow }: { children: React.ReactNode, color: string, shadow: string }) => (
   <div className={`w-[48px] h-[48px] relative group cursor-pointer`}>

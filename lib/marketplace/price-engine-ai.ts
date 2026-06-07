@@ -1,13 +1,13 @@
-import { adminDb } from '@/lib/firebase-admin';
+﻿import { adminDb } from '@/lib/firebase-admin';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 
-// ── Layer 2.75: AI Market Price Estimation ─────────────────────────────────
+//  Layer 2.75: AI Market Price Estimation 
 // Uses OpenAI (if available) or a rule-based estimator as fallback.
 // Catches every edge case: typos, vague titles, short names, obscure items.
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
-// ── OpenAI estimator ───────────────────────────────────────────────────────
+//  OpenAI estimator 
 async function estimateWithOpenAI(
   title: string,
   categoryId: string,
@@ -57,7 +57,7 @@ async function estimateWithOpenAI(
   }
 }
 
-// ── Rule-based estimator (always available, no API key needed) ─────────────
+//  Rule-based estimator (always available, no API key needed) 
 async function estimateWithRules(
   title: string,
   categoryId: string,
@@ -96,7 +96,7 @@ async function estimateWithRules(
     // Fall through to ceiling-based estimate
   }
 
-  // 2. No cache data — estimate from ceiling
+  // 2. No cache data  estimate from ceiling
   // Condition-based multiplier from title keywords
   const lowerTitle = title.toLowerCase();
   let multiplier = 0.7; // default: 70% of ceiling (typical used price)
@@ -119,7 +119,7 @@ async function estimateWithRules(
   return estimate;
 }
 
-// ── MAIN EXPORT ────────────────────────────────────────────────────────────
+//  MAIN EXPORT 
 export async function estimateMarketPrice(
   title: string,
   categoryId: string,

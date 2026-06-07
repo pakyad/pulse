@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +16,7 @@ import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
 import { CAMPUS_NODES, getLocationBadge } from '@/lib/core/locations';
 
-// ── DOMAIN ICONS (aligned with Marketplace page icon pattern) ──
+//  DOMAIN ICONS (aligned with Marketplace page icon pattern) 
 const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
   ACADEMIC: BookOpen,
   HOSTEL: Home,
@@ -75,14 +75,14 @@ export default function CreateListingPage() {
     itemTitle: string;
   } | null>(null);
 
-  // ── PCS VERIFICATION STATE ──
+  //  PCS VERIFICATION STATE 
   const [pcsPhase, setPcsPhase] = useState<'idle' | 'verifying' | 'approved' | 'rejected'>('idle');
   const [pcsResult, setPcsResult] = useState<any>(null);
   const [pcsItemId, setPcsItemId] = useState<string | null>(null);
   const [pcsApprovedBanner, setPcsApprovedBanner] = useState(false);
   const pcsUnsubRef = useRef<(() => void) | null>(null);
 
-  // ── LIVE MARKET INTELLIGENCE ──
+  //  LIVE MARKET INTELLIGENCE 
   const [marketCheck, setMarketCheck] = useState<MarketCheck | null>(null);
   const [marketLoading, setMarketLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -131,7 +131,7 @@ export default function CreateListingPage() {
     }
   }, [selectedCategory, subcategory]);
 
-  // Debounced title-driven check — only fires when title + subcategory both ready
+  // Debounced title-driven check  only fires when title + subcategory both ready
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (title.trim().length >= 10 && selectedCategory && subcategory) {
@@ -212,7 +212,7 @@ export default function CreateListingPage() {
           itemTitle: title
         });
         setIsPosting(false);
-        return; // HARD STOP — nothing below this runs
+        return; // HARD STOP  nothing below this runs
       }
 
       setIsUploading(true);
@@ -277,7 +277,7 @@ export default function CreateListingPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ── NAV (matches Marketplace page nav exactly) ── */}
+      {/*  NAV (matches Marketplace page nav exactly)  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <BackButton />
@@ -290,7 +290,7 @@ export default function CreateListingPage() {
 
       <div className="pt-28 px-6 space-y-10">
 
-        {/* ── SECTION: CLASSIFICATION (matches Marketplace filter pill pattern) ── */}
+        {/*  SECTION: CLASSIFICATION (matches Marketplace filter pill pattern)  */}
         <section className="space-y-4">
           <div className="space-y-0.5">
             <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">What are you listing?</h2>
@@ -327,7 +327,7 @@ export default function CreateListingPage() {
             className="space-y-10"
           >
 
-            {/* ── SECTION: SUBCATEGORY ── */}
+            {/*  SECTION: SUBCATEGORY  */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Subcategory</h2>
@@ -354,7 +354,7 @@ export default function CreateListingPage() {
               </div>
             </section>
 
-            {/* ── SECTION: SMART CATEGORY FIELDS ── */}
+            {/*  SECTION: SMART CATEGORY FIELDS  */}
             {subcategory && selectedCategory !== 'SERVICES' && MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.customFields?.some(f => !f.applicableSubcategories || f.applicableSubcategories.includes(subcategory)) && (
               <section className="pt-2 border-t border-slate-100">
                 <div className="space-y-0.5 mb-6">
@@ -373,7 +373,7 @@ export default function CreateListingPage() {
               </section>
             )}
 
-            {/* ── SECTION: IMAGES ── */}
+            {/*  SECTION: IMAGES  */}
             <section className="space-y-4 pt-2 border-t border-slate-100">
               <div className="flex justify-between items-center">
                 <div className="space-y-0.5">
@@ -406,12 +406,12 @@ export default function CreateListingPage() {
               </div>
             </section>
 
-            {/* ── SECTION: NAME ── */}
+            {/*  SECTION: NAME  */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Item Name</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">
-                  {subcategory ? `Be specific — include brand and model where possible.` : 'Select a subcategory first to see naming guidance.'}
+                  {subcategory ? `Be specific  include brand and model where possible.` : 'Select a subcategory first to see naming guidance.'}
                 </p>
               </div>
               <input
@@ -427,7 +427,7 @@ export default function CreateListingPage() {
               )}
             </section>
 
-            {/* ── SECTION: DETAILS ── */}
+            {/*  SECTION: DETAILS  */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Description</h2>
@@ -444,7 +444,7 @@ export default function CreateListingPage() {
 
 
 
-            {/* ── SECTION: PRICE ── */}
+            {/*  SECTION: PRICE  */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -472,7 +472,7 @@ export default function CreateListingPage() {
                 />
               </div>
 
-              {/* ── PCS ERROR ALERT ── */}
+              {/*  PCS ERROR ALERT  */}
               <AnimatePresence>
                 {pcsError && (
                   <motion.div
@@ -482,10 +482,10 @@ export default function CreateListingPage() {
                   >
                     <div className="rounded-2xl p-4 mt-3 border border-amber-200 bg-amber-50">
                       <div className="flex items-start gap-3">
-                        <span className="text-xl">💡</span>
+                        <span className="text-xl"></span>
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-amber-900 mb-1">Heads up — price is a bit high</p>
-                          <p className="text-xs text-amber-700 leading-relaxed">We checked the market and found <strong>{pcsError.itemTitle}</strong> going for around <strong>RM{pcsError.marketBaselinePrice.toFixed(2)}</strong> online. To keep things fair for students, campus listings are capped at <strong>RM{pcsError.maxAllowedStudentPrice.toFixed(2)}</strong> — that's 10% below retail.</p>
+                          <p className="text-sm font-semibold text-amber-900 mb-1">Heads up  price is a bit high</p>
+                          <p className="text-xs text-amber-700 leading-relaxed">We checked the market and found <strong>{pcsError.itemTitle}</strong> going for around <strong>RM{pcsError.marketBaselinePrice.toFixed(2)}</strong> online. To keep things fair for students, campus listings are capped at <strong>RM{pcsError.maxAllowedStudentPrice.toFixed(2)}</strong>  that's 10% below retail.</p>
                           <button 
                             onClick={() => { setPrice(pcsError.maxAllowedStudentPrice.toString()); setPcsError(null); }}
                             className="mt-3 bg-amber-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-amber-800 transition-colors"
@@ -499,7 +499,7 @@ export default function CreateListingPage() {
                 )}
               </AnimatePresence>
 
-              {/* ── LIVE MARKET INTELLIGENCE PANEL ── */}
+              {/*  LIVE MARKET INTELLIGENCE PANEL  */}
               <AnimatePresence mode="wait">
                 {marketCheck && !marketLoading && (() => {
                   const numericPrice = parseFloat(price);
@@ -550,9 +550,9 @@ export default function CreateListingPage() {
                             isBlocked ? 'text-red-700' : isCompliant ? 'text-emerald-700' : isWarning ? 'text-amber-700' : 'text-slate-600'
                           }`}>
                             {isBlocked
-                              ? 'Listing Paused — Price Too High'
+                              ? 'Listing Paused  Price Too High'
                               : isCompliant
-                              ? 'Campus-Compliant Price ✓'
+                              ? 'Campus-Compliant Price '
                               : isWarning ? 'Fair Price Range' : 'Market Intelligence Active'
                             }
                           </p>
@@ -576,7 +576,7 @@ export default function CreateListingPage() {
                           <span className="text-[12px] font-bold text-slate-600">RM {marketCheck.market_baseline.toFixed(2)}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-medium text-slate-400">Max Campus Price (−10%)</span>
+                          <span className="text-[11px] font-medium text-slate-400">Max Campus Price (10%)</span>
                           <span className={`text-[13px] font-semibold ${isBlocked ? 'text-red-500' : 'text-slate-900'}`}>
                             RM {marketCheck.max_campus_price.toFixed(2)}
                           </span>
@@ -591,7 +591,7 @@ export default function CreateListingPage() {
                         ) : (
                           <div className="border-t border-slate-100/80 pt-2 mt-1">
                             <p className="text-[10px] font-medium text-slate-300 text-center">
-                              Enter your price above to check compliance ↑
+                              Enter your price above to check compliance 
                             </p>
                           </div>
                         )}
@@ -627,7 +627,7 @@ export default function CreateListingPage() {
               </AnimatePresence>
             </section>
 
-            {/* ── SECTION: STOCK ── */}
+            {/*  SECTION: STOCK  */}
             <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Stock</h2>
@@ -648,13 +648,13 @@ export default function CreateListingPage() {
               )}
             </section>
 
-            {/* ── SECTION: DELIVERY PREFERENCE ── */}
+            {/*  SECTION: DELIVERY PREFERENCE  */}
             {selectedCategory === 'SERVICES' ? (
               <section className="pt-2 border-t border-slate-100">
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
-                  <span className="text-[16px] shrink-0 mt-0.5">💡</span>
+                  <span className="text-[16px] shrink-0 mt-0.5"></span>
                   <p className="text-[12px] font-medium text-slate-500 leading-relaxed">
-                    Services are fulfilled directly between you and the buyer — either online or via campus meetup. No runner needed.
+                    Services are fulfilled directly between you and the buyer  either online or via campus meetup. No runner needed.
                   </p>
                 </div>
               </section>
@@ -706,7 +706,7 @@ export default function CreateListingPage() {
 
 
 
-            {/* ── POST BUTTON ── */}
+            {/*  POST BUTTON  */}
             <div className="pt-4">
               <button
                 disabled={!canPost || isUploading}
@@ -730,18 +730,18 @@ export default function CreateListingPage() {
                 )}
               </button>
 
-              {/* ── PCS APPROVED BANNER ── */}
+              {/*  PCS APPROVED BANNER  */}
               {pcsApprovedBanner && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-center"
                 >
-                  <p className="text-[12px] font-bold text-emerald-700">✓ Price approved — listing is live!</p>
+                  <p className="text-[12px] font-bold text-emerald-700"> Price approved  listing is live!</p>
                 </motion.div>
               )}
 
-              {/* ── POST ERROR TOAST ── */}
+              {/*  POST ERROR TOAST  */}
               {postError && (
                 <p className="text-[11px] font-bold text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-center mt-3">
                   {postError}

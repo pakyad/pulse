@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,7 +10,7 @@ import BackButton from '@/components/shared/BackButton';
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
-// ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
+//  STANDARDIZED TYPOGRAPHY COMPONENTS 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[24px] font-bold text-slate-900 tracking-tight ${className}`}>
     {children}
@@ -61,7 +61,7 @@ export default function LeaderboardPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
       
-      {/* ── GLOBAL NAVIGATION ── */}
+      {/*  GLOBAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
             <BackButton />

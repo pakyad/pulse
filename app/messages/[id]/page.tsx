@@ -108,7 +108,7 @@ export default function ChatRoomPage() {
   return (
     <main className="h-screen flex flex-col bg-white font-sans antialiased text-slate-900 max-w-2xl mx-auto relative overflow-hidden">
       
-      {/* ── STICKY HEADER ── */}
+      {/*  STICKY HEADER  */}
       <header className="shrink-0 bg-white border-b border-slate-50 px-6 pt-8 pb-4 z-50">
          <div className="flex items-center gap-4">
             <BackButton />
@@ -126,7 +126,7 @@ export default function ChatRoomPage() {
          </div>
       </header>
 
-      {/* ── CONTEXT BANNER (Item/Post Reference) ── */}
+      {/*  CONTEXT BANNER (Item/Post Reference)  */}
       <div className="shrink-0 bg-slate-50/50 px-6 py-3 border-b border-slate-100 flex items-center justify-between">
          <div className="flex items-center gap-3 min-w-0">
             <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 ${chatInfo?.type === 'MARKETPLACE' ? 'bg-blue-100 text-slate-900' : 'bg-rose-100 text-rose-600'}`}>
@@ -140,7 +140,7 @@ export default function ChatRoomPage() {
          <ChevronRight size={16} className="text-slate-300 shrink-0 ml-4" />
       </div>
 
-      {/* ── CHAT MESSAGES ── */}
+      {/*  CHAT MESSAGES  */}
       <section className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
          {messages.map((msg, i) => {
             const isMe = msg.senderId === auth.currentUser?.uid;
@@ -165,7 +165,7 @@ export default function ChatRoomPage() {
          <div ref={bottomRef} className="h-2" />
       </section>
 
-      {/* ── INPUT BAR ── */}
+      {/*  INPUT BAR  */}
       <div className="shrink-0 bg-white border-t border-slate-50 p-4 pb-8">
          <form onSubmit={handleSend} className="flex items-center gap-3">
             <button type="button" className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 active:scale-95 transition-transform shrink-0">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -165,7 +165,7 @@ function PromoteHubContent() {
         </div>
       </section>
 
-      {/* ── IN-UI FEEDBACK TOASTS ── */}
+      {/*  IN-UI FEEDBACK TOASTS  */}
       {launchError && (
         <div className="fixed top-24 left-6 right-6 z-200 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md">
           {launchError}
@@ -173,7 +173,7 @@ function PromoteHubContent() {
       )}
       {launchSuccess && (
         <div className="fixed top-24 left-6 right-6 z-200 bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-md">
-          ✓ Campaign transmitted to Pulse Command for review.
+           Campaign transmitted to Pulse Command for review.
         </div>
       )}
 

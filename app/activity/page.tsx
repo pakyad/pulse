@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { 
   TrendingUp, Bell, Inbox, ShoppingBag, Truck, MapPin, MessageSquare
@@ -184,7 +184,7 @@ export default function ActivityPage() {
   return (
     <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900 w-full max-w-2xl mx-auto">
       
-      {/* ── INTERNAL NAV ── */}
+      {/*  INTERNAL NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
             <BackButton fallback="/home" />
@@ -223,7 +223,7 @@ export default function ActivityPage() {
             <MerchantInsights profile={profile} orders={orders} />
          ) : (
             <>
-               {/* ── TABS ── */}
+               {/*  TABS  */}
                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
                   {['All', 'Commerce', 'Campus'].map((tab) => (
                     <button
@@ -240,7 +240,7 @@ export default function ActivityPage() {
                   ))}
                </div>
 
-               {/* ── INBOX LIST ── */}
+               {/*  INBOX LIST  */}
                <div className="flex flex-col -mx-2 mt-4 space-y-1">
                    {(notifications.length > 0 ? notifications : DEMO_NOTIFICATIONS)
                     .filter(it => activeTab === 'All' || it.category === activeTab.toUpperCase())

@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import React from 'react';
 import { motion } from 'framer-motion';
 
 /**
- * 🧱 Institutional Voxel Status Core
+ *  Institutional Voxel Status Core
  * Pure SVG block-geometry icons for high-fidelity status tracking.
  */
 

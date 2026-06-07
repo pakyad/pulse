@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { db, auth } from '@/lib/firebase';
@@ -7,7 +7,7 @@ import { CheckCircle, Loader2, X, ImageOff, MessageSquare, AlertTriangle, Bot, H
 import { motion, AnimatePresence } from 'framer-motion';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 
-// ── Appeal Details Drawer ─────────────────────────────────────────
+//  Appeal Details Drawer 
 function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any; item: any; onClose: () => void; onResolve: (appeal: any, action: string, negotiatedPrice?: number) => Promise<void> }) {
   const [claudeLoading, setClaudeLoading] = useState(false);
   const [claudeResult, setClaudeResult] = useState<any>(null);
@@ -167,7 +167,7 @@ function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
-          {/* SECTION A — Claude Re-evaluation */}
+          {/* SECTION A  Claude Re-evaluation */}
           <div className="space-y-3">
             <button onClick={runClaude} disabled={claudeLoading}
               className="w-full h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[12px] font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95 disabled:opacity-50">
@@ -237,7 +237,7 @@ function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any
             </div>
           </div>
 
-          {/* SECTION B — Precedent Check */}
+          {/* SECTION B  Precedent Check */}
           <div className="space-y-2">
             <h3 className="text-[12px] font-bold text-slate-900 flex items-center gap-1.5">
               <History size={13} /> Similar Appeals History
@@ -267,7 +267,7 @@ function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any
 
         </div>
 
-        {/* SECTION C — Decision Buttons */}
+        {/* SECTION C  Decision Buttons */}
         <div className="p-6 border-t border-slate-100 bg-white space-y-3">
           {/* Approve at Listed Price */}
           <button onClick={() => executeAction('APPROVE_LISTED')} disabled={isWorking}
@@ -322,7 +322,7 @@ function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────
+//  Main Page 
 export default function AppealsPage() {
   const [appeals, setAppeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -96,7 +96,7 @@ export default function AdminPrestigePage() {
                <p className="text-[20px] font-bold">{campaigns.length}</p>
             </div>
             <div className="w-px h-10 bg-white/10" />
-            <button onClick={() => router.push('/merchant')} className="text-[12px] font-bold text-accent hover:text-white transition-colors">Terminals View →</button>
+            <button onClick={() => router.push('/merchant')} className="text-[12px] font-bold text-accent hover:text-white transition-colors">Terminals View </button>
          </div>
       </div>
 

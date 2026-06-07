@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react';
 import { auth, db } from '@/lib/firebase';
@@ -234,11 +234,11 @@ export default function DevSeedPage() {
     const wipeAndSeed = async () => {
         setLoading(true);
         setStatus([]);
-        log("🚀 Starting System Override...");
+        log(" Starting System Override...");
 
         try {
             // 1. Wipe existing items & campaigns
-            log("🧹 Wiping all existing marketplace listings and campaigns...");
+            log(" Wiping all existing marketplace listings and campaigns...");
             const itemsSnap = await getDocs(collection(db, "items"));
             let deleted = 0;
             for (const docSnap of itemsSnap.docs) {
@@ -260,10 +260,10 @@ export default function DevSeedPage() {
                 deletedOrders++;
             }
             
-            log(`✅ Wiped ${deleted} dummy items, ${deletedCamps} campaigns, & ${deletedOrders} orders.`);
+            log(` Wiped ${deleted} dummy items, ${deletedCamps} campaigns, & ${deletedOrders} orders.`);
 
             // 2. Provision Accounts
-            log("👤 Provisioning 4 Demo Accounts...");
+            log(" Provisioning 4 Demo Accounts...");
             for (const account of DEMO_ACCOUNTS) {
                 try {
                     // We use setDoc directly to the user profile instead of Auth for simplicity 
@@ -289,13 +289,13 @@ export default function DevSeedPage() {
                         ...account.data
                     });
                 } catch (err: any) {
-                    log(`⚠️ Note on ${account.email}: ${err.message}`);
+                    log(` Note on ${account.email}: ${err.message}`);
                 }
             }
-            log("✅ Accounts ready.");
+            log(" Accounts ready.");
 
             // 3. Insert 20 New Listings & Campaigns
-            log("📦 Injecting 20 High-Quality Demo Listings...");
+            log(" Injecting 20 High-Quality Demo Listings...");
             for (const item of DEMO_LISTINGS) {
                 const matchedAccount = DEMO_ACCOUNTS.find(a => a.fullName === item.seller_name);
                 const actualUid = matchedAccount ? matchedAccount.uid : item.seller_id;
@@ -308,7 +308,7 @@ export default function DevSeedPage() {
                 });
             }
             
-            log("🚀 Injecting Official Campaigns & Syncing to Marketplace...");
+            log(" Injecting Official Campaigns & Syncing to Marketplace...");
             for (const camp of DEMO_CAMPAIGNS) {
                 const matchedAccount = DEMO_ACCOUNTS.find(a => a.fullName === camp.club_name);
                 const actualUid = matchedAccount ? matchedAccount.uid : camp.seller_id;
@@ -340,11 +340,11 @@ export default function DevSeedPage() {
                 });
             }
             
-            log("✅ Successfully injected new listings and campaigns.");
-            log("🎉 OVERRIDE COMPLETE. System is ready for presentation.");
+            log(" Successfully injected new listings and campaigns.");
+            log(" OVERRIDE COMPLETE. System is ready for presentation.");
 
         } catch (error: any) {
-            log(`❌ CRITICAL ERROR: ${error.message}`);
+            log(` CRITICAL ERROR: ${error.message}`);
         }
         
         setLoading(false);
@@ -374,7 +374,7 @@ export default function DevSeedPage() {
                     </div>
                 )}
 
-                {!loading && status.includes("🎉 OVERRIDE COMPLETE. System is ready for presentation.") && (
+                {!loading && status.includes(" OVERRIDE COMPLETE. System is ready for presentation.") && (
                     <div className="mt-8 p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
                         <p className="font-semibold text-emerald-800 mb-4 text-[14px] ">Demo Accounts (Password: password123)</p>
                         <ul className="space-y-3 text-sm text-emerald-700 font-medium">

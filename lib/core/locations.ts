@@ -1,4 +1,4 @@
-export type LocationZone = 'MIIT' | 'RAH';
+﻿export type LocationZone = 'MIIT' | 'RAH';
 
 export interface LocationNode {
   token: string;
@@ -9,7 +9,7 @@ export interface LocationNode {
 }
 
 export const CAMPUS_NODES: LocationNode[] = [
-  // ── MIIT TOWER (Standard Tier - RM 3.50) ──
+  //  MIIT TOWER (Standard Tier - RM 3.50) 
   { token: 'MIIT-G-LOBBY', label: 'Ground Floor Lobby', zone: 'MIIT', tier: 'STANDARD', fee: 3.50 },
   { token: 'MIIT-04-HALL', label: 'Level 4 Teater Perdana', zone: 'MIIT', tier: 'STANDARD', fee: 3.50 },
   { token: 'MIIT-08-LAB', label: 'Level 8 Database Labs', zone: 'MIIT', tier: 'STANDARD', fee: 3.50 },
@@ -17,7 +17,7 @@ export const CAMPUS_NODES: LocationNode[] = [
   { token: 'MIIT-14-CAFE', label: 'Level 14 Student Cafe', zone: 'MIIT', tier: 'STANDARD', fee: 3.50 },
   { token: 'MIIT-20-LIBR', label: 'Level 20 Library', zone: 'MIIT', tier: 'STANDARD', fee: 3.50 },
 
-  // ── RESIDENSI RAH (Walkable 500m Orbit) ──
+  //  RESIDENSI RAH (Walkable 500m Orbit) 
   { token: 'RAH-G-GUARD', label: 'Main Guardhouse Gate', zone: 'RAH', tier: 'STANDARD', fee: 3.50 },
   { token: 'RAH-G-LOBBY', label: 'Ground Floor Parcel Rack', zone: 'RAH', tier: 'STANDARD', fee: 3.50 },
   { token: 'RAH-L13-SURAU', label: 'Level 13 Communal Lounge', zone: 'RAH', tier: 'STANDARD', fee: 3.50 },

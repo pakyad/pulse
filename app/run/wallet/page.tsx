@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
@@ -141,7 +141,7 @@ export default function RunnerWalletPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
       
-      {/* ── GLOBAL NAVIGATION ── */}
+      {/*  GLOBAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
@@ -154,7 +154,7 @@ export default function RunnerWalletPage() {
 
       <div className="pt-28 px-6 space-y-10">
         
-        {/* ── BALANCE CARD (WITH TOGGLE) ── */}
+        {/*  BALANCE CARD (WITH TOGGLE)  */}
         <div className="space-y-6">
            <div className="bg-slate-50 p-10 rounded-[32px] border border-slate-100 flex flex-col items-center justify-center relative overflow-hidden transition-all shadow-xs">
              
@@ -179,7 +179,7 @@ export default function RunnerWalletPage() {
              </div>
            </div>
 
-           {/* ── ACTIONS ── */}
+           {/*  ACTIONS  */}
            <div className="flex">
              <button onClick={() => setIsWithdrawOpen(true)} className="w-full h-16 bg-white rounded-[20px] flex items-center justify-center gap-2 border-[1.5px] border-slate-100 active:bg-slate-50 active:scale-95 transition-all shadow-sm">
                <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
@@ -190,7 +190,7 @@ export default function RunnerWalletPage() {
            </div>
         </div>
 
-        {/* ── MENU LIST ── */}
+        {/*  MENU LIST  */}
         <div className="space-y-1">
           <h2 className="text-[15px] font-bold tracking-tight px-1 mb-4">Activity</h2>
           <div className="px-2">
@@ -214,7 +214,7 @@ export default function RunnerWalletPage() {
         </div>
       </div>
 
-      {/* ── MODALS (TOP UP / WITHDRAW) ── */}
+      {/*  MODALS (TOP UP / WITHDRAW)  */}
       <AnimatePresence>
         {(isTopUpOpen || isWithdrawOpen) && (
           <div className="fixed inset-0 z-200 flex items-end justify-center p-4">

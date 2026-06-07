@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { db, auth } from '@/lib/firebase';
@@ -12,7 +12,7 @@ import AddMerchantModal from '@/components/admin/AddMerchantModal';
 
 type Filter = 'ALL' | 'STUDENT' | 'MERCHANT' | 'RUNNER';
 
-// ── User Drawer ────────────────────────────────────────────────────────────────
+//  User Drawer 
 function UserDrawer({ user, onClose, onToggle, onSuspend }: {
   user: any; onClose: () => void;
   onToggle: (id: string, field: string, current: boolean) => void;
@@ -112,7 +112,7 @@ function UserDrawer({ user, onClose, onToggle, onSuspend }: {
   );
 }
 
-// ── Page ───────────────────────────────────────────────────────────────────────
+//  Page 
 export default function UsersPage() {
   const [users,          setUsers]          = useState<any[]>([]);
   const [loading,        setLoading]        = useState(true);

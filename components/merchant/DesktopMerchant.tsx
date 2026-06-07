@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import SwipeToReady from './SwipeToReady';
@@ -30,7 +30,7 @@ export default function DesktopMerchant({
   const [isInlineFormOpen, setIsInlineFormOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  // ── FIX 7: Inline Form State ──
+  //  FIX 7: Inline Form State 
   const [formData, setFormData] = React.useState({
     name: '',
     description: '',
@@ -160,7 +160,7 @@ export default function DesktopMerchant({
   return (
     <div className="min-h-screen bg-[#F9F9FB] selection:bg-gray-100 hidden md:flex">
       
-      {/* ── Fixed Sidebar (Column 1) ── */}
+      {/*  Fixed Sidebar (Column 1)  */}
       <aside className="w-64 h-screen bg-[#FFFFFF] border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
         
         {/* Header */}
@@ -231,7 +231,7 @@ export default function DesktopMerchant({
         </div>
       </aside>
 
-      {/* ── Main Content Area ── */}
+      {/*  Main Content Area  */}
       <main className="flex-1 ml-64 flex flex-col min-h-screen bg-white text-slate-900">
         
         {/* Top Header */}
@@ -283,7 +283,7 @@ export default function DesktopMerchant({
           </div>
         </header>
 
-        {/* ── FIX 7: Inline Form ── */}
+        {/*  FIX 7: Inline Form  */}
         <AnimatePresence>
           {isInlineFormOpen && (
             <motion.div 
@@ -424,7 +424,7 @@ export default function DesktopMerchant({
           )}
         </AnimatePresence>
 
-        {/* ── ADMINISTRATIVE VIEW ── */}
+        {/*  ADMINISTRATIVE VIEW  */}
         <div className="p-10 space-y-12">
           
           {/* Data Tables */}
@@ -617,7 +617,7 @@ export default function DesktopMerchant({
             </section>
           )}
 
-          {/* 🏛️ Minimal Inventory Registry (Matured) */}
+          {/*  Minimal Inventory Registry (Matured) */}
           {isClub && items?.some((i: any) => (i.stock_count ?? 99) <= 5) && (
             <section className="space-y-4">
               <div className="flex items-center justify-between px-1">
@@ -626,7 +626,7 @@ export default function DesktopMerchant({
                   <p className="text-[13px] font-semibold text-[#111827]">Inventory Attention</p>
                 </div>
                 
-                {/* 🔍 Drake Searchbar */}
+                {/*  Drake Searchbar */}
                 <div className="relative group">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#111827] transition-colors" />
                   <input 
@@ -764,7 +764,7 @@ export default function DesktopMerchant({
 
       </main>
 
-      {/* ── FIX 16: Floating Action Bar ── */}
+      {/*  FIX 16: Floating Action Bar  */}
       <AnimatePresence>
         {selectedOrders.length >= 2 && (
           <motion.div 
@@ -785,7 +785,7 @@ export default function DesktopMerchant({
         )}
       </AnimatePresence>
 
-      {/* ── MODAL LAYER ── */}
+      {/*  MODAL LAYER  */}
       {isCreateOpen && (
         <CreateListing 
           userId={merchant?.uid} 

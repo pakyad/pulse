@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -76,7 +76,7 @@ function PriorityDot({ priority }: { priority: string }) {
   );
 }
 
-// ── Announcement Modal ───────────────────────────────────────────
+//  Announcement Modal 
 
 function AnnouncementModal({
   editing, onClose, onSave
@@ -232,7 +232,7 @@ function AnnouncementModal({
   );
 }
 
-// ── Banner Modal ────────────────────────────────────────────────
+//  Banner Modal 
 
 function BannerModal({
   editing, onClose, onSave
@@ -364,7 +364,7 @@ function BannerModal({
   );
 }
 
-// ── Main Page ────────────────────────────────────────────────────
+//  Main Page 
 
 export default function AdminAnnouncementsPage() {
   const router = useRouter();
@@ -623,7 +623,7 @@ export default function AdminAnnouncementsPage() {
         <p className="text-[13px] font-medium text-slate-400 mt-1">Manage Pulse announcements and home screen banners</p>
       </div>
 
-      {/* ── SECTION 1: Pulse Announcements ── */}
+      {/*  SECTION 1: Pulse Announcements  */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -657,7 +657,7 @@ export default function AdminAnnouncementsPage() {
         </div>
       </div>
 
-      {/* ── SECTION 2: Home Screen Banners ── */}
+      {/*  SECTION 2: Home Screen Banners  */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>

@@ -1,9 +1,9 @@
-
+﻿
 import { db } from './lib/firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 
 async function auditOrders() {
-  console.log("🏛️ Pulse Audit: Fetching recent orders...");
+  console.log(" Pulse Audit: Fetching recent orders...");
   const q = query(collection(db, "orders"), orderBy("created_at", "desc"), limit(5));
   const snap = await getDocs(q);
   

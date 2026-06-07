@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import { db, auth } from '@/lib/firebase';
@@ -8,7 +8,7 @@ import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories
 import { Loader2, CheckCircle2, ImageOff, X, AlertTriangle, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Confirm Modal ─────────────────────────────────────────────────────────────
+//  Confirm Modal 
 function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
   let title = "";
   let description = "";
@@ -61,7 +61,7 @@ function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
   );
 }
 
-// ── Item Details Drawer ───────────────────────────────────────────────────────
+//  Item Details Drawer 
 function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: () => void; onResolve: (action: string) => Promise<void> }) {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
@@ -202,7 +202,7 @@ function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: (
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+//  Main Page 
 export default function PriceReviewPage() {
   const [items, setItems] = useState<any[]>([]);
   const [reviewedItems, setReviewedItems] = useState<any[]>([]);
@@ -403,11 +403,11 @@ export default function PriceReviewPage() {
                       <span className="text-[11px] text-slate-400">
                         {item.pcs_result?.checkedAt?.toMillis
                           ? new Date(item.pcs_result.checkedAt.toMillis()).toLocaleDateString()
-                          : '—'}
+                          : ''}
                       </span>
                     </div>
                     <div className="md:col-span-2">
-                      <p className="text-[10px] text-slate-400 truncate">{item.pcs_result?.justification || '—'}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{item.pcs_result?.justification || ''}</p>
                     </div>
                   </div>
                 );

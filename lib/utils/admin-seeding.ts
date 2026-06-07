@@ -1,4 +1,4 @@
-import { db } from '@/lib/firebase';
+﻿import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, getDocs, collection } from 'firebase/firestore';
 
 /**
@@ -82,7 +82,7 @@ export const VETTED_ACCOUNTS: AccountVetting[] = [
 ];
 
 /**
- * 🏛️ Registry Correction | Institutional Data Integrity
+ *  Registry Correction | Institutional Data Integrity
  * Force-aligns the UniKL Scarf (cicMuv) to the correct Merchant UID.
  */
 export async function fixMerchantRegistry() {
@@ -99,7 +99,7 @@ export async function fixMerchantRegistry() {
                 seller_id: TARGET_UID,
                 seller_name: "Kelab Bola"
             });
-            console.log("✅ Registry Correction: Scarf aligned to Kelab Bola.");
+            console.log(" Registry Correction: Scarf aligned to Kelab Bola.");
         }
     } catch (e) {
         console.error("Registry Repair Failed:", e);

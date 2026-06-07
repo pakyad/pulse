@@ -1,14 +1,14 @@
-/**
+﻿/**
  * Pulse Price Intelligence Engine v2.0
- * ─────────────────────────────────────────────────────────────
- * Layer 0: Subcategory gate    — skip API entirely if !comparable
- * Layer 1: Firestore 24hr cache — serve cached result if fresh
- * Layer 1.5: Fuzzy word-match   — Jaccard similarity on tokens (typo-tolerant)
- * Layer 2: SerpAPI live         — Google Shopping via serpapi.com
- * Layer 2.5: Historical Memory  — expired cache as fallback
- * Layer 2.75: AI estimation     — OpenAI + rule-based (catches typos, vague titles)
- * Layer 3: Firestore reference  — seeded demo prices
- * Layer 4: Subcategory ceiling  — hardcoded safety net
+ * 
+ * Layer 0: Subcategory gate     skip API entirely if !comparable
+ * Layer 1: Firestore 24hr cache  serve cached result if fresh
+ * Layer 1.5: Fuzzy word-match    Jaccard similarity on tokens (typo-tolerant)
+ * Layer 2: SerpAPI live          Google Shopping via serpapi.com
+ * Layer 2.5: Historical Memory   expired cache as fallback
+ * Layer 2.75: AI estimation      OpenAI + rule-based (catches typos, vague titles)
+ * Layer 3: Firestore reference   seeded demo prices
+ * Layer 4: Subcategory ceiling   hardcoded safety net
  */
 
 import { adminDb } from '@/lib/firebase-admin';
@@ -29,7 +29,7 @@ export interface PriceCheckResult {
   zone?: 'green' | 'yellow' | 'red' | 'skipped';
 }
 
-// ── Input Sanity Guard ───────────────────────────────────────────────────────
+//  Input Sanity Guard 
 function sanitizeTitle(raw: string): string {
   // Normalize: lowercase, collapse spaces, strip non-printable
   return raw.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[^\w\s\-().&]/g, '');
@@ -43,11 +43,11 @@ function isMeaningfulTitle(title: string): boolean {
   return true;
 }
 
-// ── Cache Key Normaliser ──────────────────────────────────────────────────────
+//  Cache Key Normaliser 
 // Extracts the core product name (strips condition/fluff) for cache sharing,
 // but appends a condition tier so "Like New" and "Used" get different lookups.
 const FILLER = /\b(a|an|the|for|and|or|of|to|in|on|at|by|is|was|are|with|new|used|like|good|fair|poor|condition|sealed|opened|box|bnib|preloved|grade|cheap|bargain|best|offer|firm|urgent|price|selling|sale|nego|negotiable|free|retail|genuine|original|warranty|local|ready|stock|unit|piece|set|pack)\b/gi;
-const SEPARATOR = /\s*[—–,\-\(]\s*.*/; // strip everything after — – , (  (condition info)
+const SEPARATOR = /\s*[,\-\(]\s*.*/; // strip everything after   , (  (condition info)
 
 function extractConditionTier(raw: string): string {
   const t = raw.toLowerCase();
@@ -72,7 +72,7 @@ function normalizeForCacheKey(raw: string): string {
   return `${core}${tier}`;
 }
 
-// ── Layer 1: Firestore 24hr Cache ────────────────────────────────────────────
+//  Layer 1: Firestore 24hr Cache 
 async function fetchFromCache(cacheKey: string, ignoreAge: boolean = false): Promise<number | null> {
   try {
     const doc = await adminDb.collection('price_cache').doc(cacheKey).get();
@@ -101,8 +101,8 @@ async function writeToCache(cacheKey: string, price: number, rawTitle?: string):
   }
 }
 
-// ── Token-based fuzzy matching (typo-tolerant cache lookup) ─────────────────
-// Extracts meaningful words (≥3 chars, excluding filler) from a title.
+//  Token-based fuzzy matching (typo-tolerant cache lookup) 
+// Extracts meaningful words (3 chars, excluding filler) from a title.
 const TOKEN_FILLER = /\b(a|an|the|for|and|or|of|to|in|on|at|by|is|was|are|with|new|used|like|good|fair|poor|box|set|unit|piece|lot|pack)\b/gi;
 
 function extractTokens(text: string): string[] {
@@ -149,7 +149,7 @@ async function fetchFuzzyFromCache(prefix: string, title: string): Promise<numbe
   }
 }
 
-// ── Layer 2: SerpAPI (Google Shopping) ───────────────────────────────────────
+//  Layer 2: SerpAPI (Google Shopping) 
 async function fetchFromSerpApi(title: string, serpSuffix?: string): Promise<number | null> {
   const apiKey = process.env.SERP_API_KEY;
   if (!apiKey) return null;
@@ -184,7 +184,7 @@ async function fetchFromSerpApi(title: string, serpSuffix?: string): Promise<num
   }
 }
 
-// ── Layer 3: Firestore Seeded Reference ──────────────────────────────────────
+//  Layer 3: Firestore Seeded Reference 
 async function fetchFromReference(title: string, category: string): Promise<number | null> {
   try {
     const snap = await adminDb.collection('market_reference_prices').where('category', '==', category).get();
@@ -209,7 +209,7 @@ async function fetchFromReference(title: string, category: string): Promise<numb
   }
 }
 
-// ── MAIN EXPORT ───────────────────────────────────────────────────────────────
+//  MAIN EXPORT 
 export async function checkMarketPrice(
   rawTitle: string,
   categoryId: string,
@@ -219,7 +219,7 @@ export async function checkMarketPrice(
   const category = MARKETPLACE_CATEGORIES[categoryId as CategoryID];
   const subcategory = category?.subcategories.find((s) => s.label === subcategoryLabel);
 
-  // ── Layer 0: Non-comparable subcategory — skip all API calls ─────────────
+  //  Layer 0: Non-comparable subcategory  skip all API calls 
   if (!subcategory || !subcategory.comparable) {
     const ceiling = subcategory?.fixedCeiling ?? category?.ceiling ?? 100;
     return {
@@ -251,7 +251,7 @@ export async function checkMarketPrice(
         comparable: true,
       };
     }
-    // AI also failed — fall back to ceiling
+    // AI also failed  fall back to ceiling
     const ceiling = subcategory.fixedCeiling ?? 500;
     return {
       market_baseline: null,
@@ -266,7 +266,7 @@ export async function checkMarketPrice(
 
   const cacheKey = `${categoryId}_${subcategoryLabel}_${normalizeForCacheKey(title)}`.slice(0, 120);
 
-  // ── Layer 1: 24hr Firestore cache ────────────────────────────────────────
+  //  Layer 1: 24hr Firestore cache 
   const cached = await fetchFromCache(cacheKey);
   if (cached) {
     return {
@@ -280,7 +280,7 @@ export async function checkMarketPrice(
     };
   }
 
-  // ── Layer 1.5: Fuzzy token match (typo-tolerant cache share) ────────────
+  //  Layer 1.5: Fuzzy token match (typo-tolerant cache share) 
   const prefix = `${categoryId}_${subcategoryLabel}`;
   const fuzzyPrice = await fetchFuzzyFromCache(prefix, rawTitle);
   if (fuzzyPrice) {
@@ -295,7 +295,7 @@ export async function checkMarketPrice(
     };
   }
 
-  // ── Layer 2: SerpAPI live ─────────────────────────────────────────────────
+  //  Layer 2: SerpAPI live 
   const livePrice = await fetchFromSerpApi(title, subcategory.serpQuerySuffix);
   if (livePrice) {
     await writeToCache(cacheKey, livePrice, rawTitle); // Cache for next student
@@ -303,14 +303,14 @@ export async function checkMarketPrice(
       market_baseline: livePrice,
       max_campus_price: parseFloat((livePrice * MULTIPLIER).toFixed(2)),
       source: 'SERP_LIVE',
-      source_detail: `Live price from Google Shopping · ${now}`,
+      source_detail: `Live price from Google Shopping  ${now}`,
       scraped_at: now,
       is_enforced: true,
       comparable: true,
     };
   }
 
-  // ── Layer 2.5: Historical Memory (Self-Learning Database Fallback) ───────
+  //  Layer 2.5: Historical Memory (Self-Learning Database Fallback) 
   // If SerpAPI fails, check the cache AGAIN but ignore the 24h age limit.
   const historicalPrice = await fetchFromCache(cacheKey, true);
   if (historicalPrice) {
@@ -325,7 +325,7 @@ export async function checkMarketPrice(
     };
   }
 
-  // ── Layer 2.75: AI estimation (catches what SerpAPI misses) ──────────────
+  //  Layer 2.75: AI estimation (catches what SerpAPI misses) 
   const aiResult = await estimateMarketPrice(rawTitle, categoryId, subcategoryLabel);
   if (aiResult) {
     await writeToCache(cacheKey, aiResult.price, rawTitle);
@@ -340,7 +340,7 @@ export async function checkMarketPrice(
     };
   }
 
-  // ── Layer 3: Firestore seeded reference ──────────────────────────────────
+  //  Layer 3: Firestore seeded reference 
   const refPrice = await fetchFromReference(title, categoryId);
   if (refPrice) {
     await writeToCache(cacheKey, refPrice, rawTitle); // Also cache reference hits
@@ -355,7 +355,7 @@ export async function checkMarketPrice(
     };
   }
 
-  // ── Layer 4: Subcategory static ceiling ──────────────────────────────────
+  //  Layer 4: Subcategory static ceiling 
   const ceiling = subcategory.fixedCeiling ?? 500;
   return {
     market_baseline: null,
@@ -368,7 +368,7 @@ export async function checkMarketPrice(
   };
 }
 
-// ── Zone Validator + Trust Score ──────────────────────────────────────────────
+//  Zone Validator + Trust Score 
 export interface ZoneResult {
   zone: 'green' | 'yellow' | 'red' | 'skipped';
   canPublish: boolean;

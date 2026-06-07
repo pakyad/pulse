@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
@@ -33,7 +33,7 @@ function SellingStatusBadge({ status }: { status: string }) {
 function BuyingRow({ order, onClick, reviewedOrders }: { order: any; onClick: () => void; reviewedOrders: Set<string> }) {
   const dateStr = order.created_at?.toDate
     ? order.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })
-    : '—';
+    : '';
   const code = `#${(order.order_code || order.id.slice(0, 6)).toUpperCase()}`;
 
   const s = (order.status || '').toUpperCase();
@@ -49,7 +49,7 @@ function BuyingRow({ order, onClick, reviewedOrders }: { order: any; onClick: ()
       <button onClick={onClick} className="w-full flex items-center justify-between py-4 px-2 -mx-2 rounded-xl text-left group hover:bg-slate-50 active:scale-95 transition-all">
         <div className="flex-1 min-w-0 pr-4">
           <p className="text-[14px] font-bold text-slate-900 truncate leading-snug">{order.title}</p>
-          <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{dateStr} · {code}</p>
+          <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{dateStr}  {code}</p>
         </div>
         <div className="shrink-0 text-right space-y-1">
           <p className="text-[14px] font-bold text-slate-900">RM {Number(order.price).toFixed(2)}</p>
@@ -60,7 +60,7 @@ function BuyingRow({ order, onClick, reviewedOrders }: { order: any; onClick: ()
         <div className="px-2">
           {isReviewed ? (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-500">
-              Reviewed ✓
+              Reviewed 
             </span>
           ) : (
             <button
@@ -84,7 +84,7 @@ function SellingCard({ order, userId, router }: { order: any; userId: string; ro
   const thumbnail = order.image_url || order.items?.[0]?.image_url || '';
   const dateStr = order.created_at?.toDate
     ? order.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short' })
-    : '—';
+    : '';
 
   const hasRunner = !!order.runner_id;
   const [messaging, setMessaging] = useState(false);
@@ -126,7 +126,7 @@ function SellingCard({ order, userId, router }: { order: any; userId: string; ro
       const sellerName = order.seller_name || 'Seller';
       const itemId = order.items?.[0]?.productId || order.order_id || '';
       const chatRef = doc(collection(db, 'chats'));
-      const firstMessage = `Hi! I purchased your ${itemName}. Looking forward to receiving it! 📦`;
+      const firstMessage = `Hi! I purchased your ${itemName}. Looking forward to receiving it! `;
 
       await setDoc(chatRef, {
         members: [order.seller_id, order.buyer_id],
@@ -172,7 +172,7 @@ function SellingCard({ order, userId, router }: { order: any; userId: string; ro
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[14px] font-bold text-slate-900 truncate leading-snug">{itemName}</p>
-          <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{dateStr} · {orderCode}</p>
+          <p className="text-[11px] font-medium text-[#94a3b8] mt-0.5">{dateStr}  {orderCode}</p>
           <p className="text-[12px] font-semibold text-[#94a3b8] mt-1">Buyer: {buyerName || 'Loading...'}</p>
         </div>
         <div className="shrink-0 text-right space-y-1.5">
@@ -182,7 +182,7 @@ function SellingCard({ order, userId, router }: { order: any; userId: string; ro
       </div>
 
       <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
-        <span className="text-[12px]">📦</span>
+        <span className="text-[12px]"></span>
         <p className="text-[11px] font-bold text-amber-800">Drop at {handoverNode}</p>
       </div>
 
@@ -229,7 +229,7 @@ export default function MyOrdersPage() {
       if (!user) { router.push('/auth'); return; }
       setUserId(user.uid);
 
-      // Load reviewed order IDs so BuyingRow can show Leave Review / Reviewed ✓
+      // Load reviewed order IDs so BuyingRow can show Leave Review / Reviewed 
       getDocs(query(collection(db, 'Reviews'), where('buyerId', '==', user.uid))).then((snap) => {
         setReviewedOrders(new Set(snap.docs.map(d => d.data().orderId)));
       }).catch(() => {});
@@ -305,7 +305,7 @@ export default function MyOrdersPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ── NAV ── */}
+      {/*  NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <BackButton fallback="/marketplace" />
         <div>
@@ -320,7 +320,7 @@ export default function MyOrdersPage() {
         </div>
       </nav>
 
-      {/* ── ORDER TYPE TABS: Buying | Selling ── */}
+      {/*  ORDER TYPE TABS: Buying | Selling  */}
       <div className="fixed top-[68px] left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 flex gap-6">
         {(['Buying', 'Selling'] as OrderTab[]).map(t => (
           <button
@@ -336,7 +336,7 @@ export default function MyOrdersPage() {
         ))}
       </div>
 
-      {/* ── SUB TABS: Active | History ── */}
+      {/*  SUB TABS: Active | History  */}
       <div className="fixed top-[114px] left-0 right-0 z-40 bg-white border-b border-slate-50 px-6 flex gap-6">
         {(['Active', 'History'] as SubTab[]).map(t => (
           <button

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,11 +37,11 @@ const DROPOFF_COORD = { lat: 3.1725, lng: 101.7545 };
 
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3;
-  const φ1 = lat1 * Math.PI/180;
-  const φ2 = lat2 * Math.PI/180;
-  const Δφ = (lat2-lat1) * Math.PI/180;
-  const Δλ = (lon2-lon1) * Math.PI/180;
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const 1 = lat1 * Math.PI/180;
+  const 2 = lat2 * Math.PI/180;
+  const  = (lat2-lat1) * Math.PI/180;
+  const  = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(/2) * Math.sin(/2) + Math.cos(1) * Math.cos(2) * Math.sin(/2) * Math.sin(/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
 }

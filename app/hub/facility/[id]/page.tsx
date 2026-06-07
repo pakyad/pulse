@@ -22,7 +22,7 @@ import FacilityCanvas from '@/components/hub/FacilityCanvas';
 import { db, auth } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 
-// ── MOCK DATA ENGINE ──
+//  MOCK DATA ENGINE 
 const MOCK_SLOTS: any[] = [
   { id: 'S1', type: 'WORKSTATION', status: 'AVAILABLE', x: 20, y: 30, specs: ['32" 4K Monitor', 'i9 Processor', 'Mechanical Keyboard'] },
   { id: 'S2', type: 'WORKSTATION', status: 'AVAILABLE', x: 20, y: 50, specs: ['Dual 24" Monitors', 'RTX 4080', 'Ergonomic Chair'] },
@@ -48,7 +48,7 @@ export default function FacilityBookingPage() {
       } else {
         setFacility({
           name: params.id === 'f1' ? 'Library East Node' : params.id === 'f2' ? 'Software Lab A-301' : 'Main Auditorium',
-          zone: 'Level 3 · MIIT',
+          zone: 'Level 3  MIIT',
           noise: 42,
           temp: 22,
           occupancy: '14/20'
@@ -92,7 +92,7 @@ export default function FacilityBookingPage() {
   return (
     <main className="min-h-screen bg-[#FDFDFD] pb-48 font-sans antialiased text-slate-800">
       
-      {/* ── 1. FRIENDLY HEADER (Consumer baseline) ── */}
+      {/*  1. FRIENDLY HEADER (Consumer baseline)  */}
       <section className="px-6 pt-12 pb-8">
          <div className="flex items-center justify-between mb-8">
             <BackButton />
@@ -112,7 +112,7 @@ export default function FacilityBookingPage() {
 
       <div className="max-w-2xl mx-auto px-6 space-y-10">
         
-        {/* ── 2. SOFT TELEMETRY CARDS ── */}
+        {/*  2. SOFT TELEMETRY CARDS  */}
         <section className="grid grid-cols-2 gap-4">
            <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
               <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-4">
@@ -137,7 +137,7 @@ export default function FacilityBookingPage() {
            </div>
         </section>
 
-        {/* ── 3. APPROACHABLE DESK SELECTOR ── */}
+        {/*  3. APPROACHABLE DESK SELECTOR  */}
         <section className="space-y-4">
            <div className="flex justify-between items-baseline px-2">
               <h3 className="text-lg font-bold text-slate-800">Select your desk</h3>
@@ -152,7 +152,7 @@ export default function FacilityBookingPage() {
            />
         </section>
 
-        {/* ── 4. SELECTION REGISTRY ── */}
+        {/*  4. SELECTION REGISTRY  */}
         <AnimatePresence mode="wait">
           {selectedSlotId ? (
             <motion.section 
@@ -217,7 +217,7 @@ export default function FacilityBookingPage() {
           )}
         </AnimatePresence>
 
-        {/* ── 5. CONFIRMATION ACTION ── */}
+        {/*  5. CONFIRMATION ACTION  */}
         <AnimatePresence>
           {selectedSlotId && (
             <motion.div 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
@@ -21,7 +21,7 @@ function StatusBadge({ status }: { status: string }) {
 function HistoryCard({ order, onClick }: { order: any; onClick: () => void }) {
   const dateStr = order.created_at?.toDate
     ? order.created_at.toDate().toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
-    : '—';
+    : '';
   const img = order.image_url || order.images?.[0];
 
   return (
@@ -31,7 +31,7 @@ function HistoryCard({ order, onClick }: { order: any; onClick: () => void }) {
     >
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-bold text-[#94a3b8] ">
-          {dateStr} · #{order.order_code || order.id.slice(0, 6).toUpperCase()}
+          {dateStr}  #{order.order_code || order.id.slice(0, 6).toUpperCase()}
         </p>
         <StatusBadge status={order.status} />
       </div>
@@ -98,7 +98,7 @@ export default function OrderHistoryPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ── NAV ── */}
+      {/*  NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center gap-3 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <BackButton />
         <div>
@@ -109,7 +109,7 @@ export default function OrderHistoryPage() {
 
       <div className="pt-28 px-6 space-y-5">
 
-        {/* ── FILTER PILLS ── */}
+        {/*  FILTER PILLS  */}
         <div className="flex gap-2">
           {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map(f => (
             <button
@@ -126,7 +126,7 @@ export default function OrderHistoryPage() {
           ))}
         </div>
 
-        {/* ── LIST ── */}
+        {/*  LIST  */}
         <AnimatePresence mode="wait">
           <motion.div
             key={filter}

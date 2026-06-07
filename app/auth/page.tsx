@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -89,7 +89,7 @@ export default function AuthPage() {
             <input 
               type={showPassword ? 'text' : 'password'}
               value={password} onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="--------"
               className="w-full h-[52px] px-6 pr-14 bg-white border border-[#E5E7EB] rounded-full text-[14px] font-medium text-[#111827] outline-none focus:border-slate-900/20 transition-all"
             />
             <button
@@ -135,7 +135,7 @@ export default function AuthPage() {
             Sign in with Microsoft
           </button>
           {microsoftClicked && (
-            <p className="text-[11px] text-slate-400 font-medium text-center">Microsoft SSO — coming soon</p>
+            <p className="text-[11px] text-slate-400 font-medium text-center">Microsoft SSO  coming soon</p>
           )}
         </div>
 

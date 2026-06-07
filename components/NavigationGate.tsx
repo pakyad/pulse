@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -13,7 +13,7 @@ import { seedSEClubItems } from '@/lib/utils/seed-se-club';
 import { seedKelabBolaItems } from '@/lib/utils/seed-kelab-bola';
 
 /**
- * 🏛️ Pulse Navigation Gate | Institutional Governance
+ *  Pulse Navigation Gate | Institutional Governance
  * Enforces strict role isolation and layout barriers.
  */
 export default function NavigationGate() {
@@ -49,7 +49,7 @@ export default function NavigationGate() {
           await setDoc(userRef, userData);
         } else if (userSnap.exists()) {
           userData = userSnap.data();
-          // 🏛️ SYNC REQ_S101: Sync all vetting flags if they differ from Firestore
+          //  SYNC REQ_S101: Sync all vetting flags if they differ from Firestore
           const needsSync = vetting && (
             userData.role !== vetting.role || 
             userData.is_verified_runner !== vetting.is_verified_runner ||
@@ -67,7 +67,7 @@ export default function NavigationGate() {
           setRole(userData.role);
           setProfile(userData);
 
-          // 🏛️ REQ_G001: ROLE ISOLATION LOGIC
+          //  REQ_G001: ROLE ISOLATION LOGIC
           // Prevent horizontal privilege escalation
           
           const isMerchantPath = pathname?.startsWith('/merchant');
@@ -98,12 +98,12 @@ export default function NavigationGate() {
                 router.replace('/merchant');
              }
           } else if (userData.role === 'STUDENT') {
-             // 🏛️ REQ_G001: STRICT ROLE LOCKDOWN
+             //  REQ_G001: STRICT ROLE LOCKDOWN
              if (isAdminPath || isMerchantPath) {
                router.replace('/home');
              }
              
-             // 🏛️ REQ_G102: UNVERIFIED LOCKDOWN
+             //  REQ_G102: UNVERIFIED LOCKDOWN
              // Bar unverified students from sensitive logistics terminals
              if (pathname?.startsWith('/run/terminal') && !userData.is_verified_runner) {
                router.replace('/run');
@@ -127,7 +127,7 @@ export default function NavigationGate() {
     return () => unsubscribe();
   }, [pathname, router]);
 
-  // ── LAYOUT VISIBILITY PROTOCOL ──
+  //  LAYOUT VISIBILITY PROTOCOL 
   
   const isChatRoom = pathname?.startsWith('/messages/') && pathname !== '/messages';
 

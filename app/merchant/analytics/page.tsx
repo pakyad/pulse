@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -190,14 +190,14 @@ export default function MerchantAnalyticsPage() {
           <div className="bg-gray-50 rounded-xl p-5">
             <p className="text-xs text-gray-500 uppercase tracking-widest font-medium mb-2">Avg Order Value</p>
             <p className="text-2xl font-bold text-gray-900">
-              {stats.avgOrderValue > 0 ? `RM ${stats.avgOrderValue.toFixed(2)}` : '—'}
+              {stats.avgOrderValue > 0 ? `RM ${stats.avgOrderValue.toFixed(2)}` : ''}
             </p>
           </div>
         </div>
 
         {/* SECTION 2 - Revenue Line Chart */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-          <h3 className="text-base font-semibold text-gray-900 mb-4">Revenue — Last 7 Days</h3>
+          <h3 className="text-base font-semibold text-gray-900 mb-4">Revenue  Last 7 Days</h3>
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={stats.last7Days}>

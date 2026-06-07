@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -48,7 +48,7 @@ export default function CampaignsPage() {
   return (
     <main className="min-h-screen bg-slate-50 pb-24 font-sans antialiased">
       
-      {/* ── HEADER ── */}
+      {/*  HEADER  */}
       <nav className="sticky top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-4">
           <BackButton fallback="/marketplace" />
@@ -61,7 +61,7 @@ export default function CampaignsPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-6">
         
-        {/* ── HERO BANNER ── */}
+        {/*  HERO BANNER  */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -79,7 +79,7 @@ export default function CampaignsPage() {
           </div>
         </motion.div>
 
-        {/* ── CAMPAIGN LIST ── */}
+        {/*  CAMPAIGN LIST  */}
         <div className="space-y-4">
           <h3 className="text-[14px] font-bold text-slate-900 px-1 mb-2 tracking-tight">Available For You</h3>
           

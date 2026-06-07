@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
@@ -45,7 +45,7 @@ export default function RunnerOnboarding() {
 
   return (
     <main className="min-h-screen bg-white text-slate-900 pb-32">
-      {/* ── NAV ── */}
+      {/*  NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] active:scale-95 transition-all">
@@ -61,7 +61,7 @@ export default function RunnerOnboarding() {
           <p className="text-[13px] font-medium text-slate-400">Fill in your details below to start earning on campus.</p>
         </div>
 
-        {/* ── CARD 1: DELIVERY STYLE ── */}
+        {/*  CARD 1: DELIVERY STYLE  */}
         <section className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 rounded-full bg-cyan-100/50 text-cyan-600 flex items-center justify-center font-bold text-[14px]">1</div>
@@ -96,7 +96,7 @@ export default function RunnerOnboarding() {
           </div>
         </section>
 
-        {/* ── CARD 2: CAPACITY & SCHEDULE ── */}
+        {/*  CARD 2: CAPACITY & SCHEDULE  */}
         <section className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 rounded-full bg-violet-100/50 text-violet-600 flex items-center justify-center font-bold text-[14px]">2</div>
@@ -131,7 +131,7 @@ export default function RunnerOnboarding() {
           </div>
         </section>
 
-        {/* ── CARD 3: PAYMENT ── */}
+        {/*  CARD 3: PAYMENT  */}
         <section className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 rounded-full bg-emerald-100/50 text-emerald-600 flex items-center justify-center font-bold text-[14px]">3</div>
@@ -160,7 +160,7 @@ export default function RunnerOnboarding() {
           </div>
         </section>
 
-        {/* ── SUBMIT BUTTON ── */}
+        {/*  SUBMIT BUTTON  */}
         <div className="pt-4 pb-12">
           <button onClick={handleSubmit} disabled={!canSubmit || submitting}
             className={`w-full h-16 rounded-[20px] flex items-center justify-center gap-2 font-semibold text-[15px] transition-all ${canSubmit ? 'bg-slate-900 text-white active:scale-95 shadow-md hover:bg-slate-800' : 'bg-slate-50 text-slate-300 border border-slate-100'}`}>

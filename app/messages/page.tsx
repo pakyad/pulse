@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -56,7 +56,7 @@ export default function MessagesPage() {
       if (user) {
         onSnapshot(doc(db, 'users', user.uid), (snap) => setProfile(snap.data()));
         
-        // 💬 Real Chats Only
+        //  Real Chats Only
         const q = query(
           collection(db, 'chats'),
           where('members', 'array-contains', user.uid)
@@ -120,7 +120,7 @@ export default function MessagesPage() {
 
   return (
     <main className="min-h-screen bg-white pb-40 font-sans antialiased text-slate-900 w-full max-w-2xl mx-auto">
-      {/* ── INTERNAL NAV ── */}
+      {/*  INTERNAL NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <BackButton fallback="/activity" />
          <p className="text-[14px] font-bold tracking-tight">Messages</p>

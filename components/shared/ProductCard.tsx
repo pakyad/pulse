@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -52,7 +52,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       onClick={onClick}
       className="flex flex-col cursor-pointer group h-full"
     >
-      {/* ── IMAGE BOX ── */}
+      {/*  IMAGE BOX  */}
       <div className="relative aspect-square bg-slate-50 rounded-lg overflow-hidden mb-2">
         <img 
           src={item.image_url || `https://picsum.photos/seed/${item.id || item.title}/400/400`} 
@@ -70,7 +70,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
 
         {item.pcs_certified === true && (
           <div className="absolute bottom-1.5 left-1.5 bg-[#EAF3DE] text-[#3B6D11] px-2 py-0.5 rounded-full text-[10px] font-medium z-10 shadow-sm">
-            ✓ Student Price
+             Student Price
           </div>
         )}
 
@@ -83,7 +83,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
         )}
       </div>
 
-      {/* ── INFORMATION BLOCK ── */}
+      {/*  INFORMATION BLOCK  */}
       <div className="flex flex-col justify-between flex-1 px-0.5">
         
         {/* Title & Time */}

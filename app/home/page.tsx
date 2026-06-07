@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +16,7 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
-// ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
+//  STANDARDIZED TYPOGRAPHY COMPONENTS 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[15px] font-bold text-slate-900 tracking-tight ${className}`}>
     {children}
@@ -46,14 +46,14 @@ export default function PulseHome() {
       unsubs = [];
 
       if (user) {
-        // 👤 Profile Sync
+        //  Profile Sync
         const uProfile = onSnapshot(doc(db, 'users', user.uid), 
           s => setProfile(s.data()),
           e => console.warn("[Home] Profile Error:", e)
         );
         unsubs.push(uProfile);
 
-        // 🛍️ Marketplace Items
+        //  Marketplace Items
         const qItems = query(collection(db, 'items'), where('status', '==', 'active'), limit(6));
         const uItems = onSnapshot(qItems, 
           s => setLiveItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),
@@ -65,7 +65,7 @@ export default function PulseHome() {
         setLiveItems([]);
       }
 
-      // 🎠 Home Banners
+      //  Home Banners
       const qBanners = query(collection(db, 'banners'), where('active', '==', true), orderBy('created_at', 'desc'), limit(5));
       const uBanners = onSnapshot(qBanners, 
         s => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))),
@@ -85,7 +85,7 @@ export default function PulseHome() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
       
-      {/* ── GLOBAL NAVIGATION ── */}
+      {/*  GLOBAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-md shadow-slate-900/10">
@@ -106,11 +106,11 @@ export default function PulseHome() {
 
       <div className="pt-28 px-6 space-y-12">
          
-         {/* ── ACTIVE ORDER BANNER ── */}
+         {/*  ACTIVE ORDER BANNER  */}
          <ActiveOrderBanner />
          <FloatingActiveTask />
 
-          {/* ── FEATURED BANNER (HIDDEN IF EMPTY) ── */}
+          {/*  FEATURED BANNER (HIDDEN IF EMPTY)  */}
           <AnimatePresence>
             {banners.length > 0 && (
                <motion.section initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
@@ -125,7 +125,7 @@ export default function PulseHome() {
             )}
           </AnimatePresence>
 
-         {/* ── CAMPUS DIRECTORY ── */}
+         {/*  CAMPUS DIRECTORY  */}
          <section className="space-y-8">
             <div className="px-1">
                <Heading>Campus Directory</Heading>
@@ -134,7 +134,7 @@ export default function PulseHome() {
             <ServiceGrid />
          </section>
 
-          {/* ── MARKETPLACE PREVIEW ── */}
+          {/*  MARKETPLACE PREVIEW  */}
           <section className="space-y-8">
              <div className="flex justify-between items-end px-1">
                 <div>

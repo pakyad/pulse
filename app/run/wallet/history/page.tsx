@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
@@ -69,7 +69,7 @@ export default function PayoutHistoryPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-20">
       
-      {/* ── HEADER ── */}
+      {/*  HEADER  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-95 transition-all">
@@ -80,7 +80,7 @@ export default function PayoutHistoryPage() {
         <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name} />
       </nav>
 
-      {/* ── FILTERS ── */}
+      {/*  FILTERS  */}
       <div className="pt-28 px-6 flex gap-2 border-b border-slate-50 pb-4">
         <button 
           onClick={() => setActiveFilter('status')}
@@ -90,7 +90,7 @@ export default function PayoutHistoryPage() {
         </button>
       </div>
 
-      {/* ── LIST ── */}
+      {/*  LIST  */}
       <div className="divide-y divide-slate-50">
         {loading ? (
           <div className="py-20 flex justify-center">
@@ -137,7 +137,7 @@ export default function PayoutHistoryPage() {
         )}
       </div>
 
-      {/* ── FILTER BOTTOM SHEET ── */}
+      {/*  FILTER BOTTOM SHEET  */}
       <AnimatePresence>
         {activeFilter && (
           <div className="fixed inset-0 z-200 flex items-end justify-center">

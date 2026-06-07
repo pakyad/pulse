@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db, functions, storage } from '@/lib/firebase';
@@ -16,7 +16,7 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
   <p className={`text-[12px] font-medium text-[#94a3b8] leading-relaxed ${className}`}>{children}</p>
 );
 
-// ── VOXEL ICONS ──
+//  VOXEL ICONS 
 const VoxelLogistics = ({ className, size = 24 }: any) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}><rect x="2" y="10" width="16" height="8" fill="currentColor" rx="1" /><rect x="14" y="6" width="8" height="12" fill="currentColor" opacity="0.6" rx="1" /><rect x="4" y="18" width="4" height="2" fill="currentColor" rx="0.5" /><rect x="12" y="18" width="4" height="2" fill="currentColor" rx="0.5" /></svg>
 );
@@ -35,7 +35,7 @@ const SERVICES = [
             { title: 'Review',     desc: 'Confirm your request'        }] },
 ];
 
-// ── COMPACT COMPONENTS ──
+//  COMPACT COMPONENTS 
 const ChipRow = ({ options, value, onChange, activeService }: { options: string[]; value: string; onChange: (v: string) => void; activeService?: any }) => {
   const activeClass = activeService?.selectedStyle ? `${activeService.selectedStyle} border-[1.5px]` : 'bg-slate-900 text-white border-[1.5px] border-slate-900';
   const inactiveClass = `bg-slate-50 text-slate-400 border-[1.5px] border-slate-50 hover:border-slate-100`;

@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+﻿import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getStorage } from "firebase/storage";
@@ -21,7 +21,7 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 const functions = getFunctions(app);
 
-// ── EMULATOR BRIDGE ──
+//  EMULATOR BRIDGE 
 // Josh: Only connect if explicitly requested via environment variable.
 // This prevents "functions/internal" crashes if the Java-based emulators aren't running.
 if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' && typeof window !== 'undefined') {
@@ -37,18 +37,18 @@ if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' && typeof window !== 'undef
       connectStorageEmulator(storage, 'localhost', 9199);
       connectFunctionsEmulator(functions, 'localhost', 5001);
       (db as any)._emulatorConnected = true;
-      console.log("🏛️ Institutional Emulators Connected");
+      console.log(" Institutional Emulators Connected");
     }
   } catch (e) {
     console.warn("Emulator bridge connection failed:", e);
   }
 } else {
   if (typeof window !== 'undefined') {
-    console.log("🚀 Pulse Live: Connecting to Cloud Production Node");
+    console.log(" Pulse Live: Connecting to Cloud Production Node");
   }
 }
 
-// 🏛️ INSTITUTIONAL PERSISTENCE PROTOCOL
+//  INSTITUTIONAL PERSISTENCE PROTOCOL
 // Upgraded to browserLocalPersistence to ensure session continuity across navigations.
 if (typeof window !== 'undefined') {
   setPersistence(auth, browserLocalPersistence)

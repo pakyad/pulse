@@ -15,7 +15,7 @@ import ReportPriceButton from '@/components/shared/ReportPriceButton';
 import { collection, query, where, orderBy, limit } from 'firebase/firestore';
 import { replyToReview } from '@/app/actions/reviewActions';
 
-// ── CATEGORY REGISTRY RENDERER ──
+//  CATEGORY REGISTRY RENDERER 
 function DomainRegistry({ item }: { item: any }) {
   const category = MARKETPLACE_CATEGORIES[item.category as CategoryID];
   if (!category || !item.metadata) return null;
@@ -149,12 +149,12 @@ export default function ItemDetailsPage() {
     return () => unsub();
   }, [item?.seller_id]);
 
-  // Fetch reviews — for student items: by item_id; for club items: by seller_id
+  // Fetch reviews  for student items: by item_id; for club items: by seller_id
   useEffect(() => {
     if (!item || !seller) return;
     const isOfficial = seller?.is_official === true;
     
-    // 🏛️ Simplified query to avoid composite index crash
+    //  Simplified query to avoid composite index crash
     const reviewsQuery = isOfficial
       ? query(collection(db, "Reviews"), where("sellerId", "==", item.seller_id), limit(20))
       : query(collection(db, "Reviews"), where("itemId", "==", item.id), limit(20));
@@ -170,7 +170,7 @@ export default function ItemDetailsPage() {
       setReviews(list);
     }, (err) => {
       console.error("[Reviews] Firestore Fetch Error:", err);
-      // Fail gracefully — don't crash the whole page if reviews fail
+      // Fail gracefully  don't crash the whole page if reviews fail
       setReviews([]);
     });
     return () => unsub();
@@ -220,7 +220,7 @@ export default function ItemDetailsPage() {
       router.push(`/messages/${chatId}`);
     } catch (e) {
       console.error('[Chat] Failed to create chat session:', e);
-      // Do not redirect to a demo fallback — surface the error in the UI
+      // Do not redirect to a demo fallback  surface the error in the UI
     }
   };
 
@@ -248,7 +248,7 @@ export default function ItemDetailsPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ── NAV (Dynamic Scroll-Adaptive) ── */}
+      {/*  NAV (Dynamic Scroll-Adaptive)  */}
       <nav className={`fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between transition-all duration-700 ease-out pointer-events-none ${isScrolled ? 'bg-white/95 backdrop-blur-xl border-b-[0.5px] border-slate-100' : 'bg-transparent'}`}>
         <div className="pointer-events-auto">
           <button 
@@ -292,7 +292,7 @@ export default function ItemDetailsPage() {
         </div>
       </nav>
 
-      {/* ── ADDED TO CART NOTIFICATION ── */}
+      {/*  ADDED TO CART NOTIFICATION  */}
       <AnimatePresence>
         {addedToCart && (
           <motion.div 
@@ -325,7 +325,7 @@ export default function ItemDetailsPage() {
         )}
       </AnimatePresence>
 
-      {/* ── GALLERY ── */}
+      {/*  GALLERY  */}
       <section className="w-full aspect-square bg-slate-50 overflow-hidden relative">
         {images.length > 0 ? (
           <img src={images[activeImage]} className="w-full h-full object-cover" alt={item.title} />
@@ -357,10 +357,10 @@ export default function ItemDetailsPage() {
         )}
       </section>
 
-      {/* ── CONTENT ── */}
+      {/*  CONTENT  */}
       <div className="px-6 pt-6 space-y-8">
 
-        {/* ── IDENTITY ── */}
+        {/*  IDENTITY  */}
         <section className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-[22px] font-bold text-slate-900 leading-tight tracking-tight flex-1">
@@ -381,7 +381,7 @@ export default function ItemDetailsPage() {
             ) : null}
           </div>
 
-          {/* ── GOVERNANCE BANNER ── */}
+          {/*  GOVERNANCE BANNER  */}
           {(item.status === 'HELD_FOR_REVISION' || item.status === 'REJECTED_FRAUDULENT') && (
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex gap-3 mt-4">
               <ShieldAlert size={20} className="text-amber-500 shrink-0 mt-0.5" />
@@ -419,16 +419,16 @@ export default function ItemDetailsPage() {
           </div>
         </section>
 
-        {/* ── PCS CERTIFIED BADGE ── */}
+        {/*  PCS CERTIFIED BADGE  */}
         {item.pcs_certified === true && (
           <div className="flex items-center gap-2 -mt-2 mb-1">
             <span className="bg-[#EAF3DE] text-[#3B6D11] px-[10px] py-[4px] rounded-full text-[12px] font-medium leading-none">
-              ✓ Student Price
+               Student Price
             </span>
           </div>
         )}
 
-        {/* ── SELLER ROW ── */}
+        {/*  SELLER ROW  */}
         <section className="py-4 border-y border-slate-100 space-y-3">
           <button 
              onClick={() => router.push(`/user/${item.seller_id}`)}
@@ -451,10 +451,10 @@ export default function ItemDetailsPage() {
           </button>
         </section>
 
-        {/* ── CATEGORY REGISTRY ── */}
+        {/*  CATEGORY REGISTRY  */}
         <DomainRegistry item={item} />
 
-        {/* ── REVIEWS SECTION ── */}
+        {/*  REVIEWS SECTION  */}
         <section className="space-y-6 pt-2 border-t border-slate-100">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -533,7 +533,7 @@ export default function ItemDetailsPage() {
           )}
         </section>
 
-        {/* ── DESCRIPTION ── */}
+        {/*  DESCRIPTION  */}
         {item.description && (
           <section className="space-y-3 pt-2 border-t border-slate-100">
             <div className="space-y-0.5">
@@ -546,7 +546,7 @@ export default function ItemDetailsPage() {
 
 
 
-        {/* ── SELLER CONTACT ACTION ── */}
+        {/*  SELLER CONTACT ACTION  */}
         {auth.currentUser?.uid !== item.seller_id && (
           <section className="space-y-3 pt-4">
             <button 
@@ -557,7 +557,7 @@ export default function ItemDetailsPage() {
           </section>
         )}
 
-        {/* ── REPORT ACTION ── */}
+        {/*  REPORT ACTION  */}
         {auth.currentUser?.uid !== item.seller_id && (
           <section className="flex justify-center pt-8 pb-4">
             <ReportPriceButton itemId={item.id} sellerId={item.seller_id} />
@@ -566,7 +566,7 @@ export default function ItemDetailsPage() {
 
       </div>
 
-      {/* ── STICKY FOOTER ── */}
+      {/*  STICKY FOOTER  */}
       <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
         <div className="flex items-center gap-3">
           {auth.currentUser?.uid === item.seller_id ? (

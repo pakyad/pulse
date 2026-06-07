@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
@@ -16,7 +16,7 @@ const ACTION_STYLES: Record<string, { bg: string; text: string; label: string }>
   HOLD_FOR_REVISION: { bg: 'bg-amber-50',   text: 'text-amber-600',  label: 'Held' },
 };
 
-// ── Confirm Modal ─────────────────────────────────────────────────────────────
+//  Confirm Modal 
 function ConfirmModal({ onConfirm, onCancel, isProcessing }: {
   onConfirm: () => void; onCancel: () => void; isProcessing: boolean;
 }) {
@@ -51,7 +51,7 @@ function ConfirmModal({ onConfirm, onCancel, isProcessing }: {
   );
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+//  Page 
 export default function VaultPage() {
   const [entries,     setEntries]     = useState<any[]>([]);
   const [loading,     setLoading]     = useState(true);
@@ -203,7 +203,7 @@ export default function VaultPage() {
                       </div>
                       <div>
                         <p className="text-[13px] font-bold text-slate-900 leading-tight">{entry.title || 'Unnamed Item'}</p>
-                        <p className="text-[10px] text-slate-400 font-medium mt-0.5">{entry.seller_name || '—'}</p>
+                        <p className="text-[10px] text-slate-400 font-medium mt-0.5">{entry.seller_name || ''}</p>
                       </div>
                     </div>
                   </td>
@@ -213,7 +213,7 @@ export default function VaultPage() {
                     </span>
                   </td>
                   <td className="px-6 py-5">
-                    <p className="text-[12px] font-medium text-slate-500 max-w-[200px] truncate">{entry.vault_reason || '—'}</p>
+                    <p className="text-[12px] font-medium text-slate-500 max-w-[200px] truncate">{entry.vault_reason || ''}</p>
                   </td>
                   <td className="px-6 py-5">
                     <span className="text-[11px] font-bold text-slate-300 ">

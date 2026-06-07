@@ -1,9 +1,9 @@
-
+﻿
 import { db } from './lib/firebase';
 import { collection, query, getDocs, updateDoc, doc } from 'firebase/firestore';
 
 async function fixScarfAlignment() {
-  console.log("🏛️ Pulse Registry Audit: Aligning UniKL Scarf...");
+  console.log(" Pulse Registry Audit: Aligning UniKL Scarf...");
   
   const itemsRef = collection(db, "items");
   const q = query(itemsRef);
@@ -17,12 +17,12 @@ async function fixScarfAlignment() {
         seller_id: "2GSboliteBeTsO3eeVCIoBseLB62",
         seller_name: "Kelab Bola"
       });
-      console.log("✅ Registry Update: Force-aligned to Kelab Bola (2GSboliteBeTsO3eeVCIoBseLB62)");
+      console.log(" Registry Update: Force-aligned to Kelab Bola (2GSboliteBeTsO3eeVCIoBseLB62)");
       fixedCount++;
     }
   }
   
-  if (fixedCount === 0) console.log("⚠️ No matching item found with prefix cicMuv.");
+  if (fixedCount === 0) console.log(" No matching item found with prefix cicMuv.");
 }
 
 // Since this is a scratch script for me to run, I'll just keep the logic here.

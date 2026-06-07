@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -63,7 +63,7 @@ export default function MerchantInsightsPage() {
     };
   }, [router]);
 
-  // ── SECTION 1: Stat Cards ──
+  //  SECTION 1: Stat Cards 
   const stats = useMemo(() => {
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -76,12 +76,12 @@ export default function MerchantInsightsPage() {
     }).reduce((s, o) => s + Number(o.total || o.price || 0), 0);
     
     const totalOrders = orders.length;
-    const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "—";
+    const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "";
 
     return { totalRevenue, thisMonthRevenue, totalOrders, avgOrderValue };
   }, [orders]);
 
-  // ── SECTION 2: Sales Over Time (Last 7 Days) ──
+  //  SECTION 2: Sales Over Time (Last 7 Days) 
   const lineChartData = useMemo(() => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const data = [];
@@ -102,7 +102,7 @@ export default function MerchantInsightsPage() {
     return data;
   }, [orders]);
 
-  // ── SECTION 3: Top Products (Horizontal Bar Chart) ──
+  //  SECTION 3: Top Products (Horizontal Bar Chart) 
   const barChartData = useMemo(() => {
     const products: Record<string, number> = {};
     orders.forEach(o => {
@@ -116,7 +116,7 @@ export default function MerchantInsightsPage() {
       .slice(0, 5);
   }, [orders]);
 
-  // ── SECTION 4: Recent Orders Table ──
+  //  SECTION 4: Recent Orders Table 
   const recentOrders = useMemo(() => {
     return [...orders]
       .sort((a, b) => {
@@ -138,7 +138,7 @@ export default function MerchantInsightsPage() {
   return (
     <div className="min-h-screen bg-[#F9F9FB] selection:bg-gray-100 hidden md:flex">
       
-      {/* ── Fixed Sidebar ── */}
+      {/*  Fixed Sidebar  */}
       <aside className="w-64 h-screen bg-[#FFFFFF] border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
         <div className="px-6 py-8 flex items-center gap-2">
           <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
@@ -186,7 +186,7 @@ export default function MerchantInsightsPage() {
         </div>
       </aside>
 
-      {/* ── Main Content Area ── */}
+      {/*  Main Content Area  */}
       <main className="flex-1 ml-64 flex flex-col min-h-screen bg-[#F9F9FB]">
         <div className="max-w-4xl mx-auto w-full px-6 py-8 space-y-8">
           

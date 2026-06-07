@@ -1,4 +1,4 @@
-"use server"
+﻿"use server"
 
 import { adminDb } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
@@ -74,7 +74,7 @@ export async function submitReview(payload: {
         isReviewed: true
     });
 
-    // 3. Aggregation — only for club sellers (target_type = 'SELLER')
+    // 3. Aggregation  only for club sellers (target_type = 'SELLER')
     if (payload.targetType === 'SELLER' && payload.vendorId) {
       const userRef = adminDb.collection("users").doc(payload.vendorId);
       const userSnap = await userRef.get();

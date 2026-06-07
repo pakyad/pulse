@@ -74,7 +74,7 @@ export default function ReviewsPage() {
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans">
-      {/* ── GLOBAL NAVIGATION ── */}
+      {/*  GLOBAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
             <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-90 transition-all">
@@ -85,7 +85,7 @@ export default function ReviewsPage() {
       </nav>
 
       <div className="pt-28 px-8 space-y-8">
-         {/* ── SUMMARY HEADER ── */}
+         {/*  SUMMARY HEADER  */}
          <section className="flex flex-col items-center justify-center py-6 border-b border-slate-100">
             <div className="flex items-end gap-2 mb-2">
                <p className="text-[48px] font-semibold tracking-tighter leading-none text-slate-900">
@@ -100,7 +100,7 @@ export default function ReviewsPage() {
             </p>
          </section>
 
-         {/* ── REVIEWS LIST ── */}
+         {/*  REVIEWS LIST  */}
          <section className="space-y-6">
             {reviews.length === 0 ? (
                <div className="w-full py-16 bg-slate-50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-slate-200">

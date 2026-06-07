@@ -1,12 +1,12 @@
-/**
+﻿/**
  * Pulse Market Governance Engine v2.0
- * "Trust-First, Flag-Second" — Inspired by Airbnb Smart Pricing + Carousell Price Insights
+ * "Trust-First, Flag-Second"  Inspired by Airbnb Smart Pricing + Carousell Price Insights
  *
  * Philosophy:
  *  - Sellers are NEVER blocked. They are INFORMED.
  *  - The platform auto-flags egregious prices (>150% ceiling) algorithmically.
  *  - Community reports add a second signal layer.
- *  - Reviewer only handles flagged cases — not every listing.
+ *  - Reviewer only handles flagged cases  not every listing.
  */
 
 import { db } from '@/lib/firebase';
@@ -16,7 +16,7 @@ import {
 } from 'firebase/firestore';
 import { MARKETPLACE_CATEGORIES, CategoryID } from './categories';
 
-// ── TYPES ──────────────────────────────────────────────────────────────────────
+//  TYPES 
 
 export type PriceTier = 'COMPLIANT' | 'ADVISORY' | 'AUTO_FLAG';
 
@@ -31,11 +31,11 @@ export interface PriceIntelligence {
   shouldAutoFlag: boolean;        // True if price > ceiling * 1.5
 }
 
-// ── CORE ENGINE ────────────────────────────────────────────────────────────────
+//  CORE ENGINE 
 
 /**
  * Analyses a price against the category ceiling and returns intelligence.
- * This is ADVISORY ONLY — it never blocks submission.
+ * This is ADVISORY ONLY  it never blocks submission.
  */
 export function analysePrice(
   price: number,
@@ -65,16 +65,16 @@ export function analysePrice(
 
   if (!ceiling) return { ...empty, tier: 'COMPLIANT' };
 
-  // Campus range: 50–90% of ceiling (typical healthy pricing zone)
+  // Campus range: 5090% of ceiling (typical healthy pricing zone)
   const rangeMin = parseFloat((ceiling * 0.5).toFixed(2));
   const rangeMax = parseFloat((ceiling * 0.9).toFixed(2));
   const ratio = price / ceiling;
   const overPercentage = Math.max(0, Math.round((ratio - 1) * 100));
 
   // Tier classification:
-  //   COMPLIANT    → price ≤ ceiling
-  //   ADVISORY     → ceiling < price ≤ ceiling × 1.5  (warn but allow)
-  //   AUTO_FLAG    → price > ceiling × 1.5             (allow + auto-flag for reviewer)
+  //   COMPLIANT     price  ceiling
+  //   ADVISORY      ceiling < price  ceiling  1.5  (warn but allow)
+  //   AUTO_FLAG     price > ceiling  1.5             (allow + auto-flag for reviewer)
 
   if (ratio <= 1.0) {
     let subMessage: string;
@@ -88,7 +88,7 @@ export function analysePrice(
         subMessage = `Market avg: RM ${marketBaseline.toFixed(2)}. Your price beats the open market.`;
       }
     } else {
-      subMessage = `Campus range: RM ${rangeMin.toFixed(2)} – RM ${rangeMax.toFixed(2)}.`;
+      subMessage = `Campus range: RM ${rangeMin.toFixed(2)}  RM ${rangeMax.toFixed(2)}.`;
       if (price > rangeMax) {
         subMessage += ` You're slightly above average, but fully compliant.`;
       } else if (price < rangeMin) {
@@ -102,7 +102,7 @@ export function analysePrice(
       rangeMin,
       rangeMax,
       overPercentage: 0,
-      message: '✓ Campus-friendly price',
+      message: ' Campus-friendly price',
       subMessage,
       shouldAutoFlag: false,
     };
@@ -116,7 +116,7 @@ export function analysePrice(
       message: marketBaseline ? `Online: RM ${marketBaseline.toFixed(2)}` : 'Above the typical campus range',
       subMessage: marketBaseline
         ? `Market avg is RM ${marketBaseline.toFixed(2)}. Max campus price (90%) is RM ${(marketBaseline * 0.9).toFixed(2)}. You can still list with a reason.`
-        : `Campus range: RM ${rangeMin}–${rangeMax}. You can still list, but buyers may compare elsewhere.`,
+        : `Campus range: RM ${rangeMin}${rangeMax}. You can still list, but buyers may compare elsewhere.`,
       shouldAutoFlag: false,
     };
   } else {
@@ -135,7 +135,7 @@ export function analysePrice(
   }
 }
 
-// ── PRICE REPORT ────────────────────────────────────────────────────────────────
+//  PRICE REPORT 
 
 /**
  * Buyer submits a price report on a listing.
@@ -170,7 +170,7 @@ export async function submitPriceReport(
       report_count: increment(1),
     });
 
-    // 3. Check if threshold reached — if so, mark as flagged
+    // 3. Check if threshold reached  if so, mark as flagged
     const itemSnap = await getDoc(itemRef);
     const flagCount = (itemSnap.data()?.price_flag_count || 0);
 

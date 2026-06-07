@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
@@ -7,7 +7,7 @@ import { approveRunner, rejectRunner } from '@/app/actions/adminActions';
 import { UserCheck, CheckCircle2, Loader2, X, AlertTriangle, PersonStanding, Car, Bike, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Confirm Modal ─────────────────────────────────────────────────────────────
+//  Confirm Modal 
 function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
   let title = action === 'approve' ? "Approve Runner" : "Reject Application";
   let description = action === 'approve' 
@@ -48,7 +48,7 @@ function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
   );
 }
 
-// ── Application Details Drawer ────────────────────────────────────────────────
+//  Application Details Drawer 
 function AppDetailsDrawer({ app, onClose, onResolve }: { app: any; onClose: () => void; onResolve: (action: string) => Promise<void> }) {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
@@ -170,7 +170,7 @@ function AppDetailsDrawer({ app, onClose, onResolve }: { app: any; onClose: () =
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+//  Main Page 
 export default function AdminRunnersPage() {
   const [apps, setApps] = useState<any[]>([]);
   const [approved, setApproved] = useState<any[]>([]);

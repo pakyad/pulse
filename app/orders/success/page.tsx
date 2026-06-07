@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
@@ -67,7 +67,7 @@ function OrderSuccessPageContent() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased flex flex-col px-6 pt-20 pb-16">
 
-      {/* ── TOP NAV EXIT ── */}
+      {/*  TOP NAV EXIT  */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl">
         <div />
         <button 
@@ -78,7 +78,7 @@ function OrderSuccessPageContent() {
         </button>
       </nav>
 
-      {/* ── SUCCESS HEADER ── */}
+      {/*  SUCCESS HEADER  */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -94,7 +94,7 @@ function OrderSuccessPageContent() {
         </p>
       </motion.div>
 
-      {/* ── ORDER CARD ── */}
+      {/*  ORDER CARD  */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -127,7 +127,7 @@ function OrderSuccessPageContent() {
         </div>
       </motion.div>
 
-      {/* ── WHAT HAPPENS NEXT ── */}
+      {/*  WHAT HAPPENS NEXT  */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -145,7 +145,7 @@ function OrderSuccessPageContent() {
         </div>
       </motion.div>
 
-      {/* ── REVIEW ── */}
+      {/*  REVIEW  */}
       {currentUser && subOrder && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -168,7 +168,7 @@ function OrderSuccessPageContent() {
         </motion.div>
       )}
 
-      {/* ── ACTIONS ── */}
+      {/*  ACTIONS  */}
       <div className="space-y-3 mt-auto">
         <button
           onClick={() => trackingId ? router.replace(`/orders/${trackingId}`) : router.replace('/me/orders')}

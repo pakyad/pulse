@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,7 +37,7 @@ export default function ParcelHub() {
   return (
     <main className="min-h-screen bg-white pb-32 font-sans antialiased text-slate-900">
       
-      {/* ── COMPACT HEADER ── */}
+      {/*  COMPACT HEADER  */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -52,7 +52,7 @@ export default function ParcelHub() {
 
       <div className="pt-24 px-5 max-w-lg mx-auto space-y-8">
         
-        {/* ── QUICK SCAN (COMPACT) ── */}
+        {/*  QUICK SCAN (COMPACT)  */}
         <section 
           className="p-5 bg-slate-900 rounded-[24px] text-white flex items-center justify-between group active:scale-95 transition-all cursor-pointer shadow-lg shadow-slate-900/10"
         >
@@ -68,7 +68,7 @@ export default function ParcelHub() {
            <ChevronRight size={16} className="text-white/20 group-hover:text-white transition-all" />
         </section>
 
-        {/* ── PARCEL LIST ── */}
+        {/*  PARCEL LIST  */}
         <section className="space-y-4">
            <div className="px-1 flex justify-between items-center">
               <h3 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest">Active Deliveries</h3>
@@ -84,7 +84,7 @@ export default function ParcelHub() {
                       </div>
                       <div>
                          <h4 className="text-[13px] font-bold text-slate-800 leading-none mb-1">{item.courier}</h4>
-                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{item.id} • {item.location}</p>
+                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{item.id} - {item.location}</p>
                       </div>
                    </div>
                    <div className="text-right">
@@ -96,7 +96,7 @@ export default function ParcelHub() {
            </div>
         </section>
 
-        {/* ── NOTIFICATION TOGGLE (TIGHT) ── */}
+        {/*  NOTIFICATION TOGGLE (TIGHT)  */}
         <section className="p-4 bg-indigo-50/50 border border-indigo-100/50 rounded-[20px] flex items-start gap-4">
            <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
               <AlertCircle size={16} />
@@ -107,13 +107,13 @@ export default function ParcelHub() {
            </div>
         </section>
 
-        {/* ── DESK INFO ── */}
+        {/*  DESK INFO  */}
         <section className="pt-4 border-t border-slate-50 flex items-center justify-between px-1">
            <div className="flex items-center gap-2">
               <MapPin size={12} className="text-slate-300" />
               <p className="text-[11px] font-bold text-slate-400">Registry Desk: Level 2, Block A</p>
            </div>
-           <p className="text-[11px] font-bold text-slate-400">8:30 AM — 5:00 PM</p>
+           <p className="text-[11px] font-bold text-slate-400">8:30 AM  5:00 PM</p>
         </section>
 
       </div>

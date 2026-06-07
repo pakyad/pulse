@@ -23,17 +23,17 @@ const BuyerLiveMap = dynamic(() => import('@/components/shared/BuyerLiveMap'), {
 
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3; // metres
-  const φ1 = lat1 * Math.PI/180;
-  const φ2 = lat2 * Math.PI/180;
-  const Δφ = (lat2-lat1) * Math.PI/180;
-  const Δλ = (lon2-lon1) * Math.PI/180;
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const 1 = lat1 * Math.PI/180;
+  const 2 = lat2 * Math.PI/180;
+  const  = (lat2-lat1) * Math.PI/180;
+  const  = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(/2) * Math.sin(/2) + Math.cos(1) * Math.cos(2) * Math.sin(/2) * Math.sin(/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
 }
 
 
-// ── Order phases ──
+//  Order phases 
 const PHASES = [
   { id: 1, label: 'Finding Runner', key: 'PENDING_RUNNER', icon: Package },
   { id: 2, label: 'Merchant Preparing', key: 'PREPARING', icon: Clock },
@@ -202,7 +202,7 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
   );
 }
 
-// ── Inline Report Form ────────────────────────────────────────────────────────
+//  Inline Report Form 
 function InlineReportForm({ orderId, userId, order, onClose, onSuccess }: {
   orderId: string; userId: string; order: any; onClose: () => void; onSuccess: () => void;
 }) {
@@ -338,7 +338,7 @@ export default function LiveOrderPage() {
   }, [id, router, order?.seller_id]);
 
 
-  // ── Cancel order (PENDING_VENDOR only) ──
+  //  Cancel order (PENDING_VENDOR only) 
   const handleCancelOrder = async () => {
     setCancelling(true);
     setCancelError(null);
@@ -462,7 +462,7 @@ export default function LiveOrderPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-36 relative">
 
-      {/* ── VIBRANT MAP HERO ── */}
+      {/*  VIBRANT MAP HERO  */}
       {!isCancelled && hasMapHero && (
         <div className="absolute top-0 left-0 right-0 h-[380px] z-0 overflow-hidden bg-slate-100">
           {/* Map rendered below without washing-out gradients */}
@@ -477,7 +477,7 @@ export default function LiveOrderPage() {
                 <div className="space-y-0.5 min-w-0 flex-1">
                   <div className="flex items-baseline gap-1.5 flex-wrap">
                     <span className="text-[14px] font-semibold tracking-tight leading-none">Walk {distance}m</span>
-                    <span className="text-[11px] font-semibold text-white/80">• {durationMin} min{durationMin > 1 ? 's' : ''}</span>
+                    <span className="text-[11px] font-semibold text-white/80">- {durationMin} min{durationMin > 1 ? 's' : ''}</span>
                   </div>
                   <p className="text-[10px] font-bold text-white/95  leading-none truncate">
                     {isClose ? 'Arriving soon at drop-off' : 'Proceed toward meet location'}
@@ -515,7 +515,7 @@ export default function LiveOrderPage() {
         </div>
       )}
 
-      {/* ── FLOATING NAV ── */}
+      {/*  FLOATING NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between pointer-events-none select-none bg-white/90 backdrop-blur-xl border-b border-slate-100/50">
         <div className="flex items-center gap-3 pointer-events-auto">
           <BackButton fallback="/me/orders" />
@@ -526,7 +526,7 @@ export default function LiveOrderPage() {
         </div>
       </nav>
 
-      {/* ── MAIN CONTENT ── */}
+      {/*  MAIN CONTENT  */}
       <div className={`${isCancelled ? 'pt-32' : hasMapHero ? 'pt-[420px]' : 'pt-[100px]'} px-6 space-y-8 relative z-10`}>
       
         {!isCancelled && !hasMapHero && (
@@ -552,14 +552,14 @@ export default function LiveOrderPage() {
           </div>
         )}
 
-        {/* ── PROGRESS VIBRANCY ── */}
+        {/*  PROGRESS VIBRANCY  */}
         {!isCancelled && (
           <section className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-slate-50">
             <OrderTracker order={order} />
           </section>
         )}
 
-        {/* ── SERVICE DELIVERY INFO ── */}
+        {/*  SERVICE DELIVERY INFO  */}
         {!isCancelled && isServiceOrder && (
           <section className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl space-y-3">
             <div className="space-y-0.5">
@@ -593,7 +593,7 @@ export default function LiveOrderPage() {
           </section>
         )}
 
-        {/* ── SERVICE DIGITAL PROGRESS NOTE ── */}
+        {/*  SERVICE DIGITAL PROGRESS NOTE  */}
         {!isCancelled && isServiceOrder && order.deliveryMethod === 'DIGITAL' && (
           <section className="flex items-start gap-3 p-4 bg-amber-50/50 border border-amber-100 rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-white border border-amber-100 flex items-center justify-center shrink-0">
@@ -608,7 +608,7 @@ export default function LiveOrderPage() {
           </section>
         )}
 
-        {/* ── PAYMENT RECEIPT ── */}
+        {/*  PAYMENT RECEIPT  */}
         <section className="space-y-3">
           <div className="space-y-0.5">
             <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Payment Receipt</h2>
@@ -673,7 +673,7 @@ export default function LiveOrderPage() {
           </div>
         </section>
 
-        {/* ── HANDSHAKE NOTICE ── */}
+        {/*  HANDSHAKE NOTICE  */}
         {!isCancelled && (
           <section className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
@@ -688,7 +688,7 @@ export default function LiveOrderPage() {
           </section>
         )}
 
-        {/* ── CANCEL ORDER (Pending only) ── */}
+        {/*  CANCEL ORDER (Pending only)  */}
         {isPending && (
           <section>
             <button
@@ -709,9 +709,9 @@ export default function LiveOrderPage() {
           </section>
         )}
 
-        {/* ── ESCROW RELEASE BUTTON REMOVED (Admin Only Now) ── */}
+        {/*  ESCROW RELEASE BUTTON REMOVED (Admin Only Now)  */}
 
-        {/* ── POST-DELIVERY REVIEW ── */}
+        {/*  POST-DELIVERY REVIEW  */}
         {showReview && userId && (
           <section className="pt-6 border-t border-slate-100">
             <PostDeliveryReview 
@@ -723,7 +723,7 @@ export default function LiveOrderPage() {
           </section>
         )}
 
-        {/* ── DRAKE SAFETY NET (Support after Delivery) ── */}
+        {/*  DRAKE SAFETY NET (Support after Delivery)  */}
         {!isCancelled && !isPending && (
           <section className="pt-4 pb-8">
             {isReportOpen ? (
@@ -754,7 +754,7 @@ export default function LiveOrderPage() {
 
       </div>
 
-      {/* ── RELAXED RETURN (Matured Exit) ── */}
+      {/*  RELAXED RETURN (Matured Exit)  */}
       {isDone && !showSuccessOverlay && (
         <div className="px-6 pb-20">
           <button 
@@ -766,7 +766,7 @@ export default function LiveOrderPage() {
         </div>
       )}
 
-      {/* ── VIBRANT SUCCESS OVERLAY ── */}
+      {/*  VIBRANT SUCCESS OVERLAY  */}
       <AnimatePresence>
         {showSuccessOverlay && (
           <motion.div 
@@ -801,7 +801,7 @@ export default function LiveOrderPage() {
         )}
       </AnimatePresence>
 
-      {/* ── CANCEL CONFIRMATION BOTTOM-SHEET ── */}
+      {/*  CANCEL CONFIRMATION BOTTOM-SHEET  */}
       <AnimatePresence>
         {showCancelConfirm && (
           <>
@@ -848,7 +848,7 @@ export default function LiveOrderPage() {
         )}
       </AnimatePresence>
 
-      {/* ── DEMO/JUDGING CONTROLS ── */}
+      {/*  DEMO/JUDGING CONTROLS  */}
       <div className="fixed bottom-6 right-6 z-50 animate-bounce">
         <button 
           onClick={async () => {

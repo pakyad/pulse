@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -14,7 +14,7 @@ export default function GlobalError({
   const router = useRouter();
 
   useEffect(() => {
-    // Log the error to the console — replace with Sentry/monitoring if needed
+    // Log the error to the console  replace with Sentry/monitoring if needed
     console.error('[Pulse Error Boundary]', error);
   }, [error]);
 

@@ -41,14 +41,14 @@ export default function CheckoutPage() {
   const [roomNumber, setRoomNumber] = useState('');
   const [qty,      setQty]      = useState(1);
 
-  // Step 2 — Payment
+  // Step 2  Payment
   const [paymentMethod, setPaymentMethod] = useState<'FPX' | 'TNG'>('FPX');
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
   const [payStatus,    setPayStatus]    = useState<PayStatus>('idle');
 
   const [errorState,    setErrorState]    = useState<null | 'INSUFFICIENT_STOCK' | 'PAYMENT_FAILED'>(null);
 
-  // ── Services delivery ──
+  //  Services delivery 
   const [serviceMethod, setServiceMethod] = useState<'DIGITAL' | 'F2F_CAMPUS' | null>(null);
   const [serviceContactInfo, setServiceContactInfo] = useState('');
 
@@ -61,7 +61,7 @@ export default function CheckoutPage() {
           console.log('[Checkout] raw item data:', JSON.stringify(data, null, 2));
           setItem({ id: snap.id, ...data });
           setLocation(CAMPUS_NODES[0].token);
-          // 🏛️ Pulse Reset: If item is sold out, we shouldn't even be here
+          //  Pulse Reset: If item is sold out, we shouldn't even be here
           if (data.stock_count !== undefined && data.stock_count !== null && data.stock_count <= 0) {
             router.push(`/marketplace/${id}`);
           }
@@ -76,7 +76,7 @@ export default function CheckoutPage() {
     load();
   }, [id, router]);
 
-  // ── Derived ──
+  //  Derived 
   const selectedNode = CAMPUS_NODES.find(n => n.token === location) || CAMPUS_NODES[0];
   const isPremium    = selectedNode.tier === 'PREMIUM';
   const runnerFee    = selectedNode.fee;
@@ -89,11 +89,11 @@ export default function CheckoutPage() {
     : !!choice && (choice === 'SELF_COLLECT' || (!!location && (!isPremium || !!roomNumber)));
   const canPay          = (paymentMethod === 'TNG' || (paymentMethod === 'FPX' && !!selectedBank)) && payStatus === 'idle' && !errorState;
 
-  // ── Pay ──
+  //  Pay 
   const handlePay = async () => {
     if (!auth.currentUser || !canPay) return;
 
-    // 🏛️ Pre-Payment Guard
+    //  Pre-Payment Guard
     if (item.stock_count !== undefined && item.stock_count !== null && item.stock_count < qty) {
       setErrorState('INSUFFICIENT_STOCK');
       return;
@@ -158,7 +158,7 @@ export default function CheckoutPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ════ ERROR OVERLAYS ════ */}
+      {/*  ERROR OVERLAYS  */}
       <AnimatePresence>
         {errorState && (
           <motion.div
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
         )}
       </AnimatePresence>
 
-      {/* ════ PAYMENT PROCESSING OVERLAY ════ */}
+      {/*  PAYMENT PROCESSING OVERLAY  */}
       <AnimatePresence>
         {(payStatus === 'processing' || payStatus === 'done') && (
           <motion.div
@@ -248,14 +248,14 @@ export default function CheckoutPage() {
         )}
       </AnimatePresence>
 
-      {/* ── NAV ── */}
+      {/*  NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <BackButton fallback="/marketplace" />
           <div>
             <p className="text-[14px] font-bold tracking-tight">Checkout</p>
             <p className="text-[11px] font-medium text-[#94a3b8]">
-              {step === 1 ? 'Step 1 of 2 — Delivery' : 'Step 2 of 2 — Payment'}
+              {step === 1 ? 'Step 1 of 2  Delivery' : 'Step 2 of 2  Payment'}
             </p>
           </div>
         </div>
@@ -268,7 +268,7 @@ export default function CheckoutPage() {
 
       <div className="pt-28 px-6 space-y-8">
 
-        {/* ── ITEM SUMMARY ── */}
+        {/*  ITEM SUMMARY  */}
         <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-100 rounded-xl">
           <div className="w-14 h-14 rounded-xl bg-white border border-slate-100 overflow-hidden shrink-0">
             {itemImage
@@ -281,7 +281,7 @@ export default function CheckoutPage() {
           </div>
           {/* Qty stepper */}
           <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-lg px-3 py-2 shrink-0">
-            <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-5 h-5 flex items-center justify-center text-[#94a3b8] active:scale-90 transition-all text-lg font-bold leading-none">−</button>
+            <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-5 h-5 flex items-center justify-center text-[#94a3b8] active:scale-90 transition-all text-lg font-bold leading-none"></button>
             <span className="text-[13px] font-bold w-5 text-center">{qty}</span>
             <button 
               onClick={() => setQty(q => q + 1)} 
@@ -295,7 +295,7 @@ export default function CheckoutPage() {
 
         <AnimatePresence mode="wait">
 
-          {/* ════ STEP 1: DELIVERY ════ */}
+          {/*  STEP 1: DELIVERY  */}
           {step === 1 && (
             <motion.div
               key="step-1"
@@ -325,7 +325,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <p className="text-[13px] font-bold text-slate-900 tracking-tight">Digital / Online</p>
-                        <p className="text-[11px] font-medium text-[#94a3b8]">Receive via email or chat · Free</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Receive via email or chat  Free</p>
                       </div>
                     </div>
                     {serviceMethod === 'DIGITAL' && (
@@ -364,7 +364,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <p className="text-[13px] font-bold text-slate-900 tracking-tight">F2F Campus Session</p>
-                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet on campus for the service · Free</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet on campus for the service  Free</p>
                       </div>
                     </div>
                     {serviceMethod === 'F2F_CAMPUS' && (
@@ -419,7 +419,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <p className="text-[13px] font-bold text-slate-900 tracking-tight">Self Collect</p>
-                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet the seller on campus · Free</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet the seller on campus  Free</p>
                       </div>
                     </div>
                     {choice === 'SELF_COLLECT' && (
@@ -549,7 +549,7 @@ export default function CheckoutPage() {
             </motion.div>
           )}
 
-          {/* ════ STEP 2: PAYMENT — FPX ════ */}
+          {/*  STEP 2: PAYMENT  FPX  */}
           {step === 2 && (
             <motion.div
               key="step-2"
@@ -557,11 +557,11 @@ export default function CheckoutPage() {
               transition={{ duration: 0.2 }}
               className="space-y-8"
             >
-              {/* ── Inline total — minimal, no dark card ── */}
+              {/*  Inline total  minimal, no dark card  */}
               <div className="flex items-center justify-between px-1 pt-1">
                 <div className="space-y-0.5">
                   <p className="text-[11px] font-medium text-[#94a3b8]">
-                    {qty} item{qty > 1 ? 's' : ''}{isService ? ' · Free delivery' : (choice === 'RUNNER' ? ` · Runner RM${runnerFee.toFixed(2)}` : '')}
+                    {qty} item{qty > 1 ? 's' : ''}{isService ? '  Free delivery' : (choice === 'RUNNER' ? `  Runner RM${runnerFee.toFixed(2)}` : '')}
                   </p>
                   <p className="text-[22px] font-bold text-slate-900 tracking-tight leading-none">RM {total.toFixed(2)}</p>
                 </div>
@@ -571,7 +571,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* ── Section header ── */}
+              {/*  Section header  */}
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">How would you like to pay?</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Select your payment method below.</p>
@@ -632,7 +632,7 @@ export default function CheckoutPage() {
                 </AnimatePresence>
               </div>
 
-              {/* ── TNG eWallet card ── */}
+              {/*  TNG eWallet card  */}
               <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden cursor-pointer" onClick={() => setPaymentMethod('TNG')}>
                 <div className="flex items-center gap-4 px-4 py-4 bg-white">
                   <div className="w-11 h-11 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden p-1">
@@ -653,7 +653,7 @@ export default function CheckoutPage() {
         </AnimatePresence>
       </div>
 
-      {/* ── FOOTER CTA ── */}
+      {/*  FOOTER CTA  */}
       <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
         {step === 1 ? (
           <button

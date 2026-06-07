@@ -92,7 +92,7 @@ export default function PublicProfilePage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans">
 
-      {/* ── In-UI Toast ── */}
+      {/*  In-UI Toast  */}
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -109,7 +109,7 @@ export default function PublicProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* ── GLOBAL NAVIGATION ── */}
+      {/*  GLOBAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-8 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
             <button onClick={() => router.back()} className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#94a3b8] border border-slate-50 active:scale-90 transition-all">
@@ -121,7 +121,7 @@ export default function PublicProfilePage() {
 
       <div className="pt-28 px-8 space-y-12">
          
-         {/* ── PROFILE HEADER ── */}
+         {/*  PROFILE HEADER  */}
          <section className="space-y-6">
             <div className="flex items-center gap-6">
                <div className="relative">
@@ -144,7 +144,7 @@ export default function PublicProfilePage() {
                </div>
             </div>
 
-            {/* ── PROFILE ACTIONS ── */}
+            {/*  PROFILE ACTIONS  */}
              <div className="flex gap-3">
                 <button 
                    onClick={handleShareProfile}
@@ -161,7 +161,7 @@ export default function PublicProfilePage() {
              </div>
          </section>
 
-         {/* ── METRICS BAR ── */}
+         {/*  METRICS BAR  */}
          <section className="flex items-center gap-6 py-4 border-y border-slate-50">
             <button 
                onClick={() => router.push(`/user/${id}/reviews`)}
@@ -184,7 +184,7 @@ export default function PublicProfilePage() {
             </div>
          </section>
 
-         {/* ── STOREFRONT GRID ── */}
+         {/*  STOREFRONT GRID  */}
          <section className="space-y-4 pt-4">
             <div className="flex items-center justify-between px-1 mb-6">
                <Heading>Storefront</Heading>

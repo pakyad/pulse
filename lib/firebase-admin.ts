@@ -1,6 +1,6 @@
-import * as admin from "firebase-admin";
+﻿import * as admin from "firebase-admin";
 
-// ── LAZY SINGLETON INITIALIZATION ──
+//  LAZY SINGLETON INITIALIZATION 
 // Prevents module-evaluation crashes if environment variables are missing 
 // or if the app is partially initialized during Next.js build cycles.
 
@@ -12,7 +12,7 @@ function getAdminApp() {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   if (!projectId || !clientEmail || !privateKey) {
-    console.warn("⚠️ [Pulse Admin] Missing Server-Side Credentials. Admin SDK functions will fail.");
+    console.warn(" [Pulse Admin] Missing Server-Side Credentials. Admin SDK functions will fail.");
     // We return the default app initialization attempt to keep the object structure, 
     // but actual calls will throw meaningful errors later instead of crashing the whole server on boot.
     return null;

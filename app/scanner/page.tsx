@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
@@ -15,7 +15,7 @@ export default function ScannerPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const scannerRef = useRef<any>(null);
 
-  // 🔊 Sythenic Pulse Sound Logic
+  //  Sythenic Pulse Sound Logic
   const triggerSuccessPulse = () => {
     try {
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -35,7 +35,7 @@ export default function ScannerPage() {
         oscillator.start();
         oscillator.stop(audioCtx.currentTime + 0.5);
 
-        // 📳 Haptic Handshake
+        //  Haptic Handshake
         if (window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(200);
         }
@@ -77,7 +77,7 @@ export default function ScannerPage() {
               const sellerId = data.seller_id;
               const sellerRef = doc(db, "users", sellerId);
 
-              // ⚡ ATOMIC HANDSHAKE
+              //  ATOMIC HANDSHAKE
               const batch = writeBatch(db);
               
               const newStatus = status === 'ON_THE_WAY' || status === 'IN_TRANSIT' || status === 'ARRIVED_AT_BUYER' 
@@ -104,7 +104,7 @@ export default function ScannerPage() {
 
               await batch.commit();
 
-              // 🎯 TRIGGER SENSORY FEEDBACK
+              //  TRIGGER SENSORY FEEDBACK
               triggerSuccessPulse();
 
               setScanResult(decodedText);

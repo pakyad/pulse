@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Bell, User, LayoutGrid, ClipboardList, BarChart3, Bike, PackageCheck, Info, ChevronRight, CheckCircle2, Pencil, Trash2, ShieldAlert, Package, LogOut, ChevronLeft, MessageSquare, AlertCircle, Settings, X, Loader2 } from 'lucide-react';
 import { db, auth } from '@/lib/firebase';
@@ -121,7 +121,7 @@ export default function MobileMerchant({
   const resolvedDisputes = disputes.filter((d: any) => d.status === 'RESOLVED' || d.status === 'SETTLED');
   const currentDisputes = disputesTab === 'PENDING' ? pendingDisputes : resolvedDisputes;
 
-  // ── STATS TAB (FIX 10) ──
+  //  STATS TAB (FIX 10) 
   const [statsData, setStatsData] = React.useState<any>({
     totalEarned: 0,
     itemsSold: 0,
@@ -206,7 +206,7 @@ export default function MobileMerchant({
   return (
     <div className="min-h-screen bg-white flex flex-col text-[#111827] selection:bg-blue-100 md:hidden pb-[60px] font-sans antialiased">
       
-      {/* ── HEADER ── */}
+      {/*  HEADER  */}
       <header className="h-[56px] px-6 border-b-[0.5px] border-[#E5E7EB] sticky top-0 bg-white/80 backdrop-blur-xl z-50 flex items-center justify-between">
          <div className="flex items-center gap-3">
             {view !== 'terminal' && (
@@ -251,7 +251,7 @@ export default function MobileMerchant({
 
       <div className="flex-1 overflow-y-auto">
         <AnimatePresence mode="wait">
-          {/* ════════════════ TERMINAL VIEW ════════════════ */}
+          {/*  TERMINAL VIEW  */}
           {view === 'terminal' && (
             <motion.div
               key="terminal"
@@ -540,7 +540,7 @@ export default function MobileMerchant({
             </motion.div>
           )}
 
-          {/* ════════════════ LOG VIEW (FIX 14) ════════════════ */}
+          {/*  LOG VIEW (FIX 14)  */}
           {view === 'logs' && (
             <motion.div
               key="logs"
@@ -623,7 +623,7 @@ export default function MobileMerchant({
             </motion.div>
           )}
 
-          {/* ════════════════ INSIGHTS VIEW (FIX 10) ════════════════ */}
+          {/*  INSIGHTS VIEW (FIX 10)  */}
           {view === 'insights' && (
             <motion.div
               key="insights"
@@ -663,7 +663,7 @@ export default function MobileMerchant({
                     </div>
                     <div className="px-5 py-2.5 bg-amber-50 border border-amber-100 text-amber-600 rounded-full flex items-center gap-2 shrink-0">
                       <TrendingUp size={14} />
-                      <span className="text-[11px] font-medium">⭐ {statsData.trustRating}</span>
+                      <span className="text-[11px] font-medium"> {statsData.trustRating}</span>
                     </div>
                   </div>
 
@@ -674,7 +674,7 @@ export default function MobileMerchant({
                       <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
                         <TrendingUp size={20} />
                       </div>
-                      <p className="text-[16px] font-medium tracking-tight truncate flex-1">🏆 {statsData.bestSellingItem}</p>
+                      <p className="text-[16px] font-medium tracking-tight truncate flex-1"> {statsData.bestSellingItem}</p>
                     </div>
                   </div>
 
@@ -710,7 +710,7 @@ export default function MobileMerchant({
             </motion.div>
           )}
 
-          {/* ════════════════ ACCOUNT VIEW ════════════════ */}
+          {/*  ACCOUNT VIEW  */}
           {view === 'account' && (
             <motion.div
               key="account"
@@ -745,7 +745,7 @@ export default function MobileMerchant({
         </AnimatePresence>
       </div>
 
-      {/* ── BOTTOM NAV ── */}
+      {/*  BOTTOM NAV  */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t-[0.5px] border-[#E5E7EB] px-6 h-[60px]">
         <div className="flex items-center justify-between h-full max-w-lg mx-auto">
             {[

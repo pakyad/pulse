@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ import BackButton from '@/components/shared/BackButton';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
-// ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
+//  STANDARDIZED TYPOGRAPHY COMPONENTS 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[24px] font-bold text-slate-900 tracking-tight ${className}`}>
     {children}
@@ -28,7 +28,7 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
   </p>
 );
 
-// ── Mission Card Component ──
+//  Mission Card Component 
 function MissionCard({ order, onAccept, disabled }: { order: any; onAccept: (id: string) => void; disabled: boolean }) {
   const [holdProgress, setHoldProgress] = useState(0);
   const [isHolding, setIsHolding] = useState(false);

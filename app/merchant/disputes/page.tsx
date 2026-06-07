@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import { db, auth } from '@/lib/firebase';
@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import DisputeThread from '../../../components/merchant/DisputeThread';
 
-// ── SKIBIDI TYPOGRAPHY (From MobileMerchant DNA) ──
+//  SKIBIDI TYPOGRAPHY (From MobileMerchant DNA) 
 const SkibidiHeading = ({ children }: { children: React.ReactNode }) => (
   <h1 className="text-[17px] font-bold text-slate-900 tracking-tight leading-none">{children}</h1>
 );
@@ -72,7 +72,7 @@ export default function MerchantDisputes() {
   return (
     <main className="min-h-screen bg-white text-slate-900 font-sans antialiased pb-40">
       
-      {/* ── SIMPLE HEADER ── */}
+      {/*  SIMPLE HEADER  */}
       <header className="px-8 py-8 border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-xl z-50">
         <div className="flex items-center justify-between max-w-2xl mx-auto">
            <div className="flex items-center gap-4">
@@ -92,7 +92,7 @@ export default function MerchantDisputes() {
 
       <div className="px-8 py-10 max-w-2xl mx-auto space-y-10">
          
-         {/* ── SHARP STATS ── */}
+         {/*  SHARP STATS  */}
          <section className="grid grid-cols-2 gap-4">
             <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-4">
                <p className="text-[10px] font-semibold text-[#94a3b8]  leading-none">Solved</p>
@@ -113,7 +113,7 @@ export default function MerchantDisputes() {
             </div>
          </section>
 
-         {/* ── MINIMALIST TABS (Matched to Orders Page) ── */}
+         {/*  MINIMALIST TABS (Matched to Orders Page)  */}
          <section className="flex items-center gap-8 border-b border-slate-50">
             {[
               { id: 'PENDING', label: 'Active' },
@@ -139,7 +139,7 @@ export default function MerchantDisputes() {
             ))}
          </section>
 
-         {/* ── SHARP LIST ── */}
+         {/*  SHARP LIST  */}
          <section className="space-y-4">
             {currentList.length === 0 ? (
                <div className="py-24 text-center flex flex-col items-center justify-center space-y-4 opacity-40">
@@ -197,7 +197,7 @@ export default function MerchantDisputes() {
          </section>
       </div>
 
-      {/* ── OVERLAY ── */}
+      {/*  OVERLAY  */}
       <AnimatePresence>
         {selectedDispute && (
           <DisputeThread 

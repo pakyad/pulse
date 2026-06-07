@@ -1,4 +1,4 @@
-import { db } from '../firebase';
+﻿import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export const seedAnnouncements = async () => {
@@ -33,8 +33,8 @@ export const seedAnnouncements = async () => {
     for (const ann of announcements) {
       await addDoc(collection(db, 'announcements'), ann);
     }
-    console.log('✅ Announcements seeded successfully');
+    console.log(' Announcements seeded successfully');
   } catch (e) {
-    console.error('❌ Seeding error:', e);
+    console.error(' Seeding error:', e);
   }
 };

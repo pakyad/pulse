@@ -1,4 +1,4 @@
-import { db } from '@/lib/firebase';
+﻿import { db } from '@/lib/firebase';
 import { collection, addDoc, query, where, getDocs, serverTimestamp, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const KELAB_BOLA_ITEMS = [
@@ -43,7 +43,7 @@ const KELAB_BOLA_ITEMS = [
 export async function seedKelabBolaItems(sellerId: string) {
     const itemsRef = collection(db, 'items');
     
-    // 🏛️ Institutional Asset Mapping (Deterministic IDs)
+    //  Institutional Asset Mapping (Deterministic IDs)
     const ASSET_MAP: Record<string, any> = {
         'd_jersey_2026': KELAB_BOLA_ITEMS[0],
         'd_scarf_fix': KELAB_BOLA_ITEMS[1],

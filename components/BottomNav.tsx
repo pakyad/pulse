@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -9,7 +9,7 @@ import { Home, Newspaper, Bike, User, ShoppingBag, LayoutGrid } from 'lucide-rea
 import { motion } from 'framer-motion';
 
 /**
- * 🏛️ Pulse Institutional Command Bar
+ *  Pulse Institutional Command Bar
  * Role-aware navigation with strict layout isolation.
  */
 export default function BottomNav() {
@@ -56,7 +56,7 @@ export default function BottomNav() {
     };
   }, []);
 
-  // ── ROLE-BASED NAVIGATION SCHEMA ──
+  //  ROLE-BASED NAVIGATION SCHEMA 
   const allItems = [
     { name: 'Home', path: '/home', icon: Home, roles: ['STUDENT', 'ADMIN'] },
     { name: 'Market', path: '/marketplace', icon: ShoppingBag, roles: ['STUDENT'] },

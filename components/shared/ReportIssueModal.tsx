@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -89,7 +89,7 @@ export default function ReportIssueModal({ isOpen, onClose, order, onSuccess }: 
 
                 <div className="p-8 space-y-8 overflow-y-auto max-h-[70vh] no-scrollbar">
                    
-                   {/* ── CASE FACT SHEET ── */}
+                   {/*  CASE FACT SHEET  */}
                    <div className="space-y-3">
                       <p className="text-[10px] font-semibold text-[#94a3b8]  px-1">Case Identity</p>
                       <div className="bg-slate-50/50 border border-slate-100 rounded-xl divide-y divide-slate-100 overflow-hidden">

@@ -1,4 +1,4 @@
-import { db } from '@/lib/firebase';
+﻿import { db } from '@/lib/firebase';
 import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 
 export const seedClubMerchants = async () => {
@@ -138,7 +138,7 @@ export const seedClubMerchants = async () => {
         transaction.set(iRef, { ...item, created_at: serverTimestamp() });
       }
     });
-    console.log("🏛️ Institutional Seeding Complete: 5 Club Merchants Online.");
+    console.log(" Institutional Seeding Complete: 5 Club Merchants Online.");
     return { success: true };
   } catch (e) {
     console.error("Seeding Failed:", e);

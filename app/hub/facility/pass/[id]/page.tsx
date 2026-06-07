@@ -70,7 +70,7 @@ export default function BookingPassPage() {
   return (
     <main className="min-h-screen bg-navy flex flex-col font-sans antialiased text-white overflow-hidden">
 
-      {/* ── In-UI Toast ── */}
+      {/*  In-UI Toast  */}
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -87,7 +87,7 @@ export default function BookingPassPage() {
         )}
       </AnimatePresence>
 
-      {/* ── 1. DARK NAV ── */}
+      {/*  1. DARK NAV  */}
       <nav className="px-6 pt-12 pb-6 flex items-center justify-between z-10">
         <BackButton fallback="/pulse" />
         <div className="text-center">
@@ -101,7 +101,7 @@ export default function BookingPassPage() {
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 pb-20 gap-12">
 
-        {/* ── 2. THE DYNAMIC PASS ── */}
+        {/*  2. THE DYNAMIC PASS  */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -113,7 +113,7 @@ export default function BookingPassPage() {
               <span className="text-[10px] font-semibold text-navy/30  mb-1.5 block">Facility Node</span>
               <h2 className="text-[20px] font-semibold text-navy tracking-tight">{booking?.facilityName || 'Global Hub'}</h2>
               <p className="text-[12px] text-slate-400 font-medium flex items-center gap-1.5 mt-1">
-                <MapPin size={12} /> Level 3 · MIIT Node
+                <MapPin size={12} /> Level 3  MIIT Node
               </p>
             </div>
             <div className="w-12 h-12 bg-navy rounded-2xl flex items-center justify-center text-white">
@@ -180,9 +180,9 @@ export default function BookingPassPage() {
           </div>
         </motion.div>
 
-        {/* ── 3. ACTIONS ── */}
+        {/*  3. ACTIONS  */}
         <div className="w-full max-w-sm space-y-3">
-          {/* Open Lab Door — writes status: 'ACCESSED' to Firestore */}
+          {/* Open Lab Door  writes status: 'ACCESSED' to Firestore */}
           <button
             onClick={handleOpenDoor}
             disabled={isOpening}

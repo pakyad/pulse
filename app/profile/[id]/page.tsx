@@ -89,7 +89,7 @@ export default function PublicProfile() {
   return (
     <main className="min-h-screen bg-[#FDFDFD] pb-40 font-sans antialiased text-navy">
 
-      {/* BACK BUTTON — floats over header */}
+      {/* BACK BUTTON  floats over header */}
       <div className="fixed top-0 left-0 right-0 z-50 px-6 pt-12 pb-4 pointer-events-none">
         <div className="flex justify-between items-center pointer-events-auto">
           <BackButton variant="overlay" />
@@ -171,7 +171,7 @@ export default function PublicProfile() {
           </div>
         </motion.div>
 
-        {/* Stats row — for clubs */}
+        {/* Stats row  for clubs */}
         {isClub && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -181,8 +181,8 @@ export default function PublicProfile() {
           >
             {[
               { label: 'Listings', value: listings.length },
-              { label: 'Members', value: profile.member_count || '—' },
-              { label: 'Sold', value: profile.total_sold || '—' },
+              { label: 'Members', value: profile.member_count || '' },
+              { label: 'Sold', value: profile.total_sold || '' },
             ].map(stat => (
               <div key={stat.label} className="bg-white border border-slate-100 rounded-4xl p-5 text-center shadow-sm">
                 <p className="text-[22px] font-semibold text-navy tabular-nums leading-none">{stat.value}</p>
@@ -192,7 +192,7 @@ export default function PublicProfile() {
           </motion.div>
         )}
 
-        {/* Stats row — for student sellers */}
+        {/* Stats row  for student sellers */}
         {isSeller && !isClub && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -202,7 +202,7 @@ export default function PublicProfile() {
           >
             {[
               { label: 'Active Listings', value: listings.length },
-              { label: 'Joined', value: profile.created_at ? new Date(profile.created_at?.seconds * 1000 || profile.created_at).getFullYear() : '—' },
+              { label: 'Joined', value: profile.created_at ? new Date(profile.created_at?.seconds * 1000 || profile.created_at).getFullYear() : '' },
             ].map(stat => (
               <div key={stat.label} className="bg-white border border-slate-100 rounded-4xl p-5 text-center shadow-sm">
                 <p className="text-[22px] font-semibold text-navy tabular-nums leading-none">{stat.value}</p>

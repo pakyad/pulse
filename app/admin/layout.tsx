@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -51,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [ready,  setReady]  = useState(false);
   const [badges, setBadges] = useState<Record<string, number>>({});
 
-  // ── Auth guard ──────────────────────────────────────────────────────────────
+  //  Auth guard 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (user) => {
       try {
@@ -67,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => unsub();
   }, [router, auth]);
 
-  // ── Real-time badge counts ──────────────────────────────────────────────────
+  //  Real-time badge counts 
   useEffect(() => {
     if (!ready) return;
 
@@ -100,7 +100,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-[#F9F9FB] flex font-sans">
 
-      {/* ── SIDEBAR ──────────────────────────────────────────────────────────── */}
+      {/*  SIDEBAR  */}
       <aside className="w-64 h-screen bg-white border-r border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
 
         {/* Brand */}
@@ -162,13 +162,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* ── MAIN CONTENT ─────────────────────────────────────────────────────── */}
+      {/*  MAIN CONTENT  */}
       <main className="flex-1 ml-64 min-h-screen flex flex-col">
         {/* Top bar */}
         <header className="bg-white/80 backdrop-blur-xl sticky top-0 z-20 px-8 py-4 flex items-center justify-between border-b border-[#E5E5EA]">
           <div className="flex-1 max-w-xs">
             <div className="relative h-9 rounded-xl bg-[#F9F9FB] border border-transparent focus-within:border-[#E5E5EA] transition-all flex items-center gap-2 px-3">
-              <span className="text-[#AEAEB2] text-[13px]">⌘</span>
+              <span className="text-[#AEAEB2] text-[13px]"></span>
               <input
                 className="flex-1 bg-transparent outline-none text-[13px] text-[#1C1C1E] placeholder-[#AEAEB2] font-medium"
                 placeholder="Search..."

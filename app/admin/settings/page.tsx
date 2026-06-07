@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from 'react';
 import { updatePriceGuideline } from '@/app/actions/adminActions';
@@ -73,7 +73,7 @@ export default function SettingsPage() {
         {/* Price */}
         <div>
           <label className="text-[10px] font-bold text-slate-400  block mb-2">
-            Price Ceiling (RM) · Campus default: RM {CAMPUS_DEFAULTS[category] ?? '—'}
+            Price Ceiling (RM)  Campus default: RM {CAMPUS_DEFAULTS[category] ?? ''}
           </label>
           <input type="number" value={price} onChange={e => setPrice(e.target.value)}
             placeholder={`e.g. ${CAMPUS_DEFAULTS[category]}`}

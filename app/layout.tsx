@@ -1,4 +1,4 @@
-import './globals.css'
+﻿import './globals.css'
 import { Inter } from 'next/font/google'
 import type { Metadata } from "next"
 import NavigationGate from '@/components/NavigationGate'
@@ -38,7 +38,7 @@ export default function RootLayout({
         <Providers>
           <NavigationGate />
 
-          {/* 🏛️ CAMPUS MAIN CONTAINER */}
+          {/*  CAMPUS MAIN CONTAINER */}
           <main className="relative">
             {children}
           </main>

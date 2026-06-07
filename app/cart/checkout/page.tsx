@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -13,7 +13,7 @@ import BackButton from '@/components/shared/BackButton';
 
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Campus Drop-Off Locations ──
+//  Campus Drop-Off Locations 
 const CAMPUS_HUBS: Record<string, any[]> = {
   'MIIT': [
     { id: 'k',        label: 'Block K',    sub: 'Main Lobby',       zone: 'campus' },
@@ -106,7 +106,7 @@ export default function CartCheckoutPage() {
         return {
           ...item,
           deliveryType: pref.type,
-          dropOffLocation: pref.type === 'RUNNER' ? `${hub.label} — ${hub.sub}` : null,
+          dropOffLocation: pref.type === 'RUNNER' ? `${hub.label}  ${hub.sub}` : null,
           floorLevel: pref.floor || null,
           roomNumber: pref.room || null
         };
@@ -147,7 +147,7 @@ export default function CartCheckoutPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
 
-      {/* ════ PAYMENT PROCESSING OVERLAY ════ */}
+      {/*  PAYMENT PROCESSING OVERLAY  */}
       <AnimatePresence>
         {(payStatus === 'processing' || payStatus === 'done') && (
           <motion.div
@@ -193,7 +193,7 @@ export default function CartCheckoutPage() {
         )}
       </AnimatePresence>
 
-      {/* ── IN-UI ERROR TOAST ── */}
+      {/*  IN-UI ERROR TOAST  */}
       <AnimatePresence>
         {orderError && (
           <motion.div
@@ -210,7 +210,7 @@ export default function CartCheckoutPage() {
         )}
       </AnimatePresence>
 
-      {/* ── NAV ── */}
+      {/*  NAV  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
         <div className="flex items-center gap-3">
           <BackButton />
@@ -225,7 +225,7 @@ export default function CartCheckoutPage() {
 
       <div className="pt-28 px-6 space-y-8">
 
-        {/* ── LOGISTICS SELECTION (STEP 1) ── */}
+        {/*  LOGISTICS SELECTION (STEP 1)  */}
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div

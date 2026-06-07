@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase";
+﻿import { auth, db } from "./firebase";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
@@ -20,7 +20,7 @@ export const isValidUniKLEmail = (email: string) => {
  * Creates an Auth record and initializes a Firestore Profile.
  */
 export const registerStudent = async (email: string, pass: string, fullName: string, matricNo: string) => {
-  // 🏛️ REQ_F101: Institutional Gating
+  //  REQ_F101: Institutional Gating
   if (!isValidUniKLEmail(email)) {
     return { user: null, error: 'Unauthorized: You must use your @s.unikl.edu.my email to join.' };
   }

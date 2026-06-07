@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
@@ -69,7 +69,7 @@ export default function MerchantDashboard() {
     };
   }, [router]);
 
-  // 🏛️ REQ_L101: THE LOGISTICS BRIDGE
+  //  REQ_L101: THE LOGISTICS BRIDGE
   // Transitions order from Merchant Prep to Runner Radar
   const handleAcceptOrder = async (orderId: string) => {
     await updateDoc(doc(db, "orders", orderId), { 
@@ -111,11 +111,11 @@ export default function MerchantDashboard() {
 
         if (handshake.buyer_confirmed && handshake.buyer_coords) {
           const R = 6371e3;
-          const φ1 = coords.lat * Math.PI/180;
-          const φ2 = handshake.buyer_coords.lat * Math.PI/180;
-          const Δφ = (handshake.buyer_coords.lat - coords.lat) * Math.PI/180;
-          const Δλ = (handshake.buyer_coords.lng - coords.lng) * Math.PI/180;
-          const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+          const 1 = coords.lat * Math.PI/180;
+          const 2 = handshake.buyer_coords.lat * Math.PI/180;
+          const  = (handshake.buyer_coords.lat - coords.lat) * Math.PI/180;
+          const  = (handshake.buyer_coords.lng - coords.lng) * Math.PI/180;
+          const a = Math.sin(/2) * Math.sin(/2) + Math.cos(1) * Math.cos(2) * Math.sin(/2) * Math.sin(/2);
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
           const dist = R * c;
           handshake.distance = dist;
@@ -141,7 +141,7 @@ export default function MerchantDashboard() {
     await updateDoc(doc(db, "items", itemId), { status: newStatus });
   };
 
-  // ── SHARED ANALYTICS LOGIC ──
+  //  SHARED ANALYTICS LOGIC 
   const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP", "READY"].includes(o.status)).reduce((s, o) => s + Number(o.total || o.price || 0), 0), [orders]);
   
   // FIX 2 & 3: Active Pipeline query - NOT DELIVERED and NOT CANCELLED

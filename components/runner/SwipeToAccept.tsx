@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -13,7 +13,7 @@ export default function SwipeToAccept({
   onSuccess, 
   loading = false,
   defaultText = "SWIPE TO ACCEPT",
-  successText = "ACCEPTED ✓"
+  successText = "ACCEPTED "
 }: SwipeToAcceptProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragX, setDragX] = useState(0);

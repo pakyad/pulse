@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -47,7 +47,7 @@ export default function PerfectSignUp() {
     }
   ];
   
-  // ── FORM STATE ──
+  //  FORM STATE 
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -181,7 +181,7 @@ export default function PerfectSignUp() {
   return (
     <main className="min-h-screen bg-white font-sans text-[#1A1A1A] antialiased relative">
       
-      {/* ── TOAST NOTIFICATION (Institutional Alert) ── */}
+      {/*  TOAST NOTIFICATION (Institutional Alert)  */}
       <AnimatePresence>
         {error && (
           <motion.div 
@@ -204,7 +204,7 @@ export default function PerfectSignUp() {
 
       <div className="max-w-md mx-auto px-5 pt-5 pb-5 flex flex-col min-h-screen">
         
-        {/* ── NAV BAR ── */}
+        {/*  NAV BAR  */}
         <div className="flex items-center justify-between mb-6 relative">
           <div className="-ml-2">
             <BackButton />
@@ -308,18 +308,18 @@ export default function PerfectSignUp() {
                         <option value="Diploma in Multimedia">Diploma in Multimedia</option>
                         <option value="Diploma in Animation">Diploma in Animation</option>
                       </optgroup>
-                      <optgroup label="Bachelor — Software Engineering & IT">
+                      <optgroup label="Bachelor  Software Engineering & IT">
                         <option value="Bachelor of IT (Hons) in Software Engineering">Bachelor of IT (Hons) in Software Engineering</option>
                         <option value="Bachelor of IT (Hons) in Computer System Security">Bachelor of IT (Hons) in Computer System Security</option>
                         <option value="Bachelor of IT (Hons) in Internet of Things">Bachelor of IT (Hons) in Internet of Things</option>
                         <option value="Bachelor of Artificial Intelligence Technology with Honours">Bachelor of Artificial Intelligence Technology with Honours</option>
                       </optgroup>
-                      <optgroup label="Bachelor — Creative Multimedia">
+                      <optgroup label="Bachelor  Creative Multimedia">
                         <option value="Bachelor of Multimedia Technology (Hons) in Interactive Multimedia Design">Bachelor of Multimedia Technology (Hons) in Interactive Multimedia Design</option>
                         <option value="Bachelor of Multimedia Technology (Hons) in Computer Animation">Bachelor of Multimedia Technology (Hons) in Computer Animation</option>
                         <option value="Bachelor of Game Development Technology with Honours">Bachelor of Game Development Technology with Honours</option>
                       </optgroup>
-                      <optgroup label="Bachelor — Computer Engineering">
+                      <optgroup label="Bachelor  Computer Engineering">
                         <option value="Bachelor of Computer Engineering Technology (Networking Systems) with Honours">Bachelor of Computer Engineering Technology (Networking Systems) with Honours</option>
                         <option value="Bachelor of Computer Engineering Technology (Computer Systems) with Honours">Bachelor of Computer Engineering Technology (Computer Systems) with Honours</option>
                       </optgroup>

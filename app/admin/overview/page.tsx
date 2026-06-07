@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef } from 'react';
 import { db } from '@/lib/firebase';
@@ -102,7 +102,7 @@ export default function OverviewPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // ── Existing listeners ──────────────────────────────────────────────
+  //  Existing listeners 
   useEffect(() => {
     const unsubUsers = onSnapshot(collection(db, 'users'), (snap) => {
       const users = snap.docs.map(d => d.data());
@@ -144,7 +144,7 @@ export default function OverviewPage() {
     return () => { unsubUsers(); unsubItems(); unsubFlagged(); unsubDisputes(); unsubOrders(); };
   }, []);
 
-  // ── Section 1: Economy (active listings, delivered orders) ──────────
+  //  Section 1: Economy (active listings, delivered orders) 
   useEffect(() => {
     const unsubActive = onSnapshot(
       query(collection(db, 'items'), where('status', '==', 'ACTIVE')),
@@ -166,7 +166,7 @@ export default function OverviewPage() {
     return () => { unsubActive(); unsubDelivered(); };
   }, []);
 
-  // ── Section 2: PCS Savings ─────────────────────────────────────────
+  //  Section 2: PCS Savings 
   useEffect(() => {
     const unsub = onSnapshot(
       query(collection(db, 'items'), where('pcs_certified', '==', true)),
@@ -189,7 +189,7 @@ export default function OverviewPage() {
     return () => unsub();
   }, []);
 
-  // ── Section 3: Sales by Category ───────────────────────────────────
+  //  Section 3: Sales by Category 
   useEffect(() => {
     const unsub = onSnapshot(
       query(collection(db, 'orders'), where('status', '==', 'DELIVERED')),
@@ -208,7 +208,7 @@ export default function OverviewPage() {
     return () => unsub();
   }, []);
 
-  // ── Section 4: PCS Decisions ───────────────────────────────────────
+  //  Section 4: PCS Decisions 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'items'), (snap) => {
       let approved = 0, rejected = 0, freeMarket = 0;
@@ -224,7 +224,7 @@ export default function OverviewPage() {
     return () => unsub();
   }, []);
 
-  // ── Section 5: Top Sellers ─────────────────────────────────────────
+  //  Section 5: Top Sellers 
   useEffect(() => {
     const unsubOrders = onSnapshot(
       query(collection(db, 'orders'), where('status', '==', 'DELIVERED')),
@@ -262,7 +262,7 @@ export default function OverviewPage() {
     return () => unsubOrders();
   }, []);
 
-  // ── Section 6: Runner Network ──────────────────────────────────────
+  //  Section 6: Runner Network 
   useEffect(() => {
     const unsubDeliveries = onSnapshot(
       query(collection(db, 'orders'), where('status', '==', 'DELIVERED')),
@@ -292,7 +292,7 @@ export default function OverviewPage() {
     return () => { unsubDeliveries(); unsubRunners(); };
   }, []);
 
-  // ── Section 7: PCS Audit Log ───────────────────────────────────────
+  //  Section 7: PCS Audit Log 
   useEffect(() => {
     const unsub = onSnapshot(
       query(collection(db, 'items'), where('pcs_result', '!=', null), fLimit(10)),
@@ -341,7 +341,7 @@ export default function OverviewPage() {
   const sortedNodes = Object.entries(runnerStats.nodeCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6);
-  const mostUsedNode = sortedNodes[0]?.[0] || '—';
+  const mostUsedNode = sortedNodes[0]?.[0] || '';
 
   const cards = [
     { label: 'System Liquidity', value: `RM ${stats.totalLocked.toFixed(2)}`, icon: Lock },
@@ -430,7 +430,7 @@ export default function OverviewPage() {
         </div>
       </div>
 
-      {/* ── SECTION 1: UniKL Student Economy ──────────────────────────── */}
+      {/*  SECTION 1: UniKL Student Economy  */}
       {section('UniKL Student Economy', 'Real-time marketplace intelligence across all student transactions', (
         <>
           <div className="grid grid-cols-3 gap-4">
@@ -446,11 +446,11 @@ export default function OverviewPage() {
         </>
       ), 'economy')}
 
-      {/* ── SECTION 2: Student Savings ────────────────────────────────── */}
+      {/*  SECTION 2: Student Savings  */}
       <div id="savings" className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl p-8 space-y-4">
         <div>
-          <h2 className="text-[16px] font-bold text-[#166534]">💰 Student Savings vs Open Market</h2>
-          <p className="text-[13px] text-[#15803D] mt-1">Total money saved by UniKL students compared to Shopee &amp; Lazada prices — powered by Claude AI.</p>
+          <h2 className="text-[16px] font-bold text-[#166534]"> Student Savings vs Open Market</h2>
+          <p className="text-[13px] text-[#15803D] mt-1">Total money saved by UniKL students compared to Shopee &amp; Lazada prices  powered by Claude AI.</p>
         </div>
         {pcsLoading ? (
           <div className="h-16 w-48 bg-green-200 rounded animate-pulse" />
@@ -473,7 +473,7 @@ export default function OverviewPage() {
         )}
       </div>
 
-      {/* ── SECTION 3: Sales by Category ──────────────────────────────── */}
+      {/*  SECTION 3: Sales by Category  */}
       {section('Sales by Category', 'Transaction volume breakdown across marketplace categories', (
         catLoading ? (
           <div className="h-[280px] bg-slate-50 rounded-xl animate-pulse" />
@@ -496,7 +496,7 @@ export default function OverviewPage() {
         )
       ), 'categories')}
 
-      {/* ── SECTION 4: PCS Decision Analytics ─────────────────────────── */}
+      {/*  SECTION 4: PCS Decision Analytics  */}
       {section('AI Price Governance', 'Claude API decision breakdown across all listing attempts', (
         pcsDecLoading ? (
           <div className="h-[260px] bg-slate-50 rounded-xl animate-pulse" />
@@ -519,23 +519,23 @@ export default function OverviewPage() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3 px-4 py-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
-                <span className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[11px] font-bold">✓</span>
-                <span className="text-[13px] font-medium text-slate-700">{pcsDecisions.approved} Approved — Live on marketplace</span>
+                <span className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[11px] font-bold"></span>
+                <span className="text-[13px] font-medium text-slate-700">{pcsDecisions.approved} Approved  Live on marketplace</span>
               </div>
               <div className="flex items-center gap-3 px-4 py-2.5 bg-red-50 rounded-xl border border-red-100">
-                <span className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-[11px] font-bold">✗</span>
-                <span className="text-[13px] font-medium text-slate-700">{pcsDecisions.rejected} Rejected — Price too high</span>
+                <span className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-[11px] font-bold"></span>
+                <span className="text-[13px] font-medium text-slate-700">{pcsDecisions.rejected} Rejected  Price too high</span>
               </div>
               <div className="flex items-center gap-3 px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                <span className="w-6 h-6 rounded-full bg-slate-400 flex items-center justify-center text-white text-[11px] font-bold">○</span>
-                <span className="text-[13px] font-medium text-slate-700">{pcsDecisions.freeMarket} Free Market — No PCS required</span>
+                <span className="w-6 h-6 rounded-full bg-slate-400 flex items-center justify-center text-white text-[11px] font-bold"></span>
+                <span className="text-[13px] font-medium text-slate-700">{pcsDecisions.freeMarket} Free Market  No PCS required</span>
               </div>
             </div>
           </div>
         )
       ), 'pcs-analytics')}
 
-      {/* ── SECTION 5: Top Student Sellers ────────────────────────────── */}
+      {/*  SECTION 5: Top Student Sellers  */}
       {section('Top Student Entrepreneurs', 'Most active sellers ranked by completed sales', (
         sellerLoading ? (
           <div className="space-y-3">
@@ -556,13 +556,13 @@ export default function OverviewPage() {
                   </div>
                   <div>
                     <p className="text-[13px] font-bold text-slate-900 leading-tight">{s.fullName}</p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate max-w-[160px]">{s.programme || '—'}</p>
+                    <p className="text-[11px] font-medium text-slate-400 truncate max-w-[160px]">{s.programme || ''}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-[13px] font-semibold text-emerald-600">RM {s.total.toFixed(2)}</p>
                   <p className="text-[11px] font-medium text-slate-400">{s.count} items sold</p>
-                  {s.trustRating > 0 && <p className="text-[11px] text-amber-500">⭐ {s.trustRating}</p>}
+                  {s.trustRating > 0 && <p className="text-[11px] text-amber-500"> {s.trustRating}</p>}
                 </div>
               </div>
             ))}
@@ -570,7 +570,7 @@ export default function OverviewPage() {
         )
       ), 'leaderboard')}
 
-      {/* ── SECTION 6: Runner Network ─────────────────────────────────── */}
+      {/*  SECTION 6: Runner Network  */}
       {section('Pulse Runner Network', 'Campus delivery infrastructure performance', (
         runnerLoading ? (
           <div className="grid grid-cols-2 gap-4">
@@ -607,8 +607,8 @@ export default function OverviewPage() {
         )
       ), 'runners')}
 
-      {/* ── SECTION 7: PCS Audit Log ──────────────────────────────────── */}
-      {section('Recent AI Price Decisions', 'Latest Claude API evaluations — full governance trail', (
+      {/*  SECTION 7: PCS Audit Log  */}
+      {section('Recent AI Price Decisions', 'Latest Claude API evaluations  full governance trail', (
         auditLoading ? (
           <div className="space-y-2">
             {[1,2,3,4,5].map(i => <div key={i} className="h-10 bg-slate-50 rounded-lg animate-pulse" />)}
@@ -639,18 +639,18 @@ export default function OverviewPage() {
                   const justification = item.pcs_result?.justification || '';
                   return (
                     <tr key={item.id} className={`hover:bg-slate-50/30 transition-colors ${i % 2 === 1 ? 'bg-slate-50/20' : ''}`}>
-                      <td className="px-4 py-3 text-[12px] font-medium text-slate-900">{title}{(item.title || '').length > 25 ? '…' : ''}</td>
-                      <td className="px-4 py-3 text-[11px] text-slate-500">{item.subcategory || '—'}</td>
+                      <td className="px-4 py-3 text-[12px] font-medium text-slate-900">{title}{(item.title || '').length > 25 ? '' : ''}</td>
+                      <td className="px-4 py-3 text-[11px] text-slate-500">{item.subcategory || ''}</td>
                       <td className="px-4 py-3 text-[12px] font-semibold text-slate-700">RM {listed.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-[12px] text-slate-500">{market > 0 ? `RM ${Number(market).toFixed(2)}` : '—'}</td>
-                      <td className="px-4 py-3 text-[12px] font-semibold text-emerald-600">{saving > 0 ? `RM ${saving.toFixed(2)}` : '—'}</td>
+                      <td className="px-4 py-3 text-[12px] text-slate-500">{market > 0 ? `RM ${Number(market).toFixed(2)}` : ''}</td>
+                      <td className="px-4 py-3 text-[12px] font-semibold text-emerald-600">{saving > 0 ? `RM ${saving.toFixed(2)}` : ''}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold ${approved ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
-                          {approved ? '✓ Approved' : '✗ Rejected'}
+                          {approved ? ' Approved' : ' Rejected'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-[11px] text-slate-400 max-w-[160px]" title={justification}>
-                        {justification ? justification.slice(0, 50) + (justification.length > 50 ? '…' : '') : '—'}
+                        {justification ? justification.slice(0, 50) + (justification.length > 50 ? '' : '') : ''}
                       </td>
                     </tr>
                   );

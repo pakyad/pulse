@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth, storage } from '@/lib/firebase';
@@ -19,7 +19,7 @@ import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 const LiveMap = dynamic(() => import('@/components/runner/LiveMap'), { ssr: false });
 
-// ── ERROR BOUNDARY ──
+//  ERROR BOUNDARY 
 class MapErrorBoundary extends Component<{children: React.ReactNode}, {hasError: boolean}> {
   constructor(props: any) { super(props); this.state = { hasError: false }; }
   static getDerivedStateFromError() { return { hasError: true }; }
@@ -38,7 +38,7 @@ class MapErrorBoundary extends Component<{children: React.ReactNode}, {hasError:
   }
 }
 
-// ── HAVERSINE DISTANCE ──
+//  HAVERSINE DISTANCE 
 function haversineMetres(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371000;
   const toRad = (d: number) => d * Math.PI / 180;
@@ -115,7 +115,7 @@ const validateImage = (img: HTMLImageElement): boolean => {
   return true;
 };
 
-// ── WATERMARK HELPER ──
+//  WATERMARK HELPER 
 const addWatermark = async (file: File, orderId: string): Promise<File> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -152,7 +152,7 @@ const addWatermark = async (file: File, orderId: string): Promise<File> => {
       
       ctx.font = `500 ${fontSize2}px sans-serif`;
       ctx.fillStyle = '#cbd5e1';
-      ctx.fillText(`${dateStr} • ${timeStr}`, 30, img.height - (stripHeight / 2) + 25);
+      ctx.fillText(`${dateStr} - ${timeStr}`, 30, img.height - (stripHeight / 2) + 25);
       
       canvas.toBlob((blob) => {
         if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }));
@@ -163,7 +163,7 @@ const addWatermark = async (file: File, orderId: string): Promise<File> => {
   });
 };
 
-// ── STANDARDIZED TYPOGRAPHY COMPONENTS ──
+//  STANDARDIZED TYPOGRAPHY COMPONENTS 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[21px] font-bold text-slate-900 tracking-tight ${className}`}>{children}</h2>
 );
@@ -255,7 +255,7 @@ export default function MissionControl() {
     };
   }, [router]);
 
-  // ── GPS BROADCAST + LOCAL COORDS CAPTURE ──
+  //  GPS BROADCAST + LOCAL COORDS CAPTURE 
   useEffect(() => {
     if (typeof window === 'undefined' || !navigator.geolocation) return;
     if (!isOnline || !activeMission) return;
@@ -290,7 +290,7 @@ export default function MissionControl() {
     return () => navigator.geolocation.clearWatch(watchId);
   }, [isOnline, activeMission?.id, activeMission?.status]);
 
-  // ── ELAPSED TIMER ──
+  //  ELAPSED TIMER 
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (!activeMission?.accepted_at) { setElapsedSeconds(0); return; }
@@ -402,7 +402,7 @@ export default function MissionControl() {
         try {
           await addDoc(collection(db, "chats", conversationId, "messages"), {
             senderId: "SYSTEM",
-            text: `📍 Your item has been delivered to ${dropOffLocation}. Here's a photo confirmation:`,
+            text: ` Your item has been delivered to ${dropOffLocation}. Here's a photo confirmation:`,
             imageUrl: url,
             createdAt: serverTimestamp(),
             isSystemMessage: true,
@@ -441,7 +441,7 @@ export default function MissionControl() {
 
   if (loading) return null;
 
-  // ── PRE-COMPUTE ACTIVE MISSION DATA ──
+  //  PRE-COMPUTE ACTIVE MISSION DATA 
   const isPickedUp = activeMission?.status === 'PICKED_UP' || activeMission?.status === 'IN_TRANSIT';
 
   const pickupDistM = runnerCoords && activeMission?.pickup_lat && activeMission?.pickup_lng
@@ -475,14 +475,14 @@ export default function MissionControl() {
   return (
     <main className="min-h-screen bg-[#FDFDFD] font-sans antialiased text-slate-900 selection:bg-slate-100 relative overflow-hidden flex flex-col pb-32">
 
-      {/* ── IN-UI ERROR TOAST ── */}
+      {/*  IN-UI ERROR TOAST  */}
       {showError && (
         <div className="fixed top-24 left-6 right-6 z-200 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-2xl text-[12px] font-bold shadow-sm text-center">
           {showError}
         </div>
       )}
 
-      {/* ── MATURED NAVIGATION ── */}
+      {/*  MATURED NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
          <div className="flex items-center gap-3">
             <BackButton fallback="/run" />
@@ -500,7 +500,7 @@ export default function MissionControl() {
            animate={{ opacity: 1 }}
            className="w-full h-full flex flex-col"
          >
-           {/* ── MAP VIEWPORT ── */}
+           {/*  MAP VIEWPORT  */}
            <section className={`transition-all duration-700 ease-in-out relative h-[35vh] w-full pt-20 border-b border-slate-50`}>
               <MapErrorBoundary>
                 <LiveMap hasActiveJob={!!activeMission} />
@@ -515,7 +515,7 @@ export default function MissionControl() {
                 animate={{ opacity: 1, y: 0 }} 
                 className="bg-white rounded-t-[32px] shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col"
               >
-                {/* ── HEADER ── */}
+                {/*  HEADER  */}
                 <div className={`px-6 pt-7 pb-5 flex items-start justify-between border-b ${tintBorder} ${tintBg}`}>
                   <div>
                     <p className={`text-[10px] font-semibold  mb-1 ${tintText} opacity-70`}>{typeLabel}</p>
@@ -530,14 +530,14 @@ export default function MissionControl() {
                   </div>
                 </div>
 
-                {/* ── TELEMETRY STRIP ── */}
+                {/*  TELEMETRY STRIP  */}
                 {locationError && (
                   <div className="mx-6 mt-4 mb-2 bg-red-50 text-red-600 px-4 py-3 rounded-2xl text-[12px] font-bold text-center flex items-center justify-center gap-2">
                     <AlertCircle size={16} /> Turn on GPS to track distance
                   </div>
                 )}
 
-                {/* ── TASK LIST (#1, #2) ── */}
+                {/*  TASK LIST (#1, #2)  */}
                 <div className="px-6 py-6 space-y-4">
                    <p className="text-[11px] font-semibold text-slate-300">Mission Tasks</p>
                    
@@ -620,7 +620,7 @@ export default function MissionControl() {
          // OPEN MISSIONS VIEW (from Orders)
          // ==========================================
          <div className="pt-24 px-6 space-y-8">
-            {/* ── MATURED FILTER PILLS ── */}
+            {/*  MATURED FILTER PILLS  */}
             <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
                {['All', 'Marketplace', 'Parcels', 'Errands'].map(t => {
                   const isActive = filter === t;
@@ -640,7 +640,7 @@ export default function MissionControl() {
                })}
             </div>
 
-            {/* ── MISSION LIST ── */}
+            {/*  MISSION LIST  */}
             <div className="space-y-4 mt-8">
                <AnimatePresence mode="popLayout">
                   {missions.length > 0 ? (
@@ -677,7 +677,7 @@ export default function MissionControl() {
                            transition={{ delay: idx * 0.05 }}
                            className="bg-white p-5 rounded-[24px] border border-slate-100 shadow-sm space-y-5"
                          >
-                            {/* ── CARD HEADER ── */}
+                            {/*  CARD HEADER  */}
                             <div className="flex justify-between items-start">
                                <div className="flex items-center gap-3">
                                   <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${tintBg} ${tintText}`}>
@@ -694,7 +694,7 @@ export default function MissionControl() {
                                </div>
                             </div>
 
-                            {/* ── INNER DETAILS ── */}
+                            {/*  INNER DETAILS  */}
                             <div className="pl-3 pr-2 py-1 flex items-stretch gap-4 relative">
                                {/* Connecting Line */}
                                <div className="absolute left-[17.5px] top-4 bottom-4 w-0.5 bg-slate-100 rounded-full" />
@@ -720,7 +720,7 @@ export default function MissionControl() {
                                </div>
                             </div>
 
-                            {/* ── TIME & ACTION BUTTON ── */}
+                            {/*  TIME & ACTION BUTTON  */}
                             <div className="flex items-center justify-between gap-4 pt-1">
                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-[12px] border border-slate-100 shrink-0">
                                   <Clock size={12} className="text-slate-400" />
@@ -769,7 +769,7 @@ export default function MissionControl() {
       )}
 
       {/* ========================================== */}
-      {/* ── OVERLAYS (Drawers, Modals, Toasts) ── */}
+      {/*  OVERLAYS (Drawers, Modals, Toasts)  */}
       {/* ========================================== */}
 
       <AnimatePresence>{optionsDrawerOpen && (

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Package, MapPin, Camera, Clock, DollarSign, FileText, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -143,7 +143,7 @@ export default function ProofInspector({ isOpen, onClose, order }: ProofInspecto
                       <div className="flex justify-between items-start pb-3 border-b border-slate-50">
                         <div>
                           <p className="text-[13px] font-bold text-slate-900">{order.title}</p>
-                          <p className="text-[11px] font-medium text-slate-400 mt-0.5">Qty: {order.items?.[0]?.qty || 1} × RM {Number(order.price / (order.items?.[0]?.qty || 1)).toFixed(2)}</p>
+                          <p className="text-[11px] font-medium text-slate-400 mt-0.5">Qty: {order.items?.[0]?.qty || 1}  RM {Number(order.price / (order.items?.[0]?.qty || 1)).toFixed(2)}</p>
                         </div>
                         <p className="text-[13px] font-bold text-slate-900">RM {Number(order.price || 0).toFixed(2)}</p>
                       </div>

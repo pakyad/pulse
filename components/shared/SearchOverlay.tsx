@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -31,7 +31,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
     const q = query.trim().toLowerCase();
     if (!q) return [];
     
-    // 🏛️ Pulse Institutional Search Protocol
+    //  Pulse Institutional Search Protocol
     return items.filter(item => {
       const title = (item.title || "").toLowerCase();
       const desc = (item.description || "").toLowerCase();
@@ -79,7 +79,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
           className="fixed inset-0 z-200 bg-white/95 backdrop-blur-3xl overflow-y-auto no-scrollbar pb-32"
         >
-          {/* ── HEADER ── */}
+          {/*  HEADER  */}
           <div className="px-6 pt-16 pb-6 flex flex-col gap-10">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
@@ -102,7 +102,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
               </button>
             </div>
 
-            {/* ── SEARCH INPUT ── */}
+            {/*  SEARCH INPUT  */}
             <div className="relative group">
               <Search size={24} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
               <input 
@@ -116,7 +116,7 @@ export default function SearchOverlay({ isOpen, onClose, items = [] }: SearchOve
             </div>
           </div>
 
-          {/* ── SEARCH RESULTS / DISCOVERY ── */}
+          {/*  SEARCH RESULTS / DISCOVERY  */}
           <div className="px-6 mt-8">
             <AnimatePresence mode="wait">
               {query.trim() ? (

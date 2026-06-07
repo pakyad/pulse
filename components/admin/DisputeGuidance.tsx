@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -43,7 +43,7 @@ export default function AdminDisputeGuide() {
         <h3 className="text-[11px] font-semibold text-[#94a3b8] ">Admin Decision Kit</h3>
       </div>
 
-      {/* ── SECTION 1: BLAME LOGIC ── */}
+      {/*  SECTION 1: BLAME LOGIC  */}
       <DrakeAccordion id="logic" title="Who is at fault?" icon={Scale}>
         <div className="space-y-4">
           <div className="p-4 bg-red-50/50 rounded-xl border border-red-100 space-y-2">
@@ -70,7 +70,7 @@ export default function AdminDisputeGuide() {
         </div>
       </DrakeAccordion>
 
-      {/* ── SECTION 2: PROCESS GUIDE ── */}
+      {/*  SECTION 2: PROCESS GUIDE  */}
       <DrakeAccordion id="process" title="How to Refund" icon={Info}>
         <div className="space-y-3">
           <p>1. <span className="text-slate-900 font-bold">Check Photos</span>: Compare Merchant Handover photo vs Runner Delivery photo.</p>
@@ -79,7 +79,7 @@ export default function AdminDisputeGuide() {
         </div>
       </DrakeAccordion>
 
-      {/* ── SECTION 3: DECISION SUMMARY (RECEIPT STYLE) ── */}
+      {/*  SECTION 3: DECISION SUMMARY (RECEIPT STYLE)  */}
       <div className="space-y-3">
         <p className="text-[11px] font-semibold text-[#94a3b8]  pl-1">Final Verdict Preview</p>
         <div className="bg-slate-50 border border-slate-100 rounded-2xl divide-y divide-slate-100 overflow-hidden">

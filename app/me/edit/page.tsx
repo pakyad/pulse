@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -26,7 +26,7 @@ const PROGRAMMES_GROUPS = [
     ]
   },
   {
-    label: 'Bachelor — Software Engineering & IT',
+    label: 'Bachelor  Software Engineering & IT',
     options: [
       'Bachelor of IT (Hons) in Software Engineering',
       'Bachelor of IT (Hons) in Computer System Security',
@@ -35,7 +35,7 @@ const PROGRAMMES_GROUPS = [
     ]
   },
   {
-    label: 'Bachelor — Creative Multimedia',
+    label: 'Bachelor  Creative Multimedia',
     options: [
       'Bachelor of Multimedia Technology (Hons) in Interactive Multimedia Design',
       'Bachelor of Multimedia Technology (Hons) in Computer Animation',
@@ -43,7 +43,7 @@ const PROGRAMMES_GROUPS = [
     ]
   },
   {
-    label: 'Bachelor — Computer Engineering',
+    label: 'Bachelor  Computer Engineering',
     options: [
       'Bachelor of Computer Engineering Technology (Networking Systems) with Honours',
       'Bachelor of Computer Engineering Technology (Computer Systems) with Honours',
@@ -75,7 +75,7 @@ const AVATAR_STYLES = [
   { id: 'initials', label: 'Formal' }
 ];
 
-// ── STANDARDIZED TYPOGRAPHY COMPONENTS (From Me Page) ──
+//  STANDARDIZED TYPOGRAPHY COMPONENTS (From Me Page) 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <h2 className={`text-[17px] font-bold text-slate-900 tracking-tight ${className}`}>
     {children}
@@ -162,7 +162,7 @@ export default function EditProfilePage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 pb-40 font-sans selection:bg-slate-100 antialiased">
       
-      {/* ── LOCAL NAVIGATION ── */}
+      {/*  LOCAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">
          <div className="flex items-center gap-4">
             <button onClick={() => router.back()} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-[#6B7280] border border-slate-50 active:scale-95 transition-all">
@@ -175,7 +175,7 @@ export default function EditProfilePage() {
 
       <div className="pt-28 p-6 space-y-12">
         
-        {/* ── AVATAR PICKER ── */}
+        {/*  AVATAR PICKER  */}
         <section className="flex flex-col items-center justify-center space-y-4">
            <button 
              onClick={() => setPickerType('avatar')}
@@ -194,7 +194,7 @@ export default function EditProfilePage() {
            </div>
         </section>
 
-        {/* ── ACADEMIC INFO ── */}
+        {/*  ACADEMIC INFO  */}
         <section className="space-y-6">
           <div className="px-1 space-y-1">
             <h2 className="text-[16px] font-semibold text-[#111827]">Academic Details</h2>
@@ -262,7 +262,7 @@ export default function EditProfilePage() {
               <div className="space-y-2">
                  <p className="text-[13px] font-semibold text-[#6B7280] capitalize px-1">Campus</p>
                  <div className="w-full h-14 bg-slate-50 border border-[#E5E7EB] rounded-[12px] px-5 flex items-center justify-between">
-                   <span className="text-[13px] font-bold text-[#6B7280]">MIIT — Malaysian Institute of Information Technology</span>
+                   <span className="text-[13px] font-bold text-[#6B7280]">MIIT  Malaysian Institute of Information Technology</span>
                    <Lock size={16} className="text-slate-400 shrink-0" />
                  </div>
               </div>
@@ -306,7 +306,7 @@ export default function EditProfilePage() {
            </div>
         </section>
 
-        {/* ── ABOUT & CONTACT ── */}
+        {/*  ABOUT & CONTACT  */}
         <section className="space-y-6">
           <div className="px-1 space-y-1">
             <h2 className="text-[16px] font-semibold text-[#111827]">Public Profile</h2>
@@ -328,7 +328,7 @@ export default function EditProfilePage() {
 
       </div>
 
-      {/* ── STICKY FOOTER ── */}
+      {/*  STICKY FOOTER  */}
       <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
         <button 
           onClick={handleSave} 
@@ -339,7 +339,7 @@ export default function EditProfilePage() {
         </button>
       </footer>
 
-      {/* ── AVATAR MODAL ── */}
+      {/*  AVATAR MODAL  */}
       <AnimatePresence>
         {pickerType === 'avatar' && (
           <div className="fixed inset-0 z-100 flex items-end justify-center">

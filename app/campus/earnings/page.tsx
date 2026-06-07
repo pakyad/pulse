@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -83,7 +83,7 @@ export default function InsightsPage() {
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-20 font-sans">
 
-      {/* ── NAV ── */}
+      {/*  NAV  */}
       <nav className="sticky top-0 left-0 right-0 z-50 px-6 py-6 bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50 flex items-center gap-4">
         <BackButton fallback="/me" />
         <div>
@@ -94,7 +94,7 @@ export default function InsightsPage() {
 
       <div className="px-6 space-y-8 pt-8">
 
-        {/* ── SECTION 1: HERO EARNINGS CARD ── */}
+        {/*  SECTION 1: HERO EARNINGS CARD  */}
         <motion.section
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="w-full bg-white border border-slate-100 rounded-[24px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
@@ -106,7 +106,7 @@ export default function InsightsPage() {
           <p className="text-[12px] font-semibold text-slate-400 mt-2">Total Earned</p>
         </motion.section>
 
-        {/* ── SECTION 2: STATS ROW ── */}
+        {/*  SECTION 2: STATS ROW  */}
         <motion.section
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="grid grid-cols-3 gap-3"
@@ -135,14 +135,14 @@ export default function InsightsPage() {
             </div>
             <div>
               <p className="text-[20px] font-semibold tracking-tight">
-                {(trustRating ?? 5.0).toFixed(1)}<span className="text-amber-400 text-[16px] ml-0.5">⭐</span>
+                {(trustRating ?? 5.0).toFixed(1)}<span className="text-amber-400 text-[16px] ml-0.5"></span>
               </p>
               <p className="text-[10px] font-bold text-slate-400">Trust Rating</p>
             </div>
           </div>
         </motion.section>
 
-        {/* ── SECTION 3: RECENT SALES ── */}
+        {/*  SECTION 3: RECENT SALES  */}
         <motion.section
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
           className="space-y-4"
@@ -171,7 +171,7 @@ export default function InsightsPage() {
               {recentSales.map((sale) => {
                 const raw = sale.created_at;
                 const date = raw?.toDate ? raw.toDate() : new Date(raw || 0);
-                const dateStr = isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                const dateStr = isNaN(date.getTime()) ? '' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
                 return (
                   <div
                     key={sale.id}
@@ -180,7 +180,7 @@ export default function InsightsPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-bold text-slate-900 truncate">{sale.title || 'Item'}</p>
                       <p className="text-[10px] font-medium text-slate-400">
-                        {sale.customer_name || 'Buyer'} · {dateStr}
+                        {sale.customer_name || 'Buyer'}  {dateStr}
                       </p>
                     </div>
                     <div className="text-right shrink-0">

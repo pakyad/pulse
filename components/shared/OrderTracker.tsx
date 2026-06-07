@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -95,7 +95,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
 
   return (
     <div className="space-y-10">
-      {/* ── HEADER ── */}
+      {/*  HEADER  */}
       {step >= 3 && (
         <div className="px-2">
           <h2 className="text-[20px] font-bold text-slate-900 tracking-tight mb-1">
@@ -104,7 +104,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
         </div>
       )}
 
-      {/* ── CRISP PIXEL 4-STEP PROGRESS BAR ── */}
+      {/*  CRISP PIXEL 4-STEP PROGRESS BAR  */}
       <div className="flex items-center justify-between relative px-4 mt-2">
         <div className="absolute left-[36px] right-[36px] top-[20px] h-[2px] bg-slate-100 z-0"></div>
         <motion.div 
@@ -143,7 +143,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
 
       <div className="h-2"></div>
 
-      {/* ── RUNNER IDENTITY VIBRANCY ── */}
+      {/*  RUNNER IDENTITY VIBRANCY  */}
       {(order.runner_id || step >= 3) && (
         <div className="flex items-center justify-between p-6 bg-white rounded-2xl border border-slate-50 shadow-sm">
           <div className="flex items-center gap-4">
@@ -157,7 +157,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
                   <Star size={12} fill="currentColor" />
                   <span>4.9</span>
                 </div>
-                <span className="text-slate-200">·</span>
+                <span className="text-slate-200"></span>
                 <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-tight">Verified Student</span>
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
 
 
 
-      {/* ── DELIVERY PROOF ── */}
+      {/*  DELIVERY PROOF  */}
       {step === 4 && deliveryPhoto && (
         <div className="px-2">
           <button className="w-full py-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-3 text-[12px] font-semibold text-emerald-600  hover:bg-emerald-100 transition-all active:scale-95">

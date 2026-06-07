@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Pulse Marketplace: Category Registry (v5.0)
  * STUDENT ECONOMY MODEL
  *
@@ -6,11 +6,11 @@
  *   Textbooks, scientific calculators, lab coats, stationery, hostel appliances.
  *
  * Secondhand electronics (TECH category) are NOT benchmarked against Shopee
- * new retail prices — that comparison is unfair and inaccurate for used goods.
+ * new retail prices  that comparison is unfair and inaccurate for used goods.
  * TECH uses fixed campus ceilings only.
  *
- * comparable: true  → SerpAPI live search triggered
- * comparable: false → Fixed ceiling, no API call
+ * comparable: true   SerpAPI live search triggered
+ * comparable: false  Fixed ceiling, no API call
  */
 
 export type CategoryID = 'ACADEMIC' | 'HOSTEL' | 'TECH' | 'APPAREL' | 'SERVICES';
@@ -45,10 +45,10 @@ export interface CategoryConfig {
 
 export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
 
-  // ─────────────────────────────────────────────────────────────
-  // ACADEMIC — Only branded/published items are comparable.
-  //            Custom notes/papers are unique — fixed ceiling only.
-  // ─────────────────────────────────────────────────────────────
+  // 
+  // ACADEMIC  Only branded/published items are comparable.
+  //            Custom notes/papers are unique  fixed ceiling only.
+  // 
   ACADEMIC: {
     id: 'ACADEMIC',
     label: 'Academic',
@@ -141,7 +141,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         label: 'Past Year Papers',
         comparable: false,
         fixedCeiling: 10.00,
-        titleHint: 'e.g. CSC3109 Final Exam 2022–2024',
+        titleHint: 'e.g. CSC3109 Final Exam 20222024',
       },
     ],
     customFields: [
@@ -171,10 +171,10 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────
-  // HOSTEL — Branded appliances/storage are comparable.
+  // 
+  // HOSTEL  Branded appliances/storage are comparable.
   //          Used furniture is hyper-local, no benchmark.
-  // ─────────────────────────────────────────────────────────────
+  // 
   HOSTEL: {
     id: 'HOSTEL',
     label: 'Hostel & Room',
@@ -255,10 +255,10 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────
-  // TECH — All hardware subcategories are market-comparable.
+  // 
+  // TECH  All hardware subcategories are market-comparable.
   //        Digital access keys are fixed (no Shopee equivalent).
-  // ─────────────────────────────────────────────────────────────
+  // 
   TECH: {
     id: 'TECH',
     label: 'Tech & Devices',
@@ -355,10 +355,10 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
     ],
   },
 
-  // ─────────────────────────────────────────────────────────────
-  // APPAREL — Branded preloved CAN be benchmarked on Shopee.
-  //           Custom/club/campus merch is unique — fixed ceiling.
-  // ─────────────────────────────────────────────────────────────
+  // 
+  // APPAREL  Branded preloved CAN be benchmarked on Shopee.
+  //           Custom/club/campus merch is unique  fixed ceiling.
+  // 
    APPAREL: {
     id: 'APPAREL',
     label: 'Apparel',

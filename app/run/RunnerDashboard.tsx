@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, 
@@ -19,7 +19,7 @@ export default function RunnerDashboard({ profile, onBack }: { profile: any, onB
 
     return (
        <div className="min-h-screen bg-white pb-32">
-          {/* ── CARRIER HEADER ── */}
+          {/*  CARRIER HEADER  */}
           <nav className="fixed top-0 left-0 right-0 z-50 px-8 pt-12 pb-6 flex items-center justify-between bg-white/95 backdrop-blur-xl border-b border-slate-50">
              <div className="flex items-center gap-4">
                 <button onClick={onBack} className="p-2 -ml-2 text-slate-300 active:scale-95 transition-all">

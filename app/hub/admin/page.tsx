@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -94,7 +94,7 @@ export default function AdminHub() {
                       </div>
                       <div>
                          <h4 className="text-[14px] font-bold text-navy">{sub.title}</h4>
-                         <p className="text-[10px] font-bold text-slate-300 ">{sub.id} • {sub.date}</p>
+                         <p className="text-[10px] font-bold text-slate-300 ">{sub.id} - {sub.date}</p>
                       </div>
                    </div>
                    <div className="flex items-center gap-3">
@@ -213,7 +213,7 @@ export default function AdminHub() {
                                     <h4 className="text-[14px] font-bold text-navy">Iyad Mohmad</h4>
                                     <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md  border border-emerald-100">Verified ID</span>
                                  </div>
-                                 <p className="text-[10px] font-bold text-slate-400 ">Matric: 52216121092 • Bachelor (SE)</p>
+                                 <p className="text-[10px] font-bold text-slate-400 ">Matric: 52216121092 - Bachelor (SE)</p>
                               </div>
                            </div>
 
