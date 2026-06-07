@@ -4,12 +4,12 @@ import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 
-// ── CAMPUS DEFAULT CEILINGS ────────────────────────────────────────────────────
+// -- CAMPUS DEFAULT CEILINGS ----------------------------------------------------
 const CAMPUS_DEFAULTS: Record<string, number> = {
   ACADEMIC: 200, HOSTEL: 500, TECH: 3500, APPAREL: 300,
 };
 
-// ── INTERNAL: Send notification to a user ─────────────────────────────────────
+// -- INTERNAL: Send notification to a user -------------------------------------
 async function sendNotification(
   userId: string,
   payload: {
@@ -32,7 +32,7 @@ async function sendNotification(
     });
 }
 
-// ── INTERNAL: Write to Governance Vault ──────────────────────────────────────
+// -- INTERNAL: Write to Governance Vault --------------------------------------
 async function writeToVault(
   itemData: Record<string, any>,
   action: string,
@@ -49,7 +49,7 @@ async function writeToVault(
   });
 }
 
-// ── INTERNAL: Write Governance Log ───────────────────────────────────────────
+// -- INTERNAL: Write Governance Log -------------------------------------------
 async function writeLog(type: string, targetId: string, details: string) {
   await adminDb.collection("governance_logs").add({
     type,
@@ -59,9 +59,9 @@ async function writeLog(type: string, targetId: string, details: string) {
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 1. APPROVE LISTING
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function approveItem(itemId: string, adminId: string) {
   try {
     await adminDb.collection("items").doc(itemId).update({
@@ -82,9 +82,9 @@ export async function approveItem(itemId: string, adminId: string) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 2. HOLD FOR REVISION  (replaces quarantine)
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function holdForRevision(
   itemId: string,
   sellerId: string,
@@ -128,9 +128,9 @@ export async function holdForRevision(
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 3. ISSUE WARNING
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function issueWarning(
   itemId: string,
   sellerId: string,
@@ -175,7 +175,7 @@ export async function issueWarning(
       // 4. Send warning notification
       await sendNotification(sellerId, {
         type: "FORMAL_WARNING",
-        title: `Formal Warning — Strike ${newStrikes} of 3`,
+        title: `Formal Warning - Strike ${newStrikes} of 3`,
         body: `Your listing "${itemTitle}" has been flagged for a pricing violation. This is strike ${newStrikes} of 3. A third strike will result in automatic merchant suspension.`,
         item_id: itemId,
         item_title: itemTitle,
@@ -197,9 +197,9 @@ export async function issueWarning(
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 4. REJECT & REMOVE (to vault)
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function rejectItem(
   itemId: string,
   sellerId: string,
@@ -222,7 +222,7 @@ export async function rejectItem(
     await writeToVault(
       { ...item, item_id: itemId },
       "REJECTED",
-      "Price violation — rejected by admin",
+      "Price violation - rejected by admin",
       adminId
     );
 
@@ -246,9 +246,9 @@ export async function rejectItem(
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 5. SUSPEND SELLER (removes item + kills merchant access)
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function suspendSeller(
   itemId: string,
   sellerId: string,
@@ -269,7 +269,7 @@ export async function suspendSeller(
     await writeToVault(
       { ...item, item_id: itemId },
       "SELLER_SUSPENDED",
-      "Listing removed — seller suspended",
+      "Listing removed - seller suspended",
       adminId
     );
 
@@ -301,9 +301,9 @@ export async function suspendSeller(
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 6. VAULT: RESTORE ITEM
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function restoreFromVault(vaultId: string, itemId: string, sellerId: string) {
   try {
     // 1. Restore item
@@ -338,9 +338,9 @@ export async function restoreFromVault(vaultId: string, itemId: string, sellerId
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 7. VAULT: PERMANENTLY DELETE
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function permanentlyDelete(vaultId: string, itemId: string) {
   try {
     // 1. Delete original item document
@@ -361,9 +361,9 @@ export async function permanentlyDelete(vaultId: string, itemId: string) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 8. UPDATE PRICE GUIDELINE
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function updatePriceGuideline(
   category: string,
   newMaxPrice: number,
@@ -390,9 +390,9 @@ export async function updatePriceGuideline(
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 9. RESOLVE DISPUTE
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function resolveDispute(disputeId: string, action: "REFUND" | "RELEASE" | "SPLIT" | "PENALTY") {
   try {
     const disputeRef = adminDb.collection("disputes").doc(disputeId);
@@ -442,9 +442,9 @@ export async function resolveDispute(disputeId: string, action: "REFUND" | "RELE
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 10. RESOLVE APPEAL
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function resolveAppeal(appealId: string, itemId: string, adminId: string, action: "APPROVE" | "REJECT") {
   try {
     if (action === "APPROVE") {
@@ -475,9 +475,9 @@ export async function resolveAppeal(appealId: string, itemId: string, adminId: s
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 11. ESCROW CONTROLS
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function holdEscrow(orderId: string) {
   try {
     await adminDb.collection("orders").doc(orderId).update({
@@ -491,9 +491,9 @@ export async function holdEscrow(orderId: string) {
     return { success: false, message: "Failed to hold escrow." };
   }
 }
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // 12. RUNNER APPLICATIONS
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 export async function approveRunner(userId: string) {
   try {
     await adminDb.collection("users").doc(userId).update({
