@@ -580,8 +580,8 @@ export default function CheckoutPage() {
               <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden cursor-pointer" onClick={() => setPaymentMethod('FPX')}>
                 {/* Method header */}
                 <div className="flex items-center gap-4 px-4 py-4 border-b border-slate-100 bg-white">
-                  <div className="w-11 h-11 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden p-1.5">
-                    <img src="https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/fpx.png" className="w-full h-full object-contain" alt="FPX" />
+                  <div className="w-11 h-11 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="w-10 h-10 rounded-lg bg-[#0066CC] flex items-center justify-center font-bold text-white text-[11px]">FPX</div>
                   </div>
                   <div className="flex-1">
                     <p className="text-[13px] font-bold text-slate-900">FPX Online Banking</p>
@@ -615,8 +615,13 @@ export default function CheckoutPage() {
                             )}
                             
                             {/* Bank Logo / Icon */}
-                            <div className="w-12 h-9 rounded-lg flex items-center justify-center mb-2 overflow-hidden">
-                              <img src={bank.logo} className="w-full h-full object-contain" alt={bank.label} />
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 overflow-hidden">
+                              {bank.id === 'maybank' && <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[11px] text-white tracking-tight" style={{background: '#F6A400'}}>MBB</div>}
+                              {bank.id === 'cimb' && <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[11px] text-white tracking-tight" style={{background: '#C00'}}>CIMB</div>}
+                              {bank.id === 'rhb' && <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[11px] text-white tracking-tight" style={{background: '#0066B3'}}>RHB</div>}
+                              {bank.id === 'hlb' && <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[11px] text-white tracking-tight" style={{background: '#0055A0'}}>HLB</div>}
+                              {bank.id === 'pbb' && <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[11px] text-white tracking-tight" style={{background: '#003087'}}>PBB</div>}
+                              {bank.id === 'ambank' && <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[11px] text-white tracking-tight" style={{background: '#E31837'}}>AMB</div>}
                             </div>
                             
                             <span className={`text-[11px] font-bold text-center leading-tight ${
@@ -635,8 +640,8 @@ export default function CheckoutPage() {
               {/*  TNG eWallet card  */}
               <div className="bg-slate-50 border border-slate-100 rounded-xl overflow-hidden cursor-pointer" onClick={() => setPaymentMethod('TNG')}>
                 <div className="flex items-center gap-4 px-4 py-4 bg-white">
-                  <div className="w-11 h-11 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden p-1">
-                    <img src="https://raw.githubusercontent.com/iyadmohmad/pulse-assets/main/banks/tng.png" className="w-full h-full object-contain" alt="TNG" />
+                  <div className="w-11 h-11 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white text-[11px]" style={{background: '#00AEEF'}}>TNG</div>
                   </div>
                   <div className="flex-1">
                     <p className="text-[13px] font-bold text-slate-900">Touch 'n Go eWallet</p>

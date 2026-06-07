@@ -157,7 +157,7 @@ export default function CartCheckoutPage() {
             {payStatus === 'processing' ? (
               <>
                 <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center">
-                  <span className="text-slate-900 font-semibold text-[13px] tracking-widest">FPX</span>
+                  <div className="w-10 h-10 rounded-lg bg-[#0066CC] flex items-center justify-center font-bold text-white text-[11px]">FPX</div>
                 </div>
                 <div className="space-y-1 text-center">
                   <p className="text-[15px] font-bold text-slate-900 tracking-tight">Almost there...</p>
@@ -356,8 +356,15 @@ export default function CartCheckoutPage() {
                      }`}
                    >
                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-white border border-slate-100 p-1.5 flex items-center justify-center shrink-0">
-                           <img src={bank.logo} alt={bank.label} className="w-full h-full object-contain" />
+                        <div className="w-10 h-10 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
+                            {bank.id === 'maybank' && <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-[10px] text-white tracking-tight" style={{background: '#F6A400'}}>MBB</div>}
+                            {bank.id === 'cimb' && <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-[10px] text-white tracking-tight" style={{background: '#C00'}}>CIMB</div>}
+                            {bank.id === 'rhb' && <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-[10px] text-white tracking-tight" style={{background: '#0066B3'}}>RHB</div>}
+                            {bank.id === 'hlb' && <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-[10px] text-white tracking-tight" style={{background: '#0055A0'}}>HLB</div>}
+                            {bank.id === 'pbb' && <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-[10px] text-white tracking-tight" style={{background: '#003087'}}>PBB</div>}
+                            {bank.id === 'ambank' && <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-[10px] text-white tracking-tight" style={{background: '#E31837'}}>AMB</div>}
+                            {bank.id === 'bsn' && <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-[10px] text-white tracking-tight" style={{background: '#003087'}}>BSN</div>}
+                            {bank.id === 'bank_islam' && <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-[10px] text-white tracking-tight" style={{background: '#C00'}}>BIMB</div>}
                         </div>
                         <span className={`text-[13px] font-bold ${selectedBank === bank.id ? 'text-slate-900' : 'text-slate-400'}`}>
                            {bank.label}
