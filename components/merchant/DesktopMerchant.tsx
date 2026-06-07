@@ -181,6 +181,120 @@ export default function DesktopMerchant({
     return item.title.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
+  const [activeSection, setActiveSection] = React.useState<'overview' | 'products' | 'settings'>('overview');
+
+  const isActive = (section: string) => activeSection === section;
+  const activeClass = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-gray-900 text-white font-medium shadow-sm transition-all";
+  const idleClass = "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium";
+
+  const renderContent = () => {
+    if (activeSection === 'products') {
+      return (
+        <div className="p-10 space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[16px] font-semibold text-[#111827]">Inventory</h3>
+            <p className="text-[13px] text-[#9CA3AF]">Manage your listed items.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {items?.map((item: any) => (
+              <div key={item.id} className="p-4 bg-white border border-[#E5E7EB] rounded-[12px] flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-[12px] bg-white border border-[#E5E7EB] overflow-hidden">
+                    {item.image_url ? <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-200"><LayoutGrid size={20} /></div>}
+                  </div>
+                  <div>
+                    <p className="text-[16px] font-medium text-[#111827] tracking-tight">{item.title}</p>
+                    <p className="text-[13px] text-[#9CA3AF]">RM {item.price?.toFixed(2)} - {item.stock_count} in stock</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={async () => { if (!confirm('Delete this listing?')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed.'); } }} className="w-9 h-9 rounded-full bg-slate-50 border border-slate-50 flex items-center justify-center text-red-300 hover:bg-red-50 hover:text-red-500 transition-all">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (activeSection === 'settings') {
+      return (
+        <div className="p-10">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm max-w-3xl">
+            <p className="text-xs text-[#1D9E75] font-medium mb-1">Merchant Portal</p>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-6">Settings</h1>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Shop Visibility</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Toggle your shop active or paused</p>
+                </div>
+                <button className="bg-gray-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-gray-800 transition-colors">Active</button>
+              </div>
+              <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Edit Profile</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Update your shop name and details</p>
+                </div>
+                <button onClick={() => router.push('/me/edit')} className="border border-gray-200 text-gray-600 text-xs rounded-full px-4 py-1.5 hover:bg-gray-50 transition-colors">Edit</button>
+              </div>
+              <div className="flex items-center justify-between py-4 border-b border-gray-100">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Notification Preferences</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Manage order and system alerts</p>
+                </div>
+                <button className="border border-gray-200 text-gray-600 text-xs rounded-full px-4 py-1.5 hover:bg-gray-50 transition-colors">Manage</button>
+              </div>
+              <div className="flex items-center justify-between py-4">
+                <div>
+                  <p className="text-sm font-semibold text-red-500">Sign Out</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Log out of your merchant account</p>
+                </div>
+                <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="border border-red-100 text-red-500 text-xs rounded-full px-4 py-1.5 hover:bg-red-50 transition-colors">Sign Out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-10 space-y-12">
+        {/* Active Pipeline */}
+        <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px] shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[16px] font-semibold text-[#111827]">Active Pipeline</h3>
+            <button onClick={handleExportOrders} className="bg-white border border-[#D1D5DB] text-[#374151] rounded-full px-4 py-2 text-xs font-medium hover:bg-slate-50 transition-colors">Export CSV</button>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {pipelineOrders.length === 0 ? (
+              <div className="py-12 text-center text-gray-500 text-sm">No active orders</div>
+            ) : (
+              pipelineOrders.map((o: any) => (
+                <div key={o.id} className="py-6 flex items-center justify-between hover:bg-slate-50/50 transition-all px-2 -mx-2 rounded-xl">
+                  <div className="flex items-center gap-4">
+                    <input type="checkbox" checked={selectedOrders.includes(o.id)} onChange={() => toggleOrderSelection(o.id)} className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
+                    <div>
+                      <p className="text-[14px] font-bold text-[#111827]">{o.title}</p>
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full uppercase mt-1 inline-block ${o.status === 'READY' || o.status === 'READY_FOR_PICKUP' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{o.status.replace(/_/g, ' ')}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && <button onClick={() => handlePrepareOrder(o.id, o.items)} className="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition-colors">Prepare</button>}
+                    {o.status === 'PREPARING' && <button onClick={() => handleMarkReady(o.id)} className="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition-colors">Ready</button>}
+                    <button onClick={() => onViewProof(o)} className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-50 transition-colors">Details</button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#F9F9FB] flex font-sans">
       
@@ -192,19 +306,19 @@ export default function DesktopMerchant({
         </div>
 
         <nav className="flex-1 px-4 py-2 space-y-1.5">
-          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white shadow-sm">
+          <button onClick={() => setActiveSection('overview')} className={isActive('overview') ? activeClass : idleClass}>
             <LayoutGrid size={18} />
             <span>Overview</span>
           </button>
-          <button onClick={() => router.push('/merchant/analytics')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button onClick={() => router.push('/merchant/analytics')} className={idleClass}>
             <BarChart3 size={18} />
             <span>Analytics</span>
           </button>
-          <button onClick={() => router.push('/marketplace')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button onClick={() => setActiveSection('products')} className={isActive('products') ? activeClass : idleClass}>
             <Package size={18} />
             <span>Inventory</span>
           </button>
-          <button onClick={() => router.push('/me/edit')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button onClick={() => setActiveSection('settings')} className={isActive('settings') ? activeClass : idleClass}>
             <Settings size={18} />
             <span>Settings</span>
           </button>
@@ -243,19 +357,19 @@ export default function DesktopMerchant({
 
         {/* Mini Stats Strip */}
         <div className="px-10 pt-8 grid grid-cols-4 gap-4">
-          <div className="bg-gray-50 rounded-xl p-4 flex-1">
+          <div className="bg-gray-50 rounded-xl p-4 flex-1 shadow-sm border border-slate-100">
             <p className="text-[10px] text-gray-500 uppercase tracking-widest font-medium mb-1">Total Revenue</p>
             <p className="text-xl font-bold text-gray-900">RM {revenue.toFixed(2)}</p>
           </div>
-          <div className="bg-gray-50 rounded-xl p-4 flex-1">
+          <div className="bg-gray-50 rounded-xl p-4 flex-1 shadow-sm border border-slate-100">
             <p className="text-[10px] text-gray-500 uppercase tracking-widest font-medium mb-1">This Month</p>
             <p className="text-xl font-bold text-gray-900">RM {monthRevenue.toFixed(2)}</p>
           </div>
-          <div className="bg-gray-50 rounded-xl p-4 flex-1">
+          <div className="bg-gray-50 rounded-xl p-4 flex-1 shadow-sm border border-slate-100">
             <p className="text-[10px] text-gray-500 uppercase tracking-widest font-medium mb-1">Active Orders</p>
             <p className="text-xl font-bold text-gray-900">{activeOrdersCount}</p>
           </div>
-          <div className="bg-gray-50 rounded-xl p-4 flex-1">
+          <div className="bg-gray-50 rounded-xl p-4 flex-1 shadow-sm border border-slate-100">
             <p className="text-[10px] text-gray-500 uppercase tracking-widest font-medium mb-1">Total Listings</p>
             <p className="text-xl font-bold text-gray-900">{items?.length || 0}</p>
           </div>
@@ -292,33 +406,7 @@ export default function DesktopMerchant({
           )}
         </AnimatePresence>
 
-        <div className="p-10 space-y-12">
-           {/* Active Pipeline */}
-           <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[20px]">
-              <div className="flex items-center justify-between mb-6">
-                 <h3 className="text-[16px] font-semibold text-[#111827]">Active Pipeline</h3>
-                 <button onClick={handleExportOrders} className="bg-white border border-[#D1D5DB] text-[#374151] rounded-full px-4 py-2 text-xs font-medium">Export CSV</button>
-              </div>
-              <div className="divide-y divide-slate-100">
-                 {pipelineOrders.map((o: any) => (
-                    <div key={o.id} className="py-6 flex items-center justify-between hover:bg-slate-50/50 transition-all">
-                       <div className="flex items-center gap-4">
-                          <input type="checkbox" checked={selectedOrders.includes(o.id)} onChange={() => toggleOrderSelection(o.id)} />
-                          <div>
-                             <p className="text-[14px] font-bold text-[#111827]">{o.title}</p>
-                             <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 uppercase mt-1 inline-block">{o.status.replace(/_/g, ' ')}</span>
-                          </div>
-                       </div>
-                       <div className="flex gap-2">
-                          {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && <button onClick={() => handlePrepareOrder(o.id, o.items)} className="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold">Prepare</button>}
-                          {o.status === 'PREPARING' && <button onClick={() => handleMarkReady(o.id)} className="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold">Ready</button>}
-                          <button onClick={() => onViewProof(o)} className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-xs font-bold">Details</button>
-                       </div>
-                    </div>
-                 ))}
-              </div>
-           </div>
-        </div>
+        {renderContent()}
       </main>
 
       {/* Floating Action Bar */}
@@ -326,7 +414,7 @@ export default function DesktopMerchant({
         {selectedOrders.length >= 2 && (
           <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }} className="fixed bottom-10 left-1/2 -translate-x-1/2 ml-32 z-50 bg-slate-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6">
             <span className="text-sm font-bold">{selectedOrders.length} orders</span>
-            <button onClick={handleBulkMarkReady} className="bg-white text-slate-900 px-5 py-2 rounded-full text-xs font-bold">Mark Ready</button>
+            <button onClick={handleBulkMarkReady} className="bg-white text-slate-900 px-5 py-2 rounded-full text-xs font-bold hover:bg-slate-50 transition-colors">Mark Ready</button>
           </motion.div>
         )}
       </AnimatePresence>
