@@ -28,6 +28,7 @@ export default function MerchantInsightsPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,15 +44,26 @@ export default function MerchantInsightsPage() {
         }));
 
         // FIX 9: Queries use seller_id == currentMerchant.uid AND status == "DELIVERED"
-        const q = query(
+        const qOrders = query(
           collection(db, "orders"), 
           where("seller_id", "==", user.uid),
           where("status", "==", "DELIVERED")
         );
         
-        unsubs.push(onSnapshot(q, (s) => {
+        unsubs.push(onSnapshot(qOrders, (s) => {
            setOrders(s.docs.map(d => ({ id: d.id, ...d.data() })));
-           setLoading(false);
+        }));
+
+        // Fetch active items for inventory stats
+        const qItems = query(
+          collection(db, "items"),
+          where("seller_id", "==", user.uid),
+          where("status", "==", "active")
+        );
+
+        unsubs.push(onSnapshot(qItems, (s) => {
+          setItems(s.docs.map(d => ({ id: d.id, ...d.data() })));
+          setLoading(false);
         }));
       } else {
         router.push('/auth');
@@ -76,10 +88,13 @@ export default function MerchantInsightsPage() {
     }).reduce((s, o) => s + Number(o.total || o.price || 0), 0);
     
     const totalOrders = orders.length;
-    const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "";
+    const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "0.00";
 
-    return { totalRevenue, thisMonthRevenue, totalOrders, avgOrderValue };
-  }, [orders]);
+    const inventoryValue = items.reduce((s, i) => s + (Number(i.price || 0) * (Number(i.stock_count || 0))), 0);
+    const totalUnits = items.reduce((s, i) => s + Number(i.stock_count || 0), 0);
+
+    return { totalRevenue, thisMonthRevenue, totalOrders, avgOrderValue, inventoryValue, totalUnits };
+  }, [orders, items]);
 
   //  SECTION 2: Sales Over Time (Last 7 Days) 
   const lineChartData = useMemo(() => {
@@ -211,8 +226,8 @@ export default function MerchantInsightsPage() {
           <div className="grid grid-cols-4 gap-4">
             <StatCard title="Total Earnings" value={`RM ${stats.totalRevenue.toFixed(2)}`} subtext="Life-to-date" />
             <StatCard title="Sales Volume" value={stats.totalOrders} subtext="Total orders" />
-            <StatCard title="Inventory Value" value={`RM ${(stats.totalRevenue * 1.2).toFixed(0)}`} subtext="Estimated" />
-            <StatCard title="Total Units" value={stats.totalOrders * 2} subtext="Items moved" />
+            <StatCard title="Inventory Value" value={`RM ${stats.inventoryValue.toFixed(0)}`} subtext="Active assets" />
+            <StatCard title="Total Units" value={stats.totalUnits} subtext="In-stock items" />
           </div>
 
           <div className="grid grid-cols-1 gap-8">

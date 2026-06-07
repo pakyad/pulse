@@ -74,9 +74,20 @@ function DisputeDetailsDrawer({ dispute, onClose, onResolve }: { dispute: any; o
 
     const fetchEvidence = async () => {
       const results: any[] = [];
-      const q = query(collection(db, 'admin_evidence'), where('orderId', '==', dispute.order_id));
-      const snap = await getDocs(q);
-      snap.forEach(d => results.push({ id: d.id, ...d.data() }));
+      const orderRefId = dispute.orderId || dispute.order_id;
+      if (!orderRefId) {
+        setEvidenceLoading(false);
+        return;
+      }
+
+      const q1 = query(collection(db, 'admin_evidence'), where('orderId', '==', orderRefId));
+      const q2 = query(collection(db, 'admin_evidence'), where('order_id', '==', orderRefId));
+      
+      const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+      
+      const combined = new Map();
+      snap1.forEach(d => combined.set(d.id, { id: d.id, ...d.data() }));
+      snap2.forEach(d => combined.set(d.id, { id: d.id, ...d.data() }));
 
       const disputeSnap = await getDoc(doc(db, 'disputes', dispute.id));
       if (disputeSnap.exists()) {
@@ -84,7 +95,7 @@ function DisputeDetailsDrawer({ dispute, onClose, onResolve }: { dispute: any; o
         setBuyerProof(d.proofUrl || d.attachments?.[0] || null);
       }
 
-      setEvidence(results);
+      setEvidence(Array.from(combined.values()));
       setEvidenceLoading(false);
     };
 
