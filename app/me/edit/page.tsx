@@ -5,18 +5,59 @@ import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Camera, Loader2, ChevronDown, Check } from 'lucide-react';
+import { ChevronLeft, Camera, Loader2, ChevronDown, Check, Lock } from 'lucide-react';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
-const MIIT_COURSES = [
-  'Bachelor of Software Engineering',
-  'Bachelor of Computer Engineering',
-  'Bachelor of Networking Systems',
-  'Bachelor of Information Technology',
-  'Bachelor of Multimedia Technology',
-  'Bachelor of Business Computing',
-  'Diploma in Software Engineering',
-  'Diploma in Information Technology'
+const PROGRAMMES_GROUPS = [
+  {
+    label: 'Pre-University & Foundation',
+    options: [
+      'Foundation in Computer Technology (FICT)',
+      'Foundation in Science and Technology (Pre-Korea Program)',
+    ]
+  },
+  {
+    label: 'Diploma',
+    options: [
+      'Diploma in Information Technology',
+      'Diploma in Networking Technology',
+      'Diploma in Multimedia',
+      'Diploma in Animation',
+    ]
+  },
+  {
+    label: 'Bachelor — Software Engineering & IT',
+    options: [
+      'Bachelor of IT (Hons) in Software Engineering',
+      'Bachelor of IT (Hons) in Computer System Security',
+      'Bachelor of IT (Hons) in Internet of Things',
+      'Bachelor of Artificial Intelligence Technology with Honours',
+    ]
+  },
+  {
+    label: 'Bachelor — Creative Multimedia',
+    options: [
+      'Bachelor of Multimedia Technology (Hons) in Interactive Multimedia Design',
+      'Bachelor of Multimedia Technology (Hons) in Computer Animation',
+      'Bachelor of Game Development Technology with Honours',
+    ]
+  },
+  {
+    label: 'Bachelor — Computer Engineering',
+    options: [
+      'Bachelor of Computer Engineering Technology (Networking Systems) with Honours',
+      'Bachelor of Computer Engineering Technology (Computer Systems) with Honours',
+    ]
+  },
+  {
+    label: 'Postgraduate',
+    options: [
+      'Master in Computer Science',
+      'Master of Information Technology',
+      'Master in Creative Digital Media',
+      'Doctor of Philosophy (Information Technology)',
+    ]
+  }
 ];
 
 const YEARS = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Postgrad'];
@@ -54,13 +95,15 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false);
 
   // Form State
-  const [faculty, setFaculty] = useState('');
+  const [programme, setProgramme] = useState('');
+  const [matricNumber, setMatricNumber] = useState('');
+  const [campus, setCampus] = useState('');
   const [yearOfStudy, setYearOfStudy] = useState('');
   const [bio, setBio] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
 
   // UI State
-  const [pickerType, setPickerType] = useState<'avatar' | 'course' | 'year' | null>(null);
+  const [pickerType, setPickerType] = useState<'avatar' | 'programme' | 'year' | null>(null);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (user) => {
@@ -69,8 +112,10 @@ export default function EditProfilePage() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setProfile(data);
-        setFaculty(data.faculty || '');
-        setYearOfStudy(data.year_of_study || '');
+        setProgramme(data.programme || data.faculty || '');
+        setMatricNumber(data.matricNumber || data.matric_no || '');
+        setCampus(data.campus || '');
+        setYearOfStudy(data.yearOfStudy || data.year_of_study || '');
         setBio(data.bio || '');
         setPhotoUrl(data.photo_url || '');
       }
@@ -84,8 +129,12 @@ export default function EditProfilePage() {
     setSaving(true);
     try {
       await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-        faculty,
+        programme,
+        matricNumber,
+        campus: 'MIIT',
+        yearOfStudy,
         year_of_study: yearOfStudy,
+        faculty: programme,
         bio,
         photo_url: photoUrl,
       });
@@ -152,81 +201,109 @@ export default function EditProfilePage() {
             <Subtext>Update your course and year of study</Subtext>
           </div>
           
-          <div className="space-y-4">
-             {/* MIIT Course Dropdown */}
-             <div className="space-y-2">
-                <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">MIIT Course</p>
-                <div className="relative">
-                  <button 
-                    onClick={() => setPickerType(pickerType === 'course' ? null : 'course')}
-                    className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
-                  >
-                    <span className={`text-[13px] font-bold ${faculty ? 'text-slate-900' : 'text-slate-400'}`}>
-                       {faculty || 'Select Course'}
-                    </span>
-                    <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'course' ? 'rotate-180' : ''}`} />
-                  </button>
-                  <AnimatePresence>
-                    {pickerType === 'course' && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full left-0 right-0 mt-3 bg-slate-50 border border-slate-100 rounded-[24px] overflow-hidden z-20 shadow-2xl shadow-slate-900/5 max-h-[300px] overflow-y-auto pr-1 scrollbar-hide"
-                      >
-                        {MIIT_COURSES.map(course => (
-                          <button
-                            key={course}
-                            onClick={() => { setFaculty(course); setPickerType(null); }}
-                            className={`w-full px-6 py-4 text-left text-[12px] font-bold transition-colors flex items-center justify-between ${
-                              faculty === course ? 'bg-blue-500 text-white' : 'text-slate-600 hover:bg-slate-100'
-                            }`}
-                          >
-                            {course}
-                            {faculty === course && <Check size={14} />}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-             </div>
+           <div className="space-y-4">
+              {/* Programme Dropdown */}
+              <div className="space-y-2">
+                 <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Programme</p>
+                 <div className="relative">
+                   <button 
+                     onClick={() => setPickerType(pickerType === 'programme' ? null : 'programme')}
+                     className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
+                   >
+                     <span className={`text-[13px] font-bold ${programme ? 'text-slate-900' : 'text-slate-400'}`}>
+                        {programme || 'Select Programme'}
+                     </span>
+                     <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'programme' ? 'rotate-180' : ''}`} />
+                   </button>
+                   <AnimatePresence>
+                     {pickerType === 'programme' && (
+                       <motion.div 
+                         initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                         className="absolute top-full left-0 right-0 mt-3 bg-slate-50 border border-slate-100 rounded-[24px] overflow-hidden z-20 shadow-2xl shadow-slate-900/5 max-h-[300px] overflow-y-auto pr-1 scrollbar-hide"
+                       >
+                         {PROGRAMMES_GROUPS.map(group => (
+                           <div key={group.label}>
+                             <p className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50/80 sticky top-0">
+                               {group.label}
+                             </p>
+                             {group.options.map(opt => (
+                               <button
+                                 key={opt}
+                                 onClick={() => { setProgramme(opt); setPickerType(null); }}
+                                 className={`w-full px-6 py-4 text-left text-[12px] font-bold transition-colors flex items-center justify-between ${
+                                   programme === opt ? 'bg-blue-500 text-white' : 'text-slate-600 hover:bg-slate-100'
+                                 }`}
+                               >
+                                 {opt}
+                                 {programme === opt && <Check size={14} />}
+                               </button>
+                             ))}
+                           </div>
+                         ))}
+                       </motion.div>
+                     )}
+                   </AnimatePresence>
+                 </div>
+              </div>
 
-             {/* Current Year Dropdown */}
-             <div className="space-y-2">
-                <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Current Year</p>
-                <div className="relative">
-                  <button 
-                    onClick={() => setPickerType(pickerType === 'year' ? null : 'year')}
-                    className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
-                  >
-                    <span className={`text-[13px] font-bold ${yearOfStudy ? 'text-slate-900' : 'text-slate-400'}`}>
-                       {yearOfStudy || 'Select Year'}
-                    </span>
-                    <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'year' ? 'rotate-180' : ''}`} />
-                  </button>
-                  <AnimatePresence>
-                    {pickerType === 'year' && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full left-0 right-0 mt-3 bg-slate-50 border border-slate-100 rounded-[24px] overflow-hidden z-20 shadow-2xl shadow-slate-900/5"
-                      >
-                        {YEARS.map(year => (
-                          <button
-                            key={year}
-                            onClick={() => { setYearOfStudy(year); setPickerType(null); }}
-                            className={`w-full px-6 py-4 text-left text-[12px] font-bold transition-colors flex items-center justify-between ${
-                              yearOfStudy === year ? 'bg-blue-500 text-white' : 'text-slate-600 hover:bg-slate-100'
-                            }`}
-                          >
-                            {year}
-                            {yearOfStudy === year && <Check size={14} />}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-             </div>
-          </div>
+              {/* Matric Number */}
+              <div className="space-y-2">
+                 <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Matric Number</p>
+                 <input
+                   type="text"
+                   placeholder="e.g. MIIT2210234"
+                   value={matricNumber}
+                   onChange={(e) => setMatricNumber(e.target.value)}
+                   className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 text-[13px] font-bold text-slate-900 outline-none focus:border-slate-900 transition-all placeholder:text-slate-400"
+                 />
+              </div>
+
+              {/* Campus (read-only) */}
+              <div className="space-y-2">
+                 <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Campus</p>
+                 <div className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between">
+                   <span className="text-[13px] font-bold text-slate-600">MIIT — Malaysian Institute of Information Technology</span>
+                   <Lock size={16} className="text-slate-400 shrink-0" />
+                 </div>
+              </div>
+
+              {/* Current Year Dropdown */}
+              <div className="space-y-2">
+                 <p className="text-[12px] font-semibold text-slate-500 capitalize px-1">Current Year</p>
+                 <div className="relative">
+                   <button 
+                     onClick={() => setPickerType(pickerType === 'year' ? null : 'year')}
+                     className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-5 flex items-center justify-between active:scale-[0.98] transition-all"
+                   >
+                     <span className={`text-[13px] font-bold ${yearOfStudy ? 'text-slate-900' : 'text-slate-400'}`}>
+                        {yearOfStudy || 'Select Year'}
+                     </span>
+                     <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${pickerType === 'year' ? 'rotate-180' : ''}`} />
+                   </button>
+                   <AnimatePresence>
+                     {pickerType === 'year' && (
+                       <motion.div 
+                         initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                         className="absolute top-full left-0 right-0 mt-3 bg-slate-50 border border-slate-100 rounded-[24px] overflow-hidden z-20 shadow-2xl shadow-slate-900/5"
+                       >
+                         {YEARS.map(year => (
+                           <button
+                             key={year}
+                             onClick={() => { setYearOfStudy(year); setPickerType(null); }}
+                             className={`w-full px-6 py-4 text-left text-[12px] font-bold transition-colors flex items-center justify-between ${
+                               yearOfStudy === year ? 'bg-blue-500 text-white' : 'text-slate-600 hover:bg-slate-100'
+                             }`}
+                           >
+                             {year}
+                             {yearOfStudy === year && <Check size={14} />}
+                           </button>
+                         ))}
+                       </motion.div>
+                     )}
+                   </AnimatePresence>
+                 </div>
+              </div>
+           </div>
         </section>
 
         {/* ── ABOUT & CONTACT ── */}

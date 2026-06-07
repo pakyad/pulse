@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDocs, getDoc, doc } from 'firebase/firestore';
 import { resolveDispute } from '@/app/actions/adminActions';
-import { Loader2, CheckCircle, FileText, X, AlertTriangle, Scale, ShieldAlert, BadgeCent } from 'lucide-react';
+import { Loader2, CheckCircle, FileText, X, AlertTriangle, Scale, ShieldAlert, BadgeCent, Camera, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Confirm Modal ─────────────────────────────────────────────────────────────
@@ -64,6 +64,32 @@ function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
 function DisputeDetailsDrawer({ dispute, onClose, onResolve }: { dispute: any; onClose: () => void; onResolve: (id: string, action: string) => Promise<void> }) {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
+  const [evidence, setEvidence] = useState<any[]>([]);
+  const [buyerProof, setBuyerProof] = useState<string | null>(null);
+  const [evidenceLoading, setEvidenceLoading] = useState(true);
+
+  useEffect(() => {
+    if (!dispute?.order_id) return;
+    setEvidenceLoading(true);
+
+    const fetchEvidence = async () => {
+      const results: any[] = [];
+      const q = query(collection(db, 'admin_evidence'), where('orderId', '==', dispute.order_id));
+      const snap = await getDocs(q);
+      snap.forEach(d => results.push({ id: d.id, ...d.data() }));
+
+      const disputeSnap = await getDoc(doc(db, 'disputes', dispute.id));
+      if (disputeSnap.exists()) {
+        const d = disputeSnap.data();
+        setBuyerProof(d.proofUrl || d.attachments?.[0] || null);
+      }
+
+      setEvidence(results);
+      setEvidenceLoading(false);
+    };
+
+    fetchEvidence();
+  }, [dispute?.id, dispute?.order_id]);
 
   if (!dispute) return null;
 
@@ -132,6 +158,46 @@ function DisputeDetailsDrawer({ dispute, onClose, onResolve }: { dispute: any; o
             </div>
           </div>
 
+          <div className="space-y-4">
+            <h3 className="text-[12px] font-bold text-slate-900">Evidence</h3>
+            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+              {evidenceLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 size={18} className="animate-spin text-slate-300" />
+                </div>
+              ) : evidence.length === 0 && !buyerProof ? (
+                <p className="text-[12px] font-medium text-slate-400 text-center py-2">No evidence submitted.</p>
+              ) : (
+                <>
+                  {buyerProof && (
+                    <div>
+                      <p className="text-[11px] font-bold text-slate-400 mb-2 flex items-center gap-1.5">
+                        <FileText size={13} /> Buyer Submitted Evidence
+                      </p>
+                      <img src={buyerProof} alt="Buyer proof"
+                        className="w-full max-h-[200px] object-cover rounded-lg border border-slate-200" />
+                    </div>
+                  )}
+                  {evidence.map((ev: any) => (
+                    <div key={ev.id}>
+                      <p className="text-[11px] font-bold text-slate-400 mb-2 flex items-center gap-1.5">
+                        <Camera size={13} />
+                        {ev.type === 'PICKUP' ? 'Pickup Photo' : 'Delivery Photo'}
+                        {ev.timestamp?.toDate && (
+                          <span className="font-medium text-slate-300">
+                            · {new Date(ev.timestamp.toDate()).toLocaleString()}
+                          </span>
+                        )}
+                      </p>
+                      <img src={ev.photoUrl} alt={ev.type}
+                        className="w-full max-h-[200px] object-cover rounded-lg border border-slate-200" />
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+
         </div>
 
         {/* Action Controls docked at bottom */}
@@ -166,6 +232,7 @@ function DisputeDetailsDrawer({ dispute, onClose, onResolve }: { dispute: any; o
 export default function DisputesPage() {
   const [disputes,      setDisputes]      = useState<any[]>([]);
   const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState('');
   const [viewingDispute, setViewingDispute] = useState<any>(null);
 
   useEffect(() => {
@@ -185,7 +252,7 @@ export default function DisputesPage() {
       const res = await resolveDispute(id, action as any);
       if (!res.success) throw new Error(res.message);
     } catch (e: any) {
-      alert("Error: " + e.message);
+      setError(e.message);
     }
   };
 
@@ -196,6 +263,14 @@ export default function DisputesPage() {
           <DisputeDetailsDrawer dispute={viewingDispute} onClose={() => setViewingDispute(null)} onResolve={handleResolve} />
         )}
       </AnimatePresence>
+
+      {/* Error banner */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-[12px] font-medium text-red-700 flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError('')} className="text-red-400 hover:text-red-700 ml-4"><X size={14} /></button>
+        </div>
+      )}
 
       {/* Header */}
       <div>

@@ -28,7 +28,7 @@ const services = [
   { id: 4, label: 'UniStore',     icon: () => <ShieldCheck size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,   path: '/hub/unistore',                color: 'bg-[#3B82F6]', shadow: 'bg-[#1E40AF]' },
   { id: 5, label: 'Inbox',        icon: () => <MessageSquare size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />, path: '/messages',                    color: 'bg-[#8B5CF6]', shadow: 'bg-[#4C1D95]' },
   { id: 6, label: 'Campaigns',    icon: () => <Ticket size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,        path: '/campaigns',                   color: 'bg-[#F43F5E]', shadow: 'bg-[#BE123C]' },
-  { id: 7, label: 'Student Market', icon: () => <ShoppingBag size={22} className="text-white drop-shadow-sm" strokeWidth={2.5} />,   path: '/marketplace?filter=student_market', color: 'bg-[#06B6D4]', shadow: 'bg-[#164E63]' },
+  { id: 7, label: 'Student Market', icon: () => <ShoppingBag size={22} className="text-[#3B6D11] drop-shadow-sm" strokeWidth={2.5} />, path: '/marketplace?pcs=true', color: 'bg-[#EAF3DE]', shadow: 'bg-[#B0CF90]' },
 ];
 
 const ServiceGrid = () => {

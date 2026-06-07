@@ -143,12 +143,11 @@ export default function MerchantDashboard() {
 
   // ── SHARED ANALYTICS LOGIC ──
   const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP"].includes(o.status)).reduce((s, o) => s + Number(o.total || o.price || 0), 0), [orders]);
-  const activeOrdersList = orders.filter(o => ["PENDING_VENDOR", "PREPARING", "PENDING_RUNNER", "READY_FOR_PICKUP"].includes(o.status));
+  const activeOrdersList = orders.filter(o => !["DELIVERED", "COMPLETED", "CANCELLED"].includes(o.status));
   
-  const incomingOrders = activeOrdersList.filter(o => o.status === 'PENDING_VENDOR' && !o.runner_id);
-  const urgentOrders = activeOrdersList.filter(o => o.status === 'PENDING_VENDOR');
-  const preparingOrders = activeOrdersList.filter(o => ['PREPARING', 'READY_FOR_PICKUP'].includes(o.status));
-  const historyOrders = orders.filter(o => ['PICKED_UP', 'IN_TRANSIT', 'ON_THE_WAY', 'DELIVERED', 'COMPLETED', 'CANCELLED'].includes(o.status)).slice(0, 20);
+  const pipelineOrders = activeOrdersList.filter(o => ['PENDING_VENDOR', 'PREPARING', 'READY_FOR_PICKUP', 'PENDING_RUNNER', 'PICKED_UP'].includes(o.status));
+  const completedOrders = orders.filter(o => ['DELIVERED', 'COMPLETED'].includes(o.status)).slice(0, 50);
+  const cancelledOrders = orders.filter(o => o.status === 'CANCELLED');
 
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" /></div>;
 
@@ -158,12 +157,11 @@ export default function MerchantDashboard() {
         <MobileMerchant 
           merchant={merchant}
           revenue={revenue}
-          activeOrdersCount={activeOrdersList.length}
-          incomingOrders={incomingOrders}
-          urgentOrders={urgentOrders}
-          preparingOrders={preparingOrders}
-          historyOrders={historyOrders}
-          topItems={items}
+          activeOrdersCount={pipelineOrders.length}
+          pipelineOrders={pipelineOrders}
+          completedOrders={completedOrders}
+          cancelledOrders={cancelledOrders}
+          items={items}
           recentOrders={orders.slice(0, 10)}
           handleAcceptOrder={handleAcceptOrder}
           handleCallRunner={handleCallRunner}
@@ -175,8 +173,9 @@ export default function MerchantDashboard() {
         <DesktopMerchant 
           merchant={merchant}
           revenue={revenue}
-          activeOrdersCount={activeOrdersList.length}
-          recentOrders={orders}
+          activeOrdersCount={pipelineOrders.length}
+          pipelineOrders={pipelineOrders}
+          completedOrders={completedOrders}
           items={items}
           handleAcceptOrder={handleAcceptOrder}
           handleCallRunner={handleCallRunner}

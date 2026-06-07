@@ -162,19 +162,9 @@ export default function PulsePage() {
       }
 
       const uAnn = onSnapshot(
-        query(collection(db, 'announcements'), limit(50)),
+        query(collection(db, 'announcements'), where('published', '==', true), orderBy('created_at', 'desc'), limit(20)),
         snap => { 
-          const list = snap.docs
-            .map(d => ({ id: d.id, ...d.data() }))
-            .filter((a: any) => a.type === 'OFFICIAL' || a.type === 'ADMIN');
-          
-          list.sort((a: any, b: any) => {
-            const ta = a.created_at?.toMillis?.() || 0;
-            const tb = b.created_at?.toMillis?.() || 0;
-            return tb - ta;
-          });
-
-          setAnnouncements(list.slice(0, 20)); 
+          setAnnouncements(snap.docs.map(d => ({ id: d.id, ...d.data() }))); 
           setLoadingAnn(false); 
         },
         (err) => {

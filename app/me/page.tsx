@@ -75,7 +75,7 @@ const MENU_GROUPS = [
     label: 'Account & Settings',
     items: [
       { icon: PixelBag, label: 'Order History', path: '/me/orders', sub: 'View past purchases & deliveries' },
-      { icon: PixelChart, label: 'Earnings Ledger', path: '/campus/earnings', sub: 'Track your marketplace revenue' },
+      { icon: PixelChart, label: 'Insights', path: '/campus/earnings', sub: 'Your seller performance at a glance' },
       { icon: PixelUser, label: 'Edit Profile', path: '/me/edit', sub: 'Update your personal details' },
       { icon: Settings, label: 'Settings', path: '/me/settings', sub: 'App preferences and security' },
     ]
@@ -138,17 +138,19 @@ export default function MePage() {
                </div>
             </button>
             <div className="flex-1 min-w-0 space-y-1">
-               <Heading className="truncate">{profile?.full_name || 'Pulse Member'}</Heading>
-               <div className="space-y-0.5">
-                  <Subtext>Matric Number: {profile?.matric_no || 'Pending'}</Subtext>
-                  {(profile?.faculty || profile?.year_of_study) && (
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight flex items-center gap-2">
-                       {profile?.faculty && <span>{profile.faculty}</span>}
-                       {profile?.faculty && profile?.year_of_study && <span className="w-1 h-1 bg-slate-200 rounded-full" />}
-                       {profile?.year_of_study && <span>{profile.year_of_study}</span>}
-                    </p>
-                  )}
-               </div>
+               <Heading className="truncate">{profile?.fullName || profile?.full_name || user?.displayName}</Heading>
+                <div className="space-y-0.5">
+                   {(profile?.matricNumber || profile?.matric_no) && (
+                     <p className="text-[12px] text-[#6B7280] font-medium">{profile?.matricNumber || profile?.matric_no}</p>
+                   )}
+                   {(profile?.programme || profile?.faculty) && (profile?.yearOfStudy || profile?.year_of_study) && (
+                     <p className="text-[11px] text-[#9CA3AF] font-medium flex items-center gap-2">
+                        <span>{profile?.programme || profile?.faculty}</span>
+                        <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                        <span>{profile?.yearOfStudy || profile?.year_of_study}</span>
+                     </p>
+                   )}
+                </div>
             </div>
          </section>
 
@@ -158,7 +160,7 @@ export default function MePage() {
                <Subtext className="text-[12px] font-semibold text-slate-500 capitalize">Trust Rating</Subtext>
                <div className="flex items-center gap-1.5 text-amber-500 pt-1" onClick={() => router.push(`/user/${user?.uid}/reviews`)} style={{cursor:'pointer'}}>
                  <p className="text-[22px] font-bold text-slate-900 hover:text-amber-600 transition-colors tracking-tight">
-                    {profile?.averageRating ? Number(profile.averageRating).toFixed(1) : '5.0'}
+                    {profile?.trustRating ? Number(profile.trustRating).toFixed(1) : '5.0'}
                  </p>
                  <Sparkles size={18} fill="currentColor" className="hover:text-amber-600 transition-colors" />
                </div>
@@ -247,7 +249,7 @@ export default function MePage() {
           <div className="fixed inset-0 z-300 flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsIDOpen(false)} className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" />
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative z-10 w-full max-w-sm">
-              <HologramID name={profile?.full_name || 'Pulse Member'} role={profile?.is_verified_runner ? 'Pulse Runner' : 'Student'} matricNo={profile?.matric_no || '—'} qrValue={user?.uid || 'anonymous'} />
+              <HologramID name={profile?.full_name || 'Pulse Member'} role={profile?.is_verified_runner ? 'Pulse Runner' : 'Student'} matricNo={profile?.matricNumber || profile?.matric_no || '—'} qrValue={user?.uid || 'anonymous'} />
               <button onClick={() => setIsIDOpen(false)} className="mt-8 w-full h-14 bg-white/10 rounded-[20px] text-white font-semibold text-[14px] hover:bg-white/20 transition-all">Close ID</button>
             </motion.div>
           </div>

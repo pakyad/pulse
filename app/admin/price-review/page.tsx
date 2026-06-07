@@ -130,6 +130,18 @@ function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: (
                   <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">{item.price_appeal}</p>
                 </div>
               )}
+              {item.pcs_result?.justification && (
+                <div className="pt-3 border-t border-red-200">
+                  <p className="text-[10px] font-semibold text-red-400 mb-1">AI Justification (PCS)</p>
+                  <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">{item.pcs_result.justification}</p>
+                  {item.pcs_result.marketPrice > 0 && (
+                    <div className="mt-2 flex gap-4 text-[11px]">
+                      <span className="text-red-400">Market Price: <strong className="text-red-900">RM {item.pcs_result.marketPrice.toFixed(2)}</strong></span>
+                      <span className="text-red-400">Max Allowed: <strong className="text-red-900">RM {item.pcs_result.maxAllowedPrice.toFixed(2)}</strong></span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -193,8 +205,12 @@ function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: (
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function PriceReviewPage() {
   const [items, setItems] = useState<any[]>([]);
+  const [reviewedItems, setReviewedItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewedLoading, setReviewedLoading] = useState(true);
+  const [error, setError] = useState('');
   const [viewingItem, setViewingItem] = useState<any>(null);
+  const [tab, setTab] = useState<'flagged' | 'reviewed'>('flagged');
 
   useEffect(() => {
     const q = query(
@@ -204,6 +220,22 @@ export default function PriceReviewPage() {
     const unsub = onSnapshot(q, (snap) => {
       setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'items'),
+      where('pcs_result', '!=', null)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const all = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter((i: any) => i.pcs_result && (i.status === 'ACTIVE' || i.status === 'REJECTED_BY_ADMIN'))
+        .sort((a: any, b: any) => (b.pcs_result?.checkedAt?.toMillis?.() || 0) - (a.pcs_result?.checkedAt?.toMillis?.() || 0));
+      setReviewedItems(all);
+      setReviewedLoading(false);
     });
     return () => unsub();
   }, []);
@@ -219,10 +251,10 @@ export default function PriceReviewPage() {
       if (action === 'hold')     res = await holdForRevision(viewingItem.id, viewingItem.seller_id, adminId, 'PRICE_TOO_HIGH', 'Please lower the price to comply with campus limits.');
       
       if (!res?.success) {
-        alert(res?.message || 'Something went wrong.');
+        setError(res?.message || 'Something went wrong.');
       }
     } catch { 
-      alert('Action failed. Try again.'); 
+      setError('Action failed. Try again.'); 
     }
   };
 
@@ -234,76 +266,156 @@ export default function PriceReviewPage() {
         )}
       </AnimatePresence>
 
+      {/* Error banner */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-[12px] font-medium text-red-700 flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError('')} className="text-red-400 hover:text-red-700 ml-4"><X size={14} /></button>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <p className="text-[10px] font-semibold text-slate-400 mb-1">Governance Engine</p>
         <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">Price Review</h1>
       </div>
 
-      {/* Main Container */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-[16px] font-bold text-slate-900">Flagged Listings</h2>
-            <p className="text-[12px] text-slate-400 mt-1">
-              Items priced abnormally high requiring admin intervention.
-            </p>
-          </div>
-          <span className="px-3 py-1 bg-red-50 border border-red-100 rounded-lg text-[11px] font-bold text-red-600">
-            {items.length} Review Required
-          </span>
-        </div>
-
-        <div className="space-y-4">
-          {loading ? (
-            <div className="py-12 flex justify-center"><Loader2 size={24} className="animate-spin text-slate-300" /></div>
-          ) : items.length === 0 ? (
-            <div className="py-12 text-center">
-              <CheckCircle2 size={32} className="mx-auto mb-3 text-slate-300" />
-              <p className="text-[13px] font-bold text-slate-500">No flagged listings</p>
-            </div>
-          ) : (
-            items.map((item) => {
-              const catConfig = MARKETPLACE_CATEGORIES[item.category as CategoryID];
-              const ceiling = catConfig?.ceiling || 0;
-              
-              return (
-                <div key={item.id} className="p-5 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-center hover:bg-slate-100/50 transition-all">
-                  
-                  {/* Col 1-6: Item Details */}
-                  <div className="md:col-span-6 flex gap-4 items-center">
-                    <div className="w-10 h-10 rounded-full bg-slate-200/50 flex items-center justify-center shrink-0">
-                      <Search size={16} className="text-slate-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-[14px] font-bold text-slate-900 line-clamp-1">{item.title}</h3>
-                      <p className="text-[11px] font-medium text-slate-400 mt-0.5">#{item.id.substring(0,8).toUpperCase()}</p>
-                    </div>
-                  </div>
-
-                  {/* Col 7-9: Price & Ceiling */}
-                  <div className="md:col-span-3">
-                    <p className="text-[15px] font-bold text-red-600">RM {Number(item.price).toFixed(2)}</p>
-                    {ceiling > 0 && (
-                      <p className="text-[10px] font-bold text-slate-400 mt-0.5">Limit: RM {ceiling.toFixed(2)}</p>
-                    )}
-                    <p className="text-[9px] font-bold mt-0.5 text-slate-400 uppercase tracking-wider">{item.flag_source === 'SELLER_APPEAL' ? 'Appeal' : item.flag_source === 'COMMUNITY' ? 'Community Flagged' : 'System Flagged'}</p>
-                  </div>
-
-                  {/* Col 10-12: Action Button */}
-                  <div className="md:col-span-3 flex items-center justify-end">
-                    <button onClick={() => setViewingItem(item)}
-                      className="h-10 px-6 rounded-xl text-[12px] font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10">
-                      Review Pricing
-                    </button>
-                  </div>
-
-                </div>
-              );
-            })
-          )}
-        </div>
+      {/* Tab Switcher */}
+      <div className="flex gap-1 p-1 bg-slate-50 rounded-xl border border-slate-100 w-fit">
+        <button onClick={() => setTab('flagged')}
+          className={`px-4 h-8 rounded-lg text-[11px] font-bold transition-all ${tab === 'flagged' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>
+          Flagged Listings
+        </button>
+        <button onClick={() => setTab('reviewed')}
+          className={`px-4 h-8 rounded-lg text-[11px] font-bold transition-all ${tab === 'reviewed' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>
+          Reviewed
+        </button>
       </div>
+
+      {/* Flagged Listings */}
+      {tab === 'flagged' && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-[16px] font-bold text-slate-900">Flagged Listings</h2>
+              <p className="text-[12px] text-slate-400 mt-1">
+                Items priced abnormally high requiring admin intervention.
+              </p>
+            </div>
+            <span className="px-3 py-1 bg-red-50 border border-red-100 rounded-lg text-[11px] font-bold text-red-600">
+              {items.length} Review Required
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {loading ? (
+              <div className="py-12 flex justify-center"><Loader2 size={24} className="animate-spin text-slate-300" /></div>
+            ) : items.length === 0 ? (
+              <div className="py-12 text-center">
+                <CheckCircle2 size={32} className="mx-auto mb-3 text-slate-300" />
+                <p className="text-[13px] font-bold text-slate-500">No flagged listings</p>
+              </div>
+            ) : (
+              items.map((item) => {
+                const catConfig = MARKETPLACE_CATEGORIES[item.category as CategoryID];
+                const ceiling = catConfig?.ceiling || 0;
+                
+                return (
+                  <div key={item.id} className="p-5 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-center hover:bg-slate-100/50 transition-all">
+                    
+                    {/* Col 1-6: Item Details */}
+                    <div className="md:col-span-6 flex gap-4 items-center">
+                      <div className="w-10 h-10 rounded-full bg-slate-200/50 flex items-center justify-center shrink-0">
+                        <Search size={16} className="text-slate-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-[14px] font-bold text-slate-900 line-clamp-1">{item.title}</h3>
+                        <p className="text-[11px] font-medium text-slate-400 mt-0.5">#{item.id.substring(0,8).toUpperCase()}</p>
+                      </div>
+                    </div>
+
+                    {/* Col 7-9: Price & Ceiling */}
+                    <div className="md:col-span-3">
+                      <p className="text-[15px] font-bold text-red-600">RM {Number(item.price).toFixed(2)}</p>
+                      {ceiling > 0 && (
+                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">Limit: RM {ceiling.toFixed(2)}</p>
+                      )}
+                      <p className="text-[9px] font-bold mt-0.5 text-slate-400 uppercase tracking-wider">{item.flag_source === 'SELLER_APPEAL' ? 'Appeal' : item.flag_source === 'COMMUNITY' ? 'Community Flagged' : 'System Flagged'}</p>
+                    </div>
+
+                    {/* Col 10-12: Action Button */}
+                    <div className="md:col-span-3 flex items-center justify-end">
+                      <button onClick={() => setViewingItem(item)}
+                        className="h-10 px-6 rounded-xl text-[12px] font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10">
+                        Review Pricing
+                      </button>
+                    </div>
+
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Reviewed Tab */}
+      {tab === 'reviewed' && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-[16px] font-bold text-slate-900">Reviewed Items</h2>
+              <p className="text-[12px] text-slate-400 mt-1">
+                Items that have been checked by PCS (Claude) AI.
+              </p>
+            </div>
+            <span className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[11px] font-bold text-slate-500">
+              {reviewedItems.length} Reviewed
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {reviewedLoading ? (
+              <div className="py-12 flex justify-center"><Loader2 size={24} className="animate-spin text-slate-300" /></div>
+            ) : reviewedItems.length === 0 ? (
+              <div className="py-12 text-center">
+                <CheckCircle2 size={32} className="mx-auto mb-3 text-slate-300" />
+                <p className="text-[13px] font-bold text-slate-500">No reviewed items</p>
+              </div>
+            ) : (
+              reviewedItems.map((item) => {
+                const decidedBy = item.pcs_result?.isJustified !== undefined ? 'Claude' : 'Admin';
+                const decision = item.status === 'ACTIVE' ? 'Approved' : 'Rejected';
+                return (
+                  <div key={item.id} className="h-14 px-5 bg-white rounded-xl border border-[#E5E7EB] grid grid-cols-1 md:grid-cols-12 gap-4 items-center hover:bg-[#F9FAFB] transition-all">
+                    <div className="md:col-span-4">
+                      <p className="text-[13px] font-bold text-slate-900 truncate">{item.title}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-semibold ${decision === 'Approved' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+                        {decision}
+                      </span>
+                    </div>
+                    <div className="md:col-span-2">
+                      <span className="text-[11px] text-slate-500">{decidedBy}</span>
+                    </div>
+                    <div className="md:col-span-2">
+                      <span className="text-[11px] text-slate-400">
+                        {item.pcs_result?.checkedAt?.toMillis
+                          ? new Date(item.pcs_result.checkedAt.toMillis()).toLocaleDateString()
+                          : '—'}
+                      </span>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[10px] text-slate-400 truncate">{item.pcs_result?.justification || '—'}</p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

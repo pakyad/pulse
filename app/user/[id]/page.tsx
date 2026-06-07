@@ -169,7 +169,7 @@ export default function PublicProfilePage() {
             >
                <div className="flex items-center gap-1.5 text-amber-500">
                  <p className="text-[16px] font-semibold text-slate-900 group-hover:text-amber-600 transition-colors">
-                    {profile?.averageRating ? Number(profile.averageRating).toFixed(1) : '5.0'}
+                    {profile?.trustRating ? Number(profile.trustRating).toFixed(1) : '5.0'}
                  </p>
                  <Star size={14} fill="currentColor" className="group-hover:text-amber-600 transition-colors" />
                </div>

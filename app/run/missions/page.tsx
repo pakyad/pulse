@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth, storage } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, runTransaction, serverTimestamp, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { 
   Camera, X, Loader2, 
@@ -349,10 +349,26 @@ export default function MissionControl() {
     if (!activeMission || !auth.currentUser || !podPhoto) return;
     setIsProcessing(true);
     try {
-      const storageRef = ref(storage, `pickup_proofs/${activeMission.id}_${Date.now()}.jpg`);
+      const timestamp = Date.now();
+      const storagePath = `orders/${activeMission.id}/pickup_${timestamp}.jpg`;
+      const storageRef = ref(storage, storagePath);
       const uploadRes = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(uploadRes.ref);
-      await updateDoc(doc(db, "orders", activeMission.id), { status: 'PICKED_UP', pickup_proof_url: url, picked_up_at: serverTimestamp() });
+
+      await updateDoc(doc(db, "orders", activeMission.id), {
+        status: 'PICKED_UP',
+        pickup_photo_url: url,
+        picked_up_at: serverTimestamp()
+      });
+
+      await addDoc(collection(db, "admin_evidence"), {
+        orderId: activeMission.id,
+        type: "PICKUP",
+        photoUrl: url,
+        runnerId: auth.currentUser.uid,
+        timestamp: serverTimestamp()
+      });
+
       setPodPhoto(null); setPodPreview(null); setProofMode(null);
     } catch (e: any) { console.error('[Pickup]', e); } finally { setIsProcessing(false); }
   };
@@ -361,9 +377,41 @@ export default function MissionControl() {
     if (!activeMission || !auth.currentUser || !podPhoto) return;
     setIsProcessing(true);
     try {
-      const storageRef = ref(storage, `delivery_proofs/${activeMission.id}_${Date.now()}.jpg`);
+      const timestamp = Date.now();
+      const storagePath = `orders/${activeMission.id}/delivery_${timestamp}.jpg`;
+      const storageRef = ref(storage, storagePath);
       const uploadRes = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(uploadRes.ref);
+
+      await updateDoc(doc(db, "orders", activeMission.id), {
+        delivery_photo_url: url,
+      });
+
+      await addDoc(collection(db, "admin_evidence"), {
+        orderId: activeMission.id,
+        type: "DELIVERY",
+        photoUrl: url,
+        runnerId: auth.currentUser.uid,
+        timestamp: serverTimestamp()
+      });
+
+      // Send photo confirmation to buyer's conversation
+      const dropOffLocation = activeMission.drop_off_location || 'drop-off location';
+      const conversationId = activeMission.conversationId;
+      if (conversationId) {
+        try {
+          await addDoc(collection(db, "chats", conversationId, "messages"), {
+            senderId: "SYSTEM",
+            text: `📍 Your item has been delivered to ${dropOffLocation}. Here's a photo confirmation:`,
+            imageUrl: url,
+            createdAt: serverTimestamp(),
+            isSystemMessage: true,
+          });
+        } catch (e) {
+          console.warn('[Delivery] Could not write conversation message:', e);
+        }
+      }
+
       const res = await completeDelivery(activeMission.id, url, auth.currentUser.uid);
       if (res.success) { setPodPhoto(null); setPodPreview(null); setProofMode(null); }
     } catch (e: any) { console.error('[Delivery]', e); } finally { setIsProcessing(false); }
@@ -767,8 +815,8 @@ export default function MissionControl() {
             <motion.div initial={{ y: 50, scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: 50, scale: 0.95 }} className="bg-white w-full max-w-sm rounded-[32px] p-8 space-y-8 shadow-xl border border-slate-100">
                <div className="text-center space-y-2">
                  <div className="w-16 h-16 bg-slate-50 rounded-[20px] mx-auto flex items-center justify-center text-slate-900 mb-4 border border-slate-100 shadow-sm"><Camera size={28} strokeWidth={2} /></div>
-                 <h3 className="text-[20px] font-semibold tracking-tight text-slate-900">{proofMode === 'PICKUP' ? 'Photo Proof of Pickup' : 'Photo Proof of Delivery'}</h3>
-                 <p className="text-[13px] font-medium text-[#94a3b8] px-4 leading-relaxed">{proofMode === 'PICKUP' ? 'Take a clear photo of the items at the pickup point.' : 'Take a clear photo of the items at the drop-off point.'}</p>
+                  <h3 className="text-[20px] font-semibold tracking-tight text-slate-900">{proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Confirm Delivery'}</h3>
+                  <p className="text-[13px] font-medium text-[#94a3b8] px-4 leading-relaxed">{proofMode === 'PICKUP' ? 'Take a photo of the item before collecting.' : 'Take a photo of the drop-off location.'}</p>
                </div>
                <div className="space-y-5">
                  <input 
@@ -815,7 +863,7 @@ export default function MissionControl() {
                  )}
                  <button disabled={!podPhoto || isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className={`w-full h-14 border rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-sm active:scale-95 outline-none ${activeMission ? (activeMission.type?.toUpperCase() === 'ERRANDS' ? 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200' : (activeMission.type?.toUpperCase() === 'PARCELS' ? 'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200' : 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200')) : 'bg-slate-900 text-white'}`}>
                    {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={18} strokeWidth={2.5} />}
-                   {proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Complete Delivery'}
+                    {proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Confirm Delivery'}
                  </button>
                  <button onClick={() => setProofMode(null)} className="w-full text-[11px] font-semibold text-[#94a3b8] hover:text-slate-600  py-1 transition-colors outline-none">Cancel</button>
                </div>

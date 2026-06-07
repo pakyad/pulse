@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, MessageSquare, CheckCircle2, Send, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { submitReview } from '@/app/actions/reviewActions';
+import { motion } from 'framer-motion';
+import { db, auth } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 
 interface PostDeliveryReviewProps {
   order: any;
@@ -19,41 +19,71 @@ export default function PostDeliveryReview({ order, userId, itemId, isOfficial }
   const [comment, setComment] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
+  const [existingReview, setExistingReview] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const isRunnerDelivery = order.delivery_type === 'RUNNER' && order.runner_id;
-  const targetType = isOfficial ? 'SELLER' : 'ITEM';
-  const reviewItemId = itemId || order.items?.[0]?.productId || '';
+
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const q = query(
+          collection(db, "Reviews"),
+          where("orderId", "==", order.id),
+          where("buyerId", "==", userId)
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          setExistingReview(snap.docs[0].data());
+          setVendorRating(snap.docs[0].data().rating || 0);
+          setIsSubmitted(true);
+        }
+      } catch (e) {
+        console.error("[ReviewCheck]", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (order.id && userId) check();
+    else setLoading(false);
+  }, [order.id, userId]);
 
   const handleSubmit = async () => {
     if (vendorRating === 0 || (isRunnerDelivery && runnerRating === 0)) return;
     setIsSubmitting(true);
-    
+
     try {
-      const res = await submitReview({
-        orderId: order.id,
+      await addDoc(collection(db, "Reviews"), {
+        sellerId: order.seller_id,
         buyerId: userId,
-        vendorRating,
-        runnerRating: isRunnerDelivery ? runnerRating : 0,
-        vendorId: order.seller_id,
-        runnerId: isRunnerDelivery ? order.runner_id : null,
-        comment,
-        itemId: reviewItemId,
-        targetType
+        orderId: order.id,
+        itemId: itemId || order.items?.[0]?.productId || '',
+        rating: vendorRating,
+        comment: comment,
+        createdAt: serverTimestamp(),
       });
 
-      if (res.success) {
-        setIsSubmitted(true);
-        setTimeout(() => {
-          router.push('/me/orders');
-        }, 1500);
+      if (isRunnerDelivery && runnerRating > 0) {
+        await addDoc(collection(db, "Reviews"), {
+          sellerId: order.runner_id,
+          buyerId: userId,
+          orderId: order.id,
+          itemId: itemId || order.items?.[0]?.productId || '',
+          rating: runnerRating,
+          comment: comment,
+          createdAt: serverTimestamp(),
+        });
       }
+
+      setIsSubmitted(true);
     } catch (err) {
       console.error(err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (loading) return null;
 
   if (isSubmitted) {
     return (
@@ -62,8 +92,13 @@ export default function PostDeliveryReview({ order, userId, itemId, isOfficial }
           <CheckCircle2 size={24} />
         </div>
         <div className="space-y-1">
-           <h4 className="text-[15px] font-bold text-slate-900">Thank You</h4>
-           <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed px-4">
+           <h4 className="text-[15px] font-bold text-slate-900">Thanks for your review!</h4>
+           <div className="flex items-center justify-center gap-0.5 mt-2 text-amber-400">
+             {[1, 2, 3, 4, 5].map(s => (
+               <Star key={s} size={18} fill={s <= vendorRating ? "currentColor" : "none"} stroke={s <= vendorRating ? "currentColor" : "#e2e8f0"} />
+             ))}
+           </div>
+           <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed px-4 mt-2">
              Your feedback helps keep the campus community safe and reliable.
            </p>
         </div>

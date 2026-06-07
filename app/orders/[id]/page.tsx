@@ -7,12 +7,11 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, CheckCircle2, Package, Activity,
-  Clock, ShieldCheck, MapPin, Receipt,
-  ShieldAlert, Truck, Info, XCircle, Star, Navigation
+  Clock, ShieldCheck, MapPin, Receipt, Globe, Users,
+  ShieldAlert, Truck, Info, XCircle, Star, Navigation, Loader2, X
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
-import ReportIssueModal from '@/components/shared/ReportIssueModal';
 import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 import { cancelOrder, releaseEscrow } from '@/app/actions/orderActions';
 import OrderTracker from '@/components/shared/OrderTracker';
@@ -203,6 +202,85 @@ function StatusKinetics({ status, orderType }: { status: string, orderType?: str
   );
 }
 
+// ── Inline Report Form ────────────────────────────────────────────────────────
+function InlineReportForm({ orderId, userId, order, onClose, onSuccess }: {
+  orderId: string; userId: string; order: any; onClose: () => void; onSuccess: () => void;
+}) {
+  const [description, setDescription] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!description.trim()) return;
+    setSubmitting(true);
+    try {
+      const { addDoc, collection, doc, updateDoc, serverTimestamp } = await import('firebase/firestore');
+      const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+      const { storage } = await import('@/lib/firebase');
+
+      let proofUrl = null;
+      if (file) {
+        const fileName = `buyer_evidence_${Date.now()}.jpg`;
+        const storageRef = ref(storage, `disputes/${orderId}/${fileName}`);
+        const snap = await uploadBytes(storageRef, file);
+        proofUrl = await getDownloadURL(snap.ref);
+      }
+
+      await addDoc(collection(db, 'disputes'), {
+        orderId,
+        buyerId: userId,
+        description: description.trim(),
+        proofUrl,
+        status: 'OPEN',
+        createdAt: serverTimestamp(),
+      });
+
+      await addDoc(collection(db, 'activityLogs'), {
+        action: 'DISPUTE_FILED',
+        itemId: order.items?.[0]?.productId || order.item_id || orderId,
+        details: `Buyer filed dispute for order ${orderId}`,
+        time: serverTimestamp(),
+      });
+
+      await updateDoc(doc(db, 'orders', orderId), { is_disputed: true });
+
+      onSuccess();
+    } catch (e) {
+      console.error('[ReportIssue]', e);
+      alert('Failed to submit report.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="p-5 bg-white border border-slate-100 rounded-2xl space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-[14px] font-bold text-slate-900">Report an Issue</h3>
+        <button onClick={onClose} className="text-slate-400 hover:text-slate-900"><X size={16} /></button>
+      </div>
+      <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe the problem..."
+        rows={3} className="w-full px-4 py-3 bg-white border border-slate-100 rounded-xl text-[13px] font-medium text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-slate-900 transition-all resize-none" />
+      <label className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition-all">
+        <input type="file" accept="image/*" className="hidden" onChange={e => setFile(e.target.files?.[0] || null)} />
+        {file ? (
+          <span className="text-[12px] font-medium text-emerald-600">Attached: {file.name.slice(0, 20)}</span>
+        ) : (
+          <>
+            <ShieldAlert size={14} className="text-slate-300" />
+            <span className="text-[11px] font-medium text-slate-400">Attach Evidence (optional)</span>
+          </>
+        )}
+      </label>
+      <button onClick={handleSubmit} disabled={!description.trim() || submitting}
+        className="w-full h-11 rounded-xl bg-slate-900 text-white text-[12px] font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2">
+        {submitting ? <Loader2 size={14} className="animate-spin" /> : <ShieldAlert size={14} />}
+        Submit Report
+      </button>
+    </div>
+  );
+}
+
 export default function LiveOrderPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -378,7 +456,8 @@ export default function LiveOrderPage() {
   const isMoving = ['ON_THE_WAY', 'IN_TRANSIT', 'PICKED_UP'].includes(status);
   const isRunner = userId === order.runner_id;
   const showBuyerMap = isMoving && !!order.runner_location;
-  const hasMapHero = isRunner || showBuyerMap;
+  const isServiceOrder = order?.deliveryMethod === 'DIGITAL' || order?.deliveryMethod === 'F2F_CAMPUS';
+  const hasMapHero = !isServiceOrder && (isRunner || showBuyerMap);
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-36 relative">
@@ -477,6 +556,55 @@ export default function LiveOrderPage() {
         {!isCancelled && (
           <section className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-slate-50">
             <OrderTracker order={order} />
+          </section>
+        )}
+
+        {/* ── SERVICE DELIVERY INFO ── */}
+        {!isCancelled && isServiceOrder && (
+          <section className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl space-y-3">
+            <div className="space-y-0.5">
+              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Delivery</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white border border-indigo-100 flex items-center justify-center shrink-0 text-indigo-600">
+                {order.deliveryMethod === 'DIGITAL' ? <Globe size={18} /> : <Users size={18} />}
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-slate-900">
+                  {order.deliveryMethod === 'DIGITAL' ? 'Digital / Online' : 'F2F Campus Session'}
+                </p>
+                <p className="text-[11px] font-medium text-[#94a3b8] capitalize">
+                  {order.deliveryMethod === 'DIGITAL' ? 'Delivered via email or chat' : 'Campus meet-up'}
+                </p>
+              </div>
+            </div>
+            {order.serviceContactInfo && (
+              <div className="p-3 bg-white border border-indigo-100 rounded-xl">
+                <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider mb-1">Contact Info</p>
+                <p className="text-[13px] font-bold text-slate-900 break-words">{order.serviceContactInfo}</p>
+              </div>
+            )}
+            {order.deliveryMethod === 'F2F_CAMPUS' && order.drop_off_location && (
+              <div className="p-3 bg-white border border-indigo-100 rounded-xl">
+                <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider mb-1">Campus Location</p>
+                <p className="text-[13px] font-bold text-slate-900">{order.drop_off_location}</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ── SERVICE DIGITAL PROGRESS NOTE ── */}
+        {!isCancelled && isServiceOrder && order.deliveryMethod === 'DIGITAL' && (
+          <section className="flex items-start gap-3 p-4 bg-amber-50/50 border border-amber-100 rounded-xl">
+            <div className="w-8 h-8 rounded-lg bg-white border border-amber-100 flex items-center justify-center shrink-0">
+              <Info size={14} className="text-amber-700" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[12px] font-bold text-slate-900">Digital Delivery Pending</p>
+              <p className="text-[11px] font-medium text-[#94a3b8] leading-relaxed">
+                The seller will send the digital item to your provided contact info once they confirm the order.
+              </p>
+            </div>
           </section>
         )}
 
@@ -598,23 +726,29 @@ export default function LiveOrderPage() {
         {/* ── DRAKE SAFETY NET (Support after Delivery) ── */}
         {!isCancelled && !isPending && (
           <section className="pt-4 pb-8">
-            <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between gap-4">
-               <div className="space-y-1 flex-1">
+            {isReportOpen ? (
+              <InlineReportForm orderId={id as string} userId={userId} order={order}
+                onClose={() => setIsReportOpen(false)} onSuccess={() => {
+                  setIsReportOpen(false);
+                  setShowSuccessOverlay(true);
+                  setTimeout(() => setShowSuccessOverlay(false), 3000);
+                }} />
+            ) : (
+              <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between gap-4">
+                <div className="space-y-1 flex-1">
                   <p className="text-[13px] font-bold text-slate-900">Need help?</p>
                   <p className="text-[11px] text-[#94a3b8] leading-relaxed pr-2">
-                     Report any issues within 24 hours.
+                    Report any issues within 24 hours.
                   </p>
-               </div>
-               
-               <button
-                 onClick={() => setIsReportOpen(true)}
-                 disabled={!order.handshake?.seller_confirmed && !isDone}
-                 className="h-10 px-4 bg-white border border-slate-200 text-[12px] font-bold text-slate-900 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm disabled:opacity-30 whitespace-nowrap"
-               >
-                 <ShieldAlert size={14} className="text-red-500" />
-                 Report Issue
-               </button>
-            </div>
+                </div>
+                <button onClick={() => setIsReportOpen(true)}
+                  disabled={!order.handshake?.seller_confirmed && !isDone}
+                  className="h-10 px-4 bg-white border border-slate-200 text-[12px] font-bold text-slate-900 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm disabled:opacity-30 whitespace-nowrap">
+                  <ShieldAlert size={14} className="text-red-500" />
+                  Report Issue
+                </button>
+              </div>
+            )}
           </section>
         )}
 
@@ -713,13 +847,6 @@ export default function LiveOrderPage() {
           </>
         )}
       </AnimatePresence>
-
-      <ReportIssueModal
-        isOpen={isReportOpen}
-        onClose={() => setIsReportOpen(false)}
-        order={order}
-        onSuccess={() => setIsReportOpen(false)}
-      />
 
       {/* ── DEMO/JUDGING CONTROLS ── */}
       <div className="fixed bottom-6 right-6 z-50 animate-bounce">

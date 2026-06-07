@@ -13,8 +13,8 @@ export default function DesktopMerchant({
   merchant, 
   revenue, 
   activeOrdersCount, 
-  attentionCount, 
-  recentOrders,
+  pipelineOrders,
+  completedOrders,
   items,
   onViewProof,
   handleAcceptOrder,
@@ -167,110 +167,153 @@ export default function DesktopMerchant({
           {/* Data Tables */}
           <div className="grid grid-cols-1 gap-12">
              
-             {/* Pending Acceptance List */}
-             <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <h3 className="text-[14px] font-bold text-slate-900">Current Orders</h3>
-                      <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                         <Info size={12} /> Track your active orders here.
+              {/* Pending Acceptance List */}
+              <div className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                 <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                       <h3 className="text-[14px] font-bold text-slate-900">Current Orders</h3>
+                       <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                          <Info size={12} /> Track your active orders here.
+                       </div>
+                    </div>
+                    <span className="text-[12px] text-slate-900 font-bold">{pipelineOrders.filter((o: any) => o.status === 'PENDING_VENDOR').length} Required</span>
+                 </div>
+                 
+                 <div className="divide-y divide-slate-100">
+                    {pipelineOrders.filter((o: any) => o.status === 'PENDING_VENDOR').length === 0 ? (
+                      <p className="p-10 text-center text-slate-400 italic text-[13px]">No pending records found in the current session.</p>
+                    ) : pipelineOrders.filter((o: any) => o.status === 'PENDING_VENDOR').map((o: any) => (
+                      <div key={o.id} className="p-6 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
+                         <div className="space-y-1">
+                            <p className="text-[12px] font-mono text-slate-400">ID: {o.id.substring(0,12).toUpperCase()}</p>
+                            <h4 className="text-[15px] font-bold text-slate-900">{o.title}</h4>
+                         </div>
+                         <div className="flex items-center gap-8">
+                             <div className="text-right">
+                                <p className="text-[14px] font-bold text-slate-900">RM {Number(o.total || o.price || 0).toFixed(2)}</p>
+                                <p className="text-[12px] text-slate-400">{o.delivery_type || 'N/A'}</p>
+                             </div>
+                            <button 
+                              onClick={() => handleAcceptOrder(o.id)}
+                              className="h-9 px-5 bg-slate-900 text-white rounded-md text-[12px] font-bold hover:bg-blue-700"
+                            >
+                               Accept
+                            </button>
+                         </div>
                       </div>
-                   </div>
-                   <span className="text-[12px] text-slate-900 font-bold">{recentOrders.filter((o: any) => o.status === 'PENDING_VENDOR').length} Required</span>
-                </div>
-                
-                <div className="divide-y divide-slate-100">
-                   {recentOrders.filter((o: any) => o.status === 'PENDING_VENDOR').length === 0 ? (
-                     <p className="p-10 text-center text-slate-400 italic text-[13px]">No pending records found in the current session.</p>
-                   ) : recentOrders.filter((o: any) => o.status === 'PENDING_VENDOR').map((o: any) => (
-                     <div key={o.id} className="p-6 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
-                        <div className="space-y-1">
-                           <p className="text-[12px] font-mono text-slate-400">ID: {o.id.substring(0,12).toUpperCase()}</p>
-                           <h4 className="text-[15px] font-bold text-slate-900">{o.title}</h4>
-                        </div>
-                        <div className="flex items-center gap-8">
+                    ))}
+                 </div>
+              </div>
+
+              {/* Logistics Pipeline Table */}
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                 <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                    <h3 className="text-[14px] font-bold text-slate-900">Active Pipeline</h3>
+                 </div>
+
+                 <div className="divide-y divide-slate-100">
+                    {pipelineOrders.filter((o: any) => o.status !== 'PENDING_VENDOR').length === 0 ? (
+                      <p className="p-10 text-center text-slate-400 italic text-[13px]">Registry is currently empty.</p>
+                    ) : pipelineOrders.filter((o: any) => o.status !== 'PENDING_VENDOR').map((o: any) => (
+                      <div key={o.id} className="p-6 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-slate-100 rounded border border-slate-200 flex items-center justify-center text-slate-400">
+                               <Package size={18} />
+                            </div>
+                             <div>
+                                <p className="text-[14px] font-bold text-slate-900">{o.title}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <VoxelStatus status={o.status} size={10} />
+                                  <p className="text-[10px] text-slate-900 font-semibold leading-none">
+                                    {o.status.replace(/_/g, ' ')}
+                                  </p>
+                                </div>
+                             </div>
+                         </div>
+                         <div className="flex items-center gap-4">
+                            {o.status === 'PREPARING' && (
+                              <div className="w-48"><SwipeToReady orderId={o.id} /></div>
+                            )}
+                            {o.status === 'READY_FOR_PICKUP' && (
+                              <span className="px-3 py-1.5 bg-amber-50 text-amber-600 rounded text-[11px] font-bold border border-amber-100 flex items-center gap-2">
+                                <Package size={12} />
+                                Waiting for Runner
+                              </span>
+                            )}
+                             {o.status === 'PENDING_RUNNER' && (
+                               <span className="px-3 py-1.5 bg-blue-50 text-slate-900 rounded text-[11px] font-bold border border-blue-100">
+                                 Runner Called
+                               </span>
+                             )}
+                            
+                            {/* 🏛️ The Handshake Directive */}
+                            {o.status !== 'DELIVERED' && o.status !== 'COMPLETED' && (
+                              <button 
+                                onClick={() => handleConfirmDelivery(o.id)}
+                                disabled={o.handshake?.seller_confirmed}
+                                className={`h-8 px-4 rounded text-[11px] font-bold transition-all shadow-sm ${
+                                  o.handshake?.seller_confirmed 
+                                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                                  : 'bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95'
+                                }`}
+                              >
+                                {o.handshake?.seller_confirmed ? 'Handoff Sent' : 'Confirm Delivery'}
+                              </button>
+                            )}
+                            <button 
+                              onClick={() => onViewProof(o)}
+                              className="h-8 px-4 border border-slate-200 rounded text-[11px] font-bold text-slate-600 hover:bg-slate-50"
+                            >
+                              Audit
+                            </button>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+
+              {/* Completed Orders Section */}
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                 <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                    <h3 className="text-[14px] font-bold text-slate-900">Completed Orders</h3>
+                    <span className="text-[12px] text-slate-500 font-medium">{completedOrders.length} orders</span>
+                 </div>
+
+                 <div className="divide-y divide-slate-100">
+                    {completedOrders.length === 0 ? (
+                      <p className="p-10 text-center text-slate-400 italic text-[13px]">No completed orders yet.</p>
+                    ) : completedOrders.map((o: any) => (
+                      <div key={o.id} className="p-6 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-emerald-50 rounded border border-emerald-100 flex items-center justify-center text-emerald-600">
+                               <CheckCircle2 size={18} />
+                            </div>
+                             <div>
+                                <p className="text-[14px] font-bold text-slate-900">{o.title}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <VoxelStatus status={o.status} size={10} />
+                                  <p className="text-[10px] text-slate-900 font-semibold leading-none">
+                                    {o.status.replace(/_/g, ' ')}
+                                  </p>
+                                </div>
+                             </div>
+                         </div>
+                         <div className="flex items-center gap-4">
                             <div className="text-right">
                                <p className="text-[14px] font-bold text-slate-900">RM {Number(o.total || o.price || 0).toFixed(2)}</p>
                                <p className="text-[12px] text-slate-400">{o.delivery_type || 'N/A'}</p>
                             </div>
-                           <button 
-                             onClick={() => handleAcceptOrder(o.id)}
-                             className="h-9 px-5 bg-slate-900 text-white rounded-md text-[12px] font-bold hover:bg-blue-700"
-                           >
-                              Accept
-                           </button>
-                        </div>
-                     </div>
-                   ))}
-                </div>
-             </div>
-
-             {/* Logistics Pipeline Table */}
-             <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                   <h3 className="text-[14px] font-bold text-slate-900">Active Pipeline</h3>
-                </div>
-
-                <div className="divide-y divide-slate-100">
-                   {recentOrders.filter((o: any) => o.status !== 'PENDING_VENDOR').length === 0 ? (
-                     <p className="p-10 text-center text-slate-400 italic text-[13px]">Registry is currently empty.</p>
-                   ) : recentOrders.filter((o: any) => o.status !== 'PENDING_VENDOR').map((o: any) => (
-                     <div key={o.id} className="p-6 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                           <div className="w-10 h-10 bg-slate-100 rounded border border-slate-200 flex items-center justify-center text-slate-400">
-                              <Package size={18} />
-                           </div>
-                            <div>
-                               <p className="text-[14px] font-bold text-slate-900">{o.title}</p>
-                               <div className="flex items-center gap-2 mt-0.5">
-                                 <VoxelStatus status={o.status} size={10} />
-                                 <p className="text-[10px] text-slate-900 font-semibold leading-none">
-                                   {o.status.replace(/_/g, ' ')}
-                                 </p>
-                               </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                           {o.status === 'PREPARING' && (
-                             <div className="w-48"><SwipeToReady orderId={o.id} /></div>
-                           )}
-                           {o.status === 'READY_FOR_PICKUP' && (
-                             <span className="px-3 py-1.5 bg-amber-50 text-amber-600 rounded text-[11px] font-bold border border-amber-100 flex items-center gap-2">
-                               <Package size={12} />
-                               Waiting for Runner
-                             </span>
-                           )}
-                            {o.status === 'PENDING_RUNNER' && (
-                              <span className="px-3 py-1.5 bg-blue-50 text-slate-900 rounded text-[11px] font-bold border border-blue-100">
-                                Runner Called
-                              </span>
-                            )}
-                           
-                           {/* 🏛️ The Handshake Directive */}
-                           {o.status !== 'DELIVERED' && o.status !== 'COMPLETED' && (
-                             <button 
-                               onClick={() => handleConfirmDelivery(o.id)}
-                               disabled={o.handshake?.seller_confirmed}
-                               className={`h-8 px-4 rounded text-[11px] font-bold transition-all shadow-sm ${
-                                 o.handshake?.seller_confirmed 
-                                 ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
-                                 : 'bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95'
-                               }`}
-                             >
-                               {o.handshake?.seller_confirmed ? 'Handoff Sent' : 'Confirm Delivery'}
-                             </button>
-                           )}
-                           <button 
-                             onClick={() => onViewProof(o)}
-                             className="h-8 px-4 border border-slate-200 rounded text-[11px] font-bold text-slate-600 hover:bg-slate-50"
-                           >
-                             Audit
-                           </button>
-                        </div>
-                     </div>
-                   ))}
-                </div>
-             </div>
+                            <button 
+                              onClick={() => onViewProof(o)}
+                              className="h-8 px-4 border border-slate-200 rounded text-[11px] font-bold text-slate-600 hover:bg-slate-50"
+                            >
+                              View Details
+                            </button>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
 
           {/* Key Indicators */}
           {isClub && (

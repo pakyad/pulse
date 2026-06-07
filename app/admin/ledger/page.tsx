@@ -23,6 +23,7 @@ export default function AdminLedgerPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -62,9 +63,11 @@ export default function AdminLedgerPage() {
         
         // Note: Real balance adjustment would happen here or in a Cloud Function
       });
-      alert(`TREASURY SYNC: Payout of RM ${request.net_payout.toFixed(2)} authorized.`);
+      setToast({ type: 'success', msg: `TREASURY SYNC: Payout of RM ${request.net_payout.toFixed(2)} authorized.` });
+      setTimeout(() => setToast(null), 4000);
     } catch (e) {
-      alert("Fiscal Handshake Failed.");
+      setToast({ type: 'error', msg: "Fiscal Handshake Failed." });
+      setTimeout(() => setToast(null), 4000);
     }
   };
 
@@ -77,6 +80,17 @@ export default function AdminLedgerPage() {
   return (
     <main className="min-h-screen bg-[#060B16] text-white p-8 md:p-16 font-sans antialiased">
       
+      {/* Toast notification */}
+      {toast && (
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl text-[13px] font-semibold shadow-2xl border ${
+          toast.type === 'success'
+            ? 'bg-emerald-900/90 border-emerald-700 text-emerald-200'
+            : 'bg-red-900/90 border-red-700 text-red-200'
+        }`}>
+          {toast.msg}
+        </div>
+      )}
+
       {/* TREASURY HEADER */}
       <div className="max-w-6xl mx-auto mb-16 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
          <div className="space-y-2">

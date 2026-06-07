@@ -39,19 +39,19 @@ export default function ReviewsPage() {
 
     const q = query(
       collection(db, 'Reviews'),
-      where('targetId', '==', id)
+      where('sellerId', '==', id)
     );
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       let fetchedReviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
       // Sort locally by createdAt desc
-      fetchedReviews.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      fetchedReviews.sort((a: any, b: any) => new Date(b.createdAt?.toMillis?.() || b.createdAt).getTime() - new Date(a.createdAt?.toMillis?.() || a.createdAt).getTime());
       
       // Fetch reviewer details for each review
       const reviewsWithUsers = await Promise.all(fetchedReviews.map(async (review: any) => {
-        if (review.reviewerId) {
-          const uSnap = await getDoc(doc(db, 'users', review.reviewerId));
+        if (review.buyerId) {
+          const uSnap = await getDoc(doc(db, 'users', review.buyerId));
           if (uSnap.exists()) {
              review.reviewer = uSnap.data();
           }
@@ -89,7 +89,7 @@ export default function ReviewsPage() {
          <section className="flex flex-col items-center justify-center py-6 border-b border-slate-100">
             <div className="flex items-end gap-2 mb-2">
                <p className="text-[48px] font-semibold tracking-tighter leading-none text-slate-900">
-                 {profile?.averageRating ? Number(profile.averageRating).toFixed(1) : '5.0'}
+                 {profile?.trustRating ? Number(profile.trustRating).toFixed(1) : '5.0'}
                </p>
                <div className="pb-2">
                  <Star size={24} fill="currentColor" className="text-amber-500" />

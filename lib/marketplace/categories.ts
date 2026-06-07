@@ -13,7 +13,7 @@
  * comparable: false → Fixed ceiling, no API call
  */
 
-export type CategoryID = 'ACADEMIC' | 'HOSTEL' | 'TECH' | 'APPAREL';
+export type CategoryID = 'ACADEMIC' | 'HOSTEL' | 'TECH' | 'APPAREL' | 'SERVICES';
 
 export interface SubcategoryConfig {
   label: string;

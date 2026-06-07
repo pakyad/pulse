@@ -6,7 +6,7 @@ import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories
 import { CheckCircle, Loader2 } from 'lucide-react';
 
 const CAMPUS_DEFAULTS: Record<string, number> = {
-  ACADEMIC: 200, HOSTEL: 500, TECH: 3500, APPAREL: 300,
+  ACADEMIC: 200, HOSTEL: 500, TECH: 3500, APPAREL: 300, SERVICES: 500,
 };
 
 export default function SettingsPage() {
@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const [type,     setType]     = useState<'REGULATED' | 'PREMIUM'>('REGULATED');
   const [saving,   setSaving]   = useState(false);
   const [done,     setDone]     = useState(false);
+  const [judgeMsg, setJudgeMsg] = useState('');
 
   const handleSave = async () => {
     if (!price || isNaN(Number(price))) return;
@@ -97,7 +98,12 @@ export default function SettingsPage() {
             Enable Judging Mode to simulate live transactions and bypass delays during the FYP2 presentation.
           </p>
         </div>
-        <button onClick={() => alert("Judging Mode Enabled: Escrow timers disabled and auto-release triggered.")}
+        {judgeMsg && (
+          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-[12px] font-medium text-emerald-800">
+            {judgeMsg}
+          </div>
+        )}
+        <button onClick={() => setJudgeMsg("Judging Mode Enabled: Escrow timers disabled and auto-release triggered.")}
           className="w-full h-12 rounded-xl font-bold text-[12px] bg-slate-50 border border-slate-200 text-slate-900 hover:bg-slate-100 transition-all active:scale-95">
           Enable Judging Mode
         </button>

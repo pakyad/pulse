@@ -7,7 +7,7 @@ import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/fire
 import {
   LayoutGrid, Inbox, ShieldCheck, ShieldAlert, Users,
   MessageSquare, ScrollText, Settings, LogOut, Archive, UserCheck, Wallet,
-  Megaphone
+  Megaphone, Store
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -30,6 +30,7 @@ const NAV_SECTIONS = [
     title: 'NETWORK',
     items: [
       { href: '/admin/runners',        label: 'Runner Apps',        icon: UserCheck,     badgeKey: 'runnerApps' },
+      { href: '/admin/merchants',      label: 'Merchants',          icon: Store        },
       { href: '/admin/users',          label: 'User Registry',      icon: Users        },
     ]
   },
@@ -64,7 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       } catch (err) { console.error('[Admin Layout] Auth error:', err); }
     });
     return () => unsub();
-  }, [router]);
+  }, [router, auth]);
 
   // ── Real-time badge counts ──────────────────────────────────────────────────
   useEffect(() => {

@@ -134,17 +134,20 @@ export default function ItemDetailsPage() {
       if (snap.exists()) {
         const itemData: any = { id: snap.id, ...snap.data() };
         setItem(itemData);
-        
-        // Fetch seller profile for live ratings
-        if (itemData.seller_id) {
-           const sellerSnap = await getDoc(doc(db, "users", itemData.seller_id));
-           if (sellerSnap.exists()) setSeller(sellerSnap.data());
-        }
       }
       setLoading(false);
     }, (err) => console.error(err));
     return () => unsub();
   }, [id]);
+
+  // Live seller profile for trustRating updates
+  useEffect(() => {
+    if (!item?.seller_id) return;
+    const unsub = onSnapshot(doc(db, "users", item.seller_id), (snap) => {
+      if (snap.exists()) setSeller(snap.data());
+    });
+    return () => unsub();
+  }, [item?.seller_id]);
 
   // Fetch reviews — for student items: by item_id; for club items: by seller_id
   useEffect(() => {
@@ -153,8 +156,8 @@ export default function ItemDetailsPage() {
     
     // 🏛️ Simplified query to avoid composite index crash
     const reviewsQuery = isOfficial
-      ? query(collection(db, "Reviews"), where("seller_id", "==", item.seller_id), where("target_type", "==", "SELLER"), limit(20))
-      : query(collection(db, "Reviews"), where("item_id", "==", item.id), where("target_type", "==", "ITEM"), limit(20));
+      ? query(collection(db, "Reviews"), where("sellerId", "==", item.seller_id), limit(20))
+      : query(collection(db, "Reviews"), where("itemId", "==", item.id), limit(20));
 
     const unsub = onSnapshot(reviewsQuery, (snap) => {
       const list = snap.docs.map(d => ({ id: d.id, ...d.data() as any }));
@@ -416,6 +419,15 @@ export default function ItemDetailsPage() {
           </div>
         </section>
 
+        {/* ── PCS CERTIFIED BADGE ── */}
+        {item.pcs_certified === true && (
+          <div className="flex items-center gap-2 -mt-2 mb-1">
+            <span className="bg-[#EAF3DE] text-[#3B6D11] px-[10px] py-[4px] rounded-full text-[12px] font-medium leading-none">
+              ✓ Student Price
+            </span>
+          </div>
+        )}
+
         {/* ── SELLER ROW ── */}
         <section className="py-4 border-y border-slate-100 space-y-3">
           <button 
@@ -430,7 +442,7 @@ export default function ItemDetailsPage() {
                   <p className="text-[13px] font-bold text-slate-900 group-hover:text-slate-900 transition-colors">{item.seller_name || 'Pulse Student'}</p>
                   <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500">
                      <Star size={12} fill="currentColor" />
-                     <span>{seller?.averageRating || '5.0'}</span>
+                      <span>{seller?.trustRating ? Number(seller.trustRating).toFixed(1) : '5.0'}</span>
                      <span className="text-slate-300 ml-1 font-medium">({seller?.totalReviews || '0'})</span>
                   </div>
                </div>
@@ -462,9 +474,9 @@ export default function ItemDetailsPage() {
                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-white border border-slate-100 flex items-center justify-center text-[9px] font-bold">
-                          {(review.reviewer_id || '?').slice(0, 2).toUpperCase()}
+                          {(review.buyerId || '?').slice(0, 2).toUpperCase()}
                         </div>
-                        <span className="text-[12px] font-bold text-slate-900">{review.reviewer_id?.slice(0, 8)}</span>
+                        <span className="text-[12px] font-bold text-slate-900">{review.buyerId?.slice(0, 8)}</span>
                      </div>
                      <div className="flex items-center gap-0.5 text-amber-400">
                         {[1,2,3,4,5].map(s => (

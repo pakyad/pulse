@@ -182,9 +182,8 @@ export default function UsersPage() {
         </button>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {/* Filters */}
+      {/* Sticky Controls */}
+      <div className="sticky top-0 z-40 bg-white border-b border-[#E5E7EB] -mx-8 px-8 py-3 flex items-center gap-3 flex-wrap shadow-none">
         <div className="flex p-1 bg-slate-50 rounded-xl border border-slate-100 gap-1">
           {FILTERS.map(f => (
             <button key={f.id} onClick={() => setFilter(f.id)}
@@ -195,7 +194,6 @@ export default function UsersPage() {
             </button>
           ))}
         </div>
-        {/* Search */}
         <div className="relative flex-1 max-w-xs">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or email..."
@@ -208,10 +206,10 @@ export default function UsersPage() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50/50 border-b border-slate-100">
-              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Name</th>
-              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Role</th>
-              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400 ">Email</th>
-              <th className="px-6 py-4 text-[9px] font-semibold text-slate-400  text-right">Action</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-400 ">Name</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-400 ">Role</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-400 ">Email</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-400  text-right">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -225,7 +223,7 @@ export default function UsersPage() {
               </td></tr>
             ) : filtered.map(u => (
               <tr key={u.id} onClick={() => setSelected(u)}
-                className="hover:bg-slate-50/50 transition-colors cursor-pointer group">
+                className="hover:bg-[#F9FAFB] transition-colors cursor-pointer group">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-slate-50 overflow-hidden border border-slate-100 shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500">
@@ -240,10 +238,10 @@ export default function UsersPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex gap-1.5 flex-wrap">
-                    {u.is_seller && <span className="px-2 py-1 bg-slate-900 text-white text-[9px] font-semibold rounded-md">Merchant</span>}
-                    {u.is_verified_runner && <span className="px-2 py-1 bg-emerald-500 text-white text-[9px] font-semibold rounded-md">Runner</span>}
+                    {u.is_seller && <span className="px-2 py-1 bg-amber-500 text-white text-[9px] font-semibold rounded-md">Merchant</span>}
+                    {u.is_verified_runner && <span className="px-2 py-1 bg-blue-500 text-white text-[9px] font-semibold rounded-md">Runner</span>}
                     {u.is_suspended && <span className="px-2 py-1 bg-red-100 text-red-500 text-[9px] font-semibold rounded-md">Suspended</span>}
-                    {!u.is_seller && !u.is_verified_runner && !u.is_suspended && <span className="px-2 py-1 bg-slate-50 text-slate-400 border border-slate-100 text-[9px] font-semibold rounded-md">Student</span>}
+                    {!u.is_seller && !u.is_verified_runner && !u.is_suspended && <span className="px-2 py-1 bg-gray-50 text-gray-400 border border-gray-100 text-[9px] font-semibold rounded-md">Student</span>}
                   </div>
                 </td>
                 <td className="px-6 py-4">

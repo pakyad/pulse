@@ -19,6 +19,7 @@ interface ProductCardProps {
     stock_count?: number;
     category?: string;
     subcategory?: string;
+    pcs_certified?: boolean;
   };
   onClick?: () => void;
 }
@@ -64,6 +65,12 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
         {isGoverned && !isSold && (
           <div className="absolute top-2 left-2 w-7 h-7 bg-teal-100 rounded-[8px] flex items-center justify-center z-10 shadow-sm border border-teal-200/50">
             <ShieldCheck size={14} className="text-teal-600" strokeWidth={2.5} />
+          </div>
+        )}
+
+        {item.pcs_certified === true && (
+          <div className="absolute bottom-1.5 left-1.5 bg-[#EAF3DE] text-[#3B6D11] px-2 py-0.5 rounded-full text-[10px] font-medium z-10 shadow-sm">
+            ✓ Student Price
           </div>
         )}
 

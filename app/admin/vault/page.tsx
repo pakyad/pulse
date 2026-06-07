@@ -5,7 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { restoreFromVault, permanentlyDelete } from '@/app/actions/adminActions';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Archive, RotateCcw, Trash2, Loader2, CheckCircle, X, ShieldOff, Filter } from 'lucide-react';
+import { Archive, RotateCcw, Trash2, Loader2, CheckCircle, X, ShieldOff, Filter, Search } from 'lucide-react';
 
 type VaultFilter = 'ALL' | 'REJECTED' | 'SELLER_SUSPENDED' | 'RESTORED';
 
@@ -59,6 +59,7 @@ export default function VaultPage() {
   const [processing,  setProcessing]  = useState<string | null>(null);
   const [confirmId,   setConfirmId]   = useState<any>(null); // { vaultId, itemId }
   const [toast,       setToast]       = useState<{ msg: string; type: 'ok' | 'err' } | null>(null);
+  const [vaultSearch, setVaultSearch] = useState('');
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -108,7 +109,9 @@ export default function VaultPage() {
     { id: 'RESTORED',        label: 'Restored' },
   ];
 
-  const filtered = entries.filter(e => filter === 'ALL' || e.vault_action === filter);
+  const filtered = entries
+    .filter(e => filter === 'ALL' || e.vault_action === filter)
+    .filter(e => !vaultSearch || e.title?.toLowerCase().includes(vaultSearch.toLowerCase()));
 
   return (
     <div className="space-y-8 max-w-6xl">
@@ -143,16 +146,23 @@ export default function VaultPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex p-1 bg-slate-50 rounded-xl border border-slate-100 gap-1 w-fit">
-        {FILTERS.map(f => (
-          <button key={f.id} onClick={() => setFilter(f.id)}
-            className={`px-4 h-8 rounded-lg text-[11px] font-bold transition-all ${
-              filter === f.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'
-            }`}>
-            {f.label}
-          </button>
-        ))}
+      {/* Filters + Search */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex p-1 bg-slate-50 rounded-xl border border-slate-100 gap-1 w-fit">
+          {FILTERS.map(f => (
+            <button key={f.id} onClick={() => setFilter(f.id)}
+              className={`px-4 h-8 rounded-lg text-[11px] font-bold transition-all ${
+                filter === f.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-700'
+              }`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <div className="relative flex-1 max-w-xs">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input value={vaultSearch} onChange={e => setVaultSearch(e.target.value)} placeholder="Search by item title..."
+            className="w-full h-10 pl-9 pr-4 bg-white border border-slate-100 rounded-xl text-[12px] font-medium text-slate-900 outline-none focus:border-slate-300 transition-all" />
+        </div>
       </div>
 
       {/* Table */}

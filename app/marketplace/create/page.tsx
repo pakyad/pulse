@@ -3,13 +3,13 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Plus, Trash2, Loader2,
-  UtensilsCrossed, BookOpen, Home, Cpu, Shirt,
+  Plus, Trash2, Loader2, Briefcase,
+  BookOpen, Home, Cpu, Shirt,
   ShieldCheck, ShieldAlert, Globe, AlertCircle
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { db, auth, storage } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, onSnapshot, getDocs, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
@@ -17,20 +17,30 @@ import { CAMPUS_NODES, getLocationBadge } from '@/lib/core/locations';
 
 // ── DOMAIN ICONS (aligned with Marketplace page icon pattern) ──
 const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
-  HUNGER: UtensilsCrossed,
   ACADEMIC: BookOpen,
   HOSTEL: Home,
   TECH: Cpu,
   APPAREL: Shirt,
+  SERVICES: Briefcase,
 };
 
 const CATEGORY_LABELS: Record<CategoryID, string> = {
-  HUNGER: 'Food',
   ACADEMIC: 'Academic',
   HOSTEL: 'Hostel',
   TECH: 'Tech',
   APPAREL: 'Apparel',
+  SERVICES: 'Services',
 };
+
+const SERVICES_SUBCATEGORIES = [
+  'Tutoring & Academic Help',
+  'Coding & Debugging',
+  'Design & Creative',
+  'Resume & Career',
+  'Photography & Video',
+  'Translation & Writing',
+  'Other Campus Services',
+];
 
 interface MarketCheck {
   market_baseline: number | null;
@@ -59,10 +69,24 @@ export default function CreateListingPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
 
+  // ── PCS VERIFICATION STATE ──
+  const [pcsPhase, setPcsPhase] = useState<'idle' | 'verifying' | 'approved' | 'rejected'>('idle');
+  const [pcsResult, setPcsResult] = useState<any>(null);
+  const [pcsItemId, setPcsItemId] = useState<string | null>(null);
+  const [pcsApprovedBanner, setPcsApprovedBanner] = useState(false);
+  const pcsUnsubRef = useRef<(() => void) | null>(null);
+
   // ── LIVE MARKET INTELLIGENCE ──
   const [marketCheck, setMarketCheck] = useState<MarketCheck | null>(null);
   const [marketLoading, setMarketLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup PCS listener on unmount
+  useEffect(() => {
+    return () => {
+      if (pcsUnsubRef.current) pcsUnsubRef.current();
+    };
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,9 +112,17 @@ export default function CreateListingPage() {
     }
   }, []);
 
-  // Reset market check when category or subcategory changes
+  // Reset market check and PCS state when category or subcategory changes
   useEffect(() => {
     setMarketCheck(null);
+    setPcsPhase('idle');
+    setPcsResult(null);
+    setPcsItemId(null);
+    setPcsApprovedBanner(false);
+    if (pcsUnsubRef.current) {
+      pcsUnsubRef.current();
+      pcsUnsubRef.current = null;
+    }
   }, [selectedCategory, subcategory]);
 
   // Debounced title-driven check — only fires when title + subcategory both ready
@@ -125,6 +157,18 @@ export default function CreateListingPage() {
     });
   };
 
+  const checkIsPriceControlled = async (sub: string): Promise<boolean> => {
+    const snap = await getDocs(collection(db, 'PriceGuidelines'));
+    let controlled = false;
+    snap.forEach((doc) => {
+      const data = doc.data();
+      const subs: any[] = data.subcategories || [];
+      const match = subs.find((s) => s.label === sub);
+      if (match) controlled = match.is_price_controlled === true;
+    });
+    return controlled;
+  };
+
   const handlePost = async () => {
     if (!selectedCategory) return;
     setIsPosting(true);
@@ -136,7 +180,6 @@ export default function CreateListingPage() {
       const numPrice = parseFloat(price);
 
       // ── SERVER-SIDE ENFORCEMENT GATE ──
-      // Hard-block if market check is enforced and price exceeds maximum
       if (marketCheck && marketCheck.is_enforced && numPrice > marketCheck.max_campus_price) {
         setPostError(
           `Price blocked. Max campus price is RM ${marketCheck.max_campus_price.toFixed(2)}. Please lower your price to continue.`
@@ -144,6 +187,9 @@ export default function CreateListingPage() {
         setIsPosting(false);
         return;
       }
+
+      // ── CHECK PCS STATUS ──
+      const isPriceControlled = await checkIsPriceControlled(subcategory);
 
       setIsUploading(true);
       const imageUrls: string[] = await Promise.all(
@@ -159,7 +205,7 @@ export default function CreateListingPage() {
       const isPriceEnforced = marketCheck?.is_enforced ?? false;
       const isAutoFlagged = isPriceEnforced && numPrice > (marketCheck?.max_campus_price ?? Infinity);
 
-      await addDoc(collection(db, 'items'), {
+      const itemData = {
         title: title.trim(),
         description: description.trim(),
         category: selectedCategory,
@@ -183,22 +229,52 @@ export default function CreateListingPage() {
         flag_source: isAutoFlagged ? 'SYSTEM' : null,
         price_justification: justification.trim() || '',
         created_at: serverTimestamp(),
-      });
-      router.push('/marketplace');
+      };
+
+      if (!isPriceControlled) {
+        // Case 1 — Free market: publish immediately
+        await addDoc(collection(db, 'items'), itemData);
+        router.push('/marketplace');
+      } else {
+        // Case 2 — PCS category: trigger Cloud Function and listen
+        const docRef = await addDoc(collection(db, 'items'), itemData);
+        const newItemId = docRef.id;
+        setPcsItemId(newItemId);
+        setPcsPhase('verifying');
+        setIsPosting(false);
+
+        pcsUnsubRef.current = onSnapshot(doc(db, 'items', newItemId), (snap) => {
+          const data = snap.data();
+          if (!data) return;
+
+          if (data.status === 'ACTIVE' && data.pcs_certified === true) {
+            if (pcsUnsubRef.current) pcsUnsubRef.current();
+            pcsUnsubRef.current = null;
+            setPcsPhase('approved');
+            setPcsApprovedBanner(true);
+            setTimeout(() => router.push('/marketplace'), 1500);
+          } else if (data.status === 'FLAGGED_FOR_REVIEW') {
+            if (pcsUnsubRef.current) pcsUnsubRef.current();
+            pcsUnsubRef.current = null;
+            setPcsPhase('rejected');
+            setPcsResult(data.pcs_result || null);
+          }
+        });
+      }
     } catch (e: any) {
       console.error('[CreateListing]', e);
       setIsUploading(false);
+      setIsPosting(false);
+      setPcsPhase('idle');
       setPostError(e?.code === 'storage/unauthorized'
         ? 'Image upload failed. Please check your connection.'
         : 'Failed to post listing. Please try again.');
-    } finally {
-      setIsPosting(false);
     }
   };
 
   const numPrice = parseFloat(price);
   const isPriceBlocked = !!(marketCheck?.validation?.zone === 'red');
-  const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting && !isPriceBlocked;
+  const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting && !isPriceBlocked && pcsPhase !== 'verifying';
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
@@ -260,19 +336,20 @@ export default function CreateListingPage() {
                 <p className="text-[11px] font-medium text-[#94a3b8]">Pick the most specific match.</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories.map((sub) => {
-                  const isActive = subcategory === sub.label;
+                {(selectedCategory === 'SERVICES' ? SERVICES_SUBCATEGORIES : MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories ?? []).map((sub) => {
+                  const label = typeof sub === 'string' ? sub : sub.label;
+                  const isActive = subcategory === label;
                   return (
                     <button
-                      key={sub.label}
-                      onClick={() => setSubcategory(sub.label)}
+                      key={label}
+                      onClick={() => setSubcategory(label)}
                       className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
                         isActive
                           ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
                           : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                       }`}
                     >
-                      {sub.label}
+                      {label}
                     </button>
                   );
                 })}
@@ -280,7 +357,7 @@ export default function CreateListingPage() {
             </section>
 
             {/* ── SECTION: SMART CATEGORY FIELDS ── */}
-            {subcategory && MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.customFields?.some(f => !f.applicableSubcategories || f.applicableSubcategories.includes(subcategory)) && (
+            {subcategory && selectedCategory !== 'SERVICES' && MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.customFields?.some(f => !f.applicableSubcategories || f.applicableSubcategories.includes(subcategory)) && (
               <section className="pt-2 border-t border-slate-100">
                 <div className="space-y-0.5 mb-6">
                   <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">More Details</h2>
@@ -383,6 +460,55 @@ export default function CreateListingPage() {
                   </div>
                 )}
               </div>
+
+              {/* ── PCS FLAGGED FOR REVIEW ALERT ── */}
+              {pcsPhase === 'rejected' && pcsResult && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 bg-red-50 border border-red-200 rounded-xl space-y-3"
+                >
+                  <h4 className="text-[13px] font-bold text-red-800">Price over student limit</h4>
+                  <p className="text-[11px] font-medium text-red-700 leading-relaxed">
+                    {pcsResult.justification}
+                  </p>
+                  <div className="text-[11px] font-medium text-red-600 space-y-1">
+                    <p>Found on Shopee/Lazada: RM {Number(pcsResult.marketPrice).toFixed(2)}</p>
+                    <p>Maximum student price: RM {Number(pcsResult.maxAllowedPrice).toFixed(2)}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setPrice(String(Number(pcsResult.maxAllowedPrice).toFixed(2)));
+                      setPcsPhase('idle');
+                      setPcsResult(null);
+                      setPcsItemId(null);
+                    }}
+                    className="w-full h-10 bg-red-600 text-white rounded-xl font-bold text-[12px] hover:bg-red-700 transition-all active:scale-95"
+                  >
+                    Set to RM {Number(pcsResult.maxAllowedPrice).toFixed(2)}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await addDoc(collection(db, 'appeals'), {
+                          item_id: pcsItemId,
+                          pcs_result: pcsResult,
+                          status: 'PENDING',
+                          created_at: serverTimestamp(),
+                        });
+                        setPcsPhase('idle');
+                        setPcsResult(null);
+                        setPcsItemId(null);
+                      } catch (e) {
+                        console.error('[Appeal]', e);
+                      }
+                    }}
+                    className="text-[11px] font-bold text-red-500 underline block text-center w-full"
+                  >
+                    Disagree? Appeal to admin
+                  </button>
+                </motion.div>
+              )}
 
               <div className={`flex items-center gap-0 h-12 bg-slate-50 border rounded-xl overflow-hidden transition-colors ${
                 isPriceBlocked ? 'border-red-300 bg-red-50/30' : 'border-slate-100 focus-within:border-slate-900'
@@ -563,66 +689,89 @@ export default function CreateListingPage() {
             </section>
 
             {/* ── SECTION: DELIVERY PREFERENCE ── */}
-            <section className="space-y-4 pt-2 border-t border-slate-100">
-              <div className="space-y-0.5">
-                <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Delivery Method</h2>
-                <p className="text-[11px] font-medium text-[#94a3b8]">Can a campus runner deliver this, or do you prefer to meet the buyer yourself?</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                 <button 
-                   onClick={() => setFulfillmentMode('DELIVERY')}
-                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'DELIVERY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
-                 >
-                    <span className="text-[13px] font-bold mb-1">Runner Delivery</span>
-                    <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'DELIVERY' ? 'text-white/80' : 'text-slate-400'}`}>Pulse runners will handle delivery</span>
-                 </button>
-                 <button 
-                   onClick={() => setFulfillmentMode('MEETUP_ONLY')}
-                   className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'MEETUP_ONLY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
-                 >
-                    <span className="text-[13px] font-bold mb-1">Strictly Meetup</span>
-                    <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'MEETUP_ONLY' ? 'text-white/80' : 'text-slate-400'}`}>You meet the buyer face-to-face</span>
-                 </button>
-              </div>
-              
-              <div className="pt-2">
-                 <div className="space-y-1.5 mb-2">
-                    <label className="text-[12px] font-bold text-slate-900">Handover Node</label>
-                    <p className="text-[10px] font-medium text-slate-400 leading-tight">Where is this item located? Buyers will collect it here, or Runners will pick it up from here.</p>
-                 </div>
-                 <div className="bg-slate-50 border border-slate-100 rounded-xl p-1.5 flex flex-col max-h-[180px] overflow-y-auto no-scrollbar">
-                    {CAMPUS_NODES.map(node => (
-                       <button
-                          key={node.token}
-                          onClick={() => setHandoverNode(node.token)}
-                          className={`px-3 py-2.5 rounded-lg text-left flex items-center justify-between transition-all ${handoverNode === node.token ? 'bg-white shadow-sm border border-slate-200' : 'hover:bg-slate-100/50 border border-transparent'}`}
-                       >
-                          <div className="flex items-center gap-2">
-                             <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${getLocationBadge(node.zone)}`}>{node.zone}</span>
-                             <span className="text-[12px] font-bold text-slate-900">{node.label}</span>
-                          </div>
-                       </button>
-                    ))}
-                 </div>
-              </div>
-            </section>
+            {selectedCategory === 'SERVICES' ? (
+              <section className="pt-2 border-t border-slate-100">
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3">
+                  <span className="text-[16px] shrink-0 mt-0.5">💡</span>
+                  <p className="text-[12px] font-medium text-slate-500 leading-relaxed">
+                    Services are fulfilled directly between you and the buyer — either online or via campus meetup. No runner needed.
+                  </p>
+                </div>
+              </section>
+            ) : (
+              <section className="space-y-4 pt-2 border-t border-slate-100">
+                <div className="space-y-0.5">
+                  <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Delivery Method</h2>
+                  <p className="text-[11px] font-medium text-[#94a3b8]">Can a campus runner deliver this, or do you prefer to meet the buyer yourself?</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                   <button 
+                     onClick={() => setFulfillmentMode('DELIVERY')}
+                     className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'DELIVERY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                   >
+                      <span className="text-[13px] font-bold mb-1">Runner Delivery</span>
+                      <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'DELIVERY' ? 'text-white/80' : 'text-slate-400'}`}>Pulse runners will handle delivery</span>
+                   </button>
+                   <button 
+                     onClick={() => setFulfillmentMode('MEETUP_ONLY')}
+                     className={`p-4 rounded-xl border text-left flex flex-col transition-all active:scale-95 ${fulfillmentMode === 'MEETUP_ONLY' ? 'bg-slate-900 border-slate-900 text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                   >
+                      <span className="text-[13px] font-bold mb-1">Strictly Meetup</span>
+                      <span className={`text-[10px] font-medium leading-tight ${fulfillmentMode === 'MEETUP_ONLY' ? 'text-white/80' : 'text-slate-400'}`}>You meet the buyer face-to-face</span>
+                   </button>
+                </div>
+                
+                <div className="pt-2">
+                   <div className="space-y-1.5 mb-2">
+                      <label className="text-[12px] font-bold text-slate-900">Handover Node</label>
+                      <p className="text-[10px] font-medium text-slate-400 leading-tight">Where is this item located? Buyers will collect it here, or Runners will pick it up from here.</p>
+                   </div>
+                   <div className="bg-slate-50 border border-slate-100 rounded-xl p-1.5 flex flex-col max-h-[180px] overflow-y-auto no-scrollbar">
+                      {CAMPUS_NODES.map(node => (
+                         <button
+                            key={node.token}
+                            onClick={() => setHandoverNode(node.token)}
+                            className={`px-3 py-2.5 rounded-lg text-left flex items-center justify-between transition-all ${handoverNode === node.token ? 'bg-white shadow-sm border border-slate-200' : 'hover:bg-slate-100/50 border border-transparent'}`}
+                         >
+                            <div className="flex items-center gap-2">
+                               <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${getLocationBadge(node.zone)}`}>{node.zone}</span>
+                               <span className="text-[12px] font-bold text-slate-900">{node.label}</span>
+                            </div>
+                         </button>
+                      ))}
+                   </div>
+                </div>
+              </section>
+            )}
 
 
 
             {/* ── POST BUTTON ── */}
             <div className="pt-4">
               <button
-                disabled={!canPost || isUploading}
+                disabled={!canPost || isUploading || pcsPhase === 'verifying'}
                 onClick={handlePost}
                 className={`w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
-                  canPost && !isUploading
+                  (canPost && !isUploading && pcsPhase !== 'verifying')
                     ? 'bg-slate-900 text-white active:scale-95 shadow-sm'
                     : 'bg-slate-50 text-slate-200 border border-slate-100'
                 }`}
               >
-                {(isPosting || isUploading) && <Loader2 size={16} className="animate-spin" />}
-                {isUploading ? 'Uploading Photos...' : isPosting ? 'Publishing...' : 'Publish Listing'}
+                {(isPosting || isUploading || pcsPhase === 'verifying') && <Loader2 size={16} className="animate-spin" />}
+                {isUploading ? 'Uploading Photos...' : pcsPhase === 'verifying' ? 'Verifying student price…' : 'Publish Listing'}
               </button>
+
+              {/* ── PCS APPROVED BANNER ── */}
+              {pcsApprovedBanner && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-center"
+                >
+                  <p className="text-[12px] font-bold text-emerald-700">✓ Price approved — listing is live!</p>
+                </motion.div>
+              )}
+
               {/* ── POST ERROR TOAST ── */}
               {postError && (
                 <p className="text-[11px] font-bold text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-center mt-3">

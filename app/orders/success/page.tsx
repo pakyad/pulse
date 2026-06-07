@@ -5,6 +5,7 @@ import { db, auth } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import { Check, ArrowRight, ShieldCheck, X } from 'lucide-react';
+import PostDeliveryReview from '@/components/marketplace/PostDeliveryReview';
 
 function OrderSuccessPageContent() {
   const searchParams = useSearchParams();
@@ -12,7 +13,9 @@ function OrderSuccessPageContent() {
   const orderId = searchParams.get('id');
 
   const [order, setOrder] = useState<any>(null);
+  const [subOrder, setSubOrder] = useState<any>(null);
   const [trackingId, setTrackingId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,6 +23,7 @@ function OrderSuccessPageContent() {
 
     const unsub = auth.onAuthStateChanged(async (user) => {
       if (!user) { router.push('/auth'); return; }
+      setCurrentUser(user);
       try {
         const snap = await getDoc(doc(db, 'parent_orders', orderId));
         if (snap.exists()) {
@@ -28,16 +32,19 @@ function OrderSuccessPageContent() {
           const q = query(collection(db, 'orders'), where('parent_id', '==', orderId));
           const querySnapshot = await getDocs(q);
           if (!querySnapshot.empty) {
-            // If multiple sub-orders exist, we'll keep trackingId null to route to the ledger instead
+            const firstSub = querySnapshot.docs[0];
+            setSubOrder({ id: firstSub.id, ...firstSub.data() });
             if (querySnapshot.size === 1) {
-              setTrackingId(querySnapshot.docs[0].id);
+              setTrackingId(firstSub.id);
             }
           }
         } else {
           // Fallback if ID was directly from orders
           const orderSnap = await getDoc(doc(db, 'orders', orderId));
           if (orderSnap.exists()) {
-            setOrder(orderSnap.data());
+            const data = orderSnap.data();
+            setOrder(data);
+            setSubOrder({ id: orderId, ...data });
             setTrackingId(orderId);
           }
         }
@@ -137,6 +144,29 @@ function OrderSuccessPageContent() {
           </p>
         </div>
       </motion.div>
+
+      {/* ── REVIEW ── */}
+      {currentUser && subOrder && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-10"
+        >
+          <PostDeliveryReview
+            order={{
+              id: subOrder.id,
+              seller_id: subOrder.seller_id,
+              title: subOrder.title,
+              items: subOrder.items,
+              delivery_type: subOrder.delivery_type,
+              runner_id: subOrder.runner_id,
+            }}
+            userId={currentUser.uid}
+            itemId={subOrder.items?.[0]?.productId}
+          />
+        </motion.div>
+      )}
 
       {/* ── ACTIONS ── */}
       <div className="space-y-3 mt-auto">

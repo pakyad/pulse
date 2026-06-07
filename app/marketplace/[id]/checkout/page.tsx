@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import {
-  ChevronLeft, Truck, Plus, Package, Check,
+  ChevronLeft, Truck, Plus, Package, Check, Globe, Users,
   ArrowRight, ShieldCheck, CheckCircle2, Lock, ShieldAlert
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
@@ -48,12 +48,17 @@ export default function CheckoutPage() {
 
   const [errorState,    setErrorState]    = useState<null | 'INSUFFICIENT_STOCK' | 'PAYMENT_FAILED'>(null);
 
+  // ── Services delivery ──
+  const [serviceMethod, setServiceMethod] = useState<'DIGITAL' | 'F2F_CAMPUS' | null>(null);
+  const [serviceContactInfo, setServiceContactInfo] = useState('');
+
   useEffect(() => {
     const load = async () => {
       try {
         const snap = await getDoc(doc(db, 'items', id as string));
         if (snap.exists()) {
           const data = snap.data();
+          console.log('[Checkout] raw item data:', JSON.stringify(data, null, 2));
           setItem({ id: snap.id, ...data });
           setLocation(CAMPUS_NODES[0].token);
           // 🏛️ Pulse Reset: If item is sold out, we shouldn't even be here
@@ -76,9 +81,12 @@ export default function CheckoutPage() {
   const isPremium    = selectedNode.tier === 'PREMIUM';
   const runnerFee    = selectedNode.fee;
   const itemPrice    = Number(item?.price) || 0;
-  const total        = (itemPrice * qty) + (choice === 'RUNNER' ? runnerFee : 0);
+  const isService    = item?.category?.toUpperCase() === 'SERVICES';
+  const total        = (itemPrice * qty) + (isService ? 0 : (choice === 'RUNNER' ? runnerFee : 0));
 
-  const canProceedStep1 = !!choice && (choice === 'SELF_COLLECT' || (!!location && (!isPremium || !!roomNumber)));
+  const canProceedStep1 = isService
+    ? !!serviceMethod && (serviceMethod === 'F2F_CAMPUS' || !!serviceContactInfo)
+    : !!choice && (choice === 'SELF_COLLECT' || (!!location && (!isPremium || !!roomNumber)));
   const canPay          = (paymentMethod === 'TNG' || (paymentMethod === 'FPX' && !!selectedBank)) && payStatus === 'idle' && !errorState;
 
   // ── Pay ──
@@ -94,20 +102,24 @@ export default function CheckoutPage() {
     setPayStatus('processing');
     await new Promise(r => setTimeout(r, 2500));
     try {
-      const dropOffStr = choice === 'RUNNER' 
-        ? (isPremium ? `RAH-DOOR-${roomNumber}` : selectedNode.token) 
-        : (item.handover_node || 'MIIT-G-LOBBY');
+      const dropOffStr = isService
+        ? (serviceMethod === 'F2F_CAMPUS' ? location : '')
+        : (choice === 'RUNNER' 
+          ? (isPremium ? `RAH-DOOR-${roomNumber}` : selectedNode.token) 
+          : (item.handover_node || 'MIIT-G-LOBBY'));
 
       const result = await placeSingleOrder({
         itemId: id as string,
         qty: qty,
-        choice: choice!,
+        choice: isService ? 'SELF_COLLECT' : choice!,
         dropOffStr: dropOffStr,
         itemPrice: itemPrice,
         total: total,
         buyerId: auth.currentUser!.uid,
         buyerName: auth.currentUser!.displayName || 'Student',
-        image_url: itemImage
+        image_url: itemImage,
+        deliveryMethod: isService ? serviceMethod! : undefined,
+        serviceContactInfo: isService ? serviceContactInfo : undefined,
       });
 
       if (!result.success) {
@@ -296,6 +308,100 @@ export default function CheckoutPage() {
                 <p className="text-[11px] font-medium text-[#94a3b8]">Choose your preferred delivery method.</p>
               </div>
 
+              {isService ? (
+                <div className="space-y-3">
+                  {/* Digital / Online */}
+                  <button
+                    onClick={() => setServiceMethod(serviceMethod === 'DIGITAL' ? null : 'DIGITAL')}
+                    className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                      serviceMethod === 'DIGITAL'
+                        ? 'bg-slate-50 border-slate-400'
+                        : 'bg-white border-slate-100 hover:border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-[#94a3b8]">
+                        <Globe size={18} />
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-bold text-slate-900 tracking-tight">Digital / Online</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Receive via email or chat · Free</p>
+                      </div>
+                    </div>
+                    {serviceMethod === 'DIGITAL' && (
+                      <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                        <Check size={12} strokeWidth={3} className="text-slate-900" />
+                      </div>
+                    )}
+                  </button>
+
+                  {serviceMethod === 'DIGITAL' && (
+                    <div className="px-1">
+                      <label className="text-[11px] font-bold text-slate-900 mb-1 block">Your contact info for delivery</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Student ID, email, or phone number"
+                        value={serviceContactInfo}
+                        onChange={(e) => setServiceContactInfo(e.target.value)}
+                        maxLength={200}
+                        className="w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-[13px] font-semibold text-slate-900 focus:outline-none focus:border-slate-400 placeholder:text-[#94a3b8]"
+                      />
+                    </div>
+                  )}
+
+                  {/* F2F Campus Session */}
+                  <button
+                    onClick={() => setServiceMethod(serviceMethod === 'F2F_CAMPUS' ? null : 'F2F_CAMPUS')}
+                    className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                      serviceMethod === 'F2F_CAMPUS'
+                        ? 'bg-slate-50 border-slate-400'
+                        : 'bg-white border-slate-100 hover:border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-[#94a3b8]">
+                        <Users size={18} />
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-bold text-slate-900 tracking-tight">F2F Campus Session</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet on campus for the service · Free</p>
+                      </div>
+                    </div>
+                    {serviceMethod === 'F2F_CAMPUS' && (
+                      <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                        <Check size={12} strokeWidth={3} className="text-slate-900" />
+                      </div>
+                    )}
+                  </button>
+
+                  {serviceMethod === 'F2F_CAMPUS' && (
+                    <div className="space-y-2 pt-1">
+                      <p className="text-[11px] font-medium text-[#94a3b8] px-1">Select your preferred campus location</p>
+                      {CAMPUS_NODES.map((node) => (
+                        <button
+                          key={node.token}
+                          onClick={() => { setLocation(node.token); setRoomNumber(''); }}
+                          className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                            location === node.token
+                              ? 'bg-slate-50 border-slate-300'
+                              : 'bg-white border-slate-100 hover:border-slate-200'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${getLocationBadge(node.zone)}`}>
+                                {node.zone}
+                              </span>
+                              <p className="text-[13px] font-bold text-slate-900">{node.label}</p>
+                            </div>
+                            <p className="text-[11px] font-medium text-[#94a3b8]">{node.tier === 'PREMIUM' ? 'Residential area' : 'Common area'}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
               <div className="space-y-3">
                 {/* Self Collect */}
                 <div className="space-y-2">
@@ -439,6 +545,7 @@ export default function CheckoutPage() {
                 </div>
                 )}
               </div>
+              )}
             </motion.div>
           )}
 
@@ -454,7 +561,7 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between px-1 pt-1">
                 <div className="space-y-0.5">
                   <p className="text-[11px] font-medium text-[#94a3b8]">
-                    {qty} item{qty > 1 ? 's' : ''}{choice === 'RUNNER' ? ` · Runner RM${runnerFee.toFixed(2)}` : ''}
+                    {qty} item{qty > 1 ? 's' : ''}{isService ? ' · Free delivery' : (choice === 'RUNNER' ? ` · Runner RM${runnerFee.toFixed(2)}` : '')}
                   </p>
                   <p className="text-[22px] font-bold text-slate-900 tracking-tight leading-none">RM {total.toFixed(2)}</p>
                 </div>

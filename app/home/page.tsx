@@ -32,7 +32,7 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
 export default function PulseHome() {
   const [profile, setProfile] = useState<any>(null);
   const [liveItems, setLiveItems] = useState<any[]>([]);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [banners, setBanners] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
@@ -65,13 +65,13 @@ export default function PulseHome() {
         setLiveItems([]);
       }
 
-      // 📰 Announcements (Public)
-      const qAnn = query(collection(db, 'announcements'), orderBy('created_at', 'desc'), limit(4));
-      const uAnn = onSnapshot(qAnn, 
-        s => setAnnouncements(s.docs.map(d => ({ id: d.id, ...d.data() }))),
-        e => console.warn("[Home] Announce Error:", e)
+      // 🎠 Home Banners
+      const qBanners = query(collection(db, 'banners'), where('active', '==', true), orderBy('created_at', 'desc'), limit(5));
+      const uBanners = onSnapshot(qBanners, 
+        s => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+        e => console.warn("[Home] Banners Error:", e)
       );
-      unsubs.push(uAnn);
+      unsubs.push(uBanners);
     });
     
     return () => { 
@@ -110,32 +110,20 @@ export default function PulseHome() {
          <ActiveOrderBanner />
          <FloatingActiveTask />
 
-         {/* ── FEATURED BANNER (HIDDEN IF EMPTY) ── */}
-         <AnimatePresence>
-            {announcements.length > 0 && (
+          {/* ── FEATURED BANNER (HIDDEN IF EMPTY) ── */}
+          <AnimatePresence>
+            {banners.length > 0 && (
                <motion.section initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                  <FeaturedBanner slides={announcements.map(a => {
-                    // Route the banner to a relevant destination based on announcement tag
-                    const tag = (a.tag || '').toUpperCase();
-                    const fallback = 
-                      tag === 'MARKETPLACE' || tag === 'COMMERCE' ? '/marketplace' :
-                      tag === 'EVENT' ? '/pulse' :
-                      '/pulse';
-                    return {
-                      id: a.id,
-                      tag: a.tag,
-                      headline: a.headline,
-                      subline: a.subline || a.body,
-                      imageUrl: a.imageUrl,
-                      bgColor: a.color || 'slate-900',
-                      ctaPath: a.ctaPath || fallback,
-                    };
-                  })} />
-
-
+                  <FeaturedBanner slides={banners.map(b => ({
+                    id: b.id,
+                    headline: b.headline,
+                    subline: b.subline || '',
+                    imageUrl: b.imageUrl,
+                    ctaPath: b.destination === 'marketplace' ? '/marketplace' : '/pulse',
+                  }))} />
                </motion.section>
             )}
-         </AnimatePresence>
+          </AnimatePresence>
 
          {/* ── CAMPUS DIRECTORY ── */}
          <section className="space-y-8">

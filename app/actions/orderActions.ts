@@ -104,6 +104,8 @@ export async function placeSingleOrder(params: {
   buyerId: string;
   buyerName: string;
   image_url: string;
+  deliveryMethod?: 'DIGITAL' | 'F2F_CAMPUS';
+  serviceContactInfo?: string;
 }) {
   try {
     const db = getAdminDb();
@@ -127,7 +129,8 @@ export async function placeSingleOrder(params: {
 
       // Sub-order
       const subOrderRef = db.collection('orders').doc();
-      const initialStatus = params.choice === 'RUNNER' ? 'PENDING_RUNNER' : 'PENDING_VENDOR';
+      const isServiceOrder = params.deliveryMethod === 'DIGITAL' || params.deliveryMethod === 'F2F_CAMPUS';
+      const initialStatus = isServiceOrder ? 'PENDING_VENDOR' : (params.choice === 'RUNNER' ? 'PENDING_RUNNER' : 'PENDING_VENDOR');
 
       transaction.set(subOrderRef, {
         order_id: subOrderRef.id,
@@ -150,6 +153,8 @@ export async function placeSingleOrder(params: {
         image_url: params.image_url,
         delivery_type: params.choice,
         drop_off_location: params.dropOffStr,
+        deliveryMethod: params.deliveryMethod || null,
+        serviceContactInfo: params.serviceContactInfo || null,
         status: initialStatus,
         handshake: {
           seller_confirmed: false,

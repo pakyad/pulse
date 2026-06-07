@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '@/lib/firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, writeBatch, doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { CheckCircle2, Loader2, X, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { holdEscrow, refundEscrow } from '@/app/actions/adminActions';
 import { releaseEscrow } from '@/app/actions/orderActions';
@@ -196,8 +196,11 @@ export default function AdminEscrowPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [disputes, setDisputes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [viewingOrder, setViewingOrder] = useState<any>(null);
   const [adminUid, setAdminUid] = useState<string>('');
+  const [bulkReleasing, setBulkReleasing] = useState(false);
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(user => {
@@ -233,12 +236,12 @@ export default function AdminEscrowPage() {
     try {
       let res;
       if (action === 'distribute') res = await releaseEscrow(viewingOrder.id, adminUid);
-      if (action === 'hold') res = await holdEscrow(viewingOrder.id, adminUid);
-      if (action === 'refund') res = await refundEscrow(viewingOrder.id, adminUid);
+      if (action === 'hold') res = await holdEscrow(viewingOrder.id);
+      if (action === 'refund') res = await refundEscrow(viewingOrder.id);
       
       if (!res?.success) throw new Error(res?.message || 'Failed to complete action');
     } catch (e: any) {
-      alert("Error: " + e.message);
+      setError(e.message);
     }
   };
 
@@ -258,6 +261,14 @@ export default function AdminEscrowPage() {
         )}
       </AnimatePresence>
 
+      {/* Error banner */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-[12px] font-medium text-red-700 flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError('')} className="text-red-400 hover:text-red-700 ml-4"><X size={14} /></button>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <p className="text-[10px] font-semibold text-slate-400 mb-1">Financial Control</p>
@@ -265,18 +276,10 @@ export default function AdminEscrowPage() {
       </div>
 
       {/* Overview Card */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
-        <div>
-          <h2 className="text-[16px] font-bold text-slate-900">System Locked Funds</h2>
-          <p className="text-[12px] text-slate-400 mt-1">
-            Total funds waiting to be released or refunded.
-          </p>
-        </div>
-        
-        <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-          <p className="text-[13px] font-semibold text-slate-500">Current Balance</p>
-          <p className="text-[24px] font-bold text-slate-900">RM {totalLocked.toFixed(2)}</p>
-        </div>
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8">
+        <p className="text-[10px] font-bold text-slate-400 mb-2">System Locked Funds</p>
+        <p className="text-[32px] font-bold text-slate-900">RM {totalLocked.toFixed(2)}</p>
+        <p className="text-[12px] text-slate-400 mt-1">Total funds waiting to be released or refunded.</p>
       </div>
 
       {/* Pending Queue */}
@@ -288,16 +291,66 @@ export default function AdminEscrowPage() {
               Orders waiting for your decision.
             </p>
           </div>
-          <span className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[11px] font-bold text-slate-500">
-            {orders.length} Pending
-          </span>
+          <div className="flex items-center gap-3">
+            {orders.length > 0 && (
+              <button onClick={() => setShowBulkConfirm(true)} disabled={bulkReleasing}
+                className="h-8 px-4 rounded-lg bg-slate-900 text-white text-[10px] font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1.5">
+                {bulkReleasing ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />}
+                Release All Completed
+              </button>
+            )}
+            <span className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[11px] font-bold text-slate-500">
+              {orders.length} Pending
+            </span>
+          </div>
         </div>
+
+        {/* Bulk confirm */}
+        <AnimatePresence>
+          {showBulkConfirm && (
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-3">
+              <p className="text-[12px] font-medium text-amber-800">
+                Release escrow for all {orders.length} DELIVERED orders? This cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <button onClick={async () => {
+                  setBulkReleasing(true);
+                  try {
+                    const batch = writeBatch(db);
+                    const toRelease = orders.filter(o => o.status === 'DELIVERED' && o.escrow_status !== 'RELEASED');
+                    toRelease.forEach(o => {
+                      batch.update(doc(db, 'orders', o.id), { escrow_status: 'RELEASED' });
+                    });
+                    await batch.commit();
+                    await addDoc(collection(db, 'activityLogs'), {
+                      action: 'BULK_ESCROW_RELEASE',
+                      details: `Bulk escrow release — ${toRelease.length} orders released.`,
+                      time: serverTimestamp(),
+                    });
+                  } catch (e: any) {
+                    setError(e.message);
+                  }
+                  setBulkReleasing(false);
+                  setShowBulkConfirm(false);
+                }} disabled={bulkReleasing}
+                  className="h-8 px-4 rounded-lg bg-slate-900 text-white text-[10px] font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50">
+                  {bulkReleasing ? 'Releasing...' : 'Confirm'}
+                </button>
+                <button onClick={() => setShowBulkConfirm(false)}
+                  className="h-8 px-4 rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 hover:bg-slate-50 transition-all">
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="space-y-4">
           {orders.length === 0 && !loading ? (
             <div className="py-8 text-center">
-              <CheckCircle2 size={32} className="mx-auto mb-3 text-slate-300" />
-              <p className="text-[13px] font-bold text-slate-500">Wallet is clear</p>
+              <CheckCircle2 size={28} className="mx-auto mb-2 text-[#D1D5DB]" />
+              <p className="text-[13px] font-bold text-[#6B7280]">Wallet is clear</p>
             </div>
           ) : (
             orders.map(order => {
@@ -305,34 +358,29 @@ export default function AdminEscrowPage() {
               const orderAmount = calculateTotal(order);
 
               return (
-                <div key={order.id} className="p-5 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-center hover:bg-slate-100/50 transition-all">
-                  
+                <div key={order.id} className="h-12 px-5 bg-white rounded-xl border border-[#E5E7EB] grid grid-cols-1 md:grid-cols-12 gap-4 items-center hover:bg-[#F9FAFB] transition-all">
+                   
                   {/* Col 1-6: Order ID */}
-                  <div className="md:col-span-6 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-slate-200/50 flex items-center justify-center shrink-0">
-                      <ShieldCheck size={16} className="text-slate-600" />
-                    </div>
+                  <div className="md:col-span-6 flex items-center gap-3">
                     <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <p className="text-[14px] font-bold text-slate-900">Order #{order.id.slice(-6).toUpperCase()}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[13px] font-bold text-slate-900">Order #{order.id.slice(-6).toUpperCase()}</p>
                         {hasRisk && (
-                          <span className="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded">Dispute Risk</span>
+                          <span className="text-[9px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full">Dispute Risk</span>
                         )}
                       </div>
-                      <p className="text-[11px] font-medium text-slate-400">Waiting for release</p>
                     </div>
                   </div>
 
                   {/* Col 7-9: Amount */}
                   <div className="md:col-span-3">
-                    <p className="text-[10px] font-bold text-slate-400 mb-0.5">Escrow Total</p>
-                    <p className="text-[15px] font-bold text-slate-900">RM {orderAmount.toFixed(2)}</p>
+                    <p className="text-[13px] font-bold text-slate-900">RM {orderAmount.toFixed(2)}</p>
                   </div>
 
                   {/* Col 10-12: Actions */}
                   <div className="md:col-span-3 flex items-center justify-end">
                     <button onClick={() => setViewingOrder(order)}
-                      className="h-10 px-6 rounded-xl text-[12px] font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10">
+                      className="h-8 px-5 rounded-lg text-[11px] font-bold bg-slate-900 text-white hover:bg-slate-800 transition-all active:scale-95">
                       Review Escrow
                     </button>
                   </div>

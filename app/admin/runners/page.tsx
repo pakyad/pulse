@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getCountFromServer } from 'firebase/firestore';
 import { approveRunner, rejectRunner } from '@/app/actions/adminActions';
-import { UserCheck, CheckCircle2, Loader2, X, AlertTriangle, PersonStanding, Car, Bike } from 'lucide-react';
+import { UserCheck, CheckCircle2, Loader2, X, AlertTriangle, PersonStanding, Car, Bike, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Confirm Modal ─────────────────────────────────────────────────────────────
@@ -173,15 +173,41 @@ function AppDetailsDrawer({ app, onClose, onResolve }: { app: any; onClose: () =
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AdminRunnersPage() {
   const [apps, setApps] = useState<any[]>([]);
+  const [approved, setApproved] = useState<any[]>([]);
+  const [deliveryCounts, setDeliveryCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [viewingApp, setViewingApp] = useState<any>(null);
 
   useEffect(() => {
     const q = query(collection(db, 'users'), where('runner_status', '==', 'pending'));
     const unsub = onSnapshot(q, (snap) => {
       setApps(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, 'users'), where('is_verified_runner', '==', true));
+    const unsub = onSnapshot(q, (snap) => {
+      setApproved(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
     });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      query(collection(db, 'orders'), where('status', '==', 'DELIVERED')),
+      (snap) => {
+        const counts: Record<string, number> = {};
+        snap.docs.forEach(d => {
+          const runnerId = d.data().runner_id;
+          if (runnerId) counts[runnerId] = (counts[runnerId] || 0) + 1;
+        });
+        setDeliveryCounts(counts);
+      }
+    );
     return () => unsub();
   }, []);
 
@@ -194,7 +220,19 @@ export default function AdminRunnersPage() {
       
       if (!res?.success) throw new Error(res?.message || 'Failed to complete action');
     } catch (e: any) {
-      alert("Error: " + e.message);
+      setError(e.message);
+    }
+  };
+
+  const revokeRunner = async (id: string) => {
+    try {
+      const { doc, updateDoc } = await import('firebase/firestore');
+      await updateDoc(doc(db, 'users', id), {
+        is_verified_runner: false,
+        runner_status: 'rejected',
+      });
+    } catch (e: any) {
+      setError(e.message);
     }
   };
 
@@ -206,6 +244,14 @@ export default function AdminRunnersPage() {
           <AppDetailsDrawer app={viewingApp} onClose={() => setViewingApp(null)} onResolve={handleAction} />
         )}
       </AnimatePresence>
+
+      {/* Error banner */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-[12px] font-medium text-red-700 flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError('')} className="text-red-400 hover:text-red-700 ml-4"><X size={14} /></button>
+        </div>
+      )}
 
       {/* Header */}
       <div>
@@ -270,6 +316,62 @@ export default function AdminRunnersPage() {
                 
               </div>
             ))
+          )}
+        </div>
+      </div>
+
+      {/* Approved Runners */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-[16px] font-bold text-slate-900">Approved Runners</h2>
+            <p className="text-[12px] text-slate-400 mt-1">
+              Currently active delivery runners on campus.
+            </p>
+          </div>
+          <span className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[11px] font-bold text-slate-500">
+            {approved.length} Active
+          </span>
+        </div>
+
+        <div className="space-y-4">
+          {loading ? (
+            <div className="py-12 flex justify-center"><Loader2 size={24} className="animate-spin text-slate-300" /></div>
+          ) : approved.length === 0 ? (
+            <div className="py-12 text-center">
+              <UserCheck size={32} className="mx-auto mb-3 text-[#D1D5DB]" />
+              <p className="text-[13px] font-bold text-[#6B7280]">No approved runners</p>
+            </div>
+          ) : (
+            approved.map((runner) => {
+              const deliveries = deliveryCounts[runner.id] || 0;
+              const trustRating = runner.trustRating || 0;
+              const initials = (runner.displayName || runner.full_name || 'U').charAt(0).toUpperCase();
+              return (
+              <div key={runner.id} className="h-16 px-5 bg-white rounded-xl border border-[#E5E7EB] grid grid-cols-1 md:grid-cols-12 gap-4 items-center hover:bg-[#F9FAFB] transition-all">
+                <div className="md:col-span-4 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center shrink-0 text-blue-600 text-[13px] font-bold">
+                    {initials}
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-bold text-slate-900">{runner.displayName || runner.full_name || 'Unknown'}</p>
+                    <p className="text-[11px] text-slate-400">{runner.email}</p>
+                  </div>
+                </div>
+                <div className="md:col-span-2 text-[12px] text-slate-500">{deliveries} deliveries</div>
+                <div className="md:col-span-3 flex items-center gap-1 text-[12px] text-amber-600">
+                  <Star size={12} className="fill-amber-400 text-amber-400" />
+                  {trustRating.toFixed(1)}
+                </div>
+                <div className="md:col-span-3 flex items-center justify-end">
+                  <button onClick={() => revokeRunner(runner.id)}
+                    className="h-7 px-3 rounded-lg border border-[#E5E7EB] text-[10px] font-bold text-red-400 hover:bg-red-50 transition-all active:scale-95">
+                    Revoke
+                  </button>
+                </div>
+              </div>
+              );
+            })
           )}
         </div>
       </div>

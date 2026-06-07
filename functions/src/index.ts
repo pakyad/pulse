@@ -1,7 +1,9 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { defineSecret } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
+import { auth } from "firebase-functions/v1";
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
@@ -338,7 +340,373 @@ export const onOrderStatusChanged = onDocumentUpdated("orders/{orderId}", async 
   try {
     await admin.messaging().send(message);
     logger.log(`Push notification sent to ${buyerId} for order ${event.params.orderId}`);
+    return null;
   } catch (error) {
     logger.error("Error sending push notification:", error);
+    return null;
   }
 });
+
+/**
+ * onOrderCreated
+ * Fires when a new order document is created. Writes a notification to the seller
+ * and creates a POST_PURCHASE conversation thread between buyer and seller.
+ */
+export const onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => {
+  const snap = event.data;
+  if (!snap) return;
+
+  const order = snap.data();
+  const orderId = event.params.orderId;
+
+  const itemName = order.title || order.items?.[0]?.title || "Item";
+  const sellerId = order.seller_id;
+  const buyerId = order.buyer_id;
+  const handoverNode = order.drop_off_location || "Main Campus";
+  const itemId = order.items?.[0]?.productId || "";
+
+  if (!sellerId || !buyerId) {
+    logger.warn(`[onOrderCreated] Missing seller or buyer on order ${orderId}`);
+    return;
+  }
+
+  let buyerName = order.customer_name || "Buyer";
+  let sellerName = order.seller_name || "Seller";
+  try {
+    const [buyerSnap, sellerSnap] = await Promise.all([
+      db.collection("users").doc(buyerId).get(),
+      db.collection("users").doc(sellerId).get(),
+    ]);
+    if (buyerSnap.exists) {
+      const d = buyerSnap.data()!;
+      buyerName = d.fullName || d.full_name || d.name || buyerName;
+    }
+    if (sellerSnap.exists) {
+      const d = sellerSnap.data()!;
+      sellerName = d.fullName || d.full_name || d.name || sellerName;
+    }
+  } catch (e) {
+    logger.warn(`[onOrderCreated] Could not fetch user profiles for order ${orderId}`);
+  }
+
+  try {
+    // 1. Write notification to seller
+    await db.collection("notifications").add({
+      user_id: sellerId,
+      type: "SALE",
+      title: "Item Sold! 🎉",
+      body: `Your ${itemName} was just purchased. Drop it at ${handoverNode} for the runner.`,
+      order_id: orderId,
+      is_read: false,
+      category: "COMMERCE",
+      created_at: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    logger.info(`[onOrderCreated] Notification written for seller ${sellerId} on order ${orderId}`);
+
+    // 2. Create post-purchase conversation thread
+    const chatId = `post_${sellerId}_${buyerId}_${orderId}`;
+    const chatRef = db.collection("chats").doc(chatId);
+
+    const lastMessageText = `Hi! I just purchased your ${itemName} (Order #${orderId.slice(0, 8).toUpperCase()}). Looking forward to receiving it! 📦`;
+
+    await chatRef.set({
+      members: [sellerId, buyerId],
+      participant_names: {
+        [sellerId]: sellerName,
+        [buyerId]: buyerName,
+      },
+      type: "MARKETPLACE",
+      context_title: itemName,
+      context_id: itemId,
+      orderId: orderId,
+      context: "POST_PURCHASE",
+      lastMessage: lastMessageText,
+      last_message_sender_id: buyerId,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      unread_count: 1,
+    });
+
+    await chatRef.collection("messages").add({
+      senderId: buyerId,
+      text: lastMessageText,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      isSystemMessage: true,
+    });
+    logger.info(`[onOrderCreated] Post-purchase chat ${chatId} created for order ${orderId}`);
+
+    // 3. Store chatId on the order for easy lookup
+    await snap.ref.update({ conversationId: chatId });
+  } catch (error) {
+    logger.error(`[onOrderCreated] Error processing order ${orderId}:`, error);
+  }
+});
+
+/**
+ * onReviewCreated
+ * Fires when a new review document is created in the "Reviews" collection.
+ * Recalculates the seller's trustRating and totalReviews.
+ */
+export const onReviewCreated = onDocumentCreated("Reviews/{reviewId}", async (event) => {
+  const snap = event.data;
+  if (!snap) return;
+
+  const review = snap.data();
+  const sellerId = review.sellerId;
+  const rating = Number(review.rating);
+
+  if (!sellerId || !rating || rating < 1 || rating > 5) {
+    logger.warn(`[onReviewCreated] Invalid review data for ${event.params.reviewId}`);
+    return;
+  }
+
+  try {
+    const reviewsSnap = await db
+      .collection("Reviews")
+      .where("sellerId", "==", sellerId)
+      .get();
+
+    let total = 0;
+    let count = 0;
+    reviewsSnap.forEach((doc) => {
+      const r = doc.data().rating;
+      if (r && r >= 1 && r <= 5) {
+        total += r;
+        count++;
+      }
+    });
+
+    const trustRating = count > 0 ? Math.round((total / count) * 10) / 10 : 0;
+
+    await db.collection("users").doc(sellerId).update({
+      trustRating,
+      totalReviews: count,
+    });
+
+    logger.info(`[onReviewCreated] Updated trustRating=${trustRating} totalReviews=${count} for user ${sellerId}`);
+  } catch (error) {
+    logger.error(`[onReviewCreated] Error processing review ${event.params.reviewId}:`, error);
+  }
+});
+
+const anthropicApiKey = defineSecret("ANTHROPIC_API_KEY");
+const resendApiKey = defineSecret("RESEND_API_KEY");
+
+export const pcsValidate = onDocumentCreated(
+  {
+    document: "items/{itemId}",
+    secrets: [anthropicApiKey],
+    region: "us-central1",
+  },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+
+    const item = snap.data();
+    const itemId = event.params.itemId;
+
+    const name = item.name || item.title || "";
+    const description = item.description || "";
+    const subcategory = item.subcategory || "";
+    const price = parseFloat(item.price) || 0;
+
+    try {
+      let isPriceControlled = false;
+
+      if (subcategory) {
+        const guidelinesSnap = await db.collection("PriceGuidelines").get();
+        guidelinesSnap.forEach((doc) => {
+          const data = doc.data();
+          const subcategories: any[] = data.subcategories || [];
+          const match = subcategories.find((s) => s.label === subcategory);
+          if (match) {
+            isPriceControlled = match.is_price_controlled === true;
+          }
+        });
+      }
+
+      if (!isPriceControlled) {
+        await snap.ref.update({
+          status: "ACTIVE",
+          pcs_certified: false,
+        });
+        return;
+      }
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": anthropicApiKey.value(),
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 500,
+          tools: [
+            {
+              type: "web_search_20250305",
+              name: "web_search",
+            },
+          ],
+          system:
+            'You are a price validation engine for a Malaysian university student marketplace called Pulse. Your only job is to find the current market price of the listed item on Shopee Malaysia or Lazada Malaysia, then determine if the student\'s listed price is at least 10% below that market price. You must respond with ONLY a valid JSON object — no other text, no markdown, no explanation outside the JSON. JSON schema: { isApproved: boolean, marketPrice: number, maxAllowedPrice: number, justification: string } where marketPrice is what you found on Shopee/Lazada in RM, maxAllowedPrice is marketPrice multiplied by 0.90, isApproved is true if the listed price is below maxAllowedPrice, and justification is one sentence max explaining the decision.',
+          messages: [
+            {
+              role: "user",
+              content: `Item name: ${name}. Subcategory: ${subcategory}. Condition notes: ${description}. Listed price: RM${price}. Search Shopee Malaysia or Lazada Malaysia for the current price of this item and validate.`,
+            },
+          ],
+        }),
+      });
+
+      const body: any = await response.json();
+      let claudeContent = "";
+      if (body.content && Array.isArray(body.content)) {
+        for (const block of body.content) {
+          if (block.type === "text") {
+            claudeContent = block.text;
+            break;
+          }
+        }
+      }
+
+      let cleaned = claudeContent.trim();
+      if (cleaned.startsWith("```")) {
+        cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "");
+      }
+
+      const result = JSON.parse(cleaned);
+      const isApproved = result.isApproved === true;
+      const marketPrice = parseFloat(result.marketPrice) || 0;
+      const maxAllowedPrice = parseFloat(result.maxAllowedPrice) || 0;
+      const justification = result.justification || "";
+
+      await snap.ref.update({
+        status: isApproved ? "ACTIVE" : "FLAGGED_FOR_REVIEW",
+        pcs_certified: isApproved,
+        pcs_result: {
+          isApproved,
+          marketPrice,
+          maxAllowedPrice,
+          justification,
+          checkedAt: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      logger.error(`[pcsValidate] Error validating item ${itemId}:`, error);
+      await snap.ref.update({
+        status: "ACTIVE",
+        pcs_certified: false,
+      });
+    }
+  }
+);
+
+/**
+ * sendWelcomeEmail
+ * Sends a welcome email via Resend when a new user signs up.
+ */
+export const sendWelcomeEmail = auth
+  .user()
+  .onCreate(async (user) => {
+      const email = user.email;
+      if (!email) return;
+
+      try {
+        const userDoc = await db.collection("users").doc(user.uid).get();
+        const userData = userDoc.data();
+        const fullName: string = userData?.fullName || "Student";
+        const matricNumber: string = userData?.matricNumber || "";
+        const firstName = fullName.split(" ")[0];
+
+        const htmlBody = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+    <tr>
+      <td align="center" style="padding:48px 24px;">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding-bottom:32px;">
+              <h1 style="margin:0;font-size:28px;font-weight:700;color:#0f172a;letter-spacing:-0.02em;">Hi ${firstName},</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom:24px;">
+              <p style="margin:0;font-size:16px;line-height:26px;color:#334155;">
+                Your Pulse account is ready. You're now part of the UniKL MIIT student marketplace.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-bottom:24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-bottom:12px;font-size:14px;font-weight:600;color:#0f172a;">Here's what you can do:</td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom:8px;font-size:15px;color:#334155;line-height:24px;">&bull; Buy &amp; sell at student prices</td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom:8px;font-size:15px;color:#334155;line-height:24px;">&bull; Request Pulse Runner deliveries</td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom:8px;font-size:15px;color:#334155;line-height:24px;">&bull; Browse Student Market verified deals</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ${matricNumber ? `
+          <tr>
+            <td style="padding:16px 20px;background:#f8fafc;border-radius:12px;margin-bottom:24px;">
+              <p style="margin:0;font-size:15px;color:#334155;">
+                Your matric number <strong style="color:#0f172a;">${matricNumber}</strong> is linked to your account.
+              </p>
+            </td>
+          </tr>
+          ` : ""}
+          <tr>
+            <td style="padding-top:24px;">
+              <p style="margin:0;font-size:15px;color:#475569;line-height:24px;">
+                See you on campus.<br>
+                <strong style="color:#0f172a;">— The Pulse Team</strong>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${resendApiKey.value()}`,
+          },
+          body: JSON.stringify({
+            from: "Pulse Campus <onboarding@resend.dev>",
+            to: [email],
+            subject: `Welcome to Pulse, ${firstName} 👋`,
+            html: htmlBody,
+          }),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          logger.error(`[sendWelcomeEmail] Resend error ${res.status}: ${errText}`);
+        } else {
+          logger.info(`[sendWelcomeEmail] Welcome email sent to ${email}`);
+        }
+      } catch (error) {
+        logger.error(`[sendWelcomeEmail] Error for ${email}:`, error);
+      }
+    }
+  );

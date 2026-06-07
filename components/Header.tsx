@@ -1,9 +1,9 @@
 'use client'
 import { useRouter, usePathname } from 'next/navigation';
 import { Search, ChevronLeft, LogOut, Bell, Settings, ShoppingCart, MessageSquare } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { auth, db } from '@/lib/firebase';
-import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getDemoUser } from '@/lib/demo-utils';
@@ -22,6 +22,28 @@ export default function Header() {
   const isRootPage = pathname === '/home';
   const showSearchBar = !pathname?.startsWith('/run');
   const displayName = profile?.full_name || auth.currentUser?.email?.split('@')[0] || 'Student';
+
+  const handleBellTap = useCallback(async () => {
+    const user = auth.currentUser;
+    if (user && notificationCount > 0) {
+      try {
+        const q = query(
+          collection(db, 'notifications'),
+          where('user_id', '==', user.uid),
+          where('is_read', '==', false)
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const batch = writeBatch(db);
+          snap.forEach(d => batch.update(d.ref, { is_read: true }));
+          await batch.commit();
+        }
+      } catch (e) {
+        console.error('[Header] Failed to mark notifications as read:', e);
+      }
+    }
+    router.push('/activity');
+  }, [router, notificationCount]);
 
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((user) => {
@@ -104,7 +126,7 @@ export default function Header() {
             </button>
 
             <button 
-              onClick={() => router.push('/activity')}
+              onClick={handleBellTap}
               className={`transition-all relative p-2 active:scale-95 ${pathname === '/activity' ? 'text-[#007AFF]' : 'text-navy/40 hover:text-navy'}`}
             >
               <Bell size={22} strokeWidth={pathname === '/activity' ? 2.5 : 2} />

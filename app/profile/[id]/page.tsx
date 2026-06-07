@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { ArrowLeft, ShieldCheck, Package, MapPin, ExternalLink, Store } from 'lucide-react';
+import { doc, getDoc, onSnapshot, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { ArrowLeft, ShieldCheck, Package, MapPin, ExternalLink, Store, Star } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
 import { motion } from 'framer-motion';
@@ -23,45 +23,41 @@ export default function PublicProfile() {
     if (!id) return;
     const uid = id as string;
 
-    const load = async () => {
-      // Try users collection first (students/sellers), then merchants collection
-      let profileSnap = await getDoc(doc(db, 'users', uid));
-      let data: any = null;
-
-      if (profileSnap.exists()) {
-        data = profileSnap.data();
+    const unsubUser = onSnapshot(doc(db, 'users', uid), (snap) => {
+      if (snap.exists()) {
+        setProfile(snap.data());
       } else {
         // Try merchants collection for club accounts
-        const merchantSnap = await getDoc(doc(db, 'merchants', uid));
-        if (merchantSnap.exists()) data = merchantSnap.data();
+        getDoc(doc(db, 'merchants', uid)).then((merchantSnap) => {
+          if (merchantSnap.exists()) setProfile(merchantSnap.data());
+        });
       }
+    });
 
-      setProfile(data);
-
-      // Fetch their active listings
-      const q = query(
-        collection(db, 'items'),
-        where('seller_id', '==', uid),
-        where('is_active', '==', true),
-        orderBy('created_at', 'desc')
-      );
+    // Fetch their active listings
+    const q = query(
+      collection(db, 'items'),
+      where('seller_id', '==', uid),
+      where('is_active', '==', true),
+      orderBy('created_at', 'desc')
+    );
+    (async () => {
       try {
         const snap = await getDocs(q);
         setListings(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       } catch {
-        // fallback: no ordering if no index
         const q2 = query(collection(db, 'items'), where('seller_id', '==', uid));
         const snap2 = await getDocs(q2);
         setListings(snap2.docs.map(d => ({ id: d.id, ...d.data() } as any)).filter(d => d.is_active));
       }
 
-      // Check if this is the current user's own profile
       const current = auth.currentUser;
       if (current?.uid === uid) setIsOwn(true);
 
       setLoading(false);
-    };
-    load();
+    })();
+
+    return () => unsubUser();
   }, [id]);
 
   if (loading) return (
@@ -156,6 +152,15 @@ export default function PublicProfile() {
                 </span>
               )}
             </div>
+
+            {/* Trust Rating */}
+            {profile.trustRating != null && (
+              <div className="flex items-center gap-1.5 mt-2 text-amber-500">
+                <Star size={13} fill="currentColor" />
+                <span className="text-[13px] font-bold">{Number(profile.trustRating).toFixed(1)}</span>
+                <span className="text-[11px] font-medium text-slate-400">({profile.totalReviews || 0} reviews)</span>
+              </div>
+            )}
 
             {/* Bio */}
             {profile.bio && (
