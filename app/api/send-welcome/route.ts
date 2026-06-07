@@ -12,9 +12,9 @@ const WELCOME_HTML = (name: string) => `
 <tr><td align="center">
 <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.04)">
   <tr><td style="padding:48px 40px 0 40px;text-align:center">
-    <h1 style="font-size:22px;font-weight:700;color:#0f172a;margin:16px 0 8px 0">Hey ${name},</h1>
+    <h1 style="font-size:22px;font-weight:700;color:#0f172a;margin:16px 0 8px 0">Hey \${name},</h1>
     <p style="font-size:14px;color:#64748b;line-height:1.6;margin:0 0 32px 0">
-      You're officially part of <strong style="color:#0f172a">Pulse</strong> - MIIT's campus marketplace.<br>
+      You are officially part of <strong style="color:#0f172a">Pulse</strong> - MIIT campus marketplace.<br>
       Buy, sell, and earn across UniKL with escrow protection.
     </p>
   </td></tr>
@@ -34,7 +34,7 @@ const WELCOME_HTML = (name: string) => `
     </table>
   </td></tr>
   <tr><td style="padding:32px 40px 0 40px;text-align:center">
-    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/home"
+    <a href="\${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/home"
        style="display:inline-block;padding:14px 40px;background:#0f172a;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:40px">
       Start Exploring ->
     </a>
@@ -48,7 +48,7 @@ const WELCOME_HTML = (name: string) => `
 </table>
 </td></tr></table>
 </body>
-</html>`;
+</html>\`;
 
 export async function POST(req: NextRequest) {
   try {
