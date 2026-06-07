@@ -14,7 +14,7 @@ const WELCOME_HTML = (name: string) => `
   <tr><td style="padding:48px 40px 0 40px;text-align:center">
     <h1 style="font-size:22px;font-weight:700;color:#0f172a;margin:16px 0 8px 0">Hey ${name},</h1>
     <p style="font-size:14px;color:#64748b;line-height:1.6;margin:0 0 32px 0">
-      You're officially part of <strong style="color:#0f172a">Pulse</strong> — MIIT's campus marketplace.<br>
+      You're officially part of <strong style="color:#0f172a">Pulse</strong> - MIIT's campus marketplace.<br>
       Buy, sell, and earn across UniKL with escrow protection.
     </p>
   </td></tr>
@@ -41,7 +41,7 @@ const WELCOME_HTML = (name: string) => `
   </td></tr>
   <tr><td style="padding:32px 40px 48px 40px;text-align:center">
     <p style="font-size:11px;color:#94a3b8;margin:0;line-height:1.6">
-      Pulse · UniKL MIIT · Kuala Lumpur<br>
+      Pulse - UniKL MIIT - Kuala Lumpur<br>
       <span style="color:#cbd5e1">Need help? Reply to this email</span>
     </p>
   </td></tr>
