@@ -479,20 +479,22 @@ export default function CreateListingPage() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="bg-red-50 border border-red-200 rounded-xl p-4 mt-2 text-sm"
                   >
-                    <p className="text-red-800 font-medium">
-                      ⚠️ Price Limit Exceeded! We found {pcsError.itemTitle} on the market for RM{pcsError.marketBaselinePrice.toFixed(2)}. To protect the student economy, the max campus listing price is RM{pcsError.maxAllowedStudentPrice.toFixed(2)}.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setPrice(pcsError.maxAllowedStudentPrice.toString());
-                        setPcsError(null);
-                      }}
-                      className="mt-3 bg-gray-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-gray-800 transition-colors"
-                    >
-                      Set price to RM{pcsError.maxAllowedStudentPrice.toFixed(2)} automatically
-                    </button>
+                    <div className="rounded-2xl p-4 mt-3 border border-amber-200 bg-amber-50">
+                      <div className="flex items-start gap-3">
+                        <span className="text-xl">💡</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-amber-900 mb-1">Heads up — price is a bit high</p>
+                          <p className="text-xs text-amber-700 leading-relaxed">We checked the market and found <strong>{pcsError.itemTitle}</strong> going for around <strong>RM{pcsError.marketBaselinePrice.toFixed(2)}</strong> online. To keep things fair for students, campus listings are capped at <strong>RM{pcsError.maxAllowedStudentPrice.toFixed(2)}</strong> — that's 10% below retail.</p>
+                          <button 
+                            onClick={() => { setPrice(pcsError.maxAllowedStudentPrice.toString()); setPcsError(null); }}
+                            className="mt-3 bg-amber-900 text-white text-xs rounded-full px-4 py-1.5 hover:bg-amber-800 transition-colors"
+                          >
+                            Set to RM{pcsError.maxAllowedStudentPrice.toFixed(2)} and continue >
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -709,14 +711,23 @@ export default function CreateListingPage() {
               <button
                 disabled={!canPost || isUploading}
                 onClick={handlePost}
-                className={`w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
-                  (canPost && !isUploading)
-                    ? 'bg-slate-900 text-white active:scale-95 shadow-sm'
-                    : 'bg-slate-50 text-slate-200 border border-slate-100'
-                }`}
+                className={(isPosting || isUploading) 
+                  ? "w-full bg-gray-900 text-white rounded-full py-3 text-sm font-medium border-2 border-gray-700 flex items-center justify-center gap-2 opacity-90 animate-pulse transition-all"
+                  : `w-full h-12 rounded-xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 transition-all ${
+                      (canPost && !isUploading)
+                        ? 'bg-slate-900 text-white active:scale-95 shadow-sm'
+                        : 'bg-slate-50 text-slate-200 border border-slate-100'
+                    }`
+                }
               >
-                {(isPosting || isUploading) && <Loader2 size={16} className="animate-spin" />}
-                {isUploading ? 'Uploading Photos...' : isPosting ? 'Running campus guardrails...' : 'Publish Listing'}
+                {(isPosting || isUploading) ? (
+                  <>
+                    <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    {isUploading ? 'Uploading Photos...' : 'Checking market price...'}
+                  </>
+                ) : (
+                  'Publish Listing'
+                )}
               </button>
 
               {/* ── PCS APPROVED BANNER ── */}
