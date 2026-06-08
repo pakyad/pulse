@@ -68,7 +68,8 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
     try {
       const uid = auth.currentUser.uid;
       const orderId = mission.id;
-      const storageRef = ref(storage, 'runners/' + uid + '/deliveries/' + orderId + '/' + Date.now() + '.jpg');
+      const fileName = Date.now() + '_' + orderId + '.jpg';
+      const storageRef = ref(storage, 'delivery_proofs/' + fileName);
       const snap = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(snap.ref);
       console.log('[Confirm] photo uploaded', url);
@@ -266,7 +267,8 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
       try {
         const uid = auth.currentUser.uid;
         const orderId = mission.id;
-        const storageRef = ref(storage, 'runners/' + uid + '/deliveries/' + orderId + '/' + Date.now() + '.jpg');
+        const fileName = Date.now() + '_' + orderId + '.jpg';
+        const storageRef = ref(storage, 'delivery_proofs/' + fileName);
         const snap = await uploadBytes(storageRef, podPhoto);
         const url = await getDownloadURL(snap.ref);
         console.log('[Confirm] photo uploaded', url);

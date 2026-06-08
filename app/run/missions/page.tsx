@@ -378,7 +378,7 @@ export default function MissionControl() {
     setIsProcessing(true);
     try {
       const timestamp = Date.now();
-      const storagePath = `orders/${activeMission.id}/delivery_${timestamp}.jpg`;
+      const storagePath = `delivery_proofs/${timestamp}_${activeMission.id}.jpg`;
       const storageRef = ref(storage, storagePath);
       const uploadRes = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(uploadRes.ref);
