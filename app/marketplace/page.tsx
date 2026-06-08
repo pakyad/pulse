@@ -471,7 +471,7 @@ function MarketplacePage() {
             filteredItems.length > 0 ? (
               <div className="grid grid-cols-2 gap-x-3 gap-y-8">
                 {filteredItems.map(item => (
-                  <ProductCard key={item.id} item={item} onClick={() => router.push(`/marketplace/${item.id}`)} />
+                  <ProductCard key={item.id} item={item} onClick={() => router.push(`/marketplace/${item.id}`)} showStudentBanner={urlFilter === 'student'} />
                 ))}
               </div>
             ) : (

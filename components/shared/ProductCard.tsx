@@ -22,9 +22,10 @@ interface ProductCardProps {
     pcs_certified?: boolean;
   };
   onClick?: () => void;
+  showStudentBanner?: boolean;
 }
 
-export default function ProductCard({ item, onClick }: ProductCardProps) {
+export default function ProductCard({ item, onClick, showStudentBanner }: ProductCardProps) {
   const isSold = item.status === 'SOLD' || (item.stock_count !== undefined && item.stock_count !== null && item.stock_count <= 0);
 
   // Mocking timeAgo if not provided by DB for the demo view
@@ -68,6 +69,18 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
           </div>
         )}
 
+        {item.pcs_certified === true && (
+          <div className="absolute bottom-1.5 left-1.5 bg-[#EAF3DE] text-[#3B6D11] px-2 py-0.5 rounded-full text-[10px] font-medium z-10 shadow-sm">
+             Student Price
+          </div>
+        )}
+
+        {showStudentBanner && !isSold && (
+          <div className="absolute bottom-0 left-0 right-0 bg-[#16a34a] px-2 py-1 text-center z-10">
+            <span className="text-xs font-semibold text-white tracking-wide">Student Price</span>
+          </div>
+        )}
+
         {isSold && (
           <div className="absolute inset-x-0 bottom-0 bg-slate-900/90 py-1.5 px-3 flex items-center justify-center z-20 backdrop-blur-sm">
             <p className="text-[11px] font-bold text-white uppercase tracking-tight">
@@ -105,15 +118,9 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
             </p>
           </div>
           
-          {item.pcs_certified === true ? (
-            <p className="text-[13px] font-bold text-[#3B6D11] bg-[#EAF3DE] px-2.5 py-1 rounded-full tracking-tight shrink-0">
-              RM {formattedPrice}
-            </p>
-          ) : (
-            <p className="text-[15px] font-bold text-slate-900 tracking-tight shrink-0 pl-2">
-              RM {formattedPrice}
-            </p>
-          )}
+          <p className="text-[15px] font-bold text-slate-900 tracking-tight shrink-0 pl-2">
+            RM {formattedPrice}
+          </p>
         </div>
 
       </div>
