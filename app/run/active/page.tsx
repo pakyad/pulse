@@ -9,9 +9,9 @@ import {
   Camera, Upload, Info, Lock, Shield, User, Store
 } from 'lucide-react';
 import { auth, db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
 import { completeDelivery } from '@/app/actions/deliveryActions';
-import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection, query, where } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection, query, where, serverTimestamp } from 'firebase/firestore';
 import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import MapErrorBoundary from '@/components/shared/MapErrorBoundary';
 import BackButton from '@/components/shared/BackButton';
@@ -192,16 +192,31 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    }, [isLoaded, mission, pickupCoord, dropoffCoord]);
 
    const handleCompleteDelivery = async () => {
-      if (!auth.currentUser || !mission || !podPhoto) return;
+      if (!auth.currentUser || !mission) return;
+      if (!podPhoto) {
+         alert("Please capture or select a photo first.");
+         return;
+      }
       setIsCompleting(true);
       try {
-         const storageRef = ref(storage, `delivery_proofs/${mission.id}_${Date.now()}.jpg`);
+         const uid = auth.currentUser.uid;
+         const orderId = mission.id;
+         const storageRef = ref(storage, `runners/${uid}/deliveries/${orderId}/${Date.now()}.jpg`);
          const uploadResult = await uploadBytes(storageRef, podPhoto);
-         const proofUrl = await getDownloadURL(uploadResult.ref);
-         await completeDelivery(mission.id, proofUrl, auth.currentUser.uid);
+         const downloadURL = await getDownloadURL(uploadResult.ref);
+         
+         await updateDoc(doc(db, 'orders', orderId), {
+            status: 'DELIVERED',
+            delivered_at: serverTimestamp(),
+            delivery_photo: downloadURL,
+            runner_id: uid,
+            buyer_confirmed: false
+         });
+         
          setStep(6);
-      } catch (error) {
+      } catch (error: any) {
          console.error(error);
+         alert("Failed to confirm delivery: " + error.message);
       } finally {
          setIsCompleting(false);
       }
@@ -313,7 +328,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
 
                          <button onClick={step === 5 ? handleCompleteDelivery : handleStepUpdate} disabled={isCompleting} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 text-[14px]">
                             {isCompleting && <Loader2 size={18} className="animate-spin" />}
-                            {step === 1 ? "Arrived at Pickup" : step === 2 ? "Confirm Pickup" : step === 3 ? "Arrived at Drop-off" : step === 4 ? "Complete Delivery" : "Confirm Completion"}
+                            {step === 1 ? "Arrived at Pickup" : step === 2 ? "Confirm Pickup" : step === 3 ? "Arrived at Drop-off" : step === 4 ? "Complete Delivery" : "Confirm Delivery"}
                          </button>
                       </motion.div>
                    ) : (
@@ -333,9 +348,9 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                                }} />
                             </label>
                          )}
-                         <button onClick={handleCompleteDelivery} disabled={!podPhoto || isCompleting} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md disabled:opacity-30 active:scale-95 transition-all">
+                         <button onClick={handleCompleteDelivery} disabled={isCompleting} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 shadow-md disabled:opacity-30 active:scale-95 transition-all">
                             {isCompleting && <Loader2 size={18} className="animate-spin" />}
-                            {isCompleting ? "Processing..." : "Complete Drop-off"}
+                            {isCompleting ? "Processing..." : "Confirm Delivery"}
                          </button>
                       </div>
                    )}
