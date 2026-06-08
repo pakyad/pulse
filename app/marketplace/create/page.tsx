@@ -91,8 +91,6 @@ export default function CreateListingPage() {
     setPostError(null);
     setPcsError(null);
     
-    const numPrice = parseFloat(price);
-
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
