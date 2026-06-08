@@ -42,6 +42,14 @@ const SERVICES_SUBCATEGORIES = [
   'Other Campus Services',
 ];
 
+const CUSTOM_CATEGORY_LABELS = {
+  Handmade: 'Handmade',
+  'Food and Beverages': 'Food and Beverages',
+  'Art and Craft': 'Art and Craft',
+  Services: 'Services',
+  Other: 'Other',
+};
+
 type PcsStatus = 'APPROVED' | 'FLAGGED' | 'BLOCKED_NO_REFERENCE' | 'FREE_MARKET' | 'ERROR';
 
 interface PcsNotice {
@@ -54,7 +62,8 @@ interface PcsNotice {
 
 export default function CreateListingPage() {
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState<CategoryID | ''>('');
+  const [listingType, setListingType] = useState('standard');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [subcategory, setSubcategory] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
@@ -77,6 +86,12 @@ export default function CreateListingPage() {
   useEffect(() => {
     setPcsError(null);
   }, [selectedCategory, subcategory]);
+
+  useEffect(() => {
+    setSelectedCategory('');
+    setSubcategory('');
+    setPcsError(null);
+  }, [listingType]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     Array.from(e.target.files || []).forEach(file => {
@@ -111,9 +126,10 @@ export default function CreateListingPage() {
         itemTitle: title,
         itemPrice: numPrice,
         category: selectedCategory,
-        subcategory,
+        subcategory: listingType === 'custom' ? selectedCategory : subcategory,
         sellerId,
-        itemId
+        itemId,
+        isCustomItem: listingType === 'custom'
       });
 
       const pcsData = pcsResult.data as any;
@@ -156,7 +172,8 @@ export default function CreateListingPage() {
         title: title.trim(),
         description: description.trim(),
         category: selectedCategory,
-        subcategory,
+        subcategory: listingType === 'custom' ? selectedCategory : subcategory,
+        listing_type: listingType,
         price: numPrice,
         stock_count: stockCount,
         metadata,
@@ -191,7 +208,10 @@ export default function CreateListingPage() {
     }
   };
 
-  const canPost = !!title && !!price && !!subcategory && images.length > 0 && !isPosting;
+  const isCustomListing = listingType === 'custom';
+  const customPriceOverLimit = isCustomListing && Number(price) > 500;
+  const canPost = !!title && !!price && !!selectedCategory && (isCustomListing || !!subcategory) && images.length > 0 && !isPosting && !customPriceOverLimit;
+  const categoryLabels = isCustomListing ? CUSTOM_CATEGORY_LABELS : CATEGORY_LABELS;
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
@@ -206,15 +226,38 @@ export default function CreateListingPage() {
       </nav>
 
       <div className="pt-28 px-6 space-y-10">
+        <section className="space-y-3">
+          <div className="flex gap-3">
+            <button
+              onClick={() => setListingType('standard')}
+              className={listingType === 'standard'
+                ? 'bg-gray-900 text-white rounded-full px-6 py-2.5 text-sm font-medium'
+                : 'border border-gray-200 text-gray-600 rounded-full px-6 py-2.5 text-sm font-medium'
+              }
+            >
+              Standard Item
+            </button>
+            <button
+              onClick={() => setListingType('custom')}
+              className={listingType === 'custom'
+                ? 'bg-gray-900 text-white rounded-full px-6 py-2.5 text-sm font-medium'
+                : 'border border-gray-200 text-gray-600 rounded-full px-6 py-2.5 text-sm font-medium'
+              }
+            >
+              Handmade / Custom
+            </button>
+          </div>
+        </section>
+
         <section className="space-y-4">
           <div className="space-y-0.5">
             <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">What are you listing?</h2>
             <p className="text-[11px] font-medium text-[#94a3b8]">Choose the category that fits your item.</p>
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1 -mx-6 px-6">
-            {(Object.keys(CATEGORY_LABELS) as CategoryID[]).map((id) => {
+            {Object.keys(categoryLabels).map((id) => {
               const isActive = selectedCategory === id;
-              const Icon = CATEGORY_ICONS[id];
+              const Icon = !isCustomListing ? CATEGORY_ICONS[id as CategoryID] : null;
               return (
                 <button
                   key={id}
@@ -223,8 +266,8 @@ export default function CreateListingPage() {
                     isActive ? 'bg-slate-900 border-slate-900 text-white shadow-sm' : 'bg-slate-50/50 border-slate-900/10 text-slate-400'
                   }`}
                 >
-                  <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
-                  <span className="text-[12px] font-bold tracking-[-0.2px]">{CATEGORY_LABELS[id]}</span>
+                  {Icon && <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />}
+                  <span className="text-[12px] font-bold tracking-[-0.2px]">{categoryLabels[id as keyof typeof categoryLabels]}</span>
                 </button>
               );
             })}
@@ -233,7 +276,7 @@ export default function CreateListingPage() {
 
         {selectedCategory && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
-            <section className="space-y-3 pt-2 border-t border-slate-100">
+            {!isCustomListing && <section className="space-y-3 pt-2 border-t border-slate-100">
               <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Subcategory</h2>
               <div className="flex flex-wrap gap-2">
                 {(selectedCategory === 'SERVICES' ? SERVICES_SUBCATEGORIES : MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories ?? []).map((sub) => {
@@ -252,7 +295,7 @@ export default function CreateListingPage() {
                   );
                 })}
               </div>
-            </section>
+            </section>}
 
             <section className="space-y-4 pt-2 border-t border-slate-100">
               <div className="flex justify-between items-center">
@@ -282,8 +325,11 @@ export default function CreateListingPage() {
               <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Price</h2>
               <div className="flex items-center h-12 bg-slate-50 border border-slate-100 rounded-xl overflow-hidden focus-within:border-slate-900">
                 <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">RM</span>
-                <input type="number" placeholder="0.00" value={price} onChange={(e) => setPrice(e.target.value)} className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-slate-900 focus:outline-none" />
+                <input type="number" placeholder={isCustomListing ? 'Max RM 500 for custom items' : '0.00'} value={price} onChange={(e) => setPrice(e.target.value)} className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-slate-900 focus:outline-none" />
               </div>
+              {customPriceOverLimit && (
+                <p className="text-[11px] font-bold text-red-500">Custom items cannot be listed above RM 500</p>
+              )}
               <AnimatePresence>
                 {pcsError && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>

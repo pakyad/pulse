@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Plus, Trash2, Loader2,
-  BookOpen, Home, Cpu, Shirt,
+  BookOpen, Home, Cpu, Shirt, Briefcase,
   ArrowUpRight, Zap, TrendingUp
 } from 'lucide-react';
 
@@ -38,6 +38,7 @@ const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
   HOSTEL: Home,
   TECH: Cpu,
   APPAREL: Shirt,
+  SERVICES: Briefcase,
 };
 
 const CATEGORY_LABELS: Record<CategoryID, string> = {
@@ -45,11 +46,21 @@ const CATEGORY_LABELS: Record<CategoryID, string> = {
   HOSTEL: 'Hostel',
   TECH: 'Tech',
   APPAREL: 'Apparel',
+  SERVICES: 'Services',
+};
+
+const CUSTOM_CATEGORY_LABELS = {
+  Handmade: 'Handmade',
+  'Food and Beverages': 'Food and Beverages',
+  'Art and Craft': 'Art and Craft',
+  Services: 'Services',
+  Other: 'Other',
 };
 
 export default function CreateListing({ userId, role, onClose, existingItem }: CreateListingProps) {
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState<CategoryID | ''>(existingItem?.category || '');
+  const [listingType, setListingType] = useState(existingItem?.listing_type || (existingItem?.pcs_is_custom ? 'custom' : 'standard'));
+  const [selectedCategory, setSelectedCategory] = useState<string>(existingItem?.category || '');
   const [subcategory, setSubcategory] = useState(existingItem?.subcategory || '');
   
   // State for images
@@ -76,8 +87,16 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       setPrice(existingItem.price?.toString() || '');
       setMetadata(existingItem.metadata || {});
       setStock(existingItem.stock_count?.toString() || '0');
+      setListingType(existingItem.listing_type || (existingItem.pcs_is_custom ? 'custom' : 'standard'));
     }
   }, [existingItem]);
+
+  useEffect(() => {
+    if (existingItem) return;
+    setSelectedCategory('');
+    setSubcategory('');
+    setPcsError(null);
+  }, [listingType, existingItem]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -130,9 +149,10 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         itemTitle: title,
         itemPrice: parseFloat(price),
         category: selectedCategory,
-        subcategory,
+        subcategory: listingType === 'custom' ? selectedCategory : subcategory,
         sellerId,
-        itemId
+        itemId,
+        isCustomItem: listingType === 'custom'
       });
 
       const pcsData = pcsResult.data as any;
@@ -166,7 +186,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         title,
         description,
         category: selectedCategory,
-        subcategory,
+        subcategory: listingType === 'custom' ? selectedCategory : subcategory,
+        listing_type: listingType,
         price: parseFloat(price),
         stock_count: stockCount,
         metadata,
@@ -209,14 +230,17 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   };
 
   const totalImageCount = existingImages.length + newImageFiles.length;
-  const canPost = !!title && !!price && !!selectedCategory && !!subcategory && totalImageCount > 0 && !isPosting;
+  const isCustomListing = listingType === 'custom';
+  const customPriceOverLimit = isCustomListing && Number(price) > 500;
+  const canPost = !!title && !!price && !!selectedCategory && (isCustomListing || !!subcategory) && totalImageCount > 0 && !isPosting && !customPriceOverLimit;
+  const categoryLabels = isCustomListing ? CUSTOM_CATEGORY_LABELS : CATEGORY_LABELS;
 
   // Derive the dynamic title hint from the selected subcategory config
   const selectedSubcategoryConfig = useMemo(() => {
-    if (!selectedCategory) return null;
+    if (!selectedCategory || isCustomListing) return null;
     return MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories
       .find((s) => s.label === subcategory) ?? null;
-  }, [selectedCategory, subcategory]);
+  }, [selectedCategory, subcategory, isCustomListing]);
 
   const titleHint = selectedSubcategoryConfig?.titleHint ?? 'e.g. Logitech MX Master 3, Thomas Calculus...';
 
@@ -267,6 +291,29 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
             </div>
           </motion.div>
         )}
+
+        <section className="space-y-3 mb-10">
+          <div className="flex gap-3">
+            <button
+              onClick={() => setListingType('standard')}
+              className={listingType === 'standard'
+                ? 'bg-gray-900 text-white rounded-full px-6 py-2.5 text-sm font-medium'
+                : 'border border-gray-200 text-gray-600 rounded-full px-6 py-2.5 text-sm font-medium'
+              }
+            >
+              Standard Item
+            </button>
+            <button
+              onClick={() => setListingType('custom')}
+              className={listingType === 'custom'
+                ? 'bg-gray-900 text-white rounded-full px-6 py-2.5 text-sm font-medium'
+                : 'border border-gray-200 text-gray-600 rounded-full px-6 py-2.5 text-sm font-medium'
+              }
+            >
+              Handmade / Custom
+            </button>
+          </div>
+        </section>
         
         {/*  SECTION: CLASSIFICATION  */}
         <section className="space-y-4">
@@ -276,9 +323,9 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
           </div>
 
           <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 -mx-6 px-6">
-            {(Object.keys(CATEGORY_LABELS) as CategoryID[]).map((id) => {
+            {Object.keys(categoryLabels).map((id) => {
               const isActive = selectedCategory === id;
-              const Icon = CATEGORY_ICONS[id];
+              const Icon = !isCustomListing ? CATEGORY_ICONS[id as CategoryID] : null;
               return (
                 <button
                   key={id}
@@ -289,8 +336,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                       : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                   }`}
                 >
-                  <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />
-                  <span className="text-[12px] font-bold tracking-[-0.2px]">{CATEGORY_LABELS[id]}</span>
+                  {Icon && <Icon size={14} strokeWidth={isActive ? 2.5 : 1.5} />}
+                  <span className="text-[12px] font-bold tracking-[-0.2px]">{categoryLabels[id as keyof typeof categoryLabels]}</span>
                 </button>
               );
             })}
@@ -306,7 +353,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
           >
 
             {/*  SUBCATEGORY  */}
-            <section className="space-y-3 pt-2 border-t border-slate-100">
+            {!isCustomListing && <section className="space-y-3 pt-2 border-t border-slate-100">
               <div className="space-y-0.5">
                 <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Subcategory</h2>
                 <p className="text-[11px] font-medium text-[#94a3b8]">Pick the most specific match.</p>
@@ -329,10 +376,10 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                   );
                 })}
               </div>
-            </section>
+            </section>}
 
             {/*  SMART CATEGORY FIELDS  */}
-            {subcategory && (
+            {!isCustomListing && subcategory && (
               <section className="pt-2 border-t border-slate-100">
                 <SmartFormFields
                   categoryId={selectedCategory as CategoryID}
@@ -440,12 +487,15 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                 <span className="px-4 text-[13px] font-bold text-[#94a3b8] border-r border-slate-100">RM</span>
                 <input
                   type="number"
-                  placeholder="0.00"
+                  placeholder={isCustomListing ? 'Max RM 500 for custom items' : '0.00'}
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   className="flex-1 h-full px-4 bg-transparent text-[14px] font-bold text-slate-900 placeholder:text-slate-200 focus:outline-none"
                 />
               </div>
+              {customPriceOverLimit && (
+                <p className="text-[11px] font-bold text-red-500">Custom items cannot be listed above RM 500</p>
+              )}
 
               {/*  PCS ERROR ALERT  */}
               <AnimatePresence>
