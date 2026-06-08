@@ -68,6 +68,7 @@ service cloud.firestore {
     }
 
     // ── OTHER COLLECTIONS ──
+    match /banners/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /announcements/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /PriceGuidelines/{id} { allow read, list: if true; allow write: if isSignedIn(); }
     match /facilities/{id} { allow read, list: if true; allow write: if isSignedIn(); }
