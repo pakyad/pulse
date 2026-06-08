@@ -38,6 +38,8 @@ const CAMPUS_CENTER = { lat: 3.1594, lng: 101.6998 };
 const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplete: (payout: number) => void }) => {
   const [step, setStep] = useState(mission.status === 'PICKED_UP' ? 2 : 1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [podPhoto, setPodPhoto] = useState<File | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
   const router = useRouter();
   
   const handleConfirmPickup = async () => {
@@ -52,17 +54,38 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
   };
 
   const handleCompleteDelivery = async () => {
-    console.log('handleCompleteDelivery called', { mission, user: auth.currentUser?.uid });
-    if (!auth.currentUser) { alert("You must be logged in."); return; }
-    if (!mission) { alert("No active mission found."); return; }
-    setIsProcessing(true);
-    try {
-      await updateDoc(doc(db, 'orders', mission.id), { status: 'DELIVERED', delivered_at: serverTimestamp(), runner_id: auth.currentUser.uid, buyer_confirmed: false });
-      onComplete(mission.total_price || mission.payout || 4.5);
-    } catch (e) {
-      console.error(e);
+    if (!podPhoto) {
+      alert('Please take a photo first');
+      return;
     }
-    setIsProcessing(false);
+    if (!auth.currentUser || !mission) {
+      alert('Session error - please refresh');
+      return;
+    }
+    setIsCompleting(true);
+    try {
+      const { getStorage, ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+      const { updateDoc, doc, serverTimestamp } = await import('firebase/firestore');
+      const storage = getStorage();
+      const uid = auth.currentUser.uid;
+      const orderId = mission.id;
+      const storageRef = ref(storage, 'runners/' + uid + '/deliveries/' + orderId + '/' + Date.now() + '.jpg');
+      const snap = await uploadBytes(storageRef, podPhoto);
+      const url = await getDownloadURL(snap.ref);
+      await updateDoc(doc(db, 'orders', orderId), {
+        status: 'DELIVERED',
+        delivered_at: serverTimestamp(),
+        delivery_photo: url,
+        runner_id: uid,
+        buyer_confirmed: false
+      });
+      alert('Delivery confirmed!');
+      setStep(6);
+    } catch (e: any) {
+      alert('Error: ' + e.message);
+    } finally {
+      setIsCompleting(false);
+    }
   };
 
   const getPhone = (locationStr: string) => {
@@ -195,35 +218,37 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    }, [isLoaded, mission, pickupCoord, dropoffCoord]);
 
    const handleCompleteDelivery = async () => {
-      console.log('handleCompleteDelivery called', { podPhoto, mission, user: auth.currentUser?.uid });
-      if (!auth.currentUser) { alert("You must be logged in."); return; }
-      if (!mission) { alert("No active mission found."); return; }
       if (!podPhoto) {
-         alert("Please take a photo first");
-         return;
+        alert('Please take a photo first');
+        return;
+      }
+      if (!auth.currentUser || !mission) {
+        alert('Session error - please refresh');
+        return;
       }
       setIsCompleting(true);
       try {
-         const uid = auth.currentUser.uid;
-         const orderId = mission.id;
-         const storageRef = ref(storage, `runners/${uid}/deliveries/${orderId}/${Date.now()}.jpg`);
-         const uploadResult = await uploadBytes(storageRef, podPhoto);
-         const downloadURL = await getDownloadURL(uploadResult.ref);
-         
-         await updateDoc(doc(db, 'orders', orderId), {
-            status: 'DELIVERED',
-            delivered_at: serverTimestamp(),
-            delivery_photo: downloadURL,
-            runner_id: uid,
-            buyer_confirmed: false
-         });
-         
-         setStep(6);
-      } catch (error: any) {
-         console.error(error);
-         alert("Failed to confirm delivery: " + error.message);
+        const { getStorage, ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+        const { updateDoc, doc, serverTimestamp } = await import('firebase/firestore');
+        const storage = getStorage();
+        const uid = auth.currentUser.uid;
+        const orderId = mission.id;
+        const storageRef = ref(storage, 'runners/' + uid + '/deliveries/' + orderId + '/' + Date.now() + '.jpg');
+        const snap = await uploadBytes(storageRef, podPhoto);
+        const url = await getDownloadURL(snap.ref);
+        await updateDoc(doc(db, 'orders', orderId), {
+          status: 'DELIVERED',
+          delivered_at: serverTimestamp(),
+          delivery_photo: url,
+          runner_id: uid,
+          buyer_confirmed: false
+        });
+        alert('Delivery confirmed!');
+        setStep(6);
+      } catch (e: any) {
+        alert('Error: ' + e.message);
       } finally {
-         setIsCompleting(false);
+        setIsCompleting(false);
       }
    };
 
