@@ -9,7 +9,7 @@ import {
   Camera, Upload, Info, Lock, Shield, User, Store
 } from 'lucide-react';
 import { auth, db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { completeDelivery } from '@/app/actions/deliveryActions';
 import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection, query, where, serverTimestamp } from 'firebase/firestore';
 import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
@@ -52,9 +52,12 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
   };
 
   const handleCompleteDelivery = async () => {
+    console.log('handleCompleteDelivery called', { mission, user: auth.currentUser?.uid });
+    if (!auth.currentUser) { alert("You must be logged in."); return; }
+    if (!mission) { alert("No active mission found."); return; }
     setIsProcessing(true);
     try {
-      await updateDoc(doc(db, 'orders', mission.id), { status: 'DELIVERED', completed_at: new Date().toISOString() });
+      await updateDoc(doc(db, 'orders', mission.id), { status: 'DELIVERED', delivered_at: serverTimestamp(), runner_id: auth.currentUser.uid, buyer_confirmed: false });
       onComplete(mission.total_price || mission.payout || 4.5);
     } catch (e) {
       console.error(e);
@@ -192,9 +195,11 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    }, [isLoaded, mission, pickupCoord, dropoffCoord]);
 
    const handleCompleteDelivery = async () => {
-      if (!auth.currentUser || !mission) return;
+      console.log('handleCompleteDelivery called', { podPhoto, mission, user: auth.currentUser?.uid });
+      if (!auth.currentUser) { alert("You must be logged in."); return; }
+      if (!mission) { alert("No active mission found."); return; }
       if (!podPhoto) {
-         alert("Please capture or select a photo first.");
+         alert("Please take a photo first");
          return;
       }
       setIsCompleting(true);
