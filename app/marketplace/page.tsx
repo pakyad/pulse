@@ -153,6 +153,7 @@ function MarketplacePage() {
   const [items,          setItems]          = useState<any[]>([]);
   const [campaigns,      setCampaigns]      = useState<any[]>([]);
   const [profile,        setProfile]        = useState<any>(null);
+  const [user,           setUser]           = useState<any>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isFilterOpen,   setIsFilterOpen]   = useState(false);
   const [searchQuery,    setSearchQuery]    = useState('');
@@ -168,45 +169,48 @@ function MarketplacePage() {
   const searchParams = useSearchParams();
   const urlFilter = searchParams.get('filter');
 
+  // Auth observer  runs once
   useEffect(() => {
-    let unsubs: (() => void)[] = [];
-
-    const unsubAuth = auth.onAuthStateChanged((user) => {
-      unsubs.forEach(u => u());
-      unsubs = [];
-
-      if (user) {
+    const unsubAuth = auth.onAuthStateChanged((u) => {
+      setUser(u);
+      if (u) {
         const uProfile = onSnapshot(
-          doc(db, 'users', user.uid),
+          doc(db, 'users', u.uid),
           s => setProfile(s.data()),
           e => console.error('[Market] Profile:', e)
         );
-        unsubs.push(uProfile);
-
-        const q = query(collection(db, 'items'), where('status', '==', 'active'));
-        const uItems = onSnapshot(
-          q,
-          s => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),
-          e => console.error('[Market] Items:', e)
-        );
-        unsubs.push(uItems);
-
         const qCamp = query(collection(db, 'campaigns'), where('status', '==', 'active'), limit(5));
         const uCamp = onSnapshot(
           qCamp,
           s => setCampaigns(s.docs.map(d => ({ id: d.id, ...d.data() }))),
           e => console.error('[Market] Campaigns:', e)
         );
-        unsubs.push(uCamp);
+        return () => { uProfile(); uCamp(); };
       } else {
         setProfile(null);
-        setItems([]);
         setCampaigns([]);
       }
     });
-
-    return () => { unsubAuth(); unsubs.forEach(u => u()); };
+    return () => unsubAuth();
   }, []);
+
+  // Items query  reacts to user + urlFilter
+  useEffect(() => {
+    if (!user) { setItems([]); return; }
+
+    const constraints: any[] = [where('status', '==', 'active')];
+    if (urlFilter === 'student') {
+      constraints.push(where('pcs_certified', '==', true));
+    }
+
+    const q = query(collection(db, 'items'), ...constraints);
+    const unsub = onSnapshot(
+      q,
+      s => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+      e => console.error('[Market] Items:', e)
+    );
+    return () => unsub();
+  }, [user, urlFilter]);
 
   const filteredItems = useMemo(() => {
     let result = [...items];
@@ -229,11 +233,6 @@ function MarketplacePage() {
         const subConfig = catConfig.subcategories.find(s => s.label === i.subcategory);
         return subConfig?.studentMarket === true;
       });
-    }
-
-    // Student Filter (PCS-approved student prices only)
-    if (urlFilter === 'student') {
-      result = result.filter(i => i.pcs_certified === true && i.pcs_status === 'APPROVED');
     }
 
     // Price
