@@ -198,12 +198,7 @@ function MarketplacePage() {
   useEffect(() => {
     if (!user) { setItems([]); return; }
 
-    const constraints: any[] = [where('status', '==', 'active')];
-    if (urlFilter === 'student') {
-      constraints.push(where('pcs_certified', '==', true));
-    }
-
-    const q = query(collection(db, 'items'), ...constraints);
+    const q = query(collection(db, 'items'), where('status', '==', 'active'));
     const unsub = onSnapshot(
       q,
       s => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),
@@ -233,6 +228,11 @@ function MarketplacePage() {
         const subConfig = catConfig.subcategories.find(s => s.label === i.subcategory);
         return subConfig?.studentMarket === true;
       });
+    }
+
+    // Student Market (PCS-certified items)
+    if (urlFilter === 'student') {
+      result = result.filter(i => i.pcs_certified === true || i.pcs_status === 'APPROVED');
     }
 
     // Price
