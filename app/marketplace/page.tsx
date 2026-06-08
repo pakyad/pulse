@@ -6,7 +6,7 @@ import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, limit } from 'firebase/firestore';
 import {
   Laptop, BookOpen, Shirt, Box, ChevronLeft,
-  Search, LayoutGrid, ShieldCheck, HeartPulse,
+  Search, LayoutGrid, ShieldCheck, HeartPulse, ShoppingBag,
   ArrowUpRight, Filter, Store, X
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -220,7 +220,7 @@ function MarketplacePage() {
       }
     }
 
-    // Student Market Filter
+    // Student Market Filter (specific subcategories)
     if (urlFilter === 'student_market') {
       result = result.filter(i => {
         if (!i.category || !i.subcategory) return false;
@@ -229,6 +229,11 @@ function MarketplacePage() {
         const subConfig = catConfig.subcategories.find(s => s.label === i.subcategory);
         return subConfig?.studentMarket === true;
       });
+    }
+
+    // Student Filter (peer-to-peer, exclude store/merchant items)
+    if (urlFilter === 'student') {
+      result = result.filter(i => i.merchant !== true);
     }
 
     // Price
@@ -352,11 +357,11 @@ function MarketplacePage() {
 
         {/*  OFFICIAL STORE BANNERS  */}
         <AnimatePresence>
-          {campaigns.length > 0 && urlFilter !== 'student_market' && (
+          {campaigns.length > 0 && urlFilter !== 'student_market' && urlFilter !== 'student' && (
             <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <div className="px-1 flex justify-between items-center">
                 <div>
-                  <h3 className="text-[14px] font-bold text-slate-900 tracking-tight">Official Store</h3>
+                  <h3 className="text-[14px] font-bold text-slate-900 tracking-tight">Marketplace</h3>
                   <p className="text-[10px] font-medium text-[#94a3b8]">Verified campus items</p>
                 </div>
                 <Store size={18} className="text-slate-200" />
@@ -397,16 +402,37 @@ function MarketplacePage() {
           )}
         </AnimatePresence>
 
+        {/*  STUDENT MARKET BANNER  */}
+        {urlFilter === 'student' && (
+          <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-2">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <ShoppingBag size={18} className="text-emerald-600" />
+                <h3 className="text-[14px] font-bold text-emerald-900 tracking-tight">Student Market</h3>
+              </div>
+              <p className="text-[12px] font-medium text-emerald-700 leading-relaxed">
+                Browse items listed by fellow students — no stores, no merchants, just peer-to-peer.
+              </p>
+              <div className="flex items-center gap-2 text-[11px] font-semibold text-emerald-600">
+                <ShieldCheck size={14} />
+                <span>Every listing is from a verified student seller</span>
+              </div>
+            </div>
+          </motion.section>
+        )}
+
         {/*  DISCOVER ITEMS  */}
         <section className="space-y-8">
           <div className="px-1 flex justify-between items-end">
             <div className="space-y-1">
-              <Heading>{urlFilter === 'student_market' ? 'Student Market' : 'Discover Items'}</Heading>
+              <Heading>{urlFilter === 'student_market' || urlFilter === 'student' ? 'Student Market' : 'Discover Items'}</Heading>
               <Subtext>
                 {searchQuery.trim()
                   ? `${filteredItems.length} results for "${searchQuery}"`
                   : urlFilter === 'student_market'
                   ? `${filteredItems.length} student-essential items across campus`
+                  : urlFilter === 'student'
+                  ? `${filteredItems.length} peer-to-peer listings`
                   : `${filteredItems.length} active listings across campus`}
               </Subtext>
             </div>
@@ -478,7 +504,7 @@ function MarketplacePage() {
           )}
 
           {/*  STUDENT MARKET EXIT  */}
-          {urlFilter === 'student_market' && (
+          {(urlFilter === 'student_market' || urlFilter === 'student') && (
             <div className="pt-8 pb-12 flex flex-col items-center justify-center gap-2">
               <p className="text-[11px] font-medium text-slate-400">Looking for more?</p>
               <button
