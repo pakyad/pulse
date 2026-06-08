@@ -96,6 +96,12 @@ async function seed() {
       docData.merchant = false;
     }
 
+    // Student peer-to-peer items get PCS-certified status
+    if (item.merchant === false) {
+      docData.pcs_certified = true;
+      docData.pcs_status = 'APPROVED';
+    }
+
     if (item.is_official) {
       docData.condition = 'Brand New';
       docData.price_tier = 'COMPLIANT';

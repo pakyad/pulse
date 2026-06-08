@@ -231,9 +231,9 @@ function MarketplacePage() {
       });
     }
 
-    // Student Filter (peer-to-peer, exclude store/merchant items)
+    // Student Filter (PCS-approved student prices only)
     if (urlFilter === 'student') {
-      result = result.filter(i => i.merchant !== true);
+      result = result.filter(i => i.pcs_certified === true && i.pcs_status === 'APPROVED');
     }
 
     // Price
@@ -402,25 +402,6 @@ function MarketplacePage() {
           )}
         </AnimatePresence>
 
-        {/*  STUDENT MARKET BANNER  */}
-        {urlFilter === 'student' && (
-          <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-2">
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 space-y-3">
-              <div className="flex items-center gap-2">
-                <ShoppingBag size={18} className="text-emerald-600" />
-                <h3 className="text-[14px] font-bold text-emerald-900 tracking-tight">Student Market</h3>
-              </div>
-              <p className="text-[12px] font-medium text-emerald-700 leading-relaxed">
-                Browse items listed by fellow students — no stores, no merchants, just peer-to-peer.
-              </p>
-              <div className="flex items-center gap-2 text-[11px] font-semibold text-emerald-600">
-                <ShieldCheck size={14} />
-                <span>Every listing is from a verified student seller</span>
-              </div>
-            </div>
-          </motion.section>
-        )}
-
         {/*  DISCOVER ITEMS  */}
         <section className="space-y-8">
           <div className="px-1 flex justify-between items-end">
@@ -432,7 +413,7 @@ function MarketplacePage() {
                   : urlFilter === 'student_market'
                   ? `${filteredItems.length} student-essential items across campus`
                   : urlFilter === 'student'
-                  ? `${filteredItems.length} peer-to-peer listings`
+                  ? `${filteredItems.length} PCS-approved student items`
                   : `${filteredItems.length} active listings across campus`}
               </Subtext>
             </div>
