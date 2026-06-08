@@ -565,9 +565,14 @@ export const pcsValidate = onCall(
           
           // FORCED NUMERIC VALIDATION: Don't trust AI for the boolean check
           const listedPrice = parseFloat(request.data.itemPrice) || 0;
-          isApproved = marketPrice > 0 ? (listedPrice <= maxAllowedPrice + 0.01) : true;
           
-          justification = parsed.justification || (isApproved ? "Price is within campus guidelines." : "Price exceeds the calculated campus limit.");
+          if (!marketPrice || marketPrice === 0) {
+            isApproved = true;
+            justification = "No market reference found — item listed as Free Market.";
+          } else {
+            isApproved = (listedPrice <= maxAllowedPrice + 0.01);
+            justification = parsed.justification || (isApproved ? "Price is within campus guidelines." : "Price exceeds the calculated campus limit.");
+          }
         } catch (e) {
           console.error('JSON parse error from Claude SDK text:', e);
           isApproved = true;

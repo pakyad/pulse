@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { doc, onSnapshot, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, onSnapshot, getDoc, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { 
   ChevronLeft, ChevronRight, Share2, Heart, ShieldCheck, ShieldAlert,
-  ArrowUpRight, Clock, MapPin, Layers, Shirt,
+  ArrowUpRight, Clock, MapPin, Layers, Shirt, Trash2,
   BookOpen, Wrench, Home, Cpu, Star, ShoppingCart, CheckCircle2, MessageCircle, Edit3
 } from 'lucide-react';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
@@ -573,22 +573,26 @@ export default function ItemDetailsPage() {
             <div className="flex-1 flex gap-3">
               <button
                 onClick={() => router.push(`/marketplace/edit/${id}`)}
-                className="flex-1 h-[52px] bg-slate-900 text-white font-bold text-[13px] rounded-full flex items-center justify-center gap-2 active:scale-[0.97] transition-all shadow-md shadow-slate-900/10"
+                className="flex-1 bg-gray-900 text-white text-sm font-medium rounded-full py-3 flex items-center justify-center gap-2"
               >
                 <Edit3 size={16} />
                 Edit Listing
               </button>
               <button
                 onClick={async () => {
-                  if (confirm('Mark this item as sold? It will be removed from the marketplace.')) {
-                    const { doc, updateDoc } = await import('firebase/firestore');
-                    await updateDoc(doc(db, 'items', id as string), { status: 'sold', stock_count: 0 });
-                    router.push('/me');
+                  if (window.confirm('Delete this listing? This cannot be undone.')) {
+                    try {
+                      await deleteDoc(doc(db, 'items', id as string));
+                      router.push('/marketplace');
+                    } catch (e) {
+                      console.error('[Delete] Failed to delete listing:', e);
+                      alert('Failed to delete listing.');
+                    }
                   }
                 }}
-                className="h-[52px] px-6 bg-white border border-slate-100 text-red-500 font-bold text-[13px] rounded-full flex items-center justify-center active:scale-[0.97] transition-all"
+                className="w-20 border border-red-100 text-red-500 text-sm font-medium rounded-full py-3 flex items-center justify-center hover:bg-red-50 active:scale-95 transition-all"
               >
-                Mark as Sold
+                <Trash2 size={16} />
               </button>
             </div>
           ) : (
