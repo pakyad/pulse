@@ -1,20 +1,30 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 import DesktopMerchant from '@/components/merchant/DesktopMerchant';
 import ProofInspector from '@/components/merchant/ProofInspector';
 
-export default function MerchantDashboard() {
+function MerchantDashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
   const [merchant, setMerchant] = useState<any>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isProofOpen, setIsProofOpen] = useState(false);
+  
+  const [activeSection, setActiveSection] = useState<'overview' | 'products' | 'settings' | 'log'>('overview');
+
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (section && ['overview', 'products', 'settings', 'log'].includes(section)) {
+      setActiveSection(section as any);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     let unsubItems: (() => void) | null = null;
@@ -116,7 +126,7 @@ export default function MerchantDashboard() {
   };
 
   const toggleItemStatus = async (itemId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const newStatus = currentStatus === 'active' ? 'PAUSED' : 'ACTIVE';
     await updateDoc(doc(db, "items", itemId), { status: newStatus });
   };
 
@@ -197,6 +207,8 @@ export default function MerchantDashboard() {
         pipelineOrders={pipelineOrders}
         completedOrders={completedOrders}
         items={items}
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
         handleAcceptOrder={handleAcceptOrder}
         handlePrepareOrder={handlePrepareOrder}
         handleMarkReady={handleMarkReady}
@@ -213,5 +225,13 @@ export default function MerchantDashboard() {
         order={selectedOrder}
       />
     </>
+  );
+}
+
+export default function MerchantDashboard() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-2 border-slate-100 border-t-slate-900 rounded-full animate-spin" /></div>}>
+      <MerchantDashboardContent />
+    </Suspense>
   );
 }

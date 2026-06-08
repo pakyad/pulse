@@ -6,6 +6,7 @@ import { auth, db } from '@/lib/firebase';
 import SwipeToReady from './SwipeToReady';
 import { deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import MerchantSidebar from '@/components/merchant/MerchantSidebar';
 import { Plus, Bell, LogOut, LayoutGrid, Package, BarChart3, Settings, Search, Info, Pencil, Trash2, ShieldAlert, ClipboardList, CheckCircle2, X, ShoppingBag } from 'lucide-react';
 import CreateListing from '@/components/CreateListing';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -19,6 +20,8 @@ export default function DesktopMerchant({
   pipelineOrders,
   completedOrders,
   items,
+  activeSection,
+  setActiveSection,
   onViewProof,
   handleAcceptOrder,
   handlePrepareOrder,
@@ -179,7 +182,6 @@ export default function DesktopMerchant({
 
   const isClub = merchant?.role === 'CLUB' || merchant?.is_verified_merchant;
 
-  const [activeSection, setActiveSection] = React.useState<'overview' | 'products' | 'settings' | 'log'>('overview');
   const [shopPaused, setShopPaused] = React.useState(merchant?.status === 'PAUSED');
 
   const isActive = (section: string) => activeSection === section;
@@ -425,43 +427,10 @@ export default function DesktopMerchant({
   return (
     <div className="min-h-screen bg-[#F9F9FB] flex font-sans">
       
-      {/*  Fixed Sidebar  */}
-      <aside className="w-64 h-screen bg-white border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
-        <div className="px-6 py-8 flex items-center gap-2">
-          <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-semibold">P</div>
-          <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
-        </div>
-
-        <nav className="flex-1 px-4 py-2 space-y-1.5">
-          <button onClick={() => setActiveSection('overview')} className={isActive('overview') ? activeClass : idleClass}>
-            <LayoutGrid size={18} />
-            <span>Overview</span>
-          </button>
-          <button onClick={() => setActiveSection('log')} className={isActive('log') ? activeClass : idleClass}>
-            <ClipboardList size={18} />
-            <span>Live Orders</span>
-          </button>
-          <button onClick={() => setActiveSection('products')} className={isActive('products') ? activeClass : idleClass}>
-            <Package size={18} />
-            <span>Products</span>
-          </button>
-          <button onClick={() => router.push('/merchant/analytics')} className={idleClass}>
-            <BarChart3 size={18} />
-            <span>Analytics</span>
-          </button>
-          <button onClick={() => setActiveSection('settings')} className={isActive('settings') ? activeClass : idleClass}>
-            <Settings size={18} />
-            <span>Settings</span>
-          </button>
-        </nav>
-
-        <div className="p-4 border-t-[0.5px] border-[#E5E5EA]">
-          <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors">
-            <LogOut size={18} />
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <MerchantSidebar 
+        active={activeSection === 'overview' ? 'overview' : activeSection === 'products' ? 'inventory' : activeSection === 'log' ? 'log' : activeSection === 'settings' ? 'settings' : 'overview'} 
+        onSectionChange={setActiveSection} 
+      />
 
       {/*  Main Content  */}
       <main className="flex-1 ml-64 flex flex-col min-h-screen bg-white">

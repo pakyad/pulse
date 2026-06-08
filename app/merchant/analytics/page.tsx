@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
+import MerchantSidebar from '@/components/merchant/MerchantSidebar';
 import { 
-  LayoutGrid, Bell, Package, ClipboardList, 
-  BarChart3, Settings, LogOut, Trophy, ChevronRight, Search
+  Trophy, ChevronRight, Search
 } from 'lucide-react';
 import { 
   LineChart, Line, BarChart, Bar, XAxis, YAxis, 
@@ -152,47 +152,7 @@ export default function MerchantAnalyticsPage() {
   return (
     <div className="min-h-screen bg-[#F9F9FB] flex font-sans antialiased">
       
-      {/* Sidebar */}
-      <aside className="w-64 h-screen bg-white border-r-[0.5px] border-[#E5E5EA] fixed left-0 top-0 flex flex-col z-30">
-        <div className="px-6 py-8 flex items-center gap-2">
-          <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
-            <span className="text-white font-semibold text-[14px]">P</span>
-          </div>
-          <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
-        </div>
-        <nav className="flex-1 px-4 py-2 space-y-1.5">
-          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
-            <LayoutGrid size={18} />
-            <span>Overview</span>
-          </button>
-          <button onClick={() => router.push('/orders')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
-            <Bell size={18} />
-            <span>Live Orders</span>
-          </button>
-          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
-            <Package size={18} />
-            <span>Inventory</span>
-          </button>
-          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
-            <ClipboardList size={18} />
-            <span>Order Log</span>
-          </button>
-          <button onClick={() => router.push('/merchant/analytics')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-gray-900 text-white font-medium shadow-sm transition-all">
-            <BarChart3 size={18} />
-            <span>Analytics</span>
-          </button>
-          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
-            <Settings size={18} />
-            <span>Settings</span>
-          </button>
-        </nav>
-        <div className="p-4 border-t-[0.5px] border-[#E5E5EA]">
-          <button onClick={() => { auth.signOut(); router.push('/auth'); }} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors">
-            <LogOut size={18} />
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <MerchantSidebar active="analytics" />
 
       {/* Main Content */}
       <main className="flex-1 ml-64 px-6 py-8">
