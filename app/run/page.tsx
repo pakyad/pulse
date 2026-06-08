@@ -319,7 +319,7 @@ export default function RunModule() {
           </div>
         ) : (
           <div className="space-y-10">
-            {profile?.is_verified_runner && (
+            {profile?.is_verified_runner ? (
               <div className="space-y-6">
                 <div className="px-1">
                   <Heading>Runner Dashboard</Heading>
@@ -348,6 +348,32 @@ export default function RunModule() {
                     <p className="text-[14px] font-bold tracking-tight">History</p>
                   </button>
                 </div>
+              </div>
+            ) : (
+              <div className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100/70 flex items-center justify-center shrink-0">
+                    <Package size={24} className="text-amber-700" strokeWidth={2} />
+                  </div>
+                  <div>
+                    <Heading>Become a Runner</Heading>
+                    <Subtext>Earn money delivering on campus</Subtext>
+                  </div>
+                </div>
+                <p className="text-[13px] font-medium text-slate-600 leading-relaxed">
+                  Help fellow students get their parcels, food, and essentials. Set your own schedule and earn per delivery.
+                </p>
+                <div className="flex gap-2">
+                  <div className="flex-1 h-2 rounded-full bg-emerald-200/60" />
+                  <div className="flex-1 h-2 rounded-full bg-amber-200/60" />
+                  <div className="flex-1 h-2 rounded-full bg-violet-200/60" />
+                </div>
+                <button
+                  onClick={() => router.push('/run/onboarding')}
+                  className="w-full h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center gap-2 text-[14px] font-bold active:scale-95 transition-all shadow-md hover:bg-slate-800"
+                >
+                  Apply to be a Runner <ArrowRight size={18} />
+                </button>
               </div>
             )}
             <div className="space-y-6">
