@@ -64,15 +64,14 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
       return;
     }
     setIsCompleting(true);
+    console.log('[Confirm] starting upload delivery photo');
     try {
-      const { getStorage, ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-      const { updateDoc, doc, serverTimestamp } = await import('firebase/firestore');
-      const storage = getStorage();
       const uid = auth.currentUser.uid;
       const orderId = mission.id;
       const storageRef = ref(storage, 'runners/' + uid + '/deliveries/' + orderId + '/' + Date.now() + '.jpg');
       const snap = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(snap.ref);
+      console.log('[Confirm] photo uploaded', url);
       await updateDoc(doc(db, 'orders', orderId), {
         status: 'DELIVERED',
         delivered_at: serverTimestamp(),
@@ -80,8 +79,10 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
         runner_id: uid,
         buyer_confirmed: false
       });
+      console.log('[Confirm] order updated to DELIVERED');
       setStep(6);
     } catch (e: any) {
+      console.error('[Confirm] error:', e);
       alert('Error: ' + e.message);
     } finally {
       setIsCompleting(false);
@@ -261,15 +262,14 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
         return;
       }
       setIsCompleting(true);
+      console.log('[Confirm] starting upload delivery photo');
       try {
-        const { getStorage, ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-        const { updateDoc, doc, serverTimestamp } = await import('firebase/firestore');
-        const storage = getStorage();
         const uid = auth.currentUser.uid;
         const orderId = mission.id;
         const storageRef = ref(storage, 'runners/' + uid + '/deliveries/' + orderId + '/' + Date.now() + '.jpg');
         const snap = await uploadBytes(storageRef, podPhoto);
         const url = await getDownloadURL(snap.ref);
+        console.log('[Confirm] photo uploaded', url);
         await updateDoc(doc(db, 'orders', orderId), {
           status: 'DELIVERED',
           delivered_at: serverTimestamp(),
@@ -277,9 +277,10 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
           runner_id: uid,
           buyer_confirmed: false
         });
-        alert('Delivery confirmed!');
+        console.log('[Confirm] order updated to DELIVERED');
         setStep(6);
       } catch (e: any) {
+        console.error('[Confirm] error:', e);
         alert('Error: ' + e.message);
       } finally {
         setIsCompleting(false);
