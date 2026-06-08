@@ -41,15 +41,36 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
   const [podPhoto, setPodPhoto] = useState<File | null>(null);
   const [podPreview, setPodPreview] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [pickupPhoto, setPickupPhoto] = useState<File | null>(null);
+  const [pickupPreview, setPickupPreview] = useState<string | null>(null);
   const router = useRouter();
   
   const handleConfirmPickup = async () => {
+    if (!pickupPhoto) {
+      alert('Please take a photo first');
+      return;
+    }
+    if (!auth.currentUser || !mission) {
+      alert('Session error - please refresh');
+      return;
+    }
     setIsProcessing(true);
     try {
-      await updateDoc(doc(db, 'orders', mission.id), { status: 'RUNNER_DELIVERING' });
+      const uid = auth.currentUser.uid;
+      const orderId = mission.id;
+      const fileName = Date.now() + '_' + orderId + '.jpg';
+      const storageRef = ref(storage, 'delivery_proofs/' + fileName);
+      const snap = await uploadBytes(storageRef, pickupPhoto);
+      const url = await getDownloadURL(snap.ref);
+      await updateDoc(doc(db, 'orders', orderId), {
+        status: 'PICKED_UP',
+        pickup_photo: url,
+        runner_id: uid
+      });
       setStep(2);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert('Error: ' + e.message);
     }
     setIsProcessing(false);
   };
@@ -155,9 +176,26 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
                   </div>
                 </div>
                 {step === 1 && (
-                  <button onClick={handleConfirmPickup} disabled={isProcessing} className="w-full h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50">
-                    {isProcessing ? <Loader2 size={16} className="animate-spin" /> : "Confirm Pickup"}
-                  </button>
+                  <>
+                    {pickupPreview ? (
+                      <div className="relative w-full h-24 rounded-2xl overflow-hidden border border-slate-100">
+                        <img src={pickupPreview} className="w-full h-full object-cover" />
+                        <button onClick={() => { setPickupPreview(null); setPickupPhoto(null); }} className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm"><X size={12} /></button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer">
+                        <Camera className="w-6 h-6 text-slate-400 mb-1" />
+                        <p className="text-[11px] font-bold text-slate-500">Capture Pickup Photo</p>
+                        <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) { setPickupPhoto(file); setPickupPreview(URL.createObjectURL(file)); }
+                        }} />
+                      </label>
+                    )}
+                    <button onClick={handleConfirmPickup} disabled={isProcessing} className="w-full h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50">
+                      {isProcessing ? <Loader2 size={16} className="animate-spin" /> : "Confirm Pickup"}
+                    </button>
+                  </>
                 )}
                 {step > 1 && <div className="flex items-center gap-2 text-blue-600 font-bold text-[12px] pt-1"><CheckCircle2 size={16} strokeWidth={2.5} /> Item Secured</div>}
               </div>
@@ -213,6 +251,8 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
    const [podPhoto, setPodPhoto] = useState<File | null>(null);
    const [podPreview, setPodPreview] = useState<string | null>(null);
+   const [pickupPhoto, setPickupPhoto] = useState<File | null>(null);
+   const [pickupPreview, setPickupPreview] = useState<string | null>(null);
    const [isCompleting, setIsCompleting] = useState(false);
 
    // Dynamic coordinates from mission/order data
@@ -283,6 +323,40 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
         setStep(6);
       } catch (e: any) {
         console.error('[Confirm] error:', e);
+        alert('Error: ' + e.message);
+      } finally {
+        setIsCompleting(false);
+      }
+   };
+
+   const handleConfirmPickup = async () => {
+      if (!pickupPhoto) {
+        alert('Please take a photo first');
+        return;
+      }
+      if (!auth.currentUser || !mission) {
+        alert('Session error - please refresh');
+        return;
+      }
+      setIsCompleting(true);
+      try {
+        const uid = auth.currentUser.uid;
+        const orderId = mission.id;
+        const fileName = Date.now() + '_' + orderId + '.jpg';
+        const storageRef = ref(storage, 'delivery_proofs/' + fileName);
+        const snap = await uploadBytes(storageRef, pickupPhoto);
+        const url = await getDownloadURL(snap.ref);
+        await updateDoc(doc(db, 'orders', orderId), {
+          status: 'PICKED_UP',
+          pickup_photo: url,
+          runner_id: uid
+        });
+        const nextStep = step + 1;
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, { current_missions: [{ ...mission, step: nextStep }] });
+        setStep(nextStep);
+      } catch (e: any) {
+        console.error(e);
         alert('Error: ' + e.message);
       } finally {
         setIsCompleting(false);
@@ -379,10 +453,29 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                                   </label>
                                )}
                             </div>
-                         ) : (
-                           <div className="rounded-2xl p-4 bg-slate-50/50 border border-slate-100">
-                             <p className="text-[10px] font-semibold mb-2.5 text-slate-400 uppercase tracking-widest">Order Bundle</p>
-                             <div className="space-y-2">
+                          ) : step === 2 ? (
+                            <div className="space-y-3">
+                              <p className="text-[11px] font-semibold text-slate-400 ">Pickup Proof</p>
+                              {pickupPreview ? (
+                                <div className="relative w-full h-24 rounded-2xl overflow-hidden border border-slate-100">
+                                  <img src={pickupPreview} className="w-full h-full object-cover" />
+                                  <button onClick={() => { setPickupPreview(null); setPickupPhoto(null); }} className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm"><X size={12} /></button>
+                                </div>
+                              ) : (
+                                <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer">
+                                  <Camera className="w-6 h-6 text-slate-400 mb-1" />
+                                  <p className="text-[11px] font-bold text-slate-500">Capture Pickup Photo</p>
+                                  <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) { setPickupPhoto(file); setPickupPreview(URL.createObjectURL(file)); }
+                                  }} />
+                                </label>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="rounded-2xl p-4 bg-slate-50/50 border border-slate-100">
+                              <p className="text-[10px] font-semibold mb-2.5 text-slate-400 uppercase tracking-widest">Order Bundle</p>
+                              <div className="space-y-2">
                                 {(mission?.items || []).map((item: any, i: number) => (
                                    <div key={i} className="flex justify-between items-center text-[13px] font-bold text-slate-900">
                                       <span>{item.qty}x {item.name || item.title}</span>
@@ -393,9 +486,9 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                            </div>
                          )}
 
-                         <button onClick={step === 5 ? handleCompleteDelivery : handleStepUpdate} disabled={isCompleting} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 text-[14px]">
-                            {isCompleting && <Loader2 size={18} className="animate-spin" />}
-                            {step === 1 ? "Arrived at Pickup" : step === 2 ? "Confirm Pickup" : step === 3 ? "Arrived at Drop-off" : step === 4 ? "Complete Delivery" : "Confirm Delivery"}
+                          <button onClick={step === 2 ? handleConfirmPickup : step === 5 ? handleCompleteDelivery : handleStepUpdate} disabled={isCompleting} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 text-[14px]">
+                             {isCompleting && <Loader2 size={18} className="animate-spin" />}
+                             {step === 1 ? "Arrived at Pickup" : step === 2 ? "Confirm Pickup" : step === 3 ? "Arrived at Drop-off" : step === 4 ? "Complete Delivery" : "Confirm Delivery"}
                          </button>
                       </motion.div>
                    ) : (
