@@ -1,4 +1,4 @@
-﻿import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { defineSecret } from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
@@ -568,7 +568,7 @@ export const pcsValidate = onCall(
           
           if (!marketPrice || marketPrice === 0) {
             isApproved = true;
-            justification = "No market reference found — item listed as Free Market.";
+            justification = "No market reference found  item listed as Free Market.";
           } else {
             isApproved = (listedPrice <= maxAllowedPrice + 0.01);
             justification = parsed.justification || (isApproved ? "Price is within campus guidelines." : "Price exceeds the calculated campus limit.");

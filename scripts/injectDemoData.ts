@@ -38,20 +38,20 @@ const EMAILS = [
 ];
 
 async function inject() {
-  console.log("🚀 Starting data injection...");
+  console.log(" Starting data injection...");
 
   const userMap: Record<string, string> = {};
 
   // 1. Get UIDs
-  console.log("🔍 Fetching user UIDs...");
+  console.log(" Fetching user UIDs...");
   const usersRef = db.collection("users");
   for (const email of EMAILS) {
     const snap = await usersRef.where("email", "==", email).get();
     if (!snap.empty) {
       userMap[email] = snap.docs[0].id;
-      console.log(`✅ Found ${email}: ${userMap[email]}`);
+      console.log(` Found ${email}: ${userMap[email]}`);
     } else {
-      console.warn(`⚠️ User not found for ${email}, using mock UID`);
+      console.warn(` User not found for ${email}, using mock UID`);
       userMap[email] = `MOCK_${email.split('@')[0].toUpperCase()}`;
     }
   }
@@ -66,7 +66,7 @@ async function inject() {
   const timestamp = admin.firestore.FieldValue.serverTimestamp();
 
   // 2. ITEMS
-  console.log("📦 Injecting ITEMS...");
+  console.log(" Injecting ITEMS...");
   const items = [
     { title: "Badminton Racket Yonex Astrox 77", price: 180, stock_count: 8, category: "SPORTS", subcategory: "Racket Sports", seller_id: sportsUid, seller_name: "Sports Council", status: "ACTIVE", merchant: true, pcs_certified: true, pcs_status: "APPROVED", pcs_market_price: 220, pcs_max_allowed: 198, description: "Lightly used, excellent condition. Comes with original cover.", drop_off_location: "Ground Floor Lobby", created_at: timestamp },
     { title: "Official UniKL MIIT Jersey 2026", price: 45, stock_count: 50, category: "APPAREL", subcategory: "Jerseys", seller_id: sportsUid, seller_name: "Sports Council", status: "ACTIVE", merchant: true, pcs_certified: true, pcs_status: "APPROVED", pcs_market_price: 65, pcs_max_allowed: 58, description: "Official 2026 sports jersey. Available in all sizes.", drop_off_location: "Ground Floor Lobby", created_at: timestamp },
@@ -83,7 +83,7 @@ async function inject() {
   }
 
   // 3. ORDERS
-  console.log("🛒 Injecting ORDERS...");
+  console.log(" Injecting ORDERS...");
   const createDelivered = (b: string, s: string, r: string, t: string, p: number) => ({
     title: t, price: p, total: p, status: "DELIVERED", buyer_id: b, seller_id: s, runner_id: r,
     customer_name: "Student", seller_name: "Merchant", drop_off_location: "Campus Hub",
@@ -99,7 +99,7 @@ async function inject() {
   for (let i=0; i<3; i++) await db.collection("orders").add(createDelivered(amirulUid, iyadUid, irfanUid, "Casio FX-570EX Scientific Calculator", 48));
 
   // 4. FLAGGED ITEMS (Prompt says PriceGuidelines, but these are flagged items for Price Review)
-  console.log("🚩 Injecting FLAGGED ITEMS...");
+  console.log(" Injecting FLAGGED ITEMS...");
   const flagged = [
     { title: "iPhone 15 Pro Max 256GB", price: 5500, listed_price: 5500, market_price: 4800, max_allowed: 4320, seller_id: iyadUid, status: "active", is_price_flagged: true, flagged_at: timestamp, category: "TECH", created_at: timestamp },
     { title: "Sony WH-1000XM5 Headphones", price: 1800, listed_price: 1800, market_price: 1399, max_allowed: 1259, seller_id: muhaimiUid, status: "active", is_price_flagged: true, flagged_at: timestamp, category: "TECH", created_at: timestamp },
@@ -112,7 +112,7 @@ async function inject() {
   }
 
   // 5. APPEALS
-  console.log("⚖️ Injecting APPEALS...");
+  console.log(" Injecting APPEALS...");
   const appeals = [
     { itemTitle: "iPhone 15 Pro Max 256GB", reason: "I bought this at full price from Apple Store, receipt attached. Fair resale price.", seller_id: iyadUid, status: "PENDING", type: "PRICE_APPEAL", created_at: timestamp },
     { itemTitle: "Sony WH-1000XM5 Headphones", reason: "Limited edition colorway not available in Malaysia. Price reflects scarcity.", seller_id: muhaimiUid, status: "PENDING", type: "PRICE_APPEAL", created_at: timestamp },
@@ -125,7 +125,7 @@ async function inject() {
   }
 
   // 6. DISPUTES
-  console.log("🚫 Injecting DISPUTES...");
+  console.log(" Injecting DISPUTES...");
   const disputes = [
     { orderId: "demo1", buyerId: iyadUid, sellerId: sportsUid, title: "Item not as described", description: "Jersey received has a tear on the collar. Photos attached.", status: "OPEN", amount: 45, created_at: timestamp },
     { orderId: "demo2", buyerId: amirulUid, sellerId: techUid, title: "Wrong item delivered", description: "Ordered Arduino Uno but received Arduino Nano.", status: "OPEN", amount: 85, created_at: timestamp },
@@ -136,7 +136,7 @@ async function inject() {
   }
 
   // 7. REVIEWS
-  console.log("⭐ Injecting REVIEWS...");
+  console.log(" Injecting REVIEWS...");
   const buyers = [iyadUid, muhaimiUid, amirulUid];
   const sellers = [sportsUid, techUid];
   const comments = ["Fast delivery, great product!", "Exactly as described, highly recommend", "Good seller, responsive communication", "Quality item at fair campus price"];
@@ -151,7 +151,7 @@ async function inject() {
     });
   }
 
-  console.log("✨ Demo data injection complete!");
+  console.log(" Demo data injection complete!");
 }
 
 inject().catch(console.error);

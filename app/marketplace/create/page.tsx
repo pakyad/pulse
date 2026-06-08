@@ -265,7 +265,7 @@ export default function CreateListingPage() {
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
                     <div className="rounded-2xl p-4 mt-3 bg-amber-50 border border-amber-100">
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5"><span className="text-sm">📊</span></div>
+                        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5"><span className="text-sm"></span></div>
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-gray-900 mb-0.5">Whoa, that is a bit steep</p>
                           <p className="text-xs text-gray-500 leading-relaxed mb-3">We found <strong className="text-gray-700">{pcsError?.itemTitle}</strong> going for around <strong className="text-gray-700">RM{pcsError?.marketBaselinePrice}</strong> out there. Campus listings get a 10% friendlier cap so the max here is <strong className="text-gray-700">RM{pcsError?.maxAllowedStudentPrice}</strong>.</p>

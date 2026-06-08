@@ -433,7 +433,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                     <div className="rounded-2xl p-4 mt-3 bg-amber-50 border border-amber-100">
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-sm">📊</span>
+                          <span className="text-sm"></span>
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-gray-900 mb-0.5">Whoa, that is a bit steep</p>

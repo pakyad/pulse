@@ -239,7 +239,7 @@ export default function MobileMerchant({
                 {stats.topProducts.slice(0,5).map((p,i) => (
                   <div key={i} className={"flex items-center py-2.5 " + (i < stats.topProducts.length - 1 ? "border-b border-[#F9FAFB]" : "") + (i === 0 ? " bg-amber-50 -mx-4 px-4 rounded-xl" : "")}>
                     <span className="text-[12px] text-[#9CA3AF] w-5">{i+1}</span>
-                    {i === 0 && <span className="text-[14px] mr-1.5">🏆</span>}
+                    {i === 0 && <span className="text-[14px] mr-1.5"></span>}
                     <span className="text-[14px] font-medium text-[#111827] flex-1 truncate">{p.name}</span>
                     <span className="text-[14px] font-semibold text-[#111827]">RM {p.revenue.toFixed(2)}</span>
                   </div>
