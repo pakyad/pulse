@@ -290,6 +290,7 @@ export default function LiveOrderPage() {
   const [order, setOrder] = useState<any>(null);
   const [userId, setUserId] = useState<string>('');
   const [sellerOfficial, setSellerOfficial] = useState(false);
+  const [runnerProfile, setRunnerProfile] = useState<{name: string, photo: string} | null>(null);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -325,7 +326,23 @@ export default function LiveOrderPage() {
       if (!user) { router.push('/auth'); return; }
       setUserId(user.uid);
       unsub = onSnapshot(doc(db, 'orders', id as string), (snap) => {
-        if (snap.exists()) setOrder({ id: snap.id, ...snap.data() });
+        if (snap.exists()) {
+          const data = snap.data();
+          setOrder({ id: snap.id, ...data });
+          
+          // Fetch runner profile if id exists
+          if (data.runner_id) {
+            getDoc(doc(db, 'users', data.runner_id)).then(uSnap => {
+              if (uSnap.exists()) {
+                const uData = uSnap.data();
+                setRunnerProfile({
+                  name: uData.full_name || uData.displayName || 'Pulse Runner',
+                  photo: uData.photo_url || uData.avatar || ''
+                });
+              }
+            });
+          }
+        }
         setLoading(false);
       });
     });
@@ -557,7 +574,7 @@ export default function LiveOrderPage() {
         {/*  PROGRESS VIBRANCY  */}
         {!isCancelled && (
           <section className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-slate-50">
-            <OrderTracker order={order} />
+            <OrderTracker order={order} runnerProfile={runnerProfile} />
           </section>
         )}
 

@@ -55,6 +55,7 @@ const PixelPin = ({ className }: { className?: string }) => (
 
 interface OrderTrackerProps {
   order: any;
+  runnerProfile?: { name: string, photo: string } | null;
 }
 
 export function getTrackerStep(status: string) {
@@ -65,7 +66,7 @@ export function getTrackerStep(status: string) {
   return 1;
 }
 
-export default function OrderTracker({ order }: OrderTrackerProps) {
+export default function OrderTracker({ order, runnerProfile }: OrderTrackerProps) {
   const step = getTrackerStep(order.status);
   const isCustom = ['PARCELS', 'ERRANDS'].includes(order.type?.toUpperCase());
   const stepsData = isCustom 
@@ -92,6 +93,9 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
     if (step === 2) return isCustom ? 'Runner is heading to pickup' : 'Preparing your order';
     return isCustom ? 'Finding a runner' : 'Waiting for merchant';
   };
+
+  const runnerName = runnerProfile?.name || order.runner_name || 'Pulse Runner';
+  const runnerPhoto = runnerProfile?.photo || `https://api.dicebear.com/7.x/initials/svg?seed=${runnerName}`;
 
   return (
     <div className="space-y-10">
@@ -148,10 +152,10 @@ export default function OrderTracker({ order }: OrderTrackerProps) {
         <div className="flex items-center justify-between p-6 bg-white rounded-2xl border border-slate-50 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200 shadow-inner">
-              <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${order.runner_name || 'Runner'}`} className="w-full h-full object-cover" alt="Runner" />
+              <img src={runnerPhoto} className="w-full h-full object-cover" alt="Runner" />
             </div>
             <div className="space-y-0.5">
-              <p className="text-[15px] font-bold text-slate-900">{order.runner_name || 'Pulse Runner'}</p>
+              <p className="text-[15px] font-bold text-slate-900">{runnerName}</p>
               <div className="flex items-center gap-1.5">
                 <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-500">
                   <Star size={12} fill="currentColor" />
