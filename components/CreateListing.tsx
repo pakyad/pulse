@@ -9,8 +9,9 @@ import {
   ArrowUpRight, Zap, TrendingUp
 } from 'lucide-react';
 
-import { db, auth } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
+import { db, auth, storage } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import SmartFormFields from '@/components/marketplace/SmartFormFields';
@@ -40,7 +41,11 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<CategoryID | ''>(existingItem?.category || '');
   const [subcategory, setSubcategory] = useState(existingItem?.subcategory || '');
-  const [images, setImages] = useState<string[]>(existingItem?.images || []);
+  
+  // State for images
+  const [existingImages, setExistingImages] = useState<string[]>(existingItem?.imageUrls || existingItem?.images || []);
+  const [newImageFiles, setNewImageFiles] = useState<{file: File, preview: string}[]>([]);
+  
   const [title, setTitle] = useState(existingItem?.title || '');
   const [description, setDescription] = useState(existingItem?.description || '');
   const [price, setPrice] = useState(existingItem?.price?.toString() || '');
@@ -59,7 +64,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     if (existingItem) {
       setSelectedCategory(existingItem.category || '');
       setSubcategory(existingItem.subcategory || '');
-      setImages(existingItem.images || []);
+      setExistingImages(existingItem.imageUrls || existingItem.images || []);
       setTitle(existingItem.title || '');
       setDescription(existingItem.description || '');
       setPrice(existingItem.price?.toString() || '');
@@ -70,40 +75,25 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Institutional Image Compressor: Prevents 1MB Firestore limit crashes
-  const compressImage = (base64: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = base64;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > MAX_WIDTH) {
-          height *= MAX_WIDTH / width;
-          width = MAX_WIDTH;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        // Compress to 0.7 quality to stay well under the 1MB limit
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
-      };
-    });
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newFiles = files.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }));
+    setNewImageFiles(prev => [...prev, ...newFiles].slice(0, 10 - existingImages.length));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    Array.from(e.target.files || []).forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const compressed = await compressImage(reader.result as string);
-        setImages(prev => [...prev, compressed].slice(0, 10));
-      };
-      reader.readAsDataURL(file);
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeNewImage = (index: number) => {
+    setNewImageFiles(prev => {
+      const updated = [...prev];
+      URL.revokeObjectURL(updated[index].preview);
+      updated.splice(index, 1);
+      return updated;
     });
   };
 
@@ -112,10 +102,20 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     setIsPosting(true);
     setPcsError(null);
     try {
-      const { updateDoc, doc: _doc } = await import('firebase/firestore');
       const user = auth.currentUser;
       const sellerId = userId || user?.uid || 'ANON';
       const itemId = existingItem?.id || doc(collection(db, 'items')).id;
+
+      // 1. Upload new images to Firebase Storage
+      const uploadedUrls: string[] = [];
+      for (const item of newImageFiles) {
+        const storageRef = ref(storage, `items/${sellerId}/${Date.now()}_${item.file.name}`);
+        const snapshot = await uploadBytes(storageRef, item.file);
+        const url = await getDownloadURL(snapshot.ref);
+        uploadedUrls.push(url);
+      }
+
+      const finalImages = [...existingImages, ...uploadedUrls];
 
       const functions = getFunctions(undefined, 'us-central1');
       const pcsValidate = httpsCallable(functions, 'pcsValidate');
@@ -151,7 +151,9 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         price: parseFloat(price),
         stock_count: stockCount,
         metadata,
-        images,
+        images: finalImages, // Keep images for compatibility
+        imageUrls: finalImages,
+        image_url: finalImages[0] || '',
         seller_id: sellerId,
         seller_name: user?.displayName || 'Pulse Vendor',
         status: itemStatus,
@@ -182,7 +184,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     }
   };
 
-  const canPost = !!title && !!price && !!selectedCategory && !!subcategory && images.length > 0 && !isPosting;
+  const totalImageCount = existingImages.length + newImageFiles.length;
+  const canPost = !!title && !!price && !!selectedCategory && !!subcategory && totalImageCount > 0 && !isPosting;
 
   // Derive the dynamic title hint from the selected subcategory config
   const selectedSubcategoryConfig = useMemo(() => {
@@ -326,23 +329,41 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                   <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Photos</h2>
                   <p className="text-[11px] font-medium text-[#94a3b8]">Add up to 10 images.</p>
                 </div>
-                <span className="text-[11px] font-bold text-[#94a3b8]">{images.length}/10</span>
+                <span className="text-[11px] font-bold text-[#94a3b8]">{totalImageCount}/10</span>
               </div>
 
               <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="shrink-0 w-24 h-24 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center gap-1.5 hover:bg-slate-100 transition-all"
-                >
-                  <Plus size={18} className="text-[#94a3b8]" />
-                  <span className="text-[9px] font-bold text-[#94a3b8] ">Add</span>
-                </button>
-                <input type="file" multiple accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
-                {images.map((img, i) => (
-                  <div key={i} className="shrink-0 w-24 h-24 relative rounded-xl overflow-hidden border border-slate-100 group">
+                {totalImageCount < 10 && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="shrink-0 w-24 h-24 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center gap-1.5 hover:bg-slate-100 transition-all"
+                  >
+                    <Plus size={18} className="text-[#94a3b8]" />
+                    <span className="text-[9px] font-bold text-[#94a3b8] ">Add</span>
+                  </button>
+                )}
+                <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                
+                {/* Existing Images */}
+                {existingImages.map((img, i) => (
+                  <div key={`existing-${i}`} className="shrink-0 w-24 h-24 relative rounded-xl overflow-hidden border border-slate-100 group">
                     <img src={img} className="w-full h-full object-cover" />
                     <button
-                      onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
+                      onClick={() => removeExistingImage(i)}
+                      className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+
+                {/* New Images */}
+                {newImageFiles.map((item, i) => (
+                  <div key={`new-${i}`} className="shrink-0 w-24 h-24 relative rounded-xl overflow-hidden border border-slate-100 group">
+                    <img src={item.preview} className="w-full h-full object-cover" />
+                    <div className="absolute top-1 left-1 px-1.5 py-0.5 bg-blue-500 text-white text-[8px] font-bold rounded-md shadow-sm">NEW</div>
+                    <button
+                      onClick={() => removeNewImage(i)}
                       className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all"
                     >
                       <Trash2 size={16} />
