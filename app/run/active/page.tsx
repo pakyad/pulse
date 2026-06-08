@@ -39,6 +39,7 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
   const [step, setStep] = useState(mission.status === 'PICKED_UP' ? 2 : 1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [podPhoto, setPodPhoto] = useState<File | null>(null);
+  const [podPreview, setPodPreview] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const router = useRouter();
   
@@ -79,7 +80,6 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
         runner_id: uid,
         buyer_confirmed: false
       });
-      alert('Delivery confirmed!');
       setStep(6);
     } catch (e: any) {
       alert('Error: ' + e.message);
@@ -92,6 +92,23 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
     const match = locationStr?.match(/\(([^,]+),\s*([^)]+)\)/);
     return match ? match[2] : '';
   };
+
+  if (step === 6) {
+    return (
+      <div className="fixed inset-0 z-100 bg-white flex flex-col items-center justify-center px-8 text-center">
+        <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
+          <CheckCircle2 size={40} />
+        </div>
+        <h1 className="text-[14px] font-semibold text-blue-600 mb-2">Delivery Confirmed</h1>
+        <p className="text-[42px] font-semibold text-slate-900 tracking-tighter leading-none mb-10">
+          +RM {(mission.total_price || mission.payout || 4.5).toFixed(2)}
+        </p>
+        <button onClick={() => { onComplete(mission.total_price || mission.payout || 4.5); router.push('/run'); }} className="w-full max-w-xs h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md active:scale-95 transition-all">
+          Dismiss & Return
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col pt-6 pb-10 font-sans antialiased text-slate-900">
@@ -149,19 +166,36 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-semibold ${step === 2 ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-400'}`}>2</div>
                 <p className="text-[13px] font-bold text-slate-900">Delivery</p>
               </div>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 bg-white border border-slate-100 p-3.5 rounded-xl">
-                  <MapPin className="text-slate-400 shrink-0 mt-0.5" size={16} />
-                  <div>
-                    <p className="text-[10px] font-semibold text-slate-400 mb-0.5">Drop-off Point</p>
-                    <p className="text-[13px] font-bold text-slate-900 leading-snug">{mission.drop_off_location || 'Campus Destination'}</p>
-                  </div>
-                </div>
-                {step === 2 && (
-                  <button onClick={handleCompleteDelivery} disabled={isProcessing} className="w-full h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50">
-                    {isProcessing ? <Loader2 size={16} className="animate-spin" /> : "Complete Delivery"}
-                  </button>
-                )}
+               <div className="space-y-4">
+                 <div className="flex items-start gap-3 bg-white border border-slate-100 p-3.5 rounded-xl">
+                   <MapPin className="text-slate-400 shrink-0 mt-0.5" size={16} />
+                   <div>
+                     <p className="text-[10px] font-semibold text-slate-400 mb-0.5">Drop-off Point</p>
+                     <p className="text-[13px] font-bold text-slate-900 leading-snug">{mission.drop_off_location || 'Campus Destination'}</p>
+                   </div>
+                 </div>
+                 {step === 2 && (
+                   <>
+                     {podPreview ? (
+                       <div className="relative w-full h-24 rounded-2xl overflow-hidden border border-slate-100">
+                         <img src={podPreview} className="w-full h-full object-cover" />
+                         <button onClick={() => { setPodPreview(null); setPodPhoto(null); }} className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm"><X size={12} /></button>
+                       </div>
+                     ) : (
+                       <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer">
+                         <Camera className="w-6 h-6 text-slate-400 mb-1" />
+                         <p className="text-[11px] font-bold text-slate-500">Capture Drop-off Photo</p>
+                         <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
+                           const file = e.target.files?.[0];
+                           if (file) { setPodPhoto(file); setPodPreview(URL.createObjectURL(file)); }
+                         }} />
+                       </label>
+                     )}
+                     <button onClick={handleCompleteDelivery} disabled={isCompleting} className="w-full h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-all shadow-md shadow-slate-900/10 disabled:opacity-50">
+                       {isCompleting ? <Loader2 size={16} className="animate-spin" /> : "Complete Delivery"}
+                     </button>
+                   </>
+                 )}
               </div>
            </div>
         </div>
