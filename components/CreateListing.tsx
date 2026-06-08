@@ -23,6 +23,16 @@ interface CreateListingProps {
   existingItem?: any;
 }
 
+type PcsStatus = 'APPROVED' | 'FLAGGED' | 'BLOCKED_NO_REFERENCE' | 'FREE_MARKET' | 'ERROR';
+
+interface PcsNotice {
+  marketBaselinePrice: number;
+  maxAllowedStudentPrice: number;
+  itemTitle: string;
+  pcsStatus: PcsStatus;
+  justification?: string;
+}
+
 const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
   ACADEMIC: BookOpen,
   HOSTEL: Home,
@@ -53,11 +63,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const [stock, setStock] = useState(existingItem?.stock_count?.toString() || '1');
 
   const [isPosting, setIsPosting] = useState(false);
-  const [pcsError, setPcsError] = useState<{
-    marketBaselinePrice: number;
-    maxAllowedStudentPrice: number;
-    itemTitle: string;
-  } | null>(null);
+  const [pcsError, setPcsError] = useState<PcsNotice | null>(null);
 
   // -- FORCE SYNC EXISTING ITEM DATA --
   useEffect(() => {
@@ -74,6 +80,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   }, [existingItem]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -130,11 +137,23 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
 
       const pcsData = pcsResult.data as any;
 
+      if (pcsData.pcsStatus === 'FREE_MARKET') {
+        setPcsError({
+          marketBaselinePrice: pcsData.marketBaselinePrice,
+          maxAllowedStudentPrice: pcsData.maxAllowedStudentPrice,
+          itemTitle: title,
+          pcsStatus: pcsData.pcsStatus,
+          justification: pcsData.justification
+        });
+      }
+
       if (pcsData.isApproved === false) {
         setPcsError({
           marketBaselinePrice: pcsData.marketBaselinePrice,
           maxAllowedStudentPrice: pcsData.maxAllowedStudentPrice,
-          itemTitle: title
+          itemTitle: title,
+          pcsStatus: pcsData.pcsStatus || 'FLAGGED',
+          justification: pcsData.justification
         });
         setIsPosting(false);
         return;
@@ -162,7 +181,12 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         flag_source: null,
         price_appeal: '',
         is_official: role?.toUpperCase() === 'CLUB' || role?.toUpperCase() === 'MERCHANT',
-        pcs_certified: true,
+        pcs_certified: pcsData.isApproved === true,
+        pcs_status: pcsData.pcsStatus,
+        pcs_market_price: pcsData.marketBaselinePrice,
+        pcs_max_allowed: pcsData.maxAllowedStudentPrice,
+        pcs_reason: pcsData.justification,
+        pcs_is_custom: pcsData.isCustomItem === true,
         updated_at: serverTimestamp(),
       };
 
@@ -380,6 +404,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                 <p className="text-[11px] font-medium text-[#94a3b8]">Keep it short and clear.</p>
               </div>
               <input
+                ref={titleInputRef}
                 placeholder="e.g. Calculus Textbook, Canon EOS..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -430,20 +455,52 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <div className="rounded-2xl p-4 mt-3 bg-amber-50 border border-amber-100">
+                    <div className={`rounded-2xl p-4 mt-3 border ${
+                      pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE'
+                        ? 'bg-red-50 border-red-100'
+                        : pcsError.pcsStatus === 'FREE_MARKET'
+                        ? 'bg-emerald-50 border-emerald-100'
+                        : 'bg-amber-50 border-amber-100'
+                    }`}>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE'
+                            ? 'bg-red-100'
+                            : pcsError.pcsStatus === 'FREE_MARKET'
+                            ? 'bg-emerald-100'
+                            : 'bg-amber-100'
+                        }`}>
                           <span className="text-sm"></span>
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900 mb-0.5">Whoa, that is a bit steep</p>
-                          <p className="text-xs text-gray-500 leading-relaxed mb-3">We found <strong className="text-gray-700">{pcsError?.itemTitle}</strong> going for around <strong className="text-gray-700">RM{pcsError?.marketBaselinePrice}</strong> out there. Campus listings get a 10% friendlier cap so the max here is <strong className="text-gray-700">RM{pcsError?.maxAllowedStudentPrice}</strong>.</p>
-                          <button
-                            onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }}
-                            className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800 active:scale-95 transition-all"
-                          >
-                            Set to RM{pcsError?.maxAllowedStudentPrice} and keep going
-                          </button>
+                          {pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
+                            <>
+                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Your item needs a specific name</p>
+                              <p className="text-xs text-gray-500 leading-relaxed mb-3">Items above RM500 must have a verifiable market price. Try using the exact brand and model name.</p>
+                              <button
+                                onClick={() => { titleInputRef.current?.focus(); }}
+                                className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800 active:scale-95 transition-all"
+                              >
+                                Update item name
+                              </button>
+                            </>
+                          ) : pcsError.pcsStatus === 'FREE_MARKET' ? (
+                            <>
+                              <p className="text-sm font-semibold text-emerald-900 mb-0.5">Free Market listing</p>
+                              <p className="text-xs text-emerald-700 leading-relaxed">Listed as Free Market item. No Student Price badge will be shown.</p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Whoa, that is a bit steep</p>
+                              <p className="text-xs text-gray-500 leading-relaxed mb-3">We found <strong className="text-gray-700">{pcsError?.itemTitle}</strong> going for around <strong className="text-gray-700">RM{pcsError?.marketBaselinePrice}</strong> out there. Campus listings get a 10% friendlier cap so the max here is <strong className="text-gray-700">RM{pcsError?.maxAllowedStudentPrice}</strong>.</p>
+                              <button
+                                onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }}
+                                className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800 active:scale-95 transition-all"
+                              >
+                                Set to RM{pcsError?.maxAllowedStudentPrice} and keep going
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -20,6 +20,7 @@ interface ProductCardProps {
     category?: string;
     subcategory?: string;
     pcs_certified?: boolean;
+    pcs_status?: string;
   };
   onClick?: () => void;
   showStudentBanner?: boolean;
@@ -47,6 +48,13 @@ export default function ProductCard({ item, onClick, showStudentBanner }: Produc
     }
   }
 
+  const priceBadge =
+    item.pcs_certified === true && item.pcs_status === 'APPROVED'
+      ? { label: 'Student Price', className: 'bg-[#EAF3DE] text-[#3B6D11]' }
+      : item.pcs_status === 'FREE_MARKET'
+      ? { label: 'Unverified Price', className: 'bg-slate-100 text-slate-500' }
+      : null;
+
   return (
     <motion.div
       whileTap={{ scale: 0.98 }}
@@ -69,13 +77,13 @@ export default function ProductCard({ item, onClick, showStudentBanner }: Produc
           </div>
         )}
 
-        {item.pcs_certified === true && (
-          <div className="absolute bottom-1.5 left-1.5 bg-[#EAF3DE] text-[#3B6D11] px-2 py-0.5 rounded-full text-[10px] font-medium z-10 shadow-sm">
-             Student Price
+        {priceBadge && (
+          <div className={`absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium z-10 shadow-sm ${priceBadge.className}`}>
+             {priceBadge.label}
           </div>
         )}
 
-        {showStudentBanner && !isSold && (
+        {showStudentBanner && !isSold && item.pcs_certified === true && item.pcs_status === 'APPROVED' && (
           <div className="absolute bottom-0 left-0 right-0 bg-[#16a34a] px-2 py-1 text-center z-10">
             <span className="text-xs font-semibold text-white tracking-wide">Student Price</span>
           </div>

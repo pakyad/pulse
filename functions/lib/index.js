@@ -68,14 +68,7 @@ exports.placeOrder = (0, https_1.onCall)({
                 const itemsForThisVendor = ordersByVendor[vendorId];
                 let subtotal = 0;
                 itemsForThisVendor.forEach((i) => subtotal += ((actualPrices[i.productId] || i.price) * i.qty));
-                itemsForThisVendor.forEach((item) => {
-                    const ref = db.collection('items').doc(item.productId);
-                    transaction.update(ref, {
-                        stock_count: admin.firestore.FieldValue.increment(-item.qty),
-                        // Maintain legacy field for compatibility
-                        stock: admin.firestore.FieldValue.increment(-item.qty)
-                    });
-                });
+                // Stock decrement moved to Merchant "Prepare Order" stage per REQ_FIX_5
                 transaction.set(subOrderRef, {
                     order_id: subOrderRef.id,
                     parent_id: parentOrderId,
@@ -125,7 +118,7 @@ exports.placeOrder = (0, https_1.onCall)({
     }
 });
 /**
- * 🏛️ Price Sentinel (UC_1801)
+ *  Price Sentinel (UC_1801)
  * Autonomous enforcement of institutional category ceilings.
  */
 exports.priceSentinel = (0, https_1.onCall)({
@@ -160,7 +153,7 @@ exports.priceSentinel = (0, https_1.onCall)({
     return { flagged: false };
 });
 /**
- * 🏛️ Adjudicate Appeal
+ *  Adjudicate Appeal
  */
 exports.adjudicateAppeal = (0, https_1.onCall)({ cors: true }, async (request) => {
     const data = request.data || {};
@@ -185,7 +178,7 @@ exports.adjudicateAppeal = (0, https_1.onCall)({ cors: true }, async (request) =
     return { success: true };
 });
 /**
- * 🛰️ completeHandshake (UC_1901)
+ *  completeHandshake (UC_1901)
  * Proximity-based Double-Check Handshake.
  */
 exports.completeHandshake = (0, https_1.onCall)({
@@ -243,18 +236,18 @@ exports.completeHandshake = (0, https_1.onCall)({
 });
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // metres
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-        Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const phi1 = lat1 * Math.PI / 180;
+    const phi2 = lat2 * Math.PI / 180;
+    const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+    const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+        Math.cos(phi1) * Math.cos(phi2) *
+            Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // in metres
 }
 /**
- * 🚀 Push Notification Engine
+ *  Push Notification Engine
  * Listens for order status changes and sends FCM push notifications to the buyer.
  */
 exports.onOrderStatusChanged = (0, firestore_1.onDocumentUpdated)("orders/{orderId}", async (event) => {
@@ -350,7 +343,7 @@ exports.onOrderCreated = (0, firestore_1.onDocumentCreated)("orders/{orderId}", 
         await db.collection("notifications").add({
             user_id: sellerId,
             type: "SALE",
-            title: "Item Sold! 🎉",
+            title: "Item Sold! ",
             body: `Your ${itemName} was just purchased. Drop it at ${handoverNode} for the runner.`,
             order_id: orderId,
             is_read: false,
@@ -361,7 +354,7 @@ exports.onOrderCreated = (0, firestore_1.onDocumentCreated)("orders/{orderId}", 
         // 2. Create post-purchase conversation thread
         const chatId = `post_${sellerId}_${buyerId}_${orderId}`;
         const chatRef = db.collection("chats").doc(chatId);
-        const lastMessageText = `Hi! I just purchased your ${itemName} (Order #${orderId.slice(0, 8).toUpperCase()}). Looking forward to receiving it! 📦`;
+        const lastMessageText = `Hi! I just purchased your ${itemName} (Order #${orderId.slice(0, 8).toUpperCase()}). Looking forward to receiving it! `;
         await chatRef.set({
             members: [sellerId, buyerId],
             participant_names: {
@@ -442,42 +435,42 @@ exports.pcsValidate = (0, https_1.onCall)({
     maxInstances: 10,
 }, async (request) => {
     console.log('pcsValidate called with:', request.data);
-    const { itemTitle, category } = request.data;
-    const name = itemTitle || "";
-    const subcategory = request.data.subcategory || "";
+    const data = request.data || {};
+    const itemTitle = String(data.itemTitle || "");
+    const itemId = String(data.itemId || "");
+    const sellerId = String(data.sellerId || "");
+    const listedPrice = parseFloat(data.itemPrice) || 0;
+    let isApproved = false;
+    let marketBaselinePrice = 0;
+    let maxAllowedPrice = 0;
+    let justification = "";
+    let pcsStatus = "ERROR";
+    let isCustomClaim = false;
     try {
+        if (!itemId) {
+            throw new Error("Missing itemId for PCS validation.");
+        }
+        const customKeywords = ['handmade', 'hand made', 'commission', 'commissioned', 'artwork', 'homemade', 'home cooked', 'baked', 'knitted', 'crocheted', 'DIY', 'painted', 'drawn', 'illustrated', 'friendship bracelet'];
+        const standardKeywords = ['modified', 'custom pc', 'custom build', 'printed shirt', 'jersey', 'printed hoodie', 'custom case', 'engraved'];
+        const lowerTitle = itemTitle.toLowerCase();
+        isCustomClaim = customKeywords.some((keyword) => lowerTitle.includes(keyword.toLowerCase()));
+        if (standardKeywords.some((keyword) => lowerTitle.includes(keyword.toLowerCase()))) {
+            isCustomClaim = false;
+        }
         const anthropic = new sdk_1.Anthropic({
             apiKey: anthropicApiKey.value(),
         });
-        let isPriceControlled = false;
-        const guidelinesSnap = await db.collection("PriceGuidelines").get();
-        guidelinesSnap.forEach((doc) => {
-            const data = doc.data();
-            if (doc.id.toUpperCase() === (category === null || category === void 0 ? void 0 : category.toUpperCase())) {
-                isPriceControlled = true;
-            }
-            const subcategories = data.subcategories || [];
-            const match = subcategories.find((s) => s.label === subcategory);
-            if (match) {
-                isPriceControlled = match.is_price_controlled === true;
-            }
-        });
-        if (!isPriceControlled) {
-            return {
-                isApproved: true,
-                marketBaselinePrice: 0,
-                maxAllowedStudentPrice: 0,
-                justification: "Category not under price control."
-            };
-        }
+        const prompt = isCustomClaim
+            ? `The seller claims this is a custom/handmade item. Search Shopee Malaysia and Lazada Malaysia for any standard retail equivalent of this item. If a standard retail product exists, return its price. If truly no retail equivalent exists, return marketBaselinePrice as 0. Return ONLY raw JSON: {marketBaselinePrice: number, source: string}. Item: "${itemTitle}".`
+            : `Search Shopee Malaysia and Lazada Malaysia for the current lowest retail price of ${itemTitle}. Return ONLY raw JSON: {marketBaselinePrice: number, source: string}`;
         const msg = await anthropic.messages.create({
             model: "claude-haiku-4-5-20251001",
             max_tokens: 1000,
-            system: "You are a price validation engine for Pulse. Find the current market price (RM) on Shopee Malaysia or Lazada Malaysia. respond with ONLY a raw JSON object. Format: {\"marketBaselinePrice\": 299.00, \"isApproved\": boolean, \"maxAllowedStudentPrice\": number, \"justification\": \"string\"}",
+            system: "You are a price validation engine for Pulse. Search Shopee Malaysia and Lazada Malaysia prices in Malaysian Ringgit. Respond with ONLY a raw JSON object.",
             messages: [
                 {
                     role: "user",
-                    content: `Search Shopee Malaysia or Lazada Malaysia for the current retail price of "${name}". Respond with ONLY JSON.`,
+                    content: prompt,
                 },
             ],
         });
@@ -488,47 +481,81 @@ exports.pcsValidate = (0, https_1.onCall)({
             }
         }
         console.log('Claude SDK raw text:', rawText);
-        let isApproved = true;
-        let marketPrice = 0;
-        let maxAllowedPrice = 0;
-        let justification = "";
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
             console.error('No JSON found in Claude SDK response');
-            isApproved = true;
-            justification = "Validation failed, default approval granted.";
+            marketBaselinePrice = 0;
         }
         else {
             try {
                 const parsed = JSON.parse(jsonMatch[0]);
-                marketPrice = parseFloat(parsed.marketBaselinePrice) || 0;
-                maxAllowedPrice = parseFloat(parsed.maxAllowedStudentPrice) || (marketPrice * 0.9);
-                // FORCED NUMERIC VALIDATION: Don't trust AI for the boolean check
-                const listedPrice = parseFloat(request.data.itemPrice) || 0;
-                isApproved = marketPrice > 0 ? (listedPrice <= maxAllowedPrice + 0.01) : true;
-                justification = parsed.justification || (isApproved ? "Price is within campus guidelines." : "Price exceeds the calculated campus limit.");
+                marketBaselinePrice = parseFloat(parsed.marketBaselinePrice) || 0;
             }
             catch (e) {
                 console.error('JSON parse error from Claude SDK text:', e);
-                isApproved = true;
-                justification = "Validation parse error, default approval granted.";
+                marketBaselinePrice = 0;
             }
         }
-        console.log('PCS verdict:', isApproved, marketPrice, maxAllowedPrice, 'Listed:', request.data.itemPrice);
+        if (marketBaselinePrice > 0) {
+            maxAllowedPrice = Math.round(marketBaselinePrice * 0.90 * 100) / 100;
+            isApproved = listedPrice <= maxAllowedPrice;
+            justification = isApproved
+                ? "Approved. RM" + listedPrice + " is within campus cap of RM" + maxAllowedPrice + " (90% of market RM" + marketBaselinePrice + ")"
+                : "Rejected. RM" + listedPrice + " exceeds campus cap of RM" + maxAllowedPrice + " (90% of market RM" + marketBaselinePrice + ")";
+            pcsStatus = isApproved ? "APPROVED" : "FLAGGED";
+        }
+        else if (marketBaselinePrice === 0 && listedPrice > 500) {
+            isApproved = false;
+            justification = "Items priced above RM500 require a verified market price. Please use a specific brand and model name so our system can validate your price.";
+            pcsStatus = "BLOCKED_NO_REFERENCE";
+            maxAllowedPrice = 500;
+        }
+        else if (marketBaselinePrice === 0 && listedPrice <= 500) {
+            isApproved = true;
+            justification = "No market reference found. Listed as Free Market item below RM500 threshold.";
+            pcsStatus = "FREE_MARKET";
+            maxAllowedPrice = 500;
+        }
+        await db.collection("items").doc(itemId).set({
+            pcs_status: pcsStatus,
+            pcs_certified: isApproved,
+            pcs_market_price: marketBaselinePrice,
+            pcs_max_allowed: maxAllowedPrice,
+            pcs_reason: justification,
+            pcs_is_custom: isCustomClaim,
+            pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+        if (pcsStatus === "FLAGGED" || pcsStatus === "BLOCKED_NO_REFERENCE") {
+            await db.collection("PriceGuidelines").doc(itemId).set({
+                title: itemTitle,
+                listed_price: listedPrice,
+                market_price: marketBaselinePrice,
+                max_allowed: maxAllowedPrice,
+                seller_id: sellerId,
+                status: "PENDING_REVIEW",
+                flagged_at: admin.firestore.FieldValue.serverTimestamp(),
+                reason: justification,
+            });
+        }
+        console.log('PCS verdict:', isApproved, marketBaselinePrice, maxAllowedPrice, 'Listed:', listedPrice, 'Status:', pcsStatus);
         return {
             isApproved,
-            marketBaselinePrice: marketPrice,
+            marketBaselinePrice,
             maxAllowedStudentPrice: maxAllowedPrice,
-            justification
+            justification,
+            pcsStatus,
+            isCustomItem: isCustomClaim
         };
     }
     catch (error) {
         logger.error(`[pcsValidate] Error validating item validation:`, error);
         return {
-            isApproved: true,
+            isApproved: false,
             marketBaselinePrice: 0,
             maxAllowedStudentPrice: 0,
-            justification: "Validation failed, default approval granted."
+            justification: (error === null || error === void 0 ? void 0 : error.message) || "Validation failed. Please try again.",
+            pcsStatus: "ERROR",
+            isCustomItem: isCustomClaim
         };
     }
 });
@@ -603,7 +630,7 @@ exports.sendWelcomeEmail = v1_1.auth
             <td style="padding-top:24px;">
               <p style="margin:0;font-size:15px;color:#475569;line-height:24px;">
                 See you on campus.<br>
-                <strong style="color:#0f172a;">— The Pulse Team</strong>
+                <strong style="color:#0f172a;"> The Pulse Team</strong>
               </p>
             </td>
           </tr>
@@ -622,7 +649,7 @@ exports.sendWelcomeEmail = v1_1.auth
             body: JSON.stringify({
                 from: "Pulse Campus <onboarding@resend.dev>",
                 to: [email],
-                subject: `Welcome to Pulse, ${firstName} 👋`,
+                subject: `Welcome to Pulse, ${firstName} `,
                 html: htmlBody,
             }),
         });
