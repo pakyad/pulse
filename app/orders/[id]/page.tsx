@@ -857,36 +857,6 @@ export default function LiveOrderPage() {
         )}
       </AnimatePresence>
 
-      {/*  DEMO/JUDGING CONTROLS  */}
-      <div className="fixed bottom-6 right-6 z-50 animate-bounce">
-        <button 
-          onClick={async () => {
-             const s = (order?.status || '').toUpperCase();
-             let nextStatus = 'PENDING_RUNNER';
-             if (['DELIVERED', 'COMPLETED'].includes(s)) nextStatus = 'PENDING_RUNNER';
-             else if (['IN_TRANSIT', 'ON_THE_WAY'].includes(s)) nextStatus = 'DELIVERED';
-             else if (s === 'PICKED_UP') nextStatus = 'IN_TRANSIT';
-             else if (['READY_FOR_PICKUP', 'AWAITING_RUNNER'].includes(s)) nextStatus = 'PICKED_UP';
-             else if (s === 'PREPARING') nextStatus = 'READY_FOR_PICKUP';
-             else nextStatus = 'PREPARING'; // Catch-all for Pending phases
-             
-             try {
-                await updateDoc(doc(db, 'orders', id as string), { 
-                  status: nextStatus, 
-                  runner_location: { latitude: 3.1593, longitude: 101.6996 },
-                  hasAcknowledgedSuccess: nextStatus === 'DELIVERED' ? false : (order.hasAcknowledgedSuccess ?? false)
-                });
-             } catch (e) {
-                console.error("Demo cycle failed", e);
-             }
-          }}
-          className="h-12 px-5 bg-slate-900 text-white border-2 border-indigo-500 rounded-[20px] text-[12px] font-bold shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-2 active:scale-95 transition-all"
-        >
-          <Activity size={16} className="text-indigo-400" />
-          Simulate Next Status
-        </button>
-      </div>
-
     </main>
   );
 }
