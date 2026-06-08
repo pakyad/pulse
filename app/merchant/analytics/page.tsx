@@ -161,19 +161,27 @@ export default function MerchantAnalyticsPage() {
           <h1 className="text-[24px] font-bold text-[#1C1C1E] tracking-tight">Pulse</h1>
         </div>
         <nav className="flex-1 px-4 py-2 space-y-1.5">
-          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
             <LayoutGrid size={18} />
             <span>Overview</span>
           </button>
-          <button onClick={() => router.push('/merchant/analytics')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white shadow-sm">
-            <BarChart3 size={18} />
-            <span>Analytics</span>
+          <button onClick={() => router.push('/orders')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
+            <Bell size={18} />
+            <span>Live Orders</span>
           </button>
-          <button onClick={() => router.push('/marketplace')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
             <Package size={18} />
             <span>Inventory</span>
           </button>
-          <button onClick={() => router.push('/me/edit')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
+            <ClipboardList size={18} />
+            <span>Order Log</span>
+          </button>
+          <button onClick={() => router.push('/merchant/analytics')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-gray-900 text-white font-medium shadow-sm transition-all">
+            <BarChart3 size={18} />
+            <span>Analytics</span>
+          </button>
+          <button onClick={() => router.push('/merchant')} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium">
             <Settings size={18} />
             <span>Settings</span>
           </button>
