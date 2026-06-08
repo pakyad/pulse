@@ -73,7 +73,13 @@ export default function BottomNav() {
   });
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t-[0.5px] border-slate-200 pb-8 shadow-sm" style={{ zIndex: 100 }}>
+    <nav 
+      className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t-[0.5px] border-slate-200 shadow-sm" 
+      style={{ 
+        zIndex: 100,
+        paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)'
+      }}
+    >
       <div className="flex justify-around items-center h-[64px] max-w-lg mx-auto px-6">
         {navItems.map((item) => {
           const isActive = pathname === item.path || (item.path !== '/home' && pathname?.startsWith(item.path));

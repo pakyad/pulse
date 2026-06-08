@@ -13,7 +13,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ProductCard from '@/components/shared/ProductCard';
-import AnnouncementBanner from '@/components/AnnouncementBanner';
 import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/MarketplaceFilterOverlay';
 import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
@@ -156,7 +155,6 @@ function MarketplacePage() {
   const [profile,        setProfile]        = useState<any>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isFilterOpen,   setIsFilterOpen]   = useState(false);
-  const [pcsEnabled,     setPcsEnabled]     = useState(false);
   const [searchQuery,    setSearchQuery]    = useState('');
   const [isSearchOpen,   setIsSearchOpen]   = useState(false);
   const [filters,        setFilters]        = useState<FilterState>({
@@ -169,12 +167,6 @@ function MarketplacePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlFilter = searchParams.get('filter');
-  const urlPcs = searchParams.get('pcs');
-
-  // Activate PCS filter from URL on mount
-  useEffect(() => {
-    if (urlPcs === 'true') setPcsEnabled(true);
-  }, [urlPcs]);
 
   useEffect(() => {
     let unsubs: (() => void)[] = [];
@@ -191,11 +183,7 @@ function MarketplacePage() {
         );
         unsubs.push(uProfile);
 
-        const constraints: any[] = [where('status', '==', 'active')];
-        if (pcsEnabled) {
-          constraints.push(where('pcs_certified', '==', true));
-        }
-        const q = query(collection(db, 'items'), ...constraints);
+        const q = query(collection(db, 'items'), where('status', '==', 'active'));
         const uItems = onSnapshot(
           q,
           s => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),
@@ -218,7 +206,7 @@ function MarketplacePage() {
     });
 
     return () => { unsubAuth(); unsubs.forEach(u => u()); };
-  }, [pcsEnabled]);
+  }, []);
 
   const filteredItems = useMemo(() => {
     let result = [...items];
@@ -409,9 +397,6 @@ function MarketplacePage() {
           )}
         </AnimatePresence>
 
-        {/*  HAPPENING THIS WEEK  */}
-        <AnnouncementBanner />
-
         {/*  DISCOVER ITEMS  */}
         <section className="space-y-8">
           <div className="px-1 flex justify-between items-end">
@@ -433,27 +418,6 @@ function MarketplacePage() {
               <span className="text-[13px] font-semibold text-slate-600">Filter</span>
             </button>
           </div>
-
-          {/*  STUDENT MARKET TOGGLE  */}
-          {/* Requires composite index: status ASC, pcs_certified ASC  create in Firebase console if query fails */}
-          <div className="flex gap-2 -mx-8 px-8">
-            <button
-              onClick={() => setPcsEnabled(prev => !prev)}
-              className={`h-[34px] px-4 rounded-full flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border ${
-                pcsEnabled
-                  ? 'bg-slate-900 border-transparent text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
-                  : 'bg-white border-slate-100 text-slate-500 hover:bg-slate-50 shadow-sm'
-              }`}
-            >
-              <span className="text-[12px] font-bold tracking-normal"> Student Market</span>
-            </button>
-          </div>
-
-          {pcsEnabled && (
-            <p className="text-[12px] font-medium text-[#94a3b8] -mt-1 px-1">
-              Showing items verified below market price
-            </p>
-          )}
 
           {/*  CATEGORY CHIPS  */}
           <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2 -mx-8 px-8">

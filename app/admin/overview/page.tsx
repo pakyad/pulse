@@ -176,8 +176,8 @@ export default function OverviewPage() {
         snap.forEach(d => {
           const item = d.data();
           const result = item.pcs_result;
-          if (result?.marketPrice) {
-            const saving = Number(result.marketPrice) - Number(item.price || 0);
+          if (result?.market_price) {
+            const saving = Number(result.market_price) - Number(item.price || 0);
             if (saving > 0) { total += saving; count++; }
           }
         });
@@ -252,7 +252,7 @@ export default function OverviewPage() {
             const { doc, getDoc } = await import('firebase/firestore');
             const snap = await getDoc(doc(db, 'users', s.sellerId));
             const profile = snap.data();
-            return { ...s, fullName: profile?.fullName || profile?.displayName || 'Unknown', programme: profile?.programme || '', trustRating: profile?.trustRating || 0 };
+            return { ...s, fullName: profile?.full_name || 'Unknown', programme: profile?.programme || '', trustRating: profile?.trustRating || 0 };
           } catch { return { ...s, fullName: 'Unknown', programme: '', trustRating: 0 }; }
         })).then(setTopSellers);
         setSellerLoading(false);
@@ -303,8 +303,8 @@ export default function OverviewPage() {
           if (item.pcs_result) list.push({ id: d.id, ...item });
         });
         list.sort((a, b) => {
-          const ta = a.pcs_result?.checkedAt || a.createdAt || '';
-          const tb = b.pcs_result?.checkedAt || b.createdAt || '';
+          const ta = a.pcs_result?.checked_at || a.created_at || '';
+          const tb = b.pcs_result?.checked_at || b.created_at || '';
           return tb > ta ? 1 : -1;
         });
         setPcsAudit(list.slice(0, 10));
@@ -633,7 +633,7 @@ export default function OverviewPage() {
                 {pcsAudit.map((item, i) => {
                   const title = (item.title || item.name || 'Unknown').slice(0, 25);
                   const listed = Number(item.price || 0);
-                  const market = item.pcs_result?.marketPrice || 0;
+                  const market = item.pcs_result?.market_price || 0;
                   const saving = market > 0 ? market - listed : 0;
                   const approved = item.pcs_certified === true;
                   const justification = item.pcs_result?.justification || '';

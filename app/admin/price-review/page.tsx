@@ -62,15 +62,21 @@ function ConfirmDialog({ action, onClose, onConfirm, isWorking }: any) {
 }
 
 //  Item Details Drawer 
-function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: () => void; onResolve: (action: string) => Promise<void> }) {
+function ItemDetailsDrawer({ item, onClose, onResolve, priceGuidelines }: { item: any; onClose: () => void; onResolve: (action: string) => Promise<void>; priceGuidelines?: any[] }) {
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
 
   if (!item) return null;
 
   const images = item.images?.length ? item.images : item.image_url ? [item.image_url] : [];
-  const catConfig = MARKETPLACE_CATEGORIES[item.category as CategoryID];
-  const ceiling = catConfig?.ceiling || 0;
+  const matchedGuideline = priceGuidelines?.find((g: any) =>
+    g.category === item.category && g.subcategory === item.subcategory
+  );
+  const refPrice = matchedGuideline?.market_price || 0;
+  const pcsMarket = item.pcs_result?.market_price || 0;
+  const pcsMax = item.pcs_result?.max_allowed || 0;
+  const displayMarket = pcsMarket || refPrice;
+  const displayMax = pcsMax || (displayMarket > 0 ? displayMarket * 0.9 : 0);
 
   const executeResolution = async (action: string) => {
     setIsWorking(true);
@@ -120,9 +126,19 @@ function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: (
                 <span className="font-semibold text-red-400">Listed Price</span>
                 <span className="font-bold text-red-900">RM {Number(item.price).toFixed(2)}</span>
               </div>
+              {refPrice > 0 && (
+                <div className="flex justify-between text-[13px]">
+                  <span className="font-semibold text-red-400">Reference Price (Guidelines)</span>
+                  <span className="font-bold text-red-900">RM {refPrice.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-[13px]">
-                <span className="font-semibold text-red-400">Campus Ceiling</span>
-                <span className="font-bold text-red-900">RM {ceiling.toFixed(2)}</span>
+                <span className="font-semibold text-red-400">Market Price (PCS)</span>
+                <span className="font-bold text-red-900">RM {displayMarket.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-[13px]">
+                <span className="font-semibold text-red-400">Max Allowed</span>
+                <span className="font-bold text-red-900">RM {displayMax.toFixed(2)}</span>
               </div>
               {item.price_appeal && (
                 <div className="pt-3 border-t border-red-200">
@@ -134,12 +150,6 @@ function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: (
                 <div className="pt-3 border-t border-red-200">
                   <p className="text-[10px] font-semibold text-red-400 mb-1">AI Justification (PCS)</p>
                   <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">{item.pcs_result.justification}</p>
-                  {item.pcs_result.marketPrice > 0 && (
-                    <div className="mt-2 flex gap-4 text-[11px]">
-                      <span className="text-red-400">Market Price: <strong className="text-red-900">RM {item.pcs_result.marketPrice.toFixed(2)}</strong></span>
-                      <span className="text-red-400">Max Allowed: <strong className="text-red-900">RM {item.pcs_result.maxAllowedPrice.toFixed(2)}</strong></span>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -206,6 +216,7 @@ function ItemDetailsDrawer({ item, onClose, onResolve }: { item: any; onClose: (
 export default function PriceReviewPage() {
   const [items, setItems] = useState<any[]>([]);
   const [reviewedItems, setReviewedItems] = useState<any[]>([]);
+  const [priceGuidelines, setPriceGuidelines] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewedLoading, setReviewedLoading] = useState(true);
   const [error, setError] = useState('');
@@ -225,6 +236,13 @@ export default function PriceReviewPage() {
   }, []);
 
   useEffect(() => {
+    const unsubPg = onSnapshot(collection(db, 'PriceGuidelines'), (snap) => {
+      setPriceGuidelines(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsubPg();
+  }, []);
+
+  useEffect(() => {
     const q = query(
       collection(db, 'items'),
       where('pcs_result', '!=', null)
@@ -233,7 +251,7 @@ export default function PriceReviewPage() {
       const all = snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter((i: any) => i.pcs_result && (i.status === 'ACTIVE' || i.status === 'REJECTED_BY_ADMIN'))
-        .sort((a: any, b: any) => (b.pcs_result?.checkedAt?.toMillis?.() || 0) - (a.pcs_result?.checkedAt?.toMillis?.() || 0));
+        .sort((a: any, b: any) => (b.pcs_result?.checked_at?.toMillis?.() || 0) - (a.pcs_result?.checked_at?.toMillis?.() || 0));
       setReviewedItems(all);
       setReviewedLoading(false);
     });
@@ -262,7 +280,7 @@ export default function PriceReviewPage() {
     <div className="space-y-8 max-w-[1400px] w-full">
       <AnimatePresence>
         {viewingItem && (
-          <ItemDetailsDrawer item={viewingItem} onClose={() => setViewingItem(null)} onResolve={handleAction} />
+          <ItemDetailsDrawer item={viewingItem} onClose={() => setViewingItem(null)} onResolve={handleAction} priceGuidelines={priceGuidelines} />
         )}
       </AnimatePresence>
 
@@ -401,8 +419,8 @@ export default function PriceReviewPage() {
                     </div>
                     <div className="md:col-span-2">
                       <span className="text-[11px] text-slate-400">
-                        {item.pcs_result?.checkedAt?.toMillis
-                          ? new Date(item.pcs_result.checkedAt.toMillis()).toLocaleDateString()
+                        {item.pcs_result?.checked_at?.toMillis
+                          ? new Date(item.pcs_result.checked_at.toMillis()).toLocaleDateString()
                           : ''}
                       </span>
                     </div>

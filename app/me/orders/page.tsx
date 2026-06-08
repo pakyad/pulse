@@ -7,8 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, MessageSquare, Bike, Package, Loader2 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
-type OrderTab = 'Buying' | 'Selling';
-type SubTab = 'Active' | 'History';
 type HistoryFilter = 'All' | 'Completed' | 'Cancelled';
 
 const FINAL = ['DELIVERED', 'COMPLETED', 'CANCELLED', 'ARRIVED'];
@@ -212,8 +210,7 @@ function SellingCard({ order, userId, router }: { order: any; userId: string; ro
 export default function MyOrdersPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [orderTab, setOrderTab] = useState<OrderTab>('Buying');
-  const [subTab, setSubTab] = useState<SubTab>('Active');
+  const [activeTab, setActiveTab] = useState<'Active' | 'History'>('Active');
   const [histFilter, setHistFilter] = useState<HistoryFilter>('All');
   const [buyingOrders, setBuyingOrders] = useState<any[]>([]);
   const [sellingOrders, setSellingOrders] = useState<any[]>([]);
@@ -293,8 +290,8 @@ export default function MyOrdersPage() {
     return true;
   });
 
-  const displayedBuying = subTab === 'Active' ? activeBuying : historyBuying;
-  const displayedSelling = subTab === 'Active' ? activeSelling : historySelling;
+  const displayedBuying = activeTab === 'Active' ? activeBuying : historyBuying;
+  const displayedSelling = activeTab === 'Active' ? activeSelling : historySelling;
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -313,167 +310,103 @@ export default function MyOrdersPage() {
             {profile?.role === 'CLUB' ? 'Sales Registry' : 'My Orders'}
           </p>
           <p className="text-[11px] font-medium text-[#94a3b8]">
-            {orderTab === 'Selling'
-              ? `${displayedSelling.length} ${subTab.toLowerCase()}`
-              : `${displayedBuying.length} ${subTab.toLowerCase()}`}
+            {displayedBuying.length + displayedSelling.length} {activeTab.toLowerCase()}
           </p>
         </div>
       </nav>
 
-      {/*  ORDER TYPE TABS: Buying | Selling  */}
+      {/*  TABS: Active | History  */}
       <div className="fixed top-[68px] left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 flex gap-6">
-        {(['Buying', 'Selling'] as OrderTab[]).map(t => (
+        {(['Active', 'History'] as const).map(t => (
           <button
             key={t}
-            onClick={() => { setOrderTab(t); setSubTab('Active'); }}
-            className={`relative py-4 text-[13px] font-bold transition-colors ${orderTab === t ? 'text-slate-900' : 'text-[#94a3b8]'}`}
+            onClick={() => setActiveTab(t)}
+            className={`relative py-4 text-[13px] font-bold transition-colors ${activeTab === t ? 'text-slate-900' : 'text-[#94a3b8]'}`}
           >
             {t}
-            {orderTab === t && (
-              <motion.div layoutId="order-tab-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-900 rounded-full" />
+            {activeTab === t && (
+              <motion.div layoutId="orders-tab-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-900 rounded-full" />
             )}
           </button>
         ))}
       </div>
 
-      {/*  SUB TABS: Active | History  */}
-      <div className="fixed top-[114px] left-0 right-0 z-40 bg-white border-b border-slate-50 px-6 flex gap-6">
-        {(['Active', 'History'] as SubTab[]).map(t => (
-          <button
-            key={t}
-            onClick={() => setSubTab(t)}
-            className={`relative py-3 text-[12px] font-bold transition-colors ${subTab === t ? 'text-slate-900' : 'text-[#94a3b8]'}`}
-          >
-            {t}
-            {subTab === t && (
-              <motion.div layoutId="sub-tab-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-900 rounded-full" />
-            )}
-          </button>
-        ))}
-      </div>
+      <div className="px-6" style={{ paddingTop: '120px' }}>
+        {/* History sub-filters */}
+        <AnimatePresence>
+          {activeTab === 'History' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="flex gap-2 pb-4 pt-1">
+                {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setHistFilter(f)}
+                    className={`h-[30px] px-3.5 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
+                      histFilter === f
+                        ? 'bg-slate-50 border-slate-400 text-slate-900'
+                        : 'bg-slate-50/50 border-slate-900/10 text-[#94a3b8]'
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <div className="px-6" style={{ paddingTop: '172px' }}>
         {/* Buying section */}
-        {orderTab === 'Buying' && (
-          <>
-            {/* History sub-filters */}
-            <AnimatePresence>
-              {subTab === 'History' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="flex gap-2 pb-4 pt-1">
-                    {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map(f => (
-                      <button
-                        key={f}
-                        onClick={() => setHistFilter(f)}
-                        className={`h-[30px] px-3.5 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
-                          histFilter === f
-                            ? 'bg-slate-50 border-slate-400 text-slate-900'
-                            : 'bg-slate-50/50 border-slate-900/10 text-[#94a3b8]'
-                        }`}
-                      >
-                        {f}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={subTab + histFilter}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="divide-y divide-slate-100"
-              >
-                {displayedBuying.length === 0 ? (
-                  <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
-                    <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
-                    <p className="text-[12px] font-bold opacity-40">
-                      {subTab === 'Active' ? 'No active orders' : 'No history yet'}
-                    </p>
-                  </div>
-                ) : (
-                  displayedBuying.map(order => (
-                    <BuyingRow
-                      key={order.id}
-                      order={order}
-                      onClick={() => router.push(`/orders/${order.id}`)}
-                      reviewedOrders={reviewedOrders}
-                    />
-                  ))
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </>
-        )}
+        <section className="py-6">
+          <h3 className="text-[13px] font-bold text-slate-900 mb-3">Buying</h3>
+          {displayedBuying.length === 0 ? (
+            <div className="py-12 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
+              <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
+              <p className="text-[12px] font-bold opacity-40">
+                {activeTab === 'Active' ? 'No active orders' : 'No history yet'}
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {displayedBuying.map(order => (
+                <BuyingRow
+                  key={order.id}
+                  order={order}
+                  onClick={() => router.push(`/orders/${order.id}`)}
+                  reviewedOrders={reviewedOrders}
+                />
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Selling section */}
-        {orderTab === 'Selling' && (
-          <div className="space-y-4 pt-2">
-            {/* History sub-filters */}
-            <AnimatePresence>
-              {subTab === 'History' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="flex gap-2 pb-4 pt-1">
-                    {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map(f => (
-                      <button
-                        key={f}
-                        onClick={() => setHistFilter(f)}
-                        className={`h-[30px] px-3.5 rounded-full text-[12px] font-bold border-[0.5px] transition-all active:scale-95 ${
-                          histFilter === f
-                            ? 'bg-slate-50 border-slate-400 text-slate-900'
-                            : 'bg-slate-50/50 border-slate-900/10 text-[#94a3b8]'
-                        }`}
-                      >
-                        {f}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={subTab + histFilter}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="space-y-4"
-              >
-                {displayedSelling.length === 0 ? (
-                  <div className="py-28 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
-                    <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
-                    <p className="text-[12px] font-bold opacity-40">
-                      {subTab === 'Active' ? 'No active sales' : 'No sales history'}
-                    </p>
-                  </div>
-                ) : (
-                  displayedSelling.map(order => (
-                    <SellingCard
-                      key={order.id}
-                      order={order}
-                      userId={userId}
-                      router={router}
-                    />
-                  ))
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        )}
+        <section className="py-6 border-t border-slate-100">
+          <h3 className="text-[13px] font-bold text-slate-900 mb-3">Selling</h3>
+          {displayedSelling.length === 0 ? (
+            <div className="py-12 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
+              <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
+              <p className="text-[12px] font-bold opacity-40">
+                {activeTab === 'Active' ? 'No active sales' : 'No sales history'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {displayedSelling.map(order => (
+                <SellingCard
+                  key={order.id}
+                  order={order}
+                  userId={userId}
+                  router={router}
+                />
+              ))}
+            </div>
+          )}
+        </section>
 
       </div>
     </main>

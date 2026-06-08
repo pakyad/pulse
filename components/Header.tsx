@@ -76,7 +76,10 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-100 w-full bg-[#FDFDFD]/95 backdrop-blur-2xl border-b border-slate-50 px-5 pt-4 pb-5">
+      <header 
+        className="fixed top-0 left-0 right-0 z-100 w-full bg-[#FDFDFD]/95 backdrop-blur-2xl border-b border-slate-50 px-5 pb-5"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)' }}
+      >
         <div className="flex items-center gap-3 w-full max-w-2xl mx-auto">
           
           <AnimatePresence initial={false}>

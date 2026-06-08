@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
-import { collection, onSnapshot, doc, query, orderBy, where, limit } from 'firebase/firestore';
+import { collection, onSnapshot, doc, query, where, orderBy, limit } from 'firebase/firestore';
 import {
-  ChevronLeft, Search, ChevronRight, ArrowRight,
-  Radio, Package, Megaphone, BookOpen, Wrench, Store, Zap, Plus,
+  ChevronLeft, Search, Plus,
   Calendar, MapPin, Users, CheckCircle2
 } from 'lucide-react';
 import SearchOverlay from '@/components/shared/SearchOverlay';
@@ -17,33 +16,6 @@ import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
 
 //  DEMO DATA 
-
-const DEMO_ANNOUNCEMENTS = [
-  {
-    id: 'ann_demo_1', type: 'ADMIN', tag: 'ACADEMIC',
-    headline: 'Final Exam Timetable Published  Check Your Portal',
-    body: 'All final examination venues and timetables for Semester 2 2025/2026 have been finalized. Students are required to check the official Academic Portal for their specific room assignments. No changes will be accommodated after 48 hours of this notice.',
-    created_at: { toDate: () => new Date('2026-06-03T09:00:00Z') },
-  },
-  {
-    id: 'ann_demo_2', type: 'ADMIN', tag: 'SYSTEM',
-    headline: 'Library Booking System  Scheduled Maintenance Tonight',
-    body: 'The Library Management System will undergo scheduled maintenance from 1:00 AM to 4:00 AM on 31 May 2026. All active seat bookings will be preserved. The physical library remains open.',
-    created_at: { toDate: () => new Date('2026-06-02T14:30:00Z') },
-  },
-  {
-    id: 'ann_demo_3', type: 'OFFICIAL', tag: 'MARKETPLACE',
-    headline: 'New Vendor Approved  BiteClub Now Serving Block A',
-    body: 'Pulse Marketplace is pleased to announce that BiteClub has been officially approved as a verified campus vendor. Their menu will be available for runner deliveries across Block A, B, and the Library Complex starting Monday.',
-    created_at: { toDate: () => new Date('2026-06-01T08:15:00Z') },
-  },
-  {
-    id: 'ann_demo_4', type: 'OFFICIAL', tag: 'CAMPUS NOTICE',
-    headline: 'Caf Rasa Operating Hours Extended Until 9PM',
-    body: 'In response to student feedback, Caf Rasa will extend operations until 9:00 PM Monday through Friday effective immediately. Weekend hours remain unchanged.',
-    created_at: { toDate: () => new Date('2026-05-30T11:45:00Z') },
-  },
-];
 
 const DEMO_RADAR = [
   { id: 'radar_1', type: 'LOST',  title: 'Lost: MacBook Charger (USB-C)',       detail: 'Last seen at Level 3 Library, near the window seats. White charger with blue tape on cable.', reward: 'RM 10 reward', contact: 'DM @haziq_miit',            time: '2h ago', reporter_uid: 'demo_user_1', reporter_name: 'Haziq' },
@@ -61,91 +33,16 @@ const DEMO_EVENTS = [
 
 //  HELPERS 
 
-function relativeTime(ts: any): string {
-  if (!ts) return '';
-  try {
-    const date = ts?.toDate ? ts.toDate() : new Date(ts);
-    const diff = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (diff < 60)    return 'Just now';
-    if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
-  } catch { return ''; }
-}
-
-function tagIcon(tag: string) {
-  const t = (tag || '').toUpperCase();
-  if (t === 'SYSTEM' || t === 'MAINTENANCE') return <Wrench size={12} />;
-  if (t === 'MARKETPLACE' || t === 'COMMERCE') return <Store size={12} />;
-  if (t === 'ACADEMIC') return <BookOpen size={12} />;
-  if (t === 'URGENT') return <Zap size={12} />;
-  return <Megaphone size={12} />;
-}
-
-function getTagColor(tag: string) {
-  const t = (tag || '').toUpperCase();
-  if (t === 'SYSTEM' || t === 'MAINTENANCE') return 'bg-amber-50 text-amber-600 border border-amber-100/50';
-  if (t === 'MARKETPLACE' || t === 'COMMERCE') return 'bg-emerald-50 text-emerald-600 border border-emerald-100/50';
-  if (t === 'ACADEMIC') return 'bg-blue-50 text-blue-600 border border-blue-100/50';
-  if (t === 'URGENT') return 'bg-rose-50 text-rose-600 border border-rose-100/50';
-  return 'bg-indigo-50 text-indigo-600 border border-indigo-100/50';
-}
-
-function AnnouncementCard({ ann }: { ann: any }) {
-  const [expanded, setExpanded] = useState(false);
-  const tag = (ann.tag || ann.type || 'OFFICIAL').toUpperCase();
-  return (
-    <button
-      onClick={() => setExpanded(e => !e)}
-      className="w-full text-left py-3.5 border-b border-slate-100/80 last:border-0 group active:scale-[0.99] transition-all"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0 space-y-1">
-          <div className="flex items-center gap-2">
-            <span className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold capitalize ${getTagColor(tag)}`}>
-              {tagIcon(tag)} {tag.toLowerCase()}
-            </span>
-            <span className="text-[11px] font-medium text-slate-400">{relativeTime(ann.created_at)}</span>
-          </div>
-          <p className="text-[14px] font-bold text-slate-800 leading-snug tracking-tight pr-2">{ann.headline || ann.title}</p>
-          <AnimatePresence>
-            {expanded && ann.body && (
-              <motion.p
-                key="body"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="text-[12px] font-medium text-slate-500 leading-relaxed overflow-hidden pt-1 pr-2"
-              >
-                {ann.body}
-              </motion.p>
-            )}
-          </AnimatePresence>
-        </div>
-        <motion.div
-          animate={{ rotate: expanded ? 90 : 0 }}
-          transition={{ duration: 0.18 }}
-          className="shrink-0 w-7 h-7 mt-0.5 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600 transition-colors shadow-sm"
-        >
-          <ChevronRight size={14} />
-        </motion.div>
-      </div>
-    </button>
-  );
-}
-
 //  PAGE 
 
 export default function PulsePage() {
   const router = useRouter();
   const [profile,        setProfile]        = useState<any>(null);
   const [isSearchOpen,   setIsSearchOpen]   = useState(false);
-  const [announcements,  setAnnouncements]  = useState<any[]>([]);
-  const [loadingAnn,     setLoadingAnn]     = useState(true);
   const [radarItems,     setRadarItems]     = useState<any[]>([]);
   const [isReportOpen,   setIsReportOpen]   = useState(false);
   const [events,         setEvents]         = useState<any[]>([]);
+  const [announcements,  setAnnouncements]  = useState<any[]>([]);
   const [selectedEvent,  setSelectedEvent]  = useState<any | null>(null);
   const [addedEventId,   setAddedEventId]   = useState<string | null>(null);
 
@@ -161,19 +58,6 @@ export default function PulsePage() {
         unsubs.push(uProfile);
       }
 
-      const uAnn = onSnapshot(
-        query(collection(db, 'announcements'), where('published', '==', true), orderBy('created_at', 'desc'), limit(20)),
-        snap => { 
-          setAnnouncements(snap.docs.map(d => ({ id: d.id, ...d.data() }))); 
-          setLoadingAnn(false); 
-        },
-        (err) => {
-          console.error('[Pulse] Announcements:', err);
-          setLoadingAnn(false);
-        }
-      );
-      unsubs.push(uAnn);
-
       const uRadar = onSnapshot(
         query(collection(db, 'campus_radar'), orderBy('created_at', 'desc'), limit(20)), 
         snap => setRadarItems(snap.docs.map(d => ({ id: d.id, ...d.data() }))), 
@@ -187,12 +71,17 @@ export default function PulsePage() {
         (err) => console.error('[Pulse] Events:', err)
       );
       unsubs.push(uEvents);
+
+      const uAnnounce = onSnapshot(
+        query(collection(db, 'announcements'), where('status', '==', 'published'), orderBy('published_at', 'desc'), limit(10)),
+        snap => setAnnouncements(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+        (err) => console.error('[Pulse] Announcements:', err)
+      );
+      unsubs.push(uAnnounce);
     });
 
     return () => { unsubAuth(); unsubs.forEach(u => u()); };
   }, []);
-
-  const displayAnnouncements = (!loadingAnn && announcements.length === 0) ? DEMO_ANNOUNCEMENTS : announcements;
 
   const displayRadar = radarItems.length > 0
     ? radarItems.map(item => ({
@@ -237,29 +126,46 @@ export default function PulsePage() {
         <section className="space-y-4">
           <div className="px-1">
             <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">Announcements</h2>
-            <p className="text-[12px] font-medium text-slate-500 mt-0.5">Official notices from the university</p>
+            <p className="text-[12px] font-medium text-slate-500 mt-0.5">Official campus notices and updates</p>
           </div>
-          <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-slate-100/50 overflow-hidden">
-            {loadingAnn ? (
-              <div className="divide-y divide-slate-100">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="px-5 py-4 space-y-3 animate-pulse">
-                    <div className="h-5 w-24 bg-slate-100 rounded-full" />
-                    <div className="h-4 w-3/4 bg-slate-100 rounded-full" />
+          {announcements.length > 0 ? (
+            <div className="space-y-2">
+              {announcements.map((a: any) => {
+                const timeAgo = a.published_at?.toDate
+                  ? (() => {
+                      const diff = Math.floor((Date.now() - a.published_at.toDate().getTime()) / 1000);
+                      if (diff < 60) return 'Just now';
+                      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                      return `${Math.floor(diff / 86400)}d ago`;
+                    })()
+                  : '';
+                const type = (a.type || a.tag || 'campus').toLowerCase();
+                const badgeStyle: Record<string, string> = {
+                  academic: 'bg-blue-100 text-blue-700',
+                  system: 'bg-violet-100 text-violet-700',
+                  marketplace: 'bg-emerald-100 text-emerald-700',
+                  campus: 'bg-amber-100 text-amber-700',
+                };
+                return (
+                  <div key={a.id} className="bg-white border border-slate-100 rounded-2xl p-4 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${badgeStyle[type] || badgeStyle.campus}`}>
+                        {type}
+                      </span>
+                      <span className="text-[11px] font-medium text-slate-400">{timeAgo}</span>
+                    </div>
+                    <p className="text-[14px] font-bold text-slate-900">{a.headline || a.title}</p>
+                    {a.body && <p className="text-[12px] font-medium text-slate-500 line-clamp-2">{a.body}</p>}
                   </div>
-                ))}
-              </div>
-            ) : displayAnnouncements.length > 0 ? (
-              <div className="px-5">
-                {displayAnnouncements.map(ann => <AnnouncementCard key={ann.id} ann={ann} />)}
-              </div>
-            ) : (
-              <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-300">
-                <Radio size={28} strokeWidth={1.5} />
-                <p className="text-[12px] font-bold tracking-tight">No announcements right now</p>
-              </div>
-            )}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-8 bg-slate-50/50 rounded-2xl border border-dashed border-slate-100 flex flex-col items-center justify-center text-[#94a3b8] gap-2">
+              <p className="text-[12px] font-bold">No announcements</p>
+            </div>
+          )}
         </section>
 
         {/*  CAMPUS RADAR  */}

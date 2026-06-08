@@ -4,17 +4,36 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { 
-  Bell, Settings, Search, ChevronLeft, ChevronRight, 
-  ArrowUpRight, GraduationCap, Zap, Package, 
-  Activity, LayoutGrid, Sparkles, Navigation, MapPin, Box
+  Search, ChevronRight,
+  LayoutGrid, Sparkles, Box
 } from 'lucide-react';
 import ServiceGrid from '@/components/shared/ServiceGrid';
-import FeaturedBanner, { BannerSlide } from '@/components/shared/FeaturedBanner';
+import FeaturedBanner from '@/components/shared/FeaturedBanner';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, orderBy, limit } from 'firebase/firestore';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ActiveOrderBanner from '@/components/shared/ActiveOrderBanner';
 import FloatingActiveTask from '@/components/runner/FloatingActiveTask';
+
+interface Profile {
+  full_name?: string;
+  photo_url?: string;
+}
+
+interface MarketItem {
+  id: string;
+  title?: string;
+  price?: number | string;
+  image_url?: string;
+}
+
+interface HomeBanner {
+  id: string;
+  headline?: string;
+  subline?: string;
+  imageUrl?: string;
+  destination?: string;
+}
 
 //  STANDARDIZED TYPOGRAPHY COMPONENTS 
 const Heading = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -30,9 +49,9 @@ const Subtext = ({ children, className = "" }: { children: React.ReactNode; clas
 );
 
 export default function PulseHome() {
-  const [profile, setProfile] = useState<any>(null);
-  const [liveItems, setLiveItems] = useState<any[]>([]);
-  const [banners, setBanners] = useState<any[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [liveItems, setLiveItems] = useState<MarketItem[]>([]);
+  const [banners, setBanners] = useState<HomeBanner[]>([]);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
@@ -48,7 +67,7 @@ export default function PulseHome() {
       if (user) {
         //  Profile Sync
         const uProfile = onSnapshot(doc(db, 'users', user.uid), 
-          s => setProfile(s.data()),
+          s => setProfile(s.data() as Profile),
           e => console.warn("[Home] Profile Error:", e)
         );
         unsubs.push(uProfile);
@@ -56,7 +75,7 @@ export default function PulseHome() {
         //  Marketplace Items
         const qItems = query(collection(db, 'items'), where('status', '==', 'active'), limit(6));
         const uItems = onSnapshot(qItems, 
-          s => setLiveItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+          s => setLiveItems(s.docs.map(d => ({ id: d.id, ...d.data() } as MarketItem))),
           e => console.warn("[Home] Items Error:", e)
         );
         unsubs.push(uItems);
@@ -68,10 +87,12 @@ export default function PulseHome() {
       //  Home Banners
       const qBanners = query(collection(db, 'banners'), where('active', '==', true), orderBy('created_at', 'desc'), limit(5));
       const uBanners = onSnapshot(qBanners, 
-        s => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() }))),
+        s => setBanners(s.docs.map(d => ({ id: d.id, ...d.data() } as HomeBanner))),
         e => console.warn("[Home] Banners Error:", e)
       );
       unsubs.push(uBanners);
+
+
     });
     
     return () => { 
@@ -86,7 +107,10 @@ export default function PulseHome() {
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
       
       {/*  GLOBAL NAVIGATION  */}
-      <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100">
+      <nav 
+        className="fixed top-0 left-0 right-0 z-60 px-6 pb-5 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-100"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 20px)' }}
+      >
          <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-md shadow-slate-900/10">
                <Sparkles size={18} />
@@ -104,7 +128,10 @@ export default function PulseHome() {
          </div>
       </nav>
 
-      <div className="pt-28 px-6 space-y-12">
+      <div 
+        className="px-6 space-y-12"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 110px)' }}
+      >
          
          {/*  ACTIVE ORDER BANNER  */}
          <ActiveOrderBanner />

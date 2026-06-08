@@ -43,11 +43,20 @@
     color: var(--foreground);
     @apply font-sans antialiased;
     letter-spacing: -0.01em;
+    min-height: 100vh;
     min-height: 100svh;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+}
+
+/* Safari Bottom Nav Fix */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
   }
 }
 
