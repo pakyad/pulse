@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { LayoutGrid, Bell, Package, ClipboardList, BarChart3, Settings, LogOut } from 'lucide-react'
+import { LayoutGrid, Package, ClipboardList, BarChart3, Settings, LogOut } from 'lucide-react'
 import { auth } from '@/lib/firebase'
 
 interface MerchantSidebarProps {
@@ -13,7 +13,6 @@ export default function MerchantSidebar({ active, onSectionChange }: MerchantSid
 
   const nav = [
     { key: 'overview', label: 'Overview', icon: LayoutGrid, action: () => onSectionChange ? onSectionChange('overview') : router.push('/merchant') },
-    { key: 'orders', label: 'Live Orders', icon: Bell, action: () => router.push('/orders') },
     { key: 'inventory', label: 'Inventory', icon: Package, action: () => onSectionChange ? onSectionChange('products') : router.push('/merchant?section=products') },
     { key: 'log', label: 'Order Log', icon: ClipboardList, action: () => onSectionChange ? onSectionChange('log') : router.push('/merchant?section=log') },
     { key: 'analytics', label: 'Analytics', icon: BarChart3, action: () => router.push('/merchant/analytics') },
