@@ -40,6 +40,7 @@ const SERVICES_SUBCATEGORIES = [
   'Photography & Video',
   'Translation & Writing',
   'Other Campus Services',
+  'Other',
 ];
 
 const CUSTOM_CATEGORY_LABELS = {
@@ -212,6 +213,13 @@ export default function CreateListingPage() {
   const customPriceOverLimit = isCustomListing && Number(price) > 500;
   const canPost = !!title && !!price && !!selectedCategory && (isCustomListing || !!subcategory) && images.length > 0 && !isPosting && !customPriceOverLimit;
   const categoryLabels = isCustomListing ? CUSTOM_CATEGORY_LABELS : CATEGORY_LABELS;
+  const subcategoryOptions = useMemo(() => {
+    const source = selectedCategory === 'SERVICES'
+      ? SERVICES_SUBCATEGORIES
+      : MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories ?? [];
+    const labels = source.map((sub) => typeof sub === 'string' ? sub : sub.label);
+    return labels.includes('Other') ? labels : [...labels, 'Other'];
+  }, [selectedCategory]);
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40">
@@ -279,8 +287,7 @@ export default function CreateListingPage() {
             {!isCustomListing && <section className="space-y-3 pt-2 border-t border-slate-100">
               <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">Subcategory</h2>
               <div className="flex flex-wrap gap-2">
-                {(selectedCategory === 'SERVICES' ? SERVICES_SUBCATEGORIES : MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories ?? []).map((sub) => {
-                  const label = typeof sub === 'string' ? sub : sub.label;
+                {subcategoryOptions.map((label) => {
                   const isActive = subcategory === label;
                   return (
                     <button

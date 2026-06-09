@@ -143,6 +143,12 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         fixedCeiling: 10.00,
         titleHint: 'e.g. CSC3109 Final Exam 20222024',
       },
+      {
+        label: 'Other',
+        comparable: false,
+        fixedCeiling: 500.00,
+        titleHint: 'e.g. Academic item not listed above',
+      },
     ],
     customFields: [
       {
@@ -234,6 +240,12 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         fixedCeiling: 80.00,
         titleHint: 'e.g. RGB LED Strip 5m, Study Lamp, Mirror',
       },
+      {
+        label: 'Other',
+        comparable: false,
+        fixedCeiling: 500.00,
+        titleHint: 'e.g. Hostel or room item not listed above',
+      },
     ],
     customFields: [
       {
@@ -320,6 +332,13 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         fixedCeiling: 150.00,
         titleHint: 'e.g. Microsoft Office 365 1-Year Key',
       },
+      {
+        label: 'Other',
+        comparable: false,
+        fixedCeiling: 500.00,
+        titleHint: 'e.g. Tech item not listed above',
+        brandOptions: ['Other'],
+      },
     ],
     customFields: [
       {
@@ -397,6 +416,11 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         comparable: false,
         studentMarket: true,
         titleHint: 'e.g. Herschel Little America, Laptop Backpack',
+      },
+      {
+        label: 'Other',
+        comparable: false,
+        titleHint: 'e.g. Apparel item not listed above',
       },
     ],
     customFields: [

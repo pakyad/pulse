@@ -33,10 +33,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
   const rawPrice = Number(item.price);
   const formattedPrice = isNaN(rawPrice) ? '0' : rawPrice.toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-  const priceBadge =
-    item.pcs_certified === true && item.pcs_status === 'APPROVED'
-      ? { label: 'Student Price', className: 'bg-[#EAF3DE] text-[#3B6D11]' }
-      : null;
+  const showStudentPriceBadge = item.pcs_certified === true && item.pcs_status === 'APPROVED';
 
   return (
     <motion.div
@@ -54,9 +51,11 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
           alt={item.title}
         />
         
-        {priceBadge && (
-          <div className={`absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium z-10 shadow-sm ${priceBadge.className}`}>
-             {priceBadge.label}
+        {showStudentPriceBadge && (
+          <div className="absolute top-2 left-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-sm">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         )}
 
@@ -81,6 +80,12 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
             {timeAgo}
           </span>
         </div>
+
+        {item.category && (
+          <p className="text-xs text-gray-400 mt-0.5 capitalize">
+            {item.category.toLowerCase()}
+          </p>
+        )}
 
         {/* Seller Avatar & Name + Price */}
         <div className="flex items-end justify-between mt-2.5 pb-1">
@@ -108,9 +113,9 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
 }
 /* PRODUCT CARD COMPONENT
    What: Single item card shown in marketplace grid
-   Shows: Item image, title, price, seller name, badge
+   Shows: Item image, title, category, price, seller name, badge
    Badge logic:
-     pcs_status=APPROVED and pcs_certified=true -> Student Price (green)
+     pcs_status=APPROVED and pcs_certified=true -> green verified icon
      everything else -> no badge
    Related: app/marketplace/page.tsx
 */

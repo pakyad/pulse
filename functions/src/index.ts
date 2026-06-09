@@ -506,43 +506,102 @@ export const pcsValidate = onCall(
     console.log('pcsValidate called with:', request.data);
     const data = request.data || {};
     const itemTitle = String(data.itemTitle || "");
+    const itemPrice = data.itemPrice;
+    const category = String(data.category || "");
     const itemId = String(data.itemId || "");
     const sellerId = String(data.sellerId || "");
-    const listedPrice = parseFloat(data.itemPrice) || 0;
 
     let isApproved = false;
-    let marketBaselinePrice = 0;
+    let ceilingPrice = 0;
+    let floorPrice = 0;
     let maxAllowedPrice = 0;
     let justification = "";
     let pcsStatus = "ERROR";
-    let isCustomClaim = false;
+    let source = "";
 
     try {
       if (!itemId) {
         throw new Error("Missing itemId for PCS validation.");
       }
 
-      const customKeywords = ['handmade', 'hand made', 'commission', 'commissioned', 'artwork', 'homemade', 'home cooked', 'baked', 'knitted', 'crocheted', 'DIY', 'painted', 'drawn', 'illustrated', 'friendship bracelet'];
-      const standardKeywords = ['modified', 'custom pc', 'custom build', 'printed shirt', 'jersey', 'printed hoodie', 'custom case', 'engraved'];
-      const lowerTitle = itemTitle.toLowerCase();
+      const copyrightKeywords = ['pdf', 'softcopy', 'soft copy', 'ebook', 'e-book', 'digital copy', 'scanned', 'send via whatsapp', 'send via telegram', 'send via email', 'digital file'];
+      const originalContentKeywords = ['my notes', 'my summary', 'my handwritten', 'my typed', 'original notes', 'my study notes'];
+      const titleLower = itemTitle.toLowerCase();
+      const hasCopyrightSignal = copyrightKeywords.some((keyword) => titleLower.includes(keyword));
+      const hasOriginalSignal = originalContentKeywords.some((keyword) => titleLower.includes(keyword));
 
-      isCustomClaim = customKeywords.some((keyword) => lowerTitle.includes(keyword.toLowerCase()));
-      if (standardKeywords.some((keyword) => lowerTitle.includes(keyword.toLowerCase()))) {
-        isCustomClaim = false;
+      if (hasCopyrightSignal && !hasOriginalSignal) {
+        await db.collection("items").doc(itemId).update({
+          pcs_status: "COPYRIGHT_BLOCKED",
+          pcs_certified: false,
+          pcs_reason: "Selling digital copies of published content may violate copyright law.",
+          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        return {
+          isApproved: false,
+          pcsStatus: "COPYRIGHT_BLOCKED",
+          justification: "Selling digital copies of published content is not allowed on Pulse. This may violate Malaysian copyright law. You can sell your physical copy instead.",
+          marketBaselinePrice: 0,
+          maxAllowedStudentPrice: 0,
+        };
+      }
+
+      const freeMarketCategories = ['SERVICES', 'FOOD', 'HANDMADE', 'CUSTOM', 'APPAREL'];
+      const categoryUpper = (category || '').toUpperCase();
+
+      if (freeMarketCategories.some((freeMarketCategory) => categoryUpper.includes(freeMarketCategory))) {
+        await db.collection("items").doc(itemId).update({
+          pcs_status: "FREE_MARKET",
+          pcs_certified: true,
+          pcs_reason: "Free Market category. No price validation required.",
+          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        return {
+          isApproved: true,
+          pcsStatus: "FREE_MARKET",
+          justification: "Free Market category. No price validation required.",
+          marketBaselinePrice: 0,
+          maxAllowedStudentPrice: 0,
+        };
       }
 
       const anthropic = new Anthropic({
         apiKey: anthropicApiKey.value(),
       });
 
-      const prompt = isCustomClaim
-        ? `The seller claims this is a custom/handmade item. Search Shopee Malaysia and Lazada Malaysia for any standard retail equivalent of this item. If a standard retail product exists, return its price. If truly no retail equivalent exists, return marketBaselinePrice as 0. Return ONLY raw JSON: {marketBaselinePrice: number, source: string}. Item: "${itemTitle}".`
-        : `Search Shopee Malaysia and Lazada Malaysia for the current lowest retail price of ${itemTitle}. Return ONLY raw JSON: {marketBaselinePrice: number, source: string}`;
+      let categoryContext = "";
+      if (categoryUpper.includes("ACADEMIC") || categoryUpper.includes("BOOK")) {
+        categoryContext = "For academic books and textbooks, find prices from Malaysian bookstores such as MPH, Popular, or Kinokuniya, or the publisher official website.";
+      } else {
+        categoryContext = "For this item, find prices from official brand stores on Shopee Mall or Lazada Mall, or the brand official Malaysian website.";
+      }
+
+      const prompt = `You are a price validator for a Malaysian campus marketplace.
+
+Find the price band for "${itemTitle}" available to Malaysian buyers today.
+
+${categoryContext}
+
+Identify:
+1. floorPrice: the cheapest legitimate physical copy from a real authorized seller in Malaysia (ignore pirated copies, PDF versions, damaged goods, and suspiciously cheap outliers below RM5)
+2. ceilingPrice: the official new retail price from an authorized Malaysian retailer or brand store
+
+Rules:
+- Only use Malaysian Ringgit prices
+- Do not use international prices or currency conversions unless absolutely no Malaysian price exists
+- Do not use bundle prices that include other products
+- Do not use pirated or digital copies as floor reference
+- The ceiling must be from an authorized seller not an individual reseller
+
+Return ONLY this raw JSON with no markdown no explanation:
+{"floorPrice": number, "ceilingPrice": number, "source": "where ceiling price was found"}`;
 
       const msg = await anthropic.messages.create({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 1000,
-        system: "You are a price validation engine for Pulse. Search Shopee Malaysia and Lazada Malaysia prices in Malaysian Ringgit. Respond with ONLY a raw JSON object.",
+        max_tokens: 500,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
         messages: [
           {
             role: "user",
@@ -559,46 +618,48 @@ export const pcsValidate = onCall(
       }
       console.log('Claude SDK raw text:', rawText);
 
+      const listedPrice = parseFloat(itemPrice) || 0;
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         console.error('No JSON found in Claude SDK response');
-        marketBaselinePrice = 0;
       } else {
         try {
           const parsed = JSON.parse(jsonMatch[0]);
-          marketBaselinePrice = parseFloat(parsed.marketBaselinePrice) || 0;
+          floorPrice = parseFloat(parsed.floorPrice) || 0;
+          ceilingPrice = parseFloat(parsed.ceilingPrice) || 0;
+          source = String(parsed.source || "");
         } catch (e) {
           console.error('JSON parse error from Claude SDK text:', e);
-          marketBaselinePrice = 0;
         }
       }
 
-      if (marketBaselinePrice > 0) {
-        maxAllowedPrice = Math.round(marketBaselinePrice * 0.90 * 100) / 100;
-        isApproved = listedPrice <= maxAllowedPrice;
-        justification = isApproved
-          ? "Approved. RM" + listedPrice + " is within campus cap of RM" + maxAllowedPrice + " (90% of market RM" + marketBaselinePrice + ")"
-          : "Rejected. RM" + listedPrice + " exceeds campus cap of RM" + maxAllowedPrice + " (90% of market RM" + marketBaselinePrice + ")";
+      if (ceilingPrice === 0) {
+        if (listedPrice > 500) {
+          isApproved = false;
+          pcsStatus = "BLOCKED_NO_REFERENCE";
+          justification = "Items priced above RM500 require a verified market price. Please use the specific brand and model name so our system can validate your price.";
+        } else {
+          isApproved = true;
+          pcsStatus = "FREE_MARKET";
+          justification = "No market reference found. Listed as Free Market item.";
+        }
+      } else {
+        const campusCap = Math.round(ceilingPrice * 0.90 * 100) / 100;
+        maxAllowedPrice = campusCap;
+        isApproved = listedPrice <= campusCap;
         pcsStatus = isApproved ? "APPROVED" : "FLAGGED";
-      } else if (marketBaselinePrice === 0 && listedPrice > 500) {
-        isApproved = false;
-        justification = "Items priced above RM500 require a verified market price. Please use a specific brand and model name so our system can validate your price.";
-        pcsStatus = "BLOCKED_NO_REFERENCE";
-        maxAllowedPrice = 500;
-      } else if (marketBaselinePrice === 0 && listedPrice <= 500) {
-        isApproved = true;
-        justification = "No market reference found. Listed as Free Market item below RM500 threshold.";
-        pcsStatus = "FREE_MARKET";
-        maxAllowedPrice = 500;
+        justification = isApproved
+          ? "Price is within campus cap of RM" + campusCap + " based on official retail of RM" + ceilingPrice
+          : "Price exceeds campus cap of RM" + campusCap + ". Official retail price found at RM" + ceilingPrice + " from " + source;
       }
 
       await db.collection("items").doc(itemId).set({
         pcs_status: pcsStatus,
         pcs_certified: isApproved,
-        pcs_market_price: marketBaselinePrice,
+        pcs_market_price: ceilingPrice,
+        pcs_floor_price: floorPrice,
         pcs_max_allowed: maxAllowedPrice,
         pcs_reason: justification,
-        pcs_is_custom: isCustomClaim,
         pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
@@ -606,24 +667,27 @@ export const pcsValidate = onCall(
         await db.collection("PriceGuidelines").doc(itemId).set({
           title: itemTitle,
           listed_price: listedPrice,
-          market_price: marketBaselinePrice,
+          market_price: ceilingPrice,
+          floor_price: floorPrice,
           max_allowed: maxAllowedPrice,
           seller_id: sellerId,
           status: "PENDING_REVIEW",
           flagged_at: admin.firestore.FieldValue.serverTimestamp(),
           reason: justification,
+          source,
         });
       }
 
-      console.log('PCS verdict:', isApproved, marketBaselinePrice, maxAllowedPrice, 'Listed:', listedPrice, 'Status:', pcsStatus);
+      console.log('PCS verdict:', isApproved, ceilingPrice, maxAllowedPrice, 'Listed:', listedPrice, 'Status:', pcsStatus);
 
       return {
         isApproved,
-        marketBaselinePrice,
-        maxAllowedStudentPrice: maxAllowedPrice,
-        justification,
         pcsStatus,
-        isCustomItem: isCustomClaim
+        justification,
+        marketBaselinePrice: ceilingPrice,
+        maxAllowedStudentPrice: maxAllowedPrice,
+        floorPrice,
+        source
       };
     } catch (error: any) {
       logger.error(`[pcsValidate] Error validating item validation:`, error);
@@ -633,7 +697,8 @@ export const pcsValidate = onCall(
         maxAllowedStudentPrice: 0,
         justification: error?.message || "Validation failed. Please try again.",
         pcsStatus: "ERROR",
-        isCustomItem: isCustomClaim
+        floorPrice: 0,
+        source: ""
       };
     }
   }

@@ -57,6 +57,17 @@ const CUSTOM_CATEGORY_LABELS = {
   Other: 'Other',
 };
 
+const SERVICES_SUBCATEGORIES = [
+  'Tutoring & Academic Help',
+  'Coding & Debugging',
+  'Design & Creative',
+  'Resume & Career',
+  'Photography & Video',
+  'Translation & Writing',
+  'Other Campus Services',
+  'Other',
+];
+
 export default function CreateListing({ userId, role, onClose, existingItem }: CreateListingProps) {
   const router = useRouter();
   const [listingType, setListingType] = useState(existingItem?.listing_type || (existingItem?.pcs_is_custom ? 'custom' : 'standard'));
@@ -234,6 +245,13 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const customPriceOverLimit = isCustomListing && Number(price) > 500;
   const canPost = !!title && !!price && !!selectedCategory && (isCustomListing || !!subcategory) && totalImageCount > 0 && !isPosting && !customPriceOverLimit;
   const categoryLabels = isCustomListing ? CUSTOM_CATEGORY_LABELS : CATEGORY_LABELS;
+  const subcategoryOptions = useMemo(() => {
+    const source = selectedCategory === 'SERVICES'
+      ? SERVICES_SUBCATEGORIES
+      : MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories ?? [];
+    const labels = source.map((sub) => typeof sub === 'string' ? sub : sub.label);
+    return labels.includes('Other') ? labels : [...labels, 'Other'];
+  }, [selectedCategory]);
 
   // Derive the dynamic title hint from the selected subcategory config
   const selectedSubcategoryConfig = useMemo(() => {
@@ -359,19 +377,19 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                 <p className="text-[11px] font-medium text-[#94a3b8]">Pick the most specific match.</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {MARKETPLACE_CATEGORIES[selectedCategory as CategoryID]?.subcategories.map((sub) => {
-                  const isActive = subcategory === sub.label;
+                {subcategoryOptions.map((label) => {
+                  const isActive = subcategory === label;
                   return (
                     <button
-                      key={sub.label}
-                      onClick={() => { setSubcategory(sub.label); }}
+                      key={label}
+                      onClick={() => { setSubcategory(label); }}
                       className={`h-[32px] px-4 rounded-full flex items-center border-[0.5px] transition-all active:scale-95 text-[12px] font-bold tracking-[-0.2px] whitespace-nowrap ${
                         isActive
                           ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
                           : 'bg-slate-50/50 border-slate-900/10 text-slate-400 hover:border-slate-300'
                       }`}
                     >
-                      {sub.label}
+                      {label}
                     </button>
                   );
                 })}
