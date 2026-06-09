@@ -77,13 +77,10 @@ export default function NavigationGate() {
           setRole(userData.role);
           setProfile(userData);
 
-          // Role access model:
-          // STUDENT gets student pages.
-          // RUNNER inherits STUDENT access and adds runner pages.
-          // CLUB inherits STUDENT access and adds merchant pages.
-          // ADMIN is restricted to admin pages.
           const isMerchantPath = pathname?.startsWith('/merchant');
           const isRunPath = pathname?.startsWith('/run') || pathname?.startsWith('/runner');
+          const isRunRestricted = pathname?.startsWith('/run/active') || pathname?.startsWith('/run/missions') || pathname?.startsWith('/run/history');
+          const isCreatePath = pathname === '/marketplace/create';
           const isDevPage = pathname === '/dev';
           const normalizedRole = String(userData.role || 'STUDENT').toUpperCase();
 
@@ -96,16 +93,18 @@ export default function NavigationGate() {
           if (normalizedRole === 'ADMIN') {
              if (!isAdminPath && !isAuthPage) router.replace('/admin/overview');
           } else {
-             if (isAdminPath) {
-               router.replace('/home');
-             }
+             if (isAdminPath) { router.replace('/home'); return; }
 
-             if (isMerchantPath && normalizedRole !== 'CLUB') {
-               router.replace('/home');
-             }
-
-             if (isRunPath && normalizedRole !== 'RUNNER') {
-               router.replace('/home');
+             if (normalizedRole === 'CLUB') {
+               if (isMerchantPath) { /* allowed */ }
+               else if (isCreatePath) { /* allowed */ }
+               else if (isRunRestricted) { router.replace('/home'); return; }
+             } else if (normalizedRole === 'RUNNER') {
+               if (isMerchantPath) { router.replace('/home'); return; }
+             } else {
+               // STUDENT
+               if (isMerchantPath) { router.replace('/home'); return; }
+               if (isRunRestricted) { router.replace('/home'); return; }
              }
           }
 
