@@ -99,9 +99,10 @@ export default function NavigationGate() {
                if (isMerchantPath) { /* allowed */ }
                else if (isCreatePath) { /* allowed */ }
                else if (isRunRestricted) { router.replace('/home'); return; }
-             } else if (normalizedRole === 'RUNNER') {
-               if (isMerchantPath) { router.replace('/home'); return; }
-             } else {
+              } else if (normalizedRole === 'RUNNER') {
+                if (isMerchantPath) { router.replace('/home'); return; }
+                if (isCreatePath) { /* allowed */ }
+              } else {
                // STUDENT
                if (isMerchantPath) { router.replace('/home'); return; }
                if (isRunRestricted) { router.replace('/home'); return; }
