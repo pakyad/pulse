@@ -169,14 +169,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       const pcsData = pcsResult.data as any;
 
       if (pcsData.pcsStatus === 'FREE_MARKET') {
-        setPcsError({
-          marketBaselinePrice: pcsData.marketBaselinePrice,
-          maxAllowedStudentPrice: pcsData.maxAllowedStudentPrice,
-          itemTitle: title,
-          pcsStatus: pcsData.pcsStatus,
-          justification: pcsData.justification
-        });
-        return;
+        // FREE_MARKET approved - continue to save listing
       }
 
       if (pcsData.isApproved === false) {
@@ -192,7 +185,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       }
 
       const stockCount = stock !== '' ? parseInt(stock, 10) : null;
-      const itemStatus = stockCount === 0 ? 'sold_out' : 'active';
+      const itemStatus = stockCount === 0 ? 'SOLD_OUT' : 'ACTIVE';
 
       const data = {
         title,
