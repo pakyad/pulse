@@ -136,14 +136,7 @@ export default function CreateListingPage() {
       const pcsData = pcsResult.data as any;
 
       if (pcsData.pcsStatus === 'FREE_MARKET') {
-        setPcsError({
-          marketBaselinePrice: pcsData.marketBaselinePrice,
-          maxAllowedStudentPrice: pcsData.maxAllowedStudentPrice,
-          itemTitle: title,
-          pcsStatus: pcsData.pcsStatus,
-          justification: pcsData.justification
-        });
-        return;
+        // Free market approved — continue to save
       }
 
       if (pcsData.isApproved === false) {
@@ -185,17 +178,17 @@ export default function CreateListingPage() {
         seller_name: user.displayName || 'Pulse Student',
         fulfillment_mode: fulfillmentMode,
         handover_node: handoverNode,
-        status: stockCount === 0 ? 'sold_out' : 'active',
+        status: stockCount === 0 ? 'SOLD_OUT' : 'ACTIVE',
         is_price_flagged: false,
         price_flag_count: 0,
         report_count: 0,
         flag_source: null,
         price_justification: justification.trim() || '',
         pcs_certified: pcsData.isApproved === true,
-        pcs_status: pcsData.pcsStatus,
+        pcs_status: pcsData.pcsStatus || 'FREE_MARKET',
         pcs_market_price: pcsData.marketBaselinePrice,
         pcs_max_allowed: pcsData.maxAllowedStudentPrice,
-        pcs_reason: pcsData.justification,
+        pcs_reason: pcsData.justification || pcsData.pcsStatus || 'PCS validated',
         pcs_is_custom: pcsData.isCustomItem === true,
         created_at: serverTimestamp(),
       };
