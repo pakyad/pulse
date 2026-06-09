@@ -349,6 +349,11 @@ export default function RunModule() {
                   </button>
                 </div>
               </div>
+            ) : profile?.runner_status === 'pending' ? (
+              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4">
+                <p className="text-sm font-semibold text-amber-900">Application under review</p>
+                <p className="text-xs text-amber-700 mt-0.5">Your runner application has been submitted. Admin will review and notify you soon.</p>
+              </div>
             ) : (
               <div className="bg-slate-50 border border-slate-100/80 p-6 rounded-[24px] space-y-5">
                 <div className="flex items-center gap-4">

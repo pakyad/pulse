@@ -86,6 +86,8 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
 
   const [isPosting, setIsPosting] = useState(false);
   const [pcsError, setPcsError] = useState<PcsNotice | null>(null);
+  const [justification, setJustification] = useState('');
+  const [appealSubmitted, setAppealSubmitted] = useState(false);
 
   // -- FORCE SYNC EXISTING ITEM DATA --
   useEffect(() => {
@@ -232,6 +234,28 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       alert('Failed to process listing.');
     } finally {
       setIsPosting(false);
+    }
+  };
+
+  const handleSubmitJustification = async () => {
+    if (!justification.trim()) return;
+    try {
+      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
+      await addDoc(collection(db, 'appeals'), {
+        itemTitle: pcsError?.itemTitle || title,
+        listed_price: parseFloat(price),
+        market_price: pcsError?.marketBaselinePrice || 0,
+        max_allowed: pcsError?.maxAllowedStudentPrice || 0,
+        reason: justification,
+        seller_id: auth.currentUser?.uid,
+        status: 'PENDING',
+        type: 'PRICE_APPEAL',
+        created_at: serverTimestamp()
+      });
+      setAppealSubmitted(true);
+    } catch (e) {
+      console.error('[Appeal]', e);
+      alert('Failed to submit appeal. Please try again.');
     }
   };
 
@@ -552,6 +576,11 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                               <p className="text-sm font-semibold text-emerald-900 mb-0.5">Listed as Free Market</p>
                               <p className="text-xs text-emerald-700 leading-relaxed">No market reference found for this item. Your listing will go live without a verified price badge.</p>
                             </>
+                          ) : appealSubmitted ? (
+                            <>
+                              <p className="text-sm font-semibold text-emerald-900 mb-0.5">Appeal submitted</p>
+                              <p className="text-xs text-emerald-700 leading-relaxed">Your appeal has been submitted. Admin will review within 24 hours.</p>
+                            </>
                           ) : (
                             <>
                               <p className="text-sm font-semibold text-gray-900 mb-0.5">Price exceeds campus limit</p>
@@ -562,6 +591,21 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                               >
                                 Set to RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}
                               </button>
+                              <div className="mt-3">
+                                <p className="text-xs text-gray-500 mb-1">Or explain why your price is fair:</p>
+                                <textarea
+                                  value={justification}
+                                  onChange={(e) => setJustification(e.target.value)}
+                                  placeholder="e.g. Bought from official store with receipt. Brand new sealed."
+                                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                />
+                                <button
+                                  onClick={handleSubmitJustification}
+                                  className="mt-2 w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"
+                                >
+                                  Submit for admin review
+                                </button>
+                              </div>
                             </>
                           )}
                         </div>

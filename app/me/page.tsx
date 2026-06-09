@@ -108,7 +108,7 @@ export default function MePage() {
   const isStudent = !profile?.role || profile?.role === 'STUDENT' || profile?.role === 'CLUB' || profile?.role === 'MERCHANT';
 
   return (
-    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans">
+    <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans overflow-x-hidden">
       
       {/*  GLOBAL NAVIGATION  */}
       <nav className="fixed top-0 left-0 right-0 z-60 px-6 py-6 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b-[0.5px] border-slate-50">

@@ -456,7 +456,8 @@ export default function LiveOrderPage() {
   const isDone = phase === 6;
   const isCancelled = status === 'CANCELLED';
   const isPending = status === 'PENDING_VENDOR' || status === 'PENDING';
-  const showReview = isDone && !order.isReviewed;
+  const isDeliveredOrCompleted = status === 'DELIVERED' || status === 'COMPLETED';
+  const showReview = isDeliveredOrCompleted && !order.isReviewed;
 
   const dropoffLat = 3.1594;
   const dropoffLng = 101.6998;
@@ -740,10 +741,15 @@ export default function LiveOrderPage() {
                 itemId={order.items?.[0]?.productId} 
                 isOfficial={sellerOfficial} 
               />
+            ) : isDeliveredOrCompleted ? (
+              <div className="bg-gray-50 rounded-2xl p-4 text-center">
+                <p className="text-sm font-medium text-gray-500">Rate your experience</p>
+                <p className="text-xs text-gray-400 mt-1">You have already reviewed this item</p>
+              </div>
             ) : (
               <div className="bg-gray-50 rounded-2xl p-4 text-center">
                 <p className="text-sm font-medium text-gray-500">Rate your experience</p>
-                <p className="text-xs text-gray-400 mt-1">Available after delivery is confirmed</p>
+                <p className="text-xs text-gray-400 mt-1">Review unavailable until delivery is completed</p>
               </div>
             )}
           </section>

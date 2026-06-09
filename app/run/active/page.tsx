@@ -9,8 +9,7 @@ import {
   Camera, Upload, Info, Lock, Shield, User, Store
 } from 'lucide-react';
 import { auth, db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { completeDelivery } from '@/app/actions/deliveryActions';
+import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
 import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection, query, where, serverTimestamp } from 'firebase/firestore';
 import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import MapErrorBoundary from '@/components/shared/MapErrorBoundary';
@@ -299,19 +298,18 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
         return;
       }
       if (!auth.currentUser || !mission) {
-        alert('Session error - please refresh');
+        alert('Session error. Please refresh.');
         return;
       }
       setIsCompleting(true);
-      console.log('[Confirm] starting upload delivery photo');
       try {
-        const uid = auth.currentUser.uid;
+        const storage = getStorage();
         const orderId = mission.id;
+        const uid = auth.currentUser.uid;
         const fileName = Date.now() + '_' + orderId + '.jpg';
         const storageRef = ref(storage, 'delivery_proofs/' + fileName);
         const snap = await uploadBytes(storageRef, podPhoto);
         const url = await getDownloadURL(snap.ref);
-        console.log('[Confirm] photo uploaded', url);
         await updateDoc(doc(db, 'orders', orderId), {
           status: 'DELIVERED',
           delivered_at: serverTimestamp(),
@@ -319,10 +317,9 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
           runner_id: uid,
           buyer_confirmed: false
         });
-        console.log('[Confirm] order updated to DELIVERED');
+        alert('Delivery confirmed!');
         setStep(6);
       } catch (e: any) {
-        console.error('[Confirm] error:', e);
         alert('Error: ' + e.message);
       } finally {
         setIsCompleting(false);
@@ -374,7 +371,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    };
 
    return (
-      <div className="min-h-screen bg-white font-sans text-slate-900 antialiased overflow-hidden">
+      <div className="min-h-screen bg-white font-sans text-slate-900 antialiased overflow-x-hidden">
          <AnimatePresence>
             {step === 6 && (
                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-100 bg-white flex flex-col items-center justify-center px-8 text-center">
