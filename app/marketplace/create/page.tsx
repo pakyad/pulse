@@ -186,8 +186,8 @@ export default function CreateListingPage() {
         price_justification: justification.trim() || '',
         pcs_certified: pcsData.isApproved === true,
         pcs_status: pcsData.pcsStatus || 'FREE_MARKET',
-        pcs_market_price: pcsData.marketBaselinePrice,
-        pcs_max_allowed: pcsData.maxAllowedStudentPrice,
+        pcs_market_price: pcsData.marketBaselinePrice || 0,
+        pcs_max_allowed: pcsData.maxAllowedStudentPrice || 0,
         pcs_reason: pcsData.justification || pcsData.pcsStatus || 'PCS validated',
         pcs_is_custom: pcsData.isCustomItem === true,
         created_at: serverTimestamp(),
@@ -196,6 +196,7 @@ export default function CreateListingPage() {
       await setDoc(doc(db, 'items', itemId), itemData);
       router.push('/marketplace');
     } catch (e: any) {
+      console.log('LISTING ERROR:', JSON.stringify(e, null, 2));
       console.error('[CreateListing]', e);
       setIsUploading(false);
       setIsPosting(false);

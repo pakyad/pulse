@@ -215,10 +215,10 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
         price_appeal: '',
         is_official: role?.toUpperCase() === 'CLUB' || role?.toUpperCase() === 'MERCHANT',
         pcs_certified: pcsData.isApproved === true,
-        pcs_status: pcsData.pcsStatus,
-        pcs_market_price: pcsData.marketBaselinePrice,
-        pcs_max_allowed: pcsData.maxAllowedStudentPrice,
-        pcs_reason: pcsData.justification,
+        pcs_status: pcsData.pcsStatus || 'FREE_MARKET',
+        pcs_market_price: pcsData.marketBaselinePrice || 0,
+        pcs_max_allowed: pcsData.maxAllowedStudentPrice || 0,
+        pcs_reason: pcsData.justification || pcsData.pcsStatus || 'PCS validated',
         pcs_is_custom: pcsData.isCustomItem === true,
         updated_at: serverTimestamp(),
       };
@@ -234,6 +234,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
       }
       onClose();
     } catch (e) {
+      console.log('LISTING ERROR:', JSON.stringify(e, null, 2));
       console.error(e);
       alert('Failed to process listing.');
     } finally {
