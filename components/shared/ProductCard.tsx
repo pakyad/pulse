@@ -2,8 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck } from 'lucide-react';
-import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 
 interface ProductCardProps {
   item: {
@@ -23,10 +21,9 @@ interface ProductCardProps {
     pcs_status?: string;
   };
   onClick?: () => void;
-  showStudentBanner?: boolean;
 }
 
-export default function ProductCard({ item, onClick, showStudentBanner }: ProductCardProps) {
+export default function ProductCard({ item, onClick }: ProductCardProps) {
   const isSold = item.status === 'SOLD' || (item.stock_count !== undefined && item.stock_count !== null && item.stock_count <= 0);
 
   // Mocking timeAgo if not provided by DB for the demo view
@@ -36,23 +33,9 @@ export default function ProductCard({ item, onClick, showStudentBanner }: Produc
   const rawPrice = Number(item.price);
   const formattedPrice = isNaN(rawPrice) ? '0' : rawPrice.toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-  // Check if item is under price governance
-  let isGoverned = false;
-  if (item.category && item.subcategory) {
-    const catConfig = MARKETPLACE_CATEGORIES[item.category as CategoryID];
-    if (catConfig) {
-      const subConfig = catConfig.subcategories.find(s => s.label === item.subcategory);
-      if (subConfig && subConfig.studentMarket) {
-        isGoverned = true;
-      }
-    }
-  }
-
   const priceBadge =
     item.pcs_certified === true && item.pcs_status === 'APPROVED'
       ? { label: 'Student Price', className: 'bg-[#EAF3DE] text-[#3B6D11]' }
-      : item.pcs_status === 'FREE_MARKET'
-      ? { label: 'Unverified Price', className: 'bg-slate-100 text-slate-500' }
       : null;
 
   return (
@@ -71,21 +54,9 @@ export default function ProductCard({ item, onClick, showStudentBanner }: Produc
           alt={item.title}
         />
         
-        {isGoverned && !isSold && (
-          <div className="absolute top-2 left-2 w-7 h-7 bg-teal-100 rounded-[8px] flex items-center justify-center z-10 shadow-sm border border-teal-200/50">
-            <ShieldCheck size={14} className="text-teal-600" strokeWidth={2.5} />
-          </div>
-        )}
-
         {priceBadge && (
           <div className={`absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium z-10 shadow-sm ${priceBadge.className}`}>
              {priceBadge.label}
-          </div>
-        )}
-
-        {showStudentBanner && !isSold && item.pcs_certified === true && item.pcs_status === 'APPROVED' && (
-          <div className="absolute bottom-0 left-0 right-0 bg-[#16a34a] px-2 py-1 text-center z-10">
-            <span className="text-xs font-semibold text-white tracking-wide">Student Price</span>
           </div>
         )}
 
@@ -139,9 +110,7 @@ export default function ProductCard({ item, onClick, showStudentBanner }: Produc
    What: Single item card shown in marketplace grid
    Shows: Item image, title, price, seller name, badge
    Badge logic:
-     is_official=true -> UniStore Official (blue)
-     merchant=true -> Club Store (purple)
-     pcs_status=APPROVED -> Student Price (green)
-     pcs_status=FREE_MARKET -> Unverified Price (gray)
+     pcs_status=APPROVED and pcs_certified=true -> Student Price (green)
+     everything else -> no badge
    Related: app/marketplace/page.tsx
 */

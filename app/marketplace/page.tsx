@@ -5,12 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, limit } from 'firebase/firestore';
 import {
-  Laptop, BookOpen, Shirt, Box, ChevronLeft,
-  Search, LayoutGrid, ShieldCheck, HeartPulse, ShoppingBag,
-  ArrowUpRight, Filter, Store, X
+  Box, ChevronLeft, Search, ArrowUpRight, Store, X
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 import ProductCard from '@/components/shared/ProductCard';
 import MarketplaceFilterOverlay, { FilterState } from '@/components/shared/MarketplaceFilterOverlay';
@@ -209,6 +206,7 @@ function MarketplacePage() {
 
   const filteredItems = useMemo(() => {
     let result = [...items];
+    const isStudentPriceItem = (item: any) => item.pcs_status === 'APPROVED' && item.pcs_certified === true;
 
     // Category
     if (activeCategory) {
@@ -219,27 +217,9 @@ function MarketplacePage() {
       }
     }
 
-    // Student Market Filter (specific subcategories)
-    if (urlFilter === 'student_market') {
-      result = result.filter(i => {
-        if (!i.category || !i.subcategory) return false;
-        const catConfig = MARKETPLACE_CATEGORIES[i.category as CategoryID];
-        if (!catConfig) return false;
-        const subConfig = catConfig.subcategories.find(s => s.label === i.subcategory);
-        return subConfig?.studentMarket === true;
-      });
-    }
-
-    // Student Market (PCS-certified items + hardcoded titles)
-    if (urlFilter === 'student') {
-      result = result.filter(i =>
-        i.pcs_certified === true ||
-        i.pcs_status === 'APPROVED' ||
-        i.title?.includes('Engineering Mathematics') ||
-        i.title?.includes('Casio fx-570ES') ||
-        i.title?.includes('Club Badminton') ||
-        i.title?.includes('Scientific Calculator Casio')
-      );
+    // Student Market Filter (PCS-approved student price items only)
+    if (urlFilter === 'student_market' || urlFilter === 'student') {
+      result = result.filter(isStudentPriceItem);
     }
 
     // Price
@@ -471,7 +451,7 @@ function MarketplacePage() {
             filteredItems.length > 0 ? (
               <div className="grid grid-cols-2 gap-x-3 gap-y-8">
                 {filteredItems.map(item => (
-                  <ProductCard key={item.id} item={item} onClick={() => router.push(`/marketplace/${item.id}`)} showStudentBanner={urlFilter === 'student'} />
+                  <ProductCard key={item.id} item={item} onClick={() => router.push(`/marketplace/${item.id}`)} />
                 ))}
               </div>
             ) : (
