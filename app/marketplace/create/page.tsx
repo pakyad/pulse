@@ -208,18 +208,44 @@ export default function CreateListingPage() {
   const handleSubmitJustification = async () => {
     if (!justification.trim()) return;
     try {
-      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
-      await addDoc(collection(db, 'appeals'), {
-        itemTitle: pcsError?.itemTitle || title,
-        listed_price: parseFloat(price),
-        market_price: pcsError?.marketBaselinePrice || 0,
-        max_allowed: pcsError?.maxAllowedStudentPrice || 0,
-        reason: justification,
-        seller_id: auth.currentUser?.uid,
-        status: 'PENDING',
-        type: 'PRICE_APPEAL',
-        created_at: serverTimestamp()
+      const user = auth.currentUser;
+      if (!user) throw new Error('Not authenticated');
+
+      const itemId = doc(collection(db, 'items')).id;
+      const numPrice = parseFloat(price);
+      const stockCount = stock !== '' ? parseInt(stock, 10) : null;
+
+      const imageUrls: string[] = await Promise.all(
+        images.map(async (base64, i) => {
+          const storageRef = ref(storage, `pending_listings/${user.uid}_${Date.now()}_${i}.jpg`);
+          await uploadString(storageRef, base64, 'data_url');
+          return getDownloadURL(storageRef);
+        })
+      );
+
+      await setDoc(doc(db, 'pending_listings', itemId), {
+        title: title.trim(),
+        description: description.trim(),
+        category: selectedCategory,
+        subcategory: listingType === 'custom' ? selectedCategory : subcategory,
+        listing_type: listingType,
+        price: numPrice,
+        stock_count: stockCount,
+        metadata,
+        images: imageUrls,
+        image_url: imageUrls[0] || null,
+        seller_id: user.uid,
+        seller_name: user.displayName || 'Pulse Student',
+        fulfillment_mode: fulfillmentMode,
+        handover_node: handoverNode,
+        pcs_market_price: pcsError?.marketBaselinePrice || 0,
+        pcs_max_allowed: pcsError?.maxAllowedStudentPrice || 0,
+        pcs_reason: pcsError?.justification || 'FLAGGED',
+        appeal_reason: justification.trim(),
+        status: 'PENDING_REVIEW',
+        created_at: serverTimestamp(),
       });
+
       setAppealSubmitted(true);
     } catch (e) {
       console.error('[Appeal]', e);

@@ -80,19 +80,18 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
       return;
     }
     if (!auth.currentUser || !mission) {
-      alert('Session error - please refresh');
+      alert('Session error. Please refresh.');
       return;
     }
     setIsCompleting(true);
-    console.log('[Confirm] starting upload delivery photo');
     try {
+      const storage = getStorage();
       const uid = auth.currentUser.uid;
       const orderId = mission.id;
       const fileName = Date.now() + '_' + orderId + '.jpg';
       const storageRef = ref(storage, 'delivery_proofs/' + fileName);
       const snap = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(snap.ref);
-      console.log('[Confirm] photo uploaded', url);
       await updateDoc(doc(db, 'orders', orderId), {
         status: 'DELIVERED',
         delivered_at: serverTimestamp(),
@@ -100,10 +99,9 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
         runner_id: uid,
         buyer_confirmed: false
       });
-      console.log('[Confirm] order updated to DELIVERED');
+      alert('Delivery confirmed!');
       setStep(6);
     } catch (e: any) {
-      console.error('[Confirm] error:', e);
       alert('Error: ' + e.message);
     } finally {
       setIsCompleting(false);

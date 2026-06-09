@@ -99,15 +99,16 @@ export default function NavigationGate() {
                if (isMerchantPath) { /* allowed */ }
                else if (isCreatePath) { /* allowed */ }
                else if (isRunRestricted) { router.replace('/home'); return; }
-              } else if (normalizedRole === 'RUNNER') {
-                if (isMerchantPath) { router.replace('/home'); return; }
-                // RUNNER has full student access plus run pages - allow everything else
-                return;
-              } else {
-               // STUDENT
-               if (isMerchantPath) { router.replace('/home'); return; }
-               if (isRunRestricted) { router.replace('/home'); return; }
-             }
+               } else if (normalizedRole === 'RUNNER') {
+                 if (isMerchantPath) { router.replace('/home'); setChecking(false); return; }
+                 // RUNNER has full student access plus run pages - allow everything else
+                 setChecking(false);
+                 return;
+               } else {
+                // STUDENT
+                if (isMerchantPath) { router.replace('/home'); setChecking(false); return; }
+                if (isRunRestricted) { router.replace('/home'); setChecking(false); return; }
+              }
           }
 
           // Trigger automated merchant seeding

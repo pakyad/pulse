@@ -105,7 +105,7 @@ export default function MePage() {
 
   if (loading) return null;
 
-  const isStudent = !profile?.role || profile?.role === 'STUDENT' || profile?.role === 'CLUB' || profile?.role === 'MERCHANT';
+  const isStudent = !profile?.role || profile?.role === 'STUDENT' || profile?.role === 'CLUB' || profile?.role === 'MERCHANT' || profile?.role === 'RUNNER';
 
   return (
     <main className="min-h-screen bg-white text-slate-900 antialiased pb-40 font-sans overflow-x-hidden">

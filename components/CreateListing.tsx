@@ -240,18 +240,46 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
   const handleSubmitJustification = async () => {
     if (!justification.trim()) return;
     try {
-      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
-      await addDoc(collection(db, 'appeals'), {
-        itemTitle: pcsError?.itemTitle || title,
-        listed_price: parseFloat(price),
-        market_price: pcsError?.marketBaselinePrice || 0,
-        max_allowed: pcsError?.maxAllowedStudentPrice || 0,
-        reason: justification,
-        seller_id: auth.currentUser?.uid,
-        status: 'PENDING',
-        type: 'PRICE_APPEAL',
-        created_at: serverTimestamp()
+      const user = auth.currentUser;
+      if (!user) throw new Error('Not authenticated');
+
+      const itemId = doc(collection(db, 'items')).id;
+      const numPrice = parseFloat(price);
+      const stockCount = stock !== '' ? parseInt(stock, 10) : null;
+
+      const uploadedUrls: string[] = [];
+      for (const item of newImageFiles) {
+        const storageRef = ref(storage, `pending_listings/${user.uid}_${Date.now()}_${item.file.name}`);
+        const snapshot = await uploadBytes(storageRef, item.file);
+        const url = await getDownloadURL(snapshot.ref);
+        uploadedUrls.push(url);
+      }
+      const finalImages = [...existingImages, ...uploadedUrls];
+
+      const { setDoc } = await import('firebase/firestore');
+      await setDoc(doc(db, 'pending_listings', itemId), {
+        title,
+        description,
+        category: selectedCategory,
+        subcategory: listingType === 'custom' ? selectedCategory : subcategory,
+        listing_type: listingType,
+        price: numPrice,
+        stock_count: stockCount,
+        metadata,
+        images: finalImages,
+        image_url: finalImages[0] || '',
+        seller_id: user.uid,
+        seller_name: user.displayName || 'Pulse Vendor',
+        fulfillment_mode: fulfillmentMode,
+        handover_node: handoverNode,
+        pcs_market_price: pcsError?.marketBaselinePrice || 0,
+        pcs_max_allowed: pcsError?.maxAllowedStudentPrice || 0,
+        pcs_reason: pcsError?.justification || 'FLAGGED',
+        appeal_reason: justification.trim(),
+        status: 'PENDING_REVIEW',
+        created_at: serverTimestamp(),
       });
+
       setAppealSubmitted(true);
     } catch (e) {
       console.error('[Appeal]', e);
