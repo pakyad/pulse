@@ -101,7 +101,8 @@ export default function NavigationGate() {
                else if (isRunRestricted) { router.replace('/home'); return; }
               } else if (normalizedRole === 'RUNNER') {
                 if (isMerchantPath) { router.replace('/home'); return; }
-                if (isCreatePath) { /* allowed */ }
+                // RUNNER has full student access plus run pages - allow everything else
+                return;
               } else {
                // STUDENT
                if (isMerchantPath) { router.replace('/home'); return; }
