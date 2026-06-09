@@ -58,7 +58,7 @@ export default function MerchantInsightsPage() {
         const qItems = query(
           collection(db, "items"),
           where("seller_id", "==", user.uid),
-          where("status", "==", "active")
+          where("status", "in", ["ACTIVE", "active"])
         );
 
         unsubs.push(onSnapshot(qItems, (s) => {

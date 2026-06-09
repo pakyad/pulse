@@ -444,7 +444,8 @@ export const onReviewCreated = onDocumentCreated("Reviews/{reviewId}", async (ev
   if (!snap) return;
 
   const review = snap.data();
-  const sellerId = review.sellerId;
+  const sellerId = review.sellerId || review.seller_id;
+  const itemId = review.itemId || review.item_id;
   const rating = Number(review.rating);
 
   if (!sellerId || !rating || rating < 1 || rating > 5) {
@@ -453,14 +454,23 @@ export const onReviewCreated = onDocumentCreated("Reviews/{reviewId}", async (ev
   }
 
   try {
-    const reviewsSnap = await db
+    const reviewsBySellerIdSnap = await db
       .collection("Reviews")
       .where("sellerId", "==", sellerId)
+      .get();
+    const reviewsBySellerIdSnakeSnap = await db
+      .collection("Reviews")
+      .where("seller_id", "==", sellerId)
       .get();
 
     let total = 0;
     let count = 0;
-    reviewsSnap.forEach((doc) => {
+    const reviewDocs = new Map([
+      ...reviewsBySellerIdSnap.docs.map((doc) => [doc.id, doc] as const),
+      ...reviewsBySellerIdSnakeSnap.docs.map((doc) => [doc.id, doc] as const),
+    ]);
+
+    reviewDocs.forEach((doc) => {
       const r = doc.data().rating;
       if (r && r >= 1 && r <= 5) {
         total += r;
@@ -475,7 +485,7 @@ export const onReviewCreated = onDocumentCreated("Reviews/{reviewId}", async (ev
       totalReviews: count,
     });
 
-    logger.info(`[onReviewCreated] Updated trustRating=${trustRating} totalReviews=${count} for user ${sellerId}`);
+    logger.info(`[onReviewCreated] Updated trustRating=${trustRating} totalReviews=${count} for user ${sellerId} after review on item ${itemId || "unknown"}`);
   } catch (error) {
     logger.error(`[onReviewCreated] Error processing review ${event.params.reviewId}:`, error);
   }

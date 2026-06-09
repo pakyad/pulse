@@ -73,7 +73,7 @@ export default function PulseHome() {
         unsubs.push(uProfile);
 
         //  Marketplace Items
-        const qItems = query(collection(db, 'items'), where('status', '==', 'active'), limit(6));
+        const qItems = query(collection(db, 'items'), where('status', 'in', ['ACTIVE', 'active']), limit(6));
         const uItems = onSnapshot(qItems, 
           s => setLiveItems(s.docs.map(d => ({ id: d.id, ...d.data() } as MarketItem))),
           e => console.warn("[Home] Items Error:", e)

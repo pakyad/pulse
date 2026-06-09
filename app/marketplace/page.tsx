@@ -198,7 +198,7 @@ function MarketplacePage() {
   useEffect(() => {
     if (!user) { setItems([]); return; }
 
-    const q = query(collection(db, 'items'), where('status', '==', 'active'));
+    const q = query(collection(db, 'items'), where('status', 'in', ['ACTIVE', 'active']));
     const unsub = onSnapshot(
       q,
       s => setItems(s.docs.map(d => ({ id: d.id, ...d.data() }))),

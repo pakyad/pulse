@@ -11,7 +11,7 @@ export const createItemListing = async (userId: string, role: string, itemData: 
     const q = query(
         collection(db, "items"), 
         where("seller_id", "==", userId), 
-        where("status", "==", "active")
+        where("status", "in", ["ACTIVE", "active"])
     );
     const snapshot = await getDocs(q);
     
@@ -49,7 +49,7 @@ export const createItemListing = async (userId: string, role: string, itemData: 
 export const subscribeToMarketplace = (callback: (items: any[]) => void) => {
   const q = query(
     collection(db, "items"), 
-    where("status", "==", "active"),
+    where("status", "in", ["ACTIVE", "active"]),
     orderBy("created_at", "desc")
   );
 
