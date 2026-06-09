@@ -77,45 +77,35 @@ export default function NavigationGate() {
           setRole(userData.role);
           setProfile(userData);
 
-          //  REQ_G001: ROLE ISOLATION LOGIC
-          // Prevent horizontal privilege escalation
-          
+          // Role access model:
+          // STUDENT gets student pages.
+          // RUNNER inherits STUDENT access and adds runner pages.
+          // CLUB inherits STUDENT access and adds merchant pages.
+          // ADMIN is restricted to admin pages.
           const isMerchantPath = pathname?.startsWith('/merchant');
           const isRunPath = pathname?.startsWith('/run') || pathname?.startsWith('/runner');
           const isDevPage = pathname === '/dev';
+          const normalizedRole = String(userData.role || 'STUDENT').toUpperCase();
 
           if (isDevPage) {
-            // /dev is restricted to ADMIN only
-            if (userData.role !== 'ADMIN') {
-              router.replace('/home');
-            }
+            router.replace(normalizedRole === 'ADMIN' ? '/admin/overview' : '/home');
             setChecking(false);
             return;
           }
 
-          if (userData.role === 'ADMIN') {
+          if (normalizedRole === 'ADMIN') {
              if (!isAdminPath && !isAuthPage) router.replace('/admin/overview');
-          } else if (userData.role === 'CLUB') {
-             const isAllowedSharedPath = 
-               pathname === '/me' || 
-               pathname === '/activity' || 
-               pathname === '/me/insights' ||
-               pathname?.startsWith('/me/orders') || 
-               pathname?.startsWith('/orders/');
-               
-             if (!isMerchantPath && !isAllowedSharedPath && !isAuthPage) {
-                router.replace('/merchant');
-             }
-          } else if (userData.role === 'STUDENT') {
-             //  REQ_G001: STRICT ROLE LOCKDOWN
-             if (isAdminPath || isMerchantPath) {
+          } else {
+             if (isAdminPath) {
                router.replace('/home');
              }
-             
-             //  REQ_G102: UNVERIFIED LOCKDOWN
-             // Bar unverified students from sensitive logistics terminals
-             if (pathname?.startsWith('/run/terminal') && !userData.is_verified_runner) {
-               router.replace('/run');
+
+             if (isMerchantPath && normalizedRole !== 'CLUB') {
+               router.replace('/home');
+             }
+
+             if (isRunPath && normalizedRole !== 'RUNNER') {
+               router.replace('/home');
              }
           }
 
