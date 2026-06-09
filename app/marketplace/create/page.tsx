@@ -143,6 +143,7 @@ export default function CreateListingPage() {
           pcsStatus: pcsData.pcsStatus,
           justification: pcsData.justification
         });
+        return;
       }
 
       if (pcsData.isApproved === false) {
@@ -358,20 +359,20 @@ export default function CreateListingPage() {
                         <div className="flex-1">
                           {pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
                             <>
-                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Your item needs a specific name</p>
-                              <p className="text-xs text-gray-500 leading-relaxed mb-3">Items above RM500 must have a verifiable market price. Try using the exact brand and model name.</p>
+                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Specific product name required</p>
+                              <p className="text-xs text-gray-500 leading-relaxed mb-3">Items above RM500 require a verified market price. Use the exact brand and model name so our system can find a reference price.</p>
                               <button onClick={() => { titleInputRef.current?.focus(); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2">Update item name</button>
                             </>
                           ) : pcsError.pcsStatus === 'FREE_MARKET' ? (
                             <>
-                              <p className="text-sm font-semibold text-emerald-900 mb-0.5">Free Market listing</p>
-                              <p className="text-xs text-emerald-700 leading-relaxed">Listed as Free Market item. No Student Price badge will be shown.</p>
+                              <p className="text-sm font-semibold text-emerald-900 mb-0.5">Listed as Free Market</p>
+                              <p className="text-xs text-emerald-700 leading-relaxed">No market reference found for this item. Your listing will go live without a verified price badge.</p>
                             </>
                           ) : (
                             <>
-                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Whoa, that is a bit steep</p>
-                              <p className="text-xs text-gray-500 leading-relaxed mb-3">We found <strong className="text-gray-700">{pcsError?.itemTitle}</strong> going for around <strong className="text-gray-700">RM{pcsError?.marketBaselinePrice}</strong> out there. Campus listings get a 10% friendlier cap so the max here is <strong className="text-gray-700">RM{pcsError?.maxAllowedStudentPrice}</strong>.</p>
-                              <button onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2">Set to RM{pcsError?.maxAllowedStudentPrice} and keep going</button>
+                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Price exceeds campus limit</p>
+                              <p className="text-xs text-gray-500 leading-relaxed mb-3">Official retail for <strong className="text-gray-700">{pcsError?.itemTitle}</strong> is RM{Number(pcsError?.marketBaselinePrice).toFixed(2)}. Campus listings must be at least 10% below official retail. Maximum allowed price is <strong className="text-gray-700">RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</strong>.</p>
+                              <button onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2">Set to RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</button>
                             </>
                           )}
                         </div>
