@@ -551,3 +551,9 @@ export async function refundEscrow(orderId: string) {
     return { success: false, message: "Failed to refund escrow." };
   }
 }
+/* ADMIN SERVER ACTIONS
+   What: Server-side functions for admin operations
+   Actions: approveItem, rejectItem, issueWarning, suspendSeller, resolveDispute
+   Data writes: items, users, disputes, governance_logs, governance_vault
+   Related: app/admin/ pages
+*/

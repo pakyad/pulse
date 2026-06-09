@@ -311,3 +311,9 @@ export async function cancelOrder(orderId: string, role: 'BUYER' | 'MERCHANT', u
     return { success: false, message: error.message || "Failed to cancel order" };
   }
 }
+/* ORDER SERVER ACTIONS
+   What: Server-side functions for order operations
+   Actions: placeSingleOrder, cancelOrder, updateOrderStatus
+   Data writes: orders, parent_orders, items (stock decrement)
+   Related: app/orders/[id]/page.tsx
+*/

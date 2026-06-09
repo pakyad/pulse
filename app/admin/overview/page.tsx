@@ -663,3 +663,9 @@ export default function OverviewPage() {
     </div>
   );
 }
+/* ADMIN OVERVIEW PAGE
+   What: Main admin dashboard with platform statistics
+   Shows: GMV, active listings, runner count, key metrics charts
+   Data: orders, items, users, disputes collections
+   Related: app/admin/price-review/page.tsx, app/admin/disputes/page.tsx
+*/

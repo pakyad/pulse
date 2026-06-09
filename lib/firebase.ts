@@ -56,3 +56,9 @@ if (typeof window !== 'undefined') {
 }
 
 export { db, auth, storage, functions };
+/* FIREBASE CONFIGURATION
+   What: Initializes all Firebase services for the app
+   Exports: auth, db, storage, app
+   Used by: Every page and component that needs Firebase
+   DO NOT initialize Firebase anywhere else - always import from here
+*/

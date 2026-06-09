@@ -525,3 +525,9 @@ export default function DesktopMerchant({
     </div>
   );
 }
+/* MERCHANT DESKTOP DASHBOARD COMPONENT
+   What: Full merchant dashboard UI - always shown regardless of screen size
+   Shows: Overview stats, active pipeline, inventory grid, order log, analytics, settings
+   Data: passed as props from app/merchant/page.tsx
+   Related: components/merchant/MerchantSidebar.tsx, app/merchant/analytics/page.tsx
+*/

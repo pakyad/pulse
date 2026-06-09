@@ -347,3 +347,9 @@ export default function DisputesPage() {
     </div>
   );
 }
+/* ADMIN DISPUTES PAGE
+   What: Admin mediates buyer vs seller conflicts
+   Shows: Open disputes, evidence, resolution buttons
+   Data: disputes collection, admin_evidence collection
+   Related: app/actions/adminActions.ts
+*/

@@ -737,3 +737,24 @@ export const sendWelcomeEmail = auth
       }
     }
   );
+/* FIREBASE CLOUD FUNCTIONS
+   What: All server-side logic for Pulse
+
+   EXTERNAL APIs USED HERE:
+   - Claude AI (Anthropic): pcsValidate function
+     Model: claude-haiku-4-5-20251001
+     Tool: web_search_20250305
+   - Resend Email API: sendWelcomeEmail function
+   - Firebase Admin SDK: all functions
+
+   FUNCTIONS:
+   - pcsValidate: AI price validation (MAIN INNOVATION)
+   - placeOrder: checkout and order creation
+   - priceSentinel: legacy price ceiling check
+   - adjudicateAppeal: admin appeal resolution
+   - completeHandshake: delivery confirmation
+   - onOrderStatusChanged: push notifications
+   - onOrderCreated: post-purchase chat creation
+   - onReviewCreated: seller trust rating update
+   - sendWelcomeEmail: welcome email on signup
+*/

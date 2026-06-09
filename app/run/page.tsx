@@ -399,3 +399,9 @@ export default function RunModule() {
     </main>
   );
 }
+/* RUNNER DASHBOARD PAGE
+   What: Main page for verified runners
+   Shows: Wallet balance, delivery requests, mission history
+   Data: orders collection (runner_id == currentUser.uid)
+   Related: app/run/active/page.tsx, app/run/missions/page.tsx
+*/

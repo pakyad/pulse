@@ -209,3 +209,9 @@ export default function PulseHome() {
     </main>
   );
 }
+/* HOME PAGE
+   What: Main home screen users see after login
+   Shows: Banner carousel, campus directory icons, marketplace preview
+   Data: banners collection, announcements collection, items collection
+   Related: app/marketplace/page.tsx, app/pulse/page.tsx
+*/

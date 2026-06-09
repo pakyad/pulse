@@ -135,3 +135,13 @@ export default function ProductCard({ item, onClick, showStudentBanner }: Produc
     </motion.div>
   );
 }
+/* PRODUCT CARD COMPONENT
+   What: Single item card shown in marketplace grid
+   Shows: Item image, title, price, seller name, badge
+   Badge logic:
+     is_official=true -> UniStore Official (blue)
+     merchant=true -> Club Store (purple)
+     pcs_status=APPROVED -> Student Price (green)
+     pcs_status=FREE_MARKET -> Unverified Price (gray)
+   Related: app/marketplace/page.tsx
+*/

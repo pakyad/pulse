@@ -290,3 +290,9 @@ export default function MerchantInsightsPage() {
     </div>
   );
 }
+/* SELLER INSIGHTS PAGE
+   What: Analytics page for individual student sellers
+   Shows: Revenue, stock health, inventory value
+   Data: orders collection, items collection filtered by seller_id
+   Related: app/merchant/analytics/page.tsx
+*/

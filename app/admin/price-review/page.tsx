@@ -437,3 +437,9 @@ export default function PriceReviewPage() {
     </div>
   );
 }
+/* ADMIN PRICE REVIEW PAGE
+   What: Admin reviews flagged listings from PCS
+   Shows: Items that failed PCS validation, 4-button adjudication panel
+   Data: PriceGuidelines collection, items collection
+   Related: functions/src/index.ts pcsValidate, app/admin/appeals/page.tsx
+*/

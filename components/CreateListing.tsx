@@ -624,3 +624,10 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
     </div>
   );
 }
+/* CREATE LISTING COMPONENT (SHARED)
+   What: Reusable listing form used across the app
+   Key feature: Calls pcsValidate before saving - blocks if price too high
+   PCS location: functions/src/index.ts -> pcsValidate
+   Data writes: items collection
+   Related: app/marketplace/create/page.tsx
+*/

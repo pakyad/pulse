@@ -394,3 +394,10 @@ export default function CreateListingPage() {
     </main>
   );
 }
+/* CREATE LISTING PAGE
+   What: Student creates a new item listing
+   Key feature: PCS price validation runs here before saving
+   PCS: calls pcsValidate Cloud Function -> functions/src/index.ts
+   Data writes: items collection
+   Related: components/CreateListing.tsx, functions/src/index.ts
+*/

@@ -499,3 +499,9 @@ export default function AppealsPage() {
     </div>
   );
 }
+/* ADMIN PRICE APPEALS PAGE
+   What: Sellers appeal PCS rejections here, admin decides
+   Shows: Pending appeals with seller justification
+   Data: appeals collection
+   Related: app/admin/price-review/page.tsx
+*/

@@ -595,3 +595,10 @@ export default function ActiveRunPage() {
       </Suspense>
    );
 }
+/* RUNNER ACTIVE MISSION PAGE
+   What: Runner manages a single active delivery
+   Shows: Map, step-by-step delivery flow, photo upload, confirm buttons
+   Key: Confirm Delivery uploads to delivery_proofs/ in Firebase Storage
+   Data: orders collection (single order)
+   Related: app/run/missions/page.tsx
+*/

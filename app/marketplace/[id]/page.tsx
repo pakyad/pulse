@@ -628,3 +628,9 @@ export default function ItemDetailsPage() {
     </main>
   );
 }
+/* ITEM DETAIL PAGE
+   What: Shows full details of a single listing
+   Shows: Item images, price, seller info, buyer reviews, buy button
+   Data: items collection, Reviews collection
+   Related: app/marketplace/[id]/edit/page.tsx, app/checkout/page.tsx
+*/

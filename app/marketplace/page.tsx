@@ -524,3 +524,9 @@ export default function MarketplacePageWrapper() {
     </Suspense>
   );
 }
+/* MARKETPLACE PAGE
+   What: Browse all campus listings
+   Shows: All active items, category filter, Student Market filter
+   Data: items collection (status=ACTIVE)
+   Related: app/marketplace/create/page.tsx, app/marketplace/[id]/page.tsx
+*/

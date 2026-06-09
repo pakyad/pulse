@@ -877,3 +877,9 @@ export default function LiveOrderPage() {
     </main>
   );
 }
+/* ORDER DETAIL PAGE
+   What: Buyer tracks their order status in real time
+   Shows: Order status timeline, runner info, payment receipt
+   Data: orders collection (single document, real-time listener)
+   Related: app/run/active/page.tsx, app/run/missions/page.tsx
+*/

@@ -235,3 +235,8 @@ export default function MerchantDashboard() {
     </Suspense>
   );
 }
+/* MERCHANT DASHBOARD PAGE
+   What: Entry point for merchant/club dashboard
+   Shows: DesktopMerchant component (always desktop view)
+   Related: components/merchant/DesktopMerchant.tsx, app/merchant/analytics/page.tsx
+*/

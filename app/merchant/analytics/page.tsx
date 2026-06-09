@@ -331,3 +331,9 @@ export default function MerchantAnalyticsPage() {
     </div>
   );
 }
+/* MERCHANT ANALYTICS PAGE
+   What: Revenue charts and order statistics for merchants
+   Shows: Line chart, donut chart, top products, recent orders table
+   Data: orders collection filtered by seller_id == currentUser.uid
+   Related: app/merchant/page.tsx, components/merchant/MerchantSidebar.tsx
+*/
