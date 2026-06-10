@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/lib/firebase';
@@ -35,7 +35,7 @@ function BuyingRow({ order, onClick, reviewedOrders }: { order: any; onClick: ()
   const code = `#${(order.order_code || order.id.slice(0, 6)).toUpperCase()}`;
 
   const s = (order.status || '').toUpperCase();
-  let statusBadge = <span className="flex items-center gap-1 text-[11px] font-bold text-amber-500"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />{s.replace(/_/g, ' ').replace(/\b\w/g, c => c)}</span>;
+  let statusBadge = <span className="flex items-center gap-1 text-[11px] font-bold text-amber-500"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />{s.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}</span>;
   if (s === 'CANCELLED') statusBadge = <span className="flex items-center gap-1 text-[11px] font-bold text-red-400"><span className="w-1.5 h-1.5 rounded-full bg-red-300" />Cancelled</span>;
   if (FINAL.includes(s) && s !== 'CANCELLED') statusBadge = <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-500"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />Completed</span>;
 
@@ -210,6 +210,7 @@ function SellingCard({ order, userId, router }: { order: any; userId: string; ro
 export default function MyOrdersPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [roleTab, setRoleTab] = useState<'Buying' | 'Selling'>('Buying');
   const [activeTab, setActiveTab] = useState<'Active' | 'History'>('Active');
   const [histFilter, setHistFilter] = useState<HistoryFilter>('All');
   const [buyingOrders, setBuyingOrders] = useState<any[]>([]);
@@ -315,23 +316,44 @@ export default function MyOrdersPage() {
         </div>
       </nav>
 
-      {/*  TABS: Active | History  */}
-      <div className="fixed top-[68px] left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 flex gap-6">
-        {(['Active', 'History'] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setActiveTab(t)}
-            className={`relative py-4 text-[13px] font-bold transition-colors ${activeTab === t ? 'text-slate-900' : 'text-[#94a3b8]'}`}
-          >
-            {t}
-            {activeTab === t && (
-              <motion.div layoutId="orders-tab-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-900 rounded-full" />
-            )}
-          </button>
-        ))}
+      {/*  TABS & FILTERS CONTAINER  */}
+      <div className="fixed top-[68px] left-0 right-0 z-50 bg-white border-b border-slate-100 pb-0">
+        
+        {/* Role Segmented Control */}
+        <div className="px-6 pt-3 pb-2">
+          <div className="flex p-1 bg-slate-100/80 rounded-xl">
+            {(['Buying', 'Selling'] as const).map(role => (
+              <button
+                key={role}
+                onClick={() => setRoleTab(role)}
+                className={`flex-1 py-2 text-[13px] font-bold rounded-lg transition-all ${
+                  roleTab === role ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {role}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active | History Tabs */}
+        <div className="px-6 flex gap-6">
+          {(['Active', 'History'] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setActiveTab(t)}
+              className={`relative py-3.5 text-[13px] font-bold transition-colors ${activeTab === t ? 'text-slate-900' : 'text-[#94a3b8]'}`}
+            >
+              {t}
+              {activeTab === t && (
+                <motion.div layoutId="orders-tab-underline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-900 rounded-full" />
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="px-6" style={{ paddingTop: '120px' }}>
+      <div className="px-6" style={{ paddingTop: '174px' }}>
         {/* History sub-filters */}
         <AnimatePresence>
           {activeTab === 'History' && (
@@ -341,7 +363,7 @@ export default function MyOrdersPage() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="flex gap-2 pb-4 pt-1">
+              <div className="flex gap-2 pb-4 pt-5">
                 {(['All', 'Completed', 'Cancelled'] as HistoryFilter[]).map(f => (
                   <button
                     key={f}
@@ -360,52 +382,67 @@ export default function MyOrdersPage() {
           )}
         </AnimatePresence>
 
-        {/* Buying section */}
-        <section className="py-6">
-          <h3 className="text-[13px] font-bold text-slate-900 mb-3">Buying</h3>
-          {displayedBuying.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
-              <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
-              <p className="text-[12px] font-bold opacity-40">
-                {activeTab === 'Active' ? 'No active orders' : 'No history yet'}
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {displayedBuying.map(order => (
-                <BuyingRow
-                  key={order.id}
-                  order={order}
-                  onClick={() => router.push(`/orders/${order.id}`)}
-                  reviewedOrders={reviewedOrders}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Selling section */}
-        <section className="py-6 border-t border-slate-100">
-          <h3 className="text-[13px] font-bold text-slate-900 mb-3">Selling</h3>
-          {displayedSelling.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
-              <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
-              <p className="text-[12px] font-bold opacity-40">
-                {activeTab === 'Active' ? 'No active sales' : 'No sales history'}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {displayedSelling.map(order => (
-                <SellingCard
-                  key={order.id}
-                  order={order}
-                  userId={userId}
-                  router={router}
-                />
-              ))}
-            </div>
-          )}
+        {/* Dynamic List Render based on roleTab */}
+        <section className="py-2 pb-10">
+          <AnimatePresence mode="wait">
+            {roleTab === 'Buying' ? (
+              <motion.div
+                key="buying"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {displayedBuying.length === 0 ? (
+                  <div className="py-16 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
+                    <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
+                    <p className="text-[12px] font-bold opacity-40">
+                      {activeTab === 'Active' ? 'No active orders' : 'No history yet'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {displayedBuying.map(order => (
+                      <BuyingRow
+                        key={order.id}
+                        order={order}
+                        onClick={() => router.push(`/orders/${order.id}`)}
+                        reviewedOrders={reviewedOrders}
+                      />
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="selling"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {displayedSelling.length === 0 ? (
+                  <div className="py-16 flex flex-col items-center justify-center gap-4 text-[#94a3b8]">
+                    <ShoppingBag size={40} strokeWidth={1} className="text-slate-300" />
+                    <p className="text-[12px] font-bold opacity-40">
+                      {activeTab === 'Active' ? 'No active sales' : 'No sales history'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {displayedSelling.map(order => (
+                      <SellingCard
+                        key={order.id}
+                        order={order}
+                        userId={userId}
+                        router={router}
+                      />
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </section>
 
       </div>

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,7 +7,7 @@ import { db, auth } from '@/lib/firebase';
 import { collection, onSnapshot, doc, query, where, orderBy, limit } from 'firebase/firestore';
 import {
   ChevronLeft, Search, Plus,
-  Calendar, MapPin, Users, CheckCircle2
+  Calendar, MapPin, Users, CheckCircle2, ChevronDown
 } from 'lucide-react';
 import SearchOverlay from '@/components/shared/SearchOverlay';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -32,6 +32,40 @@ const DEMO_EVENTS = [
 ];
 
 //  HELPERS 
+
+function AnnouncementCard({ a, type, timeAgo, badgeStyle }: { a: any; type: string; timeAgo: string; badgeStyle: Record<string, string> }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div 
+      onClick={() => setExpanded(!expanded)}
+      className="bg-white border border-slate-100 rounded-2xl p-4 cursor-pointer transition-all active:scale-[0.99] hover:shadow-sm"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${badgeStyle[type] || badgeStyle.campus}`}>
+            {type}
+          </span>
+          <span className="text-[11px] font-medium text-slate-400">{timeAgo}</span>
+        </div>
+        <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
+      </div>
+      <p className="text-[14px] font-bold text-slate-900 mt-2">{a.headline || a.title}</p>
+      <AnimatePresence initial={false}>
+        {expanded && a.body && (
+          <motion.section
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <p className="text-[12px] font-medium text-slate-500 pt-2">{a.body}</p>
+          </motion.section>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 //  PAGE 
 
@@ -147,18 +181,7 @@ export default function PulsePage() {
                   marketplace: 'bg-emerald-100 text-emerald-700',
                   campus: 'bg-amber-100 text-amber-700',
                 };
-                return (
-                  <div key={a.id} className="bg-white border border-slate-100 rounded-2xl p-4 space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${badgeStyle[type] || badgeStyle.campus}`}>
-                        {type}
-                      </span>
-                      <span className="text-[11px] font-medium text-slate-400">{timeAgo}</span>
-                    </div>
-                    <p className="text-[14px] font-bold text-slate-900">{a.headline || a.title}</p>
-                    {a.body && <p className="text-[12px] font-medium text-slate-500 line-clamp-2">{a.body}</p>}
-                  </div>
-                );
+                return <AnnouncementCard key={a.id} a={a} type={type} timeAgo={timeAgo} badgeStyle={badgeStyle} />;
               })}
             </div>
           ) : (

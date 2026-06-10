@@ -518,10 +518,47 @@ export const pcsValidate = onCall(
     let justification = "";
     let pcsStatus = "ERROR";
     let source = "";
+    const subcategory = String(data.subcategory || "");
+    const listedPrice = parseFloat(itemPrice) || 0;
 
-    try {
+    // Try block removed
       if (!itemId) {
         throw new Error("Missing itemId for PCS validation.");
+      }
+
+      // Check for Soft Warning categories
+      const softWarningCategories = ['Handwritten Notes (IT & CS)', 'Handwritten Notes (Engineering)', 'Handwritten Notes (Business)', 'Past Year Papers', 'Study Tables & Chairs', 'Bedding & Linen'];
+      if (softWarningCategories.includes(subcategory)) {
+        let softCap = 0;
+        if (subcategory.includes('Handwritten Notes')) softCap = 20;
+        else if (subcategory.includes('Past Year Papers')) softCap = 10;
+        else if (subcategory.includes('Study Tables')) softCap = 400;
+        else if (subcategory.includes('Bedding')) softCap = 100;
+
+        if (listedPrice > softCap) {
+          return {
+            isApproved: false,
+            pcsStatus: "SOFT_WARNING",
+            justification: `Market Advice: Similar items usually sell for around RM ${softCap} or less. Lowering your price might help you sell faster!`,
+            marketBaselinePrice: softCap,
+            maxAllowedStudentPrice: softCap,
+          };
+        } else {
+           await db.collection("items").doc(itemId).set({
+            pcs_status: "FREE_MARKET",
+            pcs_certified: true,
+            pcs_reason: "Priced within reasonable expected range for unique item.",
+            pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+          }, { merge: true });
+
+          return {
+            isApproved: true,
+            pcsStatus: "FREE_MARKET",
+            justification: "Priced within reasonable expected range for unique item.",
+            marketBaselinePrice: softCap,
+            maxAllowedStudentPrice: softCap,
+          };
+        }
       }
 
       const copyrightKeywords = ['pdf', 'softcopy', 'soft copy', 'ebook', 'e-book', 'digital copy', 'scanned', 'send via whatsapp', 'send via telegram', 'send via email', 'digital file'];
@@ -547,6 +584,26 @@ export const pcsValidate = onCall(
         };
       }
 
+      const subjectiveKeywords = ['handmade', 'preloved', 'bundle', 'secondhand', 'used', 'vintage', 'rare', 'collection', 'service', 'repair', 'print', 'tutor', 'clean', 'install', 'format', 'design', 'photography', 'rent'];
+      const hasSubjectiveSignal = subjectiveKeywords.some((keyword) => titleLower.includes(keyword));
+
+      if (hasSubjectiveSignal) {
+        await db.collection("items").doc(itemId).set({
+          pcs_status: "FREE_MARKET",
+          pcs_certified: true,
+          pcs_reason: "Subjective or unique item — no validation required.",
+          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+
+        return {
+          isApproved: true,
+          pcsStatus: "FREE_MARKET",
+          justification: "Subjective or unique item — no validation required.",
+          marketBaselinePrice: 0,
+          maxAllowedStudentPrice: 0,
+        };
+      }
+
       const accessoryKeywords = ['case', 'protector', 'screen protector', 'cable', 'charger', 'adapter', 'stand', 'holder', 'mount', 'strap', 'skin', 'sticker', 'tempered glass'];
       const hasAccessorySignal = accessoryKeywords.some((keyword) => titleLower.includes(keyword));
 
@@ -567,7 +624,7 @@ export const pcsValidate = onCall(
         };
       }
 
-      const freeMarketCategories = ['SERVICES', 'FOOD', 'HANDMADE', 'CUSTOM', 'APPAREL'];
+      const freeMarketCategories = ['SERVICES', 'FOOD', 'HANDMADE', 'CUSTOM', 'APPAREL', 'TECH'];
       const categoryUpper = (category || '').toUpperCase();
 
       if (freeMarketCategories.some((freeMarketCategory) => categoryUpper.includes(freeMarketCategory))) {
@@ -587,7 +644,7 @@ export const pcsValidate = onCall(
         };
       }
 
-      const listedPrice = parseFloat(itemPrice) || 0;
+
 
       const cacheKey = itemTitle.toLowerCase().trim().replace(/\s+/g, ' ');
       const cacheRef = db.collection("price_cache").doc(cacheKey);
@@ -641,7 +698,9 @@ Rules:
 - The ceiling must be from an authorized seller not an individual reseller
 
 Return ONLY this raw JSON with no markdown no explanation:
-{"floorPrice": number, "ceilingPrice": number, "source": "where ceiling price was found"}`;
+{"floorPrice": number, "ceilingPrice": number, "source": "where ceiling price was found"}
+
+You MUST always return a valid JSON object regardless of whether you find a price or not. If you cannot find a Malaysian retail price, return: {"floorPrice": 0, "ceilingPrice": 0, "source": "not found"}. Never refuse to output JSON. The calling system handles zero values as Free Market approval.`;
 
         const tools: any = [{ type: "web_search_20250305", name: "web_search" }];
         let messages: any[] = [{ role: "user", content: prompt }];
@@ -693,6 +752,9 @@ Return ONLY this raw JSON with no markdown no explanation:
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
           console.error('No JSON found in Claude SDK response');
+          floorPrice = 0;
+          ceilingPrice = 0;
+          source = "not found";
         } else {
           try {
             const parsed = JSON.parse(jsonMatch[0]);
@@ -701,6 +763,9 @@ Return ONLY this raw JSON with no markdown no explanation:
             source = String(parsed.source || "");
           } catch (e) {
             console.error('JSON parse error from Claude SDK text:', e);
+            floorPrice = 0;
+            ceilingPrice = 0;
+            source = "not found";
           }
         }
 
@@ -772,18 +837,7 @@ Return ONLY this raw JSON with no markdown no explanation:
         floorPrice,
         source
       };
-    } catch (error: any) {
-      logger.error(`[pcsValidate] Error validating item validation:`, error);
-      return {
-        isApproved: false,
-        marketBaselinePrice: 0,
-        maxAllowedStudentPrice: 0,
-        justification: error?.message || "Validation failed. Please try again.",
-        pcsStatus: "ERROR",
-        floorPrice: 0,
-        source: ""
-      };
-    }
+
   }
 );
 
