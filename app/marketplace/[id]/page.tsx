@@ -6,7 +6,7 @@ import { doc, onSnapshot, getDoc, setDoc, serverTimestamp, deleteDoc } from 'fir
 import { 
   ChevronLeft, ChevronRight, Share2, Heart, ShieldCheck, ShieldAlert,
   ArrowUpRight, Clock, MapPin, Layers, Shirt, Trash2,
-  BookOpen, Wrench, Home, Cpu, Star, ShoppingCart, CheckCircle2, MessageCircle, Edit3
+  BookOpen, Wrench, Home, Cpu, Star, ShoppingCart, CheckCircle2, MessageCircle, Edit3, Briefcase
 } from 'lucide-react';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
 import { useCart } from '@/lib/context/CartContext';
@@ -203,10 +203,13 @@ export default function ItemDetailsPage() {
       const chatRef = doc(db, 'chats', chatId);
       const snap = await getDoc(chatRef);
       if (!snap.exists()) {
+        const buyerSnap = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        const buyerProfile = buyerSnap.data();
+        const buyerName = buyerProfile?.full_name || buyerProfile?.fullName || auth.currentUser.displayName || "Pulse Student";
         await setDoc(chatRef, {
            members: [auth.currentUser.uid, item.seller_id],
            participant_names: {
-              [auth.currentUser.uid]: auth.currentUser.displayName || "Pulse Student",
+              [auth.currentUser.uid]: buyerName,
               [item.seller_id]: item.seller_name || "Club / Seller"
            },
            type: 'MARKETPLACE',
@@ -239,7 +242,7 @@ export default function ItemDetailsPage() {
   const images: string[] = item.images?.length ? item.images : item.image_url ? [item.image_url] : [];
 
   const CATEGORY_ICONS: Record<CategoryID, React.ElementType> = {
-    ACADEMIC: BookOpen, HOSTEL: Home, TECH: Cpu, APPAREL: Shirt
+    ACADEMIC: BookOpen, HOSTEL: Home, TECH: Cpu, APPAREL: Shirt, SERVICES: Briefcase
   };
   const CategoryIcon = category ? CATEGORY_ICONS[item.category as CategoryID] : Layers;
 
@@ -420,7 +423,7 @@ export default function ItemDetailsPage() {
         </section>
 
         {/*  PCS CERTIFIED BADGE  */}
-        {item.pcs_certified === true && (
+        {item.pcs_certified === true && item.pcs_status === 'APPROVED' && (
           <div className="flex items-center gap-2 -mt-2 mb-1">
             <span className="bg-[#EAF3DE] text-[#3B6D11] px-[10px] py-[4px] rounded-full text-[12px] font-medium leading-none">
                Student Price

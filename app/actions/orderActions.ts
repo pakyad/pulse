@@ -129,26 +129,25 @@ export async function placeSingleOrder(params: {
 
       // 1. Check stock
       if (currentStock <= 0) {
-        throw new Error("This item is out of stock");
+        throw new Error("SOLD_OUT::This item is out of stock");
       }
       if (currentStock < params.qty) {
-        throw new Error(`Only ${currentStock} units remaining.`);
+        throw new Error(`SOLD_OUT::Only ${currentStock} units remaining.`);
       }
 
       // 2. Check maxPerStudent
       if (item.maxPerStudent) {
         const existingOrdersQuery = await db.collection('orders')
           .where('buyer_id', '==', params.buyerId)
-          .where('items', 'array-contains', { productId: params.itemId }) // Simple check, might need refinement if items array is complex
+          .where('items', 'array-contains', { productId: params.itemId })
           .get();
         
-        // More robust check: filter in memory if array-contains is tricky with objects
         const userOrderCount = existingOrdersQuery.docs.filter(d => 
           d.data().items?.some((i: any) => (i.productId || i.id) === params.itemId)
         ).length;
 
         if (userOrderCount >= item.maxPerStudent) {
-          throw new Error("You have reached the purchase limit for this item");
+          throw new Error("LIMIT_REACHED::You have reached the purchase limit for this item");
         }
       }
 

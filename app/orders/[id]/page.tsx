@@ -336,7 +336,7 @@ export default function LiveOrderPage() {
               if (uSnap.exists()) {
                 const uData = uSnap.data();
                 setRunnerProfile({
-                  name: uData.full_name || uData.displayName || 'Pulse Runner',
+                  name: uData.full_name || uData.fullName || uData.displayName || 'Pulse Runner',
                   photo: uData.photo_url || uData.avatar || ''
                 });
               }
@@ -663,7 +663,7 @@ export default function LiveOrderPage() {
             <div className="flex items-center justify-between px-4 py-3.5">
               <span className="text-[13px] font-medium text-[#94a3b8]">Order Time</span>
               <span className="text-[13px] font-bold text-slate-900">
-                {order.created_at?.toDate 
+                {order.created_at && typeof order.created_at?.toDate === 'function'
                   ? order.created_at.toDate().toLocaleString('en-US', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
                   : new Date(order.created_at || Date.now()).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
               </span>

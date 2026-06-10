@@ -6,6 +6,7 @@ import {
   Package, 
   Mail, 
   ChevronLeft, 
+  ChevronRight, 
   Search, 
   Clock, 
   CheckCircle2, 

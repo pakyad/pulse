@@ -28,7 +28,7 @@ export default function DesktopMerchant({
   handleMarkReady,
   handleMessageUser,
   handleCallRunner,
-  handleConfirmDelivery,
+  handleCompleteSelfCollect,
   toggleItemStatus
 }: any) {
   const router = useRouter();
@@ -200,34 +200,41 @@ export default function DesktopMerchant({
             <button onClick={() => setIsCreateOpen(true)} className="h-10 px-6 bg-slate-900 text-white text-[13px] font-bold rounded-md hover:bg-slate-800 transition-all">+ New Listing</button>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            {items?.map((item: any) => (
-              <div key={item.id} className="bg-white rounded-2xl border border-[#F3F4F6] p-4 flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-[12px] bg-white border border-[#E5E7EB] overflow-hidden">
-                    {item.image_url ? <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-200"><LayoutGrid size={20} /></div>}
+              {items?.map((item: any) => (
+                  <div key={item.id} className="bg-white rounded-2xl border border-[#F3F4F6] p-4 flex items-center justify-between shadow-sm">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-[12px] bg-white border border-[#E5E7EB] overflow-hidden">
+                        {item.image_url ? <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-200"><LayoutGrid size={20} /></div>}
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-medium text-[#111827]">{item.title}</p>
+                        <p className="text-[12px] text-[#9CA3AF]">RM {item.price?.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${(item.stock_count ?? 0) > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                          {(item.stock_count ?? 0) > 99 ? '99+' : (item.stock_count ?? 0)} in stock
+                        </span>
+                        <button onClick={async () => { const newStock = Math.max(0, (item.stock_count ?? 0) - 1); await updateDoc(doc(db, 'items', item.id), { stock_count: newStock }); }} className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-500 hover:bg-slate-200 transition-all">-</button>
+                        <button onClick={async () => { const newStock = (item.stock_count ?? 0) + 1; await updateDoc(doc(db, 'items', item.id), { stock_count: newStock }); }} className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-500 hover:bg-slate-200 transition-all">+</button>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          const newStatus = item.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
+                          updateDoc(doc(db, 'items', item.id), { status: newStatus });
+                        }}
+                        className={"text-xs rounded-full px-3 py-1.5 border transition-all " + (item.status === 'ACTIVE' ? "text-amber-600 border-amber-100 hover:bg-amber-50" : "text-emerald-600 border-emerald-100 hover:bg-emerald-50")}
+                      >
+                        {item.status === 'ACTIVE' ? 'Pause' : 'Resume'}
+                      </button>
+                      <button onClick={() => router.push('/marketplace/' + item.id + '/edit')} className="text-xs text-gray-600 border border-gray-200 rounded-full px-3 py-1.5 hover:bg-gray-50 transition-colors">Edit</button>
+                      <button onClick={async () => { if (!confirm('Delete this listing? This cannot be undone.')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed.'); } }} className="text-xs text-red-500 border border-red-100 rounded-full px-3 py-1.5 hover:bg-red-50 transition-all">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[14px] font-medium text-[#111827]">{item.title}</p>
-                    <p className="text-[12px] text-[#9CA3AF]">RM {item.price?.toFixed(2)} - {item.stock_count} in stock</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => {
-                      const newStatus = item.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
-                      updateDoc(doc(db, 'items', item.id), { status: newStatus });
-                    }}
-                    className={"text-xs rounded-full px-3 py-1.5 border transition-all " + (item.status === 'ACTIVE' ? "text-amber-600 border-amber-100 hover:bg-amber-50" : "text-emerald-600 border-emerald-100 hover:bg-emerald-50")}
-                  >
-                    {item.status === 'ACTIVE' ? 'Pause' : 'Resume'}
-                  </button>
-                  <button onClick={() => router.push('/marketplace/' + item.id + '/edit')} className="text-xs text-gray-600 border border-gray-200 rounded-full px-3 py-1.5 hover:bg-gray-50 transition-colors">Edit</button>
-                  <button onClick={async () => { if (!confirm('Delete this listing? This cannot be undone.')) return; try { await deleteDoc(doc(db, 'items', item.id)); } catch(e) { alert('Failed.'); } }} className="text-xs text-red-500 border border-red-100 rounded-full px-3 py-1.5 hover:bg-red-50 transition-all">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
+                ))}
           </div>
         </div>
       );
@@ -397,27 +404,45 @@ export default function DesktopMerchant({
              <button onClick={handleExportOrders} className="bg-white border border-[#D1D5DB] text-[#374151] rounded-full px-4 py-2 text-xs font-medium hover:bg-slate-50 transition-colors">Export CSV</button>
           </div>
           <div className="divide-y divide-slate-100">
-             {(pipelineOrders || []).length === 0 ? (
-               <div className="py-12 text-center text-gray-500 text-sm">No active orders</div>
-             ) : (
-               pipelineOrders.map((o: any) => (
-                  <div key={o.id} className="py-6 flex items-center justify-between hover:bg-slate-50/50 transition-all px-2 -mx-2 rounded-xl">
-                     <div className="flex items-center gap-4">
-                        <input type="checkbox" checked={selectedOrders.includes(o.id)} onChange={() => toggleOrderSelection(o.id)} className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
-                        <div>
-                           <p className="text-[15px] font-semibold text-[#111827]">{o.title}</p>
-                           <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full uppercase mt-1 inline-block ${o.status === 'READY' || o.status === 'READY_FOR_PICKUP' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{o.status.replace(/_/g, ' ')}</span>
-                           <p className="text-[12px] text-[#9CA3AF] mt-1">Order #{o.id.slice(-6).toUpperCase()}</p>
-                        </div>
-                     </div>
-                     <div className="flex gap-2">
-                        {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && <button onClick={() => handlePrepareOrder(o.id, o.items)} className="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition-all active:scale-95">Prepare</button>}
-                        {o.status === 'PREPARING' && <button onClick={() => handleMarkReady(o.id)} className="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition-all active:scale-95">Ready</button>}
-                        <button onClick={() => onViewProof(o)} className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-50 transition-all active:scale-95">Details</button>
-                     </div>
-                  </div>
-               ))
-             )}
+           {(pipelineOrders || []).length === 0 ? (
+                <div className="py-12 text-center text-gray-500 text-sm">No active orders</div>
+              ) : (
+                pipelineOrders.map((o: any) => {
+                  const isSelfCollect = o.delivery_method === 'SELF_COLLECT' || o.delivery_type === 'SELF_COLLECT';
+                  const statusSteps = ['PENDING_VENDOR', 'PREPARING', 'READY', 'PICKED_UP', 'DELIVERED'];
+                  const currentStep = statusSteps.indexOf(o.status);
+                  const progress = currentStep >= 0 ? ((currentStep + 1) / statusSteps.length) * 100 : 0;
+                  return (
+                   <div key={o.id} className="py-6 flex items-center justify-between hover:bg-slate-50/50 transition-all px-2 -mx-2 rounded-xl">
+                      <div className="flex items-center gap-4">
+                         <input type="checkbox" checked={selectedOrders.includes(o.id)} onChange={() => toggleOrderSelection(o.id)} className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
+                         <div>
+                            <p className="text-[15px] font-semibold text-[#111827]">{o.title}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full uppercase ${o.status === 'READY' || o.status === 'READY_FOR_PICKUP' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{o.status.replace(/_/g, ' ')}</span>
+                              {o.runner_id && <span className="text-[10px] font-medium text-blue-600">Runner assigned</span>}
+                              {isSelfCollect && <span className="text-[10px] font-medium text-purple-600">Self collect</span>}
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <div className="w-24 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-slate-900 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                              </div>
+                              <p className="text-[10px] text-[#9CA3AF]">Order #{o.id.slice(-6).toUpperCase()}</p>
+                            </div>
+                         </div>
+                      </div>
+                      <div className="flex gap-2">
+                         {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && <button onClick={() => handlePrepareOrder(o.id, o.items)} className="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition-all active:scale-95">Prepare</button>}
+                         {o.status === 'PREPARING' && <button onClick={() => handleMarkReady(o.id)} className="bg-slate-900 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-800 transition-all active:scale-95">Ready</button>}
+                         {o.status === 'READY' && !isSelfCollect && <button onClick={() => handleCallRunner(o.id)} className="bg-blue-600 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-blue-700 transition-all active:scale-95">Call Runner</button>}
+                         {o.status === 'READY' && isSelfCollect && <button onClick={() => handleCompleteSelfCollect(o.id)} className="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-emerald-700 transition-all active:scale-95">Complete</button>}
+                         {o.status === 'PICKED_UP' && isSelfCollect && <button onClick={() => handleCompleteSelfCollect(o.id)} className="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-emerald-700 transition-all active:scale-95">Complete</button>}
+                         <button onClick={() => onViewProof(o)} className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-50 transition-all active:scale-95">Details</button>
+                      </div>
+                   </div>
+                  );
+                })
+              )}
           </div>
         </div>
       </div>

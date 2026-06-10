@@ -443,6 +443,7 @@ exports.pcsValidate = (0, https_1.onCall)({
     region: "us-central1",
     maxInstances: 10,
 }, async (request) => {
+    var _a;
     console.log('pcsValidate called with:', request.data);
     const data = request.data || {};
     const itemTitle = String(data.itemTitle || "");
@@ -467,16 +468,33 @@ exports.pcsValidate = (0, https_1.onCall)({
         const hasCopyrightSignal = copyrightKeywords.some((keyword) => titleLower.includes(keyword));
         const hasOriginalSignal = originalContentKeywords.some((keyword) => titleLower.includes(keyword));
         if (hasCopyrightSignal && !hasOriginalSignal) {
-            await db.collection("items").doc(itemId).update({
+            await db.collection("items").doc(itemId).set({
                 pcs_status: "COPYRIGHT_BLOCKED",
                 pcs_certified: false,
-                pcs_reason: "Selling digital copies of published content may violate copyright law.",
+                pcs_reason: "Selling digital copies is not allowed on Pulse.",
                 pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-            });
+            }, { merge: true });
             return {
                 isApproved: false,
                 pcsStatus: "COPYRIGHT_BLOCKED",
-                justification: "Selling digital copies of published content is not allowed on Pulse. This may violate Malaysian copyright law. You can sell your physical copy instead.",
+                justification: "Selling digital copies is not allowed on Pulse.",
+                marketBaselinePrice: 0,
+                maxAllowedStudentPrice: 0,
+            };
+        }
+        const accessoryKeywords = ['case', 'protector', 'screen protector', 'cable', 'charger', 'adapter', 'stand', 'holder', 'mount', 'strap', 'skin', 'sticker', 'tempered glass'];
+        const hasAccessorySignal = accessoryKeywords.some((keyword) => titleLower.includes(keyword));
+        if (hasAccessorySignal) {
+            await db.collection("items").doc(itemId).set({
+                pcs_status: "FREE_MARKET",
+                pcs_certified: true,
+                pcs_reason: "Accessory item — subjective pricing, no validation required.",
+                pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+            return {
+                isApproved: true,
+                pcsStatus: "FREE_MARKET",
+                justification: "Accessory item — subjective pricing, no validation required.",
                 marketBaselinePrice: 0,
                 maxAllowedStudentPrice: 0,
             };
@@ -484,12 +502,12 @@ exports.pcsValidate = (0, https_1.onCall)({
         const freeMarketCategories = ['SERVICES', 'FOOD', 'HANDMADE', 'CUSTOM', 'APPAREL'];
         const categoryUpper = (category || '').toUpperCase();
         if (freeMarketCategories.some((freeMarketCategory) => categoryUpper.includes(freeMarketCategory))) {
-            await db.collection("items").doc(itemId).update({
+            await db.collection("items").doc(itemId).set({
                 pcs_status: "FREE_MARKET",
                 pcs_certified: true,
                 pcs_reason: "Free Market category. No price validation required.",
                 pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-            });
+            }, { merge: true });
             return {
                 isApproved: true,
                 pcsStatus: "FREE_MARKET",
@@ -498,19 +516,42 @@ exports.pcsValidate = (0, https_1.onCall)({
                 maxAllowedStudentPrice: 0,
             };
         }
-        const anthropic = new sdk_1.Anthropic({
-            apiKey: anthropicApiKey.value(),
-        });
-        let categoryContext = "";
-        if (categoryUpper.includes("ACADEMIC") || categoryUpper.includes("BOOK")) {
-            categoryContext = "For academic books and textbooks, find prices from Malaysian bookstores such as MPH, Popular, or Kinokuniya, or the publisher official website.";
+        const listedPrice = parseFloat(itemPrice) || 0;
+        const cacheKey = itemTitle.toLowerCase().trim().replace(/\s+/g, ' ');
+        const cacheRef = db.collection("price_cache").doc(cacheKey);
+        const cacheSnap = await cacheRef.get();
+        if (cacheSnap.exists) {
+            const cached = cacheSnap.data();
+            if (((_a = cached.expiresAt) === null || _a === void 0 ? void 0 : _a.toMillis()) > Date.now()) {
+                floorPrice = cached.floorPrice || 0;
+                ceilingPrice = cached.ceilingPrice || 0;
+                source = cached.source || '';
+                console.log('Cache hit for:', cacheKey, '→ ceiling:', ceilingPrice);
+            }
         }
-        else {
-            categoryContext = "For this item, find prices from official brand stores on Shopee Mall or Lazada Mall, or the brand official Malaysian website.";
-        }
-        const prompt = `You are a price validator for a Malaysian campus marketplace.
+        if (ceilingPrice === 0) {
+            const anthropic = new sdk_1.Anthropic({
+                apiKey: anthropicApiKey.value(),
+            });
+            let categoryContext = "";
+            if (categoryUpper.includes("ACADEMIC") || categoryUpper.includes("BOOK")) {
+                categoryContext = "For academic books and textbooks, find prices from Malaysian bookstores such as MPH, Popular, or Kinokuniya, or the publisher official website.";
+            }
+            else {
+                categoryContext = "For this item, find prices from official brand stores on Shopee Mall or Lazada Mall, or the brand official Malaysian website.";
+            }
+            const prompt = `You are a price validator for a Malaysian campus marketplace.
 
-Find the price band for "${itemTitle}" available to Malaysian buyers today.
+A student listed "${itemTitle}". This may contain typos, abbreviations, or incomplete names.
+
+Step 1: Identify what the actual PRODUCT being sold is (the item itself, not just a brand/model keyword).
+- If the title includes accessory words like "case", "protector", "charger", "cable", "adapter", "stand", "holder", "mount", "strap", "screen protector", "battery", "earphone", "buds", "keyboard", "mouse" — those are the actual product, not the phone/laptop brand that follows.
+- Example: "iPhone 13 Clear Case" → the product is a "clear phone case for iPhone 13", NOT an iPhone 13.
+- Example: "MacBook Pro Charger" → the product is a "laptop charger", NOT a MacBook Pro.
+Step 2: Search for prices of the ACTUAL product in Malaysia.
+Examples: "xm5" → "Sony WH-1000XM5", "ps5" → "PlayStation 5", "ipad 10th gen" → "iPad 10th generation".
+
+Find the price band for the inferred product available to Malaysian buyers today.
 
 ${categoryContext}
 
@@ -527,45 +568,83 @@ Rules:
 
 Return ONLY this raw JSON with no markdown no explanation:
 {"floorPrice": number, "ceilingPrice": number, "source": "where ceiling price was found"}`;
-        const msg = await anthropic.messages.create({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 500,
-            tools: [{ type: "web_search_20250305", name: "web_search" }],
-            messages: [
-                {
-                    role: "user",
-                    content: prompt,
-                },
-            ],
-        });
-        let rawText = '';
-        for (const block of msg.content) {
-            if (block.type === 'text') {
-                rawText += block.text;
+            const tools = [{ type: "web_search_20250305", name: "web_search" }];
+            let messages = [{ role: "user", content: prompt }];
+            let rawText = '';
+            let firstAttemptDone = false;
+            for (let turn = 0; turn < 4; turn++) {
+                const msg = await anthropic.messages.create({
+                    model: "claude-haiku-4-5-20251001",
+                    max_tokens: 1000,
+                    tools,
+                    messages,
+                });
+                for (const block of msg.content) {
+                    if (block.type === 'text') {
+                        rawText += block.text;
+                    }
+                }
+                const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    try {
+                        const parsed = JSON.parse(jsonMatch[0]);
+                        const testCeiling = parseFloat(parsed.ceilingPrice) || 0;
+                        if (testCeiling > 0)
+                            break;
+                    }
+                    catch (_) { }
+                }
+                const toolUse = msg.content.filter((b) => b.type === 'tool_use');
+                if (toolUse.length === 0) {
+                    if (!firstAttemptDone) {
+                        firstAttemptDone = true;
+                        messages.push({ role: "assistant", content: msg.content });
+                        messages.push({ role: "user", content: "No prices found. The item name may be a typo or abbreviation. Think carefully about what product this could be and search again with the corrected full product name." });
+                    }
+                    else {
+                        break;
+                    }
+                }
+                else {
+                    firstAttemptDone = true;
+                    messages.push({ role: "assistant", content: msg.content });
+                    for (const block of toolUse) {
+                        messages.push({ role: "user", content: [{ type: "tool_result", tool_use_id: block.id, content: "done" }] });
+                    }
+                }
             }
-        }
-        console.log('Claude SDK raw text:', rawText);
-        const listedPrice = parseFloat(itemPrice) || 0;
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-            console.error('No JSON found in Claude SDK response');
-        }
-        else {
-            try {
-                const parsed = JSON.parse(jsonMatch[0]);
-                floorPrice = parseFloat(parsed.floorPrice) || 0;
-                ceilingPrice = parseFloat(parsed.ceilingPrice) || 0;
-                source = String(parsed.source || "");
+            console.log('Claude SDK raw text:', rawText);
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+                console.error('No JSON found in Claude SDK response');
             }
-            catch (e) {
-                console.error('JSON parse error from Claude SDK text:', e);
+            else {
+                try {
+                    const parsed = JSON.parse(jsonMatch[0]);
+                    floorPrice = parseFloat(parsed.floorPrice) || 0;
+                    ceilingPrice = parseFloat(parsed.ceilingPrice) || 0;
+                    source = String(parsed.source || "");
+                }
+                catch (e) {
+                    console.error('JSON parse error from Claude SDK text:', e);
+                }
+            }
+            if (ceilingPrice > 0) {
+                await cacheRef.set({
+                    floorPrice,
+                    ceilingPrice,
+                    source,
+                    cachedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    expiresAt: admin.firestore.Timestamp.fromMillis(Date.now() + 86400000),
+                });
+                console.log('Cached result for:', cacheKey);
             }
         }
         if (ceilingPrice === 0) {
             if (listedPrice > 500) {
                 isApproved = false;
                 pcsStatus = "BLOCKED_NO_REFERENCE";
-                justification = "Items priced above RM500 require a verified market price. Please use the specific brand and model name so our system can validate your price.";
+                justification = "Items above RM500 need verified market price.";
             }
             else {
                 isApproved = true;

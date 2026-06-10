@@ -133,7 +133,7 @@ export default function CheckoutPage() {
       console.error('[FPX Pay]', e);
       setPayStatus('idle');
       
-      if (e.message === 'SOLD_OUT') {
+      if (e.message.startsWith('SOLD_OUT::')) {
         setErrorState('INSUFFICIENT_STOCK');
       } else {
         setErrorState('PAYMENT_FAILED');

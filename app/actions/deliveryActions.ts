@@ -1,6 +1,6 @@
 "use server"
 
-import { adminDb, getAdminAuth } from "@/lib/firebase-admin";
+import { adminDb, getAdminDb, getAdminAuth } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -30,7 +30,8 @@ export async function completeDelivery(orderId: string, proofUrl: string, caller
     const runnerDoc = await runnerRef.get();
     const currentBalance = runnerDoc.exists ? (runnerDoc.data()!.balance || 0) : 0;
 
-    await adminDb.runTransaction(async (tx) => {
+    const db = getAdminDb();
+    await db.runTransaction(async (tx) => {
       tx.update(orderRef, {
         status: 'DELIVERED',
         delivered_at: new Date().toISOString(),
@@ -44,8 +45,7 @@ export async function completeDelivery(orderId: string, proofUrl: string, caller
         current_missions: []
       });
 
-      // Write transaction record
-      const txRef = adminDb.collection("users").doc(callerUid).collection("transactions").doc();
+      const txRef = db.collection("users").doc(callerUid).collection("transactions").doc();
       tx.set(txRef, {
         item: orderData.title || 'Delivery Completed',
         price: runnerFee,

@@ -52,7 +52,7 @@ export default function MobileMerchant({
 
   React.useEffect(() => {
     if (!merchant?.uid) return;
-    const qNotifs = query(collection(db, "notifications"), where("userId", "==", merchant.uid), where("read", "==", false));
+    const qNotifs = query(collection(db, "notifications"), where("user_id", "==", merchant.uid), where("is_read", "==", false));
     const unsubNotifs = onSnapshot(qNotifs, (snapshot) => setUnreadNotifications(snapshot.docs.length));
     return () => unsubNotifs();
   }, [merchant?.uid]);
@@ -157,18 +157,34 @@ export default function MobileMerchant({
                 <div className="space-y-3">
                   {activeTab === 'ACTIVE' ? (
                     pipelineOrders.length === 0 ? <div className="py-12 text-center text-[#9CA3AF] text-sm">No active orders</div> :
-                    pipelineOrders.map((o: any) => (
-                      <div key={o.id} className="bg-white rounded-2xl border border-[#F3F4F6] p-4 mb-3 shadow-sm">
-                        <div className="flex justify-between items-start mb-3">
-                          <div><p className="text-[15px] font-semibold text-[#111827]">{o.customer_name || 'Student'}</p><p className="text-[12px] text-[#9CA3AF] mt-0.5">Order #{o.id.slice(-6).toUpperCase()}</p></div>
-                          <div className="text-right"><p className="text-[15px] font-semibold text-[#111827]">RM {o.total?.toFixed(2)}</p><span className={o.status === 'READY' || o.status === 'READY_FOR_PICKUP' ? 'text-[11px] font-medium bg-emerald-50 text-emerald-700 rounded-full px-2.5 py-0.5' : 'text-[11px] font-medium bg-amber-50 text-amber-700 rounded-full px-2.5 py-0.5'}>{o.status.replace(/_/g, ' ')}</span></div>
-                        </div>
-                        {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && <button onClick={() => handlePrepareOrder(o.id, o.items || [])} className="w-full bg-[#111827] text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform">Prepare Order</button>}
-                        {o.status === 'PREPARING' && <button onClick={() => handleMarkReady(o.id)} className="w-full bg-[#111827] text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform">Mark Ready</button>}
-                        {(o.status === 'READY' || o.status === 'READY_FOR_PICKUP' || o.status === 'PENDING_RUNNER') && <button onClick={() => handleMessageUser(o.id, o.buyer_id, o.customer_name, 'BUYER', o.title)} className="w-full bg-[#111827] text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform">Message Buyer</button>}
-                        {o.status === 'PICKED_UP' && <button onClick={() => handleConfirmDelivery(o.id)} disabled={o.handshake?.seller_confirmed} className="w-full bg-[#111827] text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform disabled:opacity-50">{o.handshake?.seller_confirmed ? 'Handoff Sent' : 'Confirm Handoff'}</button>}
-                      </div>
-                    ))
+                    pipelineOrders.map((o: any) => {
+                      const isSelfCollect = o.delivery_method === 'SELF_COLLECT' || o.delivery_type === 'SELF_COLLECT';
+                      const statusSteps = ['PENDING_VENDOR', 'PREPARING', 'READY', 'PICKED_UP', 'DELIVERED'];
+                      const currentStep = statusSteps.indexOf(o.status);
+                      const progress = currentStep >= 0 ? ((currentStep + 1) / statusSteps.length) * 100 : 0;
+                      return (
+                       <div key={o.id} className="bg-white rounded-2xl border border-[#F3F4F6] p-4 mb-3 shadow-sm">
+                         <div className="flex justify-between items-start mb-3">
+                           <div>
+                             <p className="text-[15px] font-semibold text-[#111827]">{o.customer_name || 'Student'}</p>
+                             <div className="flex items-center gap-2 mt-0.5">
+                               <span className={o.status === 'READY' || o.status === 'READY_FOR_PICKUP' ? 'text-[11px] font-medium bg-emerald-50 text-emerald-700 rounded-full px-2.5 py-0.5' : 'text-[11px] font-medium bg-amber-50 text-amber-700 rounded-full px-2.5 py-0.5'}>{o.status.replace(/_/g, ' ')}</span>
+                               {isSelfCollect && <span className="text-[10px] font-medium text-purple-600">Self collect</span>}
+                             </div>
+                           </div>
+                           <div className="text-right"><p className="text-[15px] font-semibold text-[#111827]">RM {o.total?.toFixed(2)}</p></div>
+                         </div>
+                         <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden mb-3">
+                           <div className="h-full bg-slate-900 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                         </div>
+                         {(o.status === 'PAID' || o.status === 'PENDING_VENDOR') && <button onClick={() => handlePrepareOrder(o.id, o.items || [])} className="w-full bg-[#111827] text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform">Prepare Order</button>}
+                         {o.status === 'PREPARING' && <button onClick={() => handleMarkReady(o.id)} className="w-full bg-[#111827] text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform">Mark Ready</button>}
+                         {o.status === 'READY' && !isSelfCollect && <button onClick={() => handleCallRunner(o.id)} className="w-full bg-blue-600 text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform">Call Runner</button>}
+                         {o.status === 'READY' && isSelfCollect && <button onClick={() => handleConfirmDelivery(o.id)} className="w-full bg-emerald-600 text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform">Complete Order</button>}
+                         {o.status === 'PICKED_UP' && <button onClick={() => handleConfirmDelivery(o.id)} disabled={o.handshake?.seller_confirmed} className="w-full bg-[#111827] text-white text-[14px] font-medium rounded-full py-3 mt-3 active:scale-95 transition-transform disabled:opacity-50">{o.handshake?.seller_confirmed ? 'Handoff Sent' : 'Confirm Handoff'}</button>}
+                       </div>
+                      );
+                    })
                   ) : (
                     (historyOrders || []).map((o: any) => (
                       <div key={o.id} className="bg-white rounded-2xl border border-[#F3F4F6] p-4 mb-3 shadow-sm opacity-80 flex justify-between items-center">
@@ -189,7 +205,17 @@ export default function MobileMerchant({
                   {topItems?.map((item: any) => (
                     <div key={item.id} className="bg-white rounded-2xl border border-[#F3F4F6] p-3 flex items-center gap-3 shadow-sm">
                       <div className="w-12 h-12 rounded-xl bg-slate-50 overflow-hidden shrink-0 border border-slate-100">{item.image_url ? <img src={item.image_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-200"><Package size={20} /></div>}</div>
-                      <div className="flex-1 min-w-0"><p className="text-[14px] font-medium text-[#111827] truncate">{item.title}</p><p className="text-[12px] text-[#9CA3AF]">RM {item.price?.toFixed(2)}  {item.stock_count} in stock</p></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[14px] font-medium text-[#111827] truncate">{item.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[12px] text-[#9CA3AF]">RM {item.price?.toFixed(2)}</span>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${(item.stock_count ?? 0) > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>{item.stock_count ?? 0}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1">
+                          <button onClick={async (e) => { e.stopPropagation(); const { updateDoc, doc } = await import('firebase/firestore'); const newStock = Math.max(0, (item.stock_count ?? 0) - 1); await updateDoc(doc(db, 'items', item.id), { stock_count: newStock }); }} className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">-</button>
+                          <button onClick={async (e) => { e.stopPropagation(); const { updateDoc, doc } = await import('firebase/firestore'); const newStock = (item.stock_count ?? 0) + 1; await updateDoc(doc(db, 'items', item.id), { stock_count: newStock }); }} className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">+</button>
+                        </div>
+                      </div>
                       <button onClick={() => setEditingItem(item)} className="p-2 text-slate-300 hover:text-[#111827]"><Pencil size={16} /></button>
                     </div>
                   ))}
@@ -252,6 +278,44 @@ export default function MobileMerchant({
                     <div className="w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center flex-shrink-0"><span className="text-[13px] font-semibold text-[#6B7280]">{(o.customer_name || 'S')[0].toUpperCase()}</span></div>
                     <div className="flex-1 min-w-0"><p className="text-[14px] font-medium text-[#111827] truncate">{o.title}</p><p className="text-[12px] text-[#9CA3AF]">{o.customer_name || 'Student'}</p></div>
                     <div className="text-right flex-shrink-0"><p className="text-[14px] font-semibold text-[#111827]">RM {Number(o.total || o.price || 0).toFixed(2)}</p><p className="text-[11px] text-[#9CA3AF]">{o.created_at?.toDate ? o.created_at.toDate().toLocaleDateString('en-MY', {day:'numeric',month:'short'}) : ''}</p></div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {view === 'logs' && (
+            <motion.div key="logs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-6 px-6 space-y-6">
+              <div>
+                <h3 className="text-[17px] font-semibold text-[#111827] tracking-tight">Order Log</h3>
+                <p className="text-[13px] text-[#9CA3AF] mt-0.5">Full order history.</p>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1 bg-[#F9FAFB] rounded-2xl p-4"><p className="text-[10px] text-[#9CA3AF] uppercase tracking-widest font-medium">Total</p><p className="text-[22px] font-bold text-[#111827]">{(recentOrders || []).length}</p></div>
+                <div className="flex-1 bg-[#F9FAFB] rounded-2xl p-4"><p className="text-[10px] text-[#9CA3AF] uppercase tracking-widest font-medium">Delivered</p><p className="text-[22px] font-bold text-[#111827]">{(historyOrders || []).length}</p></div>
+                <div className="flex-1 bg-[#F9FAFB] rounded-2xl p-4"><p className="text-[10px] text-[#9CA3AF] uppercase tracking-widest font-medium">Pending</p><p className="text-[22px] font-bold text-[#111827]">{pipelineOrders.length}</p></div>
+              </div>
+              <div className="space-y-2">
+                {(recentOrders || []).sort((a: any, b: any) => {
+                  const ta = a.created_at?.toDate ? a.created_at.toDate().getTime() : new Date(a.created_at || 0).getTime();
+                  const tb = b.created_at?.toDate ? b.created_at.toDate().getTime() : new Date(b.created_at || 0).getTime();
+                  return tb - ta;
+                }).map((o: any) => (
+                  <div key={o.id} className="bg-white rounded-2xl border border-[#F3F4F6] p-4 shadow-sm flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-medium text-[#111827] truncate">{o.title || 'Order'}</p>
+                      <p className="text-[11px] text-[#9CA3AF] mt-0.5">
+                        {o.customer_name || 'Student'} · #{o.id.slice(-6).toUpperCase()}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-4">
+                      <p className="text-[14px] font-semibold text-[#111827]">RM {Number(o.total || o.price || 0).toFixed(2)}</p>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 ${
+                        o.status === 'DELIVERED' || o.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700' :
+                        o.status === 'CANCELLED' ? 'bg-red-50 text-red-600' :
+                        o.status === 'READY' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'
+                      }`}>{o.status.replace(/_/g, ' ')}</span>
+                    </div>
                   </div>
                 ))}
               </div>

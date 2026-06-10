@@ -346,7 +346,8 @@ export default function MissionControl() {
   };
 
   const handleConfirmPickup = async () => {
-    if (!activeMission || !auth.currentUser || !podPhoto) return;
+    if (!activeMission || !auth.currentUser) return;
+    if (!podPhoto) { alert('Please take a photo first'); return; }
     setIsProcessing(true);
     try {
       const timestamp = Date.now();
@@ -370,11 +371,12 @@ export default function MissionControl() {
       });
 
       setPodPhoto(null); setPodPreview(null); setProofMode(null);
-    } catch (e: any) { console.error('[Pickup]', e); } finally { setIsProcessing(false); }
+    } catch (e: any) { console.error('[Pickup]', e); alert('Error: ' + e.message); } finally { setIsProcessing(false); }
   };
 
   const handleFinalizeDelivery = async () => {
-    if (!activeMission || !auth.currentUser || !podPhoto) return;
+    if (!activeMission || !auth.currentUser) return;
+    if (!podPhoto) { alert('Please take a photo first'); return; }
     setIsProcessing(true);
     try {
       const timestamp = Date.now();
@@ -395,7 +397,6 @@ export default function MissionControl() {
         timestamp: serverTimestamp()
       });
 
-      // Send photo confirmation to buyer's conversation
       const dropOffLocation = activeMission.drop_off_location || 'drop-off location';
       const conversationId = activeMission.conversationId;
       if (conversationId) {
@@ -413,8 +414,9 @@ export default function MissionControl() {
       }
 
       const res = await completeDelivery(activeMission.id, url, auth.currentUser.uid);
-      if (res.success) { setPodPhoto(null); setPodPreview(null); setProofMode(null); }
-    } catch (e: any) { console.error('[Delivery]', e); } finally { setIsProcessing(false); }
+      if (!res.success) { alert(res.message || 'Failed to complete delivery. Please try again.'); return; }
+      setPodPhoto(null); setPodPreview(null); setProofMode(null);
+    } catch (e: any) { console.error('[Delivery]', e); alert('Error: ' + e.message); } finally { setIsProcessing(false); }
   };
 
   const handleDropOrder = async () => {
@@ -861,7 +863,7 @@ export default function MissionControl() {
                       <span className="text-[13px] font-bold text-slate-500">Tap to take photo</span>
                     </label>
                  )}
-                 <button disabled={!podPhoto || isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className={`w-full h-14 border rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-sm active:scale-95 outline-none ${activeMission ? (activeMission.type?.toUpperCase() === 'ERRANDS' ? 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200' : (activeMission.type?.toUpperCase() === 'PARCELS' ? 'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200' : 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200')) : 'bg-slate-900 text-white'}`}>
+                 <button disabled={isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className={`w-full h-14 border rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-sm active:scale-95 outline-none ${activeMission ? (activeMission.type?.toUpperCase() === 'ERRANDS' ? 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200' : (activeMission.type?.toUpperCase() === 'PARCELS' ? 'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200' : 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200')) : 'bg-slate-900 text-white'}`}>
                    {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={18} strokeWidth={2.5} />}
                     {proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Confirm Delivery'}
                  </button>

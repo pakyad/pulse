@@ -89,12 +89,12 @@ function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any
     try {
       await updateDoc(doc(db, 'appeals', appeal.id), { status: 'EVIDENCE_REQUESTED' });
       await addDoc(collection(db, 'notifications'), {
-        userId: sellerId,
+        user_id: sellerId,
         type: 'EVIDENCE_REQUEST',
         title: 'Evidence Required for Your Appeal',
         body: `Admin has requested additional evidence for your ${itemTitle} appeal. Please provide receipt or purchase proof.`,
-        read: false,
-        createdAt: serverTimestamp(),
+        is_read: false,
+        created_at: serverTimestamp(),
       });
       showToast('Evidence request sent to seller.');
       onClose();
@@ -123,12 +123,12 @@ function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any
       const sellerId = appeal.sellerId || appeal.seller_id;
       if (sellerId) {
         await addDoc(collection(db, 'notifications'), {
-          userId: sellerId,
+          user_id: sellerId,
           type: 'APPEAL_REJECTED',
           title: 'Your Appeal Has Been Rejected',
           body: `Your appeal for ${itemTitle} was rejected. Reason: ${rejectReason}`,
-          read: false,
-          createdAt: serverTimestamp(),
+          is_read: false,
+          created_at: serverTimestamp(),
         });
       }
       showToast('Appeal rejected.');

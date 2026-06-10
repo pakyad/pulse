@@ -227,7 +227,7 @@ export default function MissionBoard() {
 
       await updateDoc(orderRef, {
         runner_id: auth.currentUser.uid,
-        runner_name: profile.full_name || 'Runner',
+        runner_name: profile.full_name || profile.fullName || 'Runner',
         status: 'ACCEPTED',
         accepted_at: new Date().toISOString(),
       });

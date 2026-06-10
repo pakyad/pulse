@@ -10,7 +10,7 @@ import {
 import BackButton from '@/components/shared/BackButton';
 
 import { auth, db } from '@/lib/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function PerfectSignUp() {
@@ -144,8 +144,11 @@ export default function PerfectSignUp() {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
+      await updateProfile(user, { displayName: formData.fullName });
+
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
+        full_name: formData.fullName,
         fullName: formData.fullName,
         email: formData.email,
         matricNumber: formData.matricNo,

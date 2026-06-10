@@ -15,6 +15,7 @@ export default function EditListingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [item, setItem] = useState<any>(null);
+  const [priceError, setPriceError] = useState('');
   
   // Form State
   const [title, setTitle] = useState('');
@@ -22,6 +23,8 @@ export default function EditListingPage() {
   const [stock, setStock] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [isPcsItem, setIsPcsItem] = useState(false);
+  const [originalPrice, setOriginalPrice] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -36,9 +39,12 @@ export default function EditListingPage() {
         setItem(data);
         setTitle(data.title);
         setPrice(data.price.toString());
+        setOriginalPrice(data.price);
         setStock((data.stock_count || 1).toString());
         setDescription(data.description || '');
         setImages(data.images || (data.image_url ? [data.image_url] : []));
+        const pcsApproved = data.pcs_certified === true || data.pcs_status === 'APPROVED';
+        setIsPcsItem(pcsApproved);
       }
       setLoading(false);
     };
@@ -47,11 +53,16 @@ export default function EditListingPage() {
 
   const handleSave = async () => {
     if (!id || saving) return;
+    const newPrice = parseFloat(price);
+    if (isPcsItem && newPrice !== originalPrice) {
+      setPriceError('Price is verified by Price Control System. Edit disabled.');
+      return;
+    }
     setSaving(true);
     try {
       await updateDoc(doc(db, "items", id as string), {
         title,
-        price: parseFloat(price),
+        price: newPrice,
         stock_count: parseInt(stock),
         description,
         images,
@@ -123,14 +134,29 @@ export default function EditListingPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-slate-400 px-1">PRICE (RM)</p>
-                  <input 
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-6 text-[15px] font-bold outline-none focus:border-slate-900 transition-all"
-                  />
-               </div>
+                   <div className="flex items-center justify-between">
+                     <p className="text-[10px] font-bold text-slate-400 px-1">PRICE (RM)</p>
+                     {isPcsItem && <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">PCS Verified</span>}
+                   </div>
+                   <input 
+                     type="number"
+                     value={price}
+                     onChange={(e) => setPrice(e.target.value)}
+                     disabled={isPcsItem}
+                     className={`w-full h-14 bg-slate-50 border border-slate-100 rounded-[20px] px-6 text-[15px] font-bold outline-none transition-all ${
+                       isPcsItem ? 'opacity-50 cursor-not-allowed' : 'focus:border-slate-900'
+                     }`}
+                   />
+                   {isPcsItem && (
+                     <p className="text-[11px] text-slate-400 px-1 flex items-center gap-1">
+                       <ShieldCheck size={12} className="text-emerald-500" />
+                       Price locked — PCS-verified at RM{originalPrice.toFixed(2)}. Edit stock, title, or photos instead.
+                     </p>
+                   )}
+                   {priceError && (
+                     <p className="text-[11px] text-red-500 px-1">{priceError}</p>
+                   )}
+                </div>
                <div className="space-y-2">
                   <p className="text-[10px] font-bold text-slate-400 px-1">STOCK QTY</p>
                   <input 

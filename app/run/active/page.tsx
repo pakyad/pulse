@@ -9,12 +9,13 @@ import {
   Camera, Upload, Info, Lock, Shield, User, Store
 } from 'lucide-react';
 import { auth, db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL, getStorage } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, onSnapshot, updateDoc, getDoc, addDoc, collection, query, where, serverTimestamp } from 'firebase/firestore';
 import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import MapErrorBoundary from '@/components/shared/MapErrorBoundary';
 import BackButton from '@/components/shared/BackButton';
 import { parseLocationToken, getLocationBadge } from '@/lib/core/locations';
+import { completeDelivery } from '@/app/actions/deliveryActions';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -85,22 +86,16 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
     }
     setIsCompleting(true);
     try {
-      const storage = getStorage();
       const uid = auth.currentUser.uid;
       const orderId = mission.id;
       const fileName = Date.now() + '_' + orderId + '.jpg';
       const storageRef = ref(storage, 'delivery_proofs/' + fileName);
       const snap = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(snap.ref);
-      await updateDoc(doc(db, 'orders', orderId), {
-        status: 'DELIVERED',
-        delivered_at: serverTimestamp(),
-        delivery_photo: url,
-        runner_id: uid,
-        buyer_confirmed: false
-      });
+      const res = await completeDelivery(orderId, url, uid);
+      if (!res.success) { alert(res.message || 'Failed to complete delivery.'); return; }
       alert('Delivery confirmed!');
-      setStep(6);
+      setStep(5);
     } catch (e: any) {
       alert('Error: ' + e.message);
     } finally {
@@ -243,7 +238,14 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
 
 function ActiveRunContent({ initialMission }: { initialMission: any }) {
    const router = useRouter();
-   const [step, setStep] = useState<number>(initialMission.step || 1); 
+   const statusToStep: Record<string, number> = {
+     PREPARING: 1,
+     READY_FOR_PICKUP: 1,
+     PICKED_UP: 4,
+     IN_TRANSIT: 4,
+     ARRIVED_AT_DESTINATION: 5,
+   };
+   const [step, setStep] = useState<number>(initialMission.step || statusToStep[initialMission.status] || 1); 
    const [mission, setMission] = useState<any>(initialMission);
    const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
    const [podPhoto, setPodPhoto] = useState<File | null>(null);
@@ -290,39 +292,33 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
      } catch (e) { }
    }, [isLoaded, mission, pickupCoord, dropoffCoord]);
 
-   const handleCompleteDelivery = async () => {
-      if (!podPhoto) {
-        alert('Please take a photo first');
-        return;
-      }
-      if (!auth.currentUser || !mission) {
-        alert('Session error. Please refresh.');
-        return;
-      }
-      setIsCompleting(true);
-      try {
-        const storage = getStorage();
-        const orderId = mission.id;
-        const uid = auth.currentUser.uid;
-        const fileName = Date.now() + '_' + orderId + '.jpg';
-        const storageRef = ref(storage, 'delivery_proofs/' + fileName);
-        const snap = await uploadBytes(storageRef, podPhoto);
-        const url = await getDownloadURL(snap.ref);
-        await updateDoc(doc(db, 'orders', orderId), {
-          status: 'DELIVERED',
-          delivered_at: serverTimestamp(),
-          delivery_photo: url,
-          runner_id: uid,
-          buyer_confirmed: false
-        });
-        alert('Delivery confirmed!');
-        setStep(6);
-      } catch (e: any) {
-        alert('Error: ' + e.message);
-      } finally {
-        setIsCompleting(false);
-      }
-   };
+    const handleCompleteDelivery = async () => {
+       if (!podPhoto) {
+         alert('Please take a photo first');
+         return;
+       }
+       if (!auth.currentUser || !mission) {
+         alert('Session error. Please refresh.');
+         return;
+       }
+       setIsCompleting(true);
+       try {
+         const orderId = mission.id;
+         const uid = auth.currentUser.uid;
+         const fileName = Date.now() + '_' + orderId + '.jpg';
+         const storageRef = ref(storage, 'delivery_proofs/' + fileName);
+         const snap = await uploadBytes(storageRef, podPhoto);
+         const url = await getDownloadURL(snap.ref);
+         const res = await completeDelivery(orderId, url, uid);
+         if (!res.success) { alert(res.message || 'Failed to complete delivery.'); return; }
+         alert('Delivery confirmed!');
+         setStep(5);
+       } catch (e: any) {
+         alert('Error: ' + e.message);
+       } finally {
+         setIsCompleting(false);
+       }
+    };
 
    const handleConfirmPickup = async () => {
       if (!pickupPhoto) {
@@ -371,16 +367,16 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
    return (
       <div className="min-h-screen bg-white font-sans text-slate-900 antialiased overflow-x-hidden">
          <AnimatePresence>
-            {step === 6 && (
-               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-100 bg-white flex flex-col items-center justify-center px-8 text-center">
-                  <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
-                     <CheckCircle2 size={40} />
-                  </div>
-                  <h1 className="text-[14px] font-semibold text-blue-600 mb-2">Delivery Verified</h1>
-                  <p className="text-[42px] font-semibold text-slate-900 tracking-tighter leading-none mb-10">+RM {mission?.payout?.toFixed(2) || '4.50'}</p>
-                  <button onClick={() => router.push('/run')} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md active:scale-95 transition-all">Dismiss & Return</button>
-               </motion.div>
-            )}
+             {step === 5 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-100 bg-white flex flex-col items-center justify-center px-8 text-center">
+                   <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
+                      <CheckCircle2 size={40} />
+                   </div>
+                   <h1 className="text-[14px] font-semibold text-blue-600 mb-2">Delivery Verified</h1>
+                   <p className="text-[42px] font-semibold text-slate-900 tracking-tighter leading-none mb-10">+RM {mission?.payout?.toFixed(2) || '4.50'}</p>
+                   <button onClick={() => router.push('/run')} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md active:scale-95 transition-all">Dismiss & Return</button>
+                </motion.div>
+             )}
          </AnimatePresence>
 
          <nav className="fixed top-0 left-0 right-0 z-50 px-6 pt-8 pb-4 flex items-center justify-between bg-white/90 backdrop-blur-xl border-b border-slate-100">
@@ -429,26 +425,26 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                             </div>
                          </div>
 
-                         {step === 5 ? (
-                            <div className="space-y-3">
-                               <p className="text-[11px] font-semibold text-slate-400 ">Drop-off Proof</p>
-                               {podPreview ? (
-                                  <div className="relative w-full h-24 rounded-2xl overflow-hidden border border-slate-100">
-                                     <img src={podPreview} className="w-full h-full object-cover" />
-                                     <button onClick={() => setPodPreview(null)} className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm"><X size={12} /></button>
-                                  </div>
-                               ) : (
-                                  <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer">
-                                     <Camera className="w-6 h-6 text-slate-400 mb-1" />
-                                     <p className="text-[11px] font-bold text-slate-500">Capture Drop-off Photo</p>
-                                     <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) { setPodPhoto(file); setPodPreview(URL.createObjectURL(file)); }
-                                     }} />
-                                  </label>
-                               )}
-                            </div>
-                          ) : step === 2 ? (
+                         {step === 4 ? (
+                             <div className="space-y-3">
+                                <p className="text-[11px] font-semibold text-slate-400 ">Drop-off Proof</p>
+                                {podPreview ? (
+                                   <div className="relative w-full h-24 rounded-2xl overflow-hidden border border-slate-100">
+                                      <img src={podPreview} className="w-full h-full object-cover" />
+                                      <button onClick={() => setPodPreview(null)} className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm"><X size={12} /></button>
+                                   </div>
+                                ) : (
+                                   <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-slate-200 rounded-2xl bg-slate-50 cursor-pointer">
+                                      <Camera className="w-6 h-6 text-slate-400 mb-1" />
+                                      <p className="text-[11px] font-bold text-slate-500">Capture Drop-off Photo</p>
+                                      <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => {
+                                         const file = e.target.files?.[0];
+                                         if (file) { setPodPhoto(file); setPodPreview(URL.createObjectURL(file)); }
+                                      }} />
+                                   </label>
+                                )}
+                             </div>
+                           ) : step === 2 ? (
                             <div className="space-y-3">
                               <p className="text-[11px] font-semibold text-slate-400 ">Pickup Proof</p>
                               {pickupPreview ? (
@@ -481,9 +477,9 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
                            </div>
                          )}
 
-                          <button onClick={step === 2 ? handleConfirmPickup : step === 5 ? handleCompleteDelivery : handleStepUpdate} disabled={isCompleting} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 text-[14px]">
+                          <button onClick={step === 2 ? handleConfirmPickup : step === 4 ? handleCompleteDelivery : handleStepUpdate} disabled={isCompleting} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 text-[14px]">
                              {isCompleting && <Loader2 size={18} className="animate-spin" />}
-                             {step === 1 ? "Arrived at Pickup" : step === 2 ? "Confirm Pickup" : step === 3 ? "Arrived at Drop-off" : step === 4 ? "Complete Delivery" : "Confirm Delivery"}
+                             {step === 1 ? "Arrived at Pickup" : step === 2 ? "Confirm Pickup" : step === 3 ? "Arrived at Drop-off" : "Confirm Delivery"}
                          </button>
                       </motion.div>
                    ) : (

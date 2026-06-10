@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { db, auth } from '@/lib/firebase';
-import { collection, query, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, getDoc, where } from 'firebase/firestore';
 import { 
   ShieldAlert, ChevronRight, CheckCircle2, 
   MessageSquare, AlertCircle, Loader2, ChevronLeft
@@ -41,7 +41,7 @@ export default function MerchantDisputes() {
         return;
       }
 
-      const q = query(collection(db, 'disputes'));
+      const q = query(collection(db, 'disputes'), where('seller_id', '==', user.uid));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const sortedData = data.sort((a: any, b: any) => {

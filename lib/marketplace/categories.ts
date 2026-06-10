@@ -440,4 +440,22 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
       },
     ],
   },
+
+  SERVICES: {
+    id: 'SERVICES',
+    label: 'Services',
+    subtext: 'Tutoring, printing, photography and more',
+    governance: 'OPEN',
+    subcategories: [
+      { label: 'Tutoring & Academic Help', comparable: false, titleHint: 'e.g. Mathematics tutor for Sem 2' },
+      { label: 'Printing & Binding', comparable: false, titleHint: 'e.g. A4 colour printing per page' },
+      { label: 'Photography & Video', comparable: false, titleHint: 'e.g. Graduation photoshoot' },
+      { label: 'Design & Creative', comparable: false, titleHint: 'e.g. Canva poster design' },
+      { label: 'Coding & Debugging', comparable: false, titleHint: 'e.g. Python assignment help' },
+      { label: 'Resume & Career', comparable: false, titleHint: 'e.g. CV review and formatting' },
+      { label: 'Translation & Writing', comparable: false, titleHint: 'e.g. Malay to English translation' },
+      { label: 'Other', comparable: false, titleHint: 'Describe your service' },
+    ],
+    customFields: [],
+  },
 };

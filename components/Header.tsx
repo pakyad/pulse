@@ -21,7 +21,7 @@ export default function Header() {
 
   const isRootPage = pathname === '/home';
   const showSearchBar = !pathname?.startsWith('/run');
-  const displayName = profile?.full_name || auth.currentUser?.email?.split('@')[0] || 'Student';
+  const displayName = profile?.full_name || profile?.fullName || auth.currentUser?.email?.split('@')[0] || 'Student';
 
   const handleBellTap = useCallback(async () => {
     const user = auth.currentUser;

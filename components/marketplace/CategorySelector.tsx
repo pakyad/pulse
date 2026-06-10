@@ -11,7 +11,8 @@ const CATEGORY_LABELS: Record<CategoryID, string> = {
   ACADEMIC: 'Academic',
   HOSTEL: 'Hostel',
   TECH: 'Tech',
-  APPAREL: 'Apparel'
+  APPAREL: 'Apparel',
+  SERVICES: 'Services'
 };
 
 const CategorySelector: React.FC<CategorySelectorProps> = ({ selectedCategory, onSelect }) => {

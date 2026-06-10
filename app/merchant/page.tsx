@@ -79,58 +79,22 @@ function MerchantDashboardContent() {
     });
   };
 
-  const handleConfirmDelivery = async (orderId: string) => {
-    if (!navigator.geolocation) return;
-    
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const orderRef = doc(db, "orders", orderId);
-        const orderSnap = await getDoc(orderRef);
-        
-        if (!orderSnap.exists()) return;
-
-        const orderData = orderSnap.data();
-        const handshake = orderData.handshake || {};
-
-        handshake.seller_confirmed = true;
-        handshake.seller_coords = coords;
-
-        let newStatus = orderData.status;
-
-        if (handshake.buyer_confirmed && handshake.buyer_coords) {
-          const R = 6371e3;
-          const phi1 = coords.lat * Math.PI/180;
-          const phi2 = handshake.buyer_coords.lat * Math.PI/180;
-          const deltaPhi = (handshake.buyer_coords.lat - coords.lat) * Math.PI/180;
-          const deltaLambda = (handshake.buyer_coords.lng - coords.lng) * Math.PI/180;
-          const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
-            Math.cos(phi1) * Math.cos(phi2) *
-            Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-          const dist = R * c;
-          handshake.distance = dist;
-          const isSafe = dist <= 50;
-          handshake.verification_type = isSafe ? 'IN_PERSON_SAFE' : 'REMOTE';
-          newStatus = isSafe ? 'COMPLETED' : 'DELIVERED';
-        }
-
-        await updateDoc(orderRef, { 
-          handshake,
-          ...(newStatus !== orderData.status ? { status: newStatus, completed_at: serverTimestamp(), auto_adjudicated: newStatus === 'COMPLETED' } : {})
-        });
-      } catch (e) {
-        console.error("[Merchant] Confirm delivery error:", e);
-      }
+  const handleCompleteSelfCollect = async (orderId: string) => {
+    await updateDoc(doc(db, "orders", orderId), {
+      status: "COMPLETED",
+      completed_at: serverTimestamp(),
+      handshake: { seller_confirmed: true, buyer_confirmed: true, verification_type: 'SELF_COLLECT' }
     });
   };
 
+
   const toggleItemStatus = async (itemId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'active' ? 'PAUSED' : 'ACTIVE';
+    const isActive = currentStatus?.toUpperCase() === 'ACTIVE';
+    const newStatus = isActive ? 'PAUSED' : 'ACTIVE';
     await updateDoc(doc(db, "items", itemId), { status: newStatus });
   };
 
-  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED", "READY_FOR_PICKUP", "READY"].includes(o.status)).reduce((s, o) => s + Number(o.total || o.price || 0), 0), [orders]);
+  const revenue = useMemo(() => orders.filter(o => ["DELIVERED", "COMPLETED"].includes(o.status)).reduce((s, o) => s + Number(o.total || o.price || 0), 0), [orders]);
   
   const pipelineOrders = useMemo(() => orders.filter(o => 
     o.seller_id === merchant?.uid && 
@@ -214,7 +178,7 @@ function MerchantDashboardContent() {
         handleMarkReady={handleMarkReady}
         handleMessageUser={handleMessageUser}
         handleCallRunner={handleCallRunner}
-        handleConfirmDelivery={handleConfirmDelivery}
+        handleCompleteSelfCollect={handleCompleteSelfCollect}
         toggleItemStatus={toggleItemStatus}
         onViewProof={(o: any) => { setSelectedOrder(o); setIsProofOpen(true); }}
       />

@@ -142,7 +142,7 @@ const CATEGORIES = [
   { id: 'apparel',  label: 'Clothing',    filter: 'APPAREL',  icon: PixelShirt  },
   { id: 'books',    label: 'Books',       filter: 'ACADEMIC', icon: PixelBook   },
   { id: 'services', label: 'Services',    filter: 'SERVICES', icon: PixelHeart  },
-  { id: 'food',     label: 'Food',        filter: 'HUNGER',   icon: PixelFood   },
+
   { id: 'hostel',   label: 'Hostel',      filter: 'HOSTEL',   icon: PixelHome   },
 ];
 

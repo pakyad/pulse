@@ -11,9 +11,11 @@ import {
   Power, 
   Navigation 
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
 
 export default function RunnerDashboard({ profile, onBack }: { profile: any, onBack: () => void }) {
+    const router = useRouter();
     const activeMissions = profile?.current_missions || [];
     const hasActive = activeMissions.length > 0;
 

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { db, auth, storage } from '@/lib/firebase';
-import { collection, addDoc, doc, onSnapshot, getDocs, serverTimestamp, setDoc, query, where } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, onSnapshot, getDocs, serverTimestamp, setDoc, query, where } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { MARKETPLACE_CATEGORIES, CategoryID } from '@/lib/marketplace/categories';
@@ -51,7 +51,7 @@ const CUSTOM_CATEGORY_LABELS = {
   Other: 'Other',
 };
 
-type PcsStatus = 'APPROVED' | 'FLAGGED' | 'BLOCKED_NO_REFERENCE' | 'FREE_MARKET' | 'ERROR';
+type PcsStatus = 'APPROVED' | 'FLAGGED' | 'BLOCKED_NO_REFERENCE' | 'FREE_MARKET' | 'COPYRIGHT_BLOCKED' | 'ERROR';
 
 interface PcsNotice {
   marketBaselinePrice: number;
@@ -73,6 +73,7 @@ export default function CreateListingPage() {
   const [metadata, setMetadata] = useState<Record<string, any>>({});
   const [stock, setStock] = useState('');
   const [justification, setJustification] = useState('');
+  const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const [fulfillmentMode, setFulfillmentMode] = useState<'DELIVERY' | 'MEETUP_ONLY'>('DELIVERY');
   const [handoverNode, setHandoverNode] = useState(CAMPUS_NODES[0].token);
 
@@ -118,6 +119,10 @@ export default function CreateListingPage() {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
+
+      const userSnap = await getDoc(doc(db, 'users', user.uid));
+      const userProfile = userSnap.data();
+      const sellerName = userProfile?.full_name || userProfile?.fullName || user.displayName || 'Pulse Student';
 
       const sellerId = user.uid;
       const itemId = doc(collection(db, 'items')).id;
@@ -176,7 +181,7 @@ export default function CreateListingPage() {
         images: imageUrls,
         image_url: imageUrls[0] || null,
         seller_id: user.uid,
-        seller_name: user.displayName || 'Pulse Student',
+        seller_name: sellerName,
         fulfillment_mode: fulfillmentMode,
         handover_node: handoverNode,
         status: stockCount === 0 ? 'SOLD_OUT' : 'ACTIVE',
@@ -211,19 +216,30 @@ export default function CreateListingPage() {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
 
+      const userSnap = await getDoc(doc(db, 'users', user.uid));
+      const userProfile = userSnap.data();
+      const sellerName = userProfile?.full_name || userProfile?.fullName || user.displayName || 'Pulse Student';
+
       const itemId = doc(collection(db, 'items')).id;
       const numPrice = parseFloat(price);
       const stockCount = stock !== '' ? parseInt(stock, 10) : null;
 
       const imageUrls: string[] = await Promise.all(
         images.map(async (base64, i) => {
-          const storageRef = ref(storage, `pending_listings/${user.uid}_${Date.now()}_${i}.jpg`);
+          const storageRef = ref(storage, `listings/${user.uid}_${Date.now()}_${i}.jpg`);
           await uploadString(storageRef, base64, 'data_url');
           return getDownloadURL(storageRef);
         })
       );
 
-      await setDoc(doc(db, 'pending_listings', itemId), {
+      let appealImageUrl = '';
+      if (receiptImage) {
+        const receiptRef = ref(storage, `appeals/${user.uid}_${Date.now()}.jpg`);
+        await uploadString(receiptRef, receiptImage, 'data_url');
+        appealImageUrl = await getDownloadURL(receiptRef);
+      }
+
+      await setDoc(doc(db, 'items', itemId), {
         title: title.trim(),
         description: description.trim(),
         category: selectedCategory,
@@ -234,15 +250,36 @@ export default function CreateListingPage() {
         metadata,
         images: imageUrls,
         image_url: imageUrls[0] || null,
+        appeal_image_url: appealImageUrl || null,
         seller_id: user.uid,
-        seller_name: user.displayName || 'Pulse Student',
+        seller_name: sellerName,
         fulfillment_mode: fulfillmentMode,
         handover_node: handoverNode,
         pcs_market_price: pcsError?.marketBaselinePrice || 0,
         pcs_max_allowed: pcsError?.maxAllowedStudentPrice || 0,
         pcs_reason: pcsError?.justification || 'FLAGGED',
         appeal_reason: justification.trim(),
+        price_justification: justification.trim(),
+        pcs_certified: false,
+        pcs_status: 'FLAGGED',
+        is_price_flagged: true,
+        price_flag_count: 1,
+        flag_source: 'AI',
+        report_count: 0,
         status: 'PENDING_REVIEW',
+        created_at: serverTimestamp(),
+      });
+
+      await addDoc(collection(db, 'appeals'), {
+        itemId,
+        itemTitle: title.trim(),
+        price: numPrice,
+        category: selectedCategory,
+        sellerId: user.uid,
+        sellerName,
+        justification_text: justification.trim(),
+        appeal_image_url: appealImageUrl || null,
+        status: 'PENDING',
         created_at: serverTimestamp(),
       });
 
@@ -382,36 +419,88 @@ export default function CreateListingPage() {
                 <p className="text-[11px] font-bold text-red-500">Custom items cannot be listed above RM 500</p>
               )}
               <AnimatePresence>
-                {pcsError && (
+                {pcsError && pcsError.pcsStatus !== 'FREE_MARKET' && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                    <div className={`rounded-2xl p-4 mt-3 border ${
-                      pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE'
-                        ? 'bg-red-50 border-red-100'
-                        : pcsError.pcsStatus === 'FREE_MARKET'
-                        ? 'bg-emerald-50 border-emerald-100'
-                        : 'bg-amber-50 border-amber-100'
-                    }`}>
-                      <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                          pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE'
-                            ? 'bg-red-100'
-                            : pcsError.pcsStatus === 'FREE_MARKET'
-                            ? 'bg-emerald-100'
-                            : 'bg-amber-100'
-                        }`}><span className="text-sm"></span></div>
-                        <div className="flex-1">
-                          {pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
-                            <>
-                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Specific product name required</p>
-                              <p className="text-xs text-gray-500 leading-relaxed mb-3">Items above RM500 require a verified market price. Use the exact brand and model name so our system can find a reference price.</p>
-                              <button onClick={() => { titleInputRef.current?.focus(); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2">Update item name</button>
-                            </>
-                          ) : pcsError.pcsStatus === 'FREE_MARKET' ? (
-                            <>
-                              <p className="text-sm font-semibold text-emerald-900 mb-0.5">Listed as Free Market</p>
-                              <p className="text-xs text-emerald-700 leading-relaxed">No market reference found for this item. Your listing will go live without a verified price badge.</p>
-                            </>
-                            ) : appealSubmitted ? (
+                      <div className={`rounded-2xl p-4 mt-3 border ${
+                       pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' || pcsError.pcsStatus === 'COPYRIGHT_BLOCKED'
+                         ? 'bg-red-50 border-red-100'
+                         : 'bg-amber-50 border-amber-100'
+                     }`}>
+                       <div className="flex items-start gap-3">
+                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                           pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' || pcsError.pcsStatus === 'COPYRIGHT_BLOCKED'
+                             ? 'bg-red-100'
+                             : 'bg-amber-100'
+                         }`}><span className="text-sm"></span></div>
+                         <div className="flex-1">
+                            {pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
+                              appealSubmitted ? (
+                                <>
+                                  <p className="text-sm font-semibold text-emerald-900 mb-0.5">Appeal submitted</p>
+                                  <p className="text-xs text-emerald-700 leading-relaxed">Your appeal has been submitted. Admin will review within 24 hours.</p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Specific product name required</p>
+                                  <p className="text-xs text-gray-500 leading-relaxed mb-3">Items above RM500 need verified market price.</p>
+                                  <button onClick={() => { titleInputRef.current?.focus(); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800">Update item name</button>
+                                  <div className="mt-3">
+                                    <p className="text-xs text-gray-500 mb-1">Or explain what this item is:</p>
+                                    <textarea
+                                      value={justification}
+                                      onChange={(e) => setJustification(e.target.value)}
+                                      placeholder="e.g. This is a genuine product bought from official store."
+                                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                    />
+                                    <label className="mt-2 flex items-center gap-2 cursor-pointer">
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        hidden
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            const reader = new FileReader();
+                                            reader.onload = () => setReceiptImage(reader.result as string);
+                                            reader.readAsDataURL(file);
+                                          }
+                                        }}
+                                      />
+                                      <div className="flex items-center gap-2 text-xs text-gray-500 border border-gray-200 rounded-xl px-3 py-2 hover:bg-gray-50">
+                                        <Plus size={14} />
+                                        {receiptImage ? 'Receipt added' : 'Add receipt photo'}
+                                      </div>
+                                      {receiptImage && (
+                                        <button
+                                          onClick={() => setReceiptImage(null)}
+                                          className="text-xs text-red-500 hover:underline"
+                                        >
+                                          Remove
+                                        </button>
+                                      )}
+                                    </label>
+                                    {receiptImage && (
+                                      <img
+                                        src={receiptImage}
+                                        alt="Receipt preview"
+                                        className="mt-2 w-20 h-20 object-cover rounded-lg border border-gray-200"
+                                      />
+                                    )}
+                                    <button
+                                      onClick={handleSubmitJustification}
+                                      className="mt-2 w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"
+                                    >
+                                      Submit for admin review
+                                    </button>
+                                  </div>
+                                </>
+                              )
+                            ) : pcsError.pcsStatus === 'COPYRIGHT_BLOCKED' ? (
+                             <>
+                               <p className="text-sm font-semibold text-gray-900 mb-0.5">Digital copies not allowed</p>
+                               <p className="text-xs text-gray-500 leading-relaxed">Selling digital copies is not allowed on Pulse.</p>
+                             </>
+                           ) : appealSubmitted ? (
                             <>
                               <p className="text-sm font-semibold text-emerald-900 mb-0.5">Appeal submitted</p>
                               <p className="text-xs text-emerald-700 leading-relaxed">Your appeal has been submitted. Admin will review within 24 hours.</p>
@@ -419,7 +508,7 @@ export default function CreateListingPage() {
                           ) : (
                             <>
                               <p className="text-sm font-semibold text-gray-900 mb-0.5">Price exceeds campus limit</p>
-                              <p className="text-xs text-gray-500 leading-relaxed mb-3">Official retail for <strong className="text-gray-700">{pcsError?.itemTitle}</strong> is RM{Number(pcsError?.marketBaselinePrice).toFixed(2)}. Campus listings must be at least 10% below official retail. Maximum allowed price is <strong className="text-gray-700">RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</strong>.</p>
+                              <p className="text-xs text-gray-500 leading-relaxed mb-3">Price exceeds campus limit. Official retail is RM{Number(pcsError?.marketBaselinePrice).toFixed(2)}. Maximum allowed is <strong className="text-gray-700">RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</strong>.</p>
                               <button onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2">Set to RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</button>
                               <div className="mt-3">
                                 <p className="text-xs text-gray-500 mb-1">Or explain why your price is fair:</p>
@@ -429,6 +518,40 @@ export default function CreateListingPage() {
                                   placeholder="e.g. Bought from official store with receipt. Brand new sealed."
                                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900"
                                 />
+                                <label className="mt-2 flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    hidden
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = () => setReceiptImage(reader.result as string);
+                                        reader.readAsDataURL(file);
+                                      }
+                                    }}
+                                  />
+                                  <div className="flex items-center gap-2 text-xs text-gray-500 border border-gray-200 rounded-xl px-3 py-2 hover:bg-gray-50">
+                                    <Plus size={14} />
+                                    {receiptImage ? 'Receipt added' : 'Add receipt photo'}
+                                  </div>
+                                  {receiptImage && (
+                                    <button
+                                      onClick={() => setReceiptImage(null)}
+                                      className="text-xs text-red-500 hover:underline"
+                                    >
+                                      Remove
+                                    </button>
+                                  )}
+                                </label>
+                                {receiptImage && (
+                                  <img
+                                    src={receiptImage}
+                                    alt="Receipt preview"
+                                    className="mt-2 w-20 h-20 object-cover rounded-lg border border-gray-200"
+                                  />
+                                )}
                                 <button
                                   onClick={handleSubmitJustification}
                                   className="mt-2 w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"
