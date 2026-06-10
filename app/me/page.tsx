@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -224,7 +224,6 @@ export default function MePage() {
                               title: item.title,
                               price: item.price,
                               image_url: item.images?.[0] || item.image_url,
-                              seller_id: item.seller_id,
                               seller_name: profile?.full_name,
                               seller_photo_url: profile?.photo_url,
                               stock_count: item.stock_count,
@@ -249,7 +248,7 @@ export default function MePage() {
           <div className="fixed inset-0 z-300 flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsIDOpen(false)} className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" />
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative z-10 w-full max-w-sm">
-              <HologramID name={profile?.full_name || 'Pulse Member'} role={profile?.is_verified_runner ? 'Pulse Runner' : 'Student'} matricNo={profile?.matricNumber || profile?.matric_no || ''} qrValue={user?.uid || 'anonymous'} />
+              <HologramID name={profile?.full_name || profile?.name || profile?.displayName || profile?.email?.split('@')[0] || 'Student'} role={profile?.is_verified_runner ? 'Pulse Runner' : 'Student'} matricNo={profile?.matricNumber || profile?.matric_no || ''} qrValue={user?.uid || 'anonymous'} />
               <button onClick={() => setIsIDOpen(false)} className="mt-8 w-full h-14 bg-white/10 rounded-[20px] text-white font-semibold text-[14px] hover:bg-white/20 transition-all">Close ID</button>
             </motion.div>
           </div>

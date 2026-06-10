@@ -527,12 +527,13 @@ export const pcsValidate = onCall(
       }
 
       // Check for Soft Warning categories
-      const softWarningCategories = ['Handwritten Notes (IT & CS)', 'Handwritten Notes (Engineering)', 'Handwritten Notes (Business)', 'Past Year Papers', 'Study Tables & Chairs', 'Bedding & Linen'];
+      const softWarningCategories = ['Handwritten Notes & Summaries', 'Past Year Papers & Assignments', 'Flashcards & Study Guides', 'Furniture', 'Bedding & Comfort'];
       if (softWarningCategories.includes(subcategory)) {
         let softCap = 0;
         if (subcategory.includes('Handwritten Notes')) softCap = 20;
         else if (subcategory.includes('Past Year Papers')) softCap = 10;
-        else if (subcategory.includes('Study Tables')) softCap = 400;
+        else if (subcategory.includes('Flashcards')) softCap = 30;
+        else if (subcategory.includes('Furniture')) softCap = 400;
         else if (subcategory.includes('Bedding')) softCap = 100;
 
         if (listedPrice > softCap) {

@@ -121,7 +121,7 @@ export default function ReviewsPage() {
                                  />
                               </div>
                               <div>
-                                 <p className="text-[13px] font-bold text-slate-900">{review.reviewer?.full_name || 'Pulse Member'}</p>
+                                 <p className="text-[13px] font-bold text-slate-900">{review.reviewer?.full_name || review.reviewer?.name || review.reviewer?.displayName || review.reviewer?.email?.split('@')[0] || 'Student'}</p>
                                  <p className="text-[10px] font-medium text-[#94a3b8]">
                                    {review.createdAt ? new Date(review.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently'}
                                  </p>

@@ -139,7 +139,7 @@ export default function PublicProfilePage() {
                   )}
                </div>
                <div className="flex-1 min-w-0 space-y-0.5">
-                  <Heading className="truncate">{profile?.full_name || 'Pulse Member'}</Heading>
+                  <Heading className="truncate">{profile?.full_name || profile?.name || profile?.displayName || profile?.email?.split('@')[0] || 'Student'}</Heading>
                   <Subtext>Verified Pulse Account</Subtext>
                </div>
             </div>

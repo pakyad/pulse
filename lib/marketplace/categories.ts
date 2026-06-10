@@ -1,16 +1,12 @@
-﻿/**
- * Pulse Marketplace: Category Registry (v5.0)
+/**
+ * Pulse Marketplace: Category Registry (v6.0)
  * STUDENT ECONOMY MODEL
  *
- * Live SerpAPI comparison is ONLY for standardised NEW items students must buy:
- *   Textbooks, scientific calculators, lab coats, stationery, hostel appliances.
- *
- * Secondhand electronics (TECH category) are NOT benchmarked against Shopee
- * new retail prices  that comparison is unfair and inaccurate for used goods.
- * TECH uses fixed campus ceilings only.
+ * Live SerpAPI comparison is ONLY for standardised NEW items students must buy.
+ * Unique items use "Soft Warning" logic or "Free Market" bypasses.
  *
  * comparable: true   SerpAPI live search triggered
- * comparable: false  Fixed ceiling, no API call
+ * comparable: false  Fixed ceiling or Soft Warning
  */
 
 export type CategoryID = 'ACADEMIC' | 'HOSTEL' | 'TECH' | 'APPAREL' | 'SERVICES';
@@ -45,66 +41,53 @@ export interface CategoryConfig {
 
 export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
 
-  // 
-  // ACADEMIC  Only branded/published items are comparable.
-  //            Custom notes/papers are unique  fixed ceiling only.
-  // 
+  // ==========================================
+  // ACADEMIC & STUDY
+  // ==========================================
   ACADEMIC: {
     id: 'ACADEMIC',
-    label: 'Academic',
+    label: 'Academic & Study',
     subtext: 'Books, lab gear, stationery and notes',
     governance: 'REGULATED',
     subcategories: [
       {
-        label: 'IT & Computing Books',
-        comparable: true,
-        studentMarket: true,
-        fixedCeiling: 200.00,
-        titleHint: 'e.g. Data Structures in C++, Intro to Java',
-        serpQuerySuffix: 'computer science IT textbook Malaysia',
-      },
-      {
-        label: 'Engineering Textbooks',
+        label: 'Textbooks & Reference Books',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 250.00,
-        titleHint: 'e.g. Thomas Calculus 14th Ed, Thermodynamics',
-        serpQuerySuffix: 'engineering textbook Malaysia',
+        titleHint: 'e.g. Thomas Calculus 14th Ed, Intro to Java',
+        serpQuerySuffix: 'textbook Malaysia',
       },
       {
-        label: 'Business & Law Books',
-        comparable: true,
-        studentMarket: true,
-        fixedCeiling: 180.00,
-        titleHint: 'e.g. Principles of Marketing, Business Law',
-        serpQuerySuffix: 'business law textbook Malaysia',
+        label: 'Handwritten Notes & Summaries',
+        comparable: false,
+        fixedCeiling: 20.00, // Acts as Soft Warning threshold
+        titleHint: 'e.g. CSC3109 Data Structures Sem 1 Notes',
       },
       {
-        label: 'Casio Calculators',
+        label: 'Past Year Papers & Assignments',
+        comparable: false,
+        fixedCeiling: 10.00, // Acts as Soft Warning threshold
+        titleHint: 'e.g. CSC3109 Final Exam 2022-2024',
+      },
+      {
+        label: 'Scientific Calculators',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 120.00,
         titleHint: 'e.g. Casio fx-570ES PLUS',
-        serpQuerySuffix: 'Casio scientific calculator Malaysia buy',
-      },
-      {
-        label: 'Other Calculators',
-        comparable: true,
-        studentMarket: true,
-        fixedCeiling: 100.00,
-        titleHint: 'e.g. Texas Instruments, Canon, Sharp',
         serpQuerySuffix: 'scientific calculator Malaysia buy',
       },
       {
-        label: 'Lab Coats & Goggles',
+        label: 'Lab Equipment & Safety Gear',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 80.00,
-        titleHint: 'e.g. White Lab Coat Size M',
+        titleHint: 'e.g. White Lab Coat Size M, Goggles',
         serpQuerySuffix: 'Malaysia buy',
       },
       {
-        label: 'Drawing & Architecture Tools',
+        label: 'Architecture & Drafting Tools',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 150.00,
@@ -112,36 +95,50 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         serpQuerySuffix: 'Malaysia buy',
       },
       {
+        label: 'Art & Studio Supplies',
+        comparable: true,
+        studentMarket: true,
+        fixedCeiling: 100.00,
+        titleHint: 'e.g. Acrylic Paints set, A3 Sketchpad',
+        serpQuerySuffix: 'Malaysia',
+      },
+      {
         label: 'Stationery Bundles',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 60.00,
-        titleHint: 'e.g. Stabilo Boss Highlighter Set 6pc, Pilot G2 Pack',
+        titleHint: 'e.g. Stabilo Highlighter Set, Pilot G2 Pack',
         serpQuerySuffix: 'Malaysia',
       },
       {
-        label: 'Handwritten Notes (IT & CS)',
-        comparable: false,
-        fixedCeiling: 20.00,
-        titleHint: 'e.g. CSC3109 Data Structures Sem 1 Notes',
+        label: 'Files, Binders & Organizers',
+        comparable: true,
+        studentMarket: true,
+        fixedCeiling: 50.00,
+        titleHint: 'e.g. 2-Ring Binder, Clear Folders pack',
+        serpQuerySuffix: 'Malaysia',
       },
       {
-        label: 'Handwritten Notes (Engineering)',
-        comparable: false,
-        fixedCeiling: 20.00,
-        titleHint: 'e.g. Thermodynamics Chapter 1-5 Summary',
+        label: 'Clinical Scrubs & Uniforms',
+        comparable: true,
+        studentMarket: true,
+        fixedCeiling: 150.00,
+        titleHint: 'e.g. Nursing Scrub Suit Size L',
+        serpQuerySuffix: 'Malaysia',
       },
       {
-        label: 'Handwritten Notes (Business)',
+        label: 'Flashcards & Study Guides',
         comparable: false,
-        fixedCeiling: 20.00,
-        titleHint: 'e.g. BUS2201 Macroeconomics Full Sem Notes',
+        fixedCeiling: 30.00, // Acts as Soft Warning threshold
+        titleHint: 'e.g. Medical Anatomy Flashcards',
       },
       {
-        label: 'Past Year Papers',
-        comparable: false,
-        fixedCeiling: 10.00,
-        titleHint: 'e.g. CSC3109 Final Exam 20222024',
+        label: 'Presentation Remotes / Clickers',
+        comparable: true,
+        studentMarket: true,
+        fixedCeiling: 100.00,
+        titleHint: 'e.g. Logitech R400 Presenter',
+        serpQuerySuffix: 'Malaysia',
       },
       {
         label: 'Other',
@@ -153,11 +150,11 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
     customFields: [
       {
         id: 'program',
-        label: 'Program',
+        label: 'Program / Faculty',
         type: 'select',
-        options: ['Software Engineering', 'Computer Science', 'Information Technology', 'Cybersecurity', 'Data Science', 'Multimedia Computing', 'Business Administration', 'Accounting', 'Finance', 'Mechanical Engineering', 'Electrical Engineering', 'Civil Engineering', 'Architecture', 'Law', 'Foundation in IT', 'Foundation in Business', 'Foundation in Engineering', 'Foundation in Arts'],
+        options: ['Software Engineering', 'Computer Science', 'Information Technology', 'Business Administration', 'Accounting', 'Mechanical Engineering', 'Electrical Engineering', 'Civil Engineering', 'Architecture', 'Law', 'Medicine & Nursing', 'Arts & Design', 'Other'],
         required: true,
-        applicableSubcategories: ['IT & Computing Books', 'Engineering Textbooks', 'Business & Law Books', 'Handwritten Notes (IT & CS)', 'Handwritten Notes (Engineering)', 'Handwritten Notes (Business)', 'Past Year Papers'],
+        applicableSubcategories: ['Textbooks & Reference Books', 'Handwritten Notes & Summaries', 'Past Year Papers & Assignments', 'Flashcards & Study Guides', 'Clinical Scrubs & Uniforms'],
       },
       {
         id: 'year_semester',
@@ -165,80 +162,90 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         type: 'text',
         placeholder: 'e.g. Year 2 Sem 1',
         required: true,
-        applicableSubcategories: ['IT & Computing Books', 'Engineering Textbooks', 'Business & Law Books', 'Handwritten Notes (IT & CS)', 'Handwritten Notes (Engineering)', 'Handwritten Notes (Business)', 'Past Year Papers'],
+        applicableSubcategories: ['Textbooks & Reference Books', 'Handwritten Notes & Summaries', 'Past Year Papers & Assignments', 'Flashcards & Study Guides'],
       },
       {
         id: 'subject_code',
         label: 'Subject Code',
         type: 'text',
         placeholder: 'e.g. CSC3109',
-        applicableSubcategories: ['IT & Computing Books', 'Engineering Textbooks', 'Business & Law Books', 'Handwritten Notes (IT & CS)', 'Handwritten Notes (Engineering)', 'Handwritten Notes (Business)', 'Past Year Papers'],
+        applicableSubcategories: ['Textbooks & Reference Books', 'Handwritten Notes & Summaries', 'Past Year Papers & Assignments', 'Flashcards & Study Guides'],
       },
     ],
   },
 
-  // 
-  // HOSTEL  Branded appliances/storage are comparable.
-  //          Used furniture is hyper-local, no benchmark.
-  // 
+  // ==========================================
+  // HOSTEL LIVING & SPORTS
+  // ==========================================
   HOSTEL: {
     id: 'HOSTEL',
-    label: 'Hostel & Room',
-    subtext: 'Appliances, storage and room essentials',
+    label: 'Hostel Living & Sports',
+    subtext: 'Room essentials, appliances, and gym gear',
     governance: 'OPEN',
     subcategories: [
       {
-        label: 'Stand & Table Fans',
+        label: 'Cooling & Ventilation',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 200.00,
-        titleHint: 'e.g. Pensonic 16" Stand Fan PF-1601',
+        titleHint: 'e.g. Stand Fan, Mini Air Cooler',
         serpQuerySuffix: 'fan Malaysia buy',
       },
       {
-        label: 'Rice Cookers & Kettles',
+        label: 'Cooking Appliances',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 300.00,
-        titleHint: 'e.g. Khind Rice Cooker 1.0L, Pensonic Kettle 1.7L',
+        titleHint: 'e.g. Rice Cooker 1.0L, Kettle, Toaster',
         serpQuerySuffix: 'Malaysia buy',
       },
       {
-        label: 'Irons & Laundry',
+        label: 'Laundry & Cleaning Supplies',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 200.00,
-        titleHint: 'e.g. Panasonic Dry Iron, Philips Steam Iron',
+        titleHint: 'e.g. Steam Iron, Drying Rack',
         serpQuerySuffix: 'Malaysia buy',
       },
       {
-        label: 'Study Tables & Chairs',
+        label: 'Furniture',
         comparable: false,
         studentMarket: true,
-        fixedCeiling: 400.00,
-        titleHint: 'e.g. IKEA MICKE Study Table, Ergonomic Chair',
+        fixedCeiling: 400.00, // Soft Warning threshold
+        titleHint: 'e.g. Study Table, Ergonomic Chair',
       },
       {
-        label: 'Racks & Storage Boxes',
+        label: 'Storage & Organization',
         comparable: true,
         studentMarket: true,
         fixedCeiling: 150.00,
-        titleHint: 'e.g. IKEA SAMLA Box 22L, 3-Tier Stackable Drawer',
+        titleHint: 'e.g. Stackable Drawer, Wardrobe Organizer',
         serpQuerySuffix: 'Malaysia',
       },
       {
-        label: 'Bedding & Linen',
+        label: 'Bedding & Comfort',
         comparable: false,
         studentMarket: true,
-        fixedCeiling: 100.00,
-        titleHint: 'e.g. Single Bed Pillow Set, Bolster, Bedsheet Set',
+        fixedCeiling: 100.00, // Soft Warning threshold
+        titleHint: 'e.g. Single Bed Mattress, Pillow Set',
       },
       {
         label: 'Room Decor & Lighting',
         comparable: false,
         studentMarket: true,
-        fixedCeiling: 80.00,
-        titleHint: 'e.g. RGB LED Strip 5m, Study Lamp, Mirror',
+        titleHint: 'e.g. Study Lamp, Mirror, LED Strips',
+      },
+      {
+        label: 'Snacks & Instant Food',
+        comparable: false,
+        studentMarket: true,
+        titleHint: 'e.g. Maggi Bundle, 3-in-1 Coffee pack',
+      },
+      {
+        label: 'Sports & Gym Gear',
+        comparable: false,
+        studentMarket: true,
+        titleHint: 'e.g. Badminton Racket, 5kg Dumbbell, Yoga Mat',
       },
       {
         label: 'Other',
@@ -249,114 +256,72 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
     ],
     customFields: [
       {
-        id: 'brand',
-        label: 'Appliance Brand',
-        type: 'select',
-        options: ['Khind', 'Pensonic', 'Panasonic', 'KDK', 'Midea', 'Philips', 'Other'],
-        required: true,
-        applicableSubcategories: ['Stand & Table Fans', 'Rice Cookers & Kettles', 'Irons & Laundry'],
-      },
-      {
         id: 'pickup_difficulty',
         label: 'Pickup Difficulty',
         type: 'toggle',
         options: ['Easy (Fits in Car)', 'Moderate (Needs 2 People)', 'Heavy (Needs Lorry/Van)'],
         required: true,
-        applicableSubcategories: ['Stand & Table Fans', 'Rice Cookers & Kettles', 'Irons & Laundry', 'Study Tables & Chairs', 'Racks & Storage Boxes'],
+        applicableSubcategories: ['Cooling & Ventilation', 'Cooking Appliances', 'Laundry & Cleaning Supplies', 'Furniture', 'Storage & Organization'],
       },
     ],
   },
 
-  // 
-  // TECH  All hardware subcategories are market-comparable.
-  //        Digital access keys are fixed (no Shopee equivalent).
-  // 
+  // ==========================================
+  // TECH ESSENTIALS
+  // ==========================================
   TECH: {
     id: 'TECH',
-    label: 'Tech & Devices',
-    subtext: 'Secondhand gadgets, peripherals and software',
+    label: 'Tech Essentials',
+    subtext: 'Laptops, phones, accessories and chargers',
     governance: 'OPEN',
     subcategories: [
       {
-        label: 'Laptops',
+        label: 'Laptops & Computers',
         comparable: false,
-        fixedCeiling: 3500.00,
-        titleHint: 'e.g. MacBook Air M2, Dell XPS 13, Lenovo ThinkPad',
-        brandOptions: ['Apple', 'Dell', 'Lenovo', 'ASUS', 'HP', 'Acer', 'Microsoft', 'Other'],
+        titleHint: 'e.g. MacBook Air M2, Lenovo ThinkPad',
       },
       {
-        label: 'Smartphones',
+        label: 'Smartphones & Tablets',
         comparable: false,
-        fixedCeiling: 2500.00,
-        titleHint: 'e.g. iPhone 15 Pro, Samsung S24, Google Pixel 8',
-        brandOptions: ['Apple', 'Samsung', 'Google', 'Xiaomi', 'OPPO', 'OnePlus', 'Other'],
+        titleHint: 'e.g. iPhone 13, iPad Air, Samsung S23',
       },
       {
-        label: 'Tablets',
+        label: 'Computer Accessories',
         comparable: false,
-        fixedCeiling: 2000.00,
-        titleHint: 'e.g. iPad Air, Samsung Tab S9, Huawei MatePad',
-        brandOptions: ['Apple', 'Samsung', 'Huawei', 'Lenovo', 'Xiaomi', 'Other'],
+        titleHint: 'e.g. Wireless Mouse, Mechanical Keyboard',
       },
       {
-        label: 'Keyboards & Mice',
+        label: 'Audio & Wearables',
         comparable: false,
-        fixedCeiling: 500.00,
-        titleHint: 'e.g. Logitech MX Master 3, Keychron K2 Wireless',
-        brandOptions: ['Logitech', 'Razer', 'Keychron', 'Corsair', 'SteelSeries', 'Other'],
+        titleHint: 'e.g. AirPods Pro, Sony Headphones, Apple Watch',
       },
       {
-        label: 'Headphones & Audio',
+        label: 'Power Banks & Chargers',
         comparable: false,
-        fixedCeiling: 800.00,
-        titleHint: 'e.g. Sony WH-1000XM5, Apple AirPods Pro 2nd Gen',
-        brandOptions: ['Sony', 'Apple', 'Samsung', 'JBL', 'Anker', 'Sennheiser', 'Other'],
+        titleHint: 'e.g. 10000mAh Powerbank, 65W GaN Charger',
       },
       {
-        label: 'Cables, Hubs & Chargers',
+        label: 'Thumb Drives & Storage',
         comparable: false,
-        fixedCeiling: 150.00,
-        titleHint: 'e.g. Anker 65W GaN Charger, Baseus USB-C Hub',
-        brandOptions: ['Anker', 'Baseus', 'Ugreen', 'Samsung', 'Belkin', 'Other'],
+        titleHint: 'e.g. 1TB External HDD, 64GB Pendrive',
       },
       {
-        label: 'Gaming Consoles & Games',
+        label: 'Gaming & Entertainment',
         comparable: false,
-        fixedCeiling: 1500.00,
-        titleHint: 'e.g. Nintendo Switch OLED, PS5 Controller',
-        brandOptions: ['Sony', 'Nintendo', 'Microsoft', 'Steam', 'Other'],
+        titleHint: 'e.g. PS5 Controller, Nintendo Switch',
       },
       {
-        label: 'Software Licences',
+        label: 'Software & Subscriptions',
         comparable: false,
-        fixedCeiling: 150.00,
-        titleHint: 'e.g. Microsoft Office 365 1-Year Key',
+        titleHint: 'e.g. Office 365 1-Year Key',
       },
       {
         label: 'Other',
         comparable: false,
-        fixedCeiling: 500.00,
         titleHint: 'e.g. Tech item not listed above',
-        brandOptions: ['Other'],
       },
     ],
     customFields: [
-      {
-        id: 'brand',
-        label: 'Brand / Manufacturer',
-        type: 'select',
-        options: ['Other'],
-        required: true,
-        applicableSubcategories: ['Laptops', 'Smartphones', 'Tablets', 'Keyboards & Mice', 'Headphones & Audio', 'Cables, Hubs & Chargers', 'Gaming Consoles & Games'],
-      },
-      {
-        id: 'specs',
-        label: 'Key Specs',
-        type: 'text',
-        placeholder: 'Enter specifications for this item',
-        required: true,
-        applicableSubcategories: ['Laptops', 'Smartphones', 'Tablets', 'Keyboards & Mice', 'Headphones & Audio', 'Cables, Hubs & Chargers', 'Gaming Consoles & Games'],
-      },
       {
         id: 'condition',
         label: 'Condition',
@@ -364,58 +329,58 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         options: ['Brand New (Sealed)', 'Like New (< 3 months)', 'Good (Normal Use)', 'Fair (Visible Wear)', 'For Parts Only'],
         required: true,
       },
-      {
-        id: 'warranty',
-        label: 'Warranty',
-        type: 'select',
-        options: ['No Warranty', 'Manufacturer Warranty Active', 'Seller 1-Month Guarantee'],
-        applicableSubcategories: ['Laptops', 'Smartphones', 'Tablets', 'Keyboards & Mice', 'Headphones & Audio', 'Cables, Hubs & Chargers', 'Gaming Consoles & Games'],
-      },
     ],
   },
 
-  // 
-  // APPAREL  Branded preloved CAN be benchmarked on Shopee.
-  //           Custom/club/campus merch is unique  fixed ceiling.
-  // 
-   APPAREL: {
+  // ==========================================
+  // CAMPUS LIFESTYLE & APPAREL
+  // ==========================================
+  APPAREL: {
     id: 'APPAREL',
-    label: 'Apparel',
-    subtext: 'Preloved, club shirts, campus merch and fashion',
+    label: 'Campus Lifestyle & Apparel',
+    subtext: 'Shirts, bags, shoes and daily carry',
     governance: 'OPEN',
     subcategories: [
       {
-        label: 'Club & Society Jerseys',
+        label: 'Faculty & Event Shirts',
         comparable: false,
         studentMarket: true,
-        titleHint: 'e.g. UniKL Football Club Jersey 2024 Size M',
+        titleHint: 'e.g. UniKL Engineering Shirt XL, Hackathon Tee',
       },
       {
-        label: 'Campus Event Tees',
+        label: "Men's Fashion",
         comparable: false,
-        studentMarket: true,
-        titleHint: 'e.g. Pulse Hackathon 2024 Event Tee XL',
+        titleHint: 'e.g. Uniqlo Jacket M, Zara Jeans',
       },
       {
-        label: 'Preloved Menswear',
+        label: "Women's Fashion",
         comparable: false,
-        titleHint: 'e.g. Nike Dri-FIT Tee Size L, Uniqlo Jacket M',
+        titleHint: 'e.g. Cotton On Dress, Blouse',
       },
       {
-        label: 'Preloved Womenswear',
+        label: 'Footwear',
         comparable: false,
-        titleHint: 'e.g. Cotton On Dress Size S, Zara Blouse',
-      },
-      {
-        label: 'Shoes & Sneakers',
-        comparable: false,
-        titleHint: 'e.g. Nike Air Force 1 White Size UK8',
+        titleHint: 'e.g. Nike Air Force 1 UK8, Formal Shoes',
       },
       {
         label: 'Bags & Backpacks',
         comparable: false,
         studentMarket: true,
-        titleHint: 'e.g. Herschel Little America, Laptop Backpack',
+        titleHint: 'e.g. Herschel Backpack, Laptop Bag',
+      },
+      {
+        label: 'Lanyards & ID Holders',
+        comparable: false,
+        studentMarket: true,
+        titleHint: 'e.g. Campus Lanyard, Card Holder',
+      },
+      {
+        label: 'Umbrellas & Raincoats',
+        comparable: true,
+        studentMarket: true,
+        fixedCeiling: 60.00,
+        titleHint: 'e.g. Compact Umbrella, Raincoat',
+        serpQuerySuffix: 'Malaysia',
       },
       {
         label: 'Other',
@@ -428,7 +393,7 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
         id: 'size',
         label: 'Size',
         type: 'select',
-        options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free Size'],
+        options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free Size', 'Not Applicable'],
         required: true,
       },
       {
@@ -441,19 +406,20 @@ export const MARKETPLACE_CATEGORIES: Record<CategoryID, CategoryConfig> = {
     ],
   },
 
+  // ==========================================
+  // STUDENT SERVICES
+  // ==========================================
   SERVICES: {
     id: 'SERVICES',
-    label: 'Services',
-    subtext: 'Tutoring, printing, photography and more',
+    label: 'Student Services',
+    subtext: 'Tutoring, printing, repairs and gigs',
     governance: 'OPEN',
     subcategories: [
-      { label: 'Tutoring & Academic Help', comparable: false, titleHint: 'e.g. Mathematics tutor for Sem 2' },
-      { label: 'Printing & Binding', comparable: false, titleHint: 'e.g. A4 colour printing per page' },
-      { label: 'Photography & Video', comparable: false, titleHint: 'e.g. Graduation photoshoot' },
-      { label: 'Design & Creative', comparable: false, titleHint: 'e.g. Canva poster design' },
-      { label: 'Coding & Debugging', comparable: false, titleHint: 'e.g. Python assignment help' },
-      { label: 'Resume & Career', comparable: false, titleHint: 'e.g. CV review and formatting' },
-      { label: 'Translation & Writing', comparable: false, titleHint: 'e.g. Malay to English translation' },
+      { label: 'Tutoring & Assignment Help', comparable: false, titleHint: 'e.g. Calculus Tutor for Sem 2' },
+      { label: 'Printing & Binding Services', comparable: false, titleHint: 'e.g. A4 colour printing & binding' },
+      { label: 'IT & Laptop Repair', comparable: false, titleHint: 'e.g. Laptop Formatting, Virus Removal' },
+      { label: 'Design & Photography', comparable: false, titleHint: 'e.g. Graduation Photoshoot, Poster Design' },
+      { label: 'Freelance Gigs', comparable: false, titleHint: 'e.g. Data Entry, Translation, Coding' },
       { label: 'Other', comparable: false, titleHint: 'Describe your service' },
     ],
     customFields: [],

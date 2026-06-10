@@ -83,7 +83,7 @@ export default function PublicProfile() {
 
   const isClub = profile.role === 'CLUB';
   const isSeller = profile.is_seller === true || isClub;
-  const displayName = profile.full_name || profile.name || 'Pulse Member';
+  const displayName = profile.full_name || profile.name || profile.displayName || profile.email?.split('@')[0] || 'Student';
   const campus = profile.campus || profile.faculty || null;
 
   return (
