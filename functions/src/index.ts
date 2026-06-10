@@ -518,327 +518,326 @@ export const pcsValidate = onCall(
     let justification = "";
     let pcsStatus = "ERROR";
     let source = "";
-    const subcategory = String(data.subcategory || "");
     const listedPrice = parseFloat(itemPrice) || 0;
 
-    // Try block removed
-      if (!itemId) {
-        throw new Error("Missing itemId for PCS validation.");
-      }
+    if (!itemId) {
+      throw new Error("Missing itemId for PCS validation.");
+    }
 
-      // Check for Soft Warning categories
-      const softWarningCategories = ['Handwritten Notes & Summaries', 'Past Year Papers & Assignments', 'Flashcards & Study Guides', 'Furniture', 'Bedding & Comfort'];
-      if (softWarningCategories.includes(subcategory)) {
-        let softCap = 0;
-        if (subcategory.includes('Handwritten Notes')) softCap = 20;
-        else if (subcategory.includes('Past Year Papers')) softCap = 10;
-        else if (subcategory.includes('Flashcards')) softCap = 30;
-        else if (subcategory.includes('Furniture')) softCap = 400;
-        else if (subcategory.includes('Bedding')) softCap = 100;
+    // --- 1. FIRESTORE CONFIG SEEDING ---
+    let configDoc = await db.collection("settings").doc("pcs_config").get();
+    if (!configDoc.exists) {
+      await db.collection("settings").doc("pcs_config").set({
+        forcePcsKeywords: ["casio", "fx-570", "fx-991", "fx-82", "fx-350", "fx-115", "scientific calculator", "texas instruments", "ti-84", "ti-83", "ti-nspire", "sharp calculator", "el-w531", "hp calculator", "hp prime", "graphing calculator", "textbook", "edition", "isbn", "volume", "pearson", "mcgraw", "oxford", "cengage", "wiley", "springer", "elsevier", "prentice hall", "fundamentals of", "introduction to", "principles of", "engineering mathematics", "calculus", "physics textbook", "chemistry textbook", "biology textbook", "statistics textbook", "discrete mathematics", "data structures", "algorithms", "operating systems", "computer networks", "database systems", "software engineering", "lab coat", "safety goggles", "lab apron", "dissection kit", "lab tools", "microscope slide", "pipette", "burette", "beaker", "lab gloves", "bunsen burner", "measuring cylinder", "conical flask", "t-square", "drawing board", "set square", "compass set", "technical pen", "drafting pencil", "ruling pen", "french curve", "drafting machine", "parallel ruler", "scale ruler", "architectural scale", "drawing kit", "engineering drawing set", "clean code", "design patterns", "introduction to algorithms", "the pragmatic programmer", "code complete", "refactoring", "computer organization", "digital design", "operating system concepts", "database system concepts", "safety boots", "hard hat", "high visibility vest", "safety gloves", "safety helmet", "steel toe boots", "ppe equipment", "personal protective equipment", "safety harness", "ear protection", "face shield", "respirator mask", "safety shoes", "vernier caliper", "micrometer", "multimeter", "oscilloscope", "breadboard kit", "soldering iron", "stethoscope", "blood pressure monitor", "anatomy model", "medical textbook", "nursing handbook", "pharmacology guide", "medical dictionary", "clinical manual", "dissection manual", "physiology atlas"],
+        freeMarketKeywords: ["usb cable", "screen protector", "phone case", "sticker", "food", "drinks", "cookies", "meals", "homemade", "service", "tutoring", "printing", "photography", "jersey", "club shirt", "hoodie custom", "notes bundle", "past year paper", "handmade", "preloved", "vintage", "bundle", "thrifted", "antique", "replica", "customized", "second hand", "aesthetic", "designer"],
+        campusCapPercentage: 0.90,
+        freeMarketThreshold: 300
+      });
+      configDoc = await db.collection("settings").doc("pcs_config").get();
+    }
+    const pcsConfig = configDoc.data()!;
+    const forcePcsKeywords = pcsConfig.forcePcsKeywords || [];
+    const freeMarketKeywords = pcsConfig.freeMarketKeywords || [];
+    const campusCapPercentage = pcsConfig.campusCapPercentage || 0.90;
+    const freeMarketThreshold = pcsConfig.freeMarketThreshold || 300;
 
-        if (listedPrice > softCap) {
-          return {
-            isApproved: false,
-            pcsStatus: "SOFT_WARNING",
-            justification: `Market Advice: Similar items usually sell for around RM ${softCap} or less. Lowering your price might help you sell faster!`,
-            marketBaselinePrice: softCap,
-            maxAllowedStudentPrice: softCap,
-          };
-        } else {
-           await db.collection("items").doc(itemId).set({
-            pcs_status: "FREE_MARKET",
-            pcs_certified: true,
-            pcs_reason: "Priced within reasonable expected range for unique item.",
-            pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-          }, { merge: true });
+    const titleLower = itemTitle.toLowerCase();
 
-          return {
-            isApproved: true,
-            pcsStatus: "FREE_MARKET",
-            justification: "Priced within reasonable expected range for unique item.",
-            marketBaselinePrice: softCap,
-            maxAllowedStudentPrice: softCap,
-          };
-        }
-      }
+    // --- 2. COPYRIGHT FILTER ---
+    const copyrightKeywords = ['pdf', 'softcopy', 'soft copy', 'ebook', 'e-book', 'digital copy', 'scanned', 'send via whatsapp', 'send via telegram', 'send via email', 'digital file'];
+    const originalContentKeywords = ['my notes', 'my summary', 'my handwritten', 'my typed', 'original notes', 'my study notes'];
+    const hasCopyrightSignal = copyrightKeywords.some((keyword) => titleLower.includes(keyword));
+    const hasOriginalSignal = originalContentKeywords.some((keyword) => titleLower.includes(keyword));
 
-      const copyrightKeywords = ['pdf', 'softcopy', 'soft copy', 'ebook', 'e-book', 'digital copy', 'scanned', 'send via whatsapp', 'send via telegram', 'send via email', 'digital file'];
-      const originalContentKeywords = ['my notes', 'my summary', 'my handwritten', 'my typed', 'original notes', 'my study notes'];
-      const titleLower = itemTitle.toLowerCase();
-      const hasCopyrightSignal = copyrightKeywords.some((keyword) => titleLower.includes(keyword));
-      const hasOriginalSignal = originalContentKeywords.some((keyword) => titleLower.includes(keyword));
-
-      if (hasCopyrightSignal && !hasOriginalSignal) {
-        await db.collection("items").doc(itemId).set({
-          pcs_status: "COPYRIGHT_BLOCKED",
-          pcs_certified: false,
-          pcs_reason: "Selling digital copies is not allowed on Pulse.",
-          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-
-        return {
-          isApproved: false,
-          pcsStatus: "COPYRIGHT_BLOCKED",
-          justification: "Selling digital copies is not allowed on Pulse.",
-          marketBaselinePrice: 0,
-          maxAllowedStudentPrice: 0,
-        };
-      }
-
-      const subjectiveKeywords = ['handmade', 'preloved', 'bundle', 'secondhand', 'used', 'vintage', 'rare', 'collection', 'service', 'repair', 'print', 'tutor', 'clean', 'install', 'format', 'design', 'photography', 'rent'];
-      const hasSubjectiveSignal = subjectiveKeywords.some((keyword) => titleLower.includes(keyword));
-
-      if (hasSubjectiveSignal) {
-        await db.collection("items").doc(itemId).set({
-          pcs_status: "FREE_MARKET",
-          pcs_certified: true,
-          pcs_reason: "Subjective or unique item — no validation required.",
-          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-
-        return {
-          isApproved: true,
-          pcsStatus: "FREE_MARKET",
-          justification: "Subjective or unique item — no validation required.",
-          marketBaselinePrice: 0,
-          maxAllowedStudentPrice: 0,
-        };
-      }
-
-      const accessoryKeywords = ['case', 'protector', 'screen protector', 'cable', 'charger', 'adapter', 'stand', 'holder', 'mount', 'strap', 'skin', 'sticker', 'tempered glass'];
-      const hasAccessorySignal = accessoryKeywords.some((keyword) => titleLower.includes(keyword));
-
-      if (hasAccessorySignal) {
-        await db.collection("items").doc(itemId).set({
-          pcs_status: "FREE_MARKET",
-          pcs_certified: true,
-          pcs_reason: "Accessory item — subjective pricing, no validation required.",
-          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-
-        return {
-          isApproved: true,
-          pcsStatus: "FREE_MARKET",
-          justification: "Accessory item — subjective pricing, no validation required.",
-          marketBaselinePrice: 0,
-          maxAllowedStudentPrice: 0,
-        };
-      }
-
-      const freeMarketCategories = ['SERVICES', 'FOOD', 'HANDMADE', 'CUSTOM', 'APPAREL', 'TECH'];
-      const categoryUpper = (category || '').toUpperCase();
-
-      if (freeMarketCategories.some((freeMarketCategory) => categoryUpper.includes(freeMarketCategory))) {
-        await db.collection("items").doc(itemId).set({
-          pcs_status: "FREE_MARKET",
-          pcs_certified: true,
-          pcs_reason: "Free Market category. No price validation required.",
-          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-
-        return {
-          isApproved: true,
-          pcsStatus: "FREE_MARKET",
-          justification: "Free Market category. No price validation required.",
-          marketBaselinePrice: 0,
-          maxAllowedStudentPrice: 0,
-        };
-      }
-
-
-
-      const cacheKey = itemTitle.toLowerCase().trim().replace(/\s+/g, ' ');
-      const cacheRef = db.collection("price_cache").doc(cacheKey);
-      const cacheSnap = await cacheRef.get();
-      if (cacheSnap.exists) {
-        const cached = cacheSnap.data()!;
-        if (cached.expiresAt?.toMillis() > Date.now()) {
-          floorPrice = cached.floorPrice || 0;
-          ceilingPrice = cached.ceilingPrice || 0;
-          source = cached.source || '';
-          console.log('Cache hit for:', cacheKey, '→ ceiling:', ceilingPrice);
-        }
-      }
-
-      if (ceilingPrice === 0) {
-        const anthropic = new Anthropic({
-          apiKey: anthropicApiKey.value(),
-        });
-
-        let categoryContext = "";
-        if (categoryUpper.includes("ACADEMIC") || categoryUpper.includes("BOOK")) {
-          categoryContext = "For academic books and textbooks, find prices from Malaysian bookstores such as MPH, Popular, or Kinokuniya, or the publisher official website.";
-        } else {
-          categoryContext = "For this item, find prices from official brand stores on Shopee Mall or Lazada Mall, or the brand official Malaysian website.";
-        }
-
-        const prompt = `You are a price validator for a Malaysian campus marketplace.
-
-A student listed "${itemTitle}". This may contain typos, abbreviations, or incomplete names.
-
-Step 1: Identify what the actual PRODUCT being sold is (the item itself, not just a brand/model keyword).
-- If the title includes accessory words like "case", "protector", "charger", "cable", "adapter", "stand", "holder", "mount", "strap", "screen protector", "battery", "earphone", "buds", "keyboard", "mouse" — those are the actual product, not the phone/laptop brand that follows.
-- Example: "iPhone 13 Clear Case" → the product is a "clear phone case for iPhone 13", NOT an iPhone 13.
-- Example: "MacBook Pro Charger" → the product is a "laptop charger", NOT a MacBook Pro.
-Step 2: Search for prices of the ACTUAL product in Malaysia.
-Examples: "xm5" → "Sony WH-1000XM5", "ps5" → "PlayStation 5", "ipad 10th gen" → "iPad 10th generation".
-
-Find the price band for the inferred product available to Malaysian buyers today.
-
-${categoryContext}
-
-Identify:
-1. floorPrice: the cheapest legitimate physical copy from a real authorized seller in Malaysia (ignore pirated copies, PDF versions, damaged goods, and suspiciously cheap outliers below RM5)
-2. ceilingPrice: the official new retail price from an authorized Malaysian retailer or brand store
-
-Rules:
-- Only use Malaysian Ringgit prices
-- Do not use international prices or currency conversions unless absolutely no Malaysian price exists
-- Do not use bundle prices that include other products
-- Do not use pirated or digital copies as floor reference
-- The ceiling must be from an authorized seller not an individual reseller
-
-Return ONLY this raw JSON with no markdown no explanation:
-{"floorPrice": number, "ceilingPrice": number, "source": "where ceiling price was found"}
-
-You MUST always return a valid JSON object regardless of whether you find a price or not. If you cannot find a Malaysian retail price, return: {"floorPrice": 0, "ceilingPrice": 0, "source": "not found"}. Never refuse to output JSON. The calling system handles zero values as Free Market approval.`;
-
-        const tools: any = [{ type: "web_search_20250305", name: "web_search" }];
-        let messages: any[] = [{ role: "user", content: prompt }];
-        let rawText = '';
-        let firstAttemptDone = false;
-
-        for (let turn = 0; turn < 4; turn++) {
-          const msg = await anthropic.messages.create({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 1000,
-            tools,
-            messages,
-          });
-
-          for (const block of msg.content) {
-            if (block.type === 'text') {
-              rawText += block.text;
-            }
-          }
-
-          const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            try {
-              const parsed = JSON.parse(jsonMatch[0]);
-              const testCeiling = parseFloat(parsed.ceilingPrice) || 0;
-              if (testCeiling > 0) break;
-            } catch (_) {}
-          }
-
-          const toolUse = msg.content.filter((b: any) => b.type === 'tool_use');
-          if (toolUse.length === 0) {
-            if (!firstAttemptDone) {
-              firstAttemptDone = true;
-              messages.push({ role: "assistant", content: msg.content });
-              messages.push({ role: "user", content: "No prices found. The item name may be a typo or abbreviation. Think carefully about what product this could be and search again with the corrected full product name." });
-            } else {
-              break;
-            }
-          } else {
-            firstAttemptDone = true;
-            messages.push({ role: "assistant", content: msg.content });
-            for (const block of toolUse) {
-              messages.push({ role: "user", content: [{ type: "tool_result", tool_use_id: (block as any).id, content: "done" }] });
-            }
-          }
-        }
-        console.log('Claude SDK raw text:', rawText);
-
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          console.error('No JSON found in Claude SDK response');
-          floorPrice = 0;
-          ceilingPrice = 0;
-          source = "not found";
-        } else {
-          try {
-            const parsed = JSON.parse(jsonMatch[0]);
-            floorPrice = parseFloat(parsed.floorPrice) || 0;
-            ceilingPrice = parseFloat(parsed.ceilingPrice) || 0;
-            source = String(parsed.source || "");
-          } catch (e) {
-            console.error('JSON parse error from Claude SDK text:', e);
-            floorPrice = 0;
-            ceilingPrice = 0;
-            source = "not found";
-          }
-        }
-
-        if (ceilingPrice > 0) {
-          await cacheRef.set({
-            floorPrice,
-            ceilingPrice,
-            source,
-            cachedAt: admin.firestore.FieldValue.serverTimestamp(),
-            expiresAt: admin.firestore.Timestamp.fromMillis(Date.now() + 86400000),
-          });
-          console.log('Cached result for:', cacheKey);
-        }
-      }
-
-      if (ceilingPrice === 0) {
-        if (listedPrice > 500) {
-          isApproved = false;
-          pcsStatus = "BLOCKED_NO_REFERENCE";
-          justification = "Items above RM500 need verified market price.";
-        } else {
-          isApproved = true;
-          pcsStatus = "FREE_MARKET";
-          justification = "No market reference found. Listed as Free Market item.";
-        }
-      } else {
-        const campusCap = Math.round(ceilingPrice * 0.90 * 100) / 100;
-        maxAllowedPrice = campusCap;
-        isApproved = listedPrice <= campusCap;
-        pcsStatus = isApproved ? "APPROVED" : "FLAGGED";
-        justification = isApproved
-          ? "Price is within campus cap of RM" + campusCap + " based on official retail of RM" + ceilingPrice
-          : "Price exceeds campus cap of RM" + campusCap + ". Official retail price found at RM" + ceilingPrice + " from " + source;
-      }
-
+    if (hasCopyrightSignal && !hasOriginalSignal) {
       await db.collection("items").doc(itemId).set({
-        pcs_status: pcsStatus,
-        pcs_certified: isApproved,
-        pcs_market_price: ceilingPrice,
-        pcs_floor_price: floorPrice,
-        pcs_max_allowed: maxAllowedPrice,
-        pcs_reason: justification,
+        pcs_status: "COPYRIGHT_BLOCKED",
+        pcs_certified: false,
+        pcs_reason: "Selling digital copies is not allowed on Pulse.",
         pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
-      if (pcsStatus === "FLAGGED" || pcsStatus === "BLOCKED_NO_REFERENCE") {
-        await db.collection("PriceGuidelines").doc(itemId).set({
-          title: itemTitle,
-          listed_price: listedPrice,
-          market_price: ceilingPrice,
-          floor_price: floorPrice,
-          max_allowed: maxAllowedPrice,
-          seller_id: sellerId,
-          status: "PENDING_REVIEW",
-          flagged_at: admin.firestore.FieldValue.serverTimestamp(),
-          reason: justification,
-          source,
-        });
-      }
+      return {
+        isApproved: false,
+        pcsStatus: "COPYRIGHT_BLOCKED",
+        justification: "Selling digital copies is not allowed on Pulse.",
+        marketBaselinePrice: 0,
+        maxAllowedStudentPrice: 0,
+      };
+    }
 
-      console.log('PCS verdict:', isApproved, ceilingPrice, maxAllowedPrice, 'Listed:', listedPrice, 'Status:', pcsStatus);
+    // --- 3. SUBJECTIVE KEYWORD FILTER ---
+    const subjectiveKeywords = ['handmade', 'preloved', 'bundle', 'secondhand', 'used', 'vintage', 'rare', 'collection', 'service', 'repair', 'print', 'tutor', 'clean', 'install', 'format', 'design', 'photography', 'rent'];
+    const hasSubjectiveSignal = subjectiveKeywords.some((keyword) => titleLower.includes(keyword));
+
+    if (hasSubjectiveSignal) {
+      await db.collection("items").doc(itemId).set({
+        pcs_status: "FREE_MARKET",
+        pcs_certified: true,
+        pcs_reason: "Subjective or unique item — no validation required.",
+        pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
 
       return {
-        isApproved,
-        pcsStatus,
-        justification,
-        marketBaselinePrice: ceilingPrice,
-        maxAllowedStudentPrice: maxAllowedPrice,
-        floorPrice,
-        source
+        isApproved: true,
+        pcsStatus: "FREE_MARKET",
+        justification: "Subjective or unique item — no validation required.",
+        marketBaselinePrice: 0,
+        maxAllowedStudentPrice: 0,
       };
+    }
 
+    // --- 4. STUDENT ESSENTIAL CHECK (NEW BYPASS) ---
+    const hasFreeMarketKeyword = freeMarketKeywords.some((keyword: string) => titleLower.includes(keyword));
+    if (hasFreeMarketKeyword) {
+      await db.collection("items").doc(itemId).set({
+        pcs_status: "FREE_MARKET",
+        pcs_certified: true,
+        pcs_reason: "Item identified as Free Market by config.",
+        pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+      return {
+        isApproved: true,
+        pcsStatus: "FREE_MARKET",
+        justification: "Item identified as Free Market by config.",
+        marketBaselinePrice: 0,
+        maxAllowedStudentPrice: 0,
+      };
+    }
+
+    const hasForcePcsKeyword = forcePcsKeywords.some((keyword: string) => titleLower.includes(keyword));
+    
+    if (!hasForcePcsKeyword) {
+      if (listedPrice <= freeMarketThreshold) {
+        await db.collection("items").doc(itemId).set({
+          pcs_status: "FREE_MARKET",
+          pcs_certified: true,
+          pcs_reason: "Price below free market threshold.",
+          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+        return {
+          isApproved: true,
+          pcsStatus: "FREE_MARKET",
+          justification: "Price below free market threshold.",
+          marketBaselinePrice: 0,
+          maxAllowedStudentPrice: 0,
+        };
+      } else {
+        await db.collection("items").doc(itemId).set({
+          pcs_status: "BLOCKED_NO_REFERENCE",
+          pcs_certified: false,
+          pcs_reason: "We could not find a market price for this item. Try being more specific with the brand and model name so we can check if the price is fair.",
+          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+        return {
+          isApproved: false,
+          pcsStatus: "BLOCKED_NO_REFERENCE",
+          justification: "We could not find a market price for this item. Try being more specific with the brand and model name so we can check if the price is fair.",
+          marketBaselinePrice: 0,
+          maxAllowedStudentPrice: 0,
+        };
+      }
+    }
+
+    // --- 5. FIRESTORE CACHE CHECK ---
+    const cacheKey = itemTitle.toLowerCase().trim().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_');
+    const cacheRef = db.collection("price_cache").doc(cacheKey);
+    const cacheSnap = await cacheRef.get();
+    if (cacheSnap.exists) {
+      const cached = cacheSnap.data()!;
+      if (cached.expiresAt?.toMillis() > Date.now()) {
+        floorPrice = cached.floorPrice || 0;
+        ceilingPrice = cached.ceilingPrice || 0;
+        source = cached.source || '';
+        console.log('Cache hit for:', cacheKey, '→ ceiling:', ceilingPrice);
+      }
+    }
+
+    // --- 6. SERP API + CLAUDE CHECK ---
+    if (ceilingPrice === 0) {
+      let serpApiResults = '';
+      const serpApiKey = process.env.SERP_API_KEY;
+      
+      if (serpApiKey) {
+        const query = encodeURIComponent(`${itemTitle}`);
+        const url = `https://serpapi.com/search.json?engine=google_shopping&q=${query}&gl=my&hl=en&currency=MYR&api_key=${serpApiKey}`;
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 6000);
+          const res = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeout);
+          if (res.ok) {
+            const resultData = await res.json();
+            const results: any[] = resultData?.shopping_results || [];
+            if (results.length > 0) {
+               serpApiResults = JSON.stringify(results.slice(0, 10).map(r => ({ title: r.title, price: r.price, source: r.source })));
+            }
+          }
+        } catch(e) {
+          console.error('SerpAPI fetch error:', e);
+        }
+      }
+
+      const anthropic = new Anthropic({
+        apiKey: anthropicApiKey.value(),
+      });
+
+      let prompt = "";
+      if (serpApiResults) {
+        prompt = `Malaysian campus marketplace price validator.
+Item: ${itemTitle}
+Prices from Google Shopping Malaysia: ${serpApiResults}
+
+From this data identify:
+- floorPrice: cheapest from authorized seller
+- ceilingPrice: official new retail price
+
+Ignore: below RM5, PDFs, bundles, grey market.
+Return ONLY JSON:
+{"floorPrice": number, "ceilingPrice": number, "source": string}`;
+      } else {
+        const categoryUpper = (category || '').toUpperCase();
+        prompt = `Malaysian campus marketplace price validator.
+Item: ${itemTitle}
+Category: ${categoryUpper}
+
+Find current Malaysian retail prices only.
+Textbooks: check MPH, Popular, Kinokuniya.
+Other items: check authorized brand stores.
+
+Return ONLY JSON:
+{"floorPrice": number, "ceilingPrice": number, "source": string}
+
+Rules: ignore PDFs, bundles, used copies, international prices.
+If no price found: {"floorPrice": 0, "ceilingPrice": 0, "source": "not found"}`;
+      }
+
+      const messages: any[] = [{ role: "user", content: prompt }];
+      let rawText = '';
+      let firstAttemptDone = false;
+
+      for (let turn = 0; turn < 4; turn++) {
+        const msg = await anthropic.messages.create({
+          model: "claude-3-5-haiku-latest",
+          max_tokens: 1000,
+          messages,
+        });
+
+        for (const block of msg.content) {
+          if (block.type === 'text') {
+            rawText += block.text;
+          }
+        }
+
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            const parsed = JSON.parse(jsonMatch[0]);
+            const testCeiling = parseFloat(parsed.ceilingPrice) || 0;
+            if (testCeiling > 0 || parsed.source === "not found") break;
+          } catch (_) {}
+        }
+
+        if (!firstAttemptDone) {
+          firstAttemptDone = true;
+          messages.push({ role: "assistant", content: msg.content });
+          messages.push({ role: "user", content: "Invalid JSON format. You must output raw JSON only." });
+        } else {
+          break;
+        }
+      }
+
+      console.log('Claude SDK raw text:', rawText);
+
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error('No JSON found in Claude SDK response');
+        floorPrice = 0;
+        ceilingPrice = 0;
+        source = "not found";
+      } else {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          floorPrice = parseFloat(parsed.floorPrice) || 0;
+          ceilingPrice = parseFloat(parsed.ceilingPrice) || 0;
+          source = String(parsed.source || "");
+        } catch (e) {
+          console.error('JSON parse error from Claude SDK text:', e);
+          floorPrice = 0;
+          ceilingPrice = 0;
+          source = "not found";
+        }
+      }
+
+      if (ceilingPrice > 0 || source !== "not found") {
+        await cacheRef.set({
+          floorPrice,
+          ceilingPrice,
+          source,
+          itemTitle,
+          cachedAt: admin.firestore.FieldValue.serverTimestamp(),
+          expiresAt: admin.firestore.Timestamp.fromMillis(Date.now() + 86400000),
+        });
+        console.log('Cached result for:', cacheKey);
+      }
+    }
+
+    if (ceilingPrice === 0) {
+      if (listedPrice > 500) {
+        isApproved = false;
+        pcsStatus = "BLOCKED_NO_REFERENCE";
+        justification = "Items above RM500 need verified market price.";
+      } else {
+        isApproved = true;
+        pcsStatus = "FREE_MARKET";
+        justification = "No market reference found. Listed as Free Market item.";
+      }
+    } else {
+      const campusCap = Math.round(ceilingPrice * campusCapPercentage * 100) / 100;
+      maxAllowedPrice = campusCap;
+      isApproved = listedPrice <= campusCap;
+      pcsStatus = isApproved ? "APPROVED" : "FLAGGED";
+      justification = isApproved
+        ? "Price is within campus cap of RM" + campusCap + " based on official retail of RM" + ceilingPrice
+        : "Price exceeds campus cap of RM" + campusCap + ". Official retail price found at RM" + ceilingPrice + " from " + source;
+    }
+
+    await db.collection("items").doc(itemId).set({
+      pcs_status: pcsStatus,
+      pcs_certified: isApproved,
+      pcs_market_price: ceilingPrice,
+      pcs_floor_price: floorPrice,
+      pcs_max_allowed: maxAllowedPrice,
+      pcs_reason: justification,
+      pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    if (pcsStatus === "FLAGGED" || pcsStatus === "BLOCKED_NO_REFERENCE") {
+      await db.collection("PriceGuidelines").doc(itemId).set({
+        title: itemTitle,
+        listed_price: listedPrice,
+        market_price: ceilingPrice,
+        floor_price: floorPrice,
+        max_allowed: maxAllowedPrice,
+        seller_id: sellerId,
+        status: "PENDING_REVIEW",
+        flagged_at: admin.firestore.FieldValue.serverTimestamp(),
+        reason: justification,
+        source,
+      });
+    }
+
+    console.log('PCS verdict:', isApproved, ceilingPrice, maxAllowedPrice, 'Listed:', listedPrice, 'Status:', pcsStatus);
+
+    return {
+      isApproved,
+      pcsStatus,
+      justification,
+      marketBaselinePrice: ceilingPrice,
+      maxAllowedStudentPrice: maxAllowedPrice,
+      floorPrice,
+      source
+    };
   }
 );
 

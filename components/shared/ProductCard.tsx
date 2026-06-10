@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -44,8 +44,7 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
       {/*  IMAGE BOX  */}
       <div className="relative aspect-square bg-slate-50 rounded-lg overflow-hidden mb-2">
         <img 
-          src={item.image_url || `https://picsum.photos/seed/${item.id || item.title}/400/400`} 
-          onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${item.id}/400/400`; }}
+          src={item.image_url} 
           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
           loading="lazy"
           alt={item.title}

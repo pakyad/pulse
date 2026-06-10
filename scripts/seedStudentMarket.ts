@@ -27,19 +27,7 @@ const app = initialize();
 const db = admin.firestore();
 const SERP_API_KEY = process.env.SERP_API_KEY;
 
-async function fetchGoogleImage(query: string): Promise<string | null> {
-  if (!SERP_API_KEY) return null;
-  try {
-    const response = await fetch(`https://serpapi.com/search.json?engine=google_images&q=${encodeURIComponent(query)}&api_key=${SERP_API_KEY}`);
-    const data = await response.json();
-    if (data.images_results && data.images_results.length > 0) {
-      return data.images_results[0].original;
-    }
-  } catch (error) {
-    console.error(`Failed to fetch image for query "${query}":`, error);
-  }
-  return null;
-}
+// fetchGoogleImage has been removed to lock visuals.
 
 const MOCK_ITEMS = [
   {
@@ -49,6 +37,7 @@ const MOCK_ITEMS = [
     price: 85.00,
     seller_name: "Adam Q.",
     condition: "Used - Good",
+    image_url: "https://plus.unsplash.com/premium_photo-1724266846347-bd10efdd330e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "Casio fx-570EX ClassWiz",
@@ -57,6 +46,7 @@ const MOCK_ITEMS = [
     price: 60.00,
     seller_name: "Sarah Lim",
     condition: "Used - Like New",
+    image_url: "https://plus.unsplash.com/premium_photo-1722124804439-f8ef7440d778?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "White Lab Coat Size M",
@@ -65,6 +55,7 @@ const MOCK_ITEMS = [
     price: 25.00,
     seller_name: "Farhan Y.",
     condition: "Used - Good",
+    image_url: "https://plus.unsplash.com/premium_photo-1673953886001-d866feca057f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "A4 Sketchbook 135gsm",
@@ -73,6 +64,7 @@ const MOCK_ITEMS = [
     price: 15.00,
     seller_name: "Maya T.",
     condition: "New",
+    image_url: "https://plus.unsplash.com/premium_photo-1664368832368-9d6b5f88a516?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "UniKL Engineering Faculty Shirt",
@@ -81,6 +73,7 @@ const MOCK_ITEMS = [
     price: 35.00,
     seller_name: "Ahmad F.",
     condition: "Used - Like New",
+    image_url: "https://plus.unsplash.com/premium_photo-1718913936342-eaafff98834b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "Maggi Hot Cup Curry (Box of 6)",
@@ -89,6 +82,7 @@ const MOCK_ITEMS = [
     price: 12.00,
     seller_name: "Hostel Mart",
     condition: "New",
+    image_url: "https://plus.unsplash.com/premium_photo-1675435644687-562e8042b9db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "Mini Desk Fan USB",
@@ -97,6 +91,7 @@ const MOCK_ITEMS = [
     price: 18.00,
     seller_name: "Daniel R.",
     condition: "Used - Good",
+    image_url: "https://plus.unsplash.com/premium_photo-1774048160942-70487d02f336?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "Pineng Power Bank 10000mAh",
@@ -105,6 +100,7 @@ const MOCK_ITEMS = [
     price: 40.00,
     seller_name: "Lisa Wong",
     condition: "Used - Good",
+    image_url: "https://plus.unsplash.com/premium_photo-1686743401891-bdfc1afe923e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "SanDisk Cruzer Glide 64GB",
@@ -113,6 +109,7 @@ const MOCK_ITEMS = [
     price: 20.00,
     seller_name: "Kevin T.",
     condition: "New",
+    image_url: "https://plus.unsplash.com/premium_photo-1726837308560-cb371e1cbb16?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   },
   {
     title: "Format Laptop & Reinstall Windows 11",
@@ -121,18 +118,63 @@ const MOCK_ITEMS = [
     price: 50.00,
     seller_name: "Tech Guru Sam",
     condition: "Service",
+    image_url: "https://plus.unsplash.com/premium_photo-1681302427948-2fd0eca629b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+  },
+  {
+    title: "Campbell Biology 12th Edition",
+    category: "ACADEMIC",
+    subcategory: "Textbooks & Reference Books",
+    price: 120.00,
+    seller_name: "Sarah Lim",
+    condition: "Used - Good",
+    image_url: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+  },
+  {
+    title: "Texas Instruments TI-84 Plus CE Graphing Calculator",
+    category: "ACADEMIC",
+    subcategory: "Scientific Calculators",
+    price: 350.00,
+    seller_name: "Adam Q.",
+    condition: "Used - Like New",
+    image_url: "https://images.unsplash.com/photo-1574607383476-f517f260d30b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+  },
+  {
+    title: "Engineering Drafting Tool Set (Compass & Rulers)",
+    category: "ACADEMIC",
+    subcategory: "Art & Studio Supplies",
+    price: 45.00,
+    seller_name: "Maya T.",
+    condition: "New",
+    image_url: "https://images.unsplash.com/photo-1611078519129-9e8c47f3b89b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+  },
+  {
+    title: "Medical Scrubs Dark Blue Size L",
+    category: "ACADEMIC",
+    subcategory: "Lab Equipment & Safety Gear",
+    price: 60.00,
+    seller_name: "Farhan Y.",
+    condition: "New",
+    image_url: "https://images.unsplash.com/photo-1584982751601-97dcc096659c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+  },
+  {
+    title: "Organic Chemistry Molecular Model Kit",
+    category: "ACADEMIC",
+    subcategory: "Lab Equipment & Safety Gear",
+    price: 80.00,
+    seller_name: "Ahmad F.",
+    condition: "Used - Like New",
+    image_url: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
   }
 ];
 
 async function seedStudentMarket() {
-  console.log("Seeding 10 authentic Student Market listings...");
+  console.log("Seeding 15 authentic Student Market listings...");
   
   for (const item of MOCK_ITEMS) {
     console.log(`\nCreating listing: ${item.title}`);
     
-    // Fetch real Google Image for realism
-    console.log(`Fetching Google Image for: ${item.title}...`);
-    const imageUrl = await fetchGoogleImage(item.title);
+    // Using hardcoded locked image URL instead of Google Image Search
+    const imageUrl = item.image_url;
     
     const listingRef = db.collection("items").doc();
     
@@ -149,9 +191,9 @@ async function seedStudentMarket() {
       category: item.category,
       subcategory: item.subcategory,
       condition: item.condition,
-      image_url: imageUrl || `https://api.dicebear.com/7.x/shapes/svg?seed=${item.title}`,
-      images: imageUrl ? [imageUrl] : [],
-      status: "AVAILABLE",
+      image_url: imageUrl,
+      images: [imageUrl],
+      status: "ACTIVE",
       stock_count: 1,
       is_official: false,
       pcs_certified: requiresPCS,
@@ -160,10 +202,7 @@ async function seedStudentMarket() {
       created_at: admin.firestore.FieldValue.serverTimestamp(),
     });
     
-    console.log(`✅ Seeded successfully with image: ${imageUrl ? 'YES' : 'NO'}`);
-    
-    // Wait 1.5 seconds to avoid SerpApi rate limits
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    console.log(`✅ Seeded successfully with locked image`);
   }
   
   console.log("\nStudent Market Seeding Complete!");

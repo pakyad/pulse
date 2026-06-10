@@ -613,155 +613,75 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                     exit={{ opacity: 0, height: 0 }}
                   >
                     <div className={`rounded-2xl p-4 mt-3 border ${
-                       pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' || pcsError.pcsStatus === 'COPYRIGHT_BLOCKED'
+                       pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' || pcsError.pcsStatus === 'COPYRIGHT_BLOCKED' || pcsError.pcsStatus === 'ERROR'
                          ? 'bg-red-50 border-red-100'
                          : 'bg-amber-50 border-amber-100'
                      }`}>
                        <div className="flex items-start gap-3">
                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                           pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' || pcsError.pcsStatus === 'COPYRIGHT_BLOCKED'
+                           pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' || pcsError.pcsStatus === 'COPYRIGHT_BLOCKED' || pcsError.pcsStatus === 'ERROR'
                              ? 'bg-red-100'
                              : 'bg-amber-100'
                          }`}>
                            <span className="text-sm"></span>
                          </div>
                          <div className="flex-1">
-                            {pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
-                              appealSubmitted ? (
+                            {pcsError.pcsStatus === 'ERROR' ? (
                                 <>
-                                  <p className="text-sm font-semibold text-emerald-900 mb-0.5">Appeal submitted</p>
-                                  <p className="text-xs text-emerald-700 leading-relaxed">Your appeal has been submitted. Admin will review within 24 hours.</p>
+                                  <p className="text-sm font-semibold text-red-900 mb-0.5">Validation Error</p>
+                                  <p className="text-xs text-red-800 leading-relaxed">{pcsError.justification || "Our price checking system encountered an error. Please try again."}</p>
                                 </>
-                              ) : (
+                            ) : pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
                                 <>
-                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Specific product name required</p>
-                                  <p className="text-xs text-gray-500 leading-relaxed mb-3">Items above RM500 need verified market price.</p>
+                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Help us verify your price 🤔</p>
+                                  <p className="text-xs text-gray-500 leading-relaxed mb-3">{pcsError.justification}</p>
                                   <button
                                     onClick={() => { titleInputRef.current?.focus(); }}
                                     className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800 active:scale-95 transition-all"
                                   >
-                                    Update item name
+                                    Update Item Name
                                   </button>
-                                  <div className="mt-3">
-                                    <p className="text-xs text-gray-500 mb-1">Or explain what this item is:</p>
-                                    <textarea
-                                      value={justification}
-                                      onChange={(e) => setJustification(e.target.value)}
-                                      placeholder="e.g. This is a genuine product bought from official store."
-                                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900"
-                                    />
-                                    <label className="mt-2 flex items-center gap-2 cursor-pointer">
-                                      <input
-                                        type="file"
-                                        accept="image/*"
-                                        hidden
-                                        onChange={(e) => {
-                                          const file = e.target.files?.[0];
-                                          if (file) {
-                                            setReceiptImage(file);
-                                            const reader = new FileReader();
-                                            reader.onload = () => setReceiptPreview(reader.result as string);
-                                            reader.readAsDataURL(file);
-                                          }
-                                        }}
-                                      />
-                                      <div className="flex items-center gap-2 text-xs text-gray-500 border border-gray-200 rounded-xl px-3 py-2 hover:bg-gray-50">
-                                        <Plus size={14} />
-                                        {receiptImage ? 'Receipt added' : 'Add receipt photo'}
-                                      </div>
-                                      {receiptImage && (
-                                        <button
-                                          onClick={() => { setReceiptImage(null); setReceiptPreview(null); }}
-                                          className="text-xs text-red-500 hover:underline"
-                                        >
-                                          Remove
-                                        </button>
-                                      )}
-                                    </label>
-                                    {receiptPreview && (
-                                      <img
-                                        src={receiptPreview}
-                                        alt="Receipt preview"
-                                        className="mt-2 w-20 h-20 object-cover rounded-lg border border-gray-200"
-                                      />
-                                    )}
-                                    <button
-                                      onClick={handleSubmitJustification}
-                                      className="mt-2 w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"
-                                    >
-                                      Submit for admin review
-                                    </button>
-                                  </div>
                                 </>
-                              )
                             ) : pcsError.pcsStatus === 'COPYRIGHT_BLOCKED' ? (
                              <>
-                               <p className="text-sm font-semibold text-gray-900 mb-0.5">Digital copies not allowed</p>
-                               <p className="text-xs text-gray-500 leading-relaxed">Selling digital copies is not allowed on Pulse.</p>
+                               <p className="text-sm font-semibold text-gray-900 mb-0.5">This item cannot be listed</p>
+                               <p className="text-xs text-gray-500 leading-relaxed">{pcsError.justification}</p>
                              </>
-                           ) : appealSubmitted ? (
+                            ) : pcsError.pcsStatus === 'SOFT_WARNING' ? (
+                              <>
+                                <p className="text-sm font-semibold text-amber-900 mb-0.5">Market Advice</p>
+                                <p className="text-xs text-amber-800 leading-relaxed mb-3">{pcsError.justification}</p>
+                                <button onClick={() => { handlePost(true); setPcsError(null); }} className="bg-amber-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-amber-800">Acknowledge & Post Anyway</button>
+                              </>
+                            ) : appealSubmitted ? (
                             <>
                               <p className="text-sm font-semibold text-emerald-900 mb-0.5">Appeal submitted</p>
                               <p className="text-xs text-emerald-700 leading-relaxed">Your appeal has been submitted. Admin will review within 24 hours.</p>
                             </>
                           ) : (
                             <>
-                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Price exceeds campus limit</p>
-                              <p className="text-xs text-gray-500 leading-relaxed mb-3">Price exceeds campus limit. Official retail is RM{Number(pcsError?.marketBaselinePrice).toFixed(2)}. Maximum allowed is <strong className="text-gray-700">RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</strong>.</p>
+                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Heads up on your price! 💸</p>
+                              <p className="text-xs text-gray-500 leading-relaxed mb-3">{pcsError.justification}</p>
                               <button
                                 onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }}
                                 className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800 active:scale-95 transition-all"
                               >
-                                Set to RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}
+                                Update Price to RM {Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}
                               </button>
-                              <div className="mt-3">
-                                <p className="text-xs text-gray-500 mb-1">Or explain why your price is fair:</p>
+                              
+                              <div className="mt-3 border-t border-gray-100 pt-3">
+                                <p className="text-xs text-gray-500 mb-2">Or keep your price & share why it's fair:</p>
                                 <textarea
                                   value={justification}
                                   onChange={(e) => setJustification(e.target.value)}
-                                  placeholder="e.g. Bought from official store with receipt. Brand new sealed."
-                                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                  placeholder="e.g. Brand new sealed. Includes extra accessories."
+                                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900 mb-2"
                                 />
-                                <label className="mt-2 flex items-center gap-2 cursor-pointer">
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    hidden
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        setReceiptImage(file);
-                                        const reader = new FileReader();
-                                        reader.onload = () => setReceiptPreview(reader.result as string);
-                                        reader.readAsDataURL(file);
-                                      }
-                                    }}
-                                  />
-                                  <div className="flex items-center gap-2 text-xs text-gray-500 border border-gray-200 rounded-xl px-3 py-2 hover:bg-gray-50">
-                                    <Plus size={14} />
-                                    {receiptImage ? 'Receipt added' : 'Add receipt photo'}
-                                  </div>
-                                  {receiptImage && (
-                                    <button
-                                      onClick={() => { setReceiptImage(null); setReceiptPreview(null); }}
-                                      className="text-xs text-red-500 hover:underline"
-                                    >
-                                      Remove
-                                    </button>
-                                  )}
-                                </label>
-                                {receiptPreview && (
-                                  <img
-                                    src={receiptPreview}
-                                    alt="Receipt preview"
-                                    className="mt-2 w-20 h-20 object-cover rounded-lg border border-gray-200"
-                                  />
-                                )}
                                 <button
                                   onClick={handleSubmitJustification}
-                                  className="mt-2 w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"
+                                  className="w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"
                                 >
-                                  Submit for admin review
+                                  Keep & Share Reason
                                 </button>
                               </div>
                             </>

@@ -1,0 +1,21 @@
+[debug] [2026-06-10T23:59:32.639Z] ----------------------------------------------------------------------
+[debug] [2026-06-10T23:59:32.642Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\USER\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2026-06-10T23:59:32.642Z] CLI Version:   15.11.0
+[debug] [2026-06-10T23:59:32.642Z] Platform:      win32
+[debug] [2026-06-10T23:59:32.642Z] Node Version:  v25.8.2
+[debug] [2026-06-10T23:59:32.642Z] Time:          Thu Jun 11 2026 07:59:32 GMT+0800 (Malaysia Time)
+[debug] [2026-06-10T23:59:32.642Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-10T23:59:35.973Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-10T23:59:35.973Z] > authorizing via signed-in user (iyadmohmadnazri@gmail.com)
+[debug] [2026-06-10T23:59:35.973Z] [iam] checking project codep-pulse for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2026-06-10T23:59:35.974Z] Checked if tokens are valid: false, expires at: 1781110687676
+[debug] [2026-06-10T23:59:35.974Z] Checked if tokens are valid: false, expires at: 1781110687676
+[debug] [2026-06-10T23:59:35.974Z] > refreshing access token with scopes: []
+[debug] [2026-06-10T23:59:35.975Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-06-10T23:59:35.976Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-10T23:59:36.088Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-06-10T23:59:36.088Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-10T23:59:36.172Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/codep-pulse:testIamPermissions [none]
+[debug] [2026-06-10T23:59:36.172Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/codep-pulse:testIamPermissions  x-goog-user-project=codep-pulse
+[debug] [2026-06-10T23:59:36.172Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/codep-pulse:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}

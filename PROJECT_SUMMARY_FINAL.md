@@ -14,7 +14,7 @@ A campus marketplace for UniKL MIIT students with AI-powered price controls, esc
 | Auth | Firebase Authentication (email/password + Google OAuth from Firebase console) |
 | Database | Firestore (Native mode, emulated for dev) |
 | Storage | Firebase Storage (listing images) |
-| AI Pricing | OpenAI GPT-4o-mini + SerpAPI (real market prices) |
+| AI Pricing | Anthropic Claude 3.5 Haiku + SerpAPI (real market prices) |
 | Email | Resend (welcome emails) |
 | UI | Tailwind CSS + shadcn/ui components |
 | Maps | Leaflet (react-leaflet) + OpenStreetMap (free, no API key) |
@@ -61,7 +61,7 @@ All price logic lives in `lib/marketplace/price-engine.ts` (orchestrator) and `p
 2. **Fuzzy cache match** — Jaccard similarity ≥ 0.35 on word tokens
 3. **SerpAPI** — live search for real market prices (cached for 24h)
 4. **Historical cache** — previous SerpAPI results with tokens matching
-5. **AI estimation** — OpenAI GPT-4o-mini (requires `OPENAI_API_KEY`) or rule-based fallback
+5. **AI estimation** — Anthropic Claude 3.5 Haiku (requires `ANTHROPIC_API_KEY`) or rule-based fallback
    - Rule-based: subcategory cache median OR ceiling × condition multiplier (1.0 BNIB, 0.85 Like New, 0.7 Used/Lightly, 0.5 Heavy)
 6. **Reference prices / Static ceiling** — all layers return `is_enforced: true`
 
@@ -144,7 +144,7 @@ Defined in `lib/marketplace/categories.ts`:
 6. **Sequential field reveal** in SmartFormFields instead of all-at-once overload
 7. **Fuzzy cache threshold = 0.35 Jaccard** — catches typos without false matches across subcategories
 8. **AI is fallback only** — SerpAPI runs first (real prices = authoritative); AI only when SerpAPI + cache fail
-9. **Rule-based AI fallback** uses subcategory cache median or ceiling × condition multiplier (works without OpenAI key)
+9. **Rule-based AI fallback** uses subcategory cache median or ceiling × condition multiplier (works without Anthropic key)
 10. **Announcement banner dismissible per session** (not permanent dismiss)
 11. **All "Shopee" → "Market" / "Online"** — avoids trademark/defamation risk
 12. **RUNNER inherits STUDENT access** — never blocked from student pages
@@ -164,7 +164,7 @@ Defined in `lib/marketplace/categories.ts`:
 | `FIREBASE_PRIVATE_KEY` | Firebase service account key |
 | `NEXT_PUBLIC_FIREBASE_*` | Firebase client SDK config (apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId) |
 | `SERPAPI_API_KEY` | Real market price data via Google Shopping |
-| `OPENAI_API_KEY` | AI price estimation (optional but recommended; rule-based fallback works without it) |
+| `ANTHROPIC_API_KEY` | AI price estimation (optional but recommended; rule-based fallback works without it) |
 | `RESEND_API_KEY` | Welcome email delivery |
 | `NEXT_PUBLIC_APP_URL` | Base URL for email links (e.g. `http://localhost:3000`) |
 

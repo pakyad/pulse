@@ -325,7 +325,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <p className="text-[13px] font-bold text-slate-900 tracking-tight">Digital / Online</p>
-                        <p className="text-[11px] font-medium text-[#94a3b8]">Receive via email or chat  Free</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Receive via email or chat &bull; Free</p>
                       </div>
                     </div>
                     {serviceMethod === 'DIGITAL' && (
@@ -364,7 +364,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <p className="text-[13px] font-bold text-slate-900 tracking-tight">F2F Campus Session</p>
-                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet on campus for the service  Free</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet on campus for the service &bull; Free</p>
                       </div>
                     </div>
                     {serviceMethod === 'F2F_CAMPUS' && (
@@ -419,7 +419,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <p className="text-[13px] font-bold text-slate-900 tracking-tight">Self Collect</p>
-                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet the seller on campus  Free</p>
+                        <p className="text-[11px] font-medium text-[#94a3b8]">Meet the seller on campus &bull; Free</p>
                       </div>
                     </div>
                     {choice === 'SELF_COLLECT' && (

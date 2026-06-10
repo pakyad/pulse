@@ -461,73 +461,15 @@ export default function CreateListingPage() {
                                   <p className="text-xs text-red-800 leading-relaxed">{pcsError.justification || "Our price checking system encountered an error. Please try again."}</p>
                                 </>
                             ) : pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
-                              appealSubmitted ? (
                                 <>
-                                  <p className="text-sm font-semibold text-emerald-900 mb-0.5">Appeal submitted</p>
-                                  <p className="text-xs text-emerald-700 leading-relaxed">Your appeal has been submitted. Admin will review within 24 hours.</p>
+                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Help us verify your price 🤔</p>
+                                  <p className="text-xs text-gray-500 leading-relaxed mb-3">{pcsError.justification}</p>
+                                  <button onClick={() => { titleInputRef.current?.focus(); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800">Update Item Name</button>
                                 </>
-                              ) : (
-                                <>
-                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Specific product name required</p>
-                                  <p className="text-xs text-gray-500 leading-relaxed mb-3">Items above RM500 need verified market price.</p>
-                                  <button onClick={() => { titleInputRef.current?.focus(); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800">Update item name</button>
-                                  {selectedCategory !== 'ACADEMIC' && (
-                                    <div className="mt-3">
-                                      <p className="text-xs text-gray-500 mb-1">Or explain what this item is:</p>
-                                      <textarea
-                                        value={justification}
-                                        onChange={(e) => setJustification(e.target.value)}
-                                        placeholder="e.g. This is a genuine product bought from official store."
-                                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900"
-                                      />
-                                      <label className="mt-2 flex items-center gap-2 cursor-pointer">
-                                        <input
-                                          type="file"
-                                          accept="image/*"
-                                          hidden
-                                          onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                              const reader = new FileReader();
-                                              reader.onload = () => setReceiptImage(reader.result as string);
-                                              reader.readAsDataURL(file);
-                                            }
-                                          }}
-                                        />
-                                        <div className="flex items-center gap-2 text-xs text-gray-500 border border-gray-200 rounded-xl px-3 py-2 hover:bg-gray-50">
-                                          <Plus size={14} />
-                                          {receiptImage ? 'Receipt added' : 'Add receipt photo'}
-                                        </div>
-                                        {receiptImage && (
-                                          <button
-                                            onClick={() => setReceiptImage(null)}
-                                            className="text-xs text-red-500 hover:underline"
-                                          >
-                                            Remove
-                                          </button>
-                                        )}
-                                      </label>
-                                      {receiptImage && (
-                                        <img
-                                          src={receiptImage}
-                                          alt="Receipt preview"
-                                          className="mt-2 w-20 h-20 object-cover rounded-lg border border-gray-200"
-                                        />
-                                      )}
-                                      <button
-                                        onClick={handleSubmitJustification}
-                                        className="mt-2 w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"
-                                      >
-                                        Submit for admin review
-                                      </button>
-                                    </div>
-                                  )}
-                                </>
-                              )
                             ) : pcsError.pcsStatus === 'COPYRIGHT_BLOCKED' ? (
                              <>
-                               <p className="text-sm font-semibold text-gray-900 mb-0.5">Digital copies not allowed</p>
-                               <p className="text-xs text-gray-500 leading-relaxed">Selling digital copies is not allowed on Pulse.</p>
+                               <p className="text-sm font-semibold text-gray-900 mb-0.5">This item cannot be listed</p>
+                               <p className="text-xs text-gray-500 leading-relaxed">{pcsError.justification}</p>
                              </>
                             ) : pcsError.pcsStatus === 'SOFT_WARNING' ? (
                               <>
@@ -542,64 +484,20 @@ export default function CreateListingPage() {
                             </>
                           ) : (
                             <>
-                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Market Insight: Campus Limit Exceeded</p>
-                              <p className="text-xs text-gray-500 leading-relaxed mb-3">To protect our student community, Pulse caps standard items at a 10% discount from retail. We found the official retail price for this item is <strong>RM{Number(pcsError?.marketBaselinePrice).toFixed(2)}</strong>, so the maximum allowed campus price is <strong className="text-gray-700">RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</strong>.</p>
-                              <button onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800">Adjust price to RM{Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</button>
-                              {selectedCategory !== 'ACADEMIC' ? (
-                                <div className="mt-3">
-                                  <p className="text-xs text-gray-500 mb-1">Or explain why your price is fair:</p>
-                                  <textarea
-                                    value={justification}
-                                    onChange={(e) => setJustification(e.target.value)}
-                                    placeholder="e.g. Bought from official store with receipt. Brand new sealed."
-                                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900"
-                                  />
-                                  <label className="mt-2 flex items-center gap-2 cursor-pointer">
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      hidden
-                                      onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                          const reader = new FileReader();
-                                          reader.onload = () => setReceiptImage(reader.result as string);
-                                          reader.readAsDataURL(file);
-                                        }
-                                      }}
-                                    />
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 border border-gray-200 rounded-xl px-3 py-2 hover:bg-gray-50">
-                                      <Plus size={14} />
-                                      {receiptImage ? 'Receipt added' : 'Add receipt photo'}
-                                    </div>
-                                    {receiptImage && (
-                                      <button
-                                        onClick={() => setReceiptImage(null)}
-                                        className="text-xs text-red-500 hover:underline"
-                                      >
-                                        Remove
-                                      </button>
-                                    )}
-                                  </label>
-                                  {receiptImage && (
-                                    <img
-                                      src={receiptImage}
-                                      alt="Receipt preview"
-                                      className="mt-2 w-20 h-20 object-cover rounded-lg border border-gray-200"
-                                    />
-                                  )}
-                                  <button
-                                    onClick={handleSubmitJustification}
-                                    className="mt-2 w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"
-                                  >
-                                    Submit for admin review
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="mt-3 p-3 bg-red-100 rounded-xl">
-                                  <p className="text-xs text-red-800">Academic materials are strictly regulated. Appeals are not allowed for items exceeding the official retail limit.</p>
-                                </div>
-                              )}
+                              <p className="text-sm font-semibold text-gray-900 mb-0.5">Heads up on your price! 💸</p>
+                              <p className="text-xs text-gray-500 leading-relaxed mb-3">{pcsError.justification}</p>
+                              <button onClick={() => { setPrice(String(pcsError?.maxAllowedStudentPrice)); setPcsError(null); }} className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800">Update Price to RM {Number(pcsError?.maxAllowedStudentPrice).toFixed(2)}</button>
+                              
+                              <div className="mt-3 border-t border-gray-100 pt-3">
+                                <p className="text-xs text-gray-500 mb-2">Or keep your price & share why it's fair:</p>
+                                <textarea
+                                  value={justification}
+                                  onChange={(e) => setJustification(e.target.value)}
+                                  placeholder="e.g. Brand new sealed. Includes extra accessories."
+                                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900 mb-2"
+                                />
+                                <button onClick={handleSubmitJustification} className="w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50">Keep & Share Reason</button>
+                              </div>
                             </>
                           )}
                         </div>

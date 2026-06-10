@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Pulse Price Intelligence Engine v2.0
  * 
  * Layer 0: Subcategory gate     skip API entirely if !comparable
@@ -6,7 +6,7 @@
  * Layer 1.5: Fuzzy word-match    Jaccard similarity on tokens (typo-tolerant)
  * Layer 2: SerpAPI live          Google Shopping via serpapi.com
  * Layer 2.5: Historical Memory   expired cache as fallback
- * Layer 2.75: AI estimation      OpenAI + rule-based (catches typos, vague titles)
+ * Layer 2.75: AI estimation      Claude + rule-based (catches typos, vague titles)
  * Layer 3: Firestore reference   seeded demo prices
  * Layer 4: Subcategory ceiling   hardcoded safety net
  */
