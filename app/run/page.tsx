@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db, functions, storage } from '@/lib/firebase';
@@ -119,6 +119,7 @@ export default function RunModule() {
   const [submitting, setSubmitting] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [activeMission, setActiveMission] = useState(false);
+  const [pendingMissionsCount, setPendingMissionsCount] = useState(0);
   const [customFee, setCustomFee] = useState<string>('');
   const [form, setForm] = useState<any>({
     parcelSize: '', parcelVerification: '', parcelImageName: '', parcelImageObj: null, pickupNode: '', 
@@ -131,6 +132,7 @@ export default function RunModule() {
   useEffect(() => {
     let unsubProfile: any;
     let unsubMissions: any;
+    let unsubPending: any;
     const unsubAuth = auth.onAuthStateChanged(user => {
       if (user) {
         unsubProfile = onSnapshot(doc(db, 'users', user.uid), s => setProfile(s.data()), e => console.error(e));
@@ -140,12 +142,30 @@ export default function RunModule() {
           where('status', 'in', ['RUNNER_ON_THE_WAY', 'DELIVERING', 'RUNNER_DELIVERING', 'PICKED_UP', 'ARRIVED_AT_PICKUP', 'ARRIVED_AT_MERCHANT', 'ARRIVED_AT_BUILDING', 'ARRIVED_AT_BUYER', 'ACCEPTED'])
         );
         unsubMissions = onSnapshot(q, snap => setActiveMission(!snap.empty), e => console.error(e));
+
+        const qPending = query(
+          collection(db, 'orders'),
+          where('status', '==', 'PENDING_RUNNER')
+        );
+        unsubPending = onSnapshot(qPending, snap => {
+          const validCount = snap.docs
+            .map(d => d.data())
+            .filter((o: any) => 
+               o.delivery_type?.toUpperCase() === 'RUNNER' || 
+               o.deliveryType?.toUpperCase() === 'RUNNER' || 
+               ['PARCELS', 'ERRANDS'].includes(o.type?.toUpperCase())
+            )
+            .filter((o: any) => !o.runner_id)
+            .length;
+          setPendingMissionsCount(validCount);
+        }, e => console.error(e));
       }
     });
     return () => {
       unsubAuth();
       if (unsubProfile) unsubProfile();
       if (unsubMissions) unsubMissions();
+      if (unsubPending) unsubPending();
     };
   }, []);
 
@@ -285,6 +305,34 @@ export default function RunModule() {
         <AvatarDropdown photoUrl={profile?.photo_url} userName={profile?.full_name || 'Pulse'} />
       </nav>
 
+      {/* FLOATING RADAR PILL */}
+      <AnimatePresence>
+        {profile?.is_online && pendingMissionsCount > 0 && !activeService && (
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            className="fixed top-24 left-6 right-6 z-50 max-w-lg mx-auto cursor-pointer"
+            onClick={() => router.push('/run/missions')}
+          >
+            <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 p-3 rounded-2xl shadow-xl flex items-center justify-between hover:bg-slate-800/90 transition-all active:scale-[0.98]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-[14px] bg-cyan-500/20 flex items-center justify-center">
+                   <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.6)] animate-pulse" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-bold text-white tracking-tight">{pendingMissionsCount} New Request{pendingMissionsCount > 1 ? 's' : ''}</p>
+                  <p className="text-[10px] font-medium text-slate-400 mt-0.5 tracking-tight">Tap to claim now</p>
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 mr-1">
+                <ArrowRight size={14} />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="pt-28 px-6 space-y-10 max-w-lg mx-auto">
         {activeService ? (
           <div className="space-y-8">
@@ -339,7 +387,12 @@ export default function RunModule() {
                   </div>
                 </button>
                 <div className="grid grid-cols-2 gap-3 mt-4">
-                  <button onClick={() => profile?.is_online && router.push('/run/missions')} disabled={!profile?.is_online} className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all shadow-sm ${profile?.is_online ? 'bg-cyan-50 text-cyan-950 active:scale-95' : 'bg-slate-50 text-slate-400 opacity-60 cursor-not-allowed'}`}>
+                  <button onClick={() => profile?.is_online && router.push('/run/missions')} disabled={!profile?.is_online} className={`w-full flex flex-col items-start gap-4 p-5 rounded-[24px] transition-all shadow-sm relative ${profile?.is_online ? 'bg-cyan-50 text-cyan-950 active:scale-95' : 'bg-slate-50 text-slate-400 opacity-60 cursor-not-allowed'}`}>
+                    {profile?.is_online && pendingMissionsCount > 0 && (
+                      <div className="absolute top-4 right-4 bg-rose-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm ring-2 ring-white">
+                        {pendingMissionsCount}
+                      </div>
+                    )}
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${profile?.is_online ? 'bg-cyan-200/70' : 'bg-slate-200'}`}><Package size={20} strokeWidth={2.5} /></div>
                     <p className="text-[14px] font-bold tracking-tight">Missions</p>
                   </button>

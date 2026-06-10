@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth, storage } from '@/lib/firebase';
@@ -182,6 +182,9 @@ export default function MissionControl() {
   // Terminal state
   const [podPhoto, setPodPhoto] = useState<File | null>(null);
   const [podPreview, setPodPreview] = useState<string | null>(null);
+  const [podPhoto2, setPodPhoto2] = useState<File | null>(null);
+  const [podPreview2, setPodPreview2] = useState<string | null>(null);
+  const [completedMissionData, setCompletedMissionData] = useState<{payout: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [proofMode, setProofMode] = useState<'PICKUP' | 'DELIVERY' | null>(null);
   const [runnerCoords, setRunnerCoords] = useState<{lat: number; lng: number} | null>(null);
@@ -324,9 +327,28 @@ export default function MissionControl() {
         const ref = doc(db, "orders", missionId);
         const snap = await tx.get(ref);
         if (!snap.exists() || snap.data().runner_id) throw "Mission already claimed by another node.";
+        
+        // Generate a new conversation ID for the runner and the buyer
+        const chatRef = doc(collection(db, "chats"));
+        tx.set(chatRef, {
+          members: [auth.currentUser?.uid, snap.data().buyer_id],
+          participant_names: {
+            [auth.currentUser?.uid as string]: profile?.full_name || 'Pulse Runner',
+            [snap.data().buyer_id]: snap.data().buyer_name || snap.data().customer_name || 'Buyer'
+          },
+          type: 'RUNNER',
+          metadata: { orderId: missionId, title: `Delivery for ${snap.data().itemName || 'Order'}` },
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          lastMessage: 'Runner assigned to delivery.',
+          unread_count: 0,
+          last_message_sender_id: 'SYSTEM'
+        });
+
         tx.update(ref, { 
           runner_id: auth.currentUser?.uid, 
           runner_name: profile?.full_name || 'Runner',
+          runner_conversationId: chatRef.id,
           status: 'READY_FOR_PICKUP',
           accepted_at: serverTimestamp()
         });
@@ -347,75 +369,150 @@ export default function MissionControl() {
 
   const handleConfirmPickup = async () => {
     if (!activeMission || !auth.currentUser) return;
-    if (!podPhoto) { alert('Please take a photo first'); return; }
+    if (!podPhoto) { alert('Please take the main proof photo first'); return; }
     setIsProcessing(true);
     try {
       const timestamp = Date.now();
-      const storagePath = `orders/${activeMission.id}/pickup_${timestamp}.jpg`;
-      const storageRef = ref(storage, storagePath);
-      const uploadRes = await uploadBytes(storageRef, podPhoto);
-      const url = await getDownloadURL(uploadRes.ref);
+      
+      let url1 = '';
+      let url2 = '';
+      
+      if (podPhoto) {
+         const storageRef = ref(storage, `orders/${activeMission.id}/pickup_${timestamp}_1.jpg`);
+         const uploadRes = await uploadBytes(storageRef, podPhoto);
+         url1 = await getDownloadURL(uploadRes.ref);
+      }
+      if (podPhoto2) {
+         const storageRef = ref(storage, `orders/${activeMission.id}/pickup_${timestamp}_2.jpg`);
+         const uploadRes = await uploadBytes(storageRef, podPhoto2);
+         url2 = await getDownloadURL(uploadRes.ref);
+      }
 
       await updateDoc(doc(db, "orders", activeMission.id), {
         status: 'PICKED_UP',
-        pickup_photo_url: url,
+        pickup_photo_url: url1,
+        pickup_photo_url_2: url2 || null,
         picked_up_at: serverTimestamp()
       });
+
+      const conversationId = activeMission.runner_conversationId;
+      if (conversationId) {
+        try {
+          if (url1) {
+            await addDoc(collection(db, "chats", conversationId, "messages"), {
+              senderId: "SYSTEM",
+              text: `Runner has picked up your order. Here is the proof:`,
+              imageUrl: url1,
+              createdAt: serverTimestamp(),
+              isSystemMessage: true,
+            });
+          }
+          if (url2) {
+            await addDoc(collection(db, "chats", conversationId, "messages"), {
+              senderId: "SYSTEM",
+              text: `Additional pickup proof:`,
+              imageUrl: url2,
+              createdAt: serverTimestamp(),
+              isSystemMessage: true,
+            });
+          }
+        } catch (e) {
+          console.warn('[Pickup] Could not write conversation message:', e);
+        }
+      }
 
       await addDoc(collection(db, "admin_evidence"), {
         orderId: activeMission.id,
         type: "PICKUP",
-        photoUrl: url,
+        photoUrl: url1,
+        photoUrl2: url2 || null,
         runnerId: auth.currentUser.uid,
         timestamp: serverTimestamp()
       });
 
-      setPodPhoto(null); setPodPreview(null); setProofMode(null);
+      setPodPhoto(null); setPodPreview(null);
+      setPodPhoto2(null); setPodPreview2(null);
+      setProofMode(null);
     } catch (e: any) { console.error('[Pickup]', e); alert('Error: ' + e.message); } finally { setIsProcessing(false); }
   };
 
   const handleFinalizeDelivery = async () => {
     if (!activeMission || !auth.currentUser) return;
-    if (!podPhoto) { alert('Please take a photo first'); return; }
+    if (!podPhoto) { alert('Please take the main proof photo first'); return; }
     setIsProcessing(true);
     try {
       const timestamp = Date.now();
-      const storagePath = `delivery_proofs/${timestamp}_${activeMission.id}.jpg`;
-      const storageRef = ref(storage, storagePath);
-      const uploadRes = await uploadBytes(storageRef, podPhoto);
-      const url = await getDownloadURL(uploadRes.ref);
+      
+      let url1 = '';
+      let url2 = '';
+      
+      if (podPhoto) {
+         const storageRef = ref(storage, `delivery_proofs/${timestamp}_${activeMission.id}_1.jpg`);
+         const uploadRes = await uploadBytes(storageRef, podPhoto);
+         url1 = await getDownloadURL(uploadRes.ref);
+      }
+      if (podPhoto2) {
+         const storageRef = ref(storage, `delivery_proofs/${timestamp}_${activeMission.id}_2.jpg`);
+         const uploadRes = await uploadBytes(storageRef, podPhoto2);
+         url2 = await getDownloadURL(uploadRes.ref);
+      }
 
       await updateDoc(doc(db, "orders", activeMission.id), {
-        delivery_photo_url: url,
+        delivery_photo_url: url1,
+        delivery_photo_url_2: url2 || null,
       });
 
       await addDoc(collection(db, "admin_evidence"), {
         orderId: activeMission.id,
         type: "DELIVERY",
-        photoUrl: url,
+        photoUrl: url1,
+        photoUrl2: url2 || null,
         runnerId: auth.currentUser.uid,
         timestamp: serverTimestamp()
       });
 
       const dropOffLocation = activeMission.drop_off_location || 'drop-off location';
-      const conversationId = activeMission.conversationId;
+      const conversationId = activeMission.runner_conversationId;
       if (conversationId) {
         try {
-          await addDoc(collection(db, "chats", conversationId, "messages"), {
-            senderId: "SYSTEM",
-            text: ` Your item has been delivered to ${dropOffLocation}. Here's a photo confirmation:`,
-            imageUrl: url,
-            createdAt: serverTimestamp(),
-            isSystemMessage: true,
+          if (url1) {
+            await addDoc(collection(db, "chats", conversationId, "messages"), {
+              senderId: "SYSTEM",
+              text: `Your item has been delivered to ${dropOffLocation}. Here is the proof:`,
+              imageUrl: url1,
+              createdAt: serverTimestamp(),
+              isSystemMessage: true,
+            });
+          }
+          if (url2) {
+            await addDoc(collection(db, "chats", conversationId, "messages"), {
+              senderId: "SYSTEM",
+              text: `Additional delivery proof:`,
+              imageUrl: url2,
+              createdAt: serverTimestamp(),
+              isSystemMessage: true,
+            });
+          }
+          await updateDoc(doc(db, "chats", conversationId), {
+            is_completed: true,
+            lastMessage: 'Order is delivered. Enjoy!',
+            updatedAt: serverTimestamp()
           });
         } catch (e) {
           console.warn('[Delivery] Could not write conversation message:', e);
         }
       }
 
-      const res = await completeDelivery(activeMission.id, url, auth.currentUser.uid);
+      const res = await completeDelivery(activeMission.id, url1, auth.currentUser.uid);
       if (!res.success) { alert(res.message || 'Failed to complete delivery. Please try again.'); return; }
-      setPodPhoto(null); setPodPreview(null); setProofMode(null);
+      
+      const payoutStr = (parseFloat(activeMission.total_price) || 4.5).toFixed(2);
+      setCompletedMissionData({ payout: payoutStr });
+      setTimeout(() => setCompletedMissionData(null), 4000);
+
+      setPodPhoto(null); setPodPreview(null);
+      setPodPhoto2(null); setPodPreview2(null);
+      setProofMode(null);
     } catch (e: any) { console.error('[Delivery]', e); alert('Error: ' + e.message); } finally { setIsProcessing(false); }
   };
 
@@ -837,7 +934,7 @@ export default function MissionControl() {
                              setPodPreview(URL.createObjectURL(watermarkedFile)); 
                           } catch (err: any) {
                              if (err.message === 'PHOTO_REJECTED') {
-                                setShowError("Photo rejected: Please take a clearer picture of the item.");
+                                setShowError("Photo rejected: Please take a clearer picture.");
                                 setTimeout(() => setShowError(null), 4000);
                              }
                           }
@@ -845,24 +942,54 @@ export default function MissionControl() {
                        } 
                     }} 
                  />
-                 {podPreview ? (
-                    <div className="relative aspect-video rounded-[20px] overflow-hidden border border-slate-200 group shadow-sm">
-                      <img src={podPreview} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <label htmlFor="pod-capture" className="bg-white/90 text-slate-900 px-4 py-2 rounded-xl text-[12px] font-bold cursor-pointer hover:bg-white shadow-sm">
-                           Retake Photo
-                        </label>
+                 <input 
+                    type="file" 
+                    accept="image/*" 
+                    capture="environment" 
+                    id="pod-capture-2" 
+                    className="hidden" 
+                    onChange={async (e) => { 
+                       const file = e.target.files?.[0]; 
+                       if (file) { 
+                          setIsProcessing(true);
+                          try {
+                             const watermarkedFile = await addWatermark(file, activeMission?.id || 'TEST');
+                             setPodPhoto2(watermarkedFile); 
+                             setPodPreview2(URL.createObjectURL(watermarkedFile)); 
+                          } catch (err: any) {
+                             if (err.message === 'PHOTO_REJECTED') {
+                                setShowError("Photo rejected: Please take a clearer picture.");
+                                setTimeout(() => setShowError(null), 4000);
+                             }
+                          }
+                          setIsProcessing(false);
+                       } 
+                    }} 
+                 />
+                 <div className="flex gap-3 w-full">
+                   {podPreview ? (
+                      <div className="relative flex-1 aspect-video rounded-[20px] overflow-hidden border border-slate-200 group shadow-sm">
+                        <img src={podPreview} className="w-full h-full object-cover" />
+                        <button onClick={() => { setPodPhoto(null); setPodPreview(null); }} className="absolute top-2 right-2 w-6 h-6 bg-white/90 backdrop-blur-md text-slate-700 hover:text-red-500 rounded-full flex items-center justify-center shadow-sm transition-colors"><X size={14}/></button>
                       </div>
-                      <button onClick={() => { setPodPhoto(null); setPodPreview(null); }} className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-md text-slate-700 hover:text-red-500 rounded-full flex items-center justify-center shadow-sm transition-colors"><X size={16}/></button>
-                    </div>
-                 ) : (
-                    <label htmlFor="pod-capture" className="w-full h-[160px] border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 focus-within:ring-4 focus-within:ring-slate-900/5 rounded-[24px] flex flex-col items-center justify-center gap-3 cursor-pointer transition-all outline-none">
-                      <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center">
-                         <Camera size={20} className="text-slate-400" />
+                   ) : (
+                      <label htmlFor="pod-capture" className="flex-1 aspect-video border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 focus-within:ring-4 focus-within:ring-slate-900/5 rounded-[20px] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all outline-none">
+                        <div className="w-8 h-8 bg-white rounded-full shadow-sm flex items-center justify-center"><Camera size={14} className="text-slate-400" /></div>
+                        <span className="text-[11px] font-bold text-slate-500">Main (Req)</span>
+                      </label>
+                   )}
+                   {podPreview2 ? (
+                      <div className="relative flex-1 aspect-video rounded-[20px] overflow-hidden border border-slate-200 group shadow-sm">
+                        <img src={podPreview2} className="w-full h-full object-cover" />
+                        <button onClick={() => { setPodPhoto2(null); setPodPreview2(null); }} className="absolute top-2 right-2 w-6 h-6 bg-white/90 backdrop-blur-md text-slate-700 hover:text-red-500 rounded-full flex items-center justify-center shadow-sm transition-colors"><X size={14}/></button>
                       </div>
-                      <span className="text-[13px] font-bold text-slate-500">Tap to take photo</span>
-                    </label>
-                 )}
+                   ) : (
+                      <label htmlFor="pod-capture-2" className="flex-1 aspect-video border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-slate-400 focus-within:ring-4 focus-within:ring-slate-900/5 rounded-[20px] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all outline-none">
+                        <div className="w-8 h-8 bg-white rounded-full shadow-sm flex items-center justify-center"><Camera size={14} className="text-slate-400" /></div>
+                        <span className="text-[11px] font-bold text-slate-500">Extra (Opt)</span>
+                      </label>
+                   )}
+                 </div>
                  <button disabled={isProcessing} onClick={proofMode === 'PICKUP' ? handleConfirmPickup : handleFinalizeDelivery} className={`w-full h-14 border rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-sm active:scale-95 outline-none ${activeMission ? (activeMission.type?.toUpperCase() === 'ERRANDS' ? 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200' : (activeMission.type?.toUpperCase() === 'PARCELS' ? 'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200' : 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200')) : 'bg-slate-900 text-white'}`}>
                    {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={18} strokeWidth={2.5} />}
                     {proofMode === 'PICKUP' ? 'Confirm Pickup' : 'Confirm Delivery'}
@@ -912,6 +1039,52 @@ export default function MissionControl() {
               animate={{ scale: [1, 2], opacity: [0.3, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="absolute w-64 h-64 border-[1.5px] border-white/20 rounded-full"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {completedMissionData && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-1000 bg-emerald-500 flex flex-col items-center justify-center text-white text-center p-10"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", damping: 15, stiffness: 200 }}
+              className="w-32 h-32 bg-white rounded-[40px] flex items-center justify-center mb-10 shadow-xl border border-emerald-400"
+            >
+              <motion.div
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Check size={48} className="text-emerald-500" strokeWidth={3} />
+              </motion.div>
+            </motion.div>
+            
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-4"
+            >
+              <h2 className="text-[32px] font-bold tracking-tight text-white">Mission Complete!</h2>
+              <div className="bg-emerald-600/50 rounded-2xl p-4 inline-block mt-4 border border-emerald-400">
+                 <p className="text-[14px] text-emerald-100 font-bold uppercase tracking-widest mb-1">You Earned</p>
+                 <p className="text-[36px] font-black text-white">RM {completedMissionData.payout}</p>
+              </div>
+            </motion.div>
+
+            {/* Fireworks / Pulse rings */}
+            <motion.div 
+              animate={{ scale: [1, 2.5], opacity: [0.5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="absolute w-64 h-64 border-[2px] border-white rounded-full"
             />
           </motion.div>
         )}

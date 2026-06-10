@@ -1,8 +1,11 @@
-﻿"use client";
+"use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, MessageSquare, Star, CheckCircle2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
 
 const PixelReceipt = ({ className }: { className?: string }) => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className={className} shapeRendering="crispEdges">
@@ -82,7 +85,24 @@ export default function OrderTracker({ order, runnerProfile }: OrderTrackerProps
         { label: 'On The Way', Icon: PixelTruck },
         { label: 'Arrived', Icon: PixelPin },
       ];
-  const deliveryPhoto = order.delivery_proof_url;
+
+  const router = useRouter();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!order.runner_conversationId) return;
+    const unsub = onSnapshot(doc(db, 'chats', order.runner_conversationId), (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.last_message_sender_id !== auth.currentUser?.uid && data.unread_count > 0) {
+          setUnreadCount(data.unread_count);
+        } else {
+          setUnreadCount(0);
+        }
+      }
+    });
+    return () => unsub();
+  }, [order.runner_conversationId]);
 
   const isCancelled = order.status?.toUpperCase() === 'CANCELLED';
 
@@ -170,7 +190,20 @@ export default function OrderTracker({ order, runnerProfile }: OrderTrackerProps
             <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 hover:bg-amber-500 hover:text-white transition-all active:scale-95 border border-slate-100">
               <Phone size={16} />
             </button>
-            <button className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 hover:bg-amber-500 hover:text-white transition-all active:scale-95 border border-slate-100">
+            <button 
+              onClick={() => {
+                const targetId = order.runner_conversationId || order.conversationId;
+                if (targetId) {
+                  router.push(`/messages/${targetId}`);
+                }
+              }}
+              className="relative w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 hover:bg-amber-500 hover:text-white transition-all active:scale-95 border border-slate-100"
+            >
+              {unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full flex items-center justify-center text-[9px] font-bold shadow-sm ring-2 ring-white animate-bounce">
+                  {unreadCount}
+                </div>
+              )}
               <MessageSquare size={16} />
             </button>
           </div>
@@ -179,15 +212,7 @@ export default function OrderTracker({ order, runnerProfile }: OrderTrackerProps
 
 
 
-      {/*  DELIVERY PROOF  */}
-      {step === 4 && deliveryPhoto && (
-        <div className="px-2">
-          <button className="w-full py-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center gap-3 text-[12px] font-semibold text-emerald-600  hover:bg-emerald-100 transition-all active:scale-95">
-            <CheckCircle2 size={16} />
-            View Delivery Photo
-          </button>
-        </div>
-      )}
+      {/*  DELIVERY PROOF (REMOVED: Using Single Chat Hub Instead)  */}
     </div>
   );
 }

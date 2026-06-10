@@ -33,36 +33,24 @@ const DEMO_EVENTS = [
 
 //  HELPERS 
 
-function AnnouncementCard({ a, type, timeAgo, badgeStyle }: { a: any; type: string; timeAgo: string; badgeStyle: Record<string, string> }) {
-  const [expanded, setExpanded] = useState(false);
+function AnnouncementCard({ a, type, timeAgo, badgeStyle, onClick }: { a: any; type: string; timeAgo: string; badgeStyle: Record<string, string>; onClick: () => void }) {
   return (
     <div 
-      onClick={() => setExpanded(!expanded)}
-      className="bg-white border border-slate-100 rounded-2xl p-4 cursor-pointer transition-all active:scale-[0.99] hover:shadow-sm"
+      onClick={onClick}
+      className="shrink-0 w-[260px] bg-white border border-slate-100 rounded-2xl p-4 cursor-pointer transition-all active:scale-[0.98] hover:shadow-sm flex flex-col justify-between"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div>
+        <div className="flex items-center gap-2 mb-2">
           <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${badgeStyle[type] || badgeStyle.campus}`}>
             {type}
           </span>
           <span className="text-[11px] font-medium text-slate-400">{timeAgo}</span>
         </div>
-        <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
+        <p className="text-[14px] font-bold text-slate-900 line-clamp-2">{a.headline || a.title}</p>
       </div>
-      <p className="text-[14px] font-bold text-slate-900 mt-2">{a.headline || a.title}</p>
-      <AnimatePresence initial={false}>
-        {expanded && a.body && (
-          <motion.section
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <p className="text-[12px] font-medium text-slate-500 pt-2">{a.body}</p>
-          </motion.section>
-        )}
-      </AnimatePresence>
+      {a.body && (
+        <p className="text-[12px] font-medium text-slate-500 mt-2 line-clamp-2">{a.body}</p>
+      )}
     </div>
   );
 }
@@ -79,6 +67,7 @@ export default function PulsePage() {
   const [announcements,  setAnnouncements]  = useState<any[]>([]);
   const [selectedEvent,  setSelectedEvent]  = useState<any | null>(null);
   const [addedEventId,   setAddedEventId]   = useState<string | null>(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<any | null>(null);
 
   useEffect(() => {
     const unsubs: (() => void)[] = [];
@@ -163,7 +152,7 @@ export default function PulsePage() {
             <p className="text-[12px] font-medium text-slate-500 mt-0.5">Official campus notices and updates</p>
           </div>
           {announcements.length > 0 ? (
-            <div className="space-y-2">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4">
               {announcements.map((a: any) => {
                 const timeAgo = a.published_at?.toDate
                   ? (() => {
@@ -181,7 +170,7 @@ export default function PulsePage() {
                   marketplace: 'bg-emerald-100 text-emerald-700',
                   campus: 'bg-amber-100 text-amber-700',
                 };
-                return <AnnouncementCard key={a.id} a={a} type={type} timeAgo={timeAgo} badgeStyle={badgeStyle} />;
+                return <AnnouncementCard key={a.id} a={a} type={type} timeAgo={timeAgo} badgeStyle={badgeStyle} onClick={() => setSelectedAnnouncement(a)} />;
               })}
             </div>
           ) : (
@@ -334,6 +323,44 @@ export default function PulsePage() {
                     Close
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/*  ANNOUNCEMENT DETAIL SHEET  */}
+      <AnimatePresence>
+        {selectedAnnouncement && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-200 bg-slate-900/50 backdrop-blur-md flex items-end justify-center p-4"
+            onClick={() => setSelectedAnnouncement(null)}
+          >
+            <motion.div
+              initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="bg-white w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <div>
+                <span className="px-2.5 py-1 rounded-md bg-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-3 inline-block">
+                  {selectedAnnouncement.type || selectedAnnouncement.tag || 'Notice'}
+                </span>
+                <p className="text-[18px] font-bold text-slate-900 tracking-tight leading-snug">{selectedAnnouncement.headline || selectedAnnouncement.title}</p>
+              </div>
+              
+              <div className="max-h-[40vh] overflow-y-auto pt-2 pb-4 scrollbar-hide">
+                <p className="text-[14px] font-medium text-slate-600 leading-relaxed whitespace-pre-wrap">{selectedAnnouncement.body}</p>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={() => setSelectedAnnouncement(null)}
+                  className="w-full h-12 bg-slate-50 border border-slate-100 text-slate-600 rounded-2xl font-bold text-[13px] active:scale-95 transition-all hover:bg-slate-100"
+                >
+                  Dismiss
+                </button>
               </div>
             </motion.div>
           </motion.div>

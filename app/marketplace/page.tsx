@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -470,18 +470,7 @@ function MarketplacePage() {
             </div>
           )}
 
-          {/*  STUDENT MARKET EXIT  */}
-          {(urlFilter === 'student_market' || urlFilter === 'student') && (
-            <div className="pt-8 pb-12 flex flex-col items-center justify-center gap-2">
-              <p className="text-[11px] font-medium text-slate-400">Looking for more?</p>
-              <button
-                onClick={() => router.push('/marketplace')}
-                className="h-9 px-5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center text-[11px] font-bold text-slate-500 tracking-wide active:scale-95 transition-all hover:bg-slate-100"
-              >
-                Browse Marketplace
-              </button>
-            </div>
-          )}
+
         </section>
 
       </div>
