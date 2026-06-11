@@ -85,7 +85,7 @@ export default function DesktopMerchant({
 
       if (!pcsData.isApproved) {
         setIsSubmitting(false);
-        alert('Price too high! Market price is RM' + pcsData.marketBaselinePrice + '. Max allowed is RM' + pcsData.maxAllowedStudentPrice + '. Please lower your price.');
+        alert('Listing blocked by Price Checking System:\n\n' + (pcsData.justification || 'Price exceeds maximum allowed limit for campus marketplace.'));
         return;
       }
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from 'react';
 import { db, auth } from '@/lib/firebase';
@@ -55,18 +55,25 @@ function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any
     setClaudeLoading(true);
     setClaudeResult(null);
     try {
-      const res = await fetch('/api/pcs-validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: itemTitle,
-          category: itemCategory,
-          price: appealPrice,
-          justification: appeal.justification_text || '',
-        }),
+      const { getFunctions, httpsCallable } = await import('firebase/functions');
+      const functions = getFunctions(undefined, 'us-central1');
+      const pcsValidate = httpsCallable(functions, 'pcsValidate');
+      
+      const pcsResult = await pcsValidate({ 
+        itemTitle: itemTitle, 
+        itemPrice: appealPrice, 
+        category: itemCategory, 
+        sellerId: appeal?.sellerId || appeal?.seller_id || 'ADMIN', 
+        itemId: appeal?.itemId || 'preview'
       });
-      const data = await res.json();
-      setClaudeResult(data);
+      const pcsData = pcsResult.data as any;
+      
+      setClaudeResult({
+        currentMarketPrice: pcsData.marketBaselinePrice || 0,
+        studentMaxAllowed: pcsData.maxAllowedStudentPrice || 0,
+        reasoning: pcsData.justification || 'No justification provided',
+        isJustified: pcsData.isApproved,
+      });
     } catch {
       setClaudeResult({ error: 'Failed to reach Claude.' });
     } finally {

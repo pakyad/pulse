@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from 'react';
 import { db, auth } from '@/lib/firebase';
@@ -73,8 +73,8 @@ function ItemDetailsDrawer({ item, onClose, onResolve, priceGuidelines }: { item
     g.category === item.category && g.subcategory === item.subcategory
   );
   const refPrice = matchedGuideline?.market_price || 0;
-  const pcsMarket = item.pcs_result?.market_price || 0;
-  const pcsMax = item.pcs_result?.max_allowed || 0;
+  const pcsMarket = item.pcs_market_price || 0;
+  const pcsMax = item.pcs_max_allowed || 0;
   const displayMarket = pcsMarket || refPrice;
   const displayMax = pcsMax || (displayMarket > 0 ? displayMarket * 0.9 : 0);
 
@@ -146,10 +146,10 @@ function ItemDetailsDrawer({ item, onClose, onResolve, priceGuidelines }: { item
                   <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">{item.price_appeal}</p>
                 </div>
               )}
-              {item.pcs_result?.justification && (
+              {item.pcs_reason && (
                 <div className="pt-3 border-t border-red-200">
                   <p className="text-[10px] font-semibold text-red-400 mb-1">AI Justification (PCS)</p>
-                  <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">{item.pcs_result.justification}</p>
+                  <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">{item.pcs_reason}</p>
                 </div>
               )}
             </div>
@@ -245,13 +245,13 @@ export default function PriceReviewPage() {
   useEffect(() => {
     const q = query(
       collection(db, 'items'),
-      where('pcs_result', '!=', null)
+      where('pcs_status', '!=', null)
     );
     const unsub = onSnapshot(q, (snap) => {
       const all = snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
-        .filter((i: any) => i.pcs_result && (i.status === 'ACTIVE' || i.status === 'REJECTED_BY_ADMIN'))
-        .sort((a: any, b: any) => (b.pcs_result?.checked_at?.toMillis?.() || 0) - (a.pcs_result?.checked_at?.toMillis?.() || 0));
+        .filter((i: any) => i.pcs_status)
+        .sort((a: any, b: any) => (b.pcs_checked_at?.toMillis?.() || 0) - (a.pcs_checked_at?.toMillis?.() || 0));
       setReviewedItems(all);
       setReviewedLoading(false);
     });
@@ -402,8 +402,8 @@ export default function PriceReviewPage() {
               </div>
             ) : (
               reviewedItems.map((item) => {
-                const decidedBy = item.pcs_result?.isJustified !== undefined ? 'Claude' : 'Admin';
-                const decision = item.status === 'ACTIVE' ? 'Approved' : 'Rejected';
+                const decidedBy = item.pcs_certified !== undefined ? 'Claude' : 'Admin';
+                const decision = item.status === 'ACTIVE' || item.status === 'active' ? 'Approved' : 'Rejected';
                 return (
                   <div key={item.id} className="h-14 px-5 bg-white rounded-xl border border-[#E5E7EB] grid grid-cols-1 md:grid-cols-12 gap-4 items-center hover:bg-[#F9FAFB] transition-all">
                     <div className="md:col-span-4">
@@ -419,13 +419,13 @@ export default function PriceReviewPage() {
                     </div>
                     <div className="md:col-span-2">
                       <span className="text-[11px] text-slate-400">
-                        {item.pcs_result?.checked_at?.toMillis
-                          ? new Date(item.pcs_result.checked_at.toMillis()).toLocaleDateString()
+                        {item.pcs_checked_at?.toMillis
+                          ? new Date(item.pcs_checked_at.toMillis()).toLocaleDateString()
                           : ''}
                       </span>
                     </div>
                     <div className="md:col-span-2">
-                      <p className="text-[10px] text-slate-400 truncate">{item.pcs_result?.justification || ''}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{item.pcs_reason || item.pcs_status || ''}</p>
                     </div>
                   </div>
                 );
