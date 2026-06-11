@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from 'react';
 import { db, auth, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, onSnapshot } from 'firebase/firestore';
@@ -91,7 +91,7 @@ export default function DeployAsset() {
     } finally { setLoading(false); }
   };
 
-  const isOverpriced = priceIntelligence && Number(price) > priceIntelligence.maxAllowed;
+  const isOverpriced = priceIntelligence && priceIntelligence.is_enforced && Number(price) > priceIntelligence.maxAllowed;
   const canNext = step === 1 ? !!preview : step === 2 ? title.trim() && price && Number(price) > 0 && !isOverpriced && category && subcategory : true;
 
   return (

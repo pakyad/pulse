@@ -218,6 +218,7 @@ export async function checkMarketPrice(
   const now = new Date().toISOString();
   const category = MARKETPLACE_CATEGORIES[categoryId as CategoryID];
   const subcategory = category?.subcategories.find((s) => s.label === subcategoryLabel);
+  const enforced = category?.governance === 'REGULATED';
 
   //  Layer 0: Non-comparable subcategory  skip all API calls 
   if (!subcategory || !subcategory.comparable) {
@@ -228,7 +229,7 @@ export async function checkMarketPrice(
       source: 'NOT_COMPARABLE',
       source_detail: `This item type has a fixed campus ceiling of RM ${ceiling.toFixed(2)}. No open-market benchmark is applicable.`,
       scraped_at: now,
-      is_enforced: true,
+      is_enforced: enforced,
       comparable: false,
     };
   }
@@ -247,7 +248,7 @@ export async function checkMarketPrice(
         source: 'AI_ESTIMATE',
         source_detail: `AI estimated from "${rawTitle}". Market price: RM ${aiResult.price.toFixed(2)} (${aiResult.source}).`,
         scraped_at: now,
-        is_enforced: true,
+        is_enforced: enforced,
         comparable: true,
       };
     }
@@ -259,7 +260,7 @@ export async function checkMarketPrice(
       source: 'STATIC_CEILING',
       source_detail: `Item name too vague to benchmark. Category ceiling of RM ${ceiling.toFixed(2)} applies.`,
       scraped_at: now,
-      is_enforced: true,
+      is_enforced: enforced,
       comparable: true,
     };
   }
@@ -275,7 +276,7 @@ export async function checkMarketPrice(
       source: 'FIRESTORE_CACHE',
       source_detail: `Cached market data (refreshed every 24h). Open market: RM ${cached.toFixed(2)}.`,
       scraped_at: now,
-      is_enforced: true,
+      is_enforced: enforced,
       comparable: true,
     };
   }
@@ -290,7 +291,7 @@ export async function checkMarketPrice(
       source: 'FIRESTORE_CACHE',
       source_detail: `Fuzzy-matched to similar cached item. Market price: RM ${fuzzyPrice.toFixed(2)}.`,
       scraped_at: now,
-      is_enforced: true,
+      is_enforced: enforced,
       comparable: true,
     };
   }
@@ -305,7 +306,7 @@ export async function checkMarketPrice(
       source: 'SERP_LIVE',
       source_detail: `Live price from Google Shopping  ${now}`,
       scraped_at: now,
-      is_enforced: true,
+      is_enforced: enforced,
       comparable: true,
     };
   }
@@ -320,7 +321,7 @@ export async function checkMarketPrice(
       source: 'FIRESTORE_CACHE',
       source_detail: `Historical market data (older than 24h). Used as fallback due to live API outage.`,
       scraped_at: now,
-      is_enforced: true,
+      is_enforced: enforced,
       comparable: true,
     };
   }
@@ -335,7 +336,7 @@ export async function checkMarketPrice(
       source: 'AI_ESTIMATE',
       source_detail: `AI estimated price from "${rawTitle}". Market: RM ${aiResult.price.toFixed(2)} (${aiResult.source}).`,
       scraped_at: now,
-      is_enforced: true,
+      is_enforced: enforced,
       comparable: true,
     };
   }
@@ -350,7 +351,7 @@ export async function checkMarketPrice(
       source: 'FIRESTORE_REFERENCE',
       source_detail: 'Verified campus reference pricing. Based on recent online market research.',
       scraped_at: now,
-      is_enforced: true,
+      is_enforced: enforced,
       comparable: true,
     };
   }

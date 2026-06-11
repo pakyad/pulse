@@ -524,6 +524,25 @@ export const pcsValidate = onCall(
       throw new Error("Missing itemId for PCS validation.");
     }
 
+    // --- 0. OPEN MARKET BYPASS ---
+    const openCategories = ["TECH", "APPAREL", "SERVICES"];
+    if (openCategories.includes(category.toUpperCase())) {
+      await db.collection("items").doc(itemId).set({
+        pcs_status: "FREE_MARKET",
+        pcs_certified: true,
+        pcs_reason: `Category ${category} is an open market. No price cap enforced.`,
+        pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      return {
+        isApproved: true,
+        pcsStatus: "FREE_MARKET",
+        justification: `Category ${category} is an open market. No price cap enforced.`,
+        marketBaselinePrice: 0,
+        maxAllowedStudentPrice: 0,
+      };
+    }
+
     // --- 1. FIRESTORE CONFIG SEEDING ---
     let configDoc = await db.collection("settings").doc("pcs_config").get();
     if (!configDoc.exists) {
