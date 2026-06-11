@@ -28,7 +28,7 @@ async function estimateWithClaude(
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-haiku-latest',
+        model: 'claude-3-5-sonnet-latest',
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
         max_tokens: 10,
