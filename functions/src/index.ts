@@ -553,14 +553,14 @@ export const pcsValidate = onCall(
       await db.collection("items").doc(itemId).set({
         pcs_status: "COPYRIGHT_BLOCKED",
         pcs_certified: false,
-        pcs_reason: "Selling digital copies is not allowed on Pulse.",
+        pcs_reason: "For copyright and safety reasons, Pulse currently doesn't support the sale of digital materials or PDFs. Thanks for understanding!",
         pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
       return {
         isApproved: false,
         pcsStatus: "COPYRIGHT_BLOCKED",
-        justification: "Selling digital copies is not allowed on Pulse.",
+        justification: "For copyright and safety reasons, Pulse currently doesn't support the sale of digital materials or PDFs. Thanks for understanding!",
         marketBaselinePrice: 0,
         maxAllowedStudentPrice: 0,
       };
@@ -626,13 +626,13 @@ export const pcsValidate = onCall(
         await db.collection("items").doc(itemId).set({
           pcs_status: "BLOCKED_NO_REFERENCE",
           pcs_certified: false,
-          pcs_reason: "We could not find a market price for this item. Try being more specific with the brand and model name so we can check if the price is fair.",
+          pcs_reason: "Your price requires manual verification because we couldn't find a matching retail product. Please double-check for typos, or update the item name to include the specific brand/model.",
           pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
         }, { merge: true });
         return {
           isApproved: false,
           pcsStatus: "BLOCKED_NO_REFERENCE",
-          justification: "We could not find a market price for this item. Try being more specific with the brand and model name so we can check if the price is fair.",
+          justification: "Your price requires manual verification because we couldn't find a matching retail product. Please double-check for typos, or update the item name to include the specific brand/model.",
           marketBaselinePrice: 0,
           maxAllowedStudentPrice: 0,
         };
@@ -783,10 +783,10 @@ If no price found: {"floorPrice": 0, "ceilingPrice": 0, "source": "not found"}`;
     }
 
     if (ceilingPrice === 0) {
-      if (listedPrice > 500) {
+      if (listedPrice > freeMarketThreshold) {
         isApproved = false;
         pcsStatus = "BLOCKED_NO_REFERENCE";
-        justification = "Items above RM500 need verified market price.";
+        justification = "Your price requires manual verification because we couldn't find a matching retail product. Please double-check for typos, or update the item name to include the specific brand/model.";
       } else {
         isApproved = true;
         pcsStatus = "FREE_MARKET";
@@ -799,7 +799,7 @@ If no price found: {"floorPrice": 0, "ceilingPrice": 0, "source": "not found"}`;
       pcsStatus = isApproved ? "APPROVED" : "FLAGGED";
       justification = isApproved
         ? "Price is within campus cap of RM" + campusCap + " based on official retail of RM" + ceilingPrice
-        : "Price exceeds campus cap of RM" + campusCap + ". Official retail price found at RM" + ceilingPrice + " from " + source;
+        : "The official retail price for this is RM " + ceilingPrice + ". To keep the campus marketplace fair, student prices are capped at 90% of retail (Max: RM " + campusCap + "). Please adjust your price or share a reason.";
     }
 
     await db.collection("items").doc(itemId).set({

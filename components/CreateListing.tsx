@@ -629,18 +629,26 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                             {pcsError.pcsStatus === 'ERROR' ? (
                                 <>
                                   <p className="text-sm font-semibold text-red-900 mb-0.5">Validation Error</p>
-                                  <p className="text-xs text-red-800 leading-relaxed">{pcsError.justification || "Our price checking system encountered an error. Please try again."}</p>
+                                  <p className="text-xs text-red-800 leading-relaxed">{pcsError.justification || "Oops! Our AI price checker hit a tiny snag while verifying your item. Give it another try!"}</p>
                                 </>
                             ) : pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
                                 <>
-                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Help us verify your price 🤔</p>
+                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">High Value Item Verification 🤔</p>
                                   <p className="text-xs text-gray-500 leading-relaxed mb-3">{pcsError.justification}</p>
-                                  <button
-                                    onClick={() => { titleInputRef.current?.focus(); }}
-                                    className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800 active:scale-95 transition-all"
-                                  >
-                                    Update Item Name
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => { setPcsError(null); document.getElementById('price')?.focus() || window.scrollTo({top:0, behavior:'smooth'}); }}
+                                      className="bg-gray-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-800 active:scale-95 transition-all"
+                                    >
+                                      Update Price
+                                    </button>
+                                    <button
+                                      onClick={() => { setPcsError(null); titleInputRef.current?.focus(); }}
+                                      className="bg-gray-200 text-gray-900 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-300 active:scale-95 transition-all"
+                                    >
+                                      Update Item Name
+                                    </button>
+                                  </div>
                                 </>
                             ) : pcsError.pcsStatus === 'COPYRIGHT_BLOCKED' ? (
                              <>
