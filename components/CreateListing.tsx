@@ -647,12 +647,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                                <p className="text-sm font-semibold text-gray-900 mb-0.5">This item cannot be listed</p>
                                <p className="text-xs text-gray-500 leading-relaxed">{pcsError.justification}</p>
                              </>
-                            ) : pcsError.pcsStatus === 'SOFT_WARNING' ? (
-                              <>
-                                <p className="text-sm font-semibold text-amber-900 mb-0.5">Market Advice</p>
-                                <p className="text-xs text-amber-800 leading-relaxed mb-3">{pcsError.justification}</p>
-                                <button onClick={() => { handlePost(true); setPcsError(null); }} className="bg-amber-900 text-white text-xs font-medium rounded-xl px-4 py-2 hover:bg-amber-800">Acknowledge & Post Anyway</button>
-                              </>
+
                             ) : appealSubmitted ? (
                             <>
                               <p className="text-sm font-semibold text-emerald-900 mb-0.5">Appeal submitted</p>
