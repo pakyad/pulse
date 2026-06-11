@@ -607,36 +607,22 @@ export const pcsValidate = onCall(
 
     const hasForcePcsKeyword = forcePcsKeywords.some((keyword: string) => titleLower.includes(keyword));
     
-    if (!hasForcePcsKeyword) {
-      if (listedPrice <= freeMarketThreshold) {
-        await db.collection("items").doc(itemId).set({
-          pcs_status: "FREE_MARKET",
-          pcs_certified: true,
-          pcs_reason: "Price below free market threshold.",
-          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-        return {
-          isApproved: true,
-          pcsStatus: "FREE_MARKET",
-          justification: "Price below free market threshold.",
-          marketBaselinePrice: 0,
-          maxAllowedStudentPrice: 0,
-        };
-      } else {
-        await db.collection("items").doc(itemId).set({
-          pcs_status: "BLOCKED_NO_REFERENCE",
-          pcs_certified: false,
-          pcs_reason: "Your price requires manual verification because we couldn't find a matching retail product. Please double-check for typos, or update the item name to include the specific brand/model.",
-          pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-        return {
-          isApproved: false,
-          pcsStatus: "BLOCKED_NO_REFERENCE",
-          justification: "Your price requires manual verification because we couldn't find a matching retail product. Please double-check for typos, or update the item name to include the specific brand/model.",
-          marketBaselinePrice: 0,
-          maxAllowedStudentPrice: 0,
-        };
-      }
+    // If it's NOT a required item AND the price is low, approve it instantly as Free Market.
+    // If the price is high (> 300), we let it fall through so Claude checks the price.
+    if (!hasForcePcsKeyword && listedPrice <= freeMarketThreshold) {
+      await db.collection("items").doc(itemId).set({
+        pcs_status: "FREE_MARKET",
+        pcs_certified: true,
+        pcs_reason: "Price below free market threshold.",
+        pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+      return {
+        isApproved: true,
+        pcsStatus: "FREE_MARKET",
+        justification: "Price below free market threshold.",
+        marketBaselinePrice: 0,
+        maxAllowedStudentPrice: 0,
+      };
     }
 
     // --- 5. FIRESTORE CACHE CHECK ---
