@@ -224,38 +224,43 @@ export default function PriceReviewPage() {
   const [tab, setTab] = useState<'flagged' | 'reviewed'>('flagged');
 
   useEffect(() => {
-    const q = query(
-      collection(db, 'items'),
-      where('is_price_flagged', '==', true)
-    );
-    const unsub = onSnapshot(q, (snap) => {
-      setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (!user) return;
 
-  useEffect(() => {
-    const unsubPg = onSnapshot(collection(db, 'PriceGuidelines'), (snap) => {
-      setPriceGuidelines(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-    return () => unsubPg();
-  }, []);
+      const q1 = query(
+        collection(db, 'items'),
+        where('is_price_flagged', '==', true)
+      );
+      const unsub1 = onSnapshot(q1, (snap) => {
+        setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      });
 
-  useEffect(() => {
-    const q = query(
-      collection(db, 'items'),
-      where('pcs_status', '!=', null)
-    );
-    const unsub = onSnapshot(q, (snap) => {
-      const all = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter((i: any) => i.pcs_status)
-        .sort((a: any, b: any) => (b.pcs_checked_at?.toMillis?.() || 0) - (a.pcs_checked_at?.toMillis?.() || 0));
-      setReviewedItems(all);
-      setReviewedLoading(false);
+      const unsub2 = onSnapshot(collection(db, 'PriceGuidelines'), (snap) => {
+        setPriceGuidelines(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      });
+
+      const q3 = query(
+        collection(db, 'items'),
+        where('pcs_status', '!=', null)
+      );
+      const unsub3 = onSnapshot(q3, (snap) => {
+        const all = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter((i: any) => i.pcs_status)
+          .sort((a: any, b: any) => (b.pcs_checked_at?.toMillis?.() || 0) - (a.pcs_checked_at?.toMillis?.() || 0));
+        setReviewedItems(all);
+        setReviewedLoading(false);
+      });
+
+      return () => {
+        unsub1();
+        unsub2();
+        unsub3();
+      };
     });
-    return () => unsub();
+
+    return () => unsubAuth();
   }, []);
 
   const handleAction = async (action: string) => {
