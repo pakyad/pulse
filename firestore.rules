@@ -95,5 +95,6 @@ service cloud.firestore {
     match /disputes/{id} { allow read, list, write: if isSignedIn(); }
     match /appeals/{id} { allow read, list, write: if isSignedIn(); }
     match /price_reports/{id} { allow read, list, write: if isSignedIn(); }
+    match /activityLogs/{id} { allow read, list, write: if isSignedIn(); }
   }
 }

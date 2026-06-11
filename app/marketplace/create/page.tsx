@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Trash2, Loader2, Briefcase,
   BookOpen, Home, Cpu, Shirt,
-  ShieldCheck, ShieldAlert, Globe, AlertCircle
+  ShieldCheck, ShieldAlert, Globe, AlertCircle, X
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { db, auth, storage } from '@/lib/firebase';
@@ -85,6 +85,7 @@ export default function CreateListingPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setPcsError(null);
@@ -102,6 +103,14 @@ export default function CreateListingPage() {
       reader.onloadend = () => setImages(prev => [...prev, reader.result as string].slice(0, 10));
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => setReceiptImage(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handlePost = async (skipSoftWarning: boolean | React.MouseEvent = false) => {
@@ -496,6 +505,33 @@ export default function CreateListingPage() {
                                   placeholder="e.g. Brand new sealed. Includes extra accessories."
                                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900 mb-2"
                                 />
+                                
+                                <input 
+                                  type="file" 
+                                  ref={receiptInputRef} 
+                                  onChange={handleReceiptUpload} 
+                                  accept="image/*" 
+                                  className="hidden" 
+                                />
+                                {!receiptImage ? (
+                                  <button 
+                                    onClick={() => receiptInputRef.current?.click()} 
+                                    className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 text-gray-500 text-xs font-medium rounded-xl px-4 py-3 hover:bg-gray-50 hover:text-gray-700 mb-3 transition-colors"
+                                  >
+                                    <Plus size={14} /> Attach Receipt / Proof (Optional)
+                                  </button>
+                                ) : (
+                                  <div className="relative w-full h-24 mb-3 rounded-xl border border-gray-200 overflow-hidden group">
+                                    <img src={receiptImage} alt="Receipt preview" className="w-full h-full object-cover" />
+                                    <button 
+                                      onClick={() => setReceiptImage(null)} 
+                                      className="absolute top-2 right-2 w-6 h-6 bg-white/90 text-red-500 rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <X size={12} strokeWidth={3} />
+                                    </button>
+                                  </div>
+                                )}
+
                                 <button onClick={handleSubmitJustification} className="w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50">Keep & Share Reason</button>
                               </div>
                             </>
