@@ -140,10 +140,20 @@ function ItemDetailsDrawer({ item, onClose, onResolve, priceGuidelines }: { item
                 <span className="font-semibold text-red-400">Max Allowed</span>
                 <span className="font-bold text-red-900">RM {displayMax.toFixed(2)}</span>
               </div>
-              {item.price_appeal && (
+              {(item.price_appeal || item.appeal_reason) && (
                 <div className="pt-3 border-t border-red-200">
                   <p className="text-[10px] font-semibold text-red-400 mb-1">Seller Justification</p>
-                  <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">{item.price_appeal}</p>
+                  <p className="text-[12px] font-medium text-red-900 bg-red-100/50 p-3 rounded-xl">
+                    {item.price_appeal || item.appeal_reason}
+                  </p>
+                  {item.appeal_image_url && (
+                    <div className="mt-3">
+                      <p className="text-[10px] font-semibold text-red-400 mb-1 uppercase tracking-wider">Attached Proof</p>
+                      <a href={item.appeal_image_url} target="_blank" rel="noreferrer" className="block w-24 h-24 rounded-lg overflow-hidden border border-red-200 hover:ring-2 hover:ring-red-400 transition-all">
+                        <img src={item.appeal_image_url} alt="Seller Proof" className="w-full h-full object-cover" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
               {item.pcs_reason && (

@@ -214,6 +214,14 @@ function AppealDetailsDrawer({ appeal, item, onClose, onResolve }: { appeal: any
               <p className="text-[13px] font-medium text-slate-700 leading-relaxed italic">
                 "{appeal.justification_text || 'No justification provided.'}"
               </p>
+              {appeal.appeal_image_url && (
+                <div className="mt-4">
+                  <p className="text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Attached Proof / Receipt</p>
+                  <a href={appeal.appeal_image_url} target="_blank" rel="noreferrer" className="block w-32 h-32 rounded-lg overflow-hidden border border-slate-200 hover:ring-2 hover:ring-slate-400 transition-all">
+                    <img src={appeal.appeal_image_url} alt="Seller Proof" className="w-full h-full object-cover" />
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 

@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
-import { onSnapshot, doc, collection, query, where } from 'firebase/firestore';
+import { onSnapshot, doc, collection, query, where, updateDoc, deleteDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, ShieldCheck, ShoppingBag, Store, Heart, MapPin, 
   Wallet, ChevronRight, User, LayoutGrid, Settings,
   ClipboardList, BarChart3, Upload, Footprints,
-  Sparkles, Search, Plus, Activity, Edit3, ArrowUpRight, Package
+  Sparkles, Search, Plus, Activity, Edit3, ArrowUpRight, Package, AlertCircle, Trash2, CheckCircle2
 } from 'lucide-react';
 
 import HologramID from '@/components/shared/HologramID';
@@ -86,7 +86,8 @@ export default function MePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
-  const [myListings, setMyListings] = useState<any[]>([]);
+  const [activeListings, setActiveListings] = useState<any[]>([]);
+  const [reviewListings, setReviewListings] = useState<any[]>([]);
   const [isIDOpen, setIsIDOpen] = useState(false);
   const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -97,7 +98,9 @@ export default function MePage() {
       if (!currentUser) { setLoading(false); return; }
       onSnapshot(doc(db, 'users', currentUser.uid), s => { setProfile(s.data()); setLoading(false); });
       onSnapshot(query(collection(db, 'items'), where('seller_id', '==', currentUser.uid)), s => {
-        setMyListings(s.docs.map(d => ({ id: d.id, ...d.data() })));
+        const allListings = s.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+        setActiveListings(allListings.filter((i: any) => i.status === 'ACTIVE' || i.status === 'active'));
+        setReviewListings(allListings.filter((i: any) => i.status === 'PENDING_REVIEW'));
       });
     });
     return () => unsubAuth();
@@ -167,7 +170,7 @@ export default function MePage() {
             </div>
             <div className="p-6 bg-white rounded-[24px] border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-2">
                <Subtext className="text-[12px] font-semibold text-slate-500 capitalize">Active Assets</Subtext>
-               <p className="text-[22px] font-bold text-slate-900 pt-1 tracking-tight">{myListings.length}</p>
+               <p className="text-[22px] font-bold text-slate-900 pt-1 tracking-tight">{activeListings.length}</p>
             </div>
          </section>
 
@@ -216,7 +219,7 @@ export default function MePage() {
                     <span className="text-[12px] font-bold text-slate-300 group-hover:text-slate-900 transition-colors">Add</span>
                   </button>
 
-                  {myListings.map((item) => (
+                  {activeListings.map((item) => (
                      <div key={item.id} className="relative group">
                           <ProductCard 
                             item={{
@@ -236,6 +239,100 @@ export default function MePage() {
                        </div>
                     ))}
                  </div>
+            </section>
+         )}
+
+         {/*  APPEALS & REVIEWS SECTION  */}
+         {isStudent && reviewListings.length > 0 && (
+            <section className="space-y-4 pt-4">
+               <div className="px-1 space-y-1">
+                 <Heading className="flex items-center gap-2">
+                   <AlertCircle size={18} className="text-amber-500" />
+                   Appeals & Reviews
+                 </Heading>
+                 <Subtext>Listings waiting for admin approval</Subtext>
+               </div>
+
+               <div className="space-y-4">
+                  {reviewListings.map((item) => (
+                     <div key={item.id} className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm space-y-4 relative overflow-hidden">
+                        {/* Status Badge */}
+                        <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full">
+                           <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                           <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Pending Review</span>
+                        </div>
+
+                        {/* Item Info */}
+                        <div className="flex gap-4">
+                           <div className="w-20 h-20 rounded-2xl bg-slate-50 overflow-hidden border border-slate-100 flex-shrink-0">
+                             {item.image_url || item.images?.[0] ? (
+                               <img src={item.image_url || item.images?.[0]} className="w-full h-full object-cover" alt="item" />
+                             ) : (
+                               <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                                 <Package size={24} className="text-slate-300" />
+                               </div>
+                             )}
+                           </div>
+                           <div className="pt-1">
+                             <p className="text-[14px] font-bold text-slate-900 line-clamp-1 pr-24">{item.title}</p>
+                             <p className="text-[13px] font-bold text-slate-500 mt-1">RM {Number(item.price).toFixed(2)}</p>
+                             <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">{item.category}</p>
+                           </div>
+                        </div>
+
+                        {/* AI Flag Reason */}
+                        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
+                           <div>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">AI System Flag</p>
+                             <p className="text-[12px] font-medium text-slate-700">{item.pcs_reason}</p>
+                           </div>
+                           {item.pcs_max_allowed && (
+                             <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                               <p className="text-[12px] font-semibold text-slate-600">AI Limit for Campus:</p>
+                               <p className="text-[13px] font-bold text-slate-900">RM {Number(item.pcs_max_allowed).toFixed(2)}</p>
+                             </div>
+                           )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                           <button 
+                             onClick={async () => {
+                               if (window.confirm(`Are you sure you want to withdraw this appeal and delete the listing?`)) {
+                                 await deleteDoc(doc(db, 'items', item.id));
+                               }
+                             }}
+                             className="h-12 rounded-xl border border-red-100 text-red-600 font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-red-50 transition-colors active:scale-95"
+                           >
+                             <Trash2 size={16} /> Withdraw
+                           </button>
+
+                           {item.pcs_max_allowed ? (
+                             <button 
+                               onClick={async () => {
+                                 if (window.confirm(`Update price to RM ${Number(item.pcs_max_allowed).toFixed(2)} and publish instantly?`)) {
+                                   await updateDoc(doc(db, 'items', item.id), {
+                                     price: Number(item.pcs_max_allowed),
+                                     status: 'ACTIVE',
+                                     pcs_status: 'APPROVED',
+                                     is_price_flagged: false,
+                                     pcs_certified: true
+                                   });
+                                 }
+                               }}
+                               className="h-12 rounded-xl bg-slate-900 text-white font-bold text-[12px] flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors active:scale-95 px-2"
+                             >
+                               <CheckCircle2 size={16} /> Accept RM {Number(item.pcs_max_allowed).toFixed(2)}
+                             </button>
+                           ) : (
+                             <button disabled className="h-12 rounded-xl bg-slate-100 text-slate-400 font-bold text-[12px] flex items-center justify-center px-2 cursor-not-allowed">
+                               Waiting for Admin
+                             </button>
+                           )}
+                        </div>
+                     </div>
+                  ))}
+               </div>
             </section>
          )}
 

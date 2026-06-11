@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Plus, Trash2, Loader2,
+  X, Plus, Trash2, Loader2, ImagePlus,
   BookOpen, Home, Cpu, Shirt, Briefcase,
   ArrowUpRight, Zap, TrendingUp
 } from 'lucide-react';
@@ -680,6 +680,37 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                                   placeholder="e.g. Brand new sealed. Includes extra accessories."
                                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 min-h-[80px] focus:outline-none focus:ring-2 focus:ring-gray-900 mb-2"
                                 />
+
+                                <div className="mb-3">
+                                  {receiptPreview ? (
+                                    <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-gray-200 group">
+                                      <img src={receiptPreview} className="w-full h-full object-cover" alt="Receipt preview" />
+                                      <button 
+                                        onClick={() => { setReceiptImage(null); setReceiptPreview(null); }}
+                                        className="absolute inset-0 bg-slate-900/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <label className="flex items-center gap-1.5 cursor-pointer text-[11px] font-bold text-slate-500 hover:text-slate-900 transition-colors bg-white border border-slate-200 hover:border-slate-300 rounded-xl px-3 py-2 w-fit">
+                                      <ImagePlus size={14} />
+                                      Attach Receipt / Proof
+                                      <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        onChange={(e) => {
+                                          if (e.target.files && e.target.files[0]) {
+                                            setReceiptImage(e.target.files[0]);
+                                            setReceiptPreview(URL.createObjectURL(e.target.files[0]));
+                                          }
+                                        }} 
+                                      />
+                                    </label>
+                                  )}
+                                </div>
+
                                 <button
                                   onClick={handleSubmitJustification}
                                   className="w-full border border-gray-200 text-gray-700 text-xs font-medium rounded-xl px-4 py-2 hover:bg-gray-50"

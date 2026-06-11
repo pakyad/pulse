@@ -127,7 +127,7 @@ const MOCK_ITEMS = [
     price: 120.00,
     seller_name: "Sarah Lim",
     condition: "Used - Good",
-    image_url: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+    image_url: "https://m.media-amazon.com/images/I/81xU2W0mXTL._AC_UF1000,1000_QL80_.jpg"
   },
   {
     title: "Texas Instruments TI-84 Plus CE Graphing Calculator",
@@ -136,7 +136,7 @@ const MOCK_ITEMS = [
     price: 350.00,
     seller_name: "Adam Q.",
     condition: "Used - Like New",
-    image_url: "https://images.unsplash.com/photo-1574607383476-f517f260d30b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+    image_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/TI-84_Plus_CE.png/1200px-TI-84_Plus_CE.png"
   },
   {
     title: "Engineering Drafting Tool Set (Compass & Rulers)",

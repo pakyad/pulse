@@ -60,7 +60,7 @@ async function backfillImages() {
     
     // Check if the image is missing, empty, or contains a known placeholder URL (like dicebear or picsum)
     const hasNoImages = !data.images || data.images.length === 0;
-    const isPlaceholderUrl = !data.image_url || data.image_url.trim() === '' || data.image_url.includes('dicebear') || data.image_url.includes('picsum');
+    const isPlaceholderUrl = !data.image_url || data.image_url.trim() === '' || data.image_url.includes('dicebear') || data.image_url.includes('picsum') || data.image_url.includes('placehold.co');
 
     // If it's a placeholder AND it actually has a title we can search for
     if (isPlaceholderUrl && data.title) {
