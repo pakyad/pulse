@@ -791,7 +791,7 @@ If no price found: {"floorPrice": 0, "ceilingPrice": 0, "source": "not found"}`;
       if (listedPrice > freeMarketThreshold) {
         isApproved = false;
         pcsStatus = "BLOCKED_NO_REFERENCE";
-        justification = "Your price requires manual verification because we couldn't find a matching retail product. Please double-check for typos, or update the item name to include the specific brand/model.";
+        justification = "We could not find a matching product on Shopee or Lazada for this item name. Make your listing name more specific by including the brand and model number. Once we can find it, we can verify the price is fair for your fellow students.";
       } else {
         isApproved = true;
         pcsStatus = "FREE_MARKET";

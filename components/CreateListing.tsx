@@ -633,7 +633,7 @@ export default function CreateListing({ userId, role, onClose, existingItem }: C
                                 </>
                             ) : pcsError.pcsStatus === 'BLOCKED_NO_REFERENCE' ? (
                                 <>
-                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">High Value Item Verification 🤔</p>
+                                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Almost there! Help us check your price</p>
                                   <p className="text-xs text-gray-500 leading-relaxed mb-3">{pcsError.justification}</p>
                                   <div className="flex items-center gap-2">
                                     <button
