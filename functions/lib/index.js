@@ -515,7 +515,7 @@ exports.pcsValidate = (0, https_1.onCall)({
         };
     }
     // --- 3. SUBJECTIVE KEYWORD FILTER ---
-    const subjectiveKeywords = ['handmade', 'preloved', 'bundle', 'secondhand', 'used', 'vintage', 'rare', 'collection', 'service', 'repair', 'print', 'tutor', 'clean', 'install', 'format', 'design', 'photography', 'rent'];
+    const subjectiveKeywords = ['handmade', 'preloved', 'bundle'];
     const hasSubjectiveSignal = subjectiveKeywords.some((keyword) => titleLower.includes(keyword));
     if (hasSubjectiveSignal) {
         await db.collection("items").doc(itemId).set({
