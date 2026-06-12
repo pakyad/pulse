@@ -483,18 +483,16 @@ exports.pcsValidate = (0, https_1.onCall)({
     let configDoc = await db.collection("settings").doc("pcs_config").get();
     if (!configDoc.exists) {
         await db.collection("settings").doc("pcs_config").set({
-            forcePcsKeywords: ["casio", "fx-570", "fx-991", "fx-82", "fx-350", "fx-115", "scientific calculator", "texas instruments", "ti-84", "ti-83", "ti-nspire", "sharp calculator", "el-w531", "hp calculator", "hp prime", "graphing calculator", "textbook", "edition", "isbn", "volume", "pearson", "mcgraw", "oxford", "cengage", "wiley", "springer", "elsevier", "prentice hall", "fundamentals of", "introduction to", "principles of", "engineering mathematics", "calculus", "physics textbook", "chemistry textbook", "biology textbook", "statistics textbook", "discrete mathematics", "data structures", "algorithms", "operating systems", "computer networks", "database systems", "software engineering", "lab coat", "safety goggles", "lab apron", "dissection kit", "lab tools", "microscope slide", "pipette", "burette", "beaker", "lab gloves", "bunsen burner", "measuring cylinder", "conical flask", "t-square", "drawing board", "set square", "compass set", "technical pen", "drafting pencil", "ruling pen", "french curve", "drafting machine", "parallel ruler", "scale ruler", "architectural scale", "drawing kit", "engineering drawing set", "clean code", "design patterns", "introduction to algorithms", "the pragmatic programmer", "code complete", "refactoring", "computer organization", "digital design", "operating system concepts", "database system concepts", "safety boots", "hard hat", "high visibility vest", "safety gloves", "safety helmet", "steel toe boots", "ppe equipment", "personal protective equipment", "safety harness", "ear protection", "face shield", "respirator mask", "safety shoes", "vernier caliper", "micrometer", "multimeter", "oscilloscope", "breadboard kit", "soldering iron", "stethoscope", "blood pressure monitor", "anatomy model", "medical textbook", "nursing handbook", "pharmacology guide", "medical dictionary", "clinical manual", "dissection manual", "physiology atlas"],
             freeMarketKeywords: ["usb cable", "screen protector", "phone case", "sticker", "food", "drinks", "cookies", "meals", "homemade", "service", "tutoring", "printing", "photography", "jersey", "club shirt", "hoodie custom", "notes bundle", "past year paper", "handmade", "preloved", "vintage", "bundle", "thrifted", "antique", "replica", "customized", "second hand", "aesthetic", "designer"],
             campusCapPercentage: 0.90,
-            freeMarketThreshold: 300
+            freeMarketThreshold: 30
         });
         configDoc = await db.collection("settings").doc("pcs_config").get();
     }
     const pcsConfig = configDoc.data();
-    const forcePcsKeywords = pcsConfig.forcePcsKeywords || [];
     const freeMarketKeywords = pcsConfig.freeMarketKeywords || [];
     const campusCapPercentage = pcsConfig.campusCapPercentage || 0.90;
-    const freeMarketThreshold = pcsConfig.freeMarketThreshold || 300;
+    const freeMarketThreshold = pcsConfig.freeMarketThreshold || 30;
     const titleLower = itemTitle.toLowerCase();
     // --- 2. COPYRIGHT FILTER ---
     const copyrightKeywords = ['pdf', 'softcopy', 'soft copy', 'ebook', 'e-book', 'digital copy', 'scanned', 'send via whatsapp', 'send via telegram', 'send via email', 'digital file'];
@@ -547,24 +545,6 @@ exports.pcsValidate = (0, https_1.onCall)({
             isApproved: true,
             pcsStatus: "FREE_MARKET",
             justification: "Item identified as Free Market by config.",
-            marketBaselinePrice: 0,
-            maxAllowedStudentPrice: 0,
-        };
-    }
-    const hasForcePcsKeyword = forcePcsKeywords.some((keyword) => titleLower.includes(keyword));
-    // If it's NOT a required item AND the price is low, approve it instantly as Free Market.
-    // If the price is high (> 300), we let it fall through so Claude checks the price.
-    if (!hasForcePcsKeyword && listedPrice <= freeMarketThreshold) {
-        await db.collection("items").doc(itemId).set({
-            pcs_status: "FREE_MARKET",
-            pcs_certified: true,
-            pcs_reason: "Price below free market threshold.",
-            pcs_checked_at: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-        return {
-            isApproved: true,
-            pcsStatus: "FREE_MARKET",
-            justification: "Price below free market threshold.",
             marketBaselinePrice: 0,
             maxAllowedStudentPrice: 0,
         };
@@ -710,7 +690,7 @@ If no price found: {"floorPrice": 0, "ceilingPrice": 0, "source": "not found"}`;
         if (listedPrice > freeMarketThreshold) {
             isApproved = false;
             pcsStatus = "BLOCKED_NO_REFERENCE";
-            justification = "Your price requires manual verification because we couldn't find a matching retail product. Please double-check for typos, or update the item name to include the specific brand/model.";
+            justification = "We could not find a matching product on Shopee or Lazada for this item name. Make your listing name more specific by including the brand and model number. Once we can find it, we can verify the price is fair for your fellow students.";
         }
         else {
             isApproved = true;

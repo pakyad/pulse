@@ -547,7 +547,6 @@ export const pcsValidate = onCall(
     let configDoc = await db.collection("settings").doc("pcs_config").get();
     if (!configDoc.exists) {
       await db.collection("settings").doc("pcs_config").set({
-        forcePcsKeywords: ["casio", "fx-570", "fx-991", "fx-82", "fx-350", "fx-115", "scientific calculator", "texas instruments", "ti-84", "ti-83", "ti-nspire", "sharp calculator", "el-w531", "hp calculator", "hp prime", "graphing calculator", "textbook", "edition", "isbn", "volume", "pearson", "mcgraw", "oxford", "cengage", "wiley", "springer", "elsevier", "prentice hall", "fundamentals of", "introduction to", "principles of", "engineering mathematics", "calculus", "physics textbook", "chemistry textbook", "biology textbook", "statistics textbook", "discrete mathematics", "data structures", "algorithms", "operating systems", "computer networks", "database systems", "software engineering", "lab coat", "safety goggles", "lab apron", "dissection kit", "lab tools", "microscope slide", "pipette", "burette", "beaker", "lab gloves", "bunsen burner", "measuring cylinder", "conical flask", "t-square", "drawing board", "set square", "compass set", "technical pen", "drafting pencil", "ruling pen", "french curve", "drafting machine", "parallel ruler", "scale ruler", "architectural scale", "drawing kit", "engineering drawing set", "clean code", "design patterns", "introduction to algorithms", "the pragmatic programmer", "code complete", "refactoring", "computer organization", "digital design", "operating system concepts", "database system concepts", "safety boots", "hard hat", "high visibility vest", "safety gloves", "safety helmet", "steel toe boots", "ppe equipment", "personal protective equipment", "safety harness", "ear protection", "face shield", "respirator mask", "safety shoes", "vernier caliper", "micrometer", "multimeter", "oscilloscope", "breadboard kit", "soldering iron", "stethoscope", "blood pressure monitor", "anatomy model", "medical textbook", "nursing handbook", "pharmacology guide", "medical dictionary", "clinical manual", "dissection manual", "physiology atlas"],
         freeMarketKeywords: ["usb cable", "screen protector", "phone case", "sticker", "food", "drinks", "cookies", "meals", "homemade", "service", "tutoring", "printing", "photography", "jersey", "club shirt", "hoodie custom", "notes bundle", "past year paper", "handmade", "preloved", "vintage", "bundle", "thrifted", "antique", "replica", "customized", "second hand", "aesthetic", "designer"],
         campusCapPercentage: 0.90,
         freeMarketThreshold: 30
@@ -555,7 +554,6 @@ export const pcsValidate = onCall(
       configDoc = await db.collection("settings").doc("pcs_config").get();
     }
     const pcsConfig = configDoc.data()!;
-    const forcePcsKeywords = pcsConfig.forcePcsKeywords || [];
     const freeMarketKeywords = pcsConfig.freeMarketKeywords || [];
     const campusCapPercentage = pcsConfig.campusCapPercentage || 0.90;
     const freeMarketThreshold = pcsConfig.freeMarketThreshold || 30;
@@ -624,8 +622,6 @@ export const pcsValidate = onCall(
       };
     }
 
-    const hasForcePcsKeyword = forcePcsKeywords.some((keyword: string) => titleLower.includes(keyword));
-    
     // --- 5. FIRESTORE CACHE CHECK ---
     const cacheKey = itemTitle.toLowerCase().trim().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_');
     const cacheRef = db.collection("price_cache").doc(cacheKey);
