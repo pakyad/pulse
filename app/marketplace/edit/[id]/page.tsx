@@ -136,7 +136,7 @@ export default function EditListingPage() {
                <div className="space-y-2">
                    <div className="flex items-center justify-between">
                      <p className="text-[10px] font-bold text-slate-400 px-1">PRICE (RM)</p>
-                     {isPcsItem && <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">PCS Verified</span>}
+                     {isPcsItem && <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Market Price Matched</span>}
                    </div>
                    <input 
                      type="number"

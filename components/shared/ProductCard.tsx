@@ -51,11 +51,14 @@ export default function ProductCard({ item, onClick }: ProductCardProps) {
         />
         
         {showStudentPriceBadge && (
-          <div className="absolute top-2 left-2">
+          <div className="absolute top-2 left-2 group/badge">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M11 2L13.5 4.5H17.5V8.5L20 11L17.5 13.5V17.5H13.5L11 20L8.5 17.5H4.5V13.5L2 11L4.5 8.5V4.5H8.5L11 2Z" fill="#10B981" stroke="#059669" strokeWidth="0.5"/>
               <path d="M7.5 11L9.5 13L14.5 8.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
+            <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover/badge:block w-44 bg-slate-900 text-white text-[10px] font-medium rounded-lg px-2.5 py-1.5 leading-relaxed shadow-lg z-30">
+              Market Price Matched — verified against Shopee & Lazada
+            </div>
           </div>
         )}
 

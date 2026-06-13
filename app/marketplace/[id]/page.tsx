@@ -426,8 +426,9 @@ export default function ItemDetailsPage() {
         {item.pcs_certified === true && item.pcs_status === 'APPROVED' && (
           <div className="flex items-center gap-2 -mt-2 mb-1">
             <span className="bg-[#EAF3DE] text-[#3B6D11] px-[10px] py-[4px] rounded-full text-[12px] font-medium leading-none">
-               Student Price
-            </span>
+                Student Price
+              </span>{' '}
+              <span className="text-[10px] text-[#94a3b8] font-medium">Matched against Shopee & Lazada</span>
           </div>
         )}
 

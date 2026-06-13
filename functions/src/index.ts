@@ -525,7 +525,7 @@ export const pcsValidate = onCall(
     }
 
     // --- 0. OPEN MARKET BYPASS ---
-    const openCategories = ["TECH", "APPAREL", "SERVICES"];
+    const openCategories = ["APPAREL", "SERVICES"];
     if (openCategories.includes(category.toUpperCase())) {
       await db.collection("items").doc(itemId).set({
         pcs_status: "FREE_MARKET",
