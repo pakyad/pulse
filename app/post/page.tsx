@@ -295,7 +295,7 @@ export default function DeployAsset() {
         </AnimatePresence>
 
         {/* Tactical Footer */}
-        <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto px-6 py-10 bg-[#FDFDFD]/90 backdrop-blur-xl">
+        <div className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto px-6 py-10 bg-[#FDFDFD]/90 backdrop-blur-xl pb-safe">
           {step < 3 ? (
             <motion.button
               whileTap={{ scale: 0.98, y: 1 }}

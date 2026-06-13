@@ -662,7 +662,7 @@ export default function CheckoutPage() {
       </div>
 
       {/*  FOOTER CTA  */}
-      <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
+      <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100 pb-safe">
         {step === 1 ? (
           <button
             onClick={() => setStep(2)}

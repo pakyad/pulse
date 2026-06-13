@@ -335,7 +335,7 @@ export default function MobileMerchant({
         </AnimatePresence>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t-[0.5px] border-[#E5E7EB] px-6 h-[60px]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-2xl border-t-[0.5px] border-[#E5E7EB] px-6 h-[60px] pb-safe">
         <div className="flex items-center justify-between h-full max-w-lg mx-auto">
             {[{id:'terminal',label:'Terminal',icon:LayoutGrid},{id:'logs',label:'Log',icon:ClipboardList},{id:'insights',label:'Stats',icon:BarChart3},{id:'account',label:'Account',icon:User}].filter(n => isClub || ['terminal','account'].includes(n.id)).map((nav: any) => {
               const active = view === nav.id;

@@ -851,7 +851,7 @@ export default function LiveOrderPage() {
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 500, damping: 40 }}
-              className="fixed bottom-0 left-0 right-0 z-401 bg-white rounded-t-[32px] px-6 pt-6 pb-10 space-y-6"
+              className="fixed bottom-0 left-0 right-0 z-401 bg-white rounded-t-[32px] px-6 pt-6 pb-10 space-y-6 pb-safe"
             >
               <div className="w-10 h-1 bg-slate-100 rounded-full mx-auto" />
               <div className="space-y-1">

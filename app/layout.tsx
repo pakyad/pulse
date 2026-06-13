@@ -41,7 +41,7 @@ export default function RootLayout({
           <NavigationGate />
 
           {/*  CAMPUS MAIN CONTAINER */}
-          <main className="relative">
+          <main className="relative" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
             {children}
           </main>
         </Providers>

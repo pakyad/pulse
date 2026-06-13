@@ -60,12 +60,16 @@
   }
 }
 
-/* iOS Safe Area - prevents fixed bottom elements from being hidden behind the home indicator bar */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .fixed.bottom-0,
-  .sticky.bottom-0 {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+:root {
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pb-safe {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.mb-safe {
+  margin-bottom: max(1.5rem, env(safe-area-inset-bottom));
 }
 
 @utility scrollbar-hide {

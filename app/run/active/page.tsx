@@ -407,7 +407,7 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
             </MapErrorBoundary>
          </div>
 
-         <motion.div initial={{ y: 200 }} animate={{ y: 0 }} className="fixed bottom-0 left-0 right-0 z-40 px-5 pb-6">
+         <motion.div initial={{ y: 200 }} animate={{ y: 0 }} className="fixed bottom-0 left-0 right-0 z-40 px-5 pb-6 pb-safe">
             <div className="bg-white border border-slate-100 shadow-xl rounded-[2rem] p-6 transition-all duration-500">
                 <AnimatePresence mode="wait">
                    {step <= 4 ? (

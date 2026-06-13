@@ -568,7 +568,7 @@ export default function ItemDetailsPage() {
       </div>
 
       {/*  STICKY FOOTER  */}
-      <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
+      <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100 pb-safe">
         <div className="flex items-center gap-3">
           {auth.currentUser?.uid === item.seller_id ? (
             <div className="flex-1 flex gap-3">

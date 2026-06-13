@@ -265,7 +265,7 @@ export default function CartPage() {
 
       {/*  STICKY FOOTER  */}
       {selectedItems.length > 0 && (
-        <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100">
+        <footer className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 pb-8 bg-white/95 backdrop-blur-xl border-t border-slate-100 pb-safe">
           <button
             onClick={handleCheckout}
             className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold text-[14px] tracking-tight flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-slate-900/10"

@@ -388,7 +388,7 @@ function RunnerActivePageContent() {
 
       {/*  Sticky Action Terminal  */}
       {!isCOMPLETED && order.status !== 'ARRIVED_AT_BUYER' && (
-        <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-6 py-4 pb-8">
+        <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-6 py-4 pb-8 pb-safe">
            <AnimatePresence mode="wait">
               {order.status === 'AWAITING_MERCHANT_ACCEPT' && (
                 <div className="w-full h-14 bg-slate-50 rounded-2xl flex items-center justify-center gap-3 border border-slate-100">

@@ -344,7 +344,7 @@ export default function RunnerEnrollmentSheet({ isOpen, onClose, onComplete }: a
 
           {/*  FOOTER BUTTON  */}
           {step < 5 && (
-            <div className="fixed bottom-0 left-0 right-0 p-8 bg-white/80 backdrop-blur-xl border-t border-[#F2F2F7] supports-backdrop-filter:bg-white/60" style={{ WebkitBackdropFilter: 'blur(20px)' }}>
+            <div className="fixed bottom-0 left-0 right-0 p-8 bg-white/80 backdrop-blur-xl border-t border-[#F2F2F7] supports-backdrop-filter:bg-white/60 pb-safe" style={{ WebkitBackdropFilter: 'blur(20px)' }}>
                <button 
                  onClick={step === 4 ? handleSubmit : next}
                  disabled={isSubmitting || (step === 4 && !form.agreedToTerms)}
