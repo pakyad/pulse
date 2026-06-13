@@ -10,6 +10,7 @@ export interface CartItem {
   vendorId: string;
   image?: string;
   deliveryType?: 'RUNNER' | 'SELF_COLLECT';
+  selected?: boolean;
 }
 
 interface CartContextType {
@@ -18,9 +19,15 @@ interface CartContextType {
   removeFromCart: (productId: string) => void;
   updateQty: (productId: string, qty: number) => void;
   updateDeliveryType: (productId: string, deliveryType: 'RUNNER' | 'SELF_COLLECT') => void;
+  toggleSelect: (productId: string) => void;
+  toggleSelectAll: () => void;
+  removeSelected: () => void;
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
+  selectedTotal: number;
+  selectedCount: number;
+  allSelected: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,7 +35,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // Load from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('pulse_cart');
     if (saved) {
@@ -40,7 +46,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save to localStorage
   useEffect(() => {
     localStorage.setItem('pulse_cart', JSON.stringify(cart));
   }, [cart]);
@@ -49,12 +54,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart(prev => {
       const existing = prev.find(i => i.productId === item.productId);
       if (existing) {
-        return prev.map(i => i.productId === item.productId 
-          ? { ...i, qty: i.qty + item.qty } 
+        return prev.map(i => i.productId === item.productId
+          ? { ...i, qty: i.qty + item.qty }
           : i
         );
       }
-      return [...prev, item];
+      return [...prev, { ...item, selected: true }];
     });
   };
 
@@ -74,10 +79,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart(prev => prev.map(i => i.productId === productId ? { ...i, deliveryType } : i));
   };
 
+  const toggleSelect = (productId: string) => {
+    setCart(prev => prev.map(i => i.productId === productId ? { ...i, selected: !i.selected } : i));
+  };
+
+  const toggleSelectAll = () => {
+    setCart(prev => {
+      const allSelected = prev.every(i => i.selected);
+      return prev.map(i => ({ ...i, selected: !allSelected }));
+    });
+  };
+
+  const removeSelected = () => {
+    setCart(prev => prev.filter(i => !i.selected));
+  };
+
   const clearCart = () => setCart([]);
 
   const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
   const cartCount = cart.reduce((acc, item) => acc + item.qty, 0);
+  const selectedTotal = cart.filter(i => i.selected).reduce((acc, item) => acc + (item.price * item.qty), 0);
+  const selectedCount = cart.filter(i => i.selected).reduce((acc, item) => acc + item.qty, 0);
+  const allSelected = cart.length > 0 && cart.every(i => i.selected);
 
   return (
     <CartContext.Provider value={{
@@ -86,9 +109,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeFromCart,
       updateQty,
       updateDeliveryType,
+      toggleSelect,
+      toggleSelectAll,
+      removeSelected,
       clearCart,
       cartTotal,
-      cartCount
+      cartCount,
+      selectedTotal,
+      selectedCount,
+      allSelected
     }}>
       {children}
     </CartContext.Provider>

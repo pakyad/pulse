@@ -46,7 +46,9 @@ type PayStatus = 'idle' | 'processing' | 'done';
 
 export default function CartCheckoutPage() {
   const router  = useRouter();
-  const { cart, cartTotal, clearCart } = useCart();
+  const { cart, cartTotal, removeSelected } = useCart();
+  const checkoutItems = cart.filter(i => i.selected);
+  const checkoutTotal = checkoutItems.reduce((acc, i) => acc + (i.price * i.qty), 0);
 
   const [step, setStep]               = useState<1 | 2>(1);
   const [preferences, setPreferences] = useState<Record<string, { type: 'RUNNER' | 'SELF_COLLECT', location: string, floor?: string, room?: string }>>({});
@@ -57,41 +59,41 @@ export default function CartCheckoutPage() {
 
   // Initialize delivery preference from each cart item's stored deliveryType
   useEffect(() => {
-    if (cart.length > 0 && Object.keys(preferences).length === 0) {
+    if (checkoutItems.length > 0 && Object.keys(preferences).length === 0) {
       const initial: any = {};
-      cart.forEach(item => {
+      checkoutItems.forEach(item => {
         initial[item.productId] = { type: item.deliveryType || 'SELF_COLLECT', location: 'k' };
       });
       setPreferences(initial);
     }
-  }, [cart]);
+  }, [checkoutItems]);
 
   // If cart empties outside of a payment flow, show message then redirect
   useEffect(() => {
-    if (cart.length === 0 && payStatus === 'idle') {
+    if (checkoutItems.length === 0 && payStatus === 'idle') {
       setIsRedirecting(true);
       const t = setTimeout(() => router.push('/marketplace'), 1500);
       return () => clearTimeout(t);
     }
-  }, [cart, router, payStatus]);
+  }, [checkoutItems, router, payStatus]);
 
   const hubs = CAMPUS_HUBS['MIIT'];
 
   const calculateTotal = () => {
     let runnerFees = 0;
-    cart.forEach(item => {
+    checkoutItems.forEach(item => {
       const pref = preferences[item.productId];
       if (pref?.type === 'RUNNER') {
         const hub = hubs.find(h => h.id === pref.location) || hubs[0];
         runnerFees += (hub.zone === 'campus' ? 3.50 : 5.00);
       }
     });
-    return cartTotal + runnerFees;
+    return checkoutTotal + runnerFees + platformFee;
   };
 
   const platformFee  = 1.50;
   const total           = calculateTotal() + platformFee;
-  const canProceedStep1 = cart.length > 0 && Object.keys(preferences).length === cart.length;
+  const canProceedStep1 = checkoutItems.length > 0 && Object.keys(preferences).length === checkoutItems.length;
   const canPay          = !!selectedBank && payStatus === 'idle';
 
   const handlePay = async () => {
@@ -101,7 +103,7 @@ export default function CartCheckoutPage() {
     try {
       const placeOrder = httpsCallable(functions, 'placeOrder');
 
-      const itemsWithPrefs = cart.map(item => {
+      const itemsWithPrefs = checkoutItems.map(item => {
         const pref = preferences[item.productId];
         const hub = hubs.find(h => h.id === pref.location) || hubs[0];
         return {
@@ -123,7 +125,7 @@ export default function CartCheckoutPage() {
       const { parentId } = result.data as any;
 
       setPayStatus('done');
-      clearCart();
+      removeSelected();
       await new Promise(r => setTimeout(r, 1600));
       router.push(`/orders/success?id=${parentId}`);
     } catch (e: any) {
@@ -241,7 +243,7 @@ export default function CartCheckoutPage() {
               </div>
 
               <div className="space-y-6">
-                {cart.map((item) => {
+                {checkoutItems.map((item) => {
                   const pref = preferences[item.productId] || { type: 'RUNNER', location: 'k' };
                   return (
                     <div key={item.productId} className="space-y-3 p-5 bg-white border border-slate-100 shadow-sm rounded-[24px]">
@@ -348,7 +350,7 @@ export default function CartCheckoutPage() {
 
               <div className="px-1 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-medium text-[#94a3b8]">Subtotal ({cart.length} item{cart.length > 1 ? 's' : ''})</span>
+                  <span className="text-[12px] font-medium text-[#94a3b8]">Subtotal ({checkoutItems.length} item{checkoutItems.length > 1 ? 's' : ''})</span>
                   <span className="text-[12px] font-bold text-slate-900">RM {cartTotal.toFixed(2)}</span>
                 </div>
                 {(() => {
