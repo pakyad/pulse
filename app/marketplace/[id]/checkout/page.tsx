@@ -82,7 +82,7 @@ export default function CheckoutPage() {
   const runnerFee    = selectedNode.fee;
   const itemPrice    = Number(item?.price) || 0;
   const isService    = item?.category?.toUpperCase() === 'SERVICES';
-  const platformFee  = choice === 'RUNNER' ? 2.00 : 0;
+  const platformFee  = 1.50;
   const total        = (itemPrice * qty) + (isService ? 0 : (choice === 'RUNNER' ? runnerFee : 0)) + platformFee;
 
   const canProceedStep1 = isService
@@ -564,7 +564,7 @@ export default function CheckoutPage() {
                 <div className="space-y-0.5">
                   <div className="text-[11px] font-medium text-[#94a3b8] space-y-0.5">
                     <p>{qty} item{qty > 1 ? 's' : ''}{isService ? '  Free delivery' : (choice === 'RUNNER' ? `  Runner RM${runnerFee.toFixed(2)}` : '')}</p>
-                    {platformFee > 0 && <p>Platform fee  RM{platformFee.toFixed(2)}</p>}
+                    <p>Platform fee  RM{platformFee.toFixed(2)}</p>
                   </div>
                   <p className="text-[22px] font-bold text-slate-900 tracking-tight leading-none">RM {total.toFixed(2)}</p>
                 </div>
