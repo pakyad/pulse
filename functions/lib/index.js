@@ -22,7 +22,7 @@ exports.placeOrder = (0, https_1.onCall)({
 }, async (request) => {
     var _a;
     const data = request.data || {};
-    const { userId, cartItems, deliveryType, dropOffLocation, receiptUrl } = data;
+    const { userId, cartItems, deliveryType, dropOffLocation, receiptUrl, platformFee } = data;
     const buyerId = (_a = request.auth) === null || _a === void 0 ? void 0 : _a.uid;
     if (!buyerId && !userId) {
         throw new https_1.HttpsError("unauthenticated", "Pulse Authorization Required.");
@@ -61,6 +61,7 @@ exports.placeOrder = (0, https_1.onCall)({
                 actualPrices[cartItems[i].productId] = (_c = itemData === null || itemData === void 0 ? void 0 : itemData.price) !== null && _c !== void 0 ? _c : cartItems[i].price;
             }
             let totalAmount = 0;
+            const fee = Number(platformFee) || 0;
             cartItems.forEach((item) => totalAmount += ((actualPrices[item.productId] || item.price) * item.qty));
             // 3. ATOMIC DECREMENT & SUB-ORDER CREATION
             for (const vendorId in ordersByVendor) {
@@ -79,6 +80,8 @@ exports.placeOrder = (0, https_1.onCall)({
                         price: actualPrices[item.productId] || item.price // Store actual price in item record
                     })),
                     price: subtotal,
+                    total: subtotal + fee,
+                    platform_fee: fee,
                     title: itemsForThisVendor.length > 1
                         ? `${itemsForThisVendor.length} Items Bundle`
                         : itemsForThisVendor[0].title,
@@ -97,6 +100,7 @@ exports.placeOrder = (0, https_1.onCall)({
                 });
             }
             // 4. CREATE PARENT REGISTRY
+            totalAmount += fee;
             const parentRef = db.collection('parent_orders').doc(parentOrderId);
             transaction.set(parentRef, {
                 id: parentOrderId,
@@ -104,6 +108,7 @@ exports.placeOrder = (0, https_1.onCall)({
                 total_price: totalAmount,
                 item_count: cartItems.length,
                 status: 'PAID',
+                platform_fee: fee,
                 items_summary: cartItems.map((i) => i.title).join(", "),
                 created_at: admin.firestore.FieldValue.serverTimestamp()
             });
