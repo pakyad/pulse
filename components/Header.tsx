@@ -109,7 +109,7 @@ export default function Header() {
                   className="w-full h-11 bg-[#F5F5F5] rounded-xl flex items-center px-4 gap-3 transition-all active:scale-95 absolute inset-0 border-none"
                 >
                   <Search size={20} className="text-slate-400" />
-                  <span className="text-[14px] font-medium text-slate-400">What are you looking for?</span>
+                  <span className="text-[14px] font-medium text-slate-400 whitespace-nowrap">Search...</span>
                 </motion.button>
               )}
             </AnimatePresence>
