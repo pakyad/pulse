@@ -21,7 +21,7 @@ export const placeOrder = onCall({
   region: "us-central1"
 }, async (request) => {
   const data = request.data || {};
-  const { userId, cartItems, deliveryType, dropOffLocation, receiptUrl } = data;
+  const { userId, cartItems, deliveryType, dropOffLocation, receiptUrl, platformFee } = data;
   const buyerId = request.auth?.uid;
 
   if (!buyerId && !userId) {
@@ -69,6 +69,7 @@ export const placeOrder = onCall({
       }
 
       let totalAmount = 0;
+      const fee = Number(platformFee) || 0;
       cartItems.forEach((item: any) => totalAmount += ((actualPrices[item.productId] || item.price) * item.qty));
 
       // 3. ATOMIC DECREMENT & SUB-ORDER CREATION
@@ -90,6 +91,8 @@ export const placeOrder = onCall({
             price: actualPrices[item.productId] || item.price // Store actual price in item record
           })),
           price: subtotal,
+          total: subtotal + fee,
+          platform_fee: fee,
           title: itemsForThisVendor.length > 1 
             ? `${itemsForThisVendor.length} Items Bundle` 
             : itemsForThisVendor[0].title,
@@ -109,6 +112,7 @@ export const placeOrder = onCall({
       }
 
       // 4. CREATE PARENT REGISTRY
+      totalAmount += fee;
       const parentRef = db.collection('parent_orders').doc(parentOrderId);
       transaction.set(parentRef, {
         id: parentOrderId,
@@ -116,6 +120,7 @@ export const placeOrder = onCall({
         total_price: totalAmount,
         item_count: cartItems.length,
         status: 'PAID',
+        platform_fee: fee,
         items_summary: cartItems.map((i: any) => i.title).join(", "),
         created_at: admin.firestore.FieldValue.serverTimestamp()
       });

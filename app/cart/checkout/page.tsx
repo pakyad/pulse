@@ -89,7 +89,8 @@ export default function CartCheckoutPage() {
     return cartTotal + runnerFees;
   };
 
-  const total           = calculateTotal();
+  const platformFee  = 1.50;
+  const total           = calculateTotal() + platformFee;
   const canProceedStep1 = cart.length > 0 && Object.keys(preferences).length === cart.length;
   const canPay          = !!selectedBank && payStatus === 'idle';
 
@@ -115,7 +116,8 @@ export default function CartCheckoutPage() {
       const result = await placeOrder({
         cartItems: itemsWithPrefs,
         deliveryType: 'MULTI_DISPATCH',
-        receiptUrl: 'https://pulse.edu/demo-receipt.pdf'
+        receiptUrl: 'https://pulse.edu/demo-receipt.pdf',
+        platformFee: platformFee
       });
 
       const { parentId } = result.data as any;
@@ -341,6 +343,31 @@ export default function CartCheckoutPage() {
                 <div className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold  flex items-center gap-1.5">
                    <ShieldCheck size={12} />
                    Secure
+                </div>
+              </div>
+
+              <div className="px-1 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-medium text-[#94a3b8]">Subtotal ({cart.length} item{cart.length > 1 ? 's' : ''})</span>
+                  <span className="text-[12px] font-bold text-slate-900">RM {cartTotal.toFixed(2)}</span>
+                </div>
+                {(() => {
+                  const runnerTotal = total - cartTotal - platformFee;
+                  return runnerTotal > 0 ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] font-medium text-[#94a3b8]">Runner Fees</span>
+                      <span className="text-[12px] font-bold text-slate-900">RM {runnerTotal.toFixed(2)}</span>
+                    </div>
+                  ) : null;
+                })()}
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-medium text-[#94a3b8]">Platform Fee</span>
+                  <span className="text-[12px] font-bold text-slate-900">RM {platformFee.toFixed(2)}</span>
+                </div>
+                <div className="h-px bg-slate-100 my-2" />
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-bold text-slate-900">Total</span>
+                  <span className="text-[15px] font-bold text-slate-900">RM {total.toFixed(2)}</span>
                 </div>
               </div>
 
