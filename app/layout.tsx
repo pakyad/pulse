@@ -36,12 +36,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+      </head>
       <body suppressHydrationWarning className={`${inter.variable} ${inter.className} min-h-screen bg-white relative antialiased selection:bg-slate-100`}>
         <Providers>
           <NavigationGate />
 
           {/*  CAMPUS MAIN CONTAINER */}
-          <main className="relative" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+          <main className="relative pb-safe">
             {children}
           </main>
         </Providers>
