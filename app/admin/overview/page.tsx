@@ -62,7 +62,7 @@ function section(title: string, subtitle: string, children: React.ReactNode, id?
 export default function OverviewPage() {
   const [stats, setStats] = useState({
     totalUsers: 0, totalItems: 0, activeDisputes: 0,
-    flaggedItems: 0, totalMerchants: 0, totalRunners: 0, totalLocked: 0,
+    flaggedItems: 0, totalMerchants: 0, totalRunners: 0, totalLocked: 0, platformFees: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -128,8 +128,10 @@ export default function OverviewPage() {
       query(collection(db, 'orders'), where('status', 'in', ['DELIVERED', 'COMPLETED'])),
       (snap) => {
         let locked = 0;
+        let pfTotal = 0;
         snap.forEach(d => {
           const o = d.data();
+          pfTotal += Number(o.platform_fee || 0);
           if (o.status === 'DELIVERED' && o.escrow_status !== 'RELEASED') {
             const mTotal = Number(o.item_total || o.items_total || 0);
             const rFee = Number(o.runner_fee || o.delivery_fee || 0);
@@ -138,7 +140,7 @@ export default function OverviewPage() {
             locked += sum > 0 ? sum : orderTotal;
           }
         });
-        setStats(prev => ({ ...prev, totalLocked: locked }));
+        setStats(prev => ({ ...prev, totalLocked: locked, platformFees: pfTotal }));
       }
     );
     return () => { unsubUsers(); unsubItems(); unsubFlagged(); unsubDisputes(); unsubOrders(); };
@@ -344,6 +346,7 @@ export default function OverviewPage() {
   const mostUsedNode = sortedNodes[0]?.[0] || '';
 
   const cards = [
+    { label: 'Platform Fees', value: `RM ${stats.platformFees.toFixed(2)}`, icon: TrendingUp },
     { label: 'System Liquidity', value: `RM ${stats.totalLocked.toFixed(2)}`, icon: Lock },
     { label: 'Active Listings', value: stats.totalItems, icon: ShoppingBag },
     { label: 'Pending Reviews', value: stats.flaggedItems, icon: ShieldAlert },

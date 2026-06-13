@@ -683,6 +683,12 @@ export default function LiveOrderPage() {
                   <span className="text-[13px] font-bold text-slate-900">RM {Number((order.total || order.price) - order.price).toFixed(2)}</span>
                 </div>
               )}
+              {Number(order.platform_fee) > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-medium text-[#94a3b8]">Platform Fee</span>
+                  <span className="text-[13px] font-bold text-slate-900">RM {Number(order.platform_fee).toFixed(2)}</span>
+                </div>
+              )}
             </div>
 
             {/* Total Paid */}

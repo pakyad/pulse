@@ -82,7 +82,8 @@ export default function CheckoutPage() {
   const runnerFee    = selectedNode.fee;
   const itemPrice    = Number(item?.price) || 0;
   const isService    = item?.category?.toUpperCase() === 'SERVICES';
-  const total        = (itemPrice * qty) + (isService ? 0 : (choice === 'RUNNER' ? runnerFee : 0));
+  const platformFee  = choice === 'RUNNER' ? 2.00 : 0;
+  const total        = (itemPrice * qty) + (isService ? 0 : (choice === 'RUNNER' ? runnerFee : 0)) + platformFee;
 
   const canProceedStep1 = isService
     ? !!serviceMethod && (serviceMethod === 'F2F_CAMPUS' || !!serviceContactInfo)
@@ -115,6 +116,7 @@ export default function CheckoutPage() {
         dropOffStr: dropOffStr,
         itemPrice: itemPrice,
         total: total,
+        platformFee: platformFee,
         buyerId: auth.currentUser!.uid,
         buyerName: auth.currentUser!.displayName || 'Student',
         image_url: itemImage,
@@ -560,9 +562,10 @@ export default function CheckoutPage() {
               {/*  Inline total  minimal, no dark card  */}
               <div className="flex items-center justify-between px-1 pt-1">
                 <div className="space-y-0.5">
-                  <p className="text-[11px] font-medium text-[#94a3b8]">
-                    {qty} item{qty > 1 ? 's' : ''}{isService ? '  Free delivery' : (choice === 'RUNNER' ? `  Runner RM${runnerFee.toFixed(2)}` : '')}
-                  </p>
+                  <div className="text-[11px] font-medium text-[#94a3b8] space-y-0.5">
+                    <p>{qty} item{qty > 1 ? 's' : ''}{isService ? '  Free delivery' : (choice === 'RUNNER' ? `  Runner RM${runnerFee.toFixed(2)}` : '')}</p>
+                    {platformFee > 0 && <p>Platform fee  RM{platformFee.toFixed(2)}</p>}
+                  </div>
                   <p className="text-[22px] font-bold text-slate-900 tracking-tight leading-none">RM {total.toFixed(2)}</p>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-bold text-slate-300 ">

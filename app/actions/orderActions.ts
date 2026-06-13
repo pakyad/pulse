@@ -101,6 +101,7 @@ export async function placeSingleOrder(params: {
   dropOffStr: string;
   itemPrice: number;
   total: number;
+  platformFee?: number;
   buyerId: string;
   buyerName: string;
   image_url: string;
@@ -185,6 +186,7 @@ export async function placeSingleOrder(params: {
         delivery_type: params.choice,
         drop_off_location: params.dropOffStr,
         deliveryMethod: params.deliveryMethod || null,
+        platform_fee: params.platformFee || 0,
         serviceContactInfo: params.serviceContactInfo || null,
         status: initialStatus,
         handshake: {
