@@ -422,6 +422,13 @@ export default function ItemDetailsPage() {
           </div>
         </section>
 
+        {/*  PCS CERTIFIED BADGE  */}
+        {item.pcs_certified === true && item.pcs_status === 'APPROVED' && (
+          <div className="flex items-center gap-2 -mt-2 mb-1">
+              <span className="text-[10px] text-[#94a3b8] font-medium">Matched against Shopee & Lazada</span>
+          </div>
+        )}
+
         {/*  SELLER ROW  */}
         <section className="py-4 border-y border-slate-100 space-y-3">
           <button 
