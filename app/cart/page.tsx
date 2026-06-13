@@ -6,14 +6,21 @@ import { useCart } from '@/lib/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, ShoppingBag, Trash2, Plus, Minus, 
-  ArrowRight, ShieldCheck, ShoppingCart
+  ArrowRight, ShieldCheck, ShoppingCart, Truck, MapPin
 } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 
 
+const RUNNER_FEE = 3.50;
+const PLATFORM_FEE = 1.50;
+
 export default function CartPage() {
   const router = useRouter();
-  const { cart, removeFromCart, updateQty, cartTotal, cartCount } = useCart();
+  const { cart, removeFromCart, updateQty, updateDeliveryType, cartTotal, cartCount } = useCart();
+
+  const runnerCount = cart.filter(i => i.deliveryType === 'RUNNER').length;
+  const runnerTotal = runnerCount * RUNNER_FEE;
+  const orderTotal = cartTotal + runnerTotal + PLATFORM_FEE;
 
   const handleCheckout = () => {
     // For now, we'll redirect to a generic multi-item checkout
@@ -86,6 +93,29 @@ export default function CartPage() {
                       <div>
                         <p className="text-[14px] font-bold text-slate-900 truncate">{item.title}</p>
                         <p className="text-[12px] font-bold text-[#94a3b8]">RM {item.price.toFixed(2)}</p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <button
+                            onClick={() => updateDeliveryType(item.productId, 'SELF_COLLECT')}
+                            className={`text-[9px] font-bold px-2 py-0.5 rounded-full border transition-all ${
+                              item.deliveryType === 'SELF_COLLECT'
+                                ? 'bg-slate-900 text-white border-slate-900'
+                                : 'bg-white text-[#94a3b8] border-slate-200'
+                            }`}
+                          >
+                            Self Collect
+                          </button>
+                          <button
+                            onClick={() => updateDeliveryType(item.productId, 'RUNNER')}
+                            className={`text-[9px] font-bold px-2 py-0.5 rounded-full border transition-all flex items-center gap-1 ${
+                              item.deliveryType === 'RUNNER'
+                                ? 'bg-slate-900 text-white border-slate-900'
+                                : 'bg-white text-[#94a3b8] border-slate-200'
+                            }`}
+                          >
+                            <Truck size={10} />
+                            Runner
+                          </button>
+                        </div>
                       </div>
                       
                       <div className="flex items-center justify-between">
@@ -125,13 +155,19 @@ export default function CartPage() {
                     <span>Subtotal</span>
                     <span className="text-slate-900 font-bold">RM {cartTotal.toFixed(2)}</span>
                   </div>
+                  {runnerTotal > 0 && (
+                    <div className="flex items-center justify-between text-[13px] font-medium text-[#94a3b8]">
+                      <span>Runner Fees ({runnerCount} item{runnerCount > 1 ? 's' : ''})</span>
+                      <span className="text-slate-900 font-bold">RM {runnerTotal.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-[13px] font-medium text-[#94a3b8]">
-                    <span>Service Fee</span>
-                    <span className="text-emerald-500 font-bold">Free</span>
+                    <span>Platform Fee</span>
+                    <span className="text-slate-900 font-bold">RM {PLATFORM_FEE.toFixed(2)}</span>
                   </div>
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-[15px] font-bold text-slate-900">Order Total</span>
-                    <span className="text-[20px] font-semibold text-slate-900">RM {cartTotal.toFixed(2)}</span>
+                    <span className="text-[20px] font-semibold text-slate-900">RM {orderTotal.toFixed(2)}</span>
                   </div>
                 </div>
 

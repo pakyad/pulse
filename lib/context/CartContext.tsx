@@ -9,6 +9,7 @@ export interface CartItem {
   qty: number;
   vendorId: string;
   image?: string;
+  deliveryType?: 'RUNNER' | 'SELF_COLLECT';
 }
 
 interface CartContextType {
@@ -16,6 +17,7 @@ interface CartContextType {
   addToCart: (item: CartItem) => void;
   removeFromCart: (productId: string) => void;
   updateQty: (productId: string, qty: number) => void;
+  updateDeliveryType: (productId: string, deliveryType: 'RUNNER' | 'SELF_COLLECT') => void;
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
@@ -68,6 +70,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart(prev => prev.map(i => i.productId === productId ? { ...i, qty } : i));
   };
 
+  const updateDeliveryType = (productId: string, deliveryType: 'RUNNER' | 'SELF_COLLECT') => {
+    setCart(prev => prev.map(i => i.productId === productId ? { ...i, deliveryType } : i));
+  };
+
   const clearCart = () => setCart([]);
 
   const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
@@ -79,6 +85,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addToCart,
       removeFromCart,
       updateQty,
+      updateDeliveryType,
       clearCart,
       cartTotal,
       cartCount

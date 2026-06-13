@@ -55,12 +55,12 @@ export default function CartCheckoutPage() {
   const [orderError,   setOrderError]   = useState<string | null>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Initialize delivery preference for each cart item
+  // Initialize delivery preference from each cart item's stored deliveryType
   useEffect(() => {
     if (cart.length > 0 && Object.keys(preferences).length === 0) {
       const initial: any = {};
       cart.forEach(item => {
-        initial[item.productId] = { type: 'RUNNER', location: 'k' };
+        initial[item.productId] = { type: item.deliveryType || 'SELF_COLLECT', location: 'k' };
       });
       setPreferences(initial);
     }
