@@ -318,8 +318,8 @@ function MarketplacePage() {
                   autoFocus
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search items, sellers..."
-                  className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-all"
+                  placeholder="Search items..."
+                  className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-100 rounded-2xl text-[13px] font-medium text-slate-900 placeholder:text-slate-300 outline-none focus:border-slate-300 transition-all whitespace-nowrap text-ellipsis overflow-hidden"
                 />
                 {searchQuery && (
                   <button

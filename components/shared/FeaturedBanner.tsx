@@ -84,15 +84,15 @@ export default function FeaturedBanner({ slides, autoAdvanceMs = 6000, height = 
                ) : null}
 
                {/* Neutral Mesh Template (Always present as fallback or background) */}
-               <div className="absolute inset-0 z-[-1] bg-slate-900 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#334155_0%,transparent_50%),radial-gradient(circle_at_70%_70%,#111111_0%,transparent_50%)] opacity-60" />
+               <div className="absolute inset-0 z-[-1] bg-linear-to-br from-slate-800 via-slate-900 to-indigo-950 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#6366f1_0%,transparent_50%),radial-gradient(circle_at_70%_70%,#0f172a_0%,transparent_50%)] opacity-40" />
                   
                   {/* Subtle Geometric Watermark for the Neutral Template */}
-                  <div className="absolute right-[-100px] top-[-50px] opacity-[0.03] rotate-12 pointer-events-none">
-                     <div className="w-[400px] h-[400px] border-40 border-white rounded-[80px]" />
+                  <div className="absolute right-[-100px] top-[-50px] opacity-[0.06] rotate-12 pointer-events-none">
+                     <div className="w-[400px] h-[400px] border-40 border-indigo-400 rounded-[80px]" />
                   </div>
-                  <div className="absolute left-[-50px] bottom-[-100px] opacity-[0.02] -rotate-12 pointer-events-none">
-                     <div className="w-[300px] h-[300px] border-30 border-white rounded-[60px]" />
+                  <div className="absolute left-[-50px] bottom-[-100px] opacity-[0.04] -rotate-12 pointer-events-none">
+                     <div className="w-[300px] h-[300px] border-30 border-indigo-400 rounded-[60px]" />
                   </div>
                </div>
             </div>
