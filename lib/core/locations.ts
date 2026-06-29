@@ -26,6 +26,55 @@ export const CAMPUS_NODES: LocationNode[] = [
   { token: 'RAH-DOOR-PREMIUM', label: 'Direct to Room Door', zone: 'RAH', tier: 'PREMIUM', fee: 5.00 },
 ];
 
+// GPS coordinates for each campus delivery node
+export const NODE_COORDS: Record<string, { lat: number; lng: number }> = {
+  'MIIT-G-LOBBY':    { lat: 3.1594, lng: 101.6998 },
+  'MIIT-04-HALL':    { lat: 3.1595, lng: 101.6999 },
+  'MIIT-08-LAB':     { lat: 3.1596, lng: 101.6998 },
+  'MIIT-12-MAC':     { lat: 3.1595, lng: 101.6997 },
+  'MIIT-14-CAFE':    { lat: 3.1594, lng: 101.6996 },
+  'MIIT-20-LIBR':    { lat: 3.1593, lng: 101.6998 },
+  'RAH-G-GUARD':     { lat: 3.1620, lng: 101.6980 },
+  'RAH-G-LOBBY':     { lat: 3.1621, lng: 101.6981 },
+  'RAH-L13-SURAU':   { lat: 3.1622, lng: 101.6980 },
+  'RAH-DOOR-PREMIUM':{ lat: 3.1623, lng: 101.6979 },
+};
+
+export const CAMPUS_CENTER = { lat: 3.1594, lng: 101.6998 };
+
+/**
+ * Returns the GPS coordinates for a given drop-off location token.
+ * Falls back to campus center if the node is unknown.
+ */
+export function getDropOffCoords(token: string | null | undefined): { lat: number; lng: number } {
+  if (!token) return CAMPUS_CENTER;
+  // Dynamic RAH door-to-room (e.g. RAH-DOOR-1204)
+  if (token.startsWith('RAH-DOOR-')) return NODE_COORDS['RAH-DOOR-PREMIUM'] || CAMPUS_CENTER;
+  return NODE_COORDS[token] || CAMPUS_CENTER;
+}
+
+/**
+ * Haversine distance between two GPS coordinates in metres.
+ * Earth radius = 6,371,000m (same as functions/src/index.ts).
+ */
+export function calculateDistance(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number
+): number {
+  const R = 6371e3;
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+  const deltaLambda = (lng2 - lng1) * Math.PI / 180;
+
+  const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+          Math.cos(phi1) * Math.cos(phi2) *
+          Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+}
+
 /**
  * Returns badge styling for a given location zone
  */

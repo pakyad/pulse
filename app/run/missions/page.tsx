@@ -13,6 +13,7 @@ import {
 import BackButton from '@/components/shared/BackButton';
 
 import { completeDelivery } from '@/app/actions/deliveryActions';
+import { calculateDistance, getDropOffCoords } from '@/lib/core/locations';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import AvatarDropdown from '@/components/shared/AvatarDropdown';
@@ -503,7 +504,29 @@ export default function MissionControl() {
         }
       }
 
-      const res = await completeDelivery(activeMission.id, url1, auth.currentUser.uid);
+      // GPS proximity gate — runner must be within 50m of drop-off node
+      let runnerCoordsGps: { lat: number; lng: number } | undefined;
+      let buyerCoordsGps: { lat: number; lng: number } | undefined;
+      try {
+        const runnerPos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          if (!navigator.geolocation) reject(new Error('Geolocation not supported'));
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true, timeout: 10000, maximumAge: 5000
+          });
+        });
+        runnerCoordsGps = { lat: runnerPos.coords.latitude, lng: runnerPos.coords.longitude };
+        buyerCoordsGps = getDropOffCoords(activeMission.drop_off_location);
+        const distance = calculateDistance(runnerCoordsGps.lat, runnerCoordsGps.lng, buyerCoordsGps.lat, buyerCoordsGps.lng);
+        if (distance > 50) {
+          alert('You must be within 50 metres of the buyer to confirm delivery.');
+          setIsProcessing(false);
+          return;
+        }
+      } catch (e) {
+        console.warn('[Delivery] GPS check failed:', e);
+      }
+
+      const res = await completeDelivery(activeMission.id, url1, auth.currentUser.uid, runnerCoordsGps, buyerCoordsGps);
       if (!res.success) { alert(res.message || 'Failed to complete delivery. Please try again.'); return; }
       
       const payoutStr = (parseFloat(activeMission.total_price) || 4.5).toFixed(2);

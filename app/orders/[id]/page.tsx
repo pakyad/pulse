@@ -680,7 +680,7 @@ export default function LiveOrderPage() {
               {order.delivery_type === 'RUNNER' && !['PARCELS', 'ERRANDS'].includes(order.type?.toUpperCase()) && (
                 <div className="flex items-center justify-between">
                   <span className="text-[13px] font-medium text-[#94a3b8]">Runner Fee</span>
-                  <span className="text-[13px] font-bold text-slate-900">RM {Number((order.total || order.price) - order.price).toFixed(2)}</span>
+                  <span className="text-[13px] font-bold text-slate-900">RM {Number((order.total || order.price) - order.price - (order.platform_fee || 0)).toFixed(2)}</span>
                 </div>
               )}
               {Number(order.platform_fee) > 0 && (

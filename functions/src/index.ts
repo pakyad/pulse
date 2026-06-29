@@ -73,6 +73,7 @@ export const placeOrder = onCall({
       cartItems.forEach((item: any) => totalAmount += ((actualPrices[item.productId] || item.price) * item.qty));
 
       // 3. ATOMIC DECREMENT & SUB-ORDER CREATION
+      let feeAssigned = false;
       for (const vendorId in ordersByVendor) {
         const subOrderRef = db.collection('orders').doc();
         const itemsForThisVendor = ordersByVendor[vendorId];
@@ -80,6 +81,9 @@ export const placeOrder = onCall({
         itemsForThisVendor.forEach((i: any) => subtotal += ((actualPrices[i.productId] || i.price) * i.qty));
 
         // Stock decrement moved to Merchant "Prepare Order" stage per REQ_FIX_5
+
+        const subOrderFee = feeAssigned ? 0 : fee;
+        feeAssigned = true;
 
         transaction.set(subOrderRef, {
           order_id: subOrderRef.id,
@@ -91,8 +95,8 @@ export const placeOrder = onCall({
             price: actualPrices[item.productId] || item.price // Store actual price in item record
           })),
           price: subtotal,
-          total: subtotal + fee,
-          platform_fee: fee,
+          total: subtotal + subOrderFee,
+          platform_fee: subOrderFee,
           title: itemsForThisVendor.length > 1 
             ? `${itemsForThisVendor.length} Items Bundle` 
             : itemsForThisVendor[0].title,
@@ -101,9 +105,9 @@ export const placeOrder = onCall({
           receipt_url: receiptUrl || null,
           status: 'PENDING_VENDOR',
           handshake: {
-            seller_confirmed: false,
+            runner_confirmed: false,
             buyer_confirmed: false,
-            seller_coords: null,
+            runner_coords: null,
             buyer_coords: null,
             verification_type: 'PENDING'
           },
@@ -214,7 +218,7 @@ export const completeHandshake = onCall({
   region: "us-central1"
 }, async (request) => {
   const data = request.data || {};
-  const { orderId, role, coords } = data; // role: 'seller' | 'buyer'
+  const { orderId, role, coords } = data; // role: 'runner' | 'buyer'
   
   if (!orderId || !role || !coords) {
     throw new HttpsError("invalid-argument", "Missing handshake parameters.");
@@ -229,18 +233,18 @@ export const completeHandshake = onCall({
     const order = orderDoc.data()!;
     const handshake = order.handshake || {};
 
-    if (role === 'seller') {
-      handshake.seller_confirmed = true;
-      handshake.seller_coords = coords;
+    if (role === 'runner') {
+      handshake.runner_confirmed = true;
+      handshake.runner_coords = coords;
     } else {
       handshake.buyer_confirmed = true;
       handshake.buyer_coords = coords;
     }
 
     // Logic: If both confirmed, perform the Proximity Audit
-    if (handshake.seller_confirmed && handshake.buyer_confirmed) {
+    if (handshake.runner_confirmed && handshake.buyer_confirmed) {
       const dist = calculateDistance(
-        handshake.seller_coords.lat, handshake.seller_coords.lng,
+        handshake.runner_coords.lat, handshake.runner_coords.lng,
         handshake.buyer_coords.lat, handshake.buyer_coords.lng
       );
       

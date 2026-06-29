@@ -190,9 +190,9 @@ export async function placeSingleOrder(params: {
         serviceContactInfo: params.serviceContactInfo || null,
         status: initialStatus,
         handshake: {
-          seller_confirmed: false,
+          runner_confirmed: false,
           buyer_confirmed: false,
-          seller_coords: null,
+          runner_coords: null,
           buyer_coords: null,
           verification_type: 'PENDING'
         },

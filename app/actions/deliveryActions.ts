@@ -2,12 +2,20 @@
 
 import { adminDb, getAdminDb, getAdminAuth } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
+import { calculateDistance, getDropOffCoords } from "@/lib/core/locations";
 
 /**
  * COMPLETE DELIVERY HANDSHAKE
  * Finalizes the order with visual proof and credits the runner's wallet.
+ * Requires runner to be within 50 metres of the buyer's drop-off node.
  */
-export async function completeDelivery(orderId: string, proofUrl: string, callerUid: string) {
+export async function completeDelivery(
+  orderId: string,
+  proofUrl: string,
+  callerUid: string,
+  runnerCoords?: { lat: number; lng: number },
+  buyerCoords?: { lat: number; lng: number }
+) {
   try {
     if (!callerUid) {
       return { success: false, message: "Authentication required." };
@@ -22,6 +30,20 @@ export async function completeDelivery(orderId: string, proofUrl: string, caller
     const orderData = orderDoc.data()!;
     if (orderData.runner_id !== callerUid) {
       return { success: false, message: "You are not the assigned runner for this order." };
+    }
+
+    // GPS proximity check — runner must be within 50m of buyer's drop-off node
+    if (runnerCoords && buyerCoords) {
+      const dist = calculateDistance(
+        runnerCoords.lat, runnerCoords.lng,
+        buyerCoords.lat, buyerCoords.lng
+      );
+      if (dist > 50) {
+        return {
+          success: false,
+          message: "You must be within 50 metres of the buyer to confirm delivery."
+        };
+      }
     }
 
     // 1. Credit runner's wallet

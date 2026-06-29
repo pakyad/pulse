@@ -16,6 +16,7 @@ import MapErrorBoundary from '@/components/shared/MapErrorBoundary';
 import BackButton from '@/components/shared/BackButton';
 import { parseLocationToken, getLocationBadge } from '@/lib/core/locations';
 import { completeDelivery } from '@/app/actions/deliveryActions';
+import { calculateDistance, getDropOffCoords } from '@/lib/core/locations';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -31,6 +32,15 @@ const MAP_OPTIONS = {
     { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#e2e8f0" }] }
   ]
 };
+
+function getCurrentPosition(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) reject(new Error('Geolocation not supported'));
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true, timeout: 10000, maximumAge: 5000
+    });
+  });
+}
 
 // Default coordinates if mission ones missing
 const CAMPUS_CENTER = { lat: 3.1594, lng: 101.6998 };
@@ -86,13 +96,24 @@ const ChecklistMissionView = ({ mission, onComplete }: { mission: any, onComplet
     }
     setIsCompleting(true);
     try {
+      // GPS proximity gate — runner must be within 50m of drop-off node
+      const runnerPos = await getCurrentPosition();
+      const runnerCoords = { lat: runnerPos.coords.latitude, lng: runnerPos.coords.longitude };
+      const buyerCoords = getDropOffCoords(mission.drop_off_location);
+      const distance = calculateDistance(runnerCoords.lat, runnerCoords.lng, buyerCoords.lat, buyerCoords.lng);
+      if (distance > 50) {
+        alert('You must be within 50 metres of the buyer to confirm delivery.');
+        setIsCompleting(false);
+        return;
+      }
+
       const uid = auth.currentUser.uid;
       const orderId = mission.id;
       const fileName = Date.now() + '_' + orderId + '.jpg';
       const storageRef = ref(storage, 'delivery_proofs/' + fileName);
       const snap = await uploadBytes(storageRef, podPhoto);
       const url = await getDownloadURL(snap.ref);
-      const res = await completeDelivery(orderId, url, uid);
+      const res = await completeDelivery(orderId, url, uid, runnerCoords, buyerCoords);
       if (!res.success) { alert(res.message || 'Failed to complete delivery.'); return; }
       alert('Delivery confirmed!');
       setStep(5);
@@ -303,13 +324,24 @@ function ActiveRunContent({ initialMission }: { initialMission: any }) {
        }
        setIsCompleting(true);
        try {
+         // GPS proximity gate — runner must be within 50m of drop-off node
+         const runnerPos = await getCurrentPosition();
+         const runnerCoords = { lat: runnerPos.coords.latitude, lng: runnerPos.coords.longitude };
+         const buyerCoords = getDropOffCoords(mission.drop_off_location);
+         const distance = calculateDistance(runnerCoords.lat, runnerCoords.lng, buyerCoords.lat, buyerCoords.lng);
+         if (distance > 50) {
+           alert('You must be within 50 metres of the buyer to confirm delivery.');
+           setIsCompleting(false);
+           return;
+         }
+
          const orderId = mission.id;
          const uid = auth.currentUser.uid;
          const fileName = Date.now() + '_' + orderId + '.jpg';
          const storageRef = ref(storage, 'delivery_proofs/' + fileName);
          const snap = await uploadBytes(storageRef, podPhoto);
          const url = await getDownloadURL(snap.ref);
-         const res = await completeDelivery(orderId, url, uid);
+         const res = await completeDelivery(orderId, url, uid, runnerCoords, buyerCoords);
          if (!res.success) { alert(res.message || 'Failed to complete delivery.'); return; }
          alert('Delivery confirmed!');
          setStep(5);

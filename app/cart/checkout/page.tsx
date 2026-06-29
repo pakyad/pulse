@@ -92,7 +92,7 @@ export default function CartCheckoutPage() {
   };
 
   const platformFee  = 1.50;
-  const total           = calculateTotal() + platformFee;
+  const total           = calculateTotal(); // calculateTotal already includes platformFee
   const canProceedStep1 = checkoutItems.length > 0 && Object.keys(preferences).length === checkoutItems.length;
   const canPay          = !!selectedBank && payStatus === 'idle';
 
